@@ -156,6 +156,8 @@ class AVH_RPS_Public
 
     private function getDownload()
     {
+        // TODO the RPS Client needs to be changed so the password is send encrypted instead of md5.
+        // After this this function needs to be tested.
         $username = $_REQUEST['username'];
         $password = $_REQUEST['password'];
         $this->comp_date = $_REQUEST['comp_date'];
