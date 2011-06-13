@@ -82,7 +82,7 @@ class AVH_RPS_Public
             $this->digital_admin = "";
             $this->club_officer = "";
             // Other commonly used globals
-            $this->digital_chair_email = 'chapple@optonline.net';
+            $this->digital_chair_email = 'digitalchair@raritanphoto.com';
             $this->errMsg = "";
             $this->url_params = "";
             status_header(200);
@@ -104,9 +104,6 @@ class AVH_RPS_Public
      */
     private function getCompetitionDates()
     {
-        if ($_SERVER['QUERY_STRING'] > "") {
-            $this->url_params = "?" . $_SERVER['QUERY_STRING'];
-        }
         // Connect to the Database
         try {
             if (! $db = @mysql_connect($this->host, $this->uname, $this->pw))
