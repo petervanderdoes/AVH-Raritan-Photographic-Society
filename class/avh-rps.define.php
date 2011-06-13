@@ -2,7 +2,7 @@
 if (! defined('AVH_FRAMEWORK'))
 	die('You are not allowed to call this page directly.');
 
-final class AVH_FDAS_Define
+final class AVH_RPS_Define
 {
 	/**
 	 * General Constants

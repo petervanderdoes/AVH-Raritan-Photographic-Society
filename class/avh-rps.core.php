@@ -2,7 +2,7 @@
 if (! defined('AVH_FRAMEWORK'))
 	die('You are not allowed to call this page directly.');
 
-class AVH_FDAS_Core
+class AVH_RPS_Core
 {
 	/**
 	 * Version of AVH First Defense Against Spam

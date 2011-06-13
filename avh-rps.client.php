@@ -13,7 +13,7 @@ function avh_RPS_init ()
 	$_settings->storeSetting('plugin_working_dir', pathinfo(__FILE__, PATHINFO_DIRNAME));
 	// Admin
 	if (is_admin()) {
-		require_once ($_settings->plugin_working_dir . '/class/avh-RPS.admin.php');
+		require_once ($_settings->plugin_working_dir . '/class/avh-rps.admin.php');
 		$avh_rps_admin = new AVH_RPS_Admin();
 		// Activation Hook
 		register_activation_hook(__FILE__, array ( &$avh_rps_admin, 'installPlugin' ));
