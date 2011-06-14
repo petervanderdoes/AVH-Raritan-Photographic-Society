@@ -40,19 +40,22 @@ final class AVH_RPS_Admin
     {
         // The Settings Registery
         $this->_settings = AVH_RPS_Settings::getInstance();
+        
         // The Classes Registery
         $this->_classes = AVH_RPS_Classes::getInstance();
-        // Initialize the plugin
+        
+        // Loads the CORE class
         $this->_core = $this->_classes->load_class( 'Core', 'plugin', true );
+        
         // Admin URL and Pagination
         $this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
         if ( isset( $_GET['pagination'] ) ) {
             $this->_core->actual_page = (int) $_GET['pagination'];
         }
         
-        // Admin Capabilities
-        //add_action('init', array ( &$this, 'actionInitRoles' ));
+        add_action('init', array ( &$this, 'actionInit_Roles' ));
         add_action( 'init', array( &$this, 'actionInit_UserFields' ) );
+        
         // Admin menu
         add_action( 'admin_menu', array( &$this, 'actionAdminMenu' ) );
         return;
@@ -63,24 +66,24 @@ final class AVH_RPS_Admin
      *
      * @WordPress Action init
      */
-    public function actionInitRoles()
+    public function actionInit_Roles()
     {
-        $role = get_role( 'administrator' );
-        if ( $role != null && !$role->has_cap( 'role_avh_fdas' ) ) {
-            $role->add_cap( 'role_avh_fdas' );
-        }
-        if ( $role != null && !$role->has_cap( 'role_admin_avh_fdas' ) ) {
-            $role->add_cap( 'role_admin_avh_fdas' );
-        }
-        // Clean var
-        unset( $role );
+    	/* Get the administrator role. */
+		$role =& get_role( 'administrator' );
+
+		/* If the administrator role exists, add required capabilities for the plugin. */
+		if ( !empty( $role ) ) {
+
+			/* Role management capabilities. */
+			$role->add_cap( 'edit_competition classification' );
+		}
     }
 
     public function actionInit_UserFields()
     {
         add_action( 'edit_user_profile', array( &$this, 'actionUser_Profile' ) );
         add_action( 'show_user_profile', array( &$this, 'actionUser_Profile' ) );
-        add_action( 'personal_option_update', array( &$this, 'actionProfile_Update_Save' ) );
+        add_action( 'personal_options_update', array( &$this, 'actionProfile_Update_Save' ) );
         add_action( 'edit_user_profile_update', array( &$this, 'actionProfile_Update_Save' ) );
     }
 
@@ -140,7 +143,7 @@ final class AVH_RPS_Admin
     }
 
     public function actionUser_Profile( $user_id )
-    {        
+    {
         $userID = $user_id->ID;
         $_rps_class_bw = get_user_meta( $userID, 'rps_class_bw', true );
         $_rps_class_color = get_user_meta( $userID, 'rps_class_color', true );
@@ -150,13 +153,12 @@ final class AVH_RPS_Admin
         echo '<tr>';
         echo '<th>Classification B&W</th>';
         echo '<td>';
-        if ( current_user_can('administrator' )) {
-            $_selected = false;
+        if ( current_user_can( 'edit_competition classification' ) ) {
             $p = '';
             $r = '';
             echo '<select name="rps_class_bw" id="rps_class_bw">';
             foreach ( $_classification as $key => $value ) {
-                if ( $_selected === $_rps_class_bw ) {
+                if ( $key === $_rps_class_bw ) {
                     $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
                 } else {
                     $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
@@ -173,13 +175,12 @@ final class AVH_RPS_Admin
         echo '<tr>';
         echo '<th>Classification Color</th>';
         echo '<td>';
-        if (  current_user_can('administrator' ))  {
-            $_selected = false;
+        if ( current_user_can( 'edit_competition classification' ) ) {
             $p = '';
             $r = '';
             echo '<select name="rps_class_color" id="rps_class_color">';
             foreach ( $_classification as $key => $value ) {
-                if ( $_selected === $_rps_class_color ) {
+                if ( $key === $_rps_class_color ) {
                     $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
                 } else {
                     $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
