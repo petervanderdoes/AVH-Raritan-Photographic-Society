@@ -147,6 +147,9 @@ final class AVH_RPS_Admin
         $userID = $user_id->ID;
         $_rps_class_bw = get_user_meta( $userID, 'rps_class_bw', true );
         $_rps_class_color = get_user_meta( $userID, 'rps_class_color', true );
+        $_rps_class_print_bw = get_user_meta( $userID, 'rps_class_print_bw', true );
+        $_rps_class_print_color = get_user_meta( $userID, 'rps_class_print_color', true );
+        
         $_classification = array( 'beginner'=>'Beginner', 'advanced'=>'Advanced', 'salon'=>'Salon' );
         echo '<h3 id="rps">Competition Classification</h3>';
         echo '<table class="form-table">';
