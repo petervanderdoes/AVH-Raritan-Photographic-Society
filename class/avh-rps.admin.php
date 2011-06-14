@@ -150,8 +150,9 @@ final class AVH_RPS_Admin
         $_classification = array( 'beginner'=>'Beginner', 'advanced'=>'Advanced', 'salon'=>'Salon' );
         echo '<h3 id="rps">Competition Classification</h3>';
         echo '<table class="form-table">';
+        
         echo '<tr>';
-        echo '<th>Classification B&W</th>';
+        echo '<th>Classification Digital B&W</th>';
         echo '<td>';
         if ( current_user_can( 'edit_competition classification' ) ) {
             $p = '';
@@ -173,7 +174,7 @@ final class AVH_RPS_Admin
         echo '</tr>';
         
         echo '<tr>';
-        echo '<th>Classification Color</th>';
+        echo '<th>Classification Digital Color</th>';
         echo '<td>';
         if ( current_user_can( 'edit_competition classification' ) ) {
             $p = '';
@@ -193,6 +194,51 @@ final class AVH_RPS_Admin
         }
         echo '</td>';
         echo '</tr>';
+                
+        echo '<tr>';
+        echo '<th>Classification Print B&W</th>';
+        echo '<td>';
+        if ( current_user_can( 'edit_competition classification' ) ) {
+            $p = '';
+            $r = '';
+            echo '<select name="rps_class_print_bw" id="rps_class_print_bw">';
+            foreach ( $_classification as $key => $value ) {
+                if ( $key === $_rps_class_print_bw ) {
+                    $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
+                } else {
+                    $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
+                }
+            }
+            echo $p . $r;
+            echo '</select>';
+        } else {
+            echo $_classification[$_rps_class_print_bw];
+        }
+        echo '</td>';
+        echo '</tr>';
+        
+        echo '<tr>';
+        echo '<th>Classification Print Color</th>';
+        echo '<td>';
+        if ( current_user_can( 'edit_competition classification' ) ) {
+            $p = '';
+            $r = '';
+            echo '<select name="rps_class_print_color" id="rps_class_print_color">';
+            foreach ( $_classification as $key => $value ) {
+                if ( $key === $_rps_class_print_color ) {
+                    $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
+                } else {
+                    $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
+                }
+            }
+            echo $p . $r;
+            echo '</select>';
+        } else {
+            echo $_classification[$_rps_class_print_color];
+        }
+        echo '</td>';
+        echo '</tr>';
+        
         echo '</table>';
     }
 
@@ -209,8 +255,22 @@ final class AVH_RPS_Admin
         } else {
             $_rps_class_color = get_user_meta( $userID, 'rps_class_color', true );
         }
+        if ( isset( $_POST['rps_class_print_bw'] ) ) {
+            $_rps_class_print_bw = $_POST["rps_class_print_bw"];
+        } else {
+            $_rps_class_print_bw = get_user_meta( $userID, 'rps_class_print_bw', true );
+        }
+        if ( isset( $_POST['rps_class_print_color'] ) ) {
+            $_rps_class_print_color = $_POST['rps_class_print_color'];
+        } else {
+            $_rps_class_print_color = get_user_meta( $userID, 'rps_class_print_color', true );
+        }
+        
         update_user_meta( $userID, "rps_class_bw", $_rps_class_bw );
         update_user_meta( $userID, "rps_class_color", $_rps_class_color );
+        update_user_meta( $userID, "rps_class_print_bw", $_rps_class_print_bw );
+        update_user_meta( $userID, "rps_class_print_color", $_rps_class_print_color );
+        
     }
 
     ############## Admin WP Helper ##############
