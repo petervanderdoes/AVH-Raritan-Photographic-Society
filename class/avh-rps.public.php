@@ -17,16 +17,7 @@ class AVH_RPS_Public
      */
     private $_classes;
     private $_core_options;
-    // Properties of the Club
-    private $club_name;
-    private $club_short_name;
-    private $club_max_entries_per_member_per_date;
-    private $club_max_banquet_entries_per_member;
-    private $club_season_start_month_num;
-    private $host;
-    private $dbname;
-    private $uname;
-    private $pw;
+
     // Properties of the logged in user
     private $member_id;
     private $username;
@@ -62,29 +53,9 @@ class AVH_RPS_Public
     function actionTemplate_Redirect_RPSWindowsClient()
     {
         if (array_key_exists('rpswinclient', $_REQUEST)) {
-            $this->club_name = "Raritan Photographic Society";
-            $this->club_short_name = "RPS";
-            $this->club_max_entries_per_member_per_date = 4;
-            $this->club_max_banquet_entries_per_member = 5;
-            $this->club_season_start_month_num = 9;
-            // Database credentials
-            $this->host = 'localhost';
-            $this->dbname = 'rarit0_data';
-            $this->uname = 'rarit0_data';
-            $this->pw = 'rps';
-            // Properties of the logged in user
-            $this->member_id = "";
-            $this->username = "";
-            $this->first_name = "";
-            $this->last_name = "";
-            $this->email = "";
-            $this->active_user = "";
-            $this->digital_admin = "";
-            $this->club_officer = "";
-            // Other commonly used globals
-            $this->digital_chair_email = 'digitalchair@raritanphoto.com';
+
             $this->errMsg = "";
-            $this->url_params = "";
+            // Properties of the logged in user
             status_header(200);
             switch ($_REQUEST['rpswinclient']) {
                 case 'getcompdates':
@@ -106,12 +77,12 @@ class AVH_RPS_Public
     {
         // Connect to the Database
         try {
-            if (! $db = @mysql_connect($this->host, $this->uname, $this->pw))
+            if (! $db = @mysql_connect($this->_settings->host, $this->_settings->uname, $this->_settings->pw))
                 throw new Exception(mysql_error());
-            if (! mysql_select_db($this->dbname))
+            if (! mysql_select_db($this->_settings->dbname))
                 throw new Exception(mysql_error());
         } catch (Exception $e) {
-            $this->REST_Error("Failed to obtain database handle " . $e->getMessage());
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
             die($e->getMessage());
         }
         try {
@@ -130,7 +101,7 @@ class AVH_RPS_Public
             if (! $rs = mysql_query($select . $where))
                 throw new Exception(mysql_error());
         } catch (Exception $e) {
-            $this->REST_Error("Failed to SELECT list of competitions from database - " . $e->getMessage());
+            $this->doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
             die($e->getMessage());
         }
         $dom = new DOMDocument('1.0', 'utf-8');
@@ -165,14 +136,14 @@ class AVH_RPS_Public
             if (! mysql_select_db($this->dbname))
                 throw new Exception(mysql_error());
         } catch (Exception $e) {
-            $this->REST_Error("Failed to obtain database handle " . $e->getMessage());
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
             die();
         }
         if ($db) {
             $user = wp_authenticate($username, $password);
             if (is_wp_error($user)) {
                 $a=strip_tags($user->get_error_message());
-                $this->REST_Error($a);
+                $this->doRESTError($a);
                 die();
             }
             // @todo Check if the user has the role needed.
@@ -201,7 +172,7 @@ class AVH_RPS_Public
             if (! $rs = mysql_query($sql))
                 throw new Exception(mysql_error());
         } catch (Exception $e) {
-            $this->REST_Error("Failed to SELECT competition records with date = " . $this->comp_date . " from database - " . $e->getMessage());
+            $this->doRESTError("Failed to SELECT competition records with date = " . $this->comp_date . " from database - " . $e->getMessage());
             die();
         }
         //  Create a Competitions node
@@ -236,7 +207,7 @@ class AVH_RPS_Public
                 if (! $rs2 = mysql_query($sql))
                     throw new Exception(mysql_error());
             } catch (Exception $e) {
-                $this->REST_Error("Failed to SELECT competition entries from database - " . $e->getMessage());
+                $this->doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
                 die();
             }
             // Create an Entries node
@@ -280,7 +251,7 @@ class AVH_RPS_Public
         echo $dom->saveXML();
     }
 
-    private function REST_Error($errMsg)
+    private function doRESTError($errMsg)
     {
         echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
         echo '<rsp stat="fail">' . "\n";
