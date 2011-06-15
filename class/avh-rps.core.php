@@ -58,7 +58,7 @@ class AVH_RPS_Core
         /**
          * Default options - General Purpose
          */
-        $this->_default_options = array( );
+        $this->_default_options = array();
         //add_action('init', array(&$this,'handleInitializePlugin'),10);
         $this->handleInitializePlugin();
         
@@ -75,10 +75,10 @@ class AVH_RPS_Core
         //$this->_loadData();
         //$this->_setTables();
         // Check if we have to do upgrades
-        $old_db_version = get_option('avhrps_db_version',0);
+        $old_db_version = get_option( 'avhrps_db_version', 0 );
         if ( $old_db_version < $this->_db_version ) {
-            $this->_doUpgrade($old_db_version);
-            update_option(avhrps_db_version, $this->_db_version);
+            $this->_doUpgrade( $old_db_version );
+            update_option( avhrps_db_version, $this->_db_version );
         }
         
         $this->_settings->storeSetting( 'club_name', "Raritan Photographic Society" );
@@ -115,7 +115,7 @@ class AVH_RPS_Core
      * Checks if running version is newer and do upgrades if necessary
      *
      */
-    private function _doUpgrade($old_db_version)
+    private function _doUpgrade( $old_db_version )
     {
         $options = $this->getOptions();
         // Introduced dbversion starting with v2.1
@@ -130,6 +130,84 @@ class AVH_RPS_Core
             }
         }
         $this->saveOptions( $options );
+    }
+
+    function rpsCreateThumbnail( $row, $size )
+    {
+        if ( $size >= 400 ) {
+            $maker = $row['FirstName'] . " " . $row['LastName'];
+        }
+        $dateParts = explode( " ", $row['Competition_Date'] );
+        $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'];
+        $file_name = strtr( $row['Title'], " ?[]/\\=+<>:;\",*|", "_---------------" ) . '+' . $row['Username'];
+        
+        if ( !is_dir( "$path/thumbnails" ) ) mkdir( "$path/thumbnails", 0755 );
+        
+        if ( !file_exists( "$path/thumbnails/$file_name" . "_$size.jpg" ) ) {
+            $this->rpsResizeImage( $row['Server_File_Name'], "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker );
+        }
+    
+    }
+
+    function rpsResizeImage( $image_name, $thumb_name, $size, $quality, $maker )
+    {
+        GLOBAL $comp_date;
+        
+        // Open the original image
+        if ( !file_exists( $image_name ) ) {
+            return;
+        }
+        $original_img = imagecreatefromjpeg( $image_name );
+        // Calculate the height and width of the resized image
+        if ( $dimensions = GetImageSize( $image_name ) ) {
+            $w = $dimensions[0];
+            $h = $dimensions[1];
+            if ( $w > $h ) { // Landscape image
+                $nw = $size;
+                $nh = $h * $size / $w;
+            } else { // Portrait image
+                $nh = $size;
+                $nw = $w * $size / $h;
+            }
+        } else {
+            //set new size
+            $nw = "0";
+            $nh = "0";
+        }
+        // Downsize the original image
+        $thumb_img = imagecreatetruecolor( $nw, $nh );
+        imagecopyresampled( $thumb_img, $original_img, 0, 0, 0, 0, $nw, $nh, $w, $h );
+        
+        // If this is the 400px image, write the copyright notice onto the image
+        if ( $maker > "" ) {
+            $dateParts = split( "-", $comp_date );
+            $year = $dateParts[0];
+            $black = imagecolorallocate( $thumb_img, 0, 0, 0 );
+            $white = imagecolorallocate( $thumb_img, 255, 255, 255 );
+            $font = 5;
+            $text = "Copyright " . substr( $comp_date, 0, 4 ) . " $maker";
+            $width = imagesx( $thumb_img );
+            $height = imagesy( $thumb_img );
+            $textLength = imagefontwidth( $font ) * strlen( $text );
+            $textHeight = imagefontwidth( $font );
+            
+            //imagestring($img, $font, 5, $height/2, $text, $red);
+            imagestring( $thumb_img, $font, 7, $height - ( $textHeight * 2 ), $text, $black );
+            imagestring( $thumb_img, $font, 5, $height - ( $textHeight * 2 ) - 2, $text, $white );
+        }
+        // Write the downsized image back to disk
+        imagejpeg( $thumb_img, $thumb_name, $quality );
+    }
+
+    function rpsGetThumbnailUrl( $row, $size )
+    {
+        $dateParts = explode( " ", $row['Competition_Date'] );
+        $path = '/Digital_Competitions/' . $dateParts[0]. '_' . $row['Classification'] . '_' . $row['Medium'] . '/thumbnails';
+        $file_name = strtr( $row['Title'], " ?[]/\\=+<>:;\",*|", "_---------------" ) . '+' . $row['Username'] . "_$size.jpg";
+        
+        return ($path . '/' . $file_name); #str_replace( '#', '%23', $path . '/' . $file_name );
+    
+     #return $path . '/' . $file_name;
     }
 
     /*********************************
@@ -178,7 +256,7 @@ class AVH_RPS_Core
             add_option( $this->_db_options, $this->_default_options, '', 'yes' );
             $options = $this->_default_options;
         }
-            $this->_setOptions( $options );
+        $this->_setOptions( $options );
     }
 
     /**
@@ -204,7 +282,6 @@ class AVH_RPS_Core
      */
     private function _resetToDefaultOptions()
     {
-        
 
     }
 
