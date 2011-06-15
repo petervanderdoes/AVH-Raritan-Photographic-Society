@@ -58,6 +58,7 @@ final class AVH_RPS_Admin
         
         // Admin menu
         add_action( 'admin_menu', array( &$this, 'actionAdminMenu' ) );
+        
         return;
     }
 

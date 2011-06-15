@@ -15,6 +15,12 @@ class AVH_RPS_Public
      * @var AVH_Class_registry
      */
     private $_classes;
+    
+    /**
+     * @var AVH_RPS_OldRpsDb
+     */
+    private $_rpsdb;
+    
     private $_core_options;
     
     // Properties of the logged in user
@@ -43,10 +49,13 @@ class AVH_RPS_Public
         
         // Initialize the plugin
         $this->_core = $this->_classes->load_class( 'Core', 'plugin', true );
+        $this->_core = $this->_classes->load_class( 'OldRpsDb', 'plugin', true );
         $this->_core_options = $this->_core->getOptions();
         
         // Public actions and filters
         add_action( 'template_redirect', array( &$this, 'actionTemplate_Redirect_RPSWindowsClient' ) );
+        
+        add_shortcode( 'rps_monthly_winners', array(&$this, 'shortcodeRpsMonthlyWinners' ) );
     }
 
     function actionTemplate_Redirect_RPSWindowsClient()
@@ -245,5 +254,9 @@ class AVH_RPS_Public
         echo '<rsp stat="fail">' . "\n";
         echo '	<err msg="' . $errMsg . '" >' . "</err>\n";
         echo "</rsp>\n";
+    }
+    
+    public function shortcodeRpsMonthlyWinners($atts, $content = '') {
+        
     }
 }

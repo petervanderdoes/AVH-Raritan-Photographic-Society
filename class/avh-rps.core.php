@@ -61,6 +61,7 @@ class AVH_RPS_Core
         $this->_default_options = array( );
         //add_action('init', array(&$this,'handleInitializePlugin'),10);
         $this->handleInitializePlugin();
+        
         return;
     }
 
