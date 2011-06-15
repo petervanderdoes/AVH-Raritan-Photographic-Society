@@ -330,10 +330,10 @@ class AVH_RPS_Public
         
         // Display the Theme
         $this_month = sprintf( "%d-%02s", $this->_settings->selected_year, $this->_settings->selected_month );
-        echo "<tr><th class=\"thumb_grid_title\"  align=\"center\" colspan=\"" . ( $max_num_awards + 1 ) . "\">Theme is $themes[$this_month]</th></tr>";
+        echo "<tr><th class='thumb_grid_title'  align='center' colspan='" . ( $max_num_awards + 1 ) . "'>Theme is $themes[$this_month]</th></tr>";
         
         // Output the column headings
-        echo "<tr><th class=\"thumb_col_header\" align=\"center\" style=\"border-left:1px solid #000066\">Competition</th>\n";
+        echo "<tr><th class='thumb_col_header' align='center'>Competition</th>\n";
         for ( $i = 0; $i < $max_num_awards; $i++ ) {
             switch ( $i ) {
                 case 0:
