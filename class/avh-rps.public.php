@@ -296,7 +296,13 @@ class AVH_RPS_Public
         $max_num_awards = $this->_rpsdb->getMaxAwards();
         
         // Start displaying the form
-        echo "<center>\n";
+        echo '<script type="text/javascript">';
+        echo 'function submit_form(control_name) {'."/n";
+        echo '	document.winners_form.submit_control.value = control_name;'."/n";
+        echo '	document.winners_form.submit();'."/n";
+		echo '}'."/n";
+		echo '</script>';
+
         echo "<form name=\"winners_form\" action=\"" . $_SERVER['PHP_SELF'] . "\" method=\"post\">\n";
         echo "<input name=\"submit_control\" type=\"hidden\">\n";
         echo '<input name="selected_season" type="hidden" value="'.$this->_settings->selected_season/'">'."\n";
