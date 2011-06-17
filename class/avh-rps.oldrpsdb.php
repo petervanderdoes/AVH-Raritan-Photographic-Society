@@ -104,4 +104,19 @@ class AVH_RPS_OldRpsDb
         
         return $_return;
     }
+    
+    public function getScoresCurrentUser() {
+        $sql = $this->_rpsdb->prepare("SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
+		e.Score, e.Award
+		FROM competitions as c, members as m, entries as e
+		WHERE c.ID = e.Competition_ID AND 
+		m.ID = e.Member_ID AND
+		c.Competition_Date >= %s AND
+		c.Competition_Date < %s AND
+		e.Member_ID = %s
+		ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, get_current_user_id());
+        $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
+        
+        return $_return;
+    }
 } //End Class AVH_RPS_OldRpsDb

@@ -56,6 +56,8 @@ class AVH_RPS_Public
         add_action( 'template_redirect', array( &$this, 'actionTemplate_Redirect_RPSWindowsClient' ) );
         
         add_shortcode( 'rps_monthly_winners', array( &$this, 'shortcodeRpsMonthlyWinners' ) );
+        add_shortcode( 'rps_scores_current_user', array( &$this, 'shortcodeRpsScoresCurrentUser' ) );
+    
     }
 
     function actionTemplate_Redirect_RPSWindowsClient()
@@ -264,14 +266,32 @@ class AVH_RPS_Public
         $this->_settings->storeSetting( season_start_year, "" );
         $this->_settings->storeSetting( selected_year, "" );
         $this->_settings->storeSetting( selected_month, "" );
+        
+        if ( isset( $_POST['submit_control'] ) ) {
+            $this->_settings->selected_season = esc_attr( $_POST['selected_season'] );
+            $this->_settings->season_start_year = substr( $this->_settings->selected_season, 0, 4 );
+            $this->_settings->selected_year = esc_attr( $_POST['selected_year'] );
+            $this->_settings->selected_month = esc_attr( $_POST['selected_month'] );
+            
+            switch ( $_POST['submit_control'] ) {
+                case 'new_season':
+                    $this->_settings->selected_season = esc_attr( $_POST['new_season'] );
+                    $this->_settings->season_start_year = substr( $this->_settings->selected_season, 0, 4 );
+                    $this->_settings->selected_month = "";
+                    break;
+                case 'new_month':
+                    $this->_settings->selected_year = substr( esc_attr( $_POST['new_month'] ), 0, 4 );
+                    $this->_settings->selected_month = substr( esc_attr( $_POST['new_month'] ), 5, 2 );
+            }
+        }
         $seasons = $this->_rpsdb->getSeasonList();
-        if ( $this->_settings->selected_season == "" ) {
+        if ( empty( $this->_settings->selected_season ) ) {
             $this->_settings->selected_season = $seasons[count( $seasons ) - 1];
         }
         $this->_settings->season_start_year = substr( $this->_settings->selected_season, 0, 4 );
         $this->_settings->season_start_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year, $this->_settings->club_season_start_month_num, 1 );
         $this->_settings->season_end_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1 );
-
+        
         $scores = $this->_rpsdb->getMonthlyScores();
         
         foreach ( $scores as $recs ) {
@@ -280,7 +300,7 @@ class AVH_RPS_Public
             $themes[$key] = $recs['Theme'];
         }
         
-        if ( $this->_settings->selected_month == "" ) {
+        if ( empty( $this->_settings->selected_month ) ) {
             end( $months );
             $this->_settings->selected_year = substr( key( $months ), 0, 4 );
             $this->_settings->selected_month = substr( key( $months ), 5, 2 );
@@ -297,47 +317,45 @@ class AVH_RPS_Public
         
         // Start displaying the form
         echo '<script type="text/javascript">';
-        echo 'function submit_form(control_name) {'."/n";
-        echo '	document.winners_form.submit_control.value = control_name;'."/n";
-        echo '	document.winners_form.submit();'."/n";
-		echo '}'."/n";
-		echo '</script>';
-
-        echo "<form name=\"winners_form\" action=\"" . $_SERVER['PHP_SELF'] . "\" method=\"post\">\n";
-        echo "<input name=\"submit_control\" type=\"hidden\">\n";
-        echo '<input name="selected_season" type="hidden" value="'.$this->_settings->selected_season/'">'."\n";
-        echo '<input name="selected_year" type="hidden" value="'.$this->_settings->selected_year.'">'."\n";
-        echo '<input name="selected_month" type="hidden" value="'.$this->_settings->selected_month.'">'."\n";
-        //echo "<div id=\"errmsg\">$err</div>\n";
-        echo "<table class=\"thumb_grid\">\n";
-        echo "<tr><td align=\"left\" class=\"form_title\" align=\"center\" colspan=\"" . ( $max_num_awards + 1 ) . "\">Monthly Award Winners for \n";
-        //echo "<tr><td class=\"thumb_grid_select\" align=\"center\" colspan=\"" . ($max_num_awards + 1) . "\">\n";
+        echo 'function submit_form(control_name) {' . "\n";
+        echo '	document.winners_form.submit_control.value = control_name;' . "\n";
+        echo '	document.winners_form.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>';
         
-
+        echo '<span class="competion-monthly-winners-form"> Monthly Award Winners for ';
+        $action = site_url( '/' . get_page_uri() );
+        $form = '';
+        $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
+        $form .= '<input name="submit_control" type="hidden">' . "\n";
+        $form .= '<input name="selected_season" type="hidden" value="' . $this->_settings->selected_season . '">' . "\n";
+        $form .= '<input name="selected_year" type="hidden" value="' . $this->_settings->selected_year . '">' . "\n";
+        $form .= '<input name="selected_month" type="hidden" value="' . $this->_settings->selected_month . '">' . "\n";
+        
         // Drop down list for months
-        echo "<SELECT name=\"new_month\" onchange=\"submit_form('new_month')\">\n";
-        reset( $months );
-        while ( $mth = current( $months ) ) {
-            $selected = ( substr( key( $months ), 5, 2 ) == $this->_settings->selected_month ) ? " SELECTED" : "";
-            echo "<OPTION value=\"" . key( $this->_settings->months ) . "\"$selected>$mth</OPTION>\n";
-            next( $months );
+        $form .= '<select name="new_month" onchange="submit_form(\'new_month\')">' . "\n";
+        foreach ( $months as $key => $month ) {
+            $selected = ( substr( $key, 5, 2 ) == $this->_settings->selected_month ) ? " selected" : "";
+            $form .= '<option value="' . $key . '"' . $selected . '>' . $month . '</option>' . "\n";
         }
-        echo "</SELECT>\n";
+        $form .= "</select>\n";
         
         // Drop down list for season
-        echo "<SELECT name=\"new_season\" onChange=\"submit_form('new_season')\">\n";
-        reset( $seasons );
-        while ( $season = current( $seasons ) ) {
-            $selected = ( $season == $this->_settings->selected_season ) ? " SELECTED" : "";
-            echo "<OPTION value=\"$season\"$selected>$season</OPTION>\n";
-            next( $seasons );
+        $form .= '<select name="new_season" onChange="submit_form(\'new_season\')">' . "\n";
+        foreach ( $seasons as $season ) {
+            $selected = ( $season == $this->_settings->selected_season ) ? " selected" : "";
+            $form .= '<option value="' . $season . '"' . $selected . '>' . $season . '</option>' . "\n";
         }
-        echo "</SELECT>&nbsp;</td></tr>\n";
+        $form .= '</select>' . "\n";
+        $form .= '</form>';
+        echo $form;
+        unset( $form );
+        echo '</span>';
         
-        // Display the Theme
         $this_month = sprintf( "%d-%02s", $this->_settings->selected_year, $this->_settings->selected_month );
-        echo "<tr><th class='thumb_grid_title'  align='center' colspan='" . ( $max_num_awards + 1 ) . "'>Theme is $themes[$this_month]</th></tr>";
+        echo '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
         
+        echo "<table class=\"thumb_grid\">\n";
         // Output the column headings
         echo "<tr><th class='thumb_col_header' align='center'>Competition</th>\n";
         for ( $i = 0; $i < $max_num_awards; $i++ ) {
@@ -416,5 +434,115 @@ class AVH_RPS_Public
         echo "</tr>\n</table>\n";
         echo "</form>\n";
         echo "<br />\n";
+    }
+
+    public function shortcodeRpsScoresCurrentUser( $atts, $content = '' )
+    {
+        
+        if ( isset( $_POST['selected_season_list'] ) ) {
+            $this->_settings->selected_season = $_POST['selected_season_list'];
+        }
+        // Get the list of seasons
+        $seasons = $this->_rpsdb->getSeasonList();
+                if ( empty( $this->_settings->selected_season ) ) {
+            $this->_settings->selected_season = $seasons[count( $seasons ) - 1];
+        }
+        $this->_settings->season_start_year = substr( $this->_settings->selected_season, 0, 4 );
+        $this->_settings->season_start_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year, $this->_settings->club_season_start_month_num, 1 );
+        $this->_settings->season_end_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1 );
+        
+        
+        // Start building the form
+        $action = site_url( '/' . get_page_uri() );
+        $form = '';
+        $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
+        $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '" />';
+        $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
+        foreach ( $seasons as $this_season ) {
+            if ( $this_season == $this->_settings->selected_season ) {
+                $selected = " SELECTED";
+            } else {
+                $selected = "";
+            }
+            $form .= "<option value=\"$this_season\"$selected>$this_season</option>\n";
+        }
+        $form .= "</select>&nbsp;season\n";
+        echo '<script type="text/javascript">' . "\n";
+        echo 'function submit_form() {' . "\n";
+        echo '	document.my_scores_form.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>' . "\n";
+        echo "My scores for ";
+        echo $form;
+        echo '<table class="form_frame" width="99%">';
+        echo '<tr>';
+        echo '<th class="form_frame_header" width="12%">Date</th>';
+        echo '<th class="form_frame_header">Theme</th>';
+        echo '<th class="form_frame_header">Competition</th>';
+        echo '<th class="form_frame_header">Title</th>';
+        echo '<th class="form_frame_header" width="8%">Score</th>';
+        echo '<th class="form_frame_header" width="8%">Award</th></tr>';
+        $scores = $this->_rpsdb->getScoresCurrentUser();
+        
+        // Bail out if not entries found
+        if ( empty( $scores ) ) {
+            echo "<tr><td colspan=\"6\">No entries submitted</td></tr>\n";
+            echo "</table>\n";
+        } else {
+            
+            // Build the list of submitted images
+            $compCount = 0;
+            $prev_date = "";
+            $prev_medium = "";
+            foreach ( $scores as $recs ) {
+                $dateParts = split( " ", $recs['Competition_Date'] );
+                $dateParts[0] = strftime('%d-%b-%Y', strtotime($dateParts[0]));
+                $comp_date = $dateParts[0];
+                $medium = $recs['Medium'];
+                $theme = $recs['Theme'];
+                $title = $recs['Title'];
+                $score = $recs['Score'];
+                $award = $recs['Award'];
+                if ( $dateParts[0] != $prev_date ) {
+                    $compCount += 1;
+                    $rowStyle = $compCount % 2 == 1 ? "odd_row" : "even_row";
+                    $prev_medium = "";
+                }
+                
+                $a=realpath($recs['Server_File_Name']);
+                $image_url = site_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name'])) ;
+                
+                if ( $prev_date == $dateParts[0] ) {
+                    $dateParts[0] = "";
+                    $theme = "";
+                } else {
+                    $prev_date = $dateParts[0];
+                }
+                if ( $prev_medium == $medium ) {
+                    // $medium = "";
+                    $theme = "";
+                } else {
+                    $prev_medium = $medium;
+                }
+                
+                echo "<tr>";
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$theme</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$medium</td>\n";
+                //echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
+                $score_award = "";
+                if ( $score > "" ) {
+                    $score_award = " / {$score}pts";
+                }
+                if ( $award > "" ) {
+                    $score_award .= " / $award";
+                }
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities( $title ) . "<br />$comp_date / $medium{$score_award}\">" . htmlentities( $title ) . "</a></td>\n";
+                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
+                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
+            
+            }
+            echo "</table>\n</form>\n</center>\n<br />\n";
+        }
     }
 }
