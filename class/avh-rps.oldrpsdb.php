@@ -36,18 +36,75 @@ class AVH_RPS_OldRpsDb
     public function getSeasonList()
     {
         
-        $sql = $this->_rpsdb->prepare( 'SELECT DISTINCT if(month(Competition_Date) >= %s and month(Competition_Date) <= 12,
+        $sql = $this->_rpsdb->prepare( 'SELECT DISTINCT if(month(Competition_Date) >= %s and month(Competition_Date) <= %s,
         	concat_WS("-",year(Competition_Date),substr(year(Competition_Date)+1,3,2)),
             concat_WS("-",year(Competition_Date)-1,substr(year(Competition_Date),3,2))) as "Season"
             FROM competitions
-            ORDER BY Season',
-            $this->_settings->club_season_start_month_num );
+            ORDER BY Season', $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num );
         
         $_result = $this->_rpsdb->get_results( $sql, ARRAY_A );
-        foreach ($_result as $key => $value){
-            $_seasons[$key]=$value['Season'];
+        foreach ( $_result as $key => $value ) {
+            $_seasons[$key] = $value['Season'];
         }
         return $_seasons;
+    }
+
+    public function getSeasonListOneEntry()
+    {
+        $sql = $this->_rpsdb->prepare( 'SELECT if(month(c.Competition_Date) >= %s and month(c.Competition_Date) <= %s, 
+			concat_WS(" - ",year(c.Competition_Date),substr(year(c.Competition_Date)+1,3,2)),
+			concat_WS(" - ",year(c.Competition_Date)-1,substr(year(c.Competition_Date),3,2))) as "Season",
+			count(e.ID)
+			FROM competitions c, entries e
+			WHERE c.ID = e.Competition_ID
+			GROUP BY Season
+			HAVING count(e.ID) > 0
+			ORDER BY Season', $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num );
+        
+        $_result = $this->_rpsdb->get_results( $sql, ARRAY_A );
+        foreach ( $_result as $key => $value ) {
+            $_seasons[$key] = $value['Season'];
+        }
+        return $_seasons;
+    
+    }
+
+    public function getClubCompetitionDates()
+    {
+        $sql = $this->_rpsdb->prepare( 'SELECT Competition_Date, max(Max_Entries) as Max_Entries,
+			max(Num_Judges) as Num_Judges
+			FROM competitions
+			WHERE Competition_Date >= %s AND
+				Competition_Date < %s AND
+				Special_Event = "N"
+			GROUP BY Competition_Date
+			ORDER BY Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date );
+        $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
+        return $_return;
+    }
+
+    public function getClubCompetitionResults()
+    {
+        $sql = $this->_rpsdb->prepare( 'SELECT c.Competition_Date, c.Medium, c.Classification, c.Special_Event,
+			if(c.Classification = "Beginner",0,
+			if(c.Classification = "Advanced",1,2)) as "Class_Code",
+			e.Score, e.Award, e.Member_ID
+			FROM competitions as c, entries as e
+			WHERE c.ID = e.Competition_ID AND 
+				Competition_Date >= %s AND
+				Competition_Date < %s AND
+				Special_Event = "N"
+			ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date );
+        
+        $_x = $this->_rpsdb->get_results( $sql, ARRAY_A );
+        foreach ( $_x as $key=>$_rec ) {
+            $user_info = get_userdata( $_rec['Member_ID'] );
+            $_rec['FirstName'] = $user_info->user_firstname;
+            $_rec['LastName'] = $user_info->user_lastname;
+            $_rec['Username'] = $user_info->user_login;
+            $_return[] = $_rec;
+        }
+        return $_return;
     }
 
     public function getMonthlyScores()
@@ -59,8 +116,7 @@ class AVH_RPS_OldRpsDb
 			FROM competitions 
 			WHERE Competition_Date >= %s AND
 				Competition_date < %s AND
-				Scored="Y" ORDER BY Competition_Date',
-            $this->_settings->season_start_date, $this->_settings->season_end_date );
+				Scored="Y" ORDER BY Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date );
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         return $_return;
     }
@@ -94,19 +150,20 @@ class AVH_RPS_OldRpsDb
 					e.Award Is Not Null
 				ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->_settings->min_date, $this->_settings->max_date );
         $_x = $this->_rpsdb->get_results( $sql, ARRAY_A );
-        foreach ($_x as $_rec) {
-            $user_info = get_userdata( $_rec['Member_ID']);
-            $_rec['FirstName']=$user_info->user_firstname;
-            $_rec['LastName']=$user_info->user_lastname;
-            $_rec['Username']=$user_info->user_login;
-            $_return[]=$_rec;
+        foreach ( $_x as $_rec ) {
+            $user_info = get_userdata( $_rec['Member_ID'] );
+            $_rec['FirstName'] = $user_info->user_firstname;
+            $_rec['LastName'] = $user_info->user_lastname;
+            $_rec['Username'] = $user_info->user_login;
+            $_return[] = $_rec;
         }
         
         return $_return;
     }
-    
-    public function getScoresCurrentUser() {
-        $sql = $this->_rpsdb->prepare("SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
+
+    public function getScoresCurrentUser()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
 		e.Score, e.Award
 		FROM competitions as c, members as m, entries as e
 		WHERE c.ID = e.Competition_ID AND 
@@ -114,7 +171,7 @@ class AVH_RPS_OldRpsDb
 		c.Competition_Date >= %s AND
 		c.Competition_Date < %s AND
 		e.Member_ID = %s
-		ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, get_current_user_id());
+		ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, get_current_user_id() );
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         
         return $_return;

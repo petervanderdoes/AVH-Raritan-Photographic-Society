@@ -86,6 +86,7 @@ class AVH_RPS_Core
         $this->_settings->storeSetting( 'club_max_entries_per_member_per_date', 4 );
         $this->_settings->storeSetting( 'club_max_banquet_entries_per_member', 5 );
         $this->_settings->storeSetting( 'club_season_start_month_num', 9 );
+        $this->_settings->storeSetting( 'club_season_end_month_num', 12 );
         // Database credentials
         $this->_settings->storeSetting( 'host', 'localhost' );
         $this->_settings->storeSetting( 'dbname', 'rarit0_data' );
@@ -202,12 +203,40 @@ class AVH_RPS_Core
     function rpsGetThumbnailUrl( $row, $size )
     {
         $dateParts = explode( " ", $row['Competition_Date'] );
-        $path = '/Digital_Competitions/' . $dateParts[0]. '_' . $row['Classification'] . '_' . $row['Medium'] . '/thumbnails';
+        $path = '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'] . '/thumbnails';
         $file_name = strtr( $row['Title'], " ?[]/\\=+<>:;\",*|", "_---------------" ) . '+' . $row['Username'] . "_$size.jpg";
         
-        return ($path . '/' . $file_name); #str_replace( '#', '%23', $path . '/' . $file_name );
+        return ( $path . '/' . $file_name ); #str_replace( '#', '%23', $path . '/' . $file_name );
     
-     #return $path . '/' . $file_name;
+
+    #return $path . '/' . $file_name;
+    }
+
+    private function _array_sort_func( $a, $b = NULL )
+    {
+        static $keys;
+        if ( $b === NULL ) return $keys = $a;
+        foreach ( $keys as $k ) {
+            if ( @$k[0] == '!' ) {
+                $k = substr( $k, 1 );
+                if ( @$a[$k] !== @$b[$k] ) {
+                    return strcmp( @$b[$k], @$a[$k] );
+                }
+            } else 
+                if ( @$a[$k] !== @$b[$k] ) {
+                    return strcmp( @$a[$k], @$b[$k] );
+                }
+        }
+        return 0;
+    }
+
+    public function rps_array_sort( &$array )
+    {
+        if ( !$array ) return $keys;
+        $keys = func_get_args();
+        array_shift( $keys );
+        $this->_array_sort_func( $keys );
+        usort( $array, array($this,"_array_sort_func" ));
     }
 
     /*********************************

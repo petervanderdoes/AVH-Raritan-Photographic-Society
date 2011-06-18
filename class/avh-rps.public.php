@@ -57,6 +57,7 @@ class AVH_RPS_Public
         
         add_shortcode( 'rps_monthly_winners', array( &$this, 'shortcodeRpsMonthlyWinners' ) );
         add_shortcode( 'rps_scores_current_user', array( &$this, 'shortcodeRpsScoresCurrentUser' ) );
+        add_shortcode( 'rps_all_scores', array( &$this, 'shortcodeRpsAllScores' ) );
     
     }
 
@@ -444,13 +445,12 @@ class AVH_RPS_Public
         }
         // Get the list of seasons
         $seasons = $this->_rpsdb->getSeasonList();
-                if ( empty( $this->_settings->selected_season ) ) {
+        if ( empty( $this->_settings->selected_season ) ) {
             $this->_settings->selected_season = $seasons[count( $seasons ) - 1];
         }
         $this->_settings->season_start_year = substr( $this->_settings->selected_season, 0, 4 );
         $this->_settings->season_start_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year, $this->_settings->club_season_start_month_num, 1 );
         $this->_settings->season_end_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1 );
-        
         
         // Start building the form
         $action = site_url( '/' . get_page_uri() );
@@ -467,6 +467,7 @@ class AVH_RPS_Public
             $form .= "<option value=\"$this_season\"$selected>$this_season</option>\n";
         }
         $form .= "</select>&nbsp;season\n";
+        $form .= "</form>";
         echo '<script type="text/javascript">' . "\n";
         echo 'function submit_form() {' . "\n";
         echo '	document.my_scores_form.submit();' . "\n";
@@ -496,7 +497,7 @@ class AVH_RPS_Public
             $prev_medium = "";
             foreach ( $scores as $recs ) {
                 $dateParts = split( " ", $recs['Competition_Date'] );
-                $dateParts[0] = strftime('%d-%b-%Y', strtotime($dateParts[0]));
+                $dateParts[0] = strftime( '%d-%b-%Y', strtotime( $dateParts[0] ) );
                 $comp_date = $dateParts[0];
                 $medium = $recs['Medium'];
                 $theme = $recs['Theme'];
@@ -509,8 +510,8 @@ class AVH_RPS_Public
                     $prev_medium = "";
                 }
                 
-                $a=realpath($recs['Server_File_Name']);
-                $image_url = site_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name'])) ;
+                $a = realpath( $recs['Server_File_Name'] );
+                $image_url = site_url( str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
                 
                 if ( $prev_date == $dateParts[0] ) {
                     $dateParts[0] = "";
@@ -542,7 +543,262 @@ class AVH_RPS_Public
                 echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
             
             }
-            echo "</table>\n</form>\n</center>\n<br />\n";
+            echo "</table>";
+        }
+    }
+
+    public function shortcodeRpsAllScores( $atts, $content = '' )
+    {
+        
+        if ( isset( $_POST['selected_season_list'] ) ) {
+            $this->_settings->selected_season = $_POST['selected_season_list'];
+        }
+        $award_map = array( '1st'=>'1', '2nd'=>'2', '3rd'=>'3', 'HM'=>'H' );
+        
+        $seasons = $this->_rpsdb->getSeasonListOneEntry();
+        arsort($seasons);
+        if ( !isset( $this->_settings->selected_season ) ) {
+            $this->_settings->selected_season = $seasons[count( $seasons ) - 1];
+        }
+        
+        $this->_settings->season_start_year = substr( $this->_settings->selected_season, 0, 4 );
+        $this->_settings->season_start_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year, 9, 1 );
+        $this->_settings->season_end_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year + 1, 9, 1 );
+        
+        $competition_dates = $this->_rpsdb->getClubCompetitionDates();
+        // Build an array of competition dates in "MM/DD" format for column titles.
+        // Also remember the max entries per member for each competition and the number
+        // of judges for each competition.
+        $total_max_entries = 0;
+        foreach ( $competition_dates as $key => $recs ) {
+            $comp_date = $recs['Competition_Date'];
+            $date_parts = explode( " ", $comp_date );
+            list ($comp_year, $comp_month, $comp_day) = explode( "-", $date_parts[0] );
+            $comp_dates[$date_parts[0]] = sprintf( "%d/%d", $comp_month, $comp_day );
+            $comp_max_entries[$date_parts[0]] = $recs['Max_Entries'];
+            $total_max_entries += $recs['Max_Entries'];
+            $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
+        }
+        
+        $club_competition_results = $this->_rpsdb->getClubCompetitionResults();
+        $this->_core->rps_array_sort( $club_competition_results, '!Medium', 'Class_Code', 'LastName', 'FirstName', 'Competition_Date' );
+        
+        // Bail out if no entries found
+        if ( empty( $club_competition_results ) ) {
+            echo 'No entries submitted';
+        } else {
+            
+            // Start the big table
+            
+
+            $action = site_url( '/' . get_page_uri() );
+            $form = '';
+            $form .= '<form name="all_scores_form" method="post" action="' . $action . '">';
+            $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '"/>';
+            $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
+            foreach ( $seasons as $this_season ) {
+                if ( $this_season == $this->_settings->selected_season ) {
+                    $selected = " SELECTED";
+                } else {
+                    $selected = "";
+                }
+                $form .= "<option value=\"$this_season\"$selected>$this_season</option>\n";
+            }
+            $form .= "</select>";
+            $form .= '</form>';
+            echo 'Select the season: ';
+            echo $form;
+            echo '<script type="text/javascript">' . "\n";
+            echo 'function submit_form() {' . "\n";
+            echo '	document.all_scores_form.submit();' . "\n";
+            echo '}' . "\n";
+            echo '</script>' . "\n";
+            echo "<table class=\"form_frame\" width=\"99%\">\n";
+            
+            // Build the list of submitted images
+            $prev_member = "";
+            $prev_medium = "";
+            $prev_class = "";
+            $rowCount = 0;
+            // Initialize the 2D array to hold the members scores for each month
+            // Each row represents a competition month and each column holds the scores
+            // of the submitted images for that month
+            $member_scores = array();
+            foreach ( $comp_dates as $key => $d ) {
+                $member_scores[$key] = array();
+            }
+            $total_score = 0;
+            $num_scores = 0;
+            
+            $medium = '';
+            $classification = '';
+            $member = '';
+            $last_name = '';
+            $first_name = '';
+            
+            foreach ( $club_competition_results as $key => $recs ) {
+                
+                // Remember the important values from the previous record
+                $prev_medium = $medium;
+                $prev_class = $classification;
+                $prev_member = $member;
+                $prev_lname = $last_name;
+                $prev_fname = $first_name;
+                
+                // Grab a new record from the database
+                $medium = $recs['Medium'];
+                $classification = $recs['Classification'];
+                $date_parts = explode( " ", $recs['Competition_Date'] );
+                $this_date = $date_parts[0];
+                $member = $recs['Username'];
+                $last_name = $recs['LastName'];
+                $first_name = $recs['FirstName'];
+                $score = $recs['Score'];
+                $award = $recs['Award'];
+                $special_event = $recs['Special_Event'];
+                
+                // Is this the beginning of the next member's scores?
+                if ( $member != $prev_member || $classification != $prev_class || $medium != $prev_medium ) {
+                    $rowCount += 1;
+                    $rowStyle = $rowCount % 2 == 1 ? "odd_row" : "even_row";
+                    
+                    // Don't do anything yet if this is the very first member, otherwise, output all
+                    // the accumulated scored for the member we just passed.
+                    if ( $prev_member != "" ) {
+                        // Display the members name and classification
+                        echo "<tr>";
+                        echo "<td align=\"left\" class=\"$rowStyle\">" . $prev_fname . " " . $prev_lname . "</td>\n";
+                        echo "<td align=\"center\" class=\"$rowStyle\">" . substr( $prev_class, 0, 1 ) . "</td>\n";
+                        
+                        // Iterate through all the accumulated scores for this member
+                        foreach ( $member_scores as $key => $score_array ) {
+                            // Print the scores for the submitted entries for this month
+                            for ( $i = 0; $i < count( $score_array ); $i++ ) {
+                                echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
+                            }
+                            // Pad the unused entries for this member for this month
+                            for ( $i = 0; $i < $comp_max_entries[$key] - count( $score_array ); $i++ ) {
+                                echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                            }
+                        }
+                        
+                        // Display the members annual average score
+                        if ( $total_score > 0 && $num_scores > 0 ) {
+                            echo "<td align=\"center\" class=\"$rowStyle\">" . sprintf( "%3.1f", $total_score / $num_scores ) . "</td>\n";
+                        } else {
+                            echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                        }
+                        echo "</tr>";
+                    
+                    }
+                    
+                    // Now that we've just output the scores for the previous member, are we at the
+                    // beginning of a new classification, but not at the end of the current medium?
+                    // If so, draw a horizonal line to mark the beginning of a new classification
+                    if ( $classification != $prev_class && $medium == $prev_medium ) {
+                        //echo "<tr class=\"horizontal_separator\">";
+                        echo "<tr>";
+                        echo "<td colspan=\"" . ( $total_max_entries + 3 ) . "\" class=\"horizontal_separator\"></td>";
+                        echo "</tr>\n";
+                        $prev_class = $classification;
+                    }
+                    
+                    // Are we at the beginning of a new medium?
+                    // If so, output a new set of column headings
+                    if ( $medium != $prev_medium ) {
+                        // Draw a horizontal line to end the previous medium
+                        if ( $prev_medium != "" ) {
+                            echo "<tr class=\"horizontal_separator\">";
+                            //echo "<td colspan=\"" . (count($comp_dates) * 2 + 3) . 
+                            //	"\" class=\"horizontal_separator\"></td>";
+                            echo "<td colspan=\"" . ( $total_max_entries + 3 ) . "\" class=\"horizontal_separator\"></td>";
+                            echo "</tr>\n";
+                        }
+                        
+                        // Display the category title
+                        echo "<tr><td align=\"left\" class=\"form_title\" colspan=\"" . ( $total_max_entries + 3 ) . "\">$medium scores for&nbsp;";
+                        echo "$selected_season&nbsp;";
+                        echo "season</td></tr>\n";
+                        
+                        // Display the first row column headers
+                        echo "<tr>\n<th class=\"form_frame_header\" colspan=\"2\">&nbsp;</th>\n";
+                        foreach ( $comp_dates as $key => $d ) {
+                            echo "<th class=\"form_frame_header\" colspan=\"" . $comp_max_entries[$key] . "\">$d</th>\n";
+                        }
+                        echo "<th class=\"form_frame_header\">&nbsp;</th>\n";
+                        echo "</tr>\n";
+                        // Display the second row column headers
+                        echo "<tr>\n";
+                        echo "<th class=\"form_frame_header\">Member</th>\n";
+                        echo "<th class=\"form_frame_header\">Cl.</th>\n";
+                        foreach ( $comp_dates as $key => $d ) {
+                            for ( $i = 1; $i <= $comp_max_entries[$key]; $i++ ) {
+                                echo "<th class=\"form_frame_header\">$i</th>\n";
+                            }
+                        }
+                        echo "<th class=\"form_frame_header\">Avg</th>\n";
+                        echo "</tr>\n";
+                    }
+                    
+                    // Reset the score array to be ready to start accumulating the scores for this 
+                    // new member we just started.
+                    $member_scores = array();
+                    foreach ( $comp_dates as $key => $d ) {
+                        $member_scores[$key] = array();
+                    }
+                    $total_score = 0;
+                    $num_scores = 0;
+                }
+                
+                // We're still working on the records for the current member
+                // Accumulate this member's total score to calculcate the average at the end.
+                if ( $score > 0 ) {
+                    $score = $score / $comp_num_judges[$this_date];
+                    if ( $score - floor( $score ) > 0 ) {
+                        $score = round( $score, 1 );
+                    }
+                    if ( $special_event == 'N' ) {
+                        $total_score += $score;
+                        $num_scores += 1;
+                    }
+                }
+                // Apply the award as a superscript to the score
+                if ( $award != "" ) {
+                    $score = "&nbsp;&nbsp;" . $score . "<SUP>&nbsp;$award_map[$award]</SUP>";
+                }
+                // Store the score in the appropriate array
+                $member_scores[$this_date][] = $score;
+            }
+            
+            // Output the last remaining row of the table that hasn't been displayed yet
+            $rowCount += 1;
+            $rowStyle = $rowCount % 2 == 1 ? "odd_row" : "even_row";
+            // Display the members name and classification
+            echo "<tr>";
+            echo "<td align=\"left\" class=\"$rowStyle\">" . $first_name . " " . $last_name . "</td>\n";
+            echo "<td align=\"center\" class=\"$rowStyle\">" . substr( $classification, 0, 1 ) . "</td>\n";
+            // Iterate through all the accumulated scores for this member
+            foreach ( $member_scores as $key => $score_array ) {
+                // Print the scores for the submitted entries for this month
+                for ( $i = 0; $i < count( $score_array ); $i++ ) {
+                    echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
+                }
+                // Pad the unused entries for this member for this month
+                for ( $i = 0; $i < $comp_max_entries[$key] - count( $score_array ); $i++ ) {
+                    echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                }
+            }
+            
+            // Display the members annual average score
+            if ( $total_score > 0 && $num_scores > 0 ) {
+                echo "<td align=\"center\" class=\"$rowStyle\">" . sprintf( "%3.1f", $total_score / $num_scores ) . "</td>\n";
+            } else {
+                echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+            }
+            echo "</tr>";
+            
+            // We're all done
+            echo "</table>";
         }
     }
 }
