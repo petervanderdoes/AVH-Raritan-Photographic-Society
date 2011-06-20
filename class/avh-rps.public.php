@@ -716,9 +716,9 @@ class AVH_RPS_Public
                         }
                         
                         // Display the category title
-                        echo "<tr><td align=\"left\" class=\"form_title\" colspan=\"" . ( $total_max_entries + 3 ) . "\">$medium scores for&nbsp;";
-                        echo "$selected_season&nbsp;";
-                        echo "season</td></tr>\n";
+                        echo '<tr><td align="left" class="form_title" colspan="' . ( $total_max_entries + 3 ) . '">';
+                        echo $medium.' scores for '.$this->_settings->selected_season .' season';
+                        echo '</td></tr>'."\n";
                         
                         // Display the first row column headers
                         echo "<tr>\n<th class=\"form_frame_header\" colspan=\"2\">&nbsp;</th>\n";
