@@ -140,7 +140,7 @@ class AVH_RPS_Core
         }
         $dateParts = explode( " ", $row['Competition_Date'] );
         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'];
-        $file_name = strtr( $row['Title'], " ?[]/\\=+<>:;\",*|", "_---------------" ) . '+' . $row['Username'];
+        $file_name = $row['Title'] . '+' . $row['Username'];
         
         if ( !is_dir( "$path/thumbnails" ) ) mkdir( "$path/thumbnails", 0755 );
         
@@ -203,10 +203,10 @@ class AVH_RPS_Core
     function rpsGetThumbnailUrl( $row, $size )
     {
         $dateParts = explode( " ", $row['Competition_Date'] );
-        $path = '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'] . '/thumbnails';
-        $file_name = strtr( $row['Title'], " ?[]/\\=+<>:;\",*|", "_---------------" ) . '+' . $row['Username'] . "_$size.jpg";
+        $path = '/Digital_Competitions/' . rawurlencode($dateParts[0]) . '_' . rawurlencode($row['Classification']) . '_' . rawurlencode($row['Medium']) . '/thumbnails';
+        $file_name = $row['Title'] .'+' . $row['Username'] . "_$size.jpg";
         
-        return ( $path . '/' . $file_name ); #str_replace( '#', '%23', $path . '/' . $file_name );
+        return ( $path . '/' . rawurlencode($file_name ));
     
 
     #return $path . '/' . $file_name;
