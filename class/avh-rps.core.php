@@ -202,11 +202,16 @@ class AVH_RPS_Core
 
     function rpsGetThumbnailUrl( $row, $size )
     {
-        $dateParts = explode( " ", $row['Competition_Date'] );
-        $path = '/Digital_Competitions/' . rawurlencode($dateParts[0]) . '_' . rawurlencode($row['Classification']) . '_' . rawurlencode($row['Medium']) . '/thumbnails';
-        $file_name = $row['Title'] .'+' . $row['Username'] . "_$size.jpg";
+
+        $file_parts =  pathinfo(str_replace('/home/rarit0/public_html/', '', $row['Server_File_Name']));
+        $p = explode('/', $file_parts['dirname']);
+        $path = '/';
+        foreach ($p as $part) {
+            $path .= rawurlencode($part) .'/';
+        }
+        $path .= 'thumbnails/';
         
-        return ( $path . '/' . rawurlencode($file_name ));
+        return ( $path . rawurlencode($file_parts['filename'].'_'.$size.'.jpg' ));
     
 
     #return $path . '/' . $file_name;

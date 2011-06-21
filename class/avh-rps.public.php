@@ -418,6 +418,7 @@ class AVH_RPS_Public
             $this->_core->rpsCreateThumbnail( $recs, 400 );
             echo "<td align=\"center\" class=\"thumb_cell\">\n";
             echo "  <div class=\"thumb_canvas\">\n";
+            echo "<div id='rps_colorbox_title'>$title<br />Award: $award</div>";
             echo "    <a href=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 400 ) . "\" rel=\"lightbox[$classification $medium]\" title=\"($award) $title\">\n";
             echo "    <img class=\"thumb_img\" src=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 75 ) . "\" /></a>\n";
             echo "  </div>\n</td>\n";
@@ -538,7 +539,7 @@ class AVH_RPS_Public
                 if ( $award > "" ) {
                     $score_award .= " / $award";
                 }
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities( $title ) . "<br />$comp_date / $medium{$score_award}\">" . htmlentities( $title ) . "</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><div id='rps_colorbox_title'>".htmlentities( $title )."<br />$comp_date / $medium{$score_award}</div><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities( $title ) . " / $comp_date / $medium{$score_award}\">" . htmlentities( $title ) . "</a></td>\n";
                 echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
                 echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
             
