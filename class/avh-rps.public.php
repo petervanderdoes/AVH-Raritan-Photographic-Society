@@ -58,6 +58,7 @@ class AVH_RPS_Public
         add_shortcode( 'rps_monthly_winners', array( &$this, 'shortcodeRpsMonthlyWinners' ) );
         add_shortcode( 'rps_scores_current_user', array( &$this, 'shortcodeRpsScoresCurrentUser' ) );
         add_shortcode( 'rps_all_scores', array( &$this, 'shortcodeRpsAllScores' ) );
+        add_shortcode( 'rps_my_entries', array( &$this, 'shortcodeRpsMyEntries' ) );
     
     }
 
@@ -539,7 +540,7 @@ class AVH_RPS_Public
                 if ( $award > "" ) {
                     $score_award .= " / $award";
                 }
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><div id='rps_colorbox_title'>".htmlentities( $title )."<br />$comp_date / $medium{$score_award}</div><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities( $title ) . " / $comp_date / $medium{$score_award}\">" . htmlentities( $title ) . "</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><div id='rps_colorbox_title'>" . htmlentities( $title ) . "<br />$comp_date / $medium{$score_award}</div><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities( $title ) . " / $comp_date / $medium{$score_award}\">" . htmlentities( $title ) . "</a></td>\n";
                 echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
                 echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
             
@@ -557,7 +558,7 @@ class AVH_RPS_Public
         $award_map = array( '1st'=>'1', '2nd'=>'2', '3rd'=>'3', 'HM'=>'H' );
         
         $seasons = $this->_rpsdb->getSeasonListOneEntry();
-        arsort($seasons);
+        arsort( $seasons );
         if ( !isset( $this->_settings->selected_season ) ) {
             $this->_settings->selected_season = $seasons[count( $seasons ) - 1];
         }
@@ -718,8 +719,8 @@ class AVH_RPS_Public
                         
                         // Display the category title
                         echo '<tr><td align="left" class="form_title" colspan="' . ( $total_max_entries + 3 ) . '">';
-                        echo $medium.' scores for '.$this->_settings->selected_season .' season';
-                        echo '</td></tr>'."\n";
+                        echo $medium . ' scores for ' . $this->_settings->selected_season . ' season';
+                        echo '</td></tr>' . "\n";
                         
                         // Display the first row column headers
                         echo "<tr>\n<th class=\"form_frame_header\" colspan=\"2\">&nbsp;</th>\n";
@@ -801,5 +802,358 @@ class AVH_RPS_Public
             // We're all done
             echo "</table>";
         }
+    }
+
+    public function shortcodeRpsMyEntries( $atts, $content = '' )
+    {
+        global $post;
+        
+        echo '<script language="javascript">' . "\n";
+        echo '	function confirmSubmit() {' . "\n";
+        echo '		var agree=confirm("You are about to delete one or more entries.  Are you sure?");' . "\n";
+        echo '		if (agree) {' . "\n";
+        echo '			submit_form(\'delete\');' . "\n";
+        echo '			return true ;' . "\n";
+        echo '		} else {' . "\n";
+        echo '			return false ;' . "\n";
+        echo '		}' . "\n";
+        echo ' }' . "\n";
+        echo 'function submit_form(control_name) {' . "\n";
+        echo '	document.MyEntries.submit_control.value = control_name;' . "\n";
+        echo '	document.MyEntries.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>' . "\n";
+        
+        extract( shortcode_atts( array( 'medium'=>'digital' ), $atts ) );
+        $this->_settings->medium_subset = $medium;
+        
+        if ( isset( $_POST['submit_control'] ) ) {
+            $this->_settings->comp_date = $_POST['comp_date'];
+            $this->_settings->classification = $_POST['classification'];
+            $this->_settings->medium = $_POST['medium'];
+            if ( isset( $_POST['EntryID'] ) ) {
+                $entry_array = $_POST['EntryID'];
+            }
+            $medium_subset = $_POST['medium_subset'];
+            $medium_param = "?medium=" . strtolower( $medium_subset );
+            
+            switch ( $_POST['submit_control'] ) {
+                
+                case 'select_comp':
+                    $this->_settings->comp_date = $_POST['select_comp'];
+                    break;
+                
+                case 'select_medium':
+                    $this->_settings->medium = $_POST['select_medium'];
+                    break;
+                
+                case 'add':
+                    if ( !this_comp_closed() ) {
+                        header( "Location: digital_upload.php$medium_param" );
+                    }
+                    break;
+                
+                case 'edit':
+                    if ( !this_comp_closed() ) {
+                        edit_title( $entry_array );
+                    }
+                    break;
+                
+                case 'delete':
+                    if ( !this_comp_closed() ) {
+                        delete_competition_entries( $entry_array );
+                    }
+                    break;
+            }
+        }
+        
+        // Get the currently selected competition
+        if ( !$_POST ) {
+            if ( isset( $_COOKIE['RPS_Digital_Selected_Competition'] ) ) {
+                list ($this->_settings->comp_date, $this->_settings->classification, $foo) = explode( "|", $_COOKIE['RPS_Digital_Selected_Competition'] );
+            }
+        }
+        $validComp = $this->_validateSelectedComp( $this->_settings->comp_date, $this->_settings->medium );
+        if ( $validComp === false ) {
+            echo "\n<div id=\"errmsg\">There are no competitions available to enter<br></div>\n";
+            $this->_settings->comp_date = "";
+            $this->_settings->classification = "";
+            $this->_settings->medium = "";
+            // Invalidate any existing cookie
+            $past = time() - ( 24 * 3600 );
+        }
+        // Start the form
+        $action = site_url( '/' . get_page_uri( $post->ID ) );
+        $form = '';
+        echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
+        echo '<input type="hidden" name="submit_control">' . "\n";
+        echo '<input type="hidden" name="comp_date" value="' . $this->_settings->comp_date . '">' . "\n";
+        echo '<input type="hidden" name="classification" value="' . $this->_settings->classification . '">' . "\n";
+        echo '<input type="hidden" name="medium" value="' . $this->_settings->medium . '">' . "\n";
+        echo '<input type="hidden" name="medium_subset" value="' . $this->_settings->medium_subset . '">' . "\n";
+        echo '<table class="form_frame" width="90%">' . "\n";
+        
+        // Form Heading
+        if ( $validComp ) {
+            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for" . $this->_settings->medium . " on " . strftime( '%d-%b-%Y', strtotime( $this->_settings->comp_date ) ) . "</th></tr>\n";
+        } else {
+            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
+        }
+        echo "<tr><td align=\"center\" colspan=\"6\">\n";
+        echo "<table width=\"100%\">\n";
+        if ( $this->_settings->medium == "Color Digital" ) {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        } elseif ( $this->_settings->medium == "Color Prints" ) {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        } elseif ( $this->_settings->medium == "B&W Digital" ) {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        } else {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        }
+        echo "<td width=\"75%\">\n";
+        echo "<table width=\"100%\">\n";
+        
+        // The competition date dropdown list
+        echo "<tr>\n";
+        echo "<td width=\"33%\" align=\"right\"><b>Competition Date:&nbsp;&nbsp;</b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">\n";
+        echo "<SELECT name=\"select_comp\" style=\"width:300px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_comp')\">\n";
+        // Load the values into the dropdown list
+        $prev_date = "";
+        for ( $i = 0; $i < count( $this->_open_comp_date ); $i++ ) {
+            if ( $this->_open_comp_date[$i] != $prev_date ) {
+                if ( $this->_settings->comp_date == $this->_open_comp_date[$i] ) {
+                    $selected = " SELECTED";
+                    $theme = $this->_open_comp_theme[$i];
+                } else {
+                    $selected = "";
+                }
+                echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"$this->_open_comp_date[$i]\"$selected>" . strftime( '%d-%b-%Y', strtotime( $this->_open_comp_date[$i] ) ) . " " . $this->_open_comp_theme[$i] . "</OPTION>\n";
+            }
+            $prev_date = $this->_open_comp_date[$i];
+        }
+        echo "</SELECT>\n";
+        echo "</td></tr>\n";
+        
+        // Competition medium dropdown list
+        echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">\n";
+        echo "<SELECT name=\"select_medium\" style=\"width:150px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_medium')\">\n";
+        // Load the values into the dropdown list
+        for ( $i = 0; $i < count( $this->_open_comp_date ); $i++ ) {
+            if ( $this->_open_comp_date[$i] == $this->_settings->comp_date ) {
+                if ( $this->_settings->medium == $this->_open_comp_medium[$i] ) {
+                    $selected = " SELECTED";
+                } else {
+                    $selected = "";
+                }
+                echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"" . $this->_open_comp_medium[$i] . "\"$selected>" . $this->_open_comp_medium[$i] . "</OPTION>\n";
+            }
+        }
+        echo "</SELECT>\n";
+        echo "</td></tr>\n";
+        
+        // Display the Classification and Theme for the selected competition
+        echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">" . $this->_settings->classification . "</td></tr>\n";
+        echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">$theme</td></tr>\n";
+        
+        echo "</table>\n";
+        echo "</td></tr></table>\n";
+        
+        // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
+        if ( $this->_settings->comp_date != "" ) {
+            $_comp_close_date = $this->_rpsdb->getCompetitionCloseDate();
+            if ( is_array( $_comp_close_date ) ) {
+                $close_date = $_comp_close_date['Close_Date'];
+                list ($close_year, $close_month, $close_day, $close_hour, $close_min, $close_sec) = preg_split( "/[ :\-]/", $close_date );
+                $close_epoch = mktime( $close_hour, $close_min, $close_sec, $close_month, $close_day, $close_year );
+                $time_to_close = $close_epoch - mktime();
+                if ( $time_to_close >= 0 && $time_to_close <= 604800 ) {
+                    echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date( "F j, Y", $close_epoch ) . " at " . date( "g:ia (T)", $close_epoch ) . "</td></tr>\n";
+                }
+            }
+        }
+        
+        // Display the column headers for the competition entries
+        ?>
+<tr>
+	<th class="form_frame_header" width="5%">&nbsp;</th>
+	<th class="form_frame_header" width="10%">Image</th>
+	<th class="form_frame_header" width="40%">Title</th>
+	<th class="form_frame_header" width="25%">File Name</th>
+	<th class="form_frame_header" width="10%">Width</th>
+	<th class="form_frame_header" width="10%">Height</th>
+</tr>
+<?php
+        // Retrieve the maximum number of entries per member for this competition
+        $max_entries_per_member_per_comp = $this->_rpsdb->getCompetitionMaxEntries();
+        
+        // Retrive the total number of entries submitted by this member for this competition date
+        $total_entries_submitted = $this->_rpsdb->getCompetitionEntriesUser();
+        
+        $entries = $this->_rpsdb->getCompetitionSubmittedEntriesUser();
+        // Build the rows of submitted images
+        $numRows = 0;
+        $numOversize = 0;
+        foreach ( $entries as $recs ) {
+            $numRows += 1;
+            $rowStyle = $numRows % 2 == 1 ? "odd_row" : "even_row";
+            
+            // Checkbox column
+            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs['ID'] . '">' . "\n";
+            
+            // Thumbnail column
+            $user = wp_get_current_user();
+            $a = realpath( $recs['Server_File_Name'] );
+            $image_url = site_url( str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
+            $this->_core->rpsCreateThumbnail2( $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium, $recs['Title'], $user->user_login, 75 );
+            echo "<td align=\"center\" width=\"10%\">\n";
+            echo "<div id='rps_colorbox_title'>" . htmlentities( $recs['Title'] ) . "<br />".$this->_settings->classification." ". $this->_settings->medium."</div>";
+            echo '<a href="' . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">\n";
+            echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 75 ) . "\" />\n";
+            echo "</a></td>\n";
+            
+            // Title column
+            echo '<td align="left" width="40%">';
+            echo "<div id='rps_colorbox_title'>" . htmlentities( $recs['Title'] ) . "<br />".$this->_settings->classification." ". $this->_settings->medium."</div>";
+            echo "<a href=\"" . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">" . htmlentities( $recs['Title'] ) . "</a></td>\n";
+            // File Name
+            echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
+            
+            // Image width and height columns.  The height and width values are suppressed if the Client_File_Name is
+            // empty i.e. no image uploaded for a print competition.
+            if ( file_exists(ABSPATH.str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ))) {
+                $size = getimagesize( ABSPATH.str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
+            } else {
+                $size[0] = 0;
+                $size[1] = 0;
+            }
+            if ( $recs['Client_File_Name'] > "" ) {
+                if ( $size[0] > 1024 ) {
+                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[0] . "</td>\n";
+                } else {
+                    echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
+                }
+                if ( $size[1] > 768 ) {
+                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[1] . "</td>\n";
+                } else {
+                    echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
+                }
+            } else {
+                echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
+                echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
+            }
+            if ( $size[0] > 1024 || $size[1] > 768 ) {
+                $numOversize += 1;
+            }
+        }
+        
+        // Add some instructional bullet points above the buttons
+        echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\">";
+        echo "<ul style=\"margin:0;margin-left:15px;padding:0\">\n";
+        if ( $numRows > 0 ) {
+            echo "<li>Click the thumbnail or title to view the full size image</li>\n";
+        }
+        echo "<ul></td></tr>\n";
+        
+        // Warn the user about oversized images.
+        if ( $numOversize > 0 ) {
+            echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\" class=\"warning_cell\">";
+            echo "<ul style=\"margin:0;margin-left:15px;padding:0;color:red\"><li>When the Width or Height value is red, the image is too large to display on the
+		projector. &nbsp;Here's what you need to do:\n";
+            echo "<ul style=\"margin:0;margin-left:15px;padding:0\"><li>Remove the image from the competition. (check the corresponding checkbox and click Remove)</li>\n";
+            echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
+            echo "<li>Upload the resized image.</li></ul></ul>\n";
+        }
+        if ( $resized ) {
+            echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
+            echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
+            echo "</li></ul>\n";
+        }
+        
+        // Buttons at the bottom of the list of submitted images
+        echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
+        // Don't show the Add button if the max number of images per member reached
+        if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $club_max_entries_per_member_per_date ) {
+            echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
+        }
+        if ( $numRows > 0 && $max_entries_per_member_per_comp > 0 ) {
+            echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
+        }
+        if ( $numRows > 0 ) {
+            echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
+        }
+        
+        // All done, close out the table and the form
+        echo "</table>\n</form>\n<br />\n";
+    
+    }
+
+    //
+    //	Select the list of open competitions for this member's classification and validate
+    //	the currently selected competition against that list.
+    //
+    private function _validateSelectedComp( $date, $med )
+    {
+        $open_competitions = $this->_rpsdb->getOpenCompetitions( $this->_settings->medium_subset );
+        
+        if ( empty( $open_competitions ) ) {
+            return false;
+        }
+        
+        // Read the competition attributes into a series of arrays
+        $index = 0;
+        $date_index = -1;
+        $medium_index = -1;
+        foreach ( $open_competitions as $recs ) {
+            // Append this competition to the arrays
+            $dateParts = split( " ", $recs['Competition_Date'] );
+            $this->_open_comp_date[$index] = $dateParts[0];
+            $this->_open_comp_medium[$index] = $recs['Medium'];
+            $this->_open_comp_class[$index] = $recs['Classification'];
+            $this->_open_comp_theme[$index] = $recs['Theme'];
+            // If this is the first competition whose date matches the currently selected
+            // competition date, save its array index
+            if ( $this->_open_comp_date[$index] == $date ) {
+                if ( $date_index < 0 ) {
+                    $date_index = $index;
+                }
+                // If this competition matches the date AND the medium of the currently selected
+                // competition, save its array index
+                if ( $this->_open_comp_medium[$index] == $med ) {
+                    if ( $medium_index < 0 ) {
+                        $medium_index = $index;
+                    }
+                }
+            }
+            $index += 1;
+        }
+        
+        // If date and medium both matched, then the currently selected competition is in the
+        // list of open competitions for this member
+        if ( $medium_index >= 0 ) {
+            $index = $medium_index;
+        
+     // If the date matched but the medium did not, then there are valid open competitions on
+        // the selected date for this member, but not in the currently selected medium.  In this
+        // case set the medium to the first one in the list for the selected date.
+        } elseif ( $medium_index < 0 && $date_index >= 0 ) {
+            $index = $date_index;
+        
+     // If neither the date or medium matched, simply select the first open competition in the
+        // list.
+        } else {
+            $index = 0;
+        }
+        // Establish the (possibly adjusted) selected competition
+        $this->_settings->comp_date = $this->_open_comp_date[$index];
+        $this->_settings->classification = $this->_open_comp_class[$index];
+        $this->_settings->medium = $this->_open_comp_medium[$index];
+        // Save the currently selected competition in a cookie
+        $hour = time() + ( 2 * 3600 );
+        setcookie( "RPS_Digital_Selected_Competition", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $hour );
+        return true;
     }
 }

@@ -97,7 +97,7 @@ class AVH_RPS_OldRpsDb
 			ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date );
         
         $_x = $this->_rpsdb->get_results( $sql, ARRAY_A );
-        foreach ( $_x as $key=>$_rec ) {
+        foreach ( $_x as $key => $_rec ) {
             $user_info = get_userdata( $_rec['Member_ID'] );
             $_rec['FirstName'] = $user_info->user_firstname;
             $_rec['LastName'] = $user_info->user_lastname;
@@ -174,6 +174,75 @@ class AVH_RPS_OldRpsDb
 		ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, get_current_user_id() );
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         
+        return $_return;
+    }
+
+    public function getOpenCompetitions( $subset )
+    {
+        
+        // Select the list of open competitions that match this member's classification(s)
+        if ( $subset ) {
+            $and_medium_subset = " AND c.Medium like %s";
+        } else {
+            $and_medium_subset = '';
+        }
+        // Select the list of open competitions that match this member's classification(s)
+        $_sql = "SELECT c.Competition_Date, c.Classification, c.Medium, c.Theme, c.Closed
+			FROM competitions c, member_classifications mc 
+			WHERE c.Classification = mc.Classification and
+			      c.Medium = mc.Medium and
+				  mc.Member_ID = %s and
+				  c.Closed = 'N'";
+        $_sql .= $and_medium_subset;
+        $_sql .= " ORDER BY c.Competition_Date, c.Medium";
+        $user_id = get_current_user_id();
+        $sql = $this->_rpsdb->prepare( $_sql, $user_id, '%' . $subset . '%' );
+        $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
+        return $_return;
+    
+    }
+
+    public function getCompetitionCloseDate()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT Close_Date 
+        	FROM competitions 
+        	WHERE Competition_Date = DATE(%s) 
+        		AND Classification = %s 
+        		AND Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium );
+        $_return = $this->_rpsdb->get_var( $sql );
+        return $_return;
+    }
+
+    public function getCompetitionMaxEntries()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT Max_Entries FROM competitions
+				WHERE Competition_Date = DATE %s AND 
+				Classification = %s AND
+				Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium );
+        $_return = $this->_rpsdb->get_var( $sql );
+        return $_return;
+    }
+
+    public function getCompetitionEntriesUser()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT COUNT(entries.ID) as Total_Submitted
+			FROM competitions, entries
+			WHERE competitions.ID = entries.Competition_ID
+				AND	entries.Member_ID=%s 
+				AND competitions.Competition_Date = DATE %s ", get_current_user_id(), $this->_settings->comp_date );
+        $_return = $this->_rpsdb->get_var( $sql );
+        return $_return;
+    }
+    
+    public function getCompetitionSubmittedEntriesUser(){
+        $sql = $this->_rpsdb->prepare("SELECT entries.ID, entries.Title, entries.Client_File_Name, entries.Server_File_Name, competitions.Max_Entries  
+			FROM competitions, entries
+			WHERE competitions.ID = entries.Competition_ID
+				AND entries.Member_ID = %s
+				AND competitions.Competition_Date = DATE %s
+				AND competitions.Classification = %s
+				AND competitions.Medium = %s", get_current_user_id(), $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium );
+        $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         return $_return;
     }
 } //End Class AVH_RPS_OldRpsDb

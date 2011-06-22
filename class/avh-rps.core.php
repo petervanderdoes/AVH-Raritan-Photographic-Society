@@ -150,6 +150,18 @@ class AVH_RPS_Core
     
     }
 
+    public function rpsCreateThumbnail2( $comp_date, $classification, $medium, $title, $username, $size )
+    {
+        $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+        $file_name = $title. '+' . $username;
+        
+        if ( !is_dir( "$path/thumbnails" ) ) mkdir( "$path/thumbnails", 0755 );
+        
+        if ( !file_exists( "$path/thumbnails/$file_name" . "_$size.jpg" ) ) {
+            $this->rpsResizeImage( "$path/$file_name" . ".jpg", "$path/thumbnails/$file_name" . "_$size.jpg", $size, 80, "" );
+        }
+    }
+
     function rpsResizeImage( $image_name, $thumb_name, $size, $quality, $maker )
     {
         GLOBAL $comp_date;
@@ -202,19 +214,17 @@ class AVH_RPS_Core
 
     function rpsGetThumbnailUrl( $row, $size )
     {
-
-        $file_parts =  pathinfo(str_replace('/home/rarit0/public_html/', '', $row['Server_File_Name']));
-        $p = explode('/', $file_parts['dirname']);
-        $path = '/';
-        foreach ($p as $part) {
-            $path .= rawurlencode($part) .'/';
+        
+        $file_parts = pathinfo( str_replace( '/home/rarit0/public_html/', '', $row['Server_File_Name'] ) );
+        $p = explode( '/', $file_parts['dirname'] );
+        $path = site_url() . '/';
+        foreach ( $p as $part ) {
+            $path .= rawurlencode( $part ) . '/';
         }
         $path .= 'thumbnails/';
-        
-        return ( $path . rawurlencode($file_parts['filename'].'_'.$size.'.jpg' ));
+        return ( $path . rawurlencode( $file_parts['filename'] . '_' . $size . '.jpg' ) );
     
-
-    #return $path . '/' . $file_name;
+     #return $path . '/' . $file_name;
     }
 
     private function _array_sort_func( $a, $b = NULL )
@@ -241,7 +251,7 @@ class AVH_RPS_Core
         $keys = func_get_args();
         array_shift( $keys );
         $this->_array_sort_func( $keys );
-        usort( $array, array($this,"_array_sort_func" ));
+        usort( $array, array( $this, "_array_sort_func" ) );
     }
 
     /*********************************
