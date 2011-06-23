@@ -153,7 +153,7 @@ class AVH_RPS_Core
     public function rpsCreateThumbnail2( $comp_date, $classification, $medium, $title, $username, $size )
     {
         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
-        $file_name = $title. '+' . $username;
+        $file_name = $title . '+' . $username;
         
         if ( !is_dir( "$path/thumbnails" ) ) mkdir( "$path/thumbnails", 0755 );
         
@@ -216,42 +216,58 @@ class AVH_RPS_Core
     {
         
         $file_parts = pathinfo( str_replace( '/home/rarit0/public_html/', '', $row['Server_File_Name'] ) );
+        $thumb_dir = ABSPATH . '/' . $file_parts['dirname'] . '/thumbnails';
+        if ( !is_dir( $thumb_dir ) ) mkdir( $thumb_dir, 0755 );
+        
+        if ( !file_exists( $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg' ) ) {
+            $this->rpsResizeImage( ABSPATH . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "" );
+        }
+        
         $p = explode( '/', $file_parts['dirname'] );
         $path = site_url() . '/';
         foreach ( $p as $part ) {
             $path .= rawurlencode( $part ) . '/';
         }
         $path .= 'thumbnails/';
+        
         return ( $path . rawurlencode( $file_parts['filename'] . '_' . $size . '.jpg' ) );
-    
-     #return $path . '/' . $file_name;
     }
 
-    private function _array_sort_func( $a, $b = NULL )
+    public function avh_array_msort( $array, $cols )
     {
-        static $keys;
-        if ( $b === NULL ) return $keys = $a;
-        foreach ( $keys as $k ) {
-            if ( @$k[0] == '!' ) {
-                $k = substr( $k, 1 );
-                if ( @$a[$k] !== @$b[$k] ) {
-                    return strcmp( @$b[$k], @$a[$k] );
-                }
-            } else 
-                if ( @$a[$k] !== @$b[$k] ) {
-                    return strcmp( @$a[$k], @$b[$k] );
-                }
+        $colarr = array();
+        foreach ( $cols as $col => $order ) {
+            $colarr[$col] = array();
+            foreach ( $array as $k => $row ) {
+                $colarr[$col]['_' . $k] = strtolower( $row[$col] );
+            }
         }
-        return 0;
-    }
-
-    public function rps_array_sort( &$array )
-    {
-        if ( !$array ) return $keys;
-        $keys = func_get_args();
-        array_shift( $keys );
-        $this->_array_sort_func( $keys );
-        usort( $array, array( $this, "_array_sort_func" ) );
+        $params = array();
+        foreach ( $cols as $col => $order ) {
+            $params[] = & $colarr[$col];
+            foreach ( $order as $order_element ) {
+                //pass by reference, as required by php 5.3
+                $params[] = &$order_element;
+                unset($order_element);
+            }
+        }
+        call_user_func_array( 'array_multisort', $params );
+        $ret = array();
+        $keys = array();
+        $first = true;
+        foreach ( $colarr as $col => $arr ) {
+            foreach ( $arr as $k => $v ) {
+                if ( $first ) {
+                    $keys[$k] = substr( $k, 1 );
+                }
+                $k = $keys[$k];
+                if ( !isset( $ret[$k] ) ) $ret[$k] = $array[$k];
+                $ret[$k][$col] = $array[$k][$col];
+            }
+            $first = false;
+        }
+        return $ret;
+    
     }
 
     /*********************************
