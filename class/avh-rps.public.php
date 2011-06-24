@@ -837,19 +837,24 @@ class AVH_RPS_Public
                     break;
                 
                 case 'add':
-                    if ( !this_comp_closed() ) {
+                    if ( !$this->_rpsdb->getCompetionClosed() ) {
                         header( "Location: digital_upload.php$medium_param" );
                     }
                     break;
                 
                 case 'edit':
-                    if ( !this_comp_closed() ) {
-                        edit_title( $entry_array );
+                    if ( !$this->_rpsdb->getCompetionClosed() ) {
+                        if (is_array($entry_array)) {
+                            $_query = array('id'=>$entry_array[0],'m'=>$this->_settings->medium_subset);
+                            $_query=build_query($_query);
+                            $loc = '/edit-title/?'.$_query;
+                            wp_redirect($loc);
+                        }
                     }
                     break;
                 
                 case 'delete':
-                    if ( !this_comp_closed() ) {
+                    if ( !$this->_rpsdb->getCompetionClosed() ) {
                         delete_competition_entries( $entry_array );
                     }
                     break;
@@ -1092,10 +1097,10 @@ class AVH_RPS_Public
             // Buttons at the bottom of the list of submitted images
             echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
             // Don't show the Add button if the max number of images per member reached
-            if ( $numRows < $this->_settings->max_entries_per_member_per_comp && $total_entries_submitted < $this->_settings->club_max_entries_per_member_per_date ) {
+            if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->_settings->club_max_entries_per_member_per_date ) {
                 echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
             }
-            if ( $numRows > 0 && $this->_settings->max_entries_per_member_per_comp > 0 ) {
+            if ( $numRows > 0 && $max_entries_per_member_per_comp > 0 ) {
                 echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
             }
             if ( $numRows > 0 ) {

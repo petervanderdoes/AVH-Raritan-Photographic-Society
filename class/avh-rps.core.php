@@ -98,6 +98,10 @@ class AVH_RPS_Core
         $this->_settings->storeSetting( 'graphics_url', plugins_url( 'images', $this->_settings->plugin_basename ) );
         $this->_settings->storeSetting( 'js_url', plugins_url( 'js', $this->_settings->plugin_basename ) );
         $this->_settings->storeSetting( 'css_url', plugins_url( 'css', $this->_settings->plugin_basename ) );
+$this->_settings->storeSetting( 'validComp','');
+$this->_settings->storeSetting( 'comp_date','');
+$this->_settings->storeSetting( 'classification','');
+$this->_settings->storeSetting( 'medium','');
     }
 
     /**
