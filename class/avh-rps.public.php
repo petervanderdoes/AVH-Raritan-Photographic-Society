@@ -983,11 +983,9 @@ class AVH_RPS_Public
             
             // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
             if ( $this->_settings->comp_date != "" ) {
-                $_comp_close_date = $this->_rpsdb->getCompetitionCloseDate();
-                if ( is_array( $_comp_close_date ) ) {
-                    $close_date = $_comp_close_date['Close_Date'];
-                    list ($close_year, $close_month, $close_day, $close_hour, $close_min, $close_sec) = preg_split( "/[ :\-]/", $close_date );
-                    $close_epoch = mktime( $close_hour, $close_min, $close_sec, $close_month, $close_day, $close_year );
+                 $close_date = $this->_rpsdb->getCompetitionCloseDate();
+                if ( !empty($close_date) ) {
+                    $close_epoch = strtotime($close_date);
                     $time_to_close = $close_epoch - mktime();
                     if ( $time_to_close >= 0 && $time_to_close <= 604800 ) {
                         echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date( "F j, Y", $close_epoch ) . " at " . date( "g:ia (T)", $close_epoch ) . "</td></tr>\n";
@@ -1171,7 +1169,7 @@ class AVH_RPS_Public
         $this->_settings->medium = $this->_open_comp_medium[$index];
         // Save the currently selected competition in a cookie
         $hour = time() + ( 2 * 3600 );
-        $url = parse_url( get_bloginfo( url ) );
+        $url = parse_url( get_bloginfo( 'url' ) );
         setcookie( "RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $hour, '/', $url['host'] );
         return true;
     }
