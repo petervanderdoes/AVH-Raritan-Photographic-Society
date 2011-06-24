@@ -213,6 +213,22 @@ class AVH_RPS_OldRpsDb
         return $_return;
     }
 
+    public function getCompetionClosed()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT Closed 
+            FROM competitions 
+            WHERE Competition_Date = DATE(%s) 
+                AND Classification = %s 
+                AND Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium );
+        $_closed = $this->_rpsdb->get_var( $sql );
+        if ( $_closed == "Y" ) {
+            $_return = true;
+        } else {
+            $return = false;
+        }
+        return $_return;
+    }
+
     public function getCompetitionMaxEntries()
     {
         $sql = $this->_rpsdb->prepare( "SELECT Max_Entries FROM competitions
@@ -233,9 +249,10 @@ class AVH_RPS_OldRpsDb
         $_return = $this->_rpsdb->get_var( $sql );
         return $_return;
     }
-    
-    public function getCompetitionSubmittedEntriesUser(){
-        $sql = $this->_rpsdb->prepare("SELECT entries.ID, entries.Title, entries.Client_File_Name, entries.Server_File_Name, competitions.Max_Entries  
+
+    public function getCompetitionSubmittedEntriesUser()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT entries.ID, entries.Title, entries.Client_File_Name, entries.Server_File_Name, competitions.Max_Entries  
 			FROM competitions, entries
 			WHERE competitions.ID = entries.Competition_ID
 				AND entries.Member_ID = %s
