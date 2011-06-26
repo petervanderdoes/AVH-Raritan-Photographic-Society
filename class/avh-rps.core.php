@@ -154,18 +154,6 @@ $this->_settings->storeSetting( 'medium','');
     
     }
 
-    public function rpsCreateThumbnail2( $comp_date, $classification, $medium, $title, $username, $size )
-    {
-        $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
-        $file_name = $title . '+' . $username;
-        
-        if ( !is_dir( "$path/thumbnails" ) ) mkdir( "$path/thumbnails", 0755 );
-        
-        if ( !file_exists( "$path/thumbnails/$file_name" . "_$size.jpg" ) ) {
-            $this->rpsResizeImage( "$path/$file_name" . ".jpg", "$path/thumbnails/$file_name" . "_$size.jpg", $size, 80, "" );
-        }
-    }
-
     function rpsResizeImage( $image_name, $thumb_name, $size, $quality, $maker )
     {
         GLOBAL $comp_date;
@@ -237,6 +225,32 @@ $this->_settings->storeSetting( 'medium','');
         return ( $path . rawurlencode( $file_parts['filename'] . '_' . $size . '.jpg' ) );
     }
 
+    public function rps_rename_image_file( $path, $old_name, $new_name, $ext )
+    {
+        $thumbnails = array();
+        $path = ABSPATH.$path;
+        // Rename the main image file
+        $status = rename( $path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext );
+        if ( $status ) {
+            // Rename any and all thumbnails of this file
+            if ( is_dir( $path . "/thumbnails" ) ) {
+                $thumb_base_name = $path . "/thumbnails/" . $old_name;
+                // Get all the matching thumbnail files
+                $thumbnails = glob( "$thumb_base_name*" );
+                // Iterate through the list of matching thumbnails and rename each one
+                if ( is_array( $thumbnails ) && count( $thumbnails ) > 0 ) {
+                    foreach ( $thumbnails as $thumb ) {
+                        $start = strlen( $thumb_base_name );
+                        $length = strpos( $thumb, $ext ) - $start;
+                        $suffix = substr( $thumb, $start, $length );
+                        rename( $thumb, $path . "/thumbnails/" . $new_name . $suffix . $ext );
+                    }
+                }
+            }
+        }
+        return $status;
+    }
+    
     public function avh_array_msort( $array, $cols )
     {
         $colarr = array();

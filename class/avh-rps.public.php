@@ -58,10 +58,13 @@ class AVH_RPS_Public
         add_shortcode( 'rps_monthly_winners', array( &$this, 'shortcodeRpsMonthlyWinners' ) );
         add_shortcode( 'rps_scores_current_user', array( &$this, 'shortcodeRpsScoresCurrentUser' ) );
         add_shortcode( 'rps_all_scores', array( &$this, 'shortcodeRpsAllScores' ) );
+        
         add_action( 'pre-header-my-print-entries', array( &$this, 'actionPreHeader_RpsMyEntries' ) );
         add_action( 'pre-header-my-digital-entries', array( &$this, 'actionPreHeader_RpsMyEntries' ) );
         add_shortcode( 'rps_my_entries', array( &$this, 'shortcodeRpsMyEntries' ) );
-    
+        
+        add_action( 'pre-header-edit-title', array( &$this, 'actionPreHeader_RpsEditTitle' ) );
+        add_shortcode( 'rps_edit_title', array( &$this, 'shortcodeRpsEditTitle' ) );
     }
 
     function actionTemplate_Redirect_RPSWindowsClient()
@@ -819,6 +822,9 @@ class AVH_RPS_Public
             $this->_settings->comp_date = $_POST['comp_date'];
             $this->_settings->classification = $_POST['classification'];
             $this->_settings->medium = $_POST['medium'];
+            $t = time() + ( 2 * 24 * 3600 );
+            $url = parse_url( get_bloginfo( url ) );
+            setcookie( "RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $t, '/', $url['host'] );
             
             if ( isset( $_POST['EntryID'] ) ) {
                 $entry_array = $_POST['EntryID'];
@@ -844,11 +850,13 @@ class AVH_RPS_Public
                 
                 case 'edit':
                     if ( !$this->_rpsdb->getCompetionClosed() ) {
-                        if (is_array($entry_array)) {
-                            $_query = array('id'=>$entry_array[0],'m'=>$this->_settings->medium_subset);
-                            $_query=build_query($_query);
-                            $loc = '/edit-title/?'.$_query;
-                            wp_redirect($loc);
+                        if ( is_array( $entry_array ) ) {
+                            foreach ( $entry_array as $id ) {
+                                $_query = array( 'id'=>$id, 'm'=>$this->_settings->medium_subset );
+                                $_query = build_query( $_query );
+                                $loc = '/edit-title/?' . $_query;
+                                wp_redirect( $loc );
+                            }
                         }
                     }
                     break;
@@ -864,7 +872,7 @@ class AVH_RPS_Public
         // Get the currently selected competition
         if ( !$_POST ) {
             if ( isset( $_COOKIE['RPS_MyEntries'] ) ) {
-                list ($this->_settings->comp_date, $this->_settings->classification, $foo) = explode( "|", $_COOKIE['RPS_MyEntries'] );
+                list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode( "|", $_COOKIE['RPS_MyEntries'] );
             }
         }
         $this->_settings->validComp = $this->_validateSelectedComp( $this->_settings->comp_date, $this->_settings->medium );
@@ -988,9 +996,9 @@ class AVH_RPS_Public
             
             // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
             if ( $this->_settings->comp_date != "" ) {
-                 $close_date = $this->_rpsdb->getCompetitionCloseDate();
-                if ( !empty($close_date) ) {
-                    $close_epoch = strtotime($close_date);
+                $close_date = $this->_rpsdb->getCompetitionCloseDate();
+                if ( !empty( $close_date ) ) {
+                    $close_epoch = strtotime( $close_date );
                     $time_to_close = $close_epoch - mktime();
                     if ( $time_to_close >= 0 && $time_to_close <= 604800 ) {
                         echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date( "F j, Y", $close_epoch ) . " at " . date( "g:ia (T)", $close_epoch ) . "</td></tr>\n";
@@ -1030,7 +1038,6 @@ class AVH_RPS_Public
                 $user = wp_get_current_user();
                 $a = realpath( $recs['Server_File_Name'] );
                 $image_url = site_url( str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
-                $this->_core->rpsCreateThumbnail2( $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium, $recs['Title'], $user->user_login, 75 );
                 echo "<td align=\"center\" width=\"10%\">\n";
                 echo "<div id='rps_colorbox_title'>" . htmlentities( $recs['Title'] ) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
                 echo '<a href="' . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">\n";
@@ -1177,5 +1184,120 @@ class AVH_RPS_Public
         $url = parse_url( get_bloginfo( 'url' ) );
         setcookie( "RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $hour, '/', $url['host'] );
         return true;
+    }
+
+    public function actionPreHeader_RpsEditTitle()
+    {
+        
+        if ( !empty( $_POST ) ) {
+            $redirect_to = $_POST['wp_get_referer'];
+            $this->_medium_subset = $_POST['m'];
+            $this->_entry_id = $_POST['id'];
+            
+            // Just return to the My Images page is the user clicked Cancel
+            if ( isset( $_POST['cancel'] ) ) {
+                
+                wp_redirect( $redirect_to );
+                exit();
+            }
+            
+            if ( isset( $_POST['m'] ) ) {
+                
+                if ( get_magic_quotes_gpc() ) {
+                    $server_file_name = stripslashes( $_POST['server_file_name'] );
+                    $new_title = stripslashes( trim( $_POST['new_title'] ) );
+                } else {
+                    $server_file_name = $_POST['server_file_name'];
+                    $new_title = trim( $_POST['new_title'] );
+                }
+            
+            }
+            // makes sure they filled in the title field
+            if ( !$_POST['new_title'] || trim( $_POST['new_title'] ) == "" ) {
+                $this->errmsg = 'You must provide an image title.<br><br>';
+            } else {
+                $recs = $this->_rpsdb->getCompetitionByID( $this->_entry_id );
+                if ( $recs == NULL ) {
+                    wp_die( "Failed to SELECT competition for entry ID: " . $this->_entry_id );
+                }
+                
+                $dateParts = explode( " ", $recs['Competition_Date'] );
+                $comp_date = $dateParts[0];
+                $classification = $recs['Classification'];
+                $medium = $recs['Medium'];
+                
+                // Rename the image file on the server file system
+                $ext = ".jpg";
+                $path = '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                $old_file_parts = pathinfo( $server_file_name );
+                $old_file_name = $old_file_parts['filename'];
+                $current_user = wp_get_current_user();
+                $new_file_name_noext = sanitize_file_name( $new_title ) . '+' . $current_user->user_login;
+                $new_file_name = sanitize_file_name( $new_title ) . '+' . $current_user->user_login . $ext;
+                if ( !$this->_core->rps_rename_image_file( $path, $old_file_name, $new_file_name_noext, $ext ) ) {
+                    die( "<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext" );
+                }
+                
+                // Update the Title and File Name in the database
+                $_result = $this->_rpsdb->updateEntriesTitle( $new_title, $path.'/'.$new_file_name, $this->_entry_id );
+                if ( $_result === false ) {
+                    wp_die( "Failed to UPDATE entry record from database" );
+                }
+                
+                $redirect_to = $_POST['wp_get_referer'];
+                wp_redirect( $redirect_to );
+                exit();
+            }
+        }
+    }
+
+    public function shortcodeRpsEditTitle()
+    {
+        
+        if ( isset( $_GET['m'] ) ) {
+            if ( $_GET['m'] == "prints" ) {
+                $medium_subset = "Prints";
+                $medium_param = "?m=prints";
+            } else {
+                $medium_subset = "Digital";
+                $medium_param = "?m=digital";
+            }
+        }
+        $entry_id = $_GET['id'];
+        
+        $recs = $this->_rpsdb->getEntryInfo( $entry_id );
+        $title = $recs['Title'];
+        $server_file_name = $recs['Server_File_Name'];
+        
+        $relative_path = str_replace( '/home/rarit0/public_html', '', $server_file_name );
+        
+        echo '<div id="errmsg">' . $err . '</div>';
+        $action = site_url( '/' . get_page_uri() );
+        echo '<form action="' . $action . $medium_param . '" method="post">';
+        
+        echo '<table class="form_frame" width="80%">';
+        echo '<tr><th class="form_frame_header" colspan=2>Update Image Title</th></tr>';
+        echo '<tr><td align="center">';
+        echo '<table>';
+        echo '<tr><td align="center" colspan="2">';
+        
+        echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 200 ) . "\" />\n";
+        echo '</td></tr>';
+        echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
+        echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . htmlentities( $title ) . '">';
+        echo '</td></tr>';
+        echo '<tr><td style="padding-top:20px" align="center" colspan="2">';
+        echo '<input type="submit" name="submit" value="Update">';
+        echo '<input type="submit" name="cancel" value="Cancel">';
+        echo '<input type="hidden" name="id" value="' . $entry_id . '" />';
+        echo '<input type="hidden" name="title" value="' . $title . '" />';
+        echo '<input type="hidden" name="server_file_name" value="' . $server_file_name . '" />';
+        echo '<input type="hidden" name="m" value="' . strtolower( $medium_subset ) . '" />';
+        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg( array( 'm', 'id' ), wp_get_referer() ) . '" />';
+        echo '</td></tr>';
+        echo '</table>';
+        echo '</td></tr>';
+        echo '</table>';
+        echo '</form>';
     }
 }

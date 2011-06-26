@@ -262,4 +262,35 @@ class AVH_RPS_OldRpsDb
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         return $_return;
     }
+
+    public function getEntryInfo( $id )
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT * 
+        	FROM entries 
+        	WHERE ID = %s", $id );
+        $_return = $this->_rpsdb->get_row( $sql, ARRAY_A );
+        return $_return;
+    
+    }
+
+    public function getCompetitionByID( $id )
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT Competition_Date, Classification, Medium 
+        	FROM competitions c, entries e
+        	WHERE c.ID =  e.Competition_ID
+        		AND e.ID = %s", $id );
+        $_return = $this->_rpsdb->get_row( $sql, ARRAY_A );
+        return $_return;
+    
+    }
+
+    public function updateEntriesTitle( $new_title, $new_file_name, $id )
+    {
+        
+        $data = array( 'Title'=>$new_title, 'Server_File_Name'=>$new_file_name, 'Date_Modified'=>current_time( 'mysql' ) );
+        $_where = array( 'ID'=>$id );
+        $_return = $this->_rpsdb->update( 'entries', $data, $_where );
+        return $_return;
+    
+    }
 } //End Class AVH_RPS_OldRpsDb
