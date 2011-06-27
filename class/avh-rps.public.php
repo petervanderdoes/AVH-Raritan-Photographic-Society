@@ -818,6 +818,7 @@ class AVH_RPS_Public
         $page = explode( '-', $post->post_name );
         $this->_settings->medium_subset = $page[1];
         if ( isset( $_POST['submit_control'] ) ) {
+            // @TODO Nonce check
             
             $this->_settings->comp_date = $_POST['comp_date'];
             $this->_settings->classification = $_POST['classification'];
@@ -852,6 +853,7 @@ class AVH_RPS_Public
                     if ( !$this->_rpsdb->getCompetionClosed() ) {
                         if ( is_array( $entry_array ) ) {
                             foreach ( $entry_array as $id ) {
+                                // @TODO Add Nonce
                                 $_query = array( 'id'=>$id, 'm'=>$this->_settings->medium_subset );
                                 $_query = build_query( $_query );
                                 $loc = '/edit-title/?' . $_query;
