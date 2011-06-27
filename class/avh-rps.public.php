@@ -823,7 +823,7 @@ class AVH_RPS_Public
             $this->_settings->classification = $_POST['classification'];
             $this->_settings->medium = $_POST['medium'];
             $t = time() + ( 2 * 24 * 3600 );
-            $url = parse_url( get_bloginfo( url ) );
+            $url = parse_url( get_bloginfo( 'url' ) );
             setcookie( "RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $t, '/', $url['host'] );
             
             if ( isset( $_POST['EntryID'] ) ) {
