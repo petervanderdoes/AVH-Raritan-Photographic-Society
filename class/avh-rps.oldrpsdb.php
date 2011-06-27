@@ -293,4 +293,14 @@ class AVH_RPS_OldRpsDb
         return $_return;
     
     }
+
+    public function deleteEntry( $id )
+    {
+        $sql = $this->_rpsdb->prepare( "DELETE 
+        	FROM entries 
+        	WHERE ID = %s", $id );
+        $_result = $this->_rpsdb->query( $sql );
+        
+        return $_result;
+    }
 } //End Class AVH_RPS_OldRpsDb

@@ -863,7 +863,7 @@ class AVH_RPS_Public
                 
                 case 'delete':
                     if ( !$this->_rpsdb->getCompetionClosed() ) {
-                        delete_competition_entries( $entry_array );
+                        $this->_deleteCompetitionEntries( $entry_array );
                     }
                     break;
             }
@@ -1239,7 +1239,7 @@ class AVH_RPS_Public
                 }
                 
                 // Update the Title and File Name in the database
-                $_result = $this->_rpsdb->updateEntriesTitle( $new_title, $path.'/'.$new_file_name, $this->_entry_id );
+                $_result = $this->_rpsdb->updateEntriesTitle( $new_title, $path . '/' . $new_file_name, $this->_entry_id );
                 if ( $_result === false ) {
                     wp_die( "Failed to UPDATE entry record from database" );
                 }
@@ -1271,7 +1271,11 @@ class AVH_RPS_Public
         
         $relative_path = str_replace( '/home/rarit0/public_html', '', $server_file_name );
         
-        echo '<div id="errmsg">' . $err . '</div>';
+        if ( isset( $this->errmsg ) ) {
+            echo '<div id="errmsg">';
+            echo $this->errmsg;
+            echo '</div>';
+        }
         $action = site_url( '/' . get_page_uri() );
         echo '<form action="' . $action . $medium_param . '" method="post">';
         
@@ -1299,5 +1303,55 @@ class AVH_RPS_Public
         echo '</td></tr>';
         echo '</table>';
         echo '</form>';
+    }
+
+    private function _deleteCompetitionEntries( $entries )
+    {
+        
+        if ( is_array( $entries ) ) {
+            foreach ( $entries as $id ) {
+                
+                $recs = $this->_rpsdb->getEntryInfo( $id );
+                if ( $recs == FALSE ) {
+                    $this->errmsg = sprintf( "<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id );
+                } else {
+                    
+                    $server_file_name = ABSPATH . str_replace( '/home/rarit0/public_html/', '', $recs['Server_File_Name'] );
+                    // Delete the record from the database
+                    $result = $this->_rpsdb->deleteEntry( $id );
+                    if ( $result === FALSE ) {
+                        $this->errmsg = sprintf( "<b>Failed to DELETE competition entry %s from database</b><br>" );
+                    } else {
+                        
+                        // Delete the file from the server file system
+                        if ( file_exists( $server_file_name ) ) {
+                            unlink( $server_file_name );
+                        }
+                        // Delete any thumbnails of this image
+                        $ext = ".jpg";
+                        $comp_date = $this->_settings->comp_date;
+                        $classification = $this->_settings->classification;
+                        $medium = $this->_settings->medium;
+                        $path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                        
+                        $old_file_parts = pathinfo( $server_file_name );
+                        $old_file_name = $old_file_parts['filename'];
+                        
+                        if ( is_dir( $path . "/thumbnails" ) ) {
+                            $thumb_base_name = $path . "/thumbnails/" . $old_file_name;
+                            // Get all the matching thumbnail files
+                            $thumbnails = glob( "$thumb_base_name*" );
+                            // Iterate through the list of matching thumbnails and delete each one
+                            if ( is_array( $thumbnails ) && count( $thumbnails ) > 0 ) {
+                                foreach ( $thumbnails as $thumb ) {
+                                    unlink( $thumb );
+                                }
+                            }
+                        }
+                    }
+                
+                }
+            }
+        }
     }
 }
