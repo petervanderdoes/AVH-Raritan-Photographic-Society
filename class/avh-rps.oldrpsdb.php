@@ -224,7 +224,7 @@ class AVH_RPS_OldRpsDb
         if ( $_closed == "Y" ) {
             $_return = true;
         } else {
-            $return = false;
+            $_return = false;
         }
         return $_return;
     }
