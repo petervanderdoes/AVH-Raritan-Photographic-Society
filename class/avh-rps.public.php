@@ -1137,7 +1137,7 @@ class AVH_RPS_Public
         $medium_index = -1;
         foreach ( $open_competitions as $recs ) {
             // Append this competition to the arrays
-            $dateParts = split( " ", $recs['Competition_Date'] );
+            $dateParts = explode( " ", $recs['Competition_Date'] );
             $this->_open_comp_date[$index] = $dateParts[0];
             $this->_open_comp_medium[$index] = $recs['Medium'];
             $this->_open_comp_class[$index] = $recs['Classification'];
