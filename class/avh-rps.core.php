@@ -98,10 +98,10 @@ class AVH_RPS_Core
         $this->_settings->storeSetting( 'graphics_url', plugins_url( 'images', $this->_settings->plugin_basename ) );
         $this->_settings->storeSetting( 'js_url', plugins_url( 'js', $this->_settings->plugin_basename ) );
         $this->_settings->storeSetting( 'css_url', plugins_url( 'css', $this->_settings->plugin_basename ) );
-$this->_settings->storeSetting( 'validComp','');
-$this->_settings->storeSetting( 'comp_date','');
-$this->_settings->storeSetting( 'classification','');
-$this->_settings->storeSetting( 'medium','');
+        $this->_settings->storeSetting( 'validComp', '' );
+        $this->_settings->storeSetting( 'comp_date', '' );
+        $this->_settings->storeSetting( 'classification', '' );
+        $this->_settings->storeSetting( 'medium', '' );
     }
 
     /**
@@ -228,7 +228,7 @@ $this->_settings->storeSetting( 'medium','');
     public function rps_rename_image_file( $path, $old_name, $new_name, $ext )
     {
         $thumbnails = array();
-        $path = ABSPATH.$path;
+        $path = ABSPATH . $path;
         // Rename the main image file
         $status = rename( $path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext );
         if ( $status ) {
@@ -250,7 +250,7 @@ $this->_settings->storeSetting( 'medium','');
         }
         return $status;
     }
-    
+
     public function avh_array_msort( $array, $cols )
     {
         $colarr = array();
@@ -266,7 +266,7 @@ $this->_settings->storeSetting( 'medium','');
             foreach ( $order as $order_element ) {
                 //pass by reference, as required by php 5.3
                 $params[] = &$order_element;
-                unset($order_element);
+                unset( $order_element );
             }
         }
         call_user_func_array( 'array_multisort', $params );

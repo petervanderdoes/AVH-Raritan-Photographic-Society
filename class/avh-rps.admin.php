@@ -53,7 +53,7 @@ final class AVH_RPS_Admin
             $this->_core->actual_page = (int) $_GET['pagination'];
         }
         
-        add_action('init', array ( &$this, 'actionInit_Roles' ));
+        add_action( 'init', array( &$this, 'actionInit_Roles' ) );
         add_action( 'init', array( &$this, 'actionInit_UserFields' ) );
         
         // Admin menu
@@ -69,15 +69,15 @@ final class AVH_RPS_Admin
      */
     public function actionInit_Roles()
     {
-    	/* Get the administrator role. */
-		$role =& get_role( 'administrator' );
-
-		/* If the administrator role exists, add required capabilities for the plugin. */
-		if ( !empty( $role ) ) {
-
-			/* Role management capabilities. */
-			$role->add_cap( 'edit_competition classification' );
-		}
+        /* Get the administrator role. */
+        $role = & get_role( 'administrator' );
+        
+        /* If the administrator role exists, add required capabilities for the plugin. */
+        if ( !empty( $role ) ) {
+            
+            /* Role management capabilities. */
+            $role->add_cap( 'edit_competition classification' );
+        }
     }
 
     public function actionInit_UserFields()
@@ -198,7 +198,7 @@ final class AVH_RPS_Admin
         }
         echo '</td>';
         echo '</tr>';
-                
+        
         echo '<tr>';
         echo '<th>Classification Print B&W</th>';
         echo '<td>';
@@ -274,7 +274,7 @@ final class AVH_RPS_Admin
         update_user_meta( $userID, "rps_class_color", $_rps_class_color );
         update_user_meta( $userID, "rps_class_print_bw", $_rps_class_print_bw );
         update_user_meta( $userID, "rps_class_print_color", $_rps_class_print_color );
-        
+    
     }
 
     ############## Admin WP Helper ##############
