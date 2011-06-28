@@ -158,6 +158,7 @@ class AVH_RPS_Core
 
     function rpsResizeImage( $image_name, $thumb_name, $size, $quality, $maker )
     {
+        $maker=trim($maker);
         
         // Open the original image
         if ( !file_exists( $image_name ) ) {
@@ -186,7 +187,7 @@ class AVH_RPS_Core
         imagecopyresampled( $thumb_img, $original_img, 0, 0, 0, 0, $nw, $nh, $w, $h );
         
         // If this is the 400px image, write the copyright notice onto the image
-        if ( !( empty( trim( $maker ) ) ) ) {
+        if ( !( empty( $maker ) ) ) {
             $dateParts = explode( "-", $this->_settings->comp_date );
             $year = $dateParts[0];
             $black = imagecolorallocate( $thumb_img, 0, 0, 0 );
