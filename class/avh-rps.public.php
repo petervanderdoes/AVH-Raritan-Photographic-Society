@@ -1107,7 +1107,7 @@ class AVH_RPS_Public
                 echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
                 echo "<li>Upload the resized image.</li></ul></ul>\n";
             }
-            if ( isset( $_POST['resized'] ) && ( '1' == $_POST['resized'] ) ) {
+            if ( isset( $_GET['resized'] ) && ( '1' == $_GET['resized'] ) ) {
                 echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
                 echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
                 echo "</li></ul>\n";
@@ -1498,7 +1498,7 @@ class AVH_RPS_Public
                             return;
                         }
                     }
-                    $server_file_name = str_replace( ABSPATH, '/', $path );
+                    $server_file_name = str_replace( ABSPATH, '/', $full_path . '.jpg' );
                     $data = array( 'Competition_ID'=>$comp_id, 'Title'=>$title, 'Client_File_Name'=>$client_file_name, 'Server_File_Name'=>$server_file_name );
                     $_result = $this->_rpsdb->insertEntry( $data );
                     if ( $_result === false ) {
@@ -1506,7 +1506,7 @@ class AVH_RPS_Public
                         return;
                     }
                     $query = build_query( array( 'resized'=>$resized ) );
-                    wp_redirect( $redirect_to . '/' . $query );
+                    wp_redirect( $redirect_to . '/?' . $query );
                     exit();
                 }
             }
