@@ -1571,7 +1571,7 @@ class AVH_RPS_Public
         }
         
         $action = site_url( '/' . get_page_uri( $post->ID ) );
-        echo '<form action="' . $action . '/&post=1" enctype="multipart/form-data" method="post">';
+        echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
         
         echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
         if ( isset( $_POST['wp_get_referer'] ) ) {
