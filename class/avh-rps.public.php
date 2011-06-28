@@ -1444,7 +1444,7 @@ class AVH_RPS_Public
                     }
                     
                     $max_per_date = $this->_rpsdb->checkMaxEntriesOnDate();
-                    if ( $recs['Total_Entries_Submitted'] >= $this->_settings->club_max_entries_per_member_per_date ) {
+                    if ( $max_per_date >= $this->_settings->club_max_entries_per_member_per_date ) {
                         $x = $this->_settings->club_max_entries_per_member_per_date;
                         $this->_errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
                         return;
