@@ -1457,7 +1457,8 @@ class AVH_RPS_Public
                     $path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
                     
                     $title2 = stripslashes( trim( $_POST['title'] ) );
-                    $dest_name = sanitize_file_name( $title2 ) . '+' . $username;
+                    $user=wp_get_current_user();
+                    $dest_name = sanitize_file_name( $title2 ) . '+' . $user->user_login;
                     $full_path = $path . '/' . $dest_name;
                     // Need to create the destination folder?
                     if ( !is_dir( $path ) ) mkdir( $path, 0755 );
@@ -1498,7 +1499,7 @@ class AVH_RPS_Public
                         }
                     }
                     $server_file_name = str_replace( ABSPATH, '/', $path );
-                    $data = array( 'Competition_ID'=>$this->_settings->comp_id, 'Title'=>$title, 'Client_File_Name'=>$client_file_name, 'Server_File_Name'=>$server_file_name );
+                    $data = array( 'Competition_ID'=>$comp_id, 'Title'=>$title, 'Client_File_Name'=>$client_file_name, 'Server_File_Name'=>$server_file_name );
                     $_result = $this->_rpsdb->insertEntry( $data );
                     if ( $_result === false ) {
                         $this->_errmsg = "Failed to INSERT entry record into database";
