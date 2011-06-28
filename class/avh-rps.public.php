@@ -271,6 +271,7 @@ class AVH_RPS_Public
 
     public function shortcodeRpsMonthlyWinners( $atts, $content = '' )
     {
+        global $post;
         $this->_settings->storeSetting( selected_season, '' );
         $this->_settings->storeSetting( season_start_date, "" );
         $this->_settings->storeSetting( season_end_date, "" );
@@ -335,7 +336,7 @@ class AVH_RPS_Public
         echo '</script>';
         
         echo '<span class="competion-monthly-winners-form"> Monthly Award Winners for ';
-        $action = site_url( '/' . get_page_uri() );
+        $action = site_url( '/' . get_page_uri( $post->ID ) );
         $form = '';
         $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
         $form .= '<input name="submit_control" type="hidden">' . "\n";
@@ -450,6 +451,7 @@ class AVH_RPS_Public
 
     public function shortcodeRpsScoresCurrentUser( $atts, $content = '' )
     {
+        global $post;
         
         if ( isset( $_POST['selected_season_list'] ) ) {
             $this->_settings->selected_season = $_POST['selected_season_list'];
@@ -464,7 +466,7 @@ class AVH_RPS_Public
         $this->_settings->season_end_date = sprintf( "%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1 );
         
         // Start building the form
-        $action = site_url( '/' . get_page_uri() );
+        $action = site_url( '/' . get_page_uri( $post->ID ) );
         $form = '';
         $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
         $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '" />';
@@ -560,7 +562,7 @@ class AVH_RPS_Public
 
     public function shortcodeRpsAllScores( $atts, $content = '' )
     {
-        
+        global $post;
         if ( isset( $_POST['selected_season_list'] ) ) {
             $this->_settings->selected_season = $_POST['selected_season_list'];
         }
@@ -601,7 +603,7 @@ class AVH_RPS_Public
             // Start the big table
             
 
-            $action = site_url( '/' . get_page_uri() );
+            $action = site_url( '/' . get_page_uri( $post->ID ) );
             $form = '';
             $form .= '<form name="all_scores_form" method="post" action="' . $action . '">';
             $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '"/>';
@@ -1263,7 +1265,7 @@ class AVH_RPS_Public
 
     public function shortcodeRpsEditTitle()
     {
-        
+        global $post;
         if ( isset( $_GET['m'] ) ) {
             if ( $_GET['m'] == "prints" ) {
                 $medium_subset = "Prints";
@@ -1286,7 +1288,7 @@ class AVH_RPS_Public
             echo $this->_errmsg;
             echo '</div>';
         }
-        $action = site_url( '/' . get_page_uri() );
+        $action = site_url( '/' . get_page_uri( $post->ID ) );
         echo '<form action="' . $action . $medium_param . '" method="post">';
         
         echo '<table class="form_frame" width="80%">';
@@ -1461,11 +1463,11 @@ class AVH_RPS_Public
                     if ( !is_dir( $path ) ) mkdir( $path, 0755 );
                     
                     // If the .jpg file is too big resize it
-                    if ( $size_info[0] > $this->_settings->max_width_entry || $size_info[1] > $this->_settings->max_height_entry ) {
+                    if ( $size_info[0] > $this->_settings->max_width_entry || $size_info[1] > MAX_HEIGHT ) {
                         // If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
-                        if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->max_width_entry / $this->_settings->max_height_entry ) {
+                        if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->max_width_entry / MAX_HEIGHT ) {
                             // Set the maximum width to ensure the height does not exceed the maximum height
-                            $size = $this->_settings->max_height_entry * $size_info[0] / $size_info[1];
+                            $size = MAX_HEIGHT * $size_info[0] / $size_info[1];
                         
                         } else {
                             // if its landscape and the aspect ratio is greater than the projector
@@ -1476,7 +1478,7 @@ class AVH_RPS_Public
      // If its a portrait image
                             } else {
                                 // Set the maximum height to the height of the projector
-                                $size = $this->_settings->max_height_entry;
+                                $size = MAX_HEIGHT;
                             }
                         }
                         // Resize the image and deposit it in the destination directory
@@ -1550,6 +1552,7 @@ class AVH_RPS_Public
 
     public function shortcodeRpsUploadEntry()
     {
+        global $post;
         if ( isset( $_GET['m'] ) ) {
             if ( $_GET['m'] == "prints" ) {
                 $medium_subset = "Prints";
@@ -1567,7 +1570,7 @@ class AVH_RPS_Public
             echo '</div>';
         }
         
-        $action = site_url( '/' . get_page_uri() );
+        $action = site_url( '/' . get_page_uri( $post->ID ) );
         echo '<form action="' . $action . '&post=1" enctype="multipart/form-data" method="post">';
         
         echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
