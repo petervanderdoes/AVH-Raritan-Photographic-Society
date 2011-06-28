@@ -102,6 +102,8 @@ class AVH_RPS_Core
         $this->_settings->storeSetting( 'comp_date', '' );
         $this->_settings->storeSetting( 'classification', '' );
         $this->_settings->storeSetting( 'medium', '' );
+        $this->_settings->storeSetting( 'max_width_entry', 1024 );
+        $this->_settings->storeSetting( 'max_height_entry', 768 );
     }
 
     /**
@@ -204,7 +206,7 @@ class AVH_RPS_Core
         imagejpeg( $thumb_img, $thumb_name, $quality );
         
         // Free up memory
-        imagedestroy($thumb_img);
+        imagedestroy( $thumb_img );
     }
 
     function rpsGetThumbnailUrl( $row, $size )

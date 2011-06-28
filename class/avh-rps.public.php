@@ -1461,22 +1461,22 @@ class AVH_RPS_Public
                     if ( !is_dir( $path ) ) mkdir( $path, 0755 );
                     
                     // If the .jpg file is too big resize it
-                    if ( $size_info[0] > MAX_WIDTH || $size_info[1] > MAX_HEIGHT ) {
+                    if ( $size_info[0] > $this->_settings->max_width_entry || $size_info[1] > $this->_settings->max_height_entry ) {
                         // If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
-                        if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < MAX_WIDTH / MAX_HEIGHT ) {
+                        if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->max_width_entry / $this->_settings->max_height_entry ) {
                             // Set the maximum width to ensure the height does not exceed the maximum height
-                            $size = MAX_HEIGHT * $size_info[0] / $size_info[1];
+                            $size = $this->_settings->max_height_entry * $size_info[0] / $size_info[1];
                         
                         } else {
                             // if its landscape and the aspect ratio is greater than the projector
                             if ( $size_info[0] > $size_info[1] ) {
                                 // Set the maximum width to the width of the projector
-                                $size = MAX_WIDTH;
+                                $size = $this->_settings->max_width_entry;
                             
      // If its a portrait image
                             } else {
                                 // Set the maximum height to the height of the projector
-                                $size = MAX_HEIGHT;
+                                $size = $this->_settings->max_height_entry;
                             }
                         }
                         // Resize the image and deposit it in the destination directory
