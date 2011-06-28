@@ -820,13 +820,14 @@ class AVH_RPS_Public
         $this->_settings->comp_date = "";
         $this->_settings->classification = "";
         $this->_settings->medium = "";
+        $this->_errmsg='';
         
         $page = explode( '-', $post->post_name );
         $this->_settings->medium_subset = $page[1];
         if ( isset( $_POST['submit_control'] ) ) {
             // @TODO Nonce check
-            
 
+            
             $this->_settings->comp_date = $_POST['comp_date'];
             $this->_settings->classification = $_POST['classification'];
             $this->_settings->medium = $_POST['medium'];
@@ -892,6 +893,7 @@ class AVH_RPS_Public
             $this->_settings->comp_date = "";
             $this->_settings->classification = "";
             $this->_settings->medium = "";
+            $this->_errmsg = 'There are no competitions available to enter';
             // Invalidate any existing cookie
             $past = time() - ( 24 * 3600 );
             $url = parse_url( get_bloginfo( url ) );
@@ -922,213 +924,213 @@ class AVH_RPS_Public
         extract( shortcode_atts( array( 'medium'=>'digital' ), $atts ) );
         $this->_settings->medium_subset = $medium;
         
-        if ( $this->_settings->validComp === false ) {
-            echo "\n<div id=\"errmsg\">There are no competitions available to enter<br></div>\n";
-        } else {
-            // Start the form
-            $action = site_url( '/' . get_page_uri( $post->ID ) );
-            $form = '';
-            echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
-            echo '<input type="hidden" name="submit_control">' . "\n";
-            echo '<input type="hidden" name="comp_date" value="' . $this->_settings->comp_date . '">' . "\n";
-            echo '<input type="hidden" name="classification" value="' . $this->_settings->classification . '">' . "\n";
-            echo '<input type="hidden" name="medium" value="' . $this->_settings->medium . '">' . "\n";
-            echo '<input type="hidden" name="medium_subset" value="' . $this->_settings->medium_subset . '">' . "\n";
-            echo '<table class="form_frame" width="90%">' . "\n";
-            
-            // Form Heading
-            if ( $this->_settings->validComp ) {
-                echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for" . $this->_settings->medium . " on " . strftime( '%d-%b-%Y', strtotime( $this->_settings->comp_date ) ) . "</th></tr>\n";
-            } else {
-                echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
-            }
-            echo "<tr><td align=\"center\" colspan=\"6\">\n";
-            echo "<table width=\"100%\">\n";
-            if ( $this->_settings->medium == "Color Digital" ) {
-                echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
-            } elseif ( $this->_settings->medium == "Color Prints" ) {
-                echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
-            } elseif ( $this->_settings->medium == "B&W Digital" ) {
-                echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
-            } else {
-                echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
-            }
-            echo "<td width=\"75%\">\n";
-            echo "<table width=\"100%\">\n";
-            
-            // The competition date dropdown list
-            echo "<tr>\n";
-            echo "<td width=\"33%\" align=\"right\"><b>Competition Date:&nbsp;&nbsp;</b></td>\n";
-            echo "<td width=\"64%\" align=\"left\">\n";
-            
-            echo "<SELECT name=\"select_comp\" style=\"width:300px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_comp')\">\n";
-            // Load the values into the dropdown list
-            $prev_date = "";
-            for ( $i = 0; $i < count( $this->_open_comp_date ); $i++ ) {
-                if ( $this->_open_comp_date[$i] != $prev_date ) {
-                    if ( $this->_settings->comp_date == $this->_open_comp_date[$i] ) {
-                        $selected = " SELECTED";
-                        $theme = $this->_open_comp_theme[$i];
-                    } else {
-                        $selected = "";
-                    }
-                    echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"" . $this->_open_comp_date[$i] . "\"$selected>" . strftime( '%d-%b-%Y', strtotime( $this->_open_comp_date[$i] ) ) . " " . $this->_open_comp_theme[$i] . "</OPTION>\n";
-                }
-                $prev_date = $this->_open_comp_date[$i];
-            }
-            echo "</SELECT>\n";
-            echo "</td></tr>\n";
-            
-            // Competition medium dropdown list
-            echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
-            echo "<td width=\"64%\" align=\"left\">\n";
-            echo "<SELECT name=\"select_medium\" style=\"width:150px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_medium')\">\n";
-            // Load the values into the dropdown list
-            for ( $i = 0; $i < count( $this->_open_comp_date ); $i++ ) {
-                if ( $this->_open_comp_date[$i] == $this->_settings->comp_date ) {
-                    if ( $this->_settings->medium == $this->_open_comp_medium[$i] ) {
-                        $selected = " SELECTED";
-                    } else {
-                        $selected = "";
-                    }
-                    echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"" . $this->_open_comp_medium[$i] . "\"$selected>" . $this->_open_comp_medium[$i] . "</OPTION>\n";
-                }
-            }
-            echo "</SELECT>\n";
-            echo "</td></tr>\n";
-            
-            // Display the Classification and Theme for the selected competition
-            echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
-            echo "<td width=\"64%\" align=\"left\">" . $this->_settings->classification . "</td></tr>\n";
-            echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
-            echo "<td width=\"64%\" align=\"left\">$theme</td></tr>\n";
-            
-            echo "</table>\n";
-            echo "</td></tr></table>\n";
-            
-            // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
-            if ( $this->_settings->comp_date != "" ) {
-                $close_date = $this->_rpsdb->getCompetitionCloseDate();
-                if ( !empty( $close_date ) ) {
-                    $close_epoch = strtotime( $close_date );
-                    $time_to_close = $close_epoch - mktime();
-                    if ( $time_to_close >= 0 && $time_to_close <= 604800 ) {
-                        echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date( "F j, Y", $close_epoch ) . " at " . date( "g:ia (T)", $close_epoch ) . "</td></tr>\n";
-                    }
-                }
-            }
-            
-            // Display the column headers for the competition entries
-            ?>
-<tr>
-	<th class="form_frame_header" width="5%">&nbsp;</th>
-	<th class="form_frame_header" width="10%">Image</th>
-	<th class="form_frame_header" width="40%">Title</th>
-	<th class="form_frame_header" width="25%">File Name</th>
-	<th class="form_frame_header" width="10%">Width</th>
-	<th class="form_frame_header" width="10%">Height</th>
-</tr>
-<?php
-            // Retrieve the maximum number of entries per member for this competition
-            $max_entries_per_member_per_comp = $this->_rpsdb->getCompetitionMaxEntries();
-            
-            // Retrive the total number of entries submitted by this member for this competition date
-            $total_entries_submitted = $this->_rpsdb->getCompetitionEntriesUser();
-            
-            $entries = $this->_rpsdb->getCompetitionSubmittedEntriesUser();
-            // Build the rows of submitted images
-            $numRows = 0;
-            $numOversize = 0;
-            foreach ( $entries as $recs ) {
-                $numRows += 1;
-                $rowStyle = $numRows % 2 == 1 ? "odd_row" : "even_row";
-                
-                // Checkbox column
-                echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs['ID'] . '">' . "\n";
-                
-                // Thumbnail column
-                $user = wp_get_current_user();
-                $a = realpath( $recs['Server_File_Name'] );
-                $image_url = site_url( str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
-                echo "<td align=\"center\" width=\"10%\">\n";
-                echo "<div id='rps_colorbox_title'>" . htmlentities( $recs['Title'] ) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
-                echo '<a href="' . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">\n";
-                echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 75 ) . "\" />\n";
-                echo "</a></td>\n";
-                
-                // Title column
-                echo '<td align="left" width="40%">';
-                echo "<div id='rps_colorbox_title'>" . htmlentities( $recs['Title'] ) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
-                echo "<a href=\"" . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">" . htmlentities( $recs['Title'] ) . "</a></td>\n";
-                // File Name
-                echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
-                
-                // Image width and height columns.  The height and width values are suppressed if the Client_File_Name is
-                // empty i.e. no image uploaded for a print competition.
-                if ( file_exists( ABSPATH . str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) ) ) {
-                    $size = getimagesize( ABSPATH . str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
-                } else {
-                    $size[0] = 0;
-                    $size[1] = 0;
-                }
-                if ( $recs['Client_File_Name'] > "" ) {
-                    if ( $size[0] > 1024 ) {
-                        echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[0] . "</td>\n";
-                    } else {
-                        echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
-                    }
-                    if ( $size[1] > 768 ) {
-                        echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[1] . "</td>\n";
-                    } else {
-                        echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
-                    }
-                } else {
-                    echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
-                    echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
-                }
-                if ( $size[0] > 1024 || $size[1] > 768 ) {
-                    $numOversize += 1;
-                }
-            }
-            
-            // Add some instructional bullet points above the buttons
-            echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\">";
-            echo "<ul style=\"margin:0;margin-left:15px;padding:0\">\n";
-            if ( $numRows > 0 ) {
-                echo "<li>Click the thumbnail or title to view the full size image</li>\n";
-            }
-            echo "<ul></td></tr>\n";
-            
-            // Warn the user about oversized images.
-            if ( $numOversize > 0 ) {
-                echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\" class=\"warning_cell\">";
-                echo "<ul style=\"margin:0;margin-left:15px;padding:0;color:red\"><li>When the Width or Height value is red, the image is too large to display on the projector. &nbsp;Here's what you need to do:\n";
-                echo "<ul style=\"margin:0;margin-left:15px;padding:0\"><li>Remove the image from the competition. (check the corresponding checkbox and click Remove)</li>\n";
-                echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
-                echo "<li>Upload the resized image.</li></ul></ul>\n";
-            }
-            if ( isset( $_GET['resized'] ) && ( '1' == $_GET['resized'] ) ) {
-                echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
-                echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
-                echo "</li></ul>\n";
-            }
-            
-            // Buttons at the bottom of the list of submitted images
-            echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
-            // Don't show the Add button if the max number of images per member reached
-            if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->_settings->club_max_entries_per_member_per_date ) {
-                echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
-            }
-            if ( $numRows > 0 && $max_entries_per_member_per_comp > 0 ) {
-                echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
-            }
-            if ( $numRows > 0 ) {
-                echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
-            }
-            
-            // All done, close out the table and the form
-            echo "</table>\n</form>\n<br />\n";
+        if ( !empty( $this->_errmsg ) ) {
+            echo '<div id="errmsg">' . $this->_errmsg . '</div>';
         }
+        // Start the form
+        $action = site_url( '/' . get_page_uri( $post->ID ) );
+        $form = '';
+        echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
+        echo '<input type="hidden" name="submit_control">' . "\n";
+        echo '<input type="hidden" name="comp_date" value="' . $this->_settings->comp_date . '">' . "\n";
+        echo '<input type="hidden" name="classification" value="' . $this->_settings->classification . '">' . "\n";
+        echo '<input type="hidden" name="medium" value="' . $this->_settings->medium . '">' . "\n";
+        echo '<input type="hidden" name="medium_subset" value="' . $this->_settings->medium_subset . '">' . "\n";
+        echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce( 'avh-rps-myentries' ) . '" />' . "\n";
+        echo '<table class="form_frame" width="90%">' . "\n";
+        
+        // Form Heading
+        if ( $this->_settings->validComp ) {
+            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for" . $this->_settings->medium . " on " . strftime( '%d-%b-%Y', strtotime( $this->_settings->comp_date ) ) . "</th></tr>\n";
+        } else {
+            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
+        }
+        echo "<tr><td align=\"center\" colspan=\"6\">\n";
+        echo "<table width=\"100%\">\n";
+        if ( $this->_settings->medium == "Color Digital" ) {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        } elseif ( $this->_settings->medium == "Color Prints" ) {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        } elseif ( $this->_settings->medium == "B&W Digital" ) {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        } else {
+            echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+        }
+        echo "<td width=\"75%\">\n";
+        echo "<table width=\"100%\">\n";
+        
+        // The competition date dropdown list
+        echo "<tr>\n";
+        echo "<td width=\"33%\" align=\"right\"><b>Competition Date:&nbsp;&nbsp;</b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">\n";
+        
+        echo "<SELECT name=\"select_comp\" style=\"width:300px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_comp')\">\n";
+        // Load the values into the dropdown list
+        $prev_date = "";
+        for ( $i = 0; $i < count( $this->_open_comp_date ); $i++ ) {
+            if ( $this->_open_comp_date[$i] != $prev_date ) {
+                if ( $this->_settings->comp_date == $this->_open_comp_date[$i] ) {
+                    $selected = " SELECTED";
+                    $theme = $this->_open_comp_theme[$i];
+                } else {
+                    $selected = "";
+                }
+                echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"" . $this->_open_comp_date[$i] . "\"$selected>" . strftime( '%d-%b-%Y', strtotime( $this->_open_comp_date[$i] ) ) . " " . $this->_open_comp_theme[$i] . "</OPTION>\n";
+            }
+            $prev_date = $this->_open_comp_date[$i];
+        }
+        echo "</SELECT>\n";
+        echo "</td></tr>\n";
+        
+        // Competition medium dropdown list
+        echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">\n";
+        echo "<SELECT name=\"select_medium\" style=\"width:150px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_medium')\">\n";
+        // Load the values into the dropdown list
+        for ( $i = 0; $i < count( $this->_open_comp_date ); $i++ ) {
+            if ( $this->_open_comp_date[$i] == $this->_settings->comp_date ) {
+                if ( $this->_settings->medium == $this->_open_comp_medium[$i] ) {
+                    $selected = " SELECTED";
+                } else {
+                    $selected = "";
+                }
+                echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"" . $this->_open_comp_medium[$i] . "\"$selected>" . $this->_open_comp_medium[$i] . "</OPTION>\n";
+            }
+        }
+        echo "</SELECT>\n";
+        echo "</td></tr>\n";
+        
+        // Display the Classification and Theme for the selected competition
+        echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">" . $this->_settings->classification . "</td></tr>\n";
+        echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
+        echo "<td width=\"64%\" align=\"left\">$theme</td></tr>\n";
+        
+        echo "</table>\n";
+        echo "</td></tr></table>\n";
+        
+        // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
+        if ( $this->_settings->comp_date != "" ) {
+            $close_date = $this->_rpsdb->getCompetitionCloseDate();
+            if ( !empty( $close_date ) ) {
+                $close_epoch = strtotime( $close_date );
+                $time_to_close = $close_epoch - mktime();
+                if ( $time_to_close >= 0 && $time_to_close <= 604800 ) {
+                    echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date( "F j, Y", $close_epoch ) . " at " . date( "g:ia (T)", $close_epoch ) . "</td></tr>\n";
+                }
+            }
+        }
+        
+        // Display the column headers for the competition entries
+        echo '<tr>';
+        echo '<th class="form_frame_header" width="5%">&nbsp;</th>';
+        echo '<th class="form_frame_header" width="10%">Image</th>';
+        echo '<th class="form_frame_header" width="40%">Title</th>';
+        echo '<th class="form_frame_header" width="25%">File Name</th>';
+        echo '<th class="form_frame_header" width="10%">Width</th>';
+        echo '<th class="form_frame_header" width="10%">Height</th>';
+        echo '</tr>';
+        
+        // Retrieve the maximum number of entries per member for this competition
+        $max_entries_per_member_per_comp = $this->_rpsdb->getCompetitionMaxEntries();
+        
+        // Retrive the total number of entries submitted by this member for this competition date
+        $total_entries_submitted = $this->_rpsdb->getCompetitionEntriesUser();
+        
+        $entries = $this->_rpsdb->getCompetitionSubmittedEntriesUser();
+        // Build the rows of submitted images
+        $numRows = 0;
+        $numOversize = 0;
+        foreach ( $entries as $recs ) {
+            $numRows += 1;
+            $rowStyle = $numRows % 2 == 1 ? "odd_row" : "even_row";
+            
+            // Checkbox column
+            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs['ID'] . '">' . "\n";
+            
+            // Thumbnail column
+            $user = wp_get_current_user();
+            $a = realpath( $recs['Server_File_Name'] );
+            $image_url = site_url( str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
+            echo "<td align=\"center\" width=\"10%\">\n";
+            echo "<div id='rps_colorbox_title'>" . htmlentities( $recs['Title'] ) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
+            echo '<a href="' . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">\n";
+            echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 75 ) . "\" />\n";
+            echo "</a></td>\n";
+            
+            // Title column
+            echo '<td align="left" width="40%">';
+            echo "<div id='rps_colorbox_title'>" . htmlentities( $recs['Title'] ) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
+            echo "<a href=\"" . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">" . htmlentities( $recs['Title'] ) . "</a></td>\n";
+            // File Name
+            echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
+            
+            // Image width and height columns.  The height and width values are suppressed if the Client_File_Name is
+            // empty i.e. no image uploaded for a print competition.
+            if ( file_exists( ABSPATH . str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) ) ) {
+                $size = getimagesize( ABSPATH . str_replace( '/home/rarit0/public_html', '', $recs['Server_File_Name'] ) );
+            } else {
+                $size[0] = 0;
+                $size[1] = 0;
+            }
+            if ( $recs['Client_File_Name'] > "" ) {
+                if ( $size[0] > 1024 ) {
+                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[0] . "</td>\n";
+                } else {
+                    echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
+                }
+                if ( $size[1] > 768 ) {
+                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[1] . "</td>\n";
+                } else {
+                    echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
+                }
+            } else {
+                echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
+                echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
+            }
+            if ( $size[0] > 1024 || $size[1] > 768 ) {
+                $numOversize += 1;
+            }
+        }
+        
+        // Add some instructional bullet points above the buttons
+        echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\">";
+        echo "<ul style=\"margin:0;margin-left:15px;padding:0\">\n";
+        if ( $numRows > 0 ) {
+            echo "<li>Click the thumbnail or title to view the full size image</li>\n";
+        }
+        echo "<ul></td></tr>\n";
+        
+        // Warn the user about oversized images.
+        if ( $numOversize > 0 ) {
+            echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\" class=\"warning_cell\">";
+            echo "<ul style=\"margin:0;margin-left:15px;padding:0;color:red\"><li>When the Width or Height value is red, the image is too large to display on the projector. &nbsp;Here's what you need to do:\n";
+            echo "<ul style=\"margin:0;margin-left:15px;padding:0\"><li>Remove the image from the competition. (check the corresponding checkbox and click Remove)</li>\n";
+            echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
+            echo "<li>Upload the resized image.</li></ul></ul>\n";
+        }
+        if ( isset( $_GET['resized'] ) && ( '1' == $_GET['resized'] ) ) {
+            echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
+            echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
+            echo "</li></ul>\n";
+        }
+        
+        // Buttons at the bottom of the list of submitted images
+        echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
+        // Don't show the Add button if the max number of images per member reached
+        if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->_settings->club_max_entries_per_member_per_date ) {
+            echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
+        }
+        if ( $numRows > 0 && $max_entries_per_member_per_comp > 0 ) {
+            echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
+        }
+        if ( $numRows > 0 ) {
+            echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
+        }
+        
+        // All done, close out the table and the form
+        echo "</table>\n</form>\n<br />\n";
+    
     }
 
     //
@@ -1457,7 +1459,7 @@ class AVH_RPS_Public
                     $path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
                     
                     $title2 = stripslashes( trim( $_POST['title'] ) );
-                    $user=wp_get_current_user();
+                    $user = wp_get_current_user();
                     $dest_name = sanitize_file_name( $title2 ) . '+' . $user->user_login;
                     $full_path = $path . '/' . $dest_name;
                     // Need to create the destination folder?
