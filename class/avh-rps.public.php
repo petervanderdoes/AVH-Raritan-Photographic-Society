@@ -46,7 +46,7 @@ class AVH_RPS_Public
         // Get The Registry
         $this->_settings = AVH_RPS_Settings::getInstance();
         $this->_classes = AVH_RPS_Classes::getInstance();
-        $this->_errmsg ='';
+        $this->_errmsg = '';
         
         // Initialize the plugin
         $this->_core = $this->_classes->load_class( 'Core', 'plugin', true );
@@ -1105,7 +1105,7 @@ class AVH_RPS_Public
                 echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
                 echo "<li>Upload the resized image.</li></ul></ul>\n";
             }
-            if ( $resized ) {
+            if ( isset( $_POST['resized'] ) && ( '1' == $_POST['resized'] ) ) {
                 echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
                 echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
                 echo "</li></ul>\n";
@@ -1381,7 +1381,7 @@ class AVH_RPS_Public
             // Detect this situation by comparing the length of the http content received with post_max_size
             if ( isset( $_SERVER['CONTENT_LENGTH'] ) ) {
                 if ( $_SERVER['CONTENT_LENGTH'] > $this->_core->avh_ShortHandToBytes( ini_get( 'post_max_size' ) ) ) {
-                    $this->_errmsg= "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf( "%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024 ) . " which exceeds the maximum file size of " . ini_get( 'post_max_size' ) . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk." ;
+                    $this->_errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf( "%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024 ) . " which exceeds the maximum file size of " . ini_get( 'post_max_size' ) . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                 } else {
                     if ( !$this->_checkUploadEntryTitle() ) {
                         return;
@@ -1391,7 +1391,7 @@ class AVH_RPS_Public
                     $uploaded_file_name = $_FILES['file_name']['tmp_name'];
                     $size_info = getimagesize( $uploaded_file_name );
                     if ( $size_info[2] != IMAGETYPE_JPEG ) {
-                        $this->_errmsg= "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit" ;
+                        $this->_errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                         return;
                     }
                     
@@ -1399,7 +1399,7 @@ class AVH_RPS_Public
                     if ( isset( $_COOKIE['RPS_MyEntries'] ) ) {
                         list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode( "|", $_COOKIE['RPS_MyEntries'] );
                     } else {
-                        $this->_errmsg= "Upload Form Error<br>The Selected_Competition cookie is not set." ;
+                        $this->_errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
                         return;
                     }
                     
@@ -1411,7 +1411,7 @@ class AVH_RPS_Public
                         $d = $this->comp_date;
                         $c = $this->classification;
                         $m = $this->medium;
-                        $this->_errmsg= "Upload Form Error<br>Competition $d/$c/$m not found in database<br>" ;
+                        $this->_errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
                         return;
                     }
                     
@@ -1428,7 +1428,7 @@ class AVH_RPS_Public
                     // an entry already submitted to this competition.  Dupliacte title result in duplicate
                     // file names on the server
                     if ( $this->_rpsdb->checkDuplicateTitle( $comp_id, $title ) ) {
-                        $this->_errmsg= "You have already submitted an entry with a title of \"" . stripslashes( $title ) . "\" in this competition<br>Please submit your entry again with a different title." ;
+                        $this->_errmsg = "You have already submitted an entry with a title of \"" . stripslashes( $title ) . "\" in this competition<br>Please submit your entry again with a different title.";
                         return;
                     }
                     
@@ -1437,14 +1437,14 @@ class AVH_RPS_Public
                     // maximum images per competition by having two upload windows open simultaneously.
                     $max_per_id = $this->_rpsdb->checkMaxEntriesOnId( $comp_id );
                     if ( $max_per_id >= $max_entries ) {
-                        $this->_errmsg= "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another" ;
+                        $this->_errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
                         return;
                     }
                     
                     $max_per_date = $this->_rpsdb->checkMaxEntriesOnDate();
                     if ( $recs['Total_Entries_Submitted'] >= $this->_settings->club_max_entries_per_member_per_date ) {
                         $x = $this->_settings->club_max_entries_per_member_per_date;
-                        $this->_errmsg= "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another" ;
+                        $this->_errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
                         return;
                     }
                     
@@ -1482,7 +1482,7 @@ class AVH_RPS_Public
                         // Resize the image and deposit it in the destination directory
                         if ( !$this->_core->rpsResizeImage( $uploaded_file_name, $full_path . '.jpg', $size, 95, '' ) );
                         {
-                            $this->_errmsg= "There is a problem resizing the picture for teh use of the projector." ;
+                            $this->_errmsg = "There is a problem resizing the picture for teh use of the projector.";
                             return;
                         }
                         $resized = 1;
@@ -1491,7 +1491,7 @@ class AVH_RPS_Public
                     } else {
                         $resized = 0;
                         if ( !move_uploaded_file( $uploaded_file_name, $full_path . '.jpg' ) ) {
-                            $this->_errmsg= "Failed to move uploaded file to destination folder" ;
+                            $this->_errmsg = "Failed to move uploaded file to destination folder";
                             return;
                         }
                     }
@@ -1499,11 +1499,11 @@ class AVH_RPS_Public
                     $data = array( 'Competition_ID'=>$this->_settings->comp_id, 'Title'=>$title, 'Client_File_Name'=>$client_file_name, 'Server_File_Name'=>$server_file_name );
                     $_result = $this->_rpsdb->insertEntry( $data );
                     if ( $_result === false ) {
-                        $this->_errmsg= "Failed to INSERT entry record into database" ;
+                        $this->_errmsg = "Failed to INSERT entry record into database";
                         return;
                     }
-                    $query = build_query(array('resized'=>$resized));
-                    wp_redirect($redirect_to.'/'.$query);
+                    $query = build_query( array( 'resized'=>$resized ) );
+                    wp_redirect( $redirect_to . '/' . $query );
                     exit();
                 }
             }
@@ -1517,32 +1517,32 @@ class AVH_RPS_Public
     {
         $_upload_ok = false;
         if ( !isset( $_POST['title'] ) || trim( $_POST['title'] ) == "" ) {
-            $this->_errmsg= 'Please enter your image title in the Title field.' ;
+            $this->_errmsg = 'Please enter your image title in the Title field.';
         } else {
             switch ( $_FILES['file_name']['error'] ) {
                 case UPLOAD_ERR_OK:
                     $_upload_ok = true;
                     break;
                 case UPLOAD_ERR_INI_SIZE:
-                    $this->_errmsg= "The submitted file exceeds the upload_max_filesize directive (" . ini_get( "upload_max_filesize" ) . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
+                    $this->_errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get( "upload_max_filesize" ) . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
                     break;
                 case UPLOAD_ERR_FORM_SIZE:
-                    $this->_errmsg= "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>" ;
+                    $this->_errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
                     break;
                 case UPLOAD_ERR_PARTIAL:
-                    $this->_errmsg= "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair." ;
+                    $this->_errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 case UPLOAD_ERR_NO_FILE:
-                    $this->_errmsg= "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit" ;
+                    $this->_errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                     break;
                 case UPLOAD_ERR_NO_TMP_DIR:
-                    $this->_errmsg= "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair." ;
+                    $this->_errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 case UPLOAD_ERR_CANT_WRITE:
-                    $this->_errmsg= "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair." ;
+                    $this->_errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 default:
-                    $this->_errmsg= "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair." ;
+                    $this->_errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
             }
         }
         return $_upload_ok;
