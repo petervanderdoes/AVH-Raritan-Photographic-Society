@@ -34,7 +34,7 @@ class AVH_RPS_Public
     private $club_officer;
     // Other commonly used globals
     private $digital_chair_email;
-    private $errMsg;
+    private $_errmsg;
     private $url_params;
 
     /**
@@ -46,6 +46,7 @@ class AVH_RPS_Public
         // Get The Registry
         $this->_settings = AVH_RPS_Settings::getInstance();
         $this->_classes = AVH_RPS_Classes::getInstance();
+        $this->_errmsg ='';
         
         // Initialize the plugin
         $this->_core = $this->_classes->load_class( 'Core', 'plugin', true );
@@ -65,13 +66,16 @@ class AVH_RPS_Public
         
         add_action( 'pre-header-edit-title', array( &$this, 'actionPreHeader_RpsEditTitle' ) );
         add_shortcode( 'rps_edit_title', array( &$this, 'shortcodeRpsEditTitle' ) );
+        
+        add_action( 'pre-header-upload-image', array( &$this, 'actionPreHeader_RpsUploadEntry' ) );
+        add_shortcode( 'rps_upload_image', array( &$this, 'shortcodeRpsUploadEntry' ) );
+    
     }
 
     function actionTemplate_Redirect_RPSWindowsClient()
     {
         if ( array_key_exists( 'rpswinclient', $_REQUEST ) ) {
             
-            $this->errMsg = "";
             // Properties of the logged in user
             status_header( 200 );
             switch ( $_REQUEST['rpswinclient'] ) {
@@ -820,6 +824,7 @@ class AVH_RPS_Public
         if ( isset( $_POST['submit_control'] ) ) {
             // @TODO Nonce check
             
+
             $this->_settings->comp_date = $_POST['comp_date'];
             $this->_settings->classification = $_POST['classification'];
             $this->_settings->medium = $_POST['medium'];
@@ -845,7 +850,10 @@ class AVH_RPS_Public
                 
                 case 'add':
                     if ( !$this->_rpsdb->getCompetionClosed() ) {
-                        header( "Location: digital_upload.php$medium_param" );
+                        $_query = array( 'm'=>$this->_settings->medium_subset );
+                        $_query = build_query( $_query );
+                        $loc = '/upload-image/?' . $_query;
+                        wp_redirect( $loc );
                     }
                     break;
                 
@@ -1216,7 +1224,7 @@ class AVH_RPS_Public
             }
             // makes sure they filled in the title field
             if ( !$_POST['new_title'] || trim( $_POST['new_title'] ) == "" ) {
-                $this->errmsg = 'You must provide an image title.<br><br>';
+                $this->_errmsg = 'You must provide an image title.<br><br>';
             } else {
                 $recs = $this->_rpsdb->getCompetitionByID( $this->_entry_id );
                 if ( $recs == NULL ) {
@@ -1273,9 +1281,9 @@ class AVH_RPS_Public
         
         $relative_path = str_replace( '/home/rarit0/public_html', '', $server_file_name );
         
-        if ( isset( $this->errmsg ) ) {
+        if ( isset( $this->_errmsg ) ) {
             echo '<div id="errmsg">';
-            echo $this->errmsg;
+            echo $this->_errmsg;
             echo '</div>';
         }
         $action = site_url( '/' . get_page_uri() );
@@ -1315,14 +1323,14 @@ class AVH_RPS_Public
                 
                 $recs = $this->_rpsdb->getEntryInfo( $id );
                 if ( $recs == FALSE ) {
-                    $this->errmsg = sprintf( "<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id );
+                    $this->_errmsg = sprintf( "<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id );
                 } else {
                     
                     $server_file_name = ABSPATH . str_replace( '/home/rarit0/public_html/', '', $recs['Server_File_Name'] );
                     // Delete the record from the database
                     $result = $this->_rpsdb->deleteEntry( $id );
                     if ( $result === FALSE ) {
-                        $this->errmsg = sprintf( "<b>Failed to DELETE competition entry %s from database</b><br>" );
+                        $this->_errmsg = sprintf( "<b>Failed to DELETE competition entry %s from database</b><br>" );
                     } else {
                         
                         // Delete the file from the server file system
@@ -1355,5 +1363,242 @@ class AVH_RPS_Public
                 }
             }
         }
+    }
+
+    public function actionPreHeader_RpsUploadEntry()
+    {
+        if ( isset( $_GET['post'] ) ) {
+            $redirect_to = $_POST['wp_get_referer'];
+            
+            // Just return if user clicked Cancel
+            if ( isset( $_POST['cancel'] ) ) {
+                wp_redirect( $redirect_to );
+                exit();
+            }
+            
+            // First we have to dispose of a "bug?".  If a file is uploaded and the size of the file exceeds
+            // the value of 'post_max_size' in php.ini, the $_POST and $_FILES arrays will be cleared.
+            // Detect this situation by comparing the length of the http content received with post_max_size
+            if ( isset( $_SERVER['CONTENT_LENGTH'] ) ) {
+                if ( $_SERVER['CONTENT_LENGTH'] > $this->_core->avh_ShortHandToBytes( ini_get( 'post_max_size' ) ) ) {
+                    $this->_errmsg= "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf( "%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024 ) . " which exceeds the maximum file size of " . ini_get( 'post_max_size' ) . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk." ;
+                } else {
+                    if ( !$this->_checkUploadEntryTitle() ) {
+                        return;
+                    }
+                    
+                    // Verify that the uploaded image is a JPEG
+                    $uploaded_file_name = $_FILES['file_name']['tmp_name'];
+                    $size_info = getimagesize( $uploaded_file_name );
+                    if ( $size_info[2] != IMAGETYPE_JPEG ) {
+                        $this->_errmsg= "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit" ;
+                        return;
+                    }
+                    
+                    // Retrieve and parse the selected competition cookie
+                    if ( isset( $_COOKIE['RPS_MyEntries'] ) ) {
+                        list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode( "|", $_COOKIE['RPS_MyEntries'] );
+                    } else {
+                        $this->_errmsg= "Upload Form Error<br>The Selected_Competition cookie is not set." ;
+                        return;
+                    }
+                    
+                    $recs = $this->_rpsdb->getIdmaxEntries();
+                    if ( $recs ) {
+                        $comp_id = $recs['ID'];
+                        $max_entries = $recs['Max_Entries'];
+                    } else {
+                        $d = $this->comp_date;
+                        $c = $this->classification;
+                        $m = $this->medium;
+                        $this->_errmsg= "Upload Form Error<br>Competition $d/$c/$m not found in database<br>" ;
+                        return;
+                    }
+                    
+                    // Prepare the title and client file name for storing in the database
+                    if ( !get_magic_quotes_gpc() ) {
+                        $title = addslashes( trim( $_POST['title'] ) );
+                        $client_file_name = addslashes( basename( $_FILES['file_name']['name'] ) );
+                    } else {
+                        $title = trim( $_POST['title'] );
+                        $client_file_name = basename( $_FILES['file_name']['name'] );
+                    }
+                    
+                    // Before we go any further, make sure the title is not a duplicate of
+                    // an entry already submitted to this competition.  Dupliacte title result in duplicate
+                    // file names on the server
+                    if ( $this->_rpsdb->checkDuplicateTitle( $comp_id, $title ) ) {
+                        $this->_errmsg= "You have already submitted an entry with a title of \"" . stripslashes( $title ) . "\" in this competition<br>Please submit your entry again with a different title." ;
+                        return;
+                    }
+                    
+                    // Do a final check that the user hasn't exceeded the maximum images per competition.
+                    // If we don't check this at the last minute it may be possible to exceed the
+                    // maximum images per competition by having two upload windows open simultaneously.
+                    $max_per_id = $this->_rpsdb->checkMaxEntriesOnId( $comp_id );
+                    if ( $max_per_id >= $max_entries ) {
+                        $this->_errmsg= "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another" ;
+                        return;
+                    }
+                    
+                    $max_per_date = $this->_rpsdb->checkMaxEntriesOnDate();
+                    if ( $recs['Total_Entries_Submitted'] >= $this->_settings->club_max_entries_per_member_per_date ) {
+                        $x = $this->_settings->club_max_entries_per_member_per_date;
+                        $this->_errmsg= "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another" ;
+                        return;
+                    }
+                    
+                    // Move the file to its final location
+                    $comp_date = $this->_settings->comp_date;
+                    $classification = $this->_settings->classification;
+                    $medium = $this->_settings->medium;
+                    $path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                    
+                    $title2 = stripslashes( trim( $_POST['title'] ) );
+                    $dest_name = sanitize_file_name( $title2 ) . '+' . $username;
+                    $full_path = $path . '/' . $dest_name;
+                    // Need to create the destination folder?
+                    if ( !is_dir( $path ) ) mkdir( $path, 0755 );
+                    
+                    // If the .jpg file is too big resize it
+                    if ( $size_info[0] > MAX_WIDTH || $size_info[1] > MAX_HEIGHT ) {
+                        // If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
+                        if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < MAX_WIDTH / MAX_HEIGHT ) {
+                            // Set the maximum width to ensure the height does not exceed the maximum height
+                            $size = MAX_HEIGHT * $size_info[0] / $size_info[1];
+                        
+                        } else {
+                            // if its landscape and the aspect ratio is greater than the projector
+                            if ( $size_info[0] > $size_info[1] ) {
+                                // Set the maximum width to the width of the projector
+                                $size = MAX_WIDTH;
+                            
+     // If its a portrait image
+                            } else {
+                                // Set the maximum height to the height of the projector
+                                $size = MAX_HEIGHT;
+                            }
+                        }
+                        // Resize the image and deposit it in the destination directory
+                        if ( !$this->_core->rpsResizeImage( $uploaded_file_name, $full_path . '.jpg', $size, 95, '' ) );
+                        {
+                            $this->_errmsg= "There is a problem resizing the picture for teh use of the projector." ;
+                            return;
+                        }
+                        $resized = 1;
+                    
+     // The uploaded image does not need to be resized so just move it to the destination directory
+                    } else {
+                        $resized = 0;
+                        if ( !move_uploaded_file( $uploaded_file_name, $full_path . '.jpg' ) ) {
+                            $this->_errmsg= "Failed to move uploaded file to destination folder" ;
+                            return;
+                        }
+                    }
+                    $server_file_name = str_replace( ABSPATH, '/', $path );
+                    $data = array( 'Competition_ID'=>$this->_settings->comp_id, 'Title'=>$title, 'Client_File_Name'=>$client_file_name, 'Server_File_Name'=>$server_file_name );
+                    $_result = $this->_rpsdb->insertEntry( $data );
+                    if ( $_result === false ) {
+                        $this->_errmsg= "Failed to INSERT entry record into database" ;
+                        return;
+                    }
+                    $query = build_query(array('resized'=>$resized));
+                    wp_redirect($redirect_to.'/'.$query);
+                    exit();
+                }
+            }
+        }
+    }
+
+    /**
+     * Enter description here ...
+     */
+    private function _checkUploadEntryTitle()
+    {
+        $_upload_ok = false;
+        if ( !isset( $_POST['title'] ) || trim( $_POST['title'] ) == "" ) {
+            $this->_errmsg= 'Please enter your image title in the Title field.' ;
+        } else {
+            switch ( $_FILES['file_name']['error'] ) {
+                case UPLOAD_ERR_OK:
+                    $_upload_ok = true;
+                    break;
+                case UPLOAD_ERR_INI_SIZE:
+                    $this->_errmsg= "The submitted file exceeds the upload_max_filesize directive (" . ini_get( "upload_max_filesize" ) . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
+                    break;
+                case UPLOAD_ERR_FORM_SIZE:
+                    $this->_errmsg= "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>" ;
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $this->_errmsg= "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair." ;
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $this->_errmsg= "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit" ;
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    $this->_errmsg= "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair." ;
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    $this->_errmsg= "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair." ;
+                    break;
+                default:
+                    $this->_errmsg= "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair." ;
+            }
+        }
+        return $_upload_ok;
+    }
+
+    public function shortcodeRpsUploadEntry()
+    {
+        if ( isset( $_GET['m'] ) ) {
+            if ( $_GET['m'] == "prints" ) {
+                $medium_subset = "Prints";
+                $medium_param = "?m=prints";
+            } else {
+                $medium_subset = "Digital";
+                $medium_param = "?m=digital";
+            }
+        }
+        
+        // Error messages
+        if ( isset( $this->_errmsg ) ) {
+            echo '<div id="errmsg">';
+            echo $this->_errmsg;
+            echo '</div>';
+        }
+        
+        $action = site_url( '/' . get_page_uri() );
+        echo '<form action="' . $action . '&post=1" enctype="multipart/form-data" method="post">';
+        
+        echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
+        if ( isset( $_POST['wp_get_referer'] ) ) {
+            $_ref = $_POST['wp_get_referer'];
+        } else {
+            $_ref = wp_get_referer();
+        }
+        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg( array( 'm' ), $_ref ) . '" />';
+        
+        echo '<table class="form_frame" width="80%">';
+        echo '<tr><th class="form_frame_header" colspan=2>';
+        echo 'Submit Your Image';
+        echo '</th></tr>';
+        echo '<tr><td align="center">';
+        echo '<table>';
+        echo '<tr><td class="form_field_label"><span style="color:red"><sup>*</sup> </span>Title <i>(required)</i>:</td>';
+        echo '<td class="form_field">';
+        echo '<input style="width:300px" type="text" name="title" maxlength="128">';
+        echo '</td></tr>';
+        echo '<tr><td class="form_field_label"><span style="color:red"><sup>*</sup> </span>File Name <i>(required)</i>:</td>';
+        echo '<td class="form_field">';
+        echo '<input style="width:300px" type="file" name="file_name" maxlength="128">';
+        echo '</td></tr>';
+        echo '<tr><td align="center" style="padding-top:20px" colspan="2">';
+        echo '<input type="submit" name="submit" value="Submit">';
+        echo '<input type="submit" name="cancel" value="Cancel">';
+        echo '</td></tr>';
+        echo '</table>';
+        echo '</td></tr>';
+        echo '</table>';
+        echo '</form>';
     }
 }

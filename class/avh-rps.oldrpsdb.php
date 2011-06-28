@@ -239,6 +239,26 @@ class AVH_RPS_OldRpsDb
         return $_return;
     }
 
+    public function checkMaxEntriesOnId( $id )
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT count(ID) FROM entries 
+        	WHERE Competition_ID = %s 
+        		AND Member_ID = %s", $id, get_current_user_id() );
+        $_return = $this->_rpsdb->get_var( $sql );
+        return $_return;
+    }
+
+    public function checkMaxEntriesOnDate()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT count(e.ID) as Total_Entries_Submitted
+                    FROM entries e, competitions c
+                    WHERE e.Competition_ID = c.ID AND
+                    c.Competition_Date = DATE(%s) AND
+                    e.Member_ID = %s", $this->_settings->comp_date, get_current_user_id() );
+        $_return = $this->_rpsdb->get_var( $sql );
+        return $_return;
+    }
+
     public function getCompetitionEntriesUser()
     {
         $sql = $this->_rpsdb->prepare( "SELECT COUNT(entries.ID) as Total_Submitted
@@ -284,6 +304,39 @@ class AVH_RPS_OldRpsDb
     
     }
 
+    public function getIdmaxEntries()
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT ID, Max_Entries 
+        	FROM competitions 
+        	WHERE Competition_Date = DATE %s 
+				AND Classification = %s 
+				AND Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium );
+        $_return = $this->_rpsdb->get_row( $sql, ARRAY_A );
+        return $_return;
+    }
+
+    public function checkDuplicateTitle( $id, $title )
+    {
+        $sql = $this->_rpsdb->prepare( "SELECT ID 
+        	FROM entries 
+        	WHERE Competition_ID = %s 
+        		AND Member_ID = %s 
+        		AND Title = %s", $id, get_current_user_id(), $title );
+        $_return = $this->_rpsdb->get_var( $sql );
+        if ( $_return > 0 ) {
+            $_return = true;
+        } else {
+            $_return = false;
+        }
+        return $_return;
+    }
+
+    public function insertEntry($data){
+        $data['Member_ID']=get_current_user_id();
+        $data['Date_Created']=current_time( 'mysql' );
+        $_return = $this->_rpsdb->insert( 'entries', $data );
+        return $_return;
+    }
     public function updateEntriesTitle( $new_title, $new_file_name, $id )
     {
         

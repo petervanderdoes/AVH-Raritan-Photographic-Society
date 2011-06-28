@@ -156,7 +156,6 @@ class AVH_RPS_Core
 
     function rpsResizeImage( $image_name, $thumb_name, $size, $quality, $maker )
     {
-        GLOBAL $comp_date;
         
         // Open the original image
         if ( !file_exists( $image_name ) ) {
@@ -164,7 +163,8 @@ class AVH_RPS_Core
         }
         $original_img = imagecreatefromjpeg( $image_name );
         // Calculate the height and width of the resized image
-        if ( $dimensions = GetImageSize( $image_name ) ) {
+        $dimensions = GetImageSize( $image_name );
+        if ( !( false === $dimensions ) ) {
             $w = $dimensions[0];
             $h = $dimensions[1];
             if ( $w > $h ) { // Landscape image
@@ -184,13 +184,13 @@ class AVH_RPS_Core
         imagecopyresampled( $thumb_img, $original_img, 0, 0, 0, 0, $nw, $nh, $w, $h );
         
         // If this is the 400px image, write the copyright notice onto the image
-        if ( $maker > "" ) {
-            $dateParts = split( "-", $comp_date );
+        if ( !( empty( trim( $maker ) ) ) ) {
+            $dateParts = explode( "-", $this->_settings->comp_date );
             $year = $dateParts[0];
             $black = imagecolorallocate( $thumb_img, 0, 0, 0 );
             $white = imagecolorallocate( $thumb_img, 255, 255, 255 );
             $font = 5;
-            $text = "Copyright " . substr( $comp_date, 0, 4 ) . " $maker";
+            $text = "Copyright " . substr( $this->_settings->comp_date, 0, 4 ) . " $maker";
             $width = imagesx( $thumb_img );
             $height = imagesy( $thumb_img );
             $textLength = imagefontwidth( $font ) * strlen( $text );
@@ -202,6 +202,9 @@ class AVH_RPS_Core
         }
         // Write the downsized image back to disk
         imagejpeg( $thumb_img, $thumb_name, $quality );
+        
+        // Free up memory
+        imagedestroy($thumb_img);
     }
 
     function rpsGetThumbnailUrl( $row, $size )
@@ -286,6 +289,24 @@ class AVH_RPS_Core
         }
         return $ret;
     
+    }
+
+    public function avh_ShortHandToBytes( $size_str )
+    {
+        
+        switch ( substr( $size_str, -1 ) ) {
+            case 'M':
+            case 'm':
+                return (int) $size_str * 1048576;
+            case 'K':
+            case 'k':
+                return (int) $size_str * 1024;
+            case 'G':
+            case 'g':
+                return (int) $size_str * 1073741824;
+            default:
+                return $size_str;
+        }
     }
 
     /*********************************
