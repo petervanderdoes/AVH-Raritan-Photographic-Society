@@ -1019,7 +1019,7 @@ class AVH_RPS_Public
             $close_date = $this->_rpsdb->getCompetitionCloseDate();
             if ( !empty( $close_date ) ) {
                 $close_epoch = strtotime( $close_date );
-                $time_to_close = $close_epoch - mktime();
+                $time_to_close = $close_epoch - time();
                 if ( $time_to_close >= 0 && $time_to_close <= 604800 ) {
                     echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date( "F j, Y", $close_epoch ) . " at " . date( "g:ia (T)", $close_epoch ) . "</td></tr>\n";
                 }
