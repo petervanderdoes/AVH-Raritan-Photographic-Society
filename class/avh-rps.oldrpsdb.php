@@ -180,7 +180,7 @@ class AVH_RPS_OldRpsDb
 		c.Competition_Date >= %s AND
 		c.Competition_Date < %s AND
 		e.Member_ID = %s
-		ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, get_current_user_id() );
+		ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, $this->_user_id );
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         
         return $_return;
@@ -205,7 +205,6 @@ class AVH_RPS_OldRpsDb
 				AND c.Closed = 'N'";
         $_sql .= $and_medium_subset;
         $_sql .= " GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium";
-        $user_id = get_current_user_id();
         $sql = $this->_rpsdb->prepare( $_sql, $_class1, $_class2, '%' . $subset . '%' );
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         return $_return;
@@ -253,7 +252,7 @@ class AVH_RPS_OldRpsDb
     {
         $sql = $this->_rpsdb->prepare( "SELECT count(ID) FROM entries 
         	WHERE Competition_ID = %s 
-        		AND Member_ID = %s", $id, get_current_user_id() );
+        		AND Member_ID = %s", $id, $this->_user_id );
         $_return = $this->_rpsdb->get_var( $sql );
         return $_return;
     }
@@ -264,7 +263,7 @@ class AVH_RPS_OldRpsDb
                     FROM entries e, competitions c
                     WHERE e.Competition_ID = c.ID AND
                     c.Competition_Date = DATE(%s) AND
-                    e.Member_ID = %s", $this->_settings->comp_date, get_current_user_id() );
+                    e.Member_ID = %s", $this->_settings->comp_date, $this->_user_id );
         $_return = $this->_rpsdb->get_var( $sql );
         return $_return;
     }
@@ -275,7 +274,7 @@ class AVH_RPS_OldRpsDb
 			FROM competitions, entries
 			WHERE competitions.ID = entries.Competition_ID
 				AND	entries.Member_ID=%s 
-				AND competitions.Competition_Date = DATE %s ", get_current_user_id(), $this->_settings->comp_date );
+				AND competitions.Competition_Date = DATE %s ", $this->_user_id, $this->_settings->comp_date );
         $_return = $this->_rpsdb->get_var( $sql );
         return $_return;
     }
@@ -288,7 +287,7 @@ class AVH_RPS_OldRpsDb
 				AND entries.Member_ID = %s
 				AND competitions.Competition_Date = DATE %s
 				AND competitions.Classification = %s
-				AND competitions.Medium = %s", get_current_user_id(), $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium );
+				AND competitions.Medium = %s", $this->_user_id, $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium );
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         return $_return;
     }
@@ -331,7 +330,7 @@ class AVH_RPS_OldRpsDb
         	FROM entries 
         	WHERE Competition_ID = %s 
         		AND Member_ID = %s 
-        		AND Title = %s", $id, get_current_user_id(), $title );
+        		AND Title = %s", $id, $this->_user_id, $title );
         $_return = $this->_rpsdb->get_var( $sql );
         if ( $_return > 0 ) {
             $_return = true;
@@ -342,7 +341,7 @@ class AVH_RPS_OldRpsDb
     }
 
     public function insertEntry($data){
-        $data['Member_ID']=get_current_user_id();
+        $data['Member_ID']=$this->_user_id;
         $data['Date_Created']=current_time( 'mysql' );
         $_return = $this->_rpsdb->insert( 'entries', $data );
         return $_return;
