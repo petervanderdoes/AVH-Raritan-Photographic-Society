@@ -514,7 +514,7 @@ class AVH_RPS_Public
             $prev_date = "";
             $prev_medium = "";
             foreach ( $scores as $recs ) {
-                $dateParts = split( " ", $recs['Competition_Date'] );
+                $dateParts = explode( " ", $recs['Competition_Date'] );
                 $dateParts[0] = strftime( '%d-%b-%Y', strtotime( $dateParts[0] ) );
                 $comp_date = $dateParts[0];
                 $medium = $recs['Medium'];
