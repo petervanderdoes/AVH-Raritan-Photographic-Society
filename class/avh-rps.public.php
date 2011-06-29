@@ -53,6 +53,7 @@ class AVH_RPS_Public
         $this->_rpsdb = $this->_classes->load_class( 'OldRpsDb', 'plugin', true );
         $this->_core_options = $this->_core->getOptions();
         
+        add_action('wp_loaded', array(&$this,'actionInit_InitRunTime'));
         // Public actions and filters
         add_action( 'template_redirect', array( &$this, 'actionTemplate_Redirect_RPSWindowsClient' ) );
         
@@ -72,6 +73,10 @@ class AVH_RPS_Public
     
     }
 
+    public function actionInit_InitRunTime() {
+        $this->_rpsdb->setUser_id(get_current_user_id());
+        
+    }
     function actionTemplate_Redirect_RPSWindowsClient()
     {
         if ( array_key_exists( 'rpswinclient', $_REQUEST ) ) {

@@ -18,7 +18,16 @@ class AVH_RPS_OldRpsDb
     private $_classes;
     private $_rpsdb;
 
+    private $_user_id;
     /**
+     * @param field_type $_user_id
+     */
+    public function setUser_id($_user_id)
+    {
+        $this->_user_id = $_user_id;
+    }
+
+	/**
      * PHP5 constructor
      *
      */
@@ -186,17 +195,18 @@ class AVH_RPS_OldRpsDb
         } else {
             $and_medium_subset = '';
         }
+        $user = get_userdata($this->_user_id);
+        $_class1=$user->rps_class_bw;
+        $_class2=$user->rps_class_color;
         // Select the list of open competitions that match this member's classification(s)
         $_sql = "SELECT c.Competition_Date, c.Classification, c.Medium, c.Theme, c.Closed
-			FROM competitions c, member_classifications mc 
-			WHERE c.Classification = mc.Classification and
-			      c.Medium = mc.Medium and
-				  mc.Member_ID = %s and
-				  c.Closed = 'N'";
+			FROM competitions c 
+			WHERE c.Classification IN  (%s,%s)
+				AND c.Closed = 'N'";
         $_sql .= $and_medium_subset;
-        $_sql .= " ORDER BY c.Competition_Date, c.Medium";
+        $_sql .= " GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium";
         $user_id = get_current_user_id();
-        $sql = $this->_rpsdb->prepare( $_sql, $user_id, '%' . $subset . '%' );
+        $sql = $this->_rpsdb->prepare( $_sql, $_class1, $_class2, '%' . $subset . '%' );
         $_return = $this->_rpsdb->get_results( $sql, ARRAY_A );
         return $_return;
     
