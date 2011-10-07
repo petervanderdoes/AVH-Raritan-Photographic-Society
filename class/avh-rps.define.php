@@ -18,4 +18,5 @@ final class AVH_RPS_Define
     // Menu Slugs for Admin menu
     const MENU_SLUG = 'avh-rps-competition';
     const MENU_SLUG_OVERVIEW = 'avh-rps-competition';
+    
 }
