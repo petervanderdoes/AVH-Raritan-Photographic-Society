@@ -435,7 +435,7 @@ class AVH_RPS_Public
             echo "<td align=\"center\" class=\"thumb_cell\">\n";
             echo "  <div class=\"thumb_canvas\">\n";
             echo "<div id='rps_colorbox_title'>$title<br />Award: $award</div>";
-            echo "    <a href=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 400 ) . "\" rel=\"".esc_attr($classification).esc_attr($medium)."\" title=\"($award) $title\">\n";
+            echo "    <a href=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 400 ) . "\" rel=\"".tag_escape($classification).tag_escape($medium)."\" title=\"($award) $title\">\n";
             echo "    <img class=\"thumb_img\" src=\"" . $this->_core->rpsGetThumbnailUrl( $recs, 75 ) . "\" /></a>\n";
             echo "  </div>\n</td>\n";
             $prev_comp = $comp;
