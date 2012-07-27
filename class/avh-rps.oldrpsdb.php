@@ -38,7 +38,7 @@ class AVH_RPS_OldRpsDb
         $this->_classes = AVH_RPS_Classes::getInstance();
         
         $this->_core = $this->_classes->load_class( 'Core', 'plugin', true );
-        $this->_rpsdb = new wpdb( 'avirtu2_rarit1' , '1Hallo@Done#', 'avirtu2_raritdata', 'localhost' );
+        $this->_rpsdb = new wpdb( 'avirtu2_rarit1', '1Hallo@Done#', 'avirtu2_raritdata', 'localhost' );
         $this->_rpsdb->show_errors();
     }
 

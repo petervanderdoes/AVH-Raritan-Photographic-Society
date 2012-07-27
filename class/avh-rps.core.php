@@ -89,9 +89,9 @@ class AVH_RPS_Core
         $this->_settings->storeSetting( 'club_season_end_month_num', 12 );
         // Database credentials
         $this->_settings->storeSetting( 'host', 'localhost' );
-        $this->_settings->storeSetting( 'dbname', 'rarit0_data' );
-        $this->_settings->storeSetting( 'uname', 'rarit0_data' );
-        $this->_settings->storeSetting( 'pw', 'rps' );
+        $this->_settings->storeSetting( 'dbname', 'avirtu2_raritdata' );
+        $this->_settings->storeSetting( 'uname', 'avirtu2_rarit0' );
+        $this->_settings->storeSetting( 'pw', '1Hallo@Done#' );
         $this->_settings->storeSetting( 'digital_chair_email', 'digitalchair@raritanphoto.com' );
         
         $this->_settings->storeSetting( 'siteurl', get_option( 'siteurl' ) );
