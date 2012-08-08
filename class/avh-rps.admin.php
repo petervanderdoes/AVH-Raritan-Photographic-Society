@@ -1,393 +1,729 @@
 <?php
+
 final class AVH_RPS_Admin
 {
-    /**
-     * Message management
-     *
-     */
-    private $_message = '';
-    private $_status = '';
-    /**
-     *
-     * @var AVH_RPS_Core
-     */
-    private $_core;
-    /**
-     * @var AVH_RPS_Settings
-     */
-    private $_settings;
-    /**
-     * @var AVH_RPS_Classes
-     */
-    private $_classes;
-    /**
-     * @var AVH_RPS_DB
-     */
-    private $_db;
-    private $_add_disabled_notice = false;
-    private $_hooks = array();
-    /**
-     * @var AVH_RPS_IpcacheList
-     */
-    private $_ip_cache_list;
+	/**
+	 * Message management
+	 */
+	private $_message = '';
+	private $_status = '';
+	/**
+	 *
+	 * @var AVH_RPS_Core
+	 */
+	private $_core;
+	/**
+	 *
+	 * @var AVH_RPS_Settings
+	 */
+	private $_settings;
+	/**
+	 *
+	 * @var AVH_RPS_Classes
+	 */
+	private $_classes;
+	/**
+	 *
+	 * @var AVH_RPS_OldRPSDb
+	 */
+	private $_rpsdb;
+	/**
+	 *
+	 * @var AVH_RPS_CompetitionList
+	 */
+	private $_rps_competition_list;
+	/**
+	 *
+	 * @var AVH_Form
+	 */
+	private $_form;
+	private $_add_disabled_notice = false;
+	private $_hooks = array ();
 
-    /**
-     * PHP5 Constructor
-     *
-     * @return unknown_type
-     */
-    public function __construct()
-    {
-        // The Settings Registery
-        $this->_settings = AVH_RPS_Settings::getInstance();
-        
-        // The Classes Registery
-        $this->_classes = AVH_RPS_Classes::getInstance();
-        
-        // Loads the CORE class
-        $this->_core = $this->_classes->load_class( 'Core', 'plugin', true );
-        
-        // Admin URL and Pagination
-        $this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
-        if ( isset( $_GET['pagination'] ) ) {
-            $this->_core->actual_page = (int) $_GET['pagination'];
-        }
-        
-        add_action( 'init', array( &$this, 'actionInit_Roles' ) );
-        add_action( 'init', array( &$this, 'actionInit_UserFields' ) );
-        
-        // Admin menu
-        add_action( 'admin_menu', array( &$this, 'actionAdminMenu' ) );
-        
-        return;
-    }
+	/**
+	 * PHP5 Constructor
+	 *
+	 * @return unknown_type
+	 */
+	public function __construct ()
+	{
+		// The Settings Registery
+		$this->_settings = AVH_RPS_Settings::getInstance();
 
-    /**
-     * Setup Roles
-     *
-     * @WordPress Action init
-     */
-    public function actionInit_Roles()
-    {
-        /* Get the administrator role. */
-        $role = & get_role( 'administrator' );
-        
-        /* If the administrator role exists, add required capabilities for the plugin. */
-        if ( !empty( $role ) ) {
-            
-            /* Role management capabilities. */
-            $role->add_cap( 'edit_competition classification' );
-        }
-    }
+		// The Classes Registery
+		$this->_classes = AVH_RPS_Classes::getInstance();
+		add_action('init', array ( $this, 'handleActionInit' ));
+	}
 
-    public function actionInit_UserFields()
-    {
-        add_action( 'edit_user_profile', array( &$this, 'actionUser_Profile' ) );
-        add_action( 'show_user_profile', array( &$this, 'actionUser_Profile' ) );
-        add_action( 'personal_options_update', array( &$this, 'actionProfile_Update_Save' ) );
-        add_action( 'edit_user_profile_update', array( &$this, 'actionProfile_Update_Save' ) );
-    }
+	public function handleActionInit ()
+	{
+		// Loads the CORE class
+		$this->_core = $this->_classes->load_class('Core', 'plugin', true);
+		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
 
-    /**
-     * Add the Tools and Options to the Management and Options page repectively
-     *
-     * @WordPress Action admin_menu
-     *
-     */
-    public function actionAdminMenu()
-    {
-        add_menu_page( 'AVH RPS', 'AVH RPS', '', AVH_RPS_Define::MENU_SLUG, array( &$this, 'menuOverview' ) );
-    }
+		// Admin URL and Pagination
+		$this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
+		if (isset($_GET['pagination'])) {
+			$this->_core->actual_page = (int) $_GET['pagination'];
+		}
 
-    /**
-     * Adds Settings next to the plugin actions
-     *
-     * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
-     * @param array $links
-     * @return array
-     *
-     * @since 1.0
-     */
-    public function filterPluginActions( $links )
-    {
-        $folder = AVH_Common::getBaseDirectory( $this->_settings->plugin_basename );
-        $settings_link = '<a href="admin.php?page=' . $folder . '">' . __( 'Settings', 'avh-fdas' ) . '</a>';
-        array_unshift( $links, $settings_link ); // before other links
-        return $links;
-    }
+		$this->actionInit_Roles();
+		$this->actionInit_UserFields();
 
-    /**
-     * Used when we set our own screen options.
-     *
-     * The filter needs to be set during construct otherwise it's not regonized.
-     *
-     * @param unknown_type $default
-     * @param unknown_type $option
-     * @param unknown_type $value
-     */
-    public function filterSetScreenOption( $error_value, $option, $value )
-    {
-        $return = $error_value;
-        switch ( $option ) {
-            case 'ipcachelog_per_page':
-                $value = (int) $value;
-                $return = $value;
-                if ( $value < 1 || $value > 999 ) {
-                    $return = $error_value;
-                }
-                break;
-            default:
-                $return = $error_value;
-                break;
-        }
-        return $return;
-    }
+		// Admin menu
+		add_action('admin_menu', array ( $this, 'actionAdminMenu' ));
 
-    public function actionUser_Profile( $user_id )
-    {
-        $userID = $user_id->ID;
-        $_rps_class_bw = get_user_meta( $userID, 'rps_class_bw', true );
-        $_rps_class_color = get_user_meta( $userID, 'rps_class_color', true );
-        $_rps_class_print_bw = get_user_meta( $userID, 'rps_class_print_bw', true );
-        $_rps_class_print_color = get_user_meta( $userID, 'rps_class_print_color', true );
-        
-        $_classification = array( 'beginner'=>'Beginner', 'advanced'=>'Advanced', 'salon'=>'Salon' );
-        echo '<h3 id="rps">Competition Classification</h3>';
-        echo '<table class="form-table">';
-        
-        echo '<tr>';
-        echo '<th>Classification Digital B&W</th>';
-        echo '<td>';
-        if ( current_user_can( 'edit_competition classification' ) ) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_bw" id="rps_class_bw">';
-            foreach ( $_classification as $key => $value ) {
-                if ( $key === $_rps_class_bw ) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_bw];
-        }
-        echo '</td>';
-        echo '</tr>';
-        
-        echo '<tr>';
-        echo '<th>Classification Digital Color</th>';
-        echo '<td>';
-        if ( current_user_can( 'edit_competition classification' ) ) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_color" id="rps_class_color">';
-            foreach ( $_classification as $key => $value ) {
-                if ( $key === $_rps_class_color ) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_color];
-        }
-        echo '</td>';
-        echo '</tr>';
-        
-        echo '<tr>';
-        echo '<th>Classification Print B&W</th>';
-        echo '<td>';
-        if ( current_user_can( 'edit_competition classification' ) ) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_print_bw" id="rps_class_print_bw">';
-            foreach ( $_classification as $key => $value ) {
-                if ( $key === $_rps_class_print_bw ) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_print_bw];
-        }
-        echo '</td>';
-        echo '</tr>';
-        
-        echo '<tr>';
-        echo '<th>Classification Print Color</th>';
-        echo '<td>';
-        if ( current_user_can( 'edit_competition classification' ) ) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_print_color" id="rps_class_print_color">';
-            foreach ( $_classification as $key => $value ) {
-                if ( $key === $_rps_class_print_color ) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr( $key ) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr( $key ) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_print_color];
-        }
-        echo '</td>';
-        echo '</tr>';
-        
-        echo '</table>';
-    }
+		return;
+	}
 
-    public function actionProfile_Update_Save( $user_id )
-    {
-        $userID = $user_id;
-        if ( isset( $_POST['rps_class_bw'] ) ) {
-            $_rps_class_bw = $_POST["rps_class_bw"];
-        } else {
-            $_rps_class_bw = get_user_meta( $userID, 'rps_class_bw', true );
-        }
-        if ( isset( $_POST['rps_class_color'] ) ) {
-            $_rps_class_color = $_POST['rps_class_color'];
-        } else {
-            $_rps_class_color = get_user_meta( $userID, 'rps_class_color', true );
-        }
-        if ( isset( $_POST['rps_class_print_bw'] ) ) {
-            $_rps_class_print_bw = $_POST["rps_class_print_bw"];
-        } else {
-            $_rps_class_print_bw = get_user_meta( $userID, 'rps_class_print_bw', true );
-        }
-        if ( isset( $_POST['rps_class_print_color'] ) ) {
-            $_rps_class_print_color = $_POST['rps_class_print_color'];
-        } else {
-            $_rps_class_print_color = get_user_meta( $userID, 'rps_class_print_color', true );
-        }
-        
-        update_user_meta( $userID, "rps_class_bw", $_rps_class_bw );
-        update_user_meta( $userID, "rps_class_color", $_rps_class_color );
-        update_user_meta( $userID, "rps_class_print_bw", $_rps_class_print_bw );
-        update_user_meta( $userID, "rps_class_print_color", $_rps_class_print_color );
-    
-    }
+	/**
+	 * Setup Roles
+	 *
+	 * @WordPress Action init
+	 */
+	public function actionInit_Roles ()
+	{
+		/* Get the administrator role. */
+		$role = get_role('administrator');
 
-    ############## Admin WP Helper ##############
-    /**
-     * Display plugin Copyright
-     *
-     */
-    private function _printAdminFooter()
-    {
-        echo '<div class="clear">';
-        echo '<p class="footer_avhfdas">';
-        printf( '&copy; Copyright 2010 <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH First Defense Against Spam version %s', AVH_RPS_Define::PLUGIN_VERSION );
-        echo '</p>';
-    }
+		/* If the administrator role exists, add required capabilities for the plugin. */
+		if (! empty($role)) {
 
-    /**
-     * Display WP alert
-     *
-     */
-    private function _displayMessage()
-    {
-        if ( $this->_message != '' ) {
-            $message = $this->_message;
-            $status = $this->_status;
-            $this->_message = $this->_status = ''; // Reset
-        }
-        if ( isset( $message ) ) {
-            $status = ( $status != '' ) ? $status : 'updated fade';
-            echo '<div id="message"	class="' . $status . '">';
-            echo '<p><strong>' . $message . '</strong></p></div>';
-        }
-    }
+			/* Role management capabilities. */
+			$role->add_cap('rps_edit_competition_classification');
+			$role->add_cap('rps_edit_competitions');
+		}
+	}
 
-    /**
-     * Displays the icon needed. Using this instead of core in case we ever want to show our own icons
-     * @param $icon strings
-     * @return string
-     */
-    private function _displayIcon( $icon )
-    {
-        return ( '<div class="icon32" id="icon-' . $icon . '"><br/></div>' );
-    }
+	public function actionInit_UserFields ()
+	{
+		add_action('edit_user_profile', array ( $this, 'actionUser_Profile' ));
+		add_action('show_user_profile', array ( $this, 'actionUser_Profile' ));
+		add_action('personal_options_update', array ( $this, 'actionProfile_Update_Save' ));
+		add_action('edit_user_profile_update', array ( $this, 'actionProfile_Update_Save' ));
+	}
 
-    /**
-     * Ouput formatted options
-     *
-     * @param array $option_data
-     * @return string
-     */
-    private function _printOptions( $option_data, $option_actual )
-    {
-        // Generate output
-        $output = '';
-        $output .= "\n" . '<table class="form-table avhfdas-options">' . "\n";
-        foreach ( $option_data as $option ) {
-            $section = substr( $option[0], strpos( $option[0], '[' ) + 1 );
-            $section = substr( $section, 0, strpos( $section, '][' ) );
-            $option_key = rtrim( $option[0], ']' );
-            $option_key = substr( $option_key, strpos( $option_key, '][' ) + 2 );
-            // Helper
-            if ( $option[2] == 'helper' ) {
-                $output .= '<tr style="vertical-align: top;"><td class="helper" colspan="2">' . $option[4] . '</td></tr>' . "\n";
-                continue;
-            }
-            switch ( $option[2] ) {
-                case 'checkbox':
-                    $input_type = '<input type="checkbox" id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr( $option[3] ) . '" ' . checked( '1', $option_actual[$section][$option_key], false ) . ' />' . "\n";
-                    $explanation = $option[4];
-                    break;
-                case 'dropdown':
-                    $selvalue = explode( '/', $option[3] );
-                    $seltext = explode( '/', $option[4] );
-                    $seldata = '';
-                    foreach ( (array) $selvalue as $key => $sel ) {
-                        $seldata .= '<option value="' . $sel . '" ' . selected( $sel, $option_actual[$section][$option_key], false ) . ' >' . ucfirst( $seltext[$key] ) . '</option>' . "\n";
-                    }
-                    $input_type = '<select id="' . $option[0] . '" name="' . $option[0] . '">' . $seldata . '</select>' . "\n";
-                    $explanation = $option[5];
-                    break;
-                case 'text-color':
-                    $input_type = '<input type="text" ' . ( ( $option[3] > 50 ) ? ' style="width: 95%" ' : '' ) . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr( stripcslashes( $option_actual[$section][$option_key] ) ) . '" size="' . $option[3] . '" /><div class="box_color ' . $option[0] . '"></div>' . "\n";
-                    $explanation = $option[4];
-                    break;
-                case 'textarea':
-                    $input_type = '<textarea rows="' . $option[5] . '" ' . ( ( $option[3] > 50 ) ? ' style="width: 95%" ' : '' ) . 'id="' . $option[0] . '" name="' . $option[0] . '" size="' . $option[3] . '" />' . esc_attr( stripcslashes( $option_actual[$section][$option_key] ) ) . '</textarea>';
-                    $explanation = $option[4];
-                    break;
-                case 'text':
-                default:
-                    $input_type = '<input type="text" ' . ( ( $option[3] > 50 ) ? ' style="width: 95%" ' : '' ) . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr( stripcslashes( $option_actual[$section][$option_key] ) ) . '" size="' . $option[3] . '" />' . "\n";
-                    $explanation = $option[4];
-                    break;
-            }
-            // Additional Information
-            $extra = '';
-            if ( $explanation ) {
-                $extra = '<br /><span class="description">' . __( $explanation ) . '</span>' . "\n";
-            }
-            // Output
-            $output .= '<tr style="vertical-align: top;"><th align="left" scope="row"><label for="' . $option[0] . '">' . __( $option[1] ) . '</label></th><td>' . $input_type . '	' . $extra . '</td></tr>' . "\n";
-        }
-        $output .= '</table>' . "\n";
-        return $output;
-    }
+	/**
+	 * Add the Tools and Options to the Management and Options page repectively
+	 *
+	 * @WordPress Action admin_menu
+	 */
+	public function actionAdminMenu ()
+	{
+		wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array ( 'wp-admin' ), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
+		wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array ( 'wp-admin' ), '1.8.22', 'screen');
 
-    /**
-     * Display error message at bottom of comments.
-     *
-     * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
-     */
-    private function _comment_footer_die( $msg )
-    {
-        echo "<div class='wrap'><p>$msg</p></div>";
-        die();
-    }
+		add_menu_page('RPS Competitions', 'RPS Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, array ( $this, 'menuCompetitionList' ));
+		$this->_hooks['avhrps_menu_competition_list'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, array ( $this, 'menuCompetitionList' ));
+		$this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array ( $this, 'menuCompetitionAdd' ));
+
+		add_action('load-' . $this->_hooks['avhrps_menu_competition_list'], array ( $this, 'actionLoadPagehookCompetitionList' ));
+		add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array ( $this, 'actionLoadPagehookCompetitionAdd' ));
+	}
+
+	public function actionLoadPagehookCompetitionList ()
+	{
+		global $current_screen;
+
+		$this->_rps_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+		add_filter('screen_layout_columns', array ( $this, 'filterScreenLayoutColumns' ), 10, 2);
+		// WordPress core Styles and Scripts
+		wp_enqueue_script('common');
+		wp_enqueue_script('wp-lists');
+		wp_enqueue_script('postbox');
+		wp_enqueue_style('css/dashboard');
+		// Plugin Style and Scripts
+		// wp_enqueue_script('avhrps-competition-js');
+
+		wp_enqueue_style('avhrps-admin-css');
+
+		// add_screen_option('per_page', array ( 'label' => _x('IP\'s', 'ip\'s per page (screen options)'), 'default' => 20, 'option' => 'ipcachelog_per_page' ));
+		// add_contextual_help($current_screen, '<p>' . __('You can manage IP\'s added to the IP cache Log. This screen is customizable in the same ways as other management screens, and you can act on IP\'s using the on-hover action links or the Bulk Actions.') . '</p>');
+	}
+
+	public function menuCompetitionList ()
+	{
+		global $screen_layout_columns;
+		// if (! empty($this->_rps_competition_list->messages)) {
+		// echo '<div id="moderated" class="updated"><p>' . implode("<br/>\n", $this->_rps_competition_list->messages) . '</p></div>';
+		// }
+		// $_SERVER['REQUEST_URI'] = remove_query_arg(array ( 'error', 'deleted', '_error_nonce' ), $_SERVER['REQUEST_URI']);
+
+		$pagenum = $this->_rps_competition_list->get_pagenum();
+		$doaction = $this->_rps_competition_list->current_action();
+		if ($doaction) {
+			check_admin_referer('bulk-competition_list');
+		} elseif (! empty($_GET['_wp_http_referer'])) {
+			wp_redirect(remove_query_arg(array ( '_wp_http_referer', '_wpnonce' ), stripslashes($_SERVER['REQUEST_URI'])));
+			exit();
+		}
+		$this->_rps_competition_list->prepare_items();
+		$total_pages = $this->_rps_competition_list->get_pagination_arg('total_pages');
+		if ($pagenum > $total_pages && $total_pages > 0) {
+			wp_redirect(add_query_arg('paged', $total_pages));
+			exit();
+		}
+
+		echo '<div class="wrap avhrps-wrap">';
+		echo $this->_displayIcon('index');
+		echo '<h2>RPS Competition: ' . __('Competitions', 'avh-rps');
+
+		if (isset($_REQUEST['s']) && $_REQUEST['s']) {
+			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');
+		}
+		echo '</h2>';
+
+		$this->_rps_competition_list->views();
+		echo '<form id="rps-competition-form" action="" method="get">';
+		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST . '"';
+		// echo '<input type="hidden" name="ip_status" value="' . esc_attr($ip_status) . '" />';
+		echo '<input type="hidden" name="pagegen_timestamp" value="' . esc_attr(current_time('mysql', 1)) . '" />';
+
+		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_rps_competition_list->get_pagination_arg('total_items')) . '" />';
+		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_rps_competition_list->get_pagination_arg('per_page')) . '" />';
+		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_rps_competition_list->get_pagination_arg('page')) . '" />';
+
+		if (isset($_REQUEST['paged'])) {
+			echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
+		}
+		//$this->_rps_competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
+		$this->_rps_competition_list->display();
+		echo '</form>';
+
+		echo '<div id="ajax-response"></div>';
+		$this->_printAdminFooter();
+		echo '</div>';
+	}
+
+	public function actionLoadPagehookCompetitionAdd ()
+	{
+		global $current_screen;
+
+		$this->_rps_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+		add_filter('screen_layout_columns', array ( $this, 'filterScreenLayoutColumns' ), 10, 2);
+		// WordPress core Styles and Scripts
+		wp_enqueue_script('common');
+		wp_enqueue_script('jquery-ui-datepicker');
+		// Plugin Style and Scripts
+		// wp_enqueue_script('avhrps-competition-js');
+
+		wp_enqueue_style('avhrps-admin-css');
+		wp_enqueue_style('avhrps-jquery-css');
+	}
+
+	public function menuCompetitionAdd ()
+	{
+		$option_name = 'competition_add';
+		// @format_off
+		$_default_options = array (
+				'date' => '',
+				'theme' => '',
+				'medium_bwd' => TRUE,
+				'medium_cd' => TRUE,
+				'medium_bwp' => TRUE,
+				'medium_cp' => TRUE,
+				'class_b' => TRUE,
+				'class_a' => TRUE,
+				'class_s' => TRUE,
+				'max_entries' => '2',
+				'judges' => '1',
+				'special_event' => FALSE
+			);
+		// format_on
+		$_form_options=$_default_options;
+		if (isset($_POST['action']) && ('add' == $_POST['action'])) {
+			check_admin_referer($option_name,'_wpnonce_'.$option_name);
+			$_new_options = $_default_options;
+			$_form_options = $_POST[$option_name];
+
+			$medium_array=array();
+			$class_array=array();
+			$_error_msg=array();
+			foreach ($_default_options as $option_key => $option_value) {
+
+				// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to FALSE.
+				$newval = (isset($_form_options[$option_key]) ? stripslashes($_form_options[$option_key]) : FALSE);
+				$current_value = $_default_options[$option_key];
+				switch ($option_key) {
+					case 'date':
+						// Validate
+						break;
+
+					case 'theme':
+						// Validate
+						break;
+
+				}
+				if (substr($option_key, 0,7) == 'medium_') {
+					$_new_options[$option_key]=(bool) $newval;
+					if ( $_new_options[$option_key]) {
+						$medium_array[]= $option_key;
+						continue;
+					}
+				}
+				if (substr($option_key, 0,6) == 'class_') {
+					$_new_options[$option_key]=(bool) $newval;
+					if ( $_new_options[$option_key]) {
+						$class_array[]= $option_key;
+						continue;
+					}
+				}
+				$_new_options[$option_key]=$newval;
+			}
+
+			if (empty($medium_array)) {
+				$_error_msg[]='No medium selected. At least one medium needs to be selected';
+			}
+
+			if (empty($class_array)) {
+				$_error_msg[]='No classification selected. At least one classification needs to be selected';
+			}
+
+			if (empty($_error_msg)) {
+				$this->_message = 'Competition Added';
+				$this->_status = 'updated';
+
+				// @format_off
+				// @TODO: This is needed because of the old program, someday it needs to be cleaned up.
+				$medium_convert = array(
+							'medium_bwd'	=> 'B&W Digital',
+							'medium_cd'		=> 'Color Digital',
+							'medium_bwp'	=> 'B&W Print',
+							'medium_cp'		=> 'Color Print'
+					);
+
+				$classification_convert = array (
+						'class_b' => 'Beginner',
+						'class_a' => 'Advanced',
+						'class_s' => 'Salon'
+				);
+				// @format_on
+				$data['Competition_Date'] = $_new_options['date'];
+				$data['Theme'] = $_new_options['theme'];
+				$data['Max_Entries'] = $_new_options['max_entries'];
+				$data['Num_Judges'] = $_new_options['judges'];
+				$data['Special_Event'] = ($_new_options['special_event'] ? 'Y' : 'N');
+				foreach ($medium_array as $medium) {
+					$data['Medium'] = $medium_convert[$medium];
+					foreach ($class_array as $classification) {
+						$data['Classification'] = $classification_convert[$classification];
+						$competition_ID = $this->_rpsdb->insertCompetition($data);
+						if (is_wp_error($competition_ID)) {
+							wp_die($competition_ID);
+						}
+					}
+				}
+			} else {
+				$this->_message = $_error_msg;
+				$this->_status = 'error';
+			}
+			$this->_displayMessage();
+			$_form_options = $_new_options;
+		}
+
+		$this->_form = $this->_classes->load_class('Form', 'system', false);
+
+		$this->admin_header('Add Competition');
+		$this->_form->setOption_name($option_name);
+
+		echo $this->_form->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array ( 'method' => 'post', 'id' => 'rps-competitionadd' ));
+		echo $this->_form->open_table();
+		echo $this->_form->text('Date', '', 'date', $_form_options['date']);
+		echo $this->_form->text('Theme', '', 'theme', $_form_options['theme'], array ( 'maxlength' => '32' ));
+
+		// @format_off
+		$_medium = array ( 'medium_bwd' => array ( 'text' => 'B&W Digital', 'checked' => $_form_options['medium_bwd'] ),
+							'medium_cd' => array ( 'text' => 'Color Digital', 'checked' => $_form_options['medium_cd'] ),
+							'medium_bwp' => array ( 'text' => 'B&W Print', 'checked' => $_form_options['medium_bwp'] ),
+							'medium_cp' => array ( 'text' => 'Color Digital', 'checked' => $_form_options['medium_cp'] )
+						);
+		// @format_on
+		echo $this->_form->checkboxes('Medium', '', key($_medium), $_medium);
+		unset($_medium);
+
+		// @format_off
+		$_classification = array ( 'class_b' => array ( 'text' => 'Beginner', 'checked' => $_form_options['class_b'] ),
+									'class_a' => array ( 'text' => 'Advanced', 'checked' => $_form_options['class_a'] ),
+									'class_s' => array ( 'text' => 'Salon', 'checked' => $_form_options['class_s'] )
+							);
+		// @format_on
+		echo $this->_form->checkboxes('Classification', '', key($_classification), $_classification);
+		unset($_classification);
+
+		$_max_entries = array ( '1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10' );
+		echo $this->_form->select('Max Entries', '', 'max_entries', $_max_entries, $_form_options['max_entries']);
+		unset($_max_entries);
+
+		$_judges = array ( '1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5' );
+		echo $this->_form->select('No. Judges', '', 'judges', $_judges, $_form_options['judges']);
+		unset($_judges);
+
+		$_special_event = array ( 'special_event' => array ( 'text' => '', 'checked' => $_form_options['special_event'] ) );
+		echo $this->_form->checkboxes('Special Event', '', key($_special_event), $_special_event);
+		unset($_special_event);
+
+		echo $this->_form->close_table();
+		echo $this->_form->submit('submit', 'Add Competition', array ( 'class' => 'button-primary' ));
+		echo $this->_form->settings_fields('add', $option_name);
+		echo $this->_form->close();
+		echo '<script type="text/javascript">' . "\n";
+		echo 'jQuery(function($) {' . "\n";
+		echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
+		echo '});', "\n";
+		echo "</script>";
+		$this->admin_footer();
+	}
+
+	/**
+	 * Adds Settings next to the plugin actions
+	 *
+	 * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
+	 *
+	 * @param array $links
+	 * @return array
+	 *
+	 * @since 1.0
+	 */
+	public function filterPluginActions ($links)
+	{
+		$folder = AVH_Common::getBaseDirectory($this->_settings->plugin_basename);
+		$settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
+		array_unshift($links, $settings_link); // before other links
+		return $links;
+	}
+
+	/**
+	 * Used when we set our own screen options.
+	 *
+	 * The filter needs to be set during construct otherwise it's not regonized.
+	 *
+	 * @param unknown_type $default
+	 * @param unknown_type $option
+	 * @param unknown_type $value
+	 */
+	public function filterSetScreenOption ($error_value, $option, $value)
+	{
+		$return = $error_value;
+		switch ($option) {
+			case 'competitions_per_page':
+				$value = (int) $value;
+				$return = $value;
+				if ($value < 1 || $value > 999) {
+					$return = $error_value;
+				}
+				break;
+			default:
+				$return = $error_value;
+				break;
+		}
+		return $return;
+	}
+
+	/**
+	 * Sets the amount of columns wanted for a particuler screen
+	 *
+	 * @WordPress filter screen_meta_screen
+	 *
+	 * @param $screen
+	 * @return strings
+	 */
+	public function filterScreenLayoutColumns ($columns, $screen)
+	{
+		switch ($screen) {
+			// case $this->_hooks['avhrps_menu_competition_list']:
+			// $columns[$this->_hooks['avhfdas_menu_overview']] = 1;
+			// break;
+			// case $this->_hooks['avhrps_menu_competition_add']:
+			// $columns[$this->_hooks['avhfdas_menu_general']] = 1;
+			// break;
+		}
+		return $columns;
+	}
+
+	public function actionUser_Profile ($user_id)
+	{
+		$userID = $user_id->ID;
+		$_rps_class_bw = get_user_meta($userID, 'rps_class_bw', true);
+		$_rps_class_color = get_user_meta($userID, 'rps_class_color', true);
+		$_rps_class_print_bw = get_user_meta($userID, 'rps_class_print_bw', true);
+		$_rps_class_print_color = get_user_meta($userID, 'rps_class_print_color', true);
+
+		$_classification = array ( 'beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon' );
+		echo '<h3 id="rps">Competition Classification</h3>';
+		echo '<table class="form-table">';
+
+		echo '<tr>';
+		echo '<th>Classification Digital B&W</th>';
+		echo '<td>';
+		if (current_user_can('rps_edit_competition_classification')) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_bw" id="rps_class_bw">';
+			foreach ($_classification as $key => $value) {
+				if ($key === $_rps_class_bw) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
+				} else {
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
+				}
+			}
+			echo $p . $r;
+			echo '</select>';
+		} else {
+			echo $_classification[$_rps_class_bw];
+		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '<tr>';
+		echo '<th>Classification Digital Color</th>';
+		echo '<td>';
+		if (current_user_can('rps_edit_competition_classification')) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_color" id="rps_class_color">';
+			foreach ($_classification as $key => $value) {
+				if ($key === $_rps_class_color) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
+				} else {
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
+				}
+			}
+			echo $p . $r;
+			echo '</select>';
+		} else {
+			echo $_classification[$_rps_class_color];
+		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '<tr>';
+		echo '<th>Classification Print B&W</th>';
+		echo '<td>';
+		if (current_user_can('rps_edit_competition_classification')) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_print_bw" id="rps_class_print_bw">';
+			foreach ($_classification as $key => $value) {
+				if ($key === $_rps_class_print_bw) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
+				} else {
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
+				}
+			}
+			echo $p . $r;
+			echo '</select>';
+		} else {
+			echo $_classification[$_rps_class_print_bw];
+		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '<tr>';
+		echo '<th>Classification Print Color</th>';
+		echo '<td>';
+		if (current_user_can('rps_edit_competition_classification')) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_print_color" id="rps_class_print_color">';
+			foreach ($_classification as $key => $value) {
+				if ($key === $_rps_class_print_color) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
+				} else {
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
+				}
+			}
+			echo $p . $r;
+			echo '</select>';
+		} else {
+			echo $_classification[$_rps_class_print_color];
+		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '</table>';
+	}
+
+	public function actionProfile_Update_Save ($user_id)
+	{
+		$userID = $user_id;
+		if (isset($_POST['rps_class_bw'])) {
+			$_rps_class_bw = $_POST["rps_class_bw"];
+		} else {
+			$_rps_class_bw = get_user_meta($userID, 'rps_class_bw', true);
+		}
+		if (isset($_POST['rps_class_color'])) {
+			$_rps_class_color = $_POST['rps_class_color'];
+		} else {
+			$_rps_class_color = get_user_meta($userID, 'rps_class_color', true);
+		}
+		if (isset($_POST['rps_class_print_bw'])) {
+			$_rps_class_print_bw = $_POST["rps_class_print_bw"];
+		} else {
+			$_rps_class_print_bw = get_user_meta($userID, 'rps_class_print_bw', true);
+		}
+		if (isset($_POST['rps_class_print_color'])) {
+			$_rps_class_print_color = $_POST['rps_class_print_color'];
+		} else {
+			$_rps_class_print_color = get_user_meta($userID, 'rps_class_print_color', true);
+		}
+
+		update_user_meta($userID, "rps_class_bw", $_rps_class_bw);
+		update_user_meta($userID, "rps_class_color", $_rps_class_color);
+		update_user_meta($userID, "rps_class_print_bw", $_rps_class_print_bw);
+		update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
+	}
+
+	// ############ Admin WP Helper ##############
+
+	/**
+	 * Display plugin Copyright
+	 */
+	private function _printAdminFooter ()
+	{
+		echo '<div class="clear">';
+		echo '<p class="footer_avhfdas">';
+		printf('&copy; Copyright 2012 <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s', AVH_RPS_Define::PLUGIN_VERSION);
+		echo '</p>';
+	}
+
+	/**
+	 * Display WP alert
+	 */
+	private function _displayMessage ()
+	{
+		$message = '';
+		if (is_array($this->_message)) {
+			foreach ($this->_message as $key => $_msg) {
+				$message .= $_msg . "<br>";
+			}
+		} else {
+			$message = $this->_message;
+		}
+
+		if ($message != '') {
+			$status = $this->_status;
+			$this->_message = $this->_status = ''; // Reset
+			$status = ($status != '') ? $status : 'updated fade';
+			echo '<div id="message"	class="' . $status . '">';
+			echo '<p><strong>' . $message . '</strong></p></div>';
+		}
+	}
+
+	/**
+	 * Displays the icon needed.
+	 * Using this instead of core in case we ever want to show our own icons
+	 *
+	 * @param $icon strings
+	 * @return string
+	 */
+	private function _displayIcon ($icon)
+	{
+		return ('<div class="icon32" id="icon-' . $icon . '"><br/></div>');
+	}
+
+	/**
+	 * Ouput formatted options
+	 *
+	 * @param array $option_data
+	 * @return string
+	 */
+	private function _printOptions ($option_data, $option_actual)
+	{
+		// Generate output
+		$output = '';
+		$output .= "\n" . '<table class="form-table avhfdas-options">' . "\n";
+		foreach ($option_data as $option) {
+			$section = substr($option[0], strpos($option[0], '[') + 1);
+			$section = substr($section, 0, strpos($section, ']['));
+			$option_key = rtrim($option[0], ']');
+			$option_key = substr($option_key, strpos($option_key, '][') + 2);
+			// Helper
+			if ($option[2] == 'helper') {
+				$output .= '<tr style="vertical-align: top;"><td class="helper" colspan="2">' . $option[4] . '</td></tr>' . "\n";
+				continue;
+			}
+			switch ($option[2]) {
+				case 'checkbox':
+					$input_type = '<input type="checkbox" id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr($option[3]) . '" ' . checked('1', $option_actual[$section][$option_key], false) . ' />' . "\n";
+					$explanation = $option[4];
+					break;
+				case 'dropdown':
+					$selvalue = explode('/', $option[3]);
+					$seltext = explode('/', $option[4]);
+					$seldata = '';
+					foreach ((array) $selvalue as $key => $sel) {
+						$seldata .= '<option value="' . $sel . '" ' . selected($sel, $option_actual[$section][$option_key], false) . ' >' . ucfirst($seltext[$key]) . '</option>' . "\n";
+					}
+					$input_type = '<select id="' . $option[0] . '" name="' . $option[0] . '">' . $seldata . '</select>' . "\n";
+					$explanation = $option[5];
+					break;
+				case 'text-color':
+					$input_type = '<input type="text" ' . (($option[3] > 50) ? ' style="width: 95%" ' : '') . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '" size="' . $option[3] . '" /><div class="box_color ' . $option[0] . '"></div>' . "\n";
+					$explanation = $option[4];
+					break;
+				case 'textarea':
+					$input_type = '<textarea rows="' . $option[5] . '" ' . (($option[3] > 50) ? ' style="width: 95%" ' : '') . 'id="' . $option[0] . '" name="' . $option[0] . '" size="' . $option[3] . '" />' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '</textarea>';
+					$explanation = $option[4];
+					break;
+				case 'text':
+				default:
+					$input_type = '<input type="text" ' . (($option[3] > 50) ? ' style="width: 95%" ' : '') . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '" size="' . $option[3] . '" />' . "\n";
+					$explanation = $option[4];
+					break;
+			}
+			// Additional Information
+			$extra = '';
+			if ($explanation) {
+				$extra = '<br /><span class="description">' . __($explanation) . '</span>' . "\n";
+			}
+			// Output
+			$output .= '<tr style="vertical-align: top;"><th align="left" scope="row"><label for="' . $option[0] . '">' . __($option[1]) . '</label></th><td>' . $input_type . '	' . $extra . '</td></tr>' . "\n";
+		}
+		$output .= '</table>' . "\n";
+		return $output;
+	}
+
+	/**
+	 * Display error message at bottom of comments.
+	 *
+	 * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
+	 */
+	private function _comment_footer_die ($msg)
+	{
+		echo "<div class='wrap'><p>$msg</p></div>";
+		die();
+	}
+
+	/**
+	 * Generates the header for admin pages
+	 *
+	 * @param string $title The title to show in the main heading.
+	 * @param bool $form Whether or not the form should be included.
+	 * @param string $option The long name of the option to use for the current page.
+	 * @param string $optionshort The short name of the option to use for the current page.
+	 * @param bool $contains_files Whether the form should allow for file uploads.
+	 */
+	function admin_header ($title)
+	{
+		echo '<div class="wrap">';
+		echo $this->_displayIcon('options-general');
+		echo '<h2 id="rps-title">' . $title . '</h2>';
+		echo '<div id="rps_content_top" class="postbox-container" style="width:100%;">';
+		echo '<div class="metabox-holder">';
+		echo '<div class="meta-box-sortables">';
+	}
+
+	/**
+	 * Generates the footer for admin pages
+	 *
+	 * @param bool $submit Whether or not a submit button should be shown.
+	 * @param text $text The text to be shown in the submit button.
+	 */
+	function admin_footer ()
+	{
+		echo '</div></div></div>';
+		// $this->admin_sidebar();
+		$this->_printAdminFooter();
+		echo '</div>';
+	}
 }

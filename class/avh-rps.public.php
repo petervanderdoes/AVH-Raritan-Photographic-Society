@@ -53,23 +53,23 @@ class AVH_RPS_Public
         $this->_rpsdb = $this->_classes->load_class( 'OldRpsDb', 'plugin', true );
         $this->_core_options = $this->_core->getOptions();
 
-        add_action('wp_loaded', array(&$this,'actionInit_InitRunTime'));
+        add_action('wp_loaded', array($this,'actionInit_InitRunTime'));
         // Public actions and filters
-        add_action( 'template_redirect', array( &$this, 'actionTemplate_Redirect_RPSWindowsClient' ) );
+        add_action( 'template_redirect', array( $this, 'actionTemplate_Redirect_RPSWindowsClient' ) );
 
-        add_shortcode( 'rps_monthly_winners', array( &$this, 'shortcodeRpsMonthlyWinners' ) );
-        add_shortcode( 'rps_scores_current_user', array( &$this, 'shortcodeRpsScoresCurrentUser' ) );
-        add_shortcode( 'rps_all_scores', array( &$this, 'shortcodeRpsAllScores' ) );
+        add_shortcode( 'rps_monthly_winners', array( $this, 'shortcodeRpsMonthlyWinners' ) );
+        add_shortcode( 'rps_scores_current_user', array( $this, 'shortcodeRpsScoresCurrentUser' ) );
+        add_shortcode( 'rps_all_scores', array( $this, 'shortcodeRpsAllScores' ) );
 
-        add_action( 'pre-header-my-print-entries', array( &$this, 'actionPreHeader_RpsMyEntries' ) );
-        add_action( 'pre-header-my-digital-entries', array( &$this, 'actionPreHeader_RpsMyEntries' ) );
-        add_shortcode( 'rps_my_entries', array( &$this, 'shortcodeRpsMyEntries' ) );
+        add_action( 'pre-header-my-print-entries', array( $this, 'actionPreHeader_RpsMyEntries' ) );
+        add_action( 'pre-header-my-digital-entries', array( $this, 'actionPreHeader_RpsMyEntries' ) );
+        add_shortcode( 'rps_my_entries', array( $this, 'shortcodeRpsMyEntries' ) );
 
-        add_action( 'pre-header-edit-title', array( &$this, 'actionPreHeader_RpsEditTitle' ) );
-        add_shortcode( 'rps_edit_title', array( &$this, 'shortcodeRpsEditTitle' ) );
+        add_action( 'pre-header-edit-title', array( $this, 'actionPreHeader_RpsEditTitle' ) );
+        add_shortcode( 'rps_edit_title', array( $this, 'shortcodeRpsEditTitle' ) );
 
-        add_action( 'pre-header-upload-image', array( &$this, 'actionPreHeader_RpsUploadEntry' ) );
-        add_shortcode( 'rps_upload_image', array( &$this, 'shortcodeRpsUploadEntry' ) );
+        add_action( 'pre-header-upload-image', array( $this, 'actionPreHeader_RpsUploadEntry' ) );
+        add_shortcode( 'rps_upload_image', array( $this, 'shortcodeRpsUploadEntry' ) );
 
     }
 
@@ -1507,7 +1507,7 @@ class AVH_RPS_Public
                     }
                     $server_file_name = str_replace( ABSPATH, '/', $full_path . '.jpg' );
                     $data = array( 'Competition_ID'=>$comp_id, 'Title'=>$title, 'Client_File_Name'=>$client_file_name, 'Server_File_Name'=>$server_file_name );
-                    $_result = $this->_rpsdb->insertEntry( $data );
+                    $_result = $this->_rpsdb->addEntry( $data );
                     if ( $_result === false ) {
                         $this->_errmsg = "Failed to INSERT entry record into database";
                         return;
