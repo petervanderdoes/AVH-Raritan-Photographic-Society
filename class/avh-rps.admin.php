@@ -31,7 +31,7 @@ final class AVH_RPS_Admin
 	 *
 	 * @var AVH_RPS_CompetitionList
 	 */
-	private $_rps_competition_list;
+	private $_competition_list;
 	/**
 	 *
 	 * @var AVH_Form
@@ -113,19 +113,19 @@ final class AVH_RPS_Admin
 		wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array ( 'wp-admin' ), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
 		wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array ( 'wp-admin' ), '1.8.22', 'screen');
 
-		add_menu_page('RPS Competitions', 'RPS Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, array ( $this, 'menuCompetitionList' ));
-		$this->_hooks['avhrps_menu_competition_list'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, array ( $this, 'menuCompetitionList' ));
-		$this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array ( $this, 'menuCompetitionAdd' ));
+		add_menu_page('RPS Competitions', 'RPS Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array ( $this, 'menuCompetition' ));
+		$this->_hooks['avhrps_menu_competition'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array ( $this, 'menuCompetition' ));
+		$this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array ( $this, 'menuCompetitionAdd' ));
 
-		add_action('load-' . $this->_hooks['avhrps_menu_competition_list'], array ( $this, 'actionLoadPagehookCompetitionList' ));
+		add_action('load-' . $this->_hooks['avhrps_menu_competition'], array ( $this, 'actionLoadPagehookCompetition' ));
 		add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array ( $this, 'actionLoadPagehookCompetitionAdd' ));
 	}
 
-	public function actionLoadPagehookCompetitionList ()
+	public function actionLoadPagehookCompetition ()
 	{
 		global $current_screen;
 
-		$this->_rps_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+		$this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
 		add_filter('screen_layout_columns', array ( $this, 'filterScreenLayoutColumns' ), 10, 2);
 		// WordPress core Styles and Scripts
 		wp_enqueue_script('common');
@@ -141,24 +141,24 @@ final class AVH_RPS_Admin
 		// add_contextual_help($current_screen, '<p>' . __('You can manage IP\'s added to the IP cache Log. This screen is customizable in the same ways as other management screens, and you can act on IP\'s using the on-hover action links or the Bulk Actions.') . '</p>');
 	}
 
-	public function menuCompetitionList ()
+	public function menuCompetition ()
 	{
 		global $screen_layout_columns;
-		// if (! empty($this->_rps_competition_list->messages)) {
-		// echo '<div id="moderated" class="updated"><p>' . implode("<br/>\n", $this->_rps_competition_list->messages) . '</p></div>';
+		// if (! empty($this->_competition_list->messages)) {
+		// echo '<div id="moderated" class="updated"><p>' . implode("<br/>\n", $this->_competition_list->messages) . '</p></div>';
 		// }
 		// $_SERVER['REQUEST_URI'] = remove_query_arg(array ( 'error', 'deleted', '_error_nonce' ), $_SERVER['REQUEST_URI']);
 
-		$pagenum = $this->_rps_competition_list->get_pagenum();
-		$doaction = $this->_rps_competition_list->current_action();
+		$pagenum = $this->_competition_list->get_pagenum();
+		$doaction = $this->_competition_list->current_action();
 		if ($doaction) {
 			check_admin_referer('bulk-competition_list');
 		} elseif (! empty($_GET['_wp_http_referer'])) {
 			wp_redirect(remove_query_arg(array ( '_wp_http_referer', '_wpnonce' ), stripslashes($_SERVER['REQUEST_URI'])));
 			exit();
 		}
-		$this->_rps_competition_list->prepare_items();
-		$total_pages = $this->_rps_competition_list->get_pagination_arg('total_pages');
+		$this->_competition_list->prepare_items();
+		$total_pages = $this->_competition_list->get_pagination_arg('total_pages');
 		if ($pagenum > $total_pages && $total_pages > 0) {
 			wp_redirect(add_query_arg('paged', $total_pages));
 			exit();
@@ -173,21 +173,21 @@ final class AVH_RPS_Admin
 		}
 		echo '</h2>';
 
-		$this->_rps_competition_list->views();
+		$this->_competition_list->views();
 		echo '<form id="rps-competition-form" action="" method="get">';
-		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST . '"';
+		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_COMPETITION . '"';
 		// echo '<input type="hidden" name="ip_status" value="' . esc_attr($ip_status) . '" />';
 		echo '<input type="hidden" name="pagegen_timestamp" value="' . esc_attr(current_time('mysql', 1)) . '" />';
 
-		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_rps_competition_list->get_pagination_arg('total_items')) . '" />';
-		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_rps_competition_list->get_pagination_arg('per_page')) . '" />';
-		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_rps_competition_list->get_pagination_arg('page')) . '" />';
+		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_competition_list->get_pagination_arg('total_items')) . '" />';
+		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('per_page')) . '" />';
+		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('page')) . '" />';
 
 		if (isset($_REQUEST['paged'])) {
 			echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
 		}
-		//$this->_rps_competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
-		$this->_rps_competition_list->display();
+		//$this->_competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
+		$this->_competition_list->display();
 		echo '</form>';
 
 		echo '<div id="ajax-response"></div>';
@@ -199,7 +199,7 @@ final class AVH_RPS_Admin
 	{
 		global $current_screen;
 
-		$this->_rps_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+		$this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
 		add_filter('screen_layout_columns', array ( $this, 'filterScreenLayoutColumns' ), 10, 2);
 		// WordPress core Styles and Scripts
 		wp_enqueue_script('common');
@@ -430,7 +430,7 @@ final class AVH_RPS_Admin
 	public function filterScreenLayoutColumns ($columns, $screen)
 	{
 		switch ($screen) {
-			// case $this->_hooks['avhrps_menu_competition_list']:
+			// case $this->_hooks['avhrps_menu_competition']:
 			// $columns[$this->_hooks['avhfdas_menu_overview']] = 1;
 			// break;
 			// case $this->_hooks['avhrps_menu_competition_add']:

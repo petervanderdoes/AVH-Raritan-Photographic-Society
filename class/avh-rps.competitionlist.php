@@ -148,7 +148,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 		$status_links = array ();
 		$stati = array ( 'all' => _nx_noop('All', 'All', 'competitions'), 'open' => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>', 'Open <span class="count">(<span class="open-count">%s</span>)</span>'), 'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>', 'Closed <span class="count">(<span class="closed-count">%s</span>)</span>') );
 
-		$link = 'admin.php?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_LIST;
+		$link = 'admin.php?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
 
 		foreach ($stati as $status => $label) {
 			$class = ($status == $competition_status) ? ' class="current"' : '';
@@ -262,9 +262,21 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 		$date_text = mysql2date(get_option('date_format'), $competition->Competition_Date);
 		echo $date_text;
 
-		/*
-		 * echo '<div id="inline-' . $ip->ip . '" class="hidden">'; echo '<div class="ip_hamspam">' . ($ip->spam == 0 ? 'ham' : 'spam') . '</div>'; echo '</div>'; $del_nonce = esc_html('_wpnonce=' . wp_create_nonce("delete-ip_$ip->ip")); $blacklist_nonce = esc_html('_wpnonce=' . wp_create_nonce("blacklist-ip_$ip->ip")); $hamspam_nonce = esc_html('_wpnonce=' . wp_create_nonce("hamspam-ip_$ip->ip")); $url = "admin.php?page=avh-first-defense-against-spam-ip-cache-log&i=$ip->ip"; $ham_url = esc_url($url . "&action=hamip&$hamspam_nonce"); $spam_url = esc_url($url . "&action=spamip&$hamspam_nonce"); $blacklist_url = esc_url($url . "&action=blacklistip&$blacklist_nonce"); $delete_url = esc_url($url . "&action=deleteip&$del_nonce"); $actions = array ( 'ham' => '', 'spam' => '', 'blacklist' => '', 'delete' => '' ); if ($competition_status && 'all' != $competition_status) { // not looking at all spam $actions['spam'] = "<a href='$spam_url' class='delete:the-ipcache-list:ip-$ip->ip:e7e7d3:f=hs&amp;ns=1' title='" . esc_attr__('Mark this IP as spam', 'avh-fdas') . "'>" . __('Spam', 'avh-fdas') . '</a>'; $actions['ham'] = "<a href='$ham_url' class='delete:the-ipcache-list:ip-$ip->ip:e7e7d3:f=hs&amp;ns=0' title='" . esc_attr__('Mark this IP as ham', 'avh-fdas') . "'>" . __('Ham', 'avh-fdas') . '</a>'; } else { $actions['spam'] = "<a href='$spam_url' class='dim:the-ipcache-list:ip-$ip->ip:spammed:e7e7d3:e7e7d3:new_status=1' title='" . esc_attr__('Mark this IP as spam', 'avh-fdas') . "'>" . __('Spam', 'avh-fdas') . '</a>'; $actions['ham'] = "<a href='$ham_url' class='dim:the-ipcache-list:ip-$ip->ip:spammed:e7e7d3:e7e7d3:new_status=0' title='" . esc_attr__('Mark this IP as ham', 'avh-fdas') . "'>" . __('Ham', 'avh-fdas') . '</a>'; } ; $actions['blacklist'] = "<a href='$blacklist_url' class='delete:the-ipcache-list:ip-$ip->ip:e7e7d3:f=bl delete' title='" . esc_attr__('Blacklist this IP', 'avh-fdas') . "'>" . __('Blacklist', 'avh-fdas') . '</a>'; $actions['delete'] = "<a href='$delete_url' class='delete:the-ipcache-list:ip-$ip->ip::f=dl delete' title='" . esc_attr__('Delete this IP', 'avh-fdas') . "'>" . __('Delete', 'avh-fdas') . '</a>'; $i = 0; echo '<div class="row-actions">'; foreach ($actions as $action => $link) { ++ $i; ((('ham' == $action || 'spam' == $action) && 2 === $i) || 1 === $i) ? $sep = '' : $sep = ' | '; echo "<span class='set_$action'>$sep$link</span>"; } echo '</div>';
-		 */
+		$url = admin_url('admin.php');
+		$del_nonce = wp_create_nonce('delete-competition_'.$competition->ID);
+		$del_query=array('page'=>AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition'=>$competition->ID,'action'=>'delete','_wpnonce'=>$del_nonce);
+
+		$delete_url = $url.'?'.http_build_query($del_query,'','&');
+		$actions = array ( );
+		$actions['delete'] = "<a href='$delete_url' class='delete' title='Delete this Competition'>" . 'Delete' . '</a>';
+
+		echo '<div class="row-actions">';
+		$sep = '';
+		foreach ($actions as $action => $link) {
+			echo "<span class='set_$action'>$sep$link</span>";
+			$sep = ' | ';
+		}
+		echo '</div>';
 	}
 
 	function column_theme ($competition)

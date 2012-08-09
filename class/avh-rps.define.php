@@ -18,6 +18,6 @@ final class AVH_RPS_Define
 	// Menu Slugs for Admin menu
 	const MENU_SLUG = 'avh-rps-plugin';
 	const MENU_SLUG_COMPETITION = 'avh-rps-competition';
-	const MENU_SLUG_COMPETITION_LIST = 'avh-rps-competition-list';
 	const MENU_SLUG_COMPETITION_ADD = 'avh-rps-competition-add';
+	const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
 }
