@@ -263,13 +263,18 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 		echo $date_text;
 
 		$user_ID=get_current_user_id();
-		$url = admin_url('admin.php');
-		$del_nonce = wp_create_nonce('bulk-competitions');
-		$del_query=array('page'=>AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition'=>$competition->ID,'action'=>'delete','_wpnonce'=>$del_nonce);
+		$url = admin_url('admin.php').'?';
 
-		$delete_url = $url.'?'.http_build_query($del_query,'','&');
+		$nonceDelete = wp_create_nonce('bulk-competitions');
+		$queryDelete=array('page'=>AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition'=>$competition->ID,'action'=>'delete','_wpnonce'=>$nonceDelete);
+		$urlDelete = $url.http_build_query($queryDelete,'','&');
+
+		$queryEdit=array('page'=>AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition'=>$competition->ID,'action'=>'edit');
+		$urlEdit=$url.http_build_query($queryEdit,'','&');
+
 		$actions = array ( );
-		$actions['delete'] = "<a href='$delete_url' class='delete' title='Delete this Competition'>" . 'Delete' . '</a>';
+		$actions['delete'] = '<a '.AVH_Common::attributes(array('href'=>$urlDelete, 'class'=>'delete','title'=>'Delete this competition')).'>' . 'Delete' . '</a>';
+		$actions['edit'] = '<a '.AVH_Common::attributes(array('href'=>$urlEdit, 'title'=>'Edit this competition')).'>' . 'Edit' . '</a>';
 
 		echo '<div class="row-actions">';
 		$sep = '';
