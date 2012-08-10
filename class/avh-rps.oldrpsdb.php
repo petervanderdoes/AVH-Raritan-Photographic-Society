@@ -225,7 +225,7 @@ class AVH_RPS_OldRpsDb
 		if ( $count ) {
 			$fields = 'COUNT(*)';
 			$orderby = 'ID';
-			$order='';
+			$order = '';
 		} else {
 			$fields = '*, if(Classification = "Beginner",0, if(Classification = "Advanced",1,2)) as "Class_Code"';
 		}
@@ -555,6 +555,12 @@ class AVH_RPS_OldRpsDb
 		return $_result;
 	}
 
+	public function deleteCompetition ($id)
+	{
+		$this->_rpsdb->delete( 'competitions', array( 'ID' => $id ) );
+		return TRUE;
+	}
+
 	public function countCompetitions ()
 	{
 		$where = '';
@@ -580,17 +586,6 @@ class AVH_RPS_OldRpsDb
 		$stats = (object) $stats;
 
 		return $stats;
-	}
-
-	public function deleteCompetition ($competitionID)
-	{
-		// Query database
-		$result = $this->_rpsdb->query($this->_rpsdb->prepare("DELETE FROM competitions WHERE ID=%s", $competitionID));
-		if ( $result ) {
-			return $result;
-		} else {
-			return false;
-		}
 	}
 
 	/**

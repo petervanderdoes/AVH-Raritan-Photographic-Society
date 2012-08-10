@@ -1,4 +1,5 @@
 <?php
+
 final class AVH_RPS_Admin
 {
 	/**
@@ -31,6 +32,9 @@ final class AVH_RPS_Admin
 	 * @var AVH_RPS_CompetitionList
 	 */
 	private $_competition_list;
+
+	private $_internalREQUEST;
+
 	private $_add_disabled_notice = false;
 	private $_hooks = array();
 
@@ -161,6 +165,25 @@ final class AVH_RPS_Admin
 
 				break;
 
+			case 'dodelete':
+				check_admin_referer('delete-competitions');
+				if ( empty($_REQUEST['competitions']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$competitionIds = $_REQUEST['competitions'];
+
+				$deleteCount = 0;
+
+				foreach ( (array) $competitionIds as $id ) {
+					$id = (int) $id;
+					$this->_rpsdb->deleteCompetition($id);
+					++$deleteCount;
+				}
+				$this->_internalREQUEST = array('update'=>'del','deleteCount'=>$deleteCount);
+				$this->_displayPageCompetitionList();
+				break;
+
 			default:
 				if ( !empty($_GET['_wp_http_referer']) ) {
 					wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
@@ -226,10 +249,6 @@ final class AVH_RPS_Admin
 	private function _displayPageCompetitionList ()
 	{
 		global $screen_layout_columns;
-		// if (! empty($this->_competition_list->messages)) {
-		// echo '<div id="moderated" class="updated"><p>' . implode("<br/>\n", $this->_competition_list->messages) . '</p></div>';
-		// }
-		//
 
 		$pagenum = $this->_competition_list->get_pagenum();
 		$this->_competition_list->prepare_items();
@@ -237,6 +256,25 @@ final class AVH_RPS_Admin
 		if ( $pagenum > $total_pages && $total_pages > 0 ) {
 			wp_redirect(add_query_arg('paged', $total_pages));
 			exit();
+		}
+
+		$messages = array();
+		if ( isset($this->_internalREQUEST )) :
+			$request=$this->_internalREQUEST;
+			switch ( $request['update'] )
+			{
+				case 'del':
+				case 'del_many':
+					$deleteCount = isset($request['deleteCount']) ? (int) $request['deleteCount'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+					break;
+			}
+
+			endif;
+
+		if ( !empty($messages) ) {
+			foreach ( $messages as $msg )
+				echo $msg;
 		}
 
 		echo '<div class="wrap avhrps-wrap">';
