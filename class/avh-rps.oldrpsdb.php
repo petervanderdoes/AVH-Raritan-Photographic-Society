@@ -1,5 +1,5 @@
 <?php
-if (! defined('AVH_FRAMEWORK'))
+if ( !defined('AVH_FRAMEWORK') )
 	die('You are not allowed to call this page directly.');
 
 class AVH_RPS_OldRpsDb
@@ -24,15 +24,6 @@ class AVH_RPS_OldRpsDb
 	private $_user_id;
 
 	/**
-	 *
-	 * @param field_type $_user_id
-	 */
-	public function setUser_id ($_user_id)
-	{
-		$this->_user_id = $_user_id;
-	}
-
-	/**
 	 * PHP5 constructor
 	 */
 	public function __construct ()
@@ -55,7 +46,7 @@ class AVH_RPS_OldRpsDb
 			ORDER BY Season', $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
 
 		$_result = $this->_rpsdb->get_results($sql, ARRAY_A);
-		foreach ($_result as $key => $value) {
+		foreach ( $_result as $key => $value ) {
 			$_seasons[$key] = $value['Season'];
 		}
 		return $_seasons;
@@ -74,7 +65,7 @@ class AVH_RPS_OldRpsDb
 			ORDER BY Season', $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
 
 		$_result = $this->_rpsdb->get_results($sql, ARRAY_A);
-		foreach ($_result as $key => $value) {
+		foreach ( $_result as $key => $value ) {
 			$_seasons[$key] = $value['Season'];
 		}
 		return $_seasons;
@@ -108,7 +99,7 @@ class AVH_RPS_OldRpsDb
 			ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date);
 
 		$_x = $this->_rpsdb->get_results($sql, ARRAY_A);
-		foreach ($_x as $key => $_rec) {
+		foreach ( $_x as $key => $_rec ) {
 			$user_info = get_userdata($_rec['Member_ID']);
 			$_rec['FirstName'] = $user_info->user_firstname;
 			$_rec['LastName'] = $user_info->user_lastname;
@@ -161,7 +152,7 @@ class AVH_RPS_OldRpsDb
 					e.Award Is Not Null
 				ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->_settings->min_date, $this->_settings->max_date);
 		$_x = $this->_rpsdb->get_results($sql, ARRAY_A);
-		foreach ($_x as $_rec) {
+		foreach ( $_x as $_rec ) {
 			$user_info = get_userdata($_rec['Member_ID']);
 			$_rec['FirstName'] = $user_info->user_firstname;
 			$_rec['LastName'] = $user_info->user_lastname;
@@ -192,7 +183,7 @@ class AVH_RPS_OldRpsDb
 	{
 
 		// Select the list of open competitions that match this member's classification(s)
-		if ($subset) {
+		if ( $subset ) {
 			$and_medium_subset = " AND c.Medium like %s";
 		} else {
 			$and_medium_subset = '';
@@ -214,18 +205,15 @@ class AVH_RPS_OldRpsDb
 
 	public function getCompetitions ($query_vars, $output = OBJECT)
 	{
-		$defaults = array ( 'status' => 'open', 'search' => '', 'offset' => '', 'number' => '', 'orderby' => '', 'order' => 'DESC', 'count' => false );
+		$defaults = array('status' => '','search' => '','offset' => '','number' => '','orderby' => 'ID','order' => 'ASC','count' => false);
 		$this->_query_vars = wp_parse_args($query_vars, $defaults);
 		extract($this->_query_vars, EXTR_SKIP);
-
-		$order = ('ASC' == strtoupper($order)) ? 'ASC' : 'DESC';
-		$orderby = 'Competition_Date, Medium, Class_Code';
 
 		$number = absint($number);
 		$offset = absint($offset);
 
-		if (! empty($number)) {
-			if ($offset) {
+		if ( !empty($number) ) {
+			if ( $offset ) {
 				$limits = 'LIMIT ' . $offset . ',' . $number;
 			} else {
 				$limits = 'LIMIT ' . $number;
@@ -234,15 +222,17 @@ class AVH_RPS_OldRpsDb
 			$limits = '';
 		}
 
-		if ($count) {
+		if ( $count ) {
 			$fields = 'COUNT(*)';
 			$orderby = 'ID';
+			$order='';
 		} else {
 			$fields = '*, if(Classification = "Beginner",0, if(Classification = "Advanced",1,2)) as "Class_Code"';
 		}
 
 		$join = '';
-		switch ($status) {
+		switch ( $status )
+		{
 			case 'open':
 				$where = 'Closed = "N"';
 				break;
@@ -250,22 +240,70 @@ class AVH_RPS_OldRpsDb
 				$where = 'Closed = "Y"';
 				break;
 			case 'all':
-			default:
 				$where = '1=1';
+				break;
+			default:
+				break;
 		}
 		$query = "SELECT $fields FROM competitions $join WHERE $where ORDER BY $orderby $order $limits";
 
-		if ($count) {
+		if ( $count ) {
 			return $this->_rpsdb->get_var($query);
 		}
 
 		$_result = $this->_rpsdb->get_results($query);
-		if ($output == OBJECT) {
+		if ( $output == OBJECT ) {
 			return $_result;
-		} elseif ($output == ARRAY_A) {
+		} elseif ( $output == ARRAY_A ) {
 			$_result_array = get_object_vars($_result);
 			return $_result_array;
-		} elseif ($output == ARRAY_N) {
+		} elseif ( $output == ARRAY_N ) {
+			$_result_array = array_values(get_object_vars($_result));
+			return $_result_array;
+		} else {
+			return $_result;
+		}
+	}
+
+	public function getEntries ($query_vars, $output = OBJECT)
+	{
+		$defaults = array('join' => '','where' => '1=1','fields' => '*','offset' => '','number' => '','orderby' => 'ID','order' => 'ASC','count' => false);
+		$this->_query_vars = wp_parse_args($query_vars, $defaults);
+		extract($this->_query_vars, EXTR_SKIP);
+
+		$order = ( 'ASC' == strtoupper($order) ) ? 'ASC' : 'DESC';
+
+		$number = absint($number);
+		$offset = absint($offset);
+
+		if ( !empty($number) ) {
+			if ( $offset ) {
+				$limits = 'LIMIT ' . $offset . ',' . $number;
+			} else {
+				$limits = 'LIMIT ' . $number;
+			}
+		} else {
+			$limits = '';
+		}
+
+		if ( $count ) {
+			$fields = 'COUNT(*)';
+			$orderby = 'ID';
+		}
+
+		$query = "SELECT $fields FROM entries $join WHERE $where ORDER BY $orderby $order $limits";
+
+		if ( $count ) {
+			return $this->_rpsdb->get_var($query);
+		}
+
+		$_result = $this->_rpsdb->get_results($query);
+		if ( $output == OBJECT ) {
+			return $_result;
+		} elseif ( $output == ARRAY_A ) {
+			$_result_array = get_object_vars($_result);
+			return $_result_array;
+		} elseif ( $output == ARRAY_N ) {
 			$_result_array = array_values(get_object_vars($_result));
 			return $_result_array;
 		} else {
@@ -286,64 +324,64 @@ class AVH_RPS_OldRpsDb
 	{
 		// Are we updating or creating?
 		$update = FALSE;
-		if (! empty($data['ID'])) {
+		if ( !empty($data['ID']) ) {
 			$update = TRUE;
 		}
 
-		if (! isset($data['Competition_Date'])) {
+		if ( !isset($data['Competition_Date']) ) {
 			$data['Competition_Date'] = current_time('mysql');
 		}
-		if (! isset($data['Medium'])) {
+		if ( !isset($data['Medium']) ) {
 			$data['Medium'] = '';
 		}
-		if (! isset($data['Classification'])) {
+		if ( !isset($data['Classification']) ) {
 			$data['Classification'] = '';
 		}
-		if (! isset($data['Theme'])) {
+		if ( !isset($data['Theme']) ) {
 			$data['Theme'] = '';
 		}
-		if (! isset($data['Date_Created'])) {
+		if ( !isset($data['Date_Created']) ) {
 			$data['Date_Created'] = current_time('mysql');
 		}
-		if (! isset($data['Date_Modified'])) {
+		if ( !isset($data['Date_Modified']) ) {
 			$data['Date_Modified'] = current_time('mysql');
 		}
-		if (! isset($data['Closed'])) {
+		if ( !isset($data['Closed']) ) {
 			$data['Closed'] = 'N';
 		}
-		if (! isset($data['Scored'])) {
+		if ( !isset($data['Scored']) ) {
 			$data['Scored'] = 'N';
 		}
-		if (! isset($data['Close_Date'])) {
+		if ( !isset($data['Close_Date']) ) {
 			$data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
 			$date_array = getdate($data['Close_Date']);
 			$data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
 		}
-		if (! isset($data['Max_Entries'])) {
+		if ( !isset($data['Max_Entries']) ) {
 			$data['Max_Entries'] = 2;
 		}
-		if (! isset($data['Num_Judges'])) {
+		if ( !isset($data['Num_Judges']) ) {
 			$data['Num_Judges'] = 1;
 		}
-		if (! isset($data['Special_Event'])) {
+		if ( !isset($data['Special_Event']) ) {
 			$data['Special_Event'] = 'N';
 		}
 
 		$data = stripslashes_deep($data);
 
 		$competition_ID = 0;
-		if ($update) {
+		if ( $update ) {
 			$competition_ID = (int) $data['ID'];
 		}
 
-		$where = array ( 'ID' => $competition_ID );
+		$where = array('ID' => $competition_ID);
 
-		if ($update) {
-			if (false === $this->_rpsdb->update('competitions', $data, $where)) {
+		if ( $update ) {
+			if ( false === $this->_rpsdb->update('competitions', $data, $where) ) {
 				return new WP_Error('db_update_error', 'Could not update competition into the database', $this->_rpsdb->last_error);
 			}
 		} else {
-			if (false === $this->_rpsdb->insert('competitions', $data)) {
+			if ( false === $this->_rpsdb->insert('competitions', $data) ) {
 				return new WP_Error('db_insert_error', __('Could not insert competition into the database'), $this->_rpsdb->last_error);
 			}
 			$competition_ID = (int) $this->_rpsdb->insert_id;
@@ -371,7 +409,7 @@ class AVH_RPS_OldRpsDb
 				AND Classification = %s
 				AND Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium);
 		$_closed = $this->_rpsdb->get_var($sql);
-		if ($_closed == "Y") {
+		if ( $_closed == "Y" ) {
 			$_return = true;
 		} else {
 			$_return = false;
@@ -442,14 +480,26 @@ class AVH_RPS_OldRpsDb
 		return $_return;
 	}
 
-	public function getCompetitionByID ($id)
+	public function getCompetitionByID ($id, $output = ARRAY_A)
 	{
 		$sql = $this->_rpsdb->prepare("SELECT Competition_Date, Classification, Medium
 			FROM competitions c, entries e
 			WHERE c.ID =  e.Competition_ID
 				AND e.ID = %s", $id);
-		$_return = $this->_rpsdb->get_row($sql, ARRAY_A);
-		return $_return;
+		$result = $this->_rpsdb->get_row($sql);
+
+		if ( $output == OBJECT ) {
+			return $result;
+		} elseif ( $output == ARRAY_A ) {
+			$resultArray = get_object_vars($result);
+			return $resultArray;
+		} elseif ( $output == ARRAY_N ) {
+			$resultArray = array_values(get_object_vars($result));
+			return $resultArray;
+		} else {
+			return $result;
+		}
+		return $result;
 	}
 
 	public function getIdmaxEntries ()
@@ -471,7 +521,7 @@ class AVH_RPS_OldRpsDb
 				AND Member_ID = %s
 				AND Title = %s", $id, $this->_user_id, $title);
 		$_return = $this->_rpsdb->get_var($sql);
-		if ($_return > 0) {
+		if ( $_return > 0 ) {
 			$_return = true;
 		} else {
 			$_return = false;
@@ -489,8 +539,8 @@ class AVH_RPS_OldRpsDb
 
 	public function updateEntriesTitle ($new_title, $new_file_name, $id)
 	{
-		$data = array ( 'Title' => $new_title, 'Server_File_Name' => $new_file_name, 'Date_Modified' => current_time('mysql') );
-		$_where = array ( 'ID' => $id );
+		$data = array('Title' => $new_title,'Server_File_Name' => $new_file_name,'Date_Modified' => current_time('mysql'));
+		$_where = array('ID' => $id);
 		$_return = $this->_rpsdb->update('entries', $data, $_where);
 		return $_return;
 	}
@@ -512,23 +562,43 @@ class AVH_RPS_OldRpsDb
 		$count = $this->_rpsdb->get_results("SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed", ARRAY_A);
 
 		$total = 0;
-		$status = array ( 'N' => 'open', 'Y' => 'closed' );
+		$status = array('N' => 'open','Y' => 'closed');
 		$known_types = array_keys($status);
-		foreach ((array) $count as $row) {
+		foreach ( (array) $count as $row ) {
 			// Don't count post-trashed toward totals
 			$total += $row['num_competitions'];
-			if (in_array($row['Closed'], $known_types))
+			if ( in_array($row['Closed'], $known_types) )
 				$stats[$status[$row['Closed']]] = (int) $row['num_competitions'];
 		}
 
 		$stats['all'] = $total;
-		foreach ($status as $key) {
-			if (empty($stats[$key]))
+		foreach ( $status as $key ) {
+			if ( empty($stats[$key]) )
 				$stats[$key] = 0;
 		}
 
 		$stats = (object) $stats;
 
 		return $stats;
+	}
+
+	public function deleteCompetition ($competitionID)
+	{
+		// Query database
+		$result = $this->_rpsdb->query($this->_rpsdb->prepare("DELETE FROM competitions WHERE ID=%s", $competitionID));
+		if ( $result ) {
+			return $result;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 *
+	 * @param field_type $_user_id
+	 */
+	public function setUser_id ($_user_id)
+	{
+		$this->_user_id = $_user_id;
 	}
 } //End Class AVH_RPS_OldRpsDb

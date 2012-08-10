@@ -70,8 +70,8 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 
 		$search = (isset($_REQUEST['s'])) ? $_REQUEST['s'] : '';
 
-		$orderby = (isset($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'added';
-		$order = (isset($_REQUEST['order'])) ? $_REQUEST['order'] : 'DESC';
+		$orderby = (isset($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'Competition_Date DESC, Class_Code ASC, Medium ASC';
+		$order = (isset($_REQUEST['order'])) ? $_REQUEST['order'] : '';
 
 		$competitions_per_page = $this->get_per_page($competition_status);
 
@@ -211,7 +211,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 	{
 		extract($this->_args);
 
-		wp_nonce_field("fetch-list-" . get_class($this), '_ajax_fetch_list_nonce');
+		wp_nonce_field("fetch-list-" . get_class($this), '_ajax_fetch_list_nonce', FALSE);
 
 		$this->display_tablenav('top');
 
@@ -252,7 +252,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 
 	function column_cb ($competition)
 	{
-		echo "<input type='checkbox' name='delete_competitions[]' value='$competition->ID' />";
+		echo "<input type='checkbox' name='competitions[]' value='$competition->ID' />";
 	}
 
 	function column_date ($competition)
@@ -262,8 +262,9 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 		$date_text = mysql2date(get_option('date_format'), $competition->Competition_Date);
 		echo $date_text;
 
+		$user_ID=get_current_user_id();
 		$url = admin_url('admin.php');
-		$del_nonce = wp_create_nonce('delete-competition_'.$competition->ID);
+		$del_nonce = wp_create_nonce('bulk-competitions');
 		$del_query=array('page'=>AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition'=>$competition->ID,'action'=>'delete','_wpnonce'=>$del_nonce);
 
 		$delete_url = $url.'?'.http_build_query($del_query,'','&');
