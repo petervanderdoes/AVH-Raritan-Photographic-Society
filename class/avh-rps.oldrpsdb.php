@@ -502,6 +502,12 @@ class AVH_RPS_OldRpsDb
 		return $result;
 	}
 
+	public function getCompetitionByID2 ($id, $output=OBJECT) {
+		$where = $this->_rpsdb->prepare('ID=%d',$id);
+		$result = $this->getCompetitions(array('where'=>$where));
+		return $result[0];
+	}
+
 	public function getIdmaxEntries ()
 	{
 		$sql = $this->_rpsdb->prepare("SELECT ID, Max_Entries

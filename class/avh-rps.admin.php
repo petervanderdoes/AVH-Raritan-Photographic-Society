@@ -127,6 +127,7 @@ final class AVH_RPS_Admin
 
 		add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
 		// WordPress core Styles and Scripts
+		wp_enqueue_script('jquery-ui-datepicker');
 		wp_enqueue_script('common');
 		wp_enqueue_script('wp-lists');
 		wp_enqueue_script('postbox');
@@ -135,6 +136,7 @@ final class AVH_RPS_Admin
 		// wp_enqueue_script('avhrps-competition-js');
 
 		wp_enqueue_style('avhrps-admin-css');
+		wp_enqueue_style('avhrps-jquery-css');
 
 		// add_screen_option('per_page', array ( 'label' => _x('IP\'s', 'ip\'s per page (screen options)'), 'default' => 20, 'option' => 'ipcachelog_per_page' ));
 		// add_contextual_help($current_screen, '<p>' . __('You can manage IP\'s added to the IP cache Log. This screen is customizable in the same ways as other management screens, and you can act on IP\'s using the on-hover action links or the Bulk Actions.') . '</p>');
@@ -173,6 +175,7 @@ final class AVH_RPS_Admin
 					wp_redirect($this->_redirect);
 					exit();
 				}
+				break;
 			case 'dodelete':
 				check_admin_referer('delete-competitions');
 				if ( empty($_REQUEST['competitions']) ) {
@@ -282,163 +285,76 @@ final class AVH_RPS_Admin
 
 	private function _displayPageCompetitionEdit ()
 	{
-		$option_name = 'competition_add';
-		// @format_off
-		$formDefaultOptions = array (
-		'date' => '',
-		'theme' => '',
-		'medium_bwd' => TRUE,
-		'medium_cd' => TRUE,
-		'medium_bwp' => TRUE,
-		'medium_cp' => TRUE,
-		'class_b' => TRUE,
-		'class_a' => TRUE,
-		'class_s' => TRUE,
-		'max_entries' => '2',
-		'judges' => '1',
-		'special_event' => FALSE
-		);
-		// @format_on
-		$formOptions = $formDefaultOptions;
-		if ( isset($_POST['action']) && ( 'add' == $_POST['action'] ) ) {
-			check_admin_referer($option_name, '_wpnonce_' . $option_name);
-			$formNewOptions = $formDefaultOptions;
-			$formOptions = $_POST[$option_name];
+		global $wpdb;
+		$option_name = 'competition-edit';
 
-			$mediumArray = array();
-			$classArray = array();
-			$errorMsgArray = array();
-			foreach ( $formDefaultOptions as $optionKey => $optionValue ) {
+		$competition = $this->_rpsdb->getCompetitionByID2($_REQUEST['competition']);
 
-				// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to FALSE.
-				$newval = ( isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : FALSE );
-				$current_value = $formDefaultOptions[$optionKey];
-				switch ( $optionKey )
-				{
-					case 'date':
-						// Validate
-						break;
-
-					case 'theme':
-						// Validate
-						break;
-				}
-				if ( substr($optionKey, 0, 7) == 'medium_' ) {
-					$formNewOptions[$optionKey] = (bool) $newval;
-					if ( $formNewOptions[$optionKey] ) {
-						$mediumArray[] = $optionKey;
-						continue;
-					}
-				}
-				if ( substr($optionKey, 0, 6) == 'class_' ) {
-					$formNewOptions[$optionKey] = (bool) $newval;
-					if ( $formNewOptions[$optionKey] ) {
-						$classArray[] = $optionKey;
-						continue;
-					}
-				}
-				$formNewOptions[$optionKey] = $newval;
-			}
-
-			if ( empty($mediumArray) ) {
-				$errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
-			}
-
-			if ( empty($classArray) ) {
-				$errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
-			}
-
-			if ( empty($errorMsgArray) ) {
-				$this->_message = 'Competition Added';
-				$this->_status = 'updated';
-
-				// @format_off
-				// @TODO: This is needed because of the old program, someday it needs to be cleaned up.
-				$medium_convert = array(
-				'medium_bwd'	=> 'B&W Digital',
-				'medium_cd'		=> 'Color Digital',
-				'medium_bwp'	=> 'B&W Print',
-				'medium_cp'		=> 'Color Print'
-				);
-
-				$classification_convert = array (
-				'class_b' => 'Beginner',
-				'class_a' => 'Advanced',
-				'class_s' => 'Salon'
-				);
-				// @format_on
-				$data['Competition_Date'] = $formNewOptions['date'];
-				$data['Theme'] = $formNewOptions['theme'];
-				$data['Max_Entries'] = $formNewOptions['max_entries'];
-				$data['Num_Judges'] = $formNewOptions['judges'];
-				$data['Special_Event'] = ( $formNewOptions['special_event'] ? 'Y' : 'N' );
-				foreach ( $mediumArray as $medium ) {
-					$data['Medium'] = $medium_convert[$medium];
-					foreach ( $classArray as $classification ) {
-						$data['Classification'] = $classification_convert[$classification];
-						$competition_ID = $this->_rpsdb->insertCompetition($data);
-						if ( is_wp_error($competition_ID) ) {
-							wp_die($competition_ID);
-						}
-					}
-				}
-			} else {
-				$this->_message = $errorMsgArray;
-				$this->_status = 'error';
-			}
-			$this->_displayMessage();
-			$formOptions = $formNewOptions;
-		}
+		$formOptions['date'] = mysql2date('Y-m-d', $competition->Competition_Date);
+		$formOptions['close-date'] = mysql2date('Y-m-d', $competition->Close_Date);
+		$formOptions['close-time'] = mysql2date('H:i:II', $competition->Close_Date);
 
 		/* @var $classForm AVH_Form */
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 
-		$this->admin_header('Add Competition');
+		$this->admin_header('Edit Competition');
 		$classForm->setOption_name($option_name);
 
-		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionadd'));
+		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionedit'));
 		echo $classForm->open_table();
 		echo $classForm->text('Date', '', 'date', $formOptions['date']);
-		echo $classForm->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
+		echo $classForm->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
+		echo $classForm->text('Closing Date', '', 'close-date', $formOptions['close-date']);
+
+		for ( $hour = 0; $hour <= 23; $hour++ ) {
+			$time_val = sprintf("%02d:00:00", $hour);
+			$time_text = date("g:i a", strtotime($time_val));
+			$time[$time_val] = $time_text;
+		}
+		echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
 
 		// @format_off
-		$_medium = array ( 'medium_bwd' => array ( 'text' => 'B&W Digital', 'checked' => $formOptions['medium_bwd'] ),
-		'medium_cd' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cd'] ),
-		'medium_bwp' => array ( 'text' => 'B&W Print', 'checked' => $formOptions['medium_bwp'] ),
-		'medium_cp' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cp'] )
-		);
+		$_medium = array ( 'medium_bwd'		=> 'B&W Digital',
+							'medium_cd'		=> 'Color Digital',
+							'medium_bwp'	=> 'B&W Print',
+							'medium_cp'		=> 'Color Print'
+					);
+		$selectedMedium=array_search($competition->Medium, $_medium);
 		// @format_on
-		echo $classForm->checkboxes('Medium', '', key($_medium), $_medium);
-		unset($_medium);
+		echo $classForm->select('Medium', '', 'medium', $_medium, $selectedMedium);
 
 		// @format_off
-		$_classification = array ( 'class_b' => array ( 'text' => 'Beginner', 'checked' => $formOptions['class_b'] ),
-		'class_a' => array ( 'text' => 'Advanced', 'checked' => $formOptions['class_a'] ),
-		'class_s' => array ( 'text' => 'Salon', 'checked' => $formOptions['class_s'] )
-		);
+		$_classification = array ( 'class_b' => 'Beginner',
+									'class_a' => 'Advanced',
+									'class_s' => 'Salon',
+			);
 		// @format_on
-		echo $classForm->checkboxes('Classification', '', key($_classification), $_classification);
-		unset($_classification);
+		$selectedClassification = array_search($competition->Classification, $_classification);
+		echo $classForm->select('Classification', '', 'classification', $_classification, $selectedClassification);
 
 		$_max_entries = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5','6' => '6','7' => '7','8' => '8','9' => '9','10' => '10');
-		echo $classForm->select('Max Entries', '', 'max_entries', $_max_entries, $formOptions['max_entries']);
-		unset($_max_entries);
+		echo $classForm->select('Max Entries', '', 'max_entries', $_max_entries, $competition->Max_Entries);
 
 		$_judges = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5');
-		echo $classForm->select('No. Judges', '', 'judges', $_judges, $formOptions['judges']);
-		unset($_judges);
+		echo $classForm->select('No. Judges', '', 'judges', $_judges, $competition->Num_Judges);
 
-		$_special_event = array('special_event' => array('text' => '','checked' => $formOptions['special_event']));
+		$_special_event = array('special_event' => array('text' => '','checked' => $competition->Special_Event));
 		echo $classForm->checkboxes('Special Event', '', key($_special_event), $_special_event);
-		unset($_special_event);
+
+		$_closed = array('closed' => array('text' => '','checked' => ( $competition->closed = 'Y' ? TRUE : FALSE )));
+		echo $classForm->checkboxes('Closed', '', key($_closed), $_closed);
+
+		$_scored = array('scored' => array('text' => '','checked' => ( $competition->Scored = 'Y' ? TRUE : FALSE )));
+		echo $classForm->checkboxes('Scored', '', key($_scored), $_scored);
 
 		echo $classForm->close_table();
-		echo $classForm->submit('submit', 'Add Competition', array('class' => 'button-primary'));
-		echo $classForm->settings_fields('add', $option_name);
+		echo $classForm->submit('submit', 'Update Competition', array('class' => 'button-primary'));
+		echo $classForm->settings_fields('update', $option_name);
 		echo $classForm->close();
 		echo '<script type="text/javascript">' . "\n";
 		echo 'jQuery(function($) {' . "\n";
 		echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
+		echo '	$( "#close-date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
 		echo '});', "\n";
 		echo "</script>";
 		$this->admin_footer();
@@ -452,7 +368,7 @@ final class AVH_RPS_Admin
 		global $screen_layout_columns;
 
 		$messages = array();
-		if ( isset($_GET['update']) ) :
+		if ( isset($_GET['update']) ) {
 			switch ( $_GET['update'] )
 			{
 				case 'del':
@@ -461,12 +377,7 @@ final class AVH_RPS_Admin
 					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
 					break;
 			}
-
-
-
-
-
-			endif;
+		}
 
 		if ( !empty($messages) ) {
 			foreach ( $messages as $msg )
