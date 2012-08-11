@@ -1,5 +1,6 @@
 <?php
-if ( !defined( 'AVH_FRAMEWORK' ) ) die( 'You are not allowed to call this page directly.' );
+if ( !defined('AVH_FRAMEWORK') )
+	die('You are not allowed to call this page directly.');
 
 final class AVH_RPS_Define
 {
@@ -13,8 +14,7 @@ final class AVH_RPS_Define
 	 * Plugin Specfic Constants
 	 */
 	// Message Numbers
-
-
+	
 	// Menu Slugs for Admin menu
 	const MENU_SLUG = 'avh-rps-plugin';
 	const MENU_SLUG_COMPETITION = 'avh-rps-competition';
