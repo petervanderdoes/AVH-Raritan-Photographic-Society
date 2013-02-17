@@ -19,5 +19,6 @@ final class AVH_RPS_Define
 	const MENU_SLUG = 'avh-rps-plugin';
 	const MENU_SLUG_COMPETITION = 'avh-rps-competition';
 	const MENU_SLUG_COMPETITION_ADD = 'avh-rps-competition-add';
+	const MENU_SLUG_ENTRIES = 'avh-rps-entries';
 	const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
 }

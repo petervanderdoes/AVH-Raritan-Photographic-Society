@@ -32,6 +32,11 @@ final class AVH_RPS_Admin
 	 * @var AVH_RPS_CompetitionList
 	 */
 	private $_competition_list;
+	/**
+	 *
+	 * @var AVH_RPS_EntriesList
+	 */
+	private $_entries_list;
 	private $_add_disabled_notice = false;
 	private $_hooks = array();
 	private $_referer;
@@ -89,6 +94,7 @@ final class AVH_RPS_Admin
 			// Role management capabilities.
 			$role->add_cap('rps_edit_competition_classification');
 			$role->add_cap('rps_edit_competitions');
+			$role->add_cap('rps_edit_entries');
 		}
 	}
 
@@ -111,11 +117,15 @@ final class AVH_RPS_Admin
 		wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
 
 		add_menu_page('RPS Competitions', 'RPS Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
+
 		$this->_hooks['avhrps_menu_competition'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
 		$this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
 
 		add_action('load-' . $this->_hooks['avhrps_menu_competition'], array($this,'actionLoadPagehookCompetition'));
 		add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array($this,'actionLoadPagehookCompetitionAdd'));
+
+		$this->_hooks['avhrps_menu_entries'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Entries', 'All Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
+		add_action('load-' . $this->_hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
 	}
 
 	public function actionLoadPagehookCompetition ()
@@ -402,8 +412,6 @@ final class AVH_RPS_Admin
 		$this->_competition_list->views();
 		echo '<form id="rps-competition-form" action="" method="get">';
 		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_COMPETITION . '">';
-		// echo '<input type="hidden" name="ip_status" value="' . esc_attr($ip_status) . '" />';
-		echo '<input type="hidden" name="pagegen_timestamp" value="' . esc_attr(current_time('mysql', 1)) . '" />';
 
 		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_competition_list->get_pagination_arg('total_items')) . '" />';
 		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('per_page')) . '" />';
@@ -599,6 +607,170 @@ final class AVH_RPS_Admin
 		echo '});', "\n";
 		echo "</script>";
 		$this->admin_footer();
+	}
+
+	public function actionLoadPagehookEntries ()
+	{
+		global $current_screen;
+
+		$this->_entries_list = $this->_classes->load_class('EntriesList', 'plugin', true);
+		$this->_handleRequestEntries();
+
+		add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
+		// WordPress core Styles and Scripts
+		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script('common');
+		wp_enqueue_script('wp-lists');
+		wp_enqueue_script('postbox');
+		wp_enqueue_style('css/dashboard');
+		// Plugin Style and Scripts
+		// wp_enqueue_script('avhrps-competition-js');
+
+		wp_enqueue_style('avhrps-admin-css');
+		wp_enqueue_style('avhrps-jquery-css');
+
+	}
+
+	/**
+	 * Handle the HTTP Request before the page of the menu Competition is displayed.
+	 * This is needed for the redirects.
+	 */
+	private function _handleRequestEntries ()
+	{
+		if ( empty($_REQUEST) ) {
+			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr(stripslashes($_SERVER['REQUEST_URI'])) . '" />';
+		}
+		if ( isset($_REQUEST['wp_http_referer']) ) {
+			$this->_redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
+			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr($this->_redirect) . '" />';
+		} else {
+			$this->_redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
+			$this->_referer = '';
+		}
+
+		$doAction = $this->_entries_list->current_action();
+		switch ( $doAction )
+		{
+// 			case 'delete':
+// 				check_admin_referer('bulk-entries');
+// 				if ( empty($_REQUEST['entries']) && empty($_REQUEST['entries']) ) {
+// 					wp_redirect($this->_redirect);
+// 					exit();
+// 				}
+// 				break;
+
+// 			case 'edit':
+// 				if ( empty($_REQUEST['entries']) ) {
+// 					wp_redirect($this->_redirect);
+// 					exit();
+// 				}
+// 				break;
+// 			case 'dodelete':
+// 				check_admin_referer('delete-entries');
+// 				if ( empty($_REQUEST['entries']) ) {
+// 					wp_redirect($this->_redirect);
+// 					exit();
+// 				}
+// 				$competitionIds = $_REQUEST['entries'];
+
+// 				$deleteCount = 0;
+
+// 				foreach ( (array) $competitionIds as $id ) {
+// 					$id = (int) $id;
+// 					$this->_rpsdb->deleteCompetition($id);
+// 					++$deleteCount;
+// 				}
+// 				$redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'dodelete'), $redirect);
+// 				wp_redirect($this->_redirect);
+// 				break;
+
+			default:
+				if ( !empty($_GET['_wp_http_referer']) ) {
+					wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
+					exit();
+				}
+				$pagenum = $this->_entries_list->get_pagenum();
+				$this->_entries_list->prepare_items();
+				$total_pages = $this->_entries_list->get_pagination_arg('total_pages');
+				if ( $pagenum > $total_pages && $total_pages > 0 ) {
+					wp_redirect(add_query_arg('paged', $total_pages));
+					exit();
+				}
+				break;
+		}
+	}
+	/**
+	 * Display the page for the menu Entries
+	 */
+	public function menuEntries ()
+	{
+		$doAction = $this->_entries_list->current_action();
+		switch ( $doAction )
+		{
+			case 'delete':
+				$this->_displayPageCompetitionDelete();
+				break;
+
+			case 'edit':
+				$this->_displayPageCompetitionEdit();
+				break;
+
+			default:
+				$this->_displayPageEntriesList();
+				break;
+		}
+	}
+
+	/**
+	 * Display the entries in a list
+	 */
+	private function _displayPageEntriesList ()
+	{
+		global $screen_layout_columns;
+
+		$messages = array();
+		if ( isset($_GET['update']) ) {
+			switch ( $_GET['update'] )
+			{
+				case 'del':
+				case 'del_many':
+					$deleteCount = isset($_GET['deleteCount']) ? (int) $_GET['deleteCount'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+					break;
+			}
+		}
+
+		if ( !empty($messages) ) {
+			foreach ( $messages as $msg )
+				echo $msg;
+		}
+
+		echo '<div class="wrap avhrps-wrap">';
+		echo $this->_displayIcon('index');
+		echo '<h2>RPS Competition: ' . __('Entries', 'avh-rps');
+
+		if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
+			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');
+		}
+		echo '</h2>';
+
+		$this->_entries_list->views();
+		echo '<form id="rps-entries-form" action="" method="get">';
+		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_ENTRIES . '">';
+
+		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_entries_list->get_pagination_arg('total_items')) . '" />';
+		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('per_page')) . '" />';
+		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('page')) . '" />';
+
+		if ( isset($_REQUEST['paged']) ) {
+			echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
+		}
+		$this->_entries_list->display();
+		echo '</form>';
+
+		echo '<div id="ajax-response"></div>';
+		$this->_printAdminFooter();
+		echo '</div>';
 	}
 
 	/**
