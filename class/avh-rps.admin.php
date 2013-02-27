@@ -310,7 +310,7 @@ final class AVH_RPS_Admin
 
 		$this->admin_header('Edit Competition');
 		$classForm->setOption_name($option_name);
-		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionedit'));
+		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION, array('method' => 'post','id' => 'rps-competitionedit'));
 		echo $classForm->open_table();
 		echo $classForm->text('Date', '', 'date', $formOptions['date']);
 		echo $classForm->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
@@ -466,59 +466,62 @@ final class AVH_RPS_Admin
 			);
 		// @format_on
 		$formOptions = $formDefaultOptions;
-		if ( isset($_POST['action']) && ( 'add' == $_POST['action'] ) ) {
-			check_admin_referer($option_name, '_wpnonce_' . $option_name);
-			$formNewOptions = $formDefaultOptions;
-			$formOptions = $_POST[$option_name];
+		if ( isset($_POST['action']) ) {
+			switch ( $_POST['action'] )
+			{
+				case 'add':
+					check_admin_referer($option_name, '_wpnonce_' . $option_name);
+					$formNewOptions = $formDefaultOptions;
+					$formOptions = $_POST[$option_name];
 
-			$mediumArray = array();
-			$classArray = array();
-			$errorMsgArray = array();
-			foreach ( $formDefaultOptions as $optionKey => $optionValue ) {
+					$mediumArray = array();
+					$classArray = array();
+					$errorMsgArray = array();
+					foreach ( $formDefaultOptions as $optionKey => $optionValue ) {
 
-				// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to FALSE.
-				$newval = ( isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : FALSE );
-				$current_value = $formDefaultOptions[$optionKey];
-				switch ( $optionKey )
-				{
-					case 'date':
-						// Validate
-						break;
+						// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to FALSE.
+						$newval = ( isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : FALSE );
+						$current_value = $formDefaultOptions[$optionKey];
+						switch ( $optionKey )
+						{
+							case 'date':
+								// Validate
+								break;
 
-					case 'theme':
-						// Validate
-						break;
-				}
-				if ( substr($optionKey, 0, 7) == 'medium_' ) {
-					$formNewOptions[$optionKey] = (bool) $newval;
-					if ( $formNewOptions[$optionKey] ) {
-						$mediumArray[] = $optionKey;
-						continue;
+							case 'theme':
+								// Validate
+								break;
+						}
+						if ( substr($optionKey, 0, 7) == 'medium_' ) {
+							$formNewOptions[$optionKey] = (bool) $newval;
+							if ( $formNewOptions[$optionKey] ) {
+								$mediumArray[] = $optionKey;
+								continue;
+							}
+						}
+						if ( substr($optionKey, 0, 6) == 'class_' ) {
+							$formNewOptions[$optionKey] = (bool) $newval;
+							if ( $formNewOptions[$optionKey] ) {
+								$classArray[] = $optionKey;
+								continue;
+							}
+						}
+						$formNewOptions[$optionKey] = $newval;
 					}
-				}
-				if ( substr($optionKey, 0, 6) == 'class_' ) {
-					$formNewOptions[$optionKey] = (bool) $newval;
-					if ( $formNewOptions[$optionKey] ) {
-						$classArray[] = $optionKey;
-						continue;
+
+					if ( empty($mediumArray) ) {
+						$errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
 					}
-				}
-				$formNewOptions[$optionKey] = $newval;
-			}
 
-			if ( empty($mediumArray) ) {
-				$errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
-			}
+					if ( empty($classArray) ) {
+						$errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
+					}
 
-			if ( empty($classArray) ) {
-				$errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
-			}
+					if ( empty($errorMsgArray) ) {
+						$this->_message = 'Competition Added';
+						$this->_status = 'updated';
 
-			if ( empty($errorMsgArray) ) {
-				$this->_message = 'Competition Added';
-				$this->_status = 'updated';
-
-				// @format_off
+						// @format_off
 				// @TODO: This is needed because of the old program, someday it needs to be cleaned up.
 				$medium_convert = array(
 							'medium_bwd'	=> 'B&W Digital',
@@ -533,27 +536,37 @@ final class AVH_RPS_Admin
 						'class_s' => 'Salon'
 				);
 				// @format_on
-				$data['Competition_Date'] = $formNewOptions['date'];
-				$data['Theme'] = $formNewOptions['theme'];
-				$data['Max_Entries'] = $formNewOptions['max_entries'];
-				$data['Num_Judges'] = $formNewOptions['judges'];
-				$data['Special_Event'] = ( $formNewOptions['special_event'] ? 'Y' : 'N' );
-				foreach ( $mediumArray as $medium ) {
-					$data['Medium'] = $medium_convert[$medium];
-					foreach ( $classArray as $classification ) {
-						$data['Classification'] = $classification_convert[$classification];
-						$competition_ID = $this->_rpsdb->insertCompetition($data);
-						if ( is_wp_error($competition_ID) ) {
-							wp_die($competition_ID);
+						$data['Competition_Date'] = $formNewOptions['date'];
+						$data['Theme'] = $formNewOptions['theme'];
+						$data['Max_Entries'] = $formNewOptions['max_entries'];
+						$data['Num_Judges'] = $formNewOptions['judges'];
+						$data['Special_Event'] = ( $formNewOptions['special_event'] ? 'Y' : 'N' );
+						foreach ( $mediumArray as $medium ) {
+							$data['Medium'] = $medium_convert[$medium];
+							foreach ( $classArray as $classification ) {
+								$data['Classification'] = $classification_convert[$classification];
+								$competition_ID = $this->_rpsdb->insertCompetition($data);
+								if ( is_wp_error($competition_ID) ) {
+									wp_die($competition_ID);
+								}
+							}
 						}
+					} else {
+						$this->_message = $errorMsgArray;
+						$this->_status = 'error';
 					}
-				}
-			} else {
-				$this->_message = $errorMsgArray;
-				$this->_status = 'error';
+					$this->_displayMessage();
+					$formOptions = $formNewOptions;
+					break;
+
+				case 'update':
+					$form_name='competition-edit';
+					check_admin_referer($form_name, '_wpnonce_' . $form_name);
+					$formNewOptions = $formDefaultOptions;
+					$formOptions = $_POST[$form_name];
+
+					break;
 			}
-			$this->_displayMessage();
-			$formOptions = $formNewOptions;
 		}
 
 		// @var $classForm AVH_Form
