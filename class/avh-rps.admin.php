@@ -2,6 +2,7 @@
 
 final class AVH_RPS_Admin
 {
+	/* @var $classForm AVH_Form */
 	/**
 	 * Message management
 	 */
@@ -254,12 +255,13 @@ final class AVH_RPS_Admin
 	private function _displayPageCompetitionDelete ()
 	{
 		global $wpdb;
+
 		if ( empty($_REQUEST['competitions']) ) {
 			$competitionIdsArray = array(intval($_REQUEST['competition']));
 		} else {
 			$competitionIdsArray = (array) $_REQUEST['competitions'];
 		}
-		// @var $classForm AVH_Form
+
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 
 		$this->admin_header('Delete Competitions');
@@ -297,7 +299,23 @@ final class AVH_RPS_Admin
 	private function _displayPageCompetitionEdit ()
 	{
 		global $wpdb;
+		if ( isset($_POST['update']) ) {
+			$this->_updateCompetition();
+		}
+		$vars = ( array('action','redirect','competition','wp_http_referer') );
+		for ( $i = 0; $i < count($vars); $i += 1 ) {
+			$var = $vars[$i];
+			if ( empty($_POST[$var]) ) {
+				if ( empty($_GET[$var]) )
+					$$var = '';
+				else
+					$$var = $_GET[$var];
+			} else {
+				$$var = $_POST[$var];
+			}
+		}
 		$option_name = 'competition-edit';
+		$wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
 
 		$competition = $this->_rpsdb->getCompetitionByID2($_REQUEST['competition']);
 
@@ -309,8 +327,19 @@ final class AVH_RPS_Admin
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 
 		$this->admin_header('Edit Competition');
+
+		if ( isset($_POST['update']) ) {
+			echo '<div id="message" class="updated">';
+			echo '<p><strong>Competition updated.</strong></p>';
+			if ( $wp_http_referer ) {
+				echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Competitions</a></p>';
+			}
+			echo '</div>';
+		}
+
 		$classForm->setOption_name($option_name);
-		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION, array('method' => 'post','id' => 'rps-competitionedit'));
+		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
+		echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-competitionedit'));
 		echo $classForm->open_table();
 		echo $classForm->text('Date', '', 'date', $formOptions['date']);
 		echo $classForm->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
@@ -351,15 +380,20 @@ final class AVH_RPS_Admin
 		$_special_event = array('special_event' => array('text' => '','checked' => $competition->Special_Event));
 		echo $classForm->checkboxes('Special Event', '', key($_special_event), $_special_event);
 
-		$_closed = array('closed' => array('text' => '','checked' => ( $competition->closed = 'Y' ? TRUE : FALSE )));
+		$_closed = array('closed' => array('text' => '','checked' => ( $competition->Closed == 'Y' ? TRUE : FALSE )));
 		echo $classForm->checkboxes('Closed', '', key($_closed), $_closed);
 
-		$_scored = array('scored' => array('text' => '','checked' => ( $competition->Scored = 'Y' ? TRUE : FALSE )));
+		$_scored = array('scored' => array('text' => '','checked' => ( $competition->Scored == 'Y' ? TRUE : FALSE )));
 		echo $classForm->checkboxes('Scored', '', key($_scored), $_scored);
 
 		echo $classForm->close_table();
 		echo $classForm->submit('submit', 'Update Competition', array('class' => 'button-primary'));
-		echo $classForm->settings_fields('update', $option_name);
+		if ( $wp_http_referer ) {
+			echo $classForm->hidden('wp_http_referer', esc_url($wp_http_referer));
+		}
+		echo $classForm->hidden('competition', $competition->ID);
+		echo $classForm->hidden('update', true);
+		echo $classForm->settings_fields('edit', $option_name);
 		echo $classForm->close();
 		echo '<script type="text/javascript">' . "\n";
 		echo 'jQuery(function($) {' . "\n";
@@ -557,14 +591,6 @@ final class AVH_RPS_Admin
 					}
 					$this->_displayMessage();
 					$formOptions = $formNewOptions;
-					break;
-
-				case 'update':
-					$form_name='competition-edit';
-					check_admin_referer($form_name, '_wpnonce_' . $form_name);
-					$formNewOptions = $formDefaultOptions;
-					$formOptions = $_POST[$form_name];
-
 					break;
 			}
 		}
@@ -988,6 +1014,49 @@ final class AVH_RPS_Admin
 		update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
 	}
 
+	private function _updateCompetition ()
+	{
+		$formOptions = $_POST['competition-edit'];
+
+		$formOptionsNew['date'] = $formOptions['date'];
+		$formOptionsNew['close-date'] = $formOptions['close-date'];
+		$formOptionsNew['close-time'] = $formOptions['close-time'];
+		$formOptionsNew['theme'] = $formOptions['theme'];
+		$formOptionsNew['medium'] = $formOptions['medium'];
+		$formOptionsNew['classification'] = $formOptions['classification'];
+		$formOptionsNew['max_entries'] = $formOptions['max_entries'];
+		$formOptionsNew['judges'] = $formOptions['judges'];
+		$formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
+		$formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
+		$formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
+		// @format_off
+		$_medium = array ( 'medium_bwd'		=> 'B&W Digital',
+							'medium_cd'		=> 'Color Digital',
+							'medium_bwp'	=> 'B&W Print',
+							'medium_cp'		=> 'Color Print'
+					);
+		$selectedMedium=array_search($competition->Medium, $_medium);
+		// @format_on
+
+		// @format_off
+		$_classification = array ( 'class_b' => 'Beginner',
+									'class_a' => 'Advanced',
+									'class_s' => 'Salon',
+			);
+		// @format_on
+		$data['ID'] = $_REQUEST['competition'];
+		$data['Competition_Date'] = $formOptionsNew['date'];
+		$data['Close_Date'] = $formOptionsNew['close-date'];
+		$data['Theme'] = $formOptionsNew['theme'];
+		$data['Max_Entries'] = $formOptionsNew['max_entries'];
+		$data['Num_Judges'] = $formOptionsNew['judges'];
+		$data['Special_Event'] = ( $formOptionsNew['special_event'] ? 'Y' : 'N' );
+		$data['Closed'] = ( $formOptionsNew['closed'] ? 'Y' : 'N' );
+		$data['Scored'] = ( $formOptionsNew['scored'] ? 'Y' : 'N' );
+		$data['Medium'] = $_medium[$formOptionsNew['medium']];
+		$data['Classification'] = $_classification[$formOptionsNew['classification']];
+		$competition_ID = $this->_rpsdb->insertCompetition($data);
+	}
 	// ############ Admin WP Helper ##############
 
 	/**
