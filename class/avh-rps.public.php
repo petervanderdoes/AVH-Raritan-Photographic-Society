@@ -103,6 +103,7 @@ class AVH_RPS_Public
 	/**
 	 * Enter description here .
 	 *
+	 *
 	 * ..
 	 */
 	private function getCompetitionDates ()
@@ -114,7 +115,7 @@ class AVH_RPS_Public
 			if ( !mysql_select_db($this->_settings->dbname) )
 				throw new Exception(mysql_error());
 		} catch (Exception $e) {
-			$this->doRESTError("Failed to obtain database handle " . $e->getMessage());
+			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
 			die($e->getMessage());
 		}
 		try {
@@ -133,7 +134,7 @@ class AVH_RPS_Public
 			if ( !$rs = mysql_query($select . $where) )
 				throw new Exception(mysql_error());
 		} catch (Exception $e) {
-			$this->doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
+			$this->_doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
 			die($e->getMessage());
 		}
 		$dom = new DOMDocument('1.0', 'utf-8');
@@ -168,14 +169,14 @@ class AVH_RPS_Public
 			if ( !mysql_select_db($this->_settings->dbname) )
 				throw new Exception(mysql_error());
 		} catch (Exception $e) {
-			$this->doRESTError("Failed to obtain database handle " . $e->getMessage());
+			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
 			die($e->getMessage());
 		}
 		if ( $db ) {
 			$user = wp_authenticate($username, $password);
 			if ( is_wp_error($user) ) {
 				$a = strip_tags($user->get_error_message());
-				$this->doRESTError($a);
+				$this->_doRESTError($a);
 				die();
 			}
 			// @todo Check if the user has the role needed.
@@ -205,7 +206,7 @@ class AVH_RPS_Public
 			if ( !$rs = mysql_query($sql) )
 				throw new Exception(mysql_error());
 		} catch (Exception $e) {
-			$this->doRESTError("Failed to SELECT competition records with date = " . $this->comp_date . " from database - " . $e->getMessage());
+			$this->_doRESTError("Failed to SELECT competition records with date = " . $this->comp_date . " from database - " . $e->getMessage());
 			die();
 		}
 		// Create a Competitions node
@@ -240,7 +241,7 @@ class AVH_RPS_Public
 				if ( !$rs2 = mysql_query($sql) )
 					throw new Exception(mysql_error());
 			} catch (Exception $e) {
-				$this->doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
+				$this->_doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
 				die();
 			}
 			// Create an Entries node
@@ -279,11 +280,21 @@ class AVH_RPS_Public
 		echo $dom->saveXML();
 	}
 
-	private function doRESTError ($errMsg)
+	private function _doRESTError ($errMsg)
+	{
+		$this->_doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
+	}
+
+	private function _doRESTSuccess ($message)
+	{
+		$this->_doRESTResponse("ok", $message);
+	}
+
+	private function _doRESTResponse ($status, $message)
 	{
 		echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
-		echo '<rsp stat="fail">' . "\n";
-		echo '	<err msg="' . $errMsg . '" >' . "</err>\n";
+		echo '<rsp stat="' . $status . '">' . "\n";
+		echo '	' . $message . "\n";
 		echo "</rsp>\n";
 	}
 
@@ -1529,7 +1540,6 @@ class AVH_RPS_Public
 
 	/**
 	 * Enter description here .
-	 *
 	 * ..
 	 */
 	private function _checkUploadEntryTitle ()
