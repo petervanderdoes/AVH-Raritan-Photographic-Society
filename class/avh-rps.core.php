@@ -61,7 +61,7 @@ class AVH_RPS_Core
 		$this->_default_options = array();
 		// add_action('init', array($this,'handleInitializePlugin'),10);
 		$this->handleInitializePlugin();
-		
+
 		return;
 	}
 
@@ -79,7 +79,7 @@ class AVH_RPS_Core
 			$this->_doUpgrade($old_db_version);
 			update_option(avhrps_db_version, $this->_db_version);
 		}
-		
+
 		$this->_settings->storeSetting('club_name', "Raritan Photographic Society");
 		$this->_settings->storeSetting('club_short_name', "RPS");
 		$this->_settings->storeSetting('club_max_entries_per_member_per_date', 4);
@@ -89,10 +89,10 @@ class AVH_RPS_Core
 		// Database credentials
 		$this->_settings->storeSetting('host', 'localhost');
 		$this->_settings->storeSetting('dbname', 'avirtu2_raritdata');
-		$this->_settings->storeSetting('uname', 'avirtu2_rarit0');
+		$this->_settings->storeSetting('uname', 'avirtu2_rarit1');
 		$this->_settings->storeSetting('pw', '1Hallo@Done#');
 		$this->_settings->storeSetting('digital_chair_email', 'digitalchair@raritanphoto.com');
-		
+
 		$this->_settings->storeSetting('siteurl', get_option('siteurl'));
 		$this->_settings->storeSetting('graphics_url', plugins_url('images', $this->_settings->plugin_basename));
 		$this->_settings->storeSetting('js_url', plugins_url('js', $this->_settings->plugin_basename));
@@ -107,7 +107,7 @@ class AVH_RPS_Core
 
 	/**
 	 * Setup DB Tables
-	 * 
+	 *
 	 * @return unknown_type
 	 */
 	// private function _setTables()
@@ -116,7 +116,7 @@ class AVH_RPS_Core
 	// // add DB pointer
 	// $wpdb->avhfdasipcache = $wpdb->prefix . 'avhfdas_ipcache';
 	// }
-	
+
 	/**
 	 * Checks if running version is newer and do upgrades if necessary
 	 */
@@ -145,10 +145,10 @@ class AVH_RPS_Core
 		$dateParts = explode(" ", $row['Competition_Date']);
 		$path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'];
 		$file_name = $row['Title'] . '+' . $row['Username'];
-		
+
 		if ( !is_dir("$path/thumbnails") )
 			mkdir("$path/thumbnails", 0755);
-		
+
 		if ( !file_exists("$path/thumbnails/$file_name" . "_$size.jpg") ) {
 			$this->rpsResizeImage($row['Server_File_Name'], "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
 		}
@@ -157,7 +157,7 @@ class AVH_RPS_Core
 	function rpsResizeImage ($image_name, $thumb_name, $size, $quality, $maker)
 	{
 		$maker = trim($maker);
-		
+
 		// Open the original image
 		if ( !file_exists($image_name) ) {
 			return;
@@ -183,7 +183,7 @@ class AVH_RPS_Core
 		// Downsize the original image
 		$thumb_img = imagecreatetruecolor($nw, $nh);
 		imagecopyresampled($thumb_img, $original_img, 0, 0, 0, 0, $nw, $nh, $w, $h);
-		
+
 		// If this is the 400px image, write the copyright notice onto the image
 		if ( !( empty($maker) ) ) {
 			$dateParts = explode("-", $this->_settings->comp_date);
@@ -196,14 +196,14 @@ class AVH_RPS_Core
 			$height = imagesy($thumb_img);
 			$textLength = imagefontwidth($font) * strlen($text);
 			$textHeight = imagefontwidth($font);
-			
+
 			// imagestring($img, $font, 5, $height/2, $text, $red);
 			imagestring($thumb_img, $font, 7, $height - ( $textHeight * 2 ), $text, $black);
 			imagestring($thumb_img, $font, 5, $height - ( $textHeight * 2 ) - 2, $text, $white);
 		}
 		// Write the downsized image back to disk
 		imagejpeg($thumb_img, $thumb_name, $quality);
-		
+
 		// Free up memory
 		imagedestroy($thumb_img);
 	}
@@ -214,18 +214,18 @@ class AVH_RPS_Core
 		$thumb_dir = ABSPATH . '/' . $file_parts['dirname'] . '/thumbnails';
 		if ( !is_dir($thumb_dir) )
 			mkdir($thumb_dir, 0755);
-		
+
 		if ( !file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg') ) {
 			$this->rpsResizeImage(ABSPATH . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
 		}
-		
+
 		$p = explode('/', $file_parts['dirname']);
 		$path = site_url() . '/';
 		foreach ( $p as $part ) {
 			$path .= rawurlencode($part) . '/';
 		}
 		$path .= 'thumbnails/';
-		
+
 		return ( $path . rawurlencode($file_parts['filename'] . '_' . $size . '.jpg') );
 	}
 
@@ -370,13 +370,13 @@ class AVH_RPS_Core
 	{
 		if ( !$option )
 			return false;
-		
+
 		if ( !isset($this->_options) )
 			$this->_loadOptions();
-		
+
 		if ( !is_array($this->_options) || empty($this->_options[$option]) )
 			return false;
-		
+
 		return $this->_options[$option];
 	}
 
@@ -413,7 +413,7 @@ class AVH_RPS_Core
 
 	/**
 	 * Save all current data to the DB
-	 * 
+	 *
 	 * @param array $data
 	 *
 	 */

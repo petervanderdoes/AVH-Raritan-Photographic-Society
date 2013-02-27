@@ -102,6 +102,7 @@ class AVH_RPS_Public
 
 	/**
 	 * Enter description here .
+	 *
 	 * ..
 	 */
 	private function getCompetitionDates ()
@@ -162,13 +163,13 @@ class AVH_RPS_Public
 		$this->comp_date = $_REQUEST['comp_date'];
 		$this->requested_medium = $_REQUEST['medium'];
 		try {
-			if ( !$db = @mysql_connect($this->host, $this->uname, $this->pw) )
+			if ( !$db = @mysql_connect($this->_settings->host, $this->_settings->uname, $this->_settings->pw) )
 				throw new Exception(mysql_error());
-			if ( !mysql_select_db($this->dbname) )
+			if ( !mysql_select_db($this->_settings->dbname) )
 				throw new Exception(mysql_error());
 		} catch (Exception $e) {
 			$this->doRESTError("Failed to obtain database handle " . $e->getMessage());
-			die();
+			die($e->getMessage());
 		}
 		if ( $db ) {
 			$user = wp_authenticate($username, $password);
@@ -180,6 +181,7 @@ class AVH_RPS_Public
 			// @todo Check if the user has the role needed.
 			$this->Send_Competitions($db);
 		}
+		die();
 	}
 
 	private function Send_Competitions ($comp_date, $requested_medium, $db)
@@ -267,10 +269,9 @@ class AVH_RPS_Public
 				$award_node = $entry->AppendChild($dom->CreateElement('Award'));
 				$award_node->AppendChild($dom->CreateTextNode($award));
 				// Convert the absolute server file name into a URL
-				$limit = 1;
-				$relative_path = str_replace(array('\\','#'), array('/','%23'), str_replace($_SERVER['DOCUMENT_ROOT'], '', $recs2['Server_File_Name'], $limit));
+				$image_url = site_url(str_replace('/home/rarit0/public_html', '', $recs2['Server_File_Name']));
 				$url_node = $entry->AppendChild($dom->CreateElement('Image_URL'));
-				$url_node->AppendChild($dom->CreateTextNode("http://" . $_SERVER['SERVER_NAME'] . $relative_path));
+				$url_node->AppendChild($dom->CreateTextNode($image_url));
 			}
 		}
 		// Send the completed XML response back to the client
@@ -1528,6 +1529,7 @@ class AVH_RPS_Public
 
 	/**
 	 * Enter description here .
+	 *
 	 * ..
 	 */
 	private function _checkUploadEntryTitle ()
