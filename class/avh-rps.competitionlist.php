@@ -264,7 +264,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 		$url = admin_url('admin.php') . '?';
 
 		$queryReferer = array ('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
-		$wp_http_referer='/admin.php?' . http_build_query($queryReferer, '', '&');
+		$wp_http_referer='admin.php?' . http_build_query($queryReferer, '', '&');
 
 		$nonceDelete = wp_create_nonce('bulk-competitions');
 		$queryDelete = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
