@@ -2,6 +2,7 @@
 
 final class AVH_RPS_Admin
 {
+	/* @var $classForm AVH_Form */
 	/**
 	 * Message management
 	 */
@@ -32,6 +33,11 @@ final class AVH_RPS_Admin
 	 * @var AVH_RPS_CompetitionList
 	 */
 	private $_competition_list;
+	/**
+	 *
+	 * @var AVH_RPS_EntriesList
+	 */
+	private $_entries_list;
 	private $_add_disabled_notice = false;
 	private $_hooks = array();
 	private $_referer;
@@ -89,6 +95,7 @@ final class AVH_RPS_Admin
 			// Role management capabilities.
 			$role->add_cap('rps_edit_competition_classification');
 			$role->add_cap('rps_edit_competitions');
+			$role->add_cap('rps_edit_entries');
 		}
 	}
 
@@ -110,12 +117,17 @@ final class AVH_RPS_Admin
 		wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
 		wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
 
-		add_menu_page('RPS Competitions', 'RPS Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
+		add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', AVH_RPS_Define::MENU_POSITION_COMPETITION);
+
 		$this->_hooks['avhrps_menu_competition'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
 		$this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
 
 		add_action('load-' . $this->_hooks['avhrps_menu_competition'], array($this,'actionLoadPagehookCompetition'));
 		add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array($this,'actionLoadPagehookCompetitionAdd'));
+
+		add_menu_page('All Entries', 'Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'), '', AVH_RPS_Define::MENU_POSITION_ENTRIES);
+		$this->_hooks['avhrps_menu_entries'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
+		add_action('load-' . $this->_hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
 	}
 
 	public function actionLoadPagehookCompetition ()
@@ -243,12 +255,13 @@ final class AVH_RPS_Admin
 	private function _displayPageCompetitionDelete ()
 	{
 		global $wpdb;
+
 		if ( empty($_REQUEST['competitions']) ) {
 			$competitionIdsArray = array(intval($_REQUEST['competition']));
 		} else {
 			$competitionIdsArray = (array) $_REQUEST['competitions'];
 		}
-		// @var $classForm AVH_Form
+
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 
 		$this->admin_header('Delete Competitions');
@@ -286,7 +299,23 @@ final class AVH_RPS_Admin
 	private function _displayPageCompetitionEdit ()
 	{
 		global $wpdb;
+		if ( isset($_POST['update']) ) {
+			$this->_updateCompetition();
+		}
+		$vars = ( array('action','redirect','competition','wp_http_referer') );
+		for ( $i = 0; $i < count($vars); $i += 1 ) {
+			$var = $vars[$i];
+			if ( empty($_POST[$var]) ) {
+				if ( empty($_GET[$var]) )
+					$$var = '';
+				else
+					$$var = $_GET[$var];
+			} else {
+				$$var = $_POST[$var];
+			}
+		}
 		$option_name = 'competition-edit';
+		$wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
 
 		$competition = $this->_rpsdb->getCompetitionByID2($_REQUEST['competition']);
 
@@ -298,8 +327,19 @@ final class AVH_RPS_Admin
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 
 		$this->admin_header('Edit Competition');
+
+		if ( isset($_POST['update']) ) {
+			echo '<div id="message" class="updated">';
+			echo '<p><strong>Competition updated.</strong></p>';
+			if ( $wp_http_referer ) {
+				echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Competitions</a></p>';
+			}
+			echo '</div>';
+		}
+
 		$classForm->setOption_name($option_name);
-		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionedit'));
+		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
+		echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-competitionedit'));
 		echo $classForm->open_table();
 		echo $classForm->text('Date', '', 'date', $formOptions['date']);
 		echo $classForm->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
@@ -340,15 +380,20 @@ final class AVH_RPS_Admin
 		$_special_event = array('special_event' => array('text' => '','checked' => $competition->Special_Event));
 		echo $classForm->checkboxes('Special Event', '', key($_special_event), $_special_event);
 
-		$_closed = array('closed' => array('text' => '','checked' => ( $competition->closed = 'Y' ? TRUE : FALSE )));
+		$_closed = array('closed' => array('text' => '','checked' => ( $competition->Closed == 'Y' ? TRUE : FALSE )));
 		echo $classForm->checkboxes('Closed', '', key($_closed), $_closed);
 
-		$_scored = array('scored' => array('text' => '','checked' => ( $competition->Scored = 'Y' ? TRUE : FALSE )));
+		$_scored = array('scored' => array('text' => '','checked' => ( $competition->Scored == 'Y' ? TRUE : FALSE )));
 		echo $classForm->checkboxes('Scored', '', key($_scored), $_scored);
 
 		echo $classForm->close_table();
 		echo $classForm->submit('submit', 'Update Competition', array('class' => 'button-primary'));
-		echo $classForm->settings_fields('update', $option_name);
+		if ( $wp_http_referer ) {
+			echo $classForm->hidden('wp_http_referer', esc_url($wp_http_referer));
+		}
+		echo $classForm->hidden('competition', $competition->ID);
+		echo $classForm->hidden('update', true);
+		echo $classForm->settings_fields('edit', $option_name);
 		echo $classForm->close();
 		echo '<script type="text/javascript">' . "\n";
 		echo 'jQuery(function($) {' . "\n";
@@ -356,7 +401,7 @@ final class AVH_RPS_Admin
 		echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
 		echo '   showButtonPanel: true, ' . "\n";
 		echo '   buttonImageOnly: true, ' . "\n";
-		echo '   buttonImage: "'.$this->_settings->getSetting('plugin_url') .'/images/calendar.png", ' . "\n";
+		echo '   buttonImage: "' . $this->_settings->getSetting('plugin_url') . '/images/calendar.png", ' . "\n";
 		echo '   showOn: "both"' . "\n";
 		echo ' });' . "\n";
 		echo '	$( "#date" ).datepicker();' . "\n";
@@ -392,7 +437,7 @@ final class AVH_RPS_Admin
 
 		echo '<div class="wrap avhrps-wrap">';
 		echo $this->_displayIcon('index');
-		echo '<h2>RPS Competition: ' . __('Competitions', 'avh-rps');
+		echo '<h2>Competitions: ' . __('All Competitions', 'avh-rps');
 
 		if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
 			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');
@@ -402,8 +447,6 @@ final class AVH_RPS_Admin
 		$this->_competition_list->views();
 		echo '<form id="rps-competition-form" action="" method="get">';
 		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_COMPETITION . '">';
-		// echo '<input type="hidden" name="ip_status" value="' . esc_attr($ip_status) . '" />';
-		echo '<input type="hidden" name="pagegen_timestamp" value="' . esc_attr(current_time('mysql', 1)) . '" />';
 
 		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_competition_list->get_pagination_arg('total_items')) . '" />';
 		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('per_page')) . '" />';
@@ -457,59 +500,62 @@ final class AVH_RPS_Admin
 			);
 		// @format_on
 		$formOptions = $formDefaultOptions;
-		if ( isset($_POST['action']) && ( 'add' == $_POST['action'] ) ) {
-			check_admin_referer($option_name, '_wpnonce_' . $option_name);
-			$formNewOptions = $formDefaultOptions;
-			$formOptions = $_POST[$option_name];
+		if ( isset($_POST['action']) ) {
+			switch ( $_POST['action'] )
+			{
+				case 'add':
+					check_admin_referer($option_name, '_wpnonce_' . $option_name);
+					$formNewOptions = $formDefaultOptions;
+					$formOptions = $_POST[$option_name];
 
-			$mediumArray = array();
-			$classArray = array();
-			$errorMsgArray = array();
-			foreach ( $formDefaultOptions as $optionKey => $optionValue ) {
+					$mediumArray = array();
+					$classArray = array();
+					$errorMsgArray = array();
+					foreach ( $formDefaultOptions as $optionKey => $optionValue ) {
 
-				// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to FALSE.
-				$newval = ( isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : FALSE );
-				$current_value = $formDefaultOptions[$optionKey];
-				switch ( $optionKey )
-				{
-					case 'date':
-						// Validate
-						break;
+						// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to FALSE.
+						$newval = ( isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : FALSE );
+						$current_value = $formDefaultOptions[$optionKey];
+						switch ( $optionKey )
+						{
+							case 'date':
+								// Validate
+								break;
 
-					case 'theme':
-						// Validate
-						break;
-				}
-				if ( substr($optionKey, 0, 7) == 'medium_' ) {
-					$formNewOptions[$optionKey] = (bool) $newval;
-					if ( $formNewOptions[$optionKey] ) {
-						$mediumArray[] = $optionKey;
-						continue;
+							case 'theme':
+								// Validate
+								break;
+						}
+						if ( substr($optionKey, 0, 7) == 'medium_' ) {
+							$formNewOptions[$optionKey] = (bool) $newval;
+							if ( $formNewOptions[$optionKey] ) {
+								$mediumArray[] = $optionKey;
+								continue;
+							}
+						}
+						if ( substr($optionKey, 0, 6) == 'class_' ) {
+							$formNewOptions[$optionKey] = (bool) $newval;
+							if ( $formNewOptions[$optionKey] ) {
+								$classArray[] = $optionKey;
+								continue;
+							}
+						}
+						$formNewOptions[$optionKey] = $newval;
 					}
-				}
-				if ( substr($optionKey, 0, 6) == 'class_' ) {
-					$formNewOptions[$optionKey] = (bool) $newval;
-					if ( $formNewOptions[$optionKey] ) {
-						$classArray[] = $optionKey;
-						continue;
+
+					if ( empty($mediumArray) ) {
+						$errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
 					}
-				}
-				$formNewOptions[$optionKey] = $newval;
-			}
 
-			if ( empty($mediumArray) ) {
-				$errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
-			}
+					if ( empty($classArray) ) {
+						$errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
+					}
 
-			if ( empty($classArray) ) {
-				$errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
-			}
+					if ( empty($errorMsgArray) ) {
+						$this->_message = 'Competition Added';
+						$this->_status = 'updated';
 
-			if ( empty($errorMsgArray) ) {
-				$this->_message = 'Competition Added';
-				$this->_status = 'updated';
-
-				// @format_off
+						// @format_off
 				// @TODO: This is needed because of the old program, someday it needs to be cleaned up.
 				$medium_convert = array(
 							'medium_bwd'	=> 'B&W Digital',
@@ -524,27 +570,29 @@ final class AVH_RPS_Admin
 						'class_s' => 'Salon'
 				);
 				// @format_on
-				$data['Competition_Date'] = $formNewOptions['date'];
-				$data['Theme'] = $formNewOptions['theme'];
-				$data['Max_Entries'] = $formNewOptions['max_entries'];
-				$data['Num_Judges'] = $formNewOptions['judges'];
-				$data['Special_Event'] = ( $formNewOptions['special_event'] ? 'Y' : 'N' );
-				foreach ( $mediumArray as $medium ) {
-					$data['Medium'] = $medium_convert[$medium];
-					foreach ( $classArray as $classification ) {
-						$data['Classification'] = $classification_convert[$classification];
-						$competition_ID = $this->_rpsdb->insertCompetition($data);
-						if ( is_wp_error($competition_ID) ) {
-							wp_die($competition_ID);
+						$data['Competition_Date'] = $formNewOptions['date'];
+						$data['Theme'] = $formNewOptions['theme'];
+						$data['Max_Entries'] = $formNewOptions['max_entries'];
+						$data['Num_Judges'] = $formNewOptions['judges'];
+						$data['Special_Event'] = ( $formNewOptions['special_event'] ? 'Y' : 'N' );
+						foreach ( $mediumArray as $medium ) {
+							$data['Medium'] = $medium_convert[$medium];
+							foreach ( $classArray as $classification ) {
+								$data['Classification'] = $classification_convert[$classification];
+								$competition_ID = $this->_rpsdb->insertCompetition($data);
+								if ( is_wp_error($competition_ID) ) {
+									wp_die($competition_ID);
+								}
+							}
 						}
+					} else {
+						$this->_message = $errorMsgArray;
+						$this->_status = 'error';
 					}
-				}
-			} else {
-				$this->_message = $errorMsgArray;
-				$this->_status = 'error';
+					$this->_displayMessage();
+					$formOptions = $formNewOptions;
+					break;
 			}
-			$this->_displayMessage();
-			$formOptions = $formNewOptions;
 		}
 
 		// @var $classForm AVH_Form
@@ -599,6 +647,170 @@ final class AVH_RPS_Admin
 		echo '});', "\n";
 		echo "</script>";
 		$this->admin_footer();
+	}
+
+	public function actionLoadPagehookEntries ()
+	{
+		global $current_screen;
+
+		$this->_entries_list = $this->_classes->load_class('EntriesList', 'plugin', true);
+		$this->_handleRequestEntries();
+
+		add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
+		// WordPress core Styles and Scripts
+		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script('common');
+		wp_enqueue_script('wp-lists');
+		wp_enqueue_script('postbox');
+		wp_enqueue_style('css/dashboard');
+		// Plugin Style and Scripts
+		// wp_enqueue_script('avhrps-competition-js');
+
+		wp_enqueue_style('avhrps-admin-css');
+		wp_enqueue_style('avhrps-jquery-css');
+	}
+
+	/**
+	 * Handle the HTTP Request before the page of the menu Competition is displayed.
+	 * This is needed for the redirects.
+	 */
+	private function _handleRequestEntries ()
+	{
+		if ( empty($_REQUEST) ) {
+			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr(stripslashes($_SERVER['REQUEST_URI'])) . '" />';
+		}
+		if ( isset($_REQUEST['wp_http_referer']) ) {
+			$this->_redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
+			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr($this->_redirect) . '" />';
+		} else {
+			$this->_redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
+			$this->_referer = '';
+		}
+
+		$doAction = $this->_entries_list->current_action();
+		switch ( $doAction )
+		{
+			// case 'delete':
+			// check_admin_referer('bulk-entries');
+			// if ( empty($_REQUEST['entries']) && empty($_REQUEST['entries']) ) {
+			// wp_redirect($this->_redirect);
+			// exit();
+			// }
+			// break;
+
+			// case 'edit':
+			// if ( empty($_REQUEST['entries']) ) {
+			// wp_redirect($this->_redirect);
+			// exit();
+			// }
+			// break;
+			// case 'dodelete':
+			// check_admin_referer('delete-entries');
+			// if ( empty($_REQUEST['entries']) ) {
+			// wp_redirect($this->_redirect);
+			// exit();
+			// }
+			// $competitionIds = $_REQUEST['entries'];
+
+			// $deleteCount = 0;
+
+			// foreach ( (array) $competitionIds as $id ) {
+			// $id = (int) $id;
+			// $this->_rpsdb->deleteCompetition($id);
+			// ++$deleteCount;
+			// }
+			// $redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'dodelete'), $redirect);
+			// wp_redirect($this->_redirect);
+			// break;
+
+			default:
+				if ( !empty($_GET['_wp_http_referer']) ) {
+					wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
+					exit();
+				}
+				$pagenum = $this->_entries_list->get_pagenum();
+				$this->_entries_list->prepare_items();
+				$total_pages = $this->_entries_list->get_pagination_arg('total_pages');
+				if ( $pagenum > $total_pages && $total_pages > 0 ) {
+					wp_redirect(add_query_arg('paged', $total_pages));
+					exit();
+				}
+				break;
+		}
+	}
+
+	/**
+	 * Display the page for the menu Entries
+	 */
+	public function menuEntries ()
+	{
+		$doAction = $this->_entries_list->current_action();
+		switch ( $doAction )
+		{
+			case 'delete':
+				$this->_displayPageCompetitionDelete();
+				break;
+
+			case 'edit':
+				$this->_displayPageCompetitionEdit();
+				break;
+
+			default:
+				$this->_displayPageEntriesList();
+				break;
+		}
+	}
+
+	/**
+	 * Display the entries in a list
+	 */
+	private function _displayPageEntriesList ()
+	{
+		global $screen_layout_columns;
+
+		$messages = array();
+		if ( isset($_GET['update']) ) {
+			switch ( $_GET['update'] )
+			{
+				case 'del':
+				case 'del_many':
+					$deleteCount = isset($_GET['deleteCount']) ? (int) $_GET['deleteCount'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+					break;
+			}
+		}
+
+		if ( !empty($messages) ) {
+			foreach ( $messages as $msg )
+				echo $msg;
+		}
+
+		echo '<div class="wrap avhrps-wrap">';
+		echo $this->_displayIcon('index');
+		echo '<h2>Entries: ' . __('All Entries', 'avh-rps');
+
+		if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
+			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');
+		}
+		echo '</h2>';
+
+		$this->_entries_list->views();
+		echo '<form id="rps-entries-form" action="" method="get">';
+		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_ENTRIES . '">';
+
+		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_entries_list->get_pagination_arg('total_items')) . '" />';
+		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('per_page')) . '" />';
+		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('page')) . '" />';
+
+		if ( isset($_REQUEST['paged']) ) {
+			echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
+		}
+		$this->_entries_list->display();
+		echo '</form>';
+
+		echo '<div id="ajax-response"></div>';
+		$this->_printAdminFooter();
+		echo '</div>';
 	}
 
 	/**
@@ -802,6 +1014,49 @@ final class AVH_RPS_Admin
 		update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
 	}
 
+	private function _updateCompetition ()
+	{
+		$formOptions = $_POST['competition-edit'];
+
+		$formOptionsNew['date'] = $formOptions['date'];
+		$formOptionsNew['close-date'] = $formOptions['close-date'];
+		$formOptionsNew['close-time'] = $formOptions['close-time'];
+		$formOptionsNew['theme'] = $formOptions['theme'];
+		$formOptionsNew['medium'] = $formOptions['medium'];
+		$formOptionsNew['classification'] = $formOptions['classification'];
+		$formOptionsNew['max_entries'] = $formOptions['max_entries'];
+		$formOptionsNew['judges'] = $formOptions['judges'];
+		$formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
+		$formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
+		$formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
+		// @format_off
+		$_medium = array ( 'medium_bwd'		=> 'B&W Digital',
+							'medium_cd'		=> 'Color Digital',
+							'medium_bwp'	=> 'B&W Print',
+							'medium_cp'		=> 'Color Print'
+					);
+		$selectedMedium=array_search($competition->Medium, $_medium);
+		// @format_on
+
+		// @format_off
+		$_classification = array ( 'class_b' => 'Beginner',
+									'class_a' => 'Advanced',
+									'class_s' => 'Salon',
+			);
+		// @format_on
+		$data['ID'] = $_REQUEST['competition'];
+		$data['Competition_Date'] = $formOptionsNew['date'];
+		$data['Close_Date'] = $formOptionsNew['close-date'];
+		$data['Theme'] = $formOptionsNew['theme'];
+		$data['Max_Entries'] = $formOptionsNew['max_entries'];
+		$data['Num_Judges'] = $formOptionsNew['judges'];
+		$data['Special_Event'] = ( $formOptionsNew['special_event'] ? 'Y' : 'N' );
+		$data['Closed'] = ( $formOptionsNew['closed'] ? 'Y' : 'N' );
+		$data['Scored'] = ( $formOptionsNew['scored'] ? 'Y' : 'N' );
+		$data['Medium'] = $_medium[$formOptionsNew['medium']];
+		$data['Classification'] = $_classification[$formOptionsNew['classification']];
+		$competition_ID = $this->_rpsdb->insertCompetition($data);
+	}
 	// ############ Admin WP Helper ##############
 
 	/**

@@ -4,7 +4,7 @@ if ( !defined('AVH_FRAMEWORK') )
 
 class AVH_RPS_OldRpsDb
 {
-	
+
 	/**
 	 *
 	 * @var AVH_RPS_Core
@@ -31,20 +31,20 @@ class AVH_RPS_OldRpsDb
 		// Get The Registry
 		$this->_settings = AVH_RPS_Settings::getInstance();
 		$this->_classes = AVH_RPS_Classes::getInstance();
-		
+
 		$this->_core = $this->_classes->load_class('Core', 'plugin', true);
 		$this->_rpsdb = new wpdb('avirtu2_rarit1', '1Hallo@Done#', 'avirtu2_raritdata', 'localhost');
 		$this->_rpsdb->show_errors();
 	}
 
-	public function getSeasonList ()
+	public function getSeasonList ($order="ASC")
 	{
 		$sql = $this->_rpsdb->prepare('SELECT DISTINCT if(month(Competition_Date) >= %s and month(Competition_Date) <= %s,
 			concat_WS("-",year(Competition_Date),substr(year(Competition_Date)+1,3,2)),
 			concat_WS("-",year(Competition_Date)-1,substr(year(Competition_Date),3,2))) as "Season"
 			FROM competitions
-			ORDER BY Season', $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
-		
+			ORDER BY Season '. $order, $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
+
 		$_result = $this->_rpsdb->get_results($sql, ARRAY_A);
 		foreach ( $_result as $key => $value ) {
 			$_seasons[$key] = $value['Season'];
@@ -63,7 +63,7 @@ class AVH_RPS_OldRpsDb
 			GROUP BY Season
 			HAVING count(e.ID) > 0
 			ORDER BY Season', $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
-		
+
 		$_result = $this->_rpsdb->get_results($sql, ARRAY_A);
 		foreach ( $_result as $key => $value ) {
 			$_seasons[$key] = $value['Season'];
@@ -97,7 +97,7 @@ class AVH_RPS_OldRpsDb
 				Competition_Date < %s AND
 				Special_Event = "N"
 			ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date);
-		
+
 		$_x = $this->_rpsdb->get_results($sql, ARRAY_A);
 		foreach ( $_x as $key => $_rec ) {
 			$user_info = get_userdata($_rec['Member_ID']);
@@ -159,7 +159,7 @@ class AVH_RPS_OldRpsDb
 			$_rec['Username'] = $user_info->user_login;
 			$_return[] = $_rec;
 		}
-		
+
 		return $_return;
 	}
 
@@ -175,13 +175,13 @@ class AVH_RPS_OldRpsDb
 		e.Member_ID = %s
 		ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, $this->_user_id);
 		$_return = $this->_rpsdb->get_results($sql, ARRAY_A);
-		
+
 		return $_return;
 	}
 
 	public function getOpenCompetitions ($subset)
 	{
-		
+
 		// Select the list of open competitions that match this member's classification(s)
 		if ( $subset ) {
 			$and_medium_subset = " AND c.Medium like %s";
@@ -208,10 +208,10 @@ class AVH_RPS_OldRpsDb
 		$defaults = array('status' => '','search' => '','offset' => '','number' => '','orderby' => 'ID','order' => 'ASC','count' => false);
 		$this->_query_vars = wp_parse_args($query_vars, $defaults);
 		extract($this->_query_vars, EXTR_SKIP);
-		
+
 		$number = absint($number);
 		$offset = absint($offset);
-		
+
 		if ( !empty($number) ) {
 			if ( $offset ) {
 				$limits = 'LIMIT ' . $offset . ',' . $number;
@@ -221,7 +221,7 @@ class AVH_RPS_OldRpsDb
 		} else {
 			$limits = '';
 		}
-		
+
 		if ( $count ) {
 			$fields = 'COUNT(*)';
 			$orderby = 'ID';
@@ -229,7 +229,7 @@ class AVH_RPS_OldRpsDb
 		} else {
 			$fields = '*, if(Classification = "Beginner",0, if(Classification = "Advanced",1,2)) as "Class_Code"';
 		}
-		
+
 		$join = '';
 		switch ( $status )
 		{
@@ -246,11 +246,11 @@ class AVH_RPS_OldRpsDb
 				break;
 		}
 		$query = "SELECT $fields FROM competitions $join WHERE $where ORDER BY $orderby $order $limits";
-		
+
 		if ( $count ) {
 			return $this->_rpsdb->get_var($query);
 		}
-		
+
 		$_result = $this->_rpsdb->get_results($query);
 		if ( $output == OBJECT ) {
 			return $_result;
@@ -270,12 +270,12 @@ class AVH_RPS_OldRpsDb
 		$defaults = array('join' => '','where' => '1=1','fields' => '*','offset' => '','number' => '','orderby' => 'ID','order' => 'ASC','count' => false);
 		$this->_query_vars = wp_parse_args($query_vars, $defaults);
 		extract($this->_query_vars, EXTR_SKIP);
-		
+
 		$order = ( 'ASC' == strtoupper($order) ) ? 'ASC' : 'DESC';
-		
+
 		$number = absint($number);
 		$offset = absint($offset);
-		
+
 		if ( !empty($number) ) {
 			if ( $offset ) {
 				$limits = 'LIMIT ' . $offset . ',' . $number;
@@ -285,18 +285,18 @@ class AVH_RPS_OldRpsDb
 		} else {
 			$limits = '';
 		}
-		
+
 		if ( $count ) {
 			$fields = 'COUNT(*)';
 			$orderby = 'ID';
 		}
-		
+
 		$query = "SELECT $fields FROM entries $join WHERE $where ORDER BY $orderby $order $limits";
-		
+
 		if ( $count ) {
 			return $this->_rpsdb->get_var($query);
 		}
-		
+
 		$_result = $this->_rpsdb->get_results($query);
 		if ( $output == OBJECT ) {
 			return $_result;
@@ -327,7 +327,7 @@ class AVH_RPS_OldRpsDb
 		if ( !empty($data['ID']) ) {
 			$update = TRUE;
 		}
-		
+
 		if ( !isset($data['Competition_Date']) ) {
 			$data['Competition_Date'] = current_time('mysql');
 		}
@@ -366,16 +366,16 @@ class AVH_RPS_OldRpsDb
 		if ( !isset($data['Special_Event']) ) {
 			$data['Special_Event'] = 'N';
 		}
-		
+
 		$data = stripslashes_deep($data);
-		
+
 		$competition_ID = 0;
 		if ( $update ) {
 			$competition_ID = (int) $data['ID'];
 		}
-		
+
 		$where = array('ID' => $competition_ID);
-		
+
 		if ( $update ) {
 			if ( false === $this->_rpsdb->update('competitions', $data, $where) ) {
 				return new WP_Error('db_update_error', 'Could not update competition into the database', $this->_rpsdb->last_error);
@@ -386,7 +386,7 @@ class AVH_RPS_OldRpsDb
 			}
 			$competition_ID = (int) $this->_rpsdb->insert_id;
 		}
-		
+
 		return $competition_ID;
 	}
 
@@ -487,7 +487,7 @@ class AVH_RPS_OldRpsDb
 			WHERE c.ID =  e.Competition_ID
 				AND e.ID = %s", $id);
 		$result = $this->_rpsdb->get_row($sql);
-		
+
 		if ( $output == OBJECT ) {
 			return $result;
 		} elseif ( $output == ARRAY_A ) {
@@ -558,7 +558,7 @@ class AVH_RPS_OldRpsDb
 			FROM entries
 			WHERE ID = %s", $id);
 		$_result = $this->_rpsdb->query($sql);
-		
+
 		return $_result;
 	}
 
@@ -571,9 +571,9 @@ class AVH_RPS_OldRpsDb
 	public function countCompetitions ()
 	{
 		$where = '';
-		
+
 		$count = $this->_rpsdb->get_results("SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed", ARRAY_A);
-		
+
 		$total = 0;
 		$status = array('N' => 'open','Y' => 'closed');
 		$known_types = array_keys($status);
@@ -583,15 +583,15 @@ class AVH_RPS_OldRpsDb
 			if ( in_array($row['Closed'], $known_types) )
 				$stats[$status[$row['Closed']]] = (int) $row['num_competitions'];
 		}
-		
+
 		$stats['all'] = $total;
 		foreach ( $status as $key ) {
 			if ( empty($stats[$key]) )
 				$stats[$key] = 0;
 		}
-		
+
 		$stats = (object) $stats;
-		
+
 		return $stats;
 	}
 
