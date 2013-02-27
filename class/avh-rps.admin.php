@@ -116,7 +116,7 @@ final class AVH_RPS_Admin
 		wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
 		wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
 
-		add_menu_page('RPS Competitions', 'RPS Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
+		add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', AVH_RPS_Define::MENU_POSITION_COMPETITION);
 
 		$this->_hooks['avhrps_menu_competition'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
 		$this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
@@ -124,7 +124,8 @@ final class AVH_RPS_Admin
 		add_action('load-' . $this->_hooks['avhrps_menu_competition'], array($this,'actionLoadPagehookCompetition'));
 		add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array($this,'actionLoadPagehookCompetitionAdd'));
 
-		$this->_hooks['avhrps_menu_entries'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Entries', 'All Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
+		add_menu_page('All Entries', 'Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'), '', AVH_RPS_Define::MENU_POSITION_ENTRIES);
+		$this->_hooks['avhrps_menu_entries'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
 		add_action('load-' . $this->_hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
 	}
 
@@ -366,7 +367,7 @@ final class AVH_RPS_Admin
 		echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
 		echo '   showButtonPanel: true, ' . "\n";
 		echo '   buttonImageOnly: true, ' . "\n";
-		echo '   buttonImage: "'.$this->_settings->getSetting('plugin_url') .'/images/calendar.png", ' . "\n";
+		echo '   buttonImage: "' . $this->_settings->getSetting('plugin_url') . '/images/calendar.png", ' . "\n";
 		echo '   showOn: "both"' . "\n";
 		echo ' });' . "\n";
 		echo '	$( "#date" ).datepicker();' . "\n";
@@ -402,7 +403,7 @@ final class AVH_RPS_Admin
 
 		echo '<div class="wrap avhrps-wrap">';
 		echo $this->_displayIcon('index');
-		echo '<h2>RPS Competition: ' . __('Competitions', 'avh-rps');
+		echo '<h2>Competitions: ' . __('All Competitions', 'avh-rps');
 
 		if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
 			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');
@@ -628,7 +629,6 @@ final class AVH_RPS_Admin
 
 		wp_enqueue_style('avhrps-admin-css');
 		wp_enqueue_style('avhrps-jquery-css');
-
 	}
 
 	/**
@@ -651,38 +651,38 @@ final class AVH_RPS_Admin
 		$doAction = $this->_entries_list->current_action();
 		switch ( $doAction )
 		{
-// 			case 'delete':
-// 				check_admin_referer('bulk-entries');
-// 				if ( empty($_REQUEST['entries']) && empty($_REQUEST['entries']) ) {
-// 					wp_redirect($this->_redirect);
-// 					exit();
-// 				}
-// 				break;
+			// case 'delete':
+			// check_admin_referer('bulk-entries');
+			// if ( empty($_REQUEST['entries']) && empty($_REQUEST['entries']) ) {
+			// wp_redirect($this->_redirect);
+			// exit();
+			// }
+			// break;
 
-// 			case 'edit':
-// 				if ( empty($_REQUEST['entries']) ) {
-// 					wp_redirect($this->_redirect);
-// 					exit();
-// 				}
-// 				break;
-// 			case 'dodelete':
-// 				check_admin_referer('delete-entries');
-// 				if ( empty($_REQUEST['entries']) ) {
-// 					wp_redirect($this->_redirect);
-// 					exit();
-// 				}
-// 				$competitionIds = $_REQUEST['entries'];
+			// case 'edit':
+			// if ( empty($_REQUEST['entries']) ) {
+			// wp_redirect($this->_redirect);
+			// exit();
+			// }
+			// break;
+			// case 'dodelete':
+			// check_admin_referer('delete-entries');
+			// if ( empty($_REQUEST['entries']) ) {
+			// wp_redirect($this->_redirect);
+			// exit();
+			// }
+			// $competitionIds = $_REQUEST['entries'];
 
-// 				$deleteCount = 0;
+			// $deleteCount = 0;
 
-// 				foreach ( (array) $competitionIds as $id ) {
-// 					$id = (int) $id;
-// 					$this->_rpsdb->deleteCompetition($id);
-// 					++$deleteCount;
-// 				}
-// 				$redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'dodelete'), $redirect);
-// 				wp_redirect($this->_redirect);
-// 				break;
+			// foreach ( (array) $competitionIds as $id ) {
+			// $id = (int) $id;
+			// $this->_rpsdb->deleteCompetition($id);
+			// ++$deleteCount;
+			// }
+			// $redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'dodelete'), $redirect);
+			// wp_redirect($this->_redirect);
+			// break;
 
 			default:
 				if ( !empty($_GET['_wp_http_referer']) ) {
@@ -699,6 +699,7 @@ final class AVH_RPS_Admin
 				break;
 		}
 	}
+
 	/**
 	 * Display the page for the menu Entries
 	 */
@@ -747,7 +748,7 @@ final class AVH_RPS_Admin
 
 		echo '<div class="wrap avhrps-wrap">';
 		echo $this->_displayIcon('index');
-		echo '<h2>RPS Competition: ' . __('Entries', 'avh-rps');
+		echo '<h2>Entries: ' . __('All Entries', 'avh-rps');
 
 		if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
 			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');

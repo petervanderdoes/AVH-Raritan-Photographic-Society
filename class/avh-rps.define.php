@@ -21,4 +21,10 @@ final class AVH_RPS_Define
 	const MENU_SLUG_COMPETITION_ADD = 'avh-rps-competition-add';
 	const MENU_SLUG_ENTRIES = 'avh-rps-entries';
 	const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
+
+	// Menu Positions
+	// 25 is the position for comments, so it will fit right under comments
+	// @see https://codex.wordpress.org/Function_Reference/add_menu_page
+	const MENU_POSITION_COMPETITION = '25.avh-rps-plugin.1';
+	const MENU_POSITION_ENTRIES = '25.avh-rps-plugin.2';
 }

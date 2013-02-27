@@ -196,7 +196,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
 	{
 		if ( isset($_POST['clear-recent-list']) )
 			return 'clear-recent-list';
-		if ( isset($_POST['season']))
+		if ( isset($_POST['filter-season']))
 			return 'filter-season';
 
 		return parent::current_action();
