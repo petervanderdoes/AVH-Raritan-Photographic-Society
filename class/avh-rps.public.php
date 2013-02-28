@@ -1285,7 +1285,7 @@ class AVH_RPS_Public
 	// ----- Private Functions --------
 
 	/**
-	 * Send an XML File with the competition dates
+	 * Create a XML File with the competition dates
 	 */
 	private function _sendXmlCompetitionDates ()
 	{
@@ -1346,6 +1346,9 @@ class AVH_RPS_Public
 		die();
 	}
 
+	/**
+	 * Handles request by client to download images for a particular date,
+	 */
 	private function _sendCompetitions ()
 	{
 		$username = $_REQUEST['username'];
@@ -1369,6 +1372,16 @@ class AVH_RPS_Public
 		die();
 	}
 
+	/**
+	 * Create a XML file for the client with information about images for a particular date
+	 *
+	 * @param object $db
+	 *        Connection to the RPS Database
+	 * @param string $requested_medium
+	 *        Which competition medium to use, either digital or print
+	 * @param string $comp_date
+	 *        The competition date
+	 */
 	private function _sendXmlCompetitions ($db, $requested_medium, $comp_date)
 	{
 
@@ -1443,7 +1456,7 @@ class AVH_RPS_Public
 			// Iterate through all the entries for this competition
 			foreach ( $all_records_entries as $record_entries ) {
 				$user = get_user_by('id', $record_entries['Member_ID']);
-				if ($this->_core->isPaidMember($user->ID)) {
+				if ( $this->_core->isPaidMember($user->ID) ) {
 					$entry_id = $record_entries['ID'];
 					$first_name = $user->first_name;
 					$last_name = $user->last_name;
@@ -1550,7 +1563,8 @@ class AVH_RPS_Public
 	/**
 	 * Handle the XML file containing the scores and add them to the database
 	 *
-	 * @param object $db Database handle.
+	 * @param object $db
+	 *        Database handle.
 	 */
 	private function _handleUploadScoresFile ($db, $file_name)
 	{
@@ -1625,16 +1639,34 @@ class AVH_RPS_Public
 		return $warning;
 	}
 
+	/**
+	 * Create a REST error
+	 *
+	 * @param string $errMsg
+	 *        The actual error message
+	 */
 	private function _doRESTError ($errMsg)
 	{
 		$this->_doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
 	}
 
+	/**
+	 * Create a REST success message
+	 *
+	 * @param string $message
+	 *        The actual messsage
+	 */
 	private function _doRESTSuccess ($message)
 	{
 		$this->_doRESTResponse("ok", $message);
 	}
 
+	/**
+	 * Create the REST respone
+	 *
+	 * @param string $status
+	 * @param string $message
+	 */
 	private function _doRESTResponse ($status, $message)
 	{
 		echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
@@ -1682,6 +1714,12 @@ class AVH_RPS_Public
 		return $_upload_ok;
 	}
 
+	/**
+	 * Delete competition entries
+	 *
+	 * @param array $entries
+	 *        Array of entries ID to delete.
+	 */
 	private function _deleteCompetitionEntries ($entries)
 	{
 		if ( is_array($entries) ) {
@@ -1730,8 +1768,12 @@ class AVH_RPS_Public
 		}
 	}
 
-	/*
+	/**
 	 * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
+	 *
+	 * @param string $date
+	 * @param unknown $med
+	 * @return boolean
 	 */
 	private function _validateSelectedComp ($date, $med)
 	{
