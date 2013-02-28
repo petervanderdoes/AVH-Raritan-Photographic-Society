@@ -94,223 +94,12 @@ class AVH_RPS_Public
 				case 'download':
 					$this->_sendCompetitions();
 					break;
+				case 'uploadscore':
+					$this->_doUploadScore();
 				default:
 					break;
 			}
 		}
-	}
-
-	/**
-	 * Send an XML File with the competition dates
-	 */
-	private function _sendXmlCompetitionDates ()
-	{
-		// Connect to the Database
-		try {
-			$db = new RPSPDO();
-		} catch (PDOException $e) {
-			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
-			die($e->getMessage());
-		}
-
-		try {
-			$select = "SELECT DISTINCT(Competition_Date) FROM competitions ";
-			if ( $_GET['closed'] || $_GET['scored'] ) {
-				$where = "WHERE";
-				if ( $_GET['closed'] ) {
-					$where .= " Closed=:closed";
-				}
-				if ( $_GET['scored'] ) {
-					$where .= " AND Scored=:scored";
-				}
-			} else {
-				$where .= " Competition_Date >= CURDATE()";
-			}
-
-			$sth = $db->prepare($select . $where);
-			if ( $_GET['closed'] ) {
-				$_closed = $_GET['closed'];
-				$sth->bindParam(':closed', $_closed, PDO::PARAM_STR, 1);
-			}
-			if ( $_GET['scored'] ) {
-				$_scored = $_GET['scored'];
-				$sth->bindParam(':scored', $_scored, PDO::PARAM_STR, 1);
-			}
-			$sth->execute();
-		} catch (PDOException $e) {
-			$this->_doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
-			die($e->getMessage());
-		}
-
-		$dom = new DOMDocument('1.0', 'utf-8');
-		$dom->formatOutput = true;
-		$root = $dom->createElement('rsp');
-		$dom->appendChild($root);
-		$stat = $dom->createAttribute("stat");
-		$root->appendChild($stat);
-		$value = $dom->CreateTextNode("ok");
-		$stat->appendChild($value);
-		$recs = $sth->fetch(PDO::FETCH_ASSOC);
-		while ( $recs != FALSE ) {
-			$dateParts = split(" ", $recs['Competition_Date']);
-			$comp_date = $root->appendChild($dom->createElement('Competition_Date'));
-			$comp_date->appendChild($dom->createTextNode($dateParts[0]));
-			$recs = $sth->fetch(PDO::FETCH_ASSOC);
-		}
-		echo $dom->saveXML();
-		$db = NULL;
-		die();
-	}
-
-	private function _sendCompetitions ()
-	{
-		$username = $_REQUEST['username'];
-		$password = $_REQUEST['password'];
-		try {
-			$db = new RPSPDO();
-		} catch (PDOException $e) {
-			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
-			die($e->getMessage());
-		}
-		if ( $db !== FALSE ) {
-			$user = wp_authenticate($username, $password);
-			if ( is_wp_error($user) ) {
-				$a = strip_tags($user->get_error_message());
-				$this->_doRESTError($a);
-				die();
-			}
-			// @todo Check if the user has the role needed.
-			$this->_sendXmlCompetitions($db, $_REQUEST['medium'], $_REQUEST['comp_date']);
-		}
-		die();
-	}
-
-	private function _sendXmlCompetitions ($db, $requested_medium, $comp_date)
-	{
-		/* @var $db RPSPDO */
-		// Start building the XML response
-		$dom = new DOMDocument('1.0');
-		// Create the root node
-		$rsp = $dom->CreateElement('rsp');
-		$rsp = $dom->AppendChild($rsp);
-		$rsp->SetAttribute('stat', 'ok');
-
-		$medium_clause = '';
-		if ( !( empty($requested_medium) ) ) {
-			$medium_clause = ( $requested_medium == "prints" ) ? " AND Medium like '%Prints' " : " AND Medium like '%Digital' ";
-		}
-		$_compdate = "DATE('$comp_date')";
-		$sql = "SELECT ID, Competition_Date, Theme, Medium, Classification
-		FROM competitions
-		WHERE Competition_Date = :compdate
-		$medium_clause
-		ORDER BY Medium, Classification";
-
-		try {
-			$sth_competitions = $db->prepare($sql);
-			$sth_competitions->bindParam(':compdate', $_compdate);
-			$sth_competitions->execute();
-		} catch (Exception $e) {
-			$this->_doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
-			die();
-		}
-		// Create a Competitions node
-		$xml_competions = $rsp->AppendChild($dom->CreateElement('Competitions'));
-		// Iterate through all the matching Competitions and create corresponding Competition nodes
-		$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
-		while ( $record_competitions != FALSE ) {
-			$comp_id = $record_competitions['ID'];
-			$dateParts = split(" ", $record_competitions['Competition_Date']);
-			$date = $dateParts[0];
-			$theme = $record_competitions['Theme'];
-			$medium = $record_competitions['Medium'];
-			$classification = $record_competitions['Classification'];
-			// Create the competition node in the XML response
-			$competition_element = $xml_competions->AppendChild($dom->CreateElement('Competition'));
-
-			$date_element = $competition_element->AppendChild($dom->CreateElement('Date'));
-			$date_element->AppendChild($dom->CreateTextNode($date));
-
-			$theme_element = $competition_element->AppendChild($dom->CreateElement('Theme'));
-			$theme_element->AppendChild($dom->CreateTextNode($theme));
-
-			$medium_element = $competition_element->AppendChild($dom->CreateElement('Medium'));
-			$medium_element->AppendChild($dom->CreateTextNode($medium));
-
-			$xml_classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
-			$xml_classification_node->AppendChild($dom->CreateTextNode($classification));
-
-			// Get all the entries for this competition
-			try {
-				$sql = "SELECT members.FirstName, members.LastName, entries.ID, entries.Title,
-						entries.Server_File_Name, entries.Score, entries.Award
-						FROM members, entries
-						WHERE entries.Competition_ID = :comp_id AND
-					      entries.Member_ID = members.ID AND
-						  members.Active = 'Y'
-						ORDER BY members.LastName, members.FirstName, entries.Title";
-				$sth_entries = $db->prepare($sql);
-				$sth_entries->bindParam(':comp_id', $comp_id);
-				$sth_entries->execute();
-			} catch (Exception $e) {
-				$this->_doRESTError("Failed to SELECT competition entriesfrom database - " . $e->getMessage());
-				die();
-			}
-			// Create an Entries node
-			$entries = $competition_element->AppendChild($dom->CreateElement('Entries'));
-			// Iterate through all the entries for this competition
-			$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
-			while ( $record_entries !== FALSE ) {
-				$entry_id = $record_entries['ID'];
-				$first_name = $record_entries['FirstName'];
-				$last_name = $record_entries['LastName'];
-				$title = $record_entries['Title'];
-				$score = $record_entries['Score'];
-				$award = $record_entries['Award'];
-				$server_file_name = $record_entries['Server_File_Name'];
-				// Create an Entry node
-				$entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
-				$id = $entry_element->AppendChild($dom->CreateElement('ID'));
-				$id->AppendChild($dom->CreateTextNode($entry_id));
-				$fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-				$fname->AppendChild($dom->CreateTextNode($first_name));
-				$lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-				$lname->AppendChild($dom->CreateTextNode($last_name));
-				$title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
-				$title_node->AppendChild($dom->CreateTextNode($title));
-				$score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
-				$score_node->AppendChild($dom->CreateTextNode($score));
-				$award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
-				$award_node->AppendChild($dom->CreateTextNode($award));
-				// Convert the absolute server file name into a URL
-				$image_url = site_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
-				$url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
-				$url_node->AppendChild($dom->CreateTextNode($image_url));
-				$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
-			}
-			$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
-		}
-		// Send the completed XML response back to the client
-		// header('Content-Type: text/xml');
-		echo $dom->saveXML();
-	}
-
-	private function _doRESTError ($errMsg)
-	{
-		$this->_doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
-	}
-
-	private function _doRESTSuccess ($message)
-	{
-		$this->_doRESTResponse("ok", $message);
-	}
-
-	private function _doRESTResponse ($status, $message)
-	{
-		echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
-		echo '<rsp stat="' . $status . '">' . "\n";
-		echo '	' . $message . "\n";
-		echo "</rsp>\n";
 	}
 
 	public function shortcodeRpsMonthlyWinners ($atts, $content = '')
@@ -1175,73 +964,6 @@ class AVH_RPS_Public
 		echo "</table>\n</form>\n<br />\n";
 	}
 
-	//
-	// Select the list of open competitions for this member's classification and validate
-	// the currently selected competition against that list.
-	//
-	private function _validateSelectedComp ($date, $med)
-	{
-		$open_competitions = $this->_rpsdb->getOpenCompetitions($this->_settings->medium_subset);
-
-		if ( empty($open_competitions) ) {
-			return false;
-		}
-
-		// Read the competition attributes into a series of arrays
-		$index = 0;
-		$date_index = -1;
-		$medium_index = -1;
-		foreach ( $open_competitions as $recs ) {
-			// Append this competition to the arrays
-			$dateParts = explode(" ", $recs['Competition_Date']);
-			$this->_open_comp_date[$index] = $dateParts[0];
-			$this->_open_comp_medium[$index] = $recs['Medium'];
-			$this->_open_comp_class[$index] = $recs['Classification'];
-			$this->_open_comp_theme[$index] = $recs['Theme'];
-			// If this is the first competition whose date matches the currently selected
-			// competition date, save its array index
-			if ( $this->_open_comp_date[$index] == $date ) {
-				if ( $date_index < 0 ) {
-					$date_index = $index;
-				}
-				// If this competition matches the date AND the medium of the currently selected
-				// competition, save its array index
-				if ( $this->_open_comp_medium[$index] == $med ) {
-					if ( $medium_index < 0 ) {
-						$medium_index = $index;
-					}
-				}
-			}
-			$index += 1;
-		}
-
-		// If date and medium both matched, then the currently selected competition is in the
-		// list of open competitions for this member
-		if ( $medium_index >= 0 ) {
-			$index = $medium_index;
-
-			// If the date matched but the medium did not, then there are valid open competitions on
-			// the selected date for this member, but not in the currently selected medium. In this
-			// case set the medium to the first one in the list for the selected date.
-		} elseif ( $medium_index < 0 && $date_index >= 0 ) {
-			$index = $date_index;
-
-			// If neither the date or medium matched, simply select the first open competition in the
-			// list.
-		} else {
-			$index = 0;
-		}
-		// Establish the (possibly adjusted) selected competition
-		$this->_settings->comp_date = $this->_open_comp_date[$index];
-		$this->_settings->classification = $this->_open_comp_class[$index];
-		$this->_settings->medium = $this->_open_comp_medium[$index];
-		// Save the currently selected competition in a cookie
-		$hour = time() + ( 2 * 3600 );
-		$url = parse_url(get_bloginfo('url'));
-		setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $hour, '/', $url['host']);
-		return true;
-	}
-
 	public function actionPreHeader_RpsEditTitle ()
 	{
 		if ( !empty($_POST) ) {
@@ -1357,54 +1079,6 @@ class AVH_RPS_Public
 		echo '</td></tr>';
 		echo '</table>';
 		echo '</form>';
-	}
-
-	private function _deleteCompetitionEntries ($entries)
-	{
-		if ( is_array($entries) ) {
-			foreach ( $entries as $id ) {
-
-				$recs = $this->_rpsdb->getEntryInfo($id);
-				if ( $recs == FALSE ) {
-					$this->_errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
-				} else {
-
-					$server_file_name = ABSPATH . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
-					// Delete the record from the database
-					$result = $this->_rpsdb->deleteEntry($id);
-					if ( $result === FALSE ) {
-						$this->_errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
-					} else {
-
-						// Delete the file from the server file system
-						if ( file_exists($server_file_name) ) {
-							unlink($server_file_name);
-						}
-						// Delete any thumbnails of this image
-						$ext = ".jpg";
-						$comp_date = $this->_settings->comp_date;
-						$classification = $this->_settings->classification;
-						$medium = $this->_settings->medium;
-						$path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
-
-						$old_file_parts = pathinfo($server_file_name);
-						$old_file_name = $old_file_parts['filename'];
-
-						if ( is_dir($path . "/thumbnails") ) {
-							$thumb_base_name = $path . "/thumbnails/" . $old_file_name;
-							// Get all the matching thumbnail files
-							$thumbnails = glob("$thumb_base_name*");
-							// Iterate through the list of matching thumbnails and delete each one
-							if ( is_array($thumbnails) && count($thumbnails) > 0 ) {
-								foreach ( $thumbnails as $thumb ) {
-									unlink($thumb);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 
 	public function actionPreHeader_RpsUploadEntry ()
@@ -1553,56 +1227,6 @@ class AVH_RPS_Public
 		}
 	}
 
-	/**
-	 * Enter description here .
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 *
-	 * ..
-	 */
-	private function _checkUploadEntryTitle ()
-	{
-		$_upload_ok = false;
-		if ( !isset($_POST['title']) || trim($_POST['title']) == "" ) {
-			$this->_errmsg = 'Please enter your image title in the Title field.';
-		} else {
-			switch ( $_FILES['file_name']['error'] )
-			{
-				case UPLOAD_ERR_OK:
-					$_upload_ok = true;
-					break;
-				case UPLOAD_ERR_INI_SIZE:
-					$this->_errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
-					break;
-				case UPLOAD_ERR_FORM_SIZE:
-					$this->_errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
-					break;
-				case UPLOAD_ERR_PARTIAL:
-					$this->_errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
-					break;
-				case UPLOAD_ERR_NO_FILE:
-					$this->_errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
-					break;
-				case UPLOAD_ERR_NO_TMP_DIR:
-					$this->_errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
-					break;
-				case UPLOAD_ERR_CANT_WRITE:
-					$this->_errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
-					break;
-				default:
-					$this->_errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
-			}
-		}
-		return $_upload_ok;
-	}
-
 	public function shortcodeRpsUploadEntry ()
 	{
 		global $post;
@@ -1656,5 +1280,519 @@ class AVH_RPS_Public
 		echo '</td></tr>';
 		echo '</table>';
 		echo '</form>';
+	}
+
+	// ----- Private Functions --------
+
+	/**
+	 * Send an XML File with the competition dates
+	 */
+	private function _sendXmlCompetitionDates ()
+	{
+		// Connect to the Database
+		try {
+			$db = new RPSPDO();
+		} catch (PDOException $e) {
+			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
+			die($e->getMessage());
+		}
+
+		try {
+			$select = "SELECT DISTINCT(Competition_Date) FROM competitions ";
+			if ( $_GET['closed'] || $_GET['scored'] ) {
+				$where = "WHERE";
+				if ( $_GET['closed'] ) {
+					$where .= " Closed=:closed";
+				}
+				if ( $_GET['scored'] ) {
+					$where .= " AND Scored=:scored";
+				}
+			} else {
+				$where .= " Competition_Date >= CURDATE()";
+			}
+
+			$sth = $db->prepare($select . $where);
+			if ( $_GET['closed'] ) {
+				$_closed = $_GET['closed'];
+				$sth->bindParam(':closed', $_closed, PDO::PARAM_STR, 1);
+			}
+			if ( $_GET['scored'] ) {
+				$_scored = $_GET['scored'];
+				$sth->bindParam(':scored', $_scored, PDO::PARAM_STR, 1);
+			}
+			$sth->execute();
+		} catch (PDOException $e) {
+			$this->_doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
+			die($e->getMessage());
+		}
+
+		$dom = new DOMDocument('1.0', 'utf-8');
+		$dom->formatOutput = true;
+		$root = $dom->createElement('rsp');
+		$dom->appendChild($root);
+		$stat = $dom->createAttribute("stat");
+		$root->appendChild($stat);
+		$value = $dom->CreateTextNode("ok");
+		$stat->appendChild($value);
+		$recs = $sth->fetch(PDO::FETCH_ASSOC);
+		while ( $recs != FALSE ) {
+			$dateParts = split(" ", $recs['Competition_Date']);
+			$comp_date = $root->appendChild($dom->createElement('Competition_Date'));
+			$comp_date->appendChild($dom->createTextNode($dateParts[0]));
+			$recs = $sth->fetch(PDO::FETCH_ASSOC);
+		}
+		echo $dom->saveXML();
+		$db = NULL;
+		die();
+	}
+
+	private function _sendCompetitions ()
+	{
+		$username = $_REQUEST['username'];
+		$password = $_REQUEST['password'];
+		try {
+			$db = new RPSPDO();
+		} catch (PDOException $e) {
+			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
+			die($e->getMessage());
+		}
+		if ( $db !== FALSE ) {
+			$user = wp_authenticate($username, $password);
+			if ( is_wp_error($user) ) {
+				$a = strip_tags($user->get_error_message());
+				$this->_doRESTError($a);
+				die();
+			}
+			// @todo Check if the user has the role needed.
+			$this->_sendXmlCompetitions($db, $_REQUEST['medium'], $_REQUEST['comp_date']);
+		}
+		die();
+	}
+
+	private function _sendXmlCompetitions ($db, $requested_medium, $comp_date)
+	{
+		/* @var $db RPSPDO */
+		// Start building the XML response
+		$dom = new DOMDocument('1.0');
+		// Create the root node
+		$rsp = $dom->CreateElement('rsp');
+		$rsp = $dom->AppendChild($rsp);
+		$rsp->SetAttribute('stat', 'ok');
+
+		$medium_clause = '';
+		if ( !( empty($requested_medium) ) ) {
+			$medium_clause = ( $requested_medium == "prints" ) ? " AND Medium like '%Prints' " : " AND Medium like '%Digital' ";
+		}
+		$_compdate = "DATE('$comp_date')";
+		$sql = "SELECT ID, Competition_Date, Theme, Medium, Classification
+		FROM competitions
+		WHERE Competition_Date = :compdate
+		$medium_clause
+		ORDER BY Medium, Classification";
+
+		try {
+			$sth_competitions = $db->prepare($sql);
+			$sth_competitions->bindParam(':compdate', $_compdate);
+			$sth_competitions->execute();
+		} catch (Exception $e) {
+			$this->_doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
+			die();
+		}
+		// Create a Competitions node
+		$xml_competions = $rsp->AppendChild($dom->CreateElement('Competitions'));
+		// Iterate through all the matching Competitions and create corresponding Competition nodes
+		$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
+		while ( $record_competitions != FALSE ) {
+			$comp_id = $record_competitions['ID'];
+			$dateParts = split(" ", $record_competitions['Competition_Date']);
+			$date = $dateParts[0];
+			$theme = $record_competitions['Theme'];
+			$medium = $record_competitions['Medium'];
+			$classification = $record_competitions['Classification'];
+			// Create the competition node in the XML response
+			$competition_element = $xml_competions->AppendChild($dom->CreateElement('Competition'));
+
+			$date_element = $competition_element->AppendChild($dom->CreateElement('Date'));
+			$date_element->AppendChild($dom->CreateTextNode($date));
+
+			$theme_element = $competition_element->AppendChild($dom->CreateElement('Theme'));
+			$theme_element->AppendChild($dom->CreateTextNode($theme));
+
+			$medium_element = $competition_element->AppendChild($dom->CreateElement('Medium'));
+			$medium_element->AppendChild($dom->CreateTextNode($medium));
+
+			$xml_classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
+			$xml_classification_node->AppendChild($dom->CreateTextNode($classification));
+
+			// Get all the entries for this competition
+			try {
+				$sql = "SELECT members.FirstName, members.LastName, entries.ID, entries.Title,
+						entries.Server_File_Name, entries.Score, entries.Award
+						FROM members, entries
+						WHERE entries.Competition_ID = :comp_id AND
+					      entries.Member_ID = members.ID AND
+						  members.Active = 'Y'
+						ORDER BY members.LastName, members.FirstName, entries.Title";
+				$sth_entries = $db->prepare($sql);
+				$sth_entries->bindParam(':comp_id', $comp_id);
+				$sth_entries->execute();
+			} catch (Exception $e) {
+				$this->_doRESTError("Failed to SELECT competition entriesfrom database - " . $e->getMessage());
+				die();
+			}
+			// Create an Entries node
+			$entries = $competition_element->AppendChild($dom->CreateElement('Entries'));
+			// Iterate through all the entries for this competition
+			$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
+			while ( $record_entries !== FALSE ) {
+				$entry_id = $record_entries['ID'];
+				$first_name = $record_entries['FirstName'];
+				$last_name = $record_entries['LastName'];
+				$title = $record_entries['Title'];
+				$score = $record_entries['Score'];
+				$award = $record_entries['Award'];
+				$server_file_name = $record_entries['Server_File_Name'];
+				// Create an Entry node
+				$entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
+				$id = $entry_element->AppendChild($dom->CreateElement('ID'));
+				$id->AppendChild($dom->CreateTextNode($entry_id));
+				$fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
+				$fname->AppendChild($dom->CreateTextNode($first_name));
+				$lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
+				$lname->AppendChild($dom->CreateTextNode($last_name));
+				$title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
+				$title_node->AppendChild($dom->CreateTextNode($title));
+				$score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
+				$score_node->AppendChild($dom->CreateTextNode($score));
+				$award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
+				$award_node->AppendChild($dom->CreateTextNode($award));
+				// Convert the absolute server file name into a URL
+				$image_url = site_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
+				$url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
+				$url_node->AppendChild($dom->CreateTextNode($image_url));
+				$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
+			}
+			$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
+		}
+		// Send the completed XML response back to the client
+		// header('Content-Type: text/xml');
+		echo $dom->saveXML();
+	}
+
+	/**
+	 * Handle the uploaded score from the RPS Client.
+	 */
+	private function _doUploadScore ()
+	{
+		$username = $_REQUEST['username'];
+		$password = $_REQUEST['password'];
+		try {
+			$db = new RPSPDO();
+		} catch (PDOException $e) {
+			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
+			die($e->getMessage());
+		}
+		if ( $db !== FALSE ) {
+			$user = wp_authenticate($username, $password);
+			if ( is_wp_error($user) ) {
+				$a = strip_tags($user->get_error_message());
+				$this->_doRESTError($a);
+				die();
+			}
+		}
+		// Check to see if there were any file upload errors
+		switch ( $_FILES['file']['error'] )
+		{
+			case UPLOAD_ERR_OK:
+				break;
+			case UPLOAD_ERR_INI_SIZE:
+				$this->_doRESTError("The uploaded file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . ") in php.ini.");
+				die();
+			case UPLOAD_ERR_FORM_SIZE:
+				$this->_doRESTError("The uploaded file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB allowed by this form.");
+				die();
+			case UPLOAD_ERR_PARTIAL:
+				$this->_doRESTError("The uploaded file was only partially uploaded.");
+				die();
+			case UPLOAD_ERR_NO_FILE:
+				$this->_doRESTError("No file was uploaded.");
+				die();
+			case UPLOAD_ERR_NO_TMP_DIR:
+				$this->_doRESTError("Missing a temporary folder.");
+				die();
+			case UPLOAD_ERR_CANT_WRITE:
+				$this->_doRESTError("Failed to write file to disk");
+				die();
+			default:
+				$this->_doRESTError("Unknown File Upload Error");
+				die();
+		}
+
+		// Move the file to its final location
+		$path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions';
+		$dest_name = "scores_" . $comp_date . ".xml";
+		$file_name = $path . '/' . $dest_name;
+		if ( !move_uploaded_file($_FILES['file']['tmp_name'], $file_name) ) {
+			$this->_doRESTError("<b>Failed to store uploaded file in destination folder</b><br>");
+			die();
+		}
+
+		$warning = $this->_handleUploadScoresFile($db);
+
+		// Remove the uploaded .xml file
+		unlink($file_name);
+
+		// Return success to the client
+		$warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
+		$this->_doRESTSuccess($warning);
+	}
+
+	/**
+	 * Handle the XML file containing the scores and add them to the database
+	 *
+	 * @param object $db Database handle.
+	 */
+	private function _handleUploadScoresFile ($db, $file_name)
+	{
+		$warning = '';
+
+		if ( !$xml = simplexml_load_file($file_name) ) {
+			$this->_doRESTError("Failed to open XML file");
+			die();
+		}
+
+		foreach ( $xml->Competition as $comp ) {
+			$comp_date = $comp->Date;
+			$classification = $comp->Classification;
+			$medium = $comp->Medium;
+			foreach ( $comp->Entries as $entries ) {
+				foreach ( $entries->Entry as $entry ) {
+					$entry_id = $entry->ID;
+					$first_name = html_entity_decode($entry->First_Name);
+					$last_name = html_entity_decode($entry->Last_Name);
+					$title = html_entity_decode($entry->Title);
+					$score = html_entity_decode($entry->Score);
+					$award = html_entity_decode($entry->Award);
+
+					if ( $entry_id != "" ) {
+						if ( $score != "" ) {
+							try {
+								$placeholders = array();
+								$sql = "UPDATE entries SET Score=$score,Date_Modified=NOW()";
+								if ( $award != "" ) {
+									$sql .= ", Award=:award";
+									$placeholders[] = array(':award' => array('value' => $award,'data_type' => PDO::PARAM_STR,'length' => 4));
+								}
+								$sql .= " WHERE ID=:entry_id";
+								$placeholders[] = array(':entry_id' => array('value' => $entry_id,'data_type' => PDO::PARAM_INT,'length' => 11));
+
+								$sth = $db->prepare($sql);
+								foreach ( $placeholders as $placeholder => $info ) {
+									$sth->bindValue($placeholder, $info['value'], $info['data_type'], $info['length']);
+								}
+								$sth->execute();
+							} catch (PDOException $e) {
+								$this->_doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
+								die();
+							}
+							if ( $sth->rowCount() < 1 ) {
+								$warning .= "  <info>$comp_date, $first_name $last_name, $title -- Row failed to update</info>\n";
+							}
+						}
+					} else {
+						$warning .= "  <info>$comp_date, $first_name $last_name, $title -- ID is Null -- skipped</info>\n";
+					}
+				}
+			}
+
+			// Mark this competition as scored
+			try {
+				$sql = "UPDATE competitions SET Scored='Y', Date_Modified=NOW()
+				WHERE Competition_Date='$comp_date' AND
+				Classification='$classification' AND
+				Medium = '$medium'";
+				if ( !$rs = mysql_query($sql) )
+					throw new Exception(mysql_error());
+			} catch (Exception $e) {
+				$this->_doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
+				die();
+			}
+			if ( mysql_affected_rows() < 1 ) {
+				$this->_doRESTError("No rows updated when setting Scored flag to Y in database for $comp_date / $classification");
+				die();
+			}
+		}
+		return $warning;
+	}
+
+	private function _doRESTError ($errMsg)
+	{
+		$this->_doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
+	}
+
+	private function _doRESTSuccess ($message)
+	{
+		$this->_doRESTResponse("ok", $message);
+	}
+
+	private function _doRESTResponse ($status, $message)
+	{
+		echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
+		echo '<rsp stat="' . $status . '">' . "\n";
+		echo '	' . $message . "\n";
+		echo "</rsp>\n";
+	}
+
+	/**
+	 * Check the upload entry for errors.
+	 */
+	private function _checkUploadEntryTitle ()
+	{
+		$_upload_ok = false;
+		if ( !isset($_POST['title']) || trim($_POST['title']) == "" ) {
+			$this->_errmsg = 'Please enter your image title in the Title field.';
+		} else {
+			switch ( $_FILES['file_name']['error'] )
+			{
+				case UPLOAD_ERR_OK:
+					$_upload_ok = true;
+					break;
+				case UPLOAD_ERR_INI_SIZE:
+					$this->_errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
+					break;
+				case UPLOAD_ERR_FORM_SIZE:
+					$this->_errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
+					break;
+				case UPLOAD_ERR_PARTIAL:
+					$this->_errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
+					break;
+				case UPLOAD_ERR_NO_FILE:
+					$this->_errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+					break;
+				case UPLOAD_ERR_NO_TMP_DIR:
+					$this->_errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
+					break;
+				case UPLOAD_ERR_CANT_WRITE:
+					$this->_errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
+					break;
+				default:
+					$this->_errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
+			}
+		}
+		return $_upload_ok;
+	}
+
+	private function _deleteCompetitionEntries ($entries)
+	{
+		if ( is_array($entries) ) {
+			foreach ( $entries as $id ) {
+
+				$recs = $this->_rpsdb->getEntryInfo($id);
+				if ( $recs == FALSE ) {
+					$this->_errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
+				} else {
+
+					$server_file_name = ABSPATH . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
+					// Delete the record from the database
+					$result = $this->_rpsdb->deleteEntry($id);
+					if ( $result === FALSE ) {
+						$this->_errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
+					} else {
+
+						// Delete the file from the server file system
+						if ( file_exists($server_file_name) ) {
+							unlink($server_file_name);
+						}
+						// Delete any thumbnails of this image
+						$ext = ".jpg";
+						$comp_date = $this->_settings->comp_date;
+						$classification = $this->_settings->classification;
+						$medium = $this->_settings->medium;
+						$path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+
+						$old_file_parts = pathinfo($server_file_name);
+						$old_file_name = $old_file_parts['filename'];
+
+						if ( is_dir($path . "/thumbnails") ) {
+							$thumb_base_name = $path . "/thumbnails/" . $old_file_name;
+							// Get all the matching thumbnail files
+							$thumbnails = glob("$thumb_base_name*");
+							// Iterate through the list of matching thumbnails and delete each one
+							if ( is_array($thumbnails) && count($thumbnails) > 0 ) {
+								foreach ( $thumbnails as $thumb ) {
+									unlink($thumb);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	 * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
+	 */
+	private function _validateSelectedComp ($date, $med)
+	{
+		$open_competitions = $this->_rpsdb->getOpenCompetitions($this->_settings->medium_subset);
+
+		if ( empty($open_competitions) ) {
+			return false;
+		}
+
+		// Read the competition attributes into a series of arrays
+		$index = 0;
+		$date_index = -1;
+		$medium_index = -1;
+		foreach ( $open_competitions as $recs ) {
+			// Append this competition to the arrays
+			$dateParts = explode(" ", $recs['Competition_Date']);
+			$this->_open_comp_date[$index] = $dateParts[0];
+			$this->_open_comp_medium[$index] = $recs['Medium'];
+			$this->_open_comp_class[$index] = $recs['Classification'];
+			$this->_open_comp_theme[$index] = $recs['Theme'];
+			// If this is the first competition whose date matches the currently selected
+			// competition date, save its array index
+			if ( $this->_open_comp_date[$index] == $date ) {
+				if ( $date_index < 0 ) {
+					$date_index = $index;
+				}
+				// If this competition matches the date AND the medium of the currently selected
+				// competition, save its array index
+				if ( $this->_open_comp_medium[$index] == $med ) {
+					if ( $medium_index < 0 ) {
+						$medium_index = $index;
+					}
+				}
+			}
+			$index += 1;
+		}
+
+		// If date and medium both matched, then the currently selected competition is in the
+		// list of open competitions for this member
+		if ( $medium_index >= 0 ) {
+			$index = $medium_index;
+
+			// If the date matched but the medium did not, then there are valid open competitions on
+			// the selected date for this member, but not in the currently selected medium. In this
+			// case set the medium to the first one in the list for the selected date.
+		} elseif ( $medium_index < 0 && $date_index >= 0 ) {
+			$index = $date_index;
+
+			// If neither the date or medium matched, simply select the first open competition in the
+			// list.
+		} else {
+			$index = 0;
+		}
+		// Establish the (possibly adjusted) selected competition
+		$this->_settings->comp_date = $this->_open_comp_date[$index];
+		$this->_settings->classification = $this->_open_comp_class[$index];
+		$this->_settings->medium = $this->_open_comp_medium[$index];
+		// Save the currently selected competition in a cookie
+		$hour = time() + ( 2 * 3600 );
+		$url = parse_url(get_bloginfo('url'));
+		setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $hour, '/', $url['host']);
+		return true;
 	}
 }
