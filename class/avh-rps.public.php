@@ -89,10 +89,10 @@ class AVH_RPS_Public
 			switch ( $_REQUEST['rpswinclient'] )
 			{
 				case 'getcompdate':
-					$this->getCompetitionDates();
+					$this->_sendXmlCompetitionDates();
 					break;
 				case 'download':
-					$this->getDownload();
+					$this->_sendCompetitions();
 					break;
 				default:
 					break;
@@ -101,42 +101,47 @@ class AVH_RPS_Public
 	}
 
 	/**
-	 * Enter description here .
-	 *
-	 *
-	 * ..
+	 * Send an XML File with the competition dates
 	 */
-	private function getCompetitionDates ()
+	private function _sendXmlCompetitionDates ()
 	{
 		// Connect to the Database
 		try {
-			if ( !$db = @mysql_connect($this->_settings->host, $this->_settings->uname, $this->_settings->pw) )
-				throw new Exception(mysql_error());
-			if ( !mysql_select_db($this->_settings->dbname) )
-				throw new Exception(mysql_error());
-		} catch (Exception $e) {
+			$db = new RPSPDO();
+		} catch (PDOException $e) {
 			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
 			die($e->getMessage());
 		}
+
 		try {
 			$select = "SELECT DISTINCT(Competition_Date) FROM competitions ";
-			$where = "WHERE ";
 			if ( $_GET['closed'] || $_GET['scored'] ) {
+				$where = "WHERE";
 				if ( $_GET['closed'] ) {
-					$where .= "Closed='" . $_GET['closed'] . "'";
+					$where .= " Closed=:closed";
 				}
 				if ( $_GET['scored'] ) {
-					$where .= " AND Scored='" . $_GET['scored'] . "'";
+					$where .= " AND Scored=:scored";
 				}
 			} else {
-				$where .= "Competition_Date >= CURDATE()";
+				$where .= " Competition_Date >= CURDATE()";
 			}
-			if ( !$rs = mysql_query($select . $where) )
-				throw new Exception(mysql_error());
-		} catch (Exception $e) {
+
+			$sth = $db->prepare($select . $where);
+			if ( $_GET['closed'] ) {
+				$_closed = $_GET['closed'];
+				$sth->bindParam(':closed', $_closed, PDO::PARAM_STR, 1);
+			}
+			if ( $_GET['scored'] ) {
+				$_scored = $_GET['scored'];
+				$sth->bindParam(':scored', $_scored, PDO::PARAM_STR, 1);
+			}
+			$sth->execute();
+		} catch (PDOException $e) {
 			$this->_doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
 			die($e->getMessage());
 		}
+
 		$dom = new DOMDocument('1.0', 'utf-8');
 		$dom->formatOutput = true;
 		$root = $dom->createElement('rsp');
@@ -145,34 +150,29 @@ class AVH_RPS_Public
 		$root->appendChild($stat);
 		$value = $dom->CreateTextNode("ok");
 		$stat->appendChild($value);
-		while ( $recs = mysql_fetch_assoc($rs) ) {
+		$recs = $sth->fetch(PDO::FETCH_ASSOC);
+		while ( $recs != FALSE ) {
 			$dateParts = split(" ", $recs['Competition_Date']);
-			$comp_date = $dom->createElement('Competition_Date');
+			$comp_date = $root->appendChild($dom->createElement('Competition_Date'));
 			$comp_date->appendChild($dom->createTextNode($dateParts[0]));
-			$root->appendChild($comp_date);
+			$recs = $sth->fetch(PDO::FETCH_ASSOC);
 		}
 		echo $dom->saveXML();
+		$db = NULL;
 		die();
 	}
 
-	private function getDownload ()
+	private function _sendCompetitions ()
 	{
-		// TODO the RPS Client needs to be changed so the password is send encrypted instead of md5.
-		// After this this function needs to be tested.
 		$username = $_REQUEST['username'];
 		$password = $_REQUEST['password'];
-		$this->comp_date = $_REQUEST['comp_date'];
-		$this->requested_medium = $_REQUEST['medium'];
 		try {
-			if ( !$db = @mysql_connect($this->_settings->host, $this->_settings->uname, $this->_settings->pw) )
-				throw new Exception(mysql_error());
-			if ( !mysql_select_db($this->_settings->dbname) )
-				throw new Exception(mysql_error());
-		} catch (Exception $e) {
+			$db = new RPSPDO();
+		} catch (PDOException $e) {
 			$this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
 			die($e->getMessage());
 		}
-		if ( $db ) {
+		if ( $db !== FALSE ) {
 			$user = wp_authenticate($username, $password);
 			if ( is_wp_error($user) ) {
 				$a = strip_tags($user->get_error_message());
@@ -180,100 +180,115 @@ class AVH_RPS_Public
 				die();
 			}
 			// @todo Check if the user has the role needed.
-			$this->Send_Competitions($db);
+			$this->_sendXmlCompetitions($db, $_REQUEST['medium'], $_REQUEST['comp_date']);
 		}
 		die();
 	}
 
-	private function Send_Competitions ($comp_date, $requested_medium, $db)
+	private function _sendXmlCompetitions ($db, $requested_medium, $comp_date)
 	{
+		/* @var $db RPSPDO */
 		// Start building the XML response
 		$dom = new DOMDocument('1.0');
 		// Create the root node
 		$rsp = $dom->CreateElement('rsp');
 		$rsp = $dom->AppendChild($rsp);
 		$rsp->SetAttribute('stat', 'ok');
-		// Get all the competitions that match the requested date
-		if ( $this->requested_medium > "" ) {
+
+		$medium_clause = '';
+		if ( !( empty($requested_medium) ) ) {
 			$medium_clause = ( $requested_medium == "prints" ) ? " AND Medium like '%Prints' " : " AND Medium like '%Digital' ";
 		}
+		$_compdate = "DATE('$comp_date')";
+		$sql = "SELECT ID, Competition_Date, Theme, Medium, Classification
+		FROM competitions
+		WHERE Competition_Date = :compdate
+		$medium_clause
+		ORDER BY Medium, Classification";
+
 		try {
-			$sql = "SELECT ID, Competition_Date, Theme, Medium, Classification
-				FROM competitions
-				WHERE Competition_Date = DATE('$this->comp_date')
-			    $this->medium_clause
-				ORDER BY Medium, Classification";
-			if ( !$rs = mysql_query($sql) )
-				throw new Exception(mysql_error());
+			$sth_competitions = $db->prepare($sql);
+			$sth_competitions->bindParam(':compdate', $_compdate);
+			$sth_competitions->execute();
 		} catch (Exception $e) {
-			$this->_doRESTError("Failed to SELECT competition records with date = " . $this->comp_date . " from database - " . $e->getMessage());
+			$this->_doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
 			die();
 		}
 		// Create a Competitions node
-		$comps = $rsp->AppendChild($dom->CreateElement('Competitions'));
+		$xml_competions = $rsp->AppendChild($dom->CreateElement('Competitions'));
 		// Iterate through all the matching Competitions and create corresponding Competition nodes
-		while ( $recs = mysql_fetch_assoc($rs) ) {
-			$comp_id = $recs['ID'];
-			$dateParts = split(" ", $recs['Competition_Date']);
+		$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
+		while ( $record_competitions != FALSE ) {
+			$comp_id = $record_competitions['ID'];
+			$dateParts = split(" ", $record_competitions['Competition_Date']);
 			$date = $dateParts[0];
-			$theme = $recs['Theme'];
-			$medium = $recs['Medium'];
-			$classification = $recs['Classification'];
+			$theme = $record_competitions['Theme'];
+			$medium = $record_competitions['Medium'];
+			$classification = $record_competitions['Classification'];
 			// Create the competition node in the XML response
-			$comp_node = $comps->AppendChild($dom->CreateElement('Competition'));
-			$date_node = $comp_node->AppendChild($dom->CreateElement('Date'));
-			$date_node->AppendChild($dom->CreateTextNode($date));
-			$theme_node = $comp_node->AppendChild($dom->CreateElement('Theme'));
-			$theme_node->AppendChild($dom->CreateTextNode($theme));
-			$medium_node = $comp_node->AppendChild($dom->CreateElement('Medium'));
-			$medium_node->AppendChild($dom->CreateTextNode($medium));
-			$class_node = $comp_node->AppendChild($dom->CreateElement('Classification'));
-			$class_node->AppendChild($dom->CreateTextNode($classification));
+			$competition_element = $xml_competions->AppendChild($dom->CreateElement('Competition'));
+
+			$date_element = $competition_element->AppendChild($dom->CreateElement('Date'));
+			$date_element->AppendChild($dom->CreateTextNode($date));
+
+			$theme_element = $competition_element->AppendChild($dom->CreateElement('Theme'));
+			$theme_element->AppendChild($dom->CreateTextNode($theme));
+
+			$medium_element = $competition_element->AppendChild($dom->CreateElement('Medium'));
+			$medium_element->AppendChild($dom->CreateTextNode($medium));
+
+			$xml_classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
+			$xml_classification_node->AppendChild($dom->CreateTextNode($classification));
+
 			// Get all the entries for this competition
 			try {
 				$sql = "SELECT members.FirstName, members.LastName, entries.ID, entries.Title,
 						entries.Server_File_Name, entries.Score, entries.Award
 						FROM members, entries
-						WHERE entries.Competition_ID = " . $comp_id . " AND
+						WHERE entries.Competition_ID = :comp_id AND
 					      entries.Member_ID = members.ID AND
 						  members.Active = 'Y'
 						ORDER BY members.LastName, members.FirstName, entries.Title";
-				if ( !$rs2 = mysql_query($sql) )
-					throw new Exception(mysql_error());
+				$sth_entries = $db->prepare($sql);
+				$sth_entries->bindParam(':comp_id', $comp_id);
+				$sth_entries->execute();
 			} catch (Exception $e) {
-				$this->_doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
+				$this->_doRESTError("Failed to SELECT competition entriesfrom database - " . $e->getMessage());
 				die();
 			}
 			// Create an Entries node
-			$entries = $comp_node->AppendChild($dom->CreateElement('Entries'));
+			$entries = $competition_element->AppendChild($dom->CreateElement('Entries'));
 			// Iterate through all the entries for this competition
-			while ( $recs2 = mysql_fetch_assoc($rs2) ) {
-				$entry_id = $recs2['ID'];
-				$first_name = $recs2['FirstName'];
-				$last_name = $recs2['LastName'];
-				$title = $recs2['Title'];
-				$score = $recs2['Score'];
-				$award = $recs2['Award'];
-				$server_file_name = $recs2['Server_File_Name'];
+			$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
+			while ( $record_entries !== FALSE ) {
+				$entry_id = $record_entries['ID'];
+				$first_name = $record_entries['FirstName'];
+				$last_name = $record_entries['LastName'];
+				$title = $record_entries['Title'];
+				$score = $record_entries['Score'];
+				$award = $record_entries['Award'];
+				$server_file_name = $record_entries['Server_File_Name'];
 				// Create an Entry node
-				$entry = $entries->AppendChild($dom->CreateElement('Entry'));
-				$id = $entry->AppendChild($dom->CreateElement('ID'));
+				$entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
+				$id = $entry_element->AppendChild($dom->CreateElement('ID'));
 				$id->AppendChild($dom->CreateTextNode($entry_id));
-				$fname = $entry->AppendChild($dom->CreateElement('First_Name'));
+				$fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
 				$fname->AppendChild($dom->CreateTextNode($first_name));
-				$lname = $entry->AppendChild($dom->CreateElement('Last_Name'));
+				$lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
 				$lname->AppendChild($dom->CreateTextNode($last_name));
-				$title_node = $entry->AppendChild($dom->CreateElement('Title'));
+				$title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
 				$title_node->AppendChild($dom->CreateTextNode($title));
-				$score_node = $entry->AppendChild($dom->CreateElement('Score'));
+				$score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
 				$score_node->AppendChild($dom->CreateTextNode($score));
-				$award_node = $entry->AppendChild($dom->CreateElement('Award'));
+				$award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
 				$award_node->AppendChild($dom->CreateTextNode($award));
 				// Convert the absolute server file name into a URL
-				$image_url = site_url(str_replace('/home/rarit0/public_html', '', $recs2['Server_File_Name']));
-				$url_node = $entry->AppendChild($dom->CreateElement('Image_URL'));
+				$image_url = site_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
+				$url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
 				$url_node->AppendChild($dom->CreateTextNode($image_url));
+				$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
 			}
+			$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
 		}
 		// Send the completed XML response back to the client
 		// header('Content-Type: text/xml');
@@ -1540,6 +1555,16 @@ class AVH_RPS_Public
 
 	/**
 	 * Enter description here .
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
+	 *
 	 * ..
 	 */
 	private function _checkUploadEntryTitle ()

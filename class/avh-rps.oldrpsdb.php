@@ -37,13 +37,13 @@ class AVH_RPS_OldRpsDb
 		$this->_rpsdb->show_errors();
 	}
 
-	public function getSeasonList ($order="ASC")
+	public function getSeasonList ($order = "ASC")
 	{
 		$sql = $this->_rpsdb->prepare('SELECT DISTINCT if(month(Competition_Date) >= %s and month(Competition_Date) <= %s,
 			concat_WS("-",year(Competition_Date),substr(year(Competition_Date)+1,3,2)),
 			concat_WS("-",year(Competition_Date)-1,substr(year(Competition_Date),3,2))) as "Season"
 			FROM competitions
-			ORDER BY Season '. $order, $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
+			ORDER BY Season ' . $order, $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
 
 		$_result = $this->_rpsdb->get_results($sql, ARRAY_A);
 		foreach ( $_result as $key => $value ) {
@@ -603,4 +603,23 @@ class AVH_RPS_OldRpsDb
 	{
 		$this->_user_id = $_user_id;
 	}
-} //End Class AVH_RPS_OldRpsDb
+} // End Class AVH_RPS_OldRpsDb
+class RPSPDO extends PDO
+{
+	private $engine;
+	private $host;
+	private $database;
+	private $user;
+	private $pass;
+
+	public function __construct ()
+	{
+		$this->engine = 'mysql';
+		$this->host = 'localhost';
+		$this->database = 'avirtu2_raritdata';
+		$this->user = 'avirtu2_rarit1';
+		$this->pass = '1Hallo@Done#';
+		$dns = $this->engine . ':dbname=' . $this->database . ";host=" . $this->host;
+		parent::__construct($dns, $this->user, $this->pass);
+	}
+}
