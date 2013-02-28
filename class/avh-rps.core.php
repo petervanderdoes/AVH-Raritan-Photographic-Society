@@ -311,6 +311,27 @@ class AVH_RPS_Core
 	}
 
 	/**
+	 * Check if the user is a paid member
+	 *
+	 * @param int $user_id UserID to check
+	 * @return boolean true if a paid member, false if non-existing user or non-paid member.`
+	 */
+	public function isPaidMember ($user_id = NULL)
+	{
+		if ( is_numeric($user_id) ) {
+			$user = get_user_by('id', $user_id);
+		} else {
+			$user = wp_get_current_user();
+		}
+
+		if ( empty($user) ) {
+			return false;
+		}
+
+		return in_array('s2member_level1', (array) $user->roles);
+	}
+
+	/**
 	 * *******************************
 	 * *
 	 * Methods for variable: options *

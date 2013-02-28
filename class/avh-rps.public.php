@@ -1371,6 +1371,7 @@ class AVH_RPS_Public
 
 	private function _sendXmlCompetitions ($db, $requested_medium, $comp_date)
 	{
+
 		/* @var $db RPSPDO */
 		// Start building the XML response
 		$dom = new DOMDocument('1.0');
@@ -1383,16 +1384,13 @@ class AVH_RPS_Public
 		if ( !( empty($requested_medium) ) ) {
 			$medium_clause = ( $requested_medium == "prints" ) ? " AND Medium like '%Prints' " : " AND Medium like '%Digital' ";
 		}
-		$_compdate = "DATE('$comp_date')";
 		$sql = "SELECT ID, Competition_Date, Theme, Medium, Classification
 		FROM competitions
-		WHERE Competition_Date = :compdate
-		$medium_clause
+		WHERE Competition_Date = DATE(:compdate) AND Closed = 'Y' $medium_clause
 		ORDER BY Medium, Classification";
-
 		try {
 			$sth_competitions = $db->prepare($sql);
-			$sth_competitions->bindParam(':compdate', $_compdate);
+			$sth_competitions->bindParam(':compdate', $comp_date);
 			$sth_competitions->execute();
 		} catch (Exception $e) {
 			$this->_doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
@@ -1402,7 +1400,7 @@ class AVH_RPS_Public
 		$xml_competions = $rsp->AppendChild($dom->CreateElement('Competitions'));
 		// Iterate through all the matching Competitions and create corresponding Competition nodes
 		$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
-		while ( $record_competitions != FALSE ) {
+		while ( $record_competitions !== FALSE ) {
 			$comp_id = $record_competitions['ID'];
 			$dateParts = split(" ", $record_competitions['Competition_Date']);
 			$date = $dateParts[0];
@@ -1426,51 +1424,52 @@ class AVH_RPS_Public
 
 			// Get all the entries for this competition
 			try {
-				$sql = "SELECT members.FirstName, members.LastName, entries.ID, entries.Title,
+				$sql = "SELECT entries.ID, entries.Title, entries.Member_ID,
 						entries.Server_File_Name, entries.Score, entries.Award
-						FROM members, entries
-						WHERE entries.Competition_ID = :comp_id AND
-					      entries.Member_ID = members.ID AND
-						  members.Active = 'Y'
-						ORDER BY members.LastName, members.FirstName, entries.Title";
+						FROM entries
+						WHERE entries.Competition_ID = :comp_id
+						ORDER BY entries.Title";
 				$sth_entries = $db->prepare($sql);
-				$sth_entries->bindParam(':comp_id', $comp_id);
+				$sth_entries->bindParam(':comp_id', $comp_id, PDO::PARAM_INT, 11);
 				$sth_entries->execute();
 			} catch (Exception $e) {
-				$this->_doRESTError("Failed to SELECT competition entriesfrom database - " . $e->getMessage());
+				$this->_doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
 				die();
 			}
+			$all_records_entries = $sth_entries->fetchAll();
 			// Create an Entries node
+
 			$entries = $competition_element->AppendChild($dom->CreateElement('Entries'));
 			// Iterate through all the entries for this competition
-			$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
-			while ( $record_entries !== FALSE ) {
-				$entry_id = $record_entries['ID'];
-				$first_name = $record_entries['FirstName'];
-				$last_name = $record_entries['LastName'];
-				$title = $record_entries['Title'];
-				$score = $record_entries['Score'];
-				$award = $record_entries['Award'];
-				$server_file_name = $record_entries['Server_File_Name'];
-				// Create an Entry node
-				$entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
-				$id = $entry_element->AppendChild($dom->CreateElement('ID'));
-				$id->AppendChild($dom->CreateTextNode($entry_id));
-				$fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-				$fname->AppendChild($dom->CreateTextNode($first_name));
-				$lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-				$lname->AppendChild($dom->CreateTextNode($last_name));
-				$title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
-				$title_node->AppendChild($dom->CreateTextNode($title));
-				$score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
-				$score_node->AppendChild($dom->CreateTextNode($score));
-				$award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
-				$award_node->AppendChild($dom->CreateTextNode($award));
-				// Convert the absolute server file name into a URL
-				$image_url = site_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
-				$url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
-				$url_node->AppendChild($dom->CreateTextNode($image_url));
-				$record_entries = $sth_entries->fetch(PDO::FETCH_ASSOC);
+			foreach ( $all_records_entries as $record_entries ) {
+				$user = get_user_by('id', $record_entries['Member_ID']);
+				if ($this->_core->isPaidMember($user->ID)) {
+					$entry_id = $record_entries['ID'];
+					$first_name = $user->first_name;
+					$last_name = $user->last_name;
+					$title = $record_entries['Title'];
+					$score = $record_entries['Score'];
+					$award = $record_entries['Award'];
+					$server_file_name = $record_entries['Server_File_Name'];
+					// Create an Entry node
+					$entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
+					$id = $entry_element->AppendChild($dom->CreateElement('ID'));
+					$id->AppendChild($dom->CreateTextNode($entry_id));
+					$fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
+					$fname->AppendChild($dom->CreateTextNode($first_name));
+					$lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
+					$lname->AppendChild($dom->CreateTextNode($last_name));
+					$title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
+					$title_node->AppendChild($dom->CreateTextNode($title));
+					$score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
+					$score_node->AppendChild($dom->CreateTextNode($score));
+					$award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
+					$award_node->AppendChild($dom->CreateTextNode($award));
+					// Convert the absolute server file name into a URL
+					$image_url = site_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
+					$url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
+					$url_node->AppendChild($dom->CreateTextNode($image_url));
+				}
 			}
 			$record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
 		}
@@ -1486,6 +1485,7 @@ class AVH_RPS_Public
 	{
 		$username = $_REQUEST['username'];
 		$password = $_REQUEST['password'];
+		$comp_date = $_REQUEST['date'];
 		try {
 			$db = new RPSPDO();
 		} catch (PDOException $e) {
@@ -1496,7 +1496,7 @@ class AVH_RPS_Public
 			$user = wp_authenticate($username, $password);
 			if ( is_wp_error($user) ) {
 				$a = strip_tags($user->get_error_message());
-				$this->_doRESTError($a);
+				$this->_doRESTError("Unable to authenticate: $a");
 				die();
 			}
 		}
@@ -1533,11 +1533,11 @@ class AVH_RPS_Public
 		$dest_name = "scores_" . $comp_date . ".xml";
 		$file_name = $path . '/' . $dest_name;
 		if ( !move_uploaded_file($_FILES['file']['tmp_name'], $file_name) ) {
-			$this->_doRESTError("<b>Failed to store uploaded file in destination folder</b><br>");
+			$this->_doRESTError("Failed to store scores XML file in destination folder.");
 			die();
 		}
 
-		$warning = $this->_handleUploadScoresFile($db);
+		$warning = $this->_handleUploadScoresFile($db, $file_name);
 
 		// Remove the uploaded .xml file
 		unlink($file_name);
@@ -1557,7 +1557,7 @@ class AVH_RPS_Public
 		$warning = '';
 
 		if ( !$xml = simplexml_load_file($file_name) ) {
-			$this->_doRESTError("Failed to open XML file");
+			$this->_doRESTError("Failed to open scores XML file");
 			die();
 		}
 
