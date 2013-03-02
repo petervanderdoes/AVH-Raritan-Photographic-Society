@@ -317,7 +317,8 @@ class AVH_RPS_OldRpsDb
 	 * If the $data parameter has 'ID' set to a value, then competition will be updated.
 	 *
 	 * @param array $data
-	 * @param bool $wp_error Optional. Allow return of WP_Error on failure.
+	 * @param bool $wp_error
+	 *        Optional. Allow return of WP_Error on failure.
 	 * @return object WP_Error on failure. The post ID on success.
 	 */
 	public function insertCompetition ($data)
@@ -326,61 +327,56 @@ class AVH_RPS_OldRpsDb
 		$update = FALSE;
 		if ( !empty($data['ID']) ) {
 			$update = TRUE;
-		}
-
-		if ( !isset($data['Competition_Date']) ) {
-			$data['Competition_Date'] = current_time('mysql');
-		}
-		if ( !isset($data['Medium']) ) {
-			$data['Medium'] = '';
-		}
-		if ( !isset($data['Classification']) ) {
-			$data['Classification'] = '';
-		}
-		if ( !isset($data['Theme']) ) {
-			$data['Theme'] = '';
-		}
-		if ( !isset($data['Date_Created']) ) {
-			$data['Date_Created'] = current_time('mysql');
-		}
-		if ( !isset($data['Date_Modified']) ) {
-			$data['Date_Modified'] = current_time('mysql');
-		}
-		if ( !isset($data['Closed']) ) {
-			$data['Closed'] = 'N';
-		}
-		if ( !isset($data['Scored']) ) {
-			$data['Scored'] = 'N';
-		}
-		if ( !isset($data['Close_Date']) ) {
-			$data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
-			$date_array = getdate($data['Close_Date']);
-			$data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
-		}
-		if ( !isset($data['Max_Entries']) ) {
-			$data['Max_Entries'] = 2;
-		}
-		if ( !isset($data['Num_Judges']) ) {
-			$data['Num_Judges'] = 1;
-		}
-		if ( !isset($data['Special_Event']) ) {
-			$data['Special_Event'] = 'N';
-		}
-
-		$data = stripslashes_deep($data);
-
-		$competition_ID = 0;
-		if ( $update ) {
 			$competition_ID = (int) $data['ID'];
-		}
-
-		$where = array('ID' => $competition_ID);
-
-		if ( $update ) {
+			$where = array('ID' => $competition_ID);
+			if ( !isset($data['Date_Modified']) ) {
+				$data['Date_Modified'] = current_time('mysql');
+			}
+			$data = stripslashes_deep($data);
 			if ( false === $this->_rpsdb->update('competitions', $data, $where) ) {
 				return new WP_Error('db_update_error', 'Could not update competition into the database', $this->_rpsdb->last_error);
 			}
 		} else {
+			$competition_ID = 0;
+			if ( !isset($data['Competition_Date']) ) {
+				$data['Competition_Date'] = current_time('mysql');
+			}
+			if ( !isset($data['Medium']) ) {
+				$data['Medium'] = '';
+			}
+			if ( !isset($data['Classification']) ) {
+				$data['Classification'] = '';
+			}
+			if ( !isset($data['Theme']) ) {
+				$data['Theme'] = '';
+			}
+			if ( !isset($data['Date_Created']) ) {
+				$data['Date_Created'] = current_time('mysql');
+			}
+			if ( !isset($data['Date_Modified']) ) {
+				$data['Date_Modified'] = current_time('mysql');
+			}
+			if ( !isset($data['Closed']) ) {
+				$data['Closed'] = 'N';
+			}
+			if ( !isset($data['Scored']) ) {
+				$data['Scored'] = 'N';
+			}
+			if ( !isset($data['Close_Date']) ) {
+				$data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
+				$date_array = getdate($data['Close_Date']);
+				$data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
+			}
+			if ( !isset($data['Max_Entries']) ) {
+				$data['Max_Entries'] = 2;
+			}
+			if ( !isset($data['Num_Judges']) ) {
+				$data['Num_Judges'] = 1;
+			}
+			if ( !isset($data['Special_Event']) ) {
+				$data['Special_Event'] = 'N';
+			}
+			$data = stripslashes_deep($data);
 			if ( false === $this->_rpsdb->insert('competitions', $data) ) {
 				return new WP_Error('db_insert_error', __('Could not insert competition into the database'), $this->_rpsdb->last_error);
 			}
