@@ -160,38 +160,36 @@ final class AVH_RPS_Admin
 	 */
 	private function _handleRequestCompetition ()
 	{
-		if ( empty($_REQUEST) ) {
-			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr(stripslashes($_SERVER['REQUEST_URI'])) . '" />';
-		}
 		if ( isset($_REQUEST['wp_http_referer']) ) {
-			$this->_redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
-			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr($this->_redirect) . '" />';
+			$redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
 		} else {
-			$this->_redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
-			$this->_referer = '';
+			$redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
 		}
 
 		$doAction = $this->_competition_list->current_action();
 		switch ( $doAction )
 		{
 			case 'delete':
+			case 'open':
+			case 'close':
 				check_admin_referer('bulk-competitions');
 				if ( empty($_REQUEST['competitions']) && empty($_REQUEST['competition']) ) {
-					wp_redirect($this->_redirect);
+					wp_redirect($redirect);
 					exit();
 				}
 				break;
 
 			case 'edit':
 				if ( empty($_REQUEST['competition']) ) {
-					wp_redirect($this->_redirect);
+					wp_redirect($redirect);
 					exit();
 				}
 				break;
+
 			case 'dodelete':
 				check_admin_referer('delete-competitions');
 				if ( empty($_REQUEST['competitions']) ) {
-					wp_redirect($this->_redirect);
+					wp_redirect($redirect);
 					exit();
 				}
 				$competitionIds = $_REQUEST['competitions'];
@@ -203,8 +201,46 @@ final class AVH_RPS_Admin
 					$this->_rpsdb->deleteCompetition($id);
 					++$deleteCount;
 				}
-				$redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'dodelete'), $redirect);
-				wp_redirect($this->_redirect);
+				$redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'del_many'), $redirect);
+				wp_redirect($redirect);
+				break;
+
+			case 'doopen':
+				check_admin_referer('open-competitions');
+				if ( empty($_REQUEST['competitions']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$competitionIds = $_REQUEST['competitions'];
+				$count = 0;
+
+				foreach ( (array) $competitionIds as $id ) {
+					$data['ID'] = (int) $id;
+					$data['Closed'] = 'N';
+					$this->_rpsdb->insertCompetition($data);
+					++$count;
+				}
+				$redirect = add_query_arg(array('count' => $count,'update' => 'open_many'), $redirect);
+				wp_redirect($redirect);
+				break;
+
+			case 'doclose':
+				check_admin_referer('close-competitions');
+				if ( empty($_REQUEST['competitions']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$competitionIds = $_REQUEST['competitions'];
+				$count = 0;
+
+				foreach ( (array) $competitionIds as $id ) {
+					$data['ID'] = (int) $id;
+					$data['Closed'] = 'Y';
+					$this->_rpsdb->insertCompetition($data);
+					++$count;
+				}
+				$redirect = add_query_arg(array('count' => $count,'update' => 'close_many'), $redirect);
+				wp_redirect($redirect);
 				break;
 
 			default:
@@ -237,6 +273,14 @@ final class AVH_RPS_Admin
 
 			case 'edit':
 				$this->_displayPageCompetitionEdit();
+				break;
+
+			case 'open':
+				$this->_displayPageCompetitionOpenClose('open');
+				break;
+
+			case 'close':
+				$this->_displayPageCompetitionOpenClose('close');
 				break;
 
 			default:
@@ -412,6 +456,55 @@ final class AVH_RPS_Admin
 	}
 
 	/**
+	 * Display the page to confirm the deletion of the selected competitions.
+	 *
+	 * @param string $redirect
+	 * @param string $referer
+	 *
+	 */
+	private function _displayPageCompetitionOpenClose ($action)
+	{
+		global $wpdb;
+
+		if ( $action == 'open' ) {
+			$title = 'Open Competitions';
+			$action_verb = 'openend';
+		}
+		if ( $action == 'close ' ) {
+			$title = 'Close Competitions';
+			$action_verb = 'closed';
+		}
+
+		if ( empty($_REQUEST['competitions']) ) {
+			$competitionIdsArray = array(intval($_REQUEST['competition']));
+		} else {
+			$competitionIdsArray = (array) $_REQUEST['competitions'];
+		}
+
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+
+		$this->admin_header($title);
+		echo $classForm->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
+		wp_nonce_field($action . '-competitions');
+		echo $this->_referer;
+
+		echo '<p>' . _n('You have specified this competition to be ' . $action_verb . ':', 'You have specified these competitions to be ' . $action_verb . '::', count($competitionIdsArray)) . '</p>';
+
+		foreach ( $competitionIdsArray as $competitionID ) {
+			$sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
+			$competition = $this->_rpsdb->getCompetitions(array('where' => $sqlWhere));
+			$competition = $competition[0];
+			echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
+		}
+
+		echo $classForm->hidden('action', 'do' . $action);
+		echo $classForm->submit('openclose', 'Confirm', array('class' => 'button-secondary'));
+
+		echo $classForm->close();
+		$this->admin_footer();
+	}
+
+	/**
 	 * Display the competion in a list
 	 */
 	private function _displayPageCompetitionList ()
@@ -426,6 +519,14 @@ final class AVH_RPS_Admin
 				case 'del_many':
 					$deleteCount = isset($_GET['deleteCount']) ? (int) $_GET['deleteCount'] : 0;
 					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+					break;
+				case 'open_many':
+					$openCount = isset($_GET['count']) ? (int) $_GET['count'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition opened.', '%s competitions opened.', $openCount), number_format_i18n($openCount)) . '</p></div>';
+					break;
+				case 'close_many':
+					$closeCount = isset($_GET['count']) ? (int) $_GET['count'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition closed.', '%s competitions closed.', $closeCount), number_format_i18n($closeCount)) . '</p></div>';
 					break;
 			}
 		}
@@ -864,7 +965,8 @@ final class AVH_RPS_Admin
 	 *
 	 * @WordPress filter screen_meta_screen
 	 *
-	 * @param $screen
+	 * @param
+	 *        $screen
 	 * @return strings
 	 */
 	public function filterScreenLayoutColumns ($columns, $screen)
@@ -1171,7 +1273,8 @@ final class AVH_RPS_Admin
 	/**
 	 * Display error message at bottom of comments.
 	 *
-	 * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
+	 * @param string $msg
+	 *        Error Message. Assumed to contain HTML and be sanitized.
 	 */
 	private function _comment_footer_die ($msg)
 	{
@@ -1182,11 +1285,16 @@ final class AVH_RPS_Admin
 	/**
 	 * Generates the header for admin pages
 	 *
-	 * @param string $title The title to show in the main heading.
-	 * @param bool $form Whether or not the form should be included.
-	 * @param string $option The long name of the option to use for the current page.
-	 * @param string $optionshort The short name of the option to use for the current page.
-	 * @param bool $contains_files Whether the form should allow for file uploads.
+	 * @param string $title
+	 *        The title to show in the main heading.
+	 * @param bool $form
+	 *        Whether or not the form should be included.
+	 * @param string $option
+	 *        The long name of the option to use for the current page.
+	 * @param string $optionshort
+	 *        The short name of the option to use for the current page.
+	 * @param bool $contains_files
+	 *        Whether the form should allow for file uploads.
 	 */
 	function admin_header ($title)
 	{
@@ -1201,8 +1309,10 @@ final class AVH_RPS_Admin
 	/**
 	 * Generates the footer for admin pages
 	 *
-	 * @param bool $submit Whether or not a submit button should be shown.
-	 * @param text $text The text to be shown in the submit button.
+	 * @param bool $submit
+	 *        Whether or not a submit button should be shown.
+	 * @param text $text
+	 *        The text to be shown in the submit button.
 	 */
 	function admin_footer ()
 	{
