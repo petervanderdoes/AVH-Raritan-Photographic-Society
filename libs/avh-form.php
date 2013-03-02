@@ -5,7 +5,7 @@ if ( !class_exists('AVH_Form') ) {
 
 	class AVH_Form
 	{
-		
+
 		// @var Use tables to create Form
 		private $_use_table = false;
 		private $_option_name;
@@ -22,8 +22,10 @@ if ( !class_exists('AVH_Form') ) {
 		 * // When "file" inputs are present, you must include the "enctype"
 		 * echo Form::open(NULL, array('enctype' => 'multipart/form-data'));
 		 *
-		 * @param mixed $action form action, defaults to the current request URI, or [Request] class to use
-		 * @param array $attributes html attributes
+		 * @param mixed $action
+		 *        form action, defaults to the current request URI, or [Request] class to use
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses Request::instance
 		 * @uses URL::site
@@ -35,7 +37,7 @@ if ( !class_exists('AVH_Form') ) {
 				// Use POST method
 				$attributes['method'] = 'post';
 			}
-			
+
 			return '<form action="' . $action . '"' . AVH_Common::attributes($attributes) . '>';
 		}
 
@@ -104,16 +106,19 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::hidden('csrf', $token);
 		 *
-		 * @param string $name input name
-		 * @param string $value input value
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param string $value
+		 *        input value
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses $this->input
 		 */
 		public function hidden ($name, $value = NULL, array $attributes = NULL, $use_option_name = FALSE)
 		{
 			$attributes['type'] = 'hidden';
-			
+
 			return $this->_input($name, $value, $attributes, $use_option_name);
 		}
 
@@ -124,9 +129,12 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::button('save', 'Save Profile', array('type' => 'submit'));
 		 *
-		 * @param string $name input name
-		 * @param string $body input value
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param string $body
+		 *        input value
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses AVH_Common::attributes
 		 */
@@ -134,7 +142,7 @@ if ( !class_exists('AVH_Form') ) {
 		{
 			// Set the input name
 			$attributes['name'] = $name;
-			
+
 			return '<button' . AVH_Common::attributes($attributes) . '>' . $body . '</button>';
 		}
 
@@ -143,9 +151,12 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::submit(NULL, 'Login');
 		 *
-		 * @param string $name input name
-		 * @param string $value input value
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param string $value
+		 *        input value
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses Form::input
 		 */
@@ -154,9 +165,9 @@ if ( !class_exists('AVH_Form') ) {
 			$attributes['type'] = 'submit';
 			return '<p class="submit">' . $this->_input($name, $value, $attributes) . '</p>';
 		}
-		
+
 		// ____________PRIVATE FUNCTIONS____________
-		
+
 		/**
 		 * Creates a form input.
 		 * If no type is specified, a "text" type input will
@@ -164,9 +175,12 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::input('username', $username);
 		 *
-		 * @param string $name input name
-		 * @param string $value input value
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param string $value
+		 *        input value
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses AVH_Common::attributes
 		 */
@@ -178,19 +192,19 @@ if ( !class_exists('AVH_Form') ) {
 			} else {
 				$attributes['name'] = $name;
 			}
-			
+
 			// Set the input value
 			$attributes['value'] = $value;
-			
+
 			if ( !isset($attributes['type']) ) {
 				// Default type is text
 				$attributes['type'] = 'text';
 			}
-			
+
 			if ( !isset($attributes['id']) ) {
 				$attributes['id'] = $name;
 			}
-			
+
 			return '<input' . AVH_Common::attributes($attributes) . ' />';
 		}
 
@@ -199,16 +213,19 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::password('password');
 		 *
-		 * @param string $name input name
-		 * @param string $value input value
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param string $value
+		 *        input value
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses $this->input
 		 */
 		private function _password ($name, $value = NULL, array $attributes = NULL)
 		{
 			$attributes['type'] = 'password';
-			
+
 			return $this->_input($name, $value, $attributes);
 		}
 
@@ -218,15 +235,17 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::file('image');
 		 *
-		 * @param string $name input name
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses $this->input
 		 */
 		private function _file ($name, array $attributes = NULL)
 		{
 			$attributes['type'] = 'file';
-			
+
 			return $this->_input($name, NULL, $attributes);
 		}
 
@@ -235,22 +254,26 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::checkbox('remember_me', 1, (bool) $remember);
 		 *
-		 * @param string $name input name
-		 * @param string $value input value
-		 * @param boolean $checked checked status
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param string $value
+		 *        input value
+		 * @param boolean $checked
+		 *        checked status
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses $this->input
 		 */
 		private function _checkbox ($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
 		{
 			$attributes['type'] = 'checkbox';
-			
+
 			if ( $checked === TRUE ) {
 				// Make the checkbox active
 				$attributes[] = 'checked';
 			}
-			
+
 			return $this->_input($name, $value, $attributes);
 		}
 
@@ -260,22 +283,26 @@ if ( !class_exists('AVH_Form') ) {
 		 * echo Form::radio('like_cats', 1, $cats);
 		 * echo Form::radio('like_cats', 0, ! $cats);
 		 *
-		 * @param string $name input name
-		 * @param string $value input value
-		 * @param boolean $checked checked status
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param string $value
+		 *        input value
+		 * @param boolean $checked
+		 *        checked status
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses $this->input
 		 */
 		private function _radio ($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
 		{
 			$attributes['type'] = 'radio';
-			
+
 			if ( $checked === TRUE ) {
 				// Make the radio active
 				$attributes[] = 'checked';
 			}
-			
+
 			return $this->_input($name, $value, $attributes);
 		}
 
@@ -284,10 +311,14 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::textarea('about', $about);
 		 *
-		 * @param string $name textarea name
-		 * @param string $body textarea body
-		 * @param array $attributes html attributes
-		 * @param boolean $double_encode encode existing HTML characters
+		 * @param string $name
+		 *        textarea name
+		 * @param string $body
+		 *        textarea body
+		 * @param array $attributes
+		 *        html attributes
+		 * @param boolean $double_encode
+		 *        encode existing HTML characters
 		 * @return string
 		 * @uses AVH_Common::attributes
 		 */
@@ -295,10 +326,10 @@ if ( !class_exists('AVH_Form') ) {
 		{
 			// Set the input name
 			$attributes['name'] = $name;
-			
+
 			// Add default rows and cols attributes (required)
 			$attributes += array('rows' => 10,'cols' => 50);
-			
+
 			return '<textarea' . AVH_Common::attributes($attributes) . '>' . esc_textarea($body) . '</textarea>';
 		}
 
@@ -309,10 +340,14 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * [!!] Support for multiple selected options was added in v3.0.7.
 		 *
-		 * @param string $name input name
-		 * @param array $options available options
-		 * @param mixed $selected selected option string, or an array of selected options
-		 * @param array $attributes html attributes
+		 * @param string $name
+		 *        input name
+		 * @param array $options
+		 *        available options
+		 * @param mixed $selected
+		 *        selected option string, or an array of selected options
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses AVH_Common::attributes
 		 */
@@ -324,12 +359,12 @@ if ( !class_exists('AVH_Form') ) {
 			} else {
 				$attributes['name'] = $name;
 			}
-			
+
 			if ( is_array($selected) ) {
 				// This is a multi-select, god save us!
 				$attributes[] = 'multiple';
 			}
-			
+
 			if ( !is_array($selected) ) {
 				if ( $selected === NULL ) {
 					// Use an empty array
@@ -339,7 +374,7 @@ if ( !class_exists('AVH_Form') ) {
 					$selected = array((string) $selected);
 				}
 			}
-			
+
 			if ( empty($options) ) {
 				// There are no options
 				$options = '';
@@ -348,51 +383,51 @@ if ( !class_exists('AVH_Form') ) {
 					if ( is_array($name) ) {
 						// Create a new optgroup
 						$group = array('label' => $value);
-						
+
 						// Create a new list of options
 						$_options = array();
-						
+
 						foreach ( $name as $_value => $_name ) {
 							// Force value to be string
 							$_value = (string) $_value;
-							
+
 							// Create a new attribute set for this option
 							$option = array('value' => $_value);
-							
+
 							if ( in_array($_value, $selected) ) {
 								// This option is selected
 								$option[] = 'selected';
 							}
-							
+
 							// Change the option to the HTML string
 							$_options[] = '<option' . AVH_Common::attributes($option) . '>' . esc_html($name) . '</option>';
 						}
-						
+
 						// Compile the options into a string
 						$_options = "\n" . implode("\n", $_options) . "\n";
-						
+
 						$options[$value] = '<optgroup' . AVH_Common::attributes($group) . '>' . $_options . '</optgroup>';
 					} else {
 						// Force value to be string
 						$value = (string) $value;
-						
+
 						// Create a new attribute set for this option
 						$option = array('value' => $value);
-						
+
 						if ( in_array($value, $selected) ) {
 							// This option is selected
 							$option[] = 'selected';
 						}
-						
+
 						// Change the option to the HTML string
 						$options[$value] = '<option' . AVH_Common::attributes($option) . '>' . esc_html($name) . '</option>';
 					}
 				}
-				
+
 				// Compile the options into a single string
 				$options = "\n" . implode("\n", $options) . "\n";
 			}
-			
+
 			return '<select' . AVH_Common::attributes($attributes) . '>' . $options . '</select>';
 		}
 
@@ -401,10 +436,14 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::image(NULL, NULL, array('src' => 'media/img/login.png'));
 		 *
-		 * @param string $name input name
-		 * @param string $value input value
-		 * @param array $attributes html attributes
-		 * @param boolean $index add index file to URL?
+		 * @param string $name
+		 *        input name
+		 * @param string $value
+		 *        input value
+		 * @param array $attributes
+		 *        html attributes
+		 * @param boolean $index
+		 *        add index file to URL?
 		 * @return string
 		 * @uses $this->input
 		 */
@@ -416,9 +455,9 @@ if ( !class_exists('AVH_Form') ) {
 					$attributes['src'] = URL::base($index) . $attributes['src'];
 				}
 			}
-			
+
 			$attributes['type'] = 'image';
-			
+
 			return $this->_input($name, $value, $attributes);
 		}
 
@@ -428,9 +467,12 @@ if ( !class_exists('AVH_Form') ) {
 		 *
 		 * echo Form::label('username', 'Username');
 		 *
-		 * @param string $input target input
-		 * @param string $text label text
-		 * @param array $attributes html attributes
+		 * @param string $input
+		 *        target input
+		 * @param string $text
+		 *        label text
+		 * @param array $attributes
+		 *        html attributes
 		 * @return string
 		 * @uses AVH_Common::attributes
 		 */
@@ -440,10 +482,10 @@ if ( !class_exists('AVH_Form') ) {
 				// Use the input name as the text
 				$text = ucwords(preg_replace('/[\W_]+/', ' ', $input));
 			}
-			
+
 			// Set the label target
 			$attributes['for'] = $input;
-			
+
 			return '<label' . AVH_Common::attributes($attributes) . '>' . $text . '</label>';
 		}
 
@@ -471,7 +513,7 @@ if ( !class_exists('AVH_Form') ) {
 				return "\n" . $field;
 			}
 		}
-		
+
 		// __________________________________________
 		// ____________Setter and Getters____________
 		// __________________________________________

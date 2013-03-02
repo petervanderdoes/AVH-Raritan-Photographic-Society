@@ -196,7 +196,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
 	{
 		if ( isset($_POST['clear-recent-list']) )
 			return 'clear-recent-list';
-		if ( isset($_POST['filter-season']))
+		if ( isset($_POST['filter-season']) )
 			return 'filter-season';
 
 		return parent::current_action();
@@ -251,12 +251,12 @@ class AVH_RPS_EntriesList extends WP_List_Table
 	function column_season ($entry)
 	{
 		$_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
-		$unix_date=mysql2date('U', $_competition->Competition_Date);
-		$_competition_month = date('n',$unix_date);
+		$unix_date = mysql2date('U', $_competition->Competition_Date);
+		$_competition_month = date('n', $unix_date);
 		if ( $_competition_month >= $this->_settings->club_season_start_month_num && $_competition_month <= $this->_settings->club_season_end_month_num ) {
-			$_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year',$unix_date));
+			$_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
 		} else {
-			$_season_text = date('Y', strtotime('-1 year',$unix_date)) . ' - ' . date('Y', $unix_date);
+			$_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
 		}
 		echo $_season_text;
 	}

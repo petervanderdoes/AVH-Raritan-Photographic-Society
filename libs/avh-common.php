@@ -76,8 +76,8 @@ if ( !class_exists('AVH_Common') ) {
 		/**
 		 * Determines if the current version of PHP is greater then the supplied value
 		 *
-		 * @param string
-		 * @return bool
+		 * @param string $version The needed PHP version
+		 * @return bool False if the version is lower than the given version.
 		 */
 		public static function isPHP ($version = '5.0.0')
 		{
@@ -106,7 +106,7 @@ if ( !class_exists('AVH_Common') ) {
 			$public_base = max($directory_array);
 			return $public_base;
 		}
-		
+
 		// Returns the url of the plugin's root folder
 		public function get_base_url ()
 		{
@@ -145,14 +145,15 @@ if ( !class_exists('AVH_Common') ) {
 		 *
 		 * echo '<div'.HTML::attributes($attrs).'>'.$content.'</div>';
 		 *
-		 * @param array $attributes attribute list
+		 * @param array $attributes
+		 *        attribute list
 		 * @return string
 		 */
 		public static function attributes (array $attributes = NULL)
 		{
 			if ( empty($attributes) )
 				return '';
-			
+
 			$sorted = array();
 			foreach ( self::$attribute_order as $key ) {
 				if ( isset($attributes[$key]) ) {
@@ -160,31 +161,31 @@ if ( !class_exists('AVH_Common') ) {
 					$sorted[$key] = $attributes[$key];
 				}
 			}
-			
+
 			// Combine the sorted attributes
 			$attributes = $sorted + $attributes;
-			
+
 			$compiled = '';
 			foreach ( $attributes as $key => $value ) {
 				if ( $value === NULL ) {
 					// Skip attributes that have NULL values
 					continue;
 				}
-				
+
 				if ( is_int($key) ) {
 					// Assume non-associative keys are mirrored attributes
 					$key = $value;
 				}
-				
+
 				// Add the attribute key
 				$compiled .= ' ' . $key;
-				
+
 				if ( $value ) {
 					// Add the attribute value
 					$compiled .= '="' . esc_attr($value) . '"';
 				}
 			}
-			
+
 			return $compiled;
 		}
 	}
