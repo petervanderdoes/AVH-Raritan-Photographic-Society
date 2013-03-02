@@ -143,7 +143,6 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 	{
 		global $totals, $competition_status;
 
-		// $total_ips = $this->_ipcachedb->getIpCache(array ( 'count' => true, 'offset' => 0, 'number' => 0 ));
 		$num_competitions = $this->_rpsdb->countCompetitions();
 		$status_links = array();
 		$stati = array('all' => _nx_noop('All', 'All', 'competitions'),'open' => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>', 'Open <span class="count">(<span class="open-count">%s</span>)</span>'),'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>', 'Closed <span class="count">(<span class="closed-count">%s</span>)</span>'));
@@ -170,14 +169,12 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 
 		$actions = array();
 
-		// if (in_array($competition_status, array ( 'all', 'ham' ))) {
-		// $actions['spam'] = __('Mark as spam');
-		// }
-		// if (in_array($competition_status, array ( 'all', 'spam' ))) {
-		// $actions['ham'] = __('Mark as ham');
-		// }
 		$actions['delete'] = __('Delete');
-		// $actions['blacklist'] = __('Blacklist');
+// 		if ( 'open' == $competition_status ) {
+// 			$actions['close'] = __('Close');
+// 		} elseif ( 'closed' == $competition_status ) {
+// 			$actions['open'] = __('Open');
+// 		}
 
 		return $actions;
 	}
@@ -263,19 +260,30 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 		$user_ID = get_current_user_id();
 		$url = admin_url('admin.php') . '?';
 
-		$queryReferer = array ('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
-		$wp_http_referer='admin.php?' . http_build_query($queryReferer, '', '&');
+		$queryReferer = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
+		$wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
 		$nonceDelete = wp_create_nonce('bulk-competitions');
 		$queryDelete = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
 		$urlDelete = $url . http_build_query($queryDelete, '', '&');
 
-		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'edit','wp_http_referer' =>$wp_http_referer);
+		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'edit','wp_http_referer' => $wp_http_referer);
 		$urlEdit = $url . http_build_query($queryEdit, '', '&');
 
 		$actions = array();
 		$actions['delete'] = '<a ' . AVH_Common::attributes(array('href' => $urlDelete,'class' => 'delete','title' => 'Delete this competition')) . '>' . 'Delete' . '</a>';
 		$actions['edit'] = '<a ' . AVH_Common::attributes(array('href' => $urlEdit,'title' => 'Edit this competition')) . '>' . 'Edit' . '</a>';
+
+		// We'll not add these for now, maybe later. There is no real need to open/close a single part of a competition anyway.
+		// if ( $competition->Closed == 'Y' ) {
+		// $queryOpen = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'open','wp_http_referer' => $wp_http_referer);
+		// $urlOpen = $url . http_build_query($queryOpen, '', '&');
+		// $actions['open'] = '<a ' . AVH_Common::attributes(array('href' => $urlOpen,'title' => 'Open this competition')) . '>' . 'Open' . '</a>';
+		// } else {
+		// $queryClose = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'close','wp_http_referer' => $wp_http_referer);
+		// $urlClose = $url . http_build_query($queryClose, '', '&');
+		// $actions['close'] = '<a ' . AVH_Common::attributes(array('href' => $urlClose,'title' => 'Close this competition')) . '>' . 'Close' . '</a>';
+		// }
 
 		echo '<div class="row-actions">';
 		$sep = '';
