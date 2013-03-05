@@ -170,11 +170,11 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 		$actions = array();
 
 		$actions['delete'] = __('Delete');
-		// if ( 'open' == $competition_status ) {
-		// $actions['close'] = __('Close');
-		// } elseif ( 'closed' == $competition_status ) {
-		// $actions['open'] = __('Open');
-		// }
+		if ( 'open' == $competition_status ) {
+			$actions['close'] = __('Close');
+		} elseif ( 'closed' == $competition_status ) {
+			$actions['open'] = __('Open');
+		}
 
 		return $actions;
 	}
