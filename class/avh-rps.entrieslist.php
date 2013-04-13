@@ -83,6 +83,10 @@ class AVH_RPS_EntriesList extends WP_List_Table
 			$number = $entries_per_page + min(8, $entries_per_page); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
 		}
 
+		$where = '1=1';
+		if (isset($_REQUEST['user_id'])) {
+			$where = 'Member_ID='.$_REQUEST['user_id'];
+		}
 		$page = $this->get_pagenum();
 
 		if ( isset($_REQUEST['start']) ) {
@@ -95,7 +99,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
 			$start += $_REQUEST['offset'];
 		}
 
-		$args = array('search' => $search,'offset' => $start,'number' => $number,'orderby' => $orderby,'order' => $order);
+		$args = array('search' => $search,'offset' => $start,'number' => $number,'orderby' => $orderby,'order' => $order, 'where'=>$where);
 
 		$_entries = $this->_rpsdb->getEntries($args);
 		$this->items = array_slice($_entries, 0, $entries_per_page);

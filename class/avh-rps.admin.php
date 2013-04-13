@@ -849,11 +849,7 @@ final class AVH_RPS_Admin
 		switch ( $doAction )
 		{
 			case 'delete':
-				$this->_displayPageCompetitionDelete();
-				break;
-
-			case 'edit':
-				$this->_displayPageCompetitionEdit();
+				$this->_displayPageEntriesDelete();
 				break;
 
 			default:
