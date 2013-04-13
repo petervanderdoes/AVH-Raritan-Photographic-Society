@@ -65,10 +65,10 @@ if ( !class_exists('AVH_Form') ) {
 			return "\n</table>\n";
 		}
 
-		public function settings_fields ($action, $option)
+		public function settings_fields ($action, $nonce)
 		{
 			$_return = $this->hidden('action', $action);
-			$_return .= wp_nonce_field($option, '_wpnonce_' . $option, TRUE, FALSE);
+			$_return .= wp_nonce_field($nonce, '_wpnonce', TRUE, FALSE);
 			return $_return;
 		}
 
