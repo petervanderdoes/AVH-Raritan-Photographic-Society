@@ -282,6 +282,29 @@ class AVH_RPS_EntriesList extends WP_List_Table
 	function column_title ($entry)
 	{
 		echo $entry->Title;
+		$url = admin_url('admin.php') . '?';
+
+		$queryReferer = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
+		$wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
+
+//		$nonceDelete = wp_create_nonce('bulk-competitions');
+//		$queryDelete = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
+//		$urlDelete = $url . http_build_query($queryDelete, '', '&');
+
+		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'entry' => $entry->ID,'action' => 'edit','wp_http_referer' => $wp_http_referer);
+		$urlEdit = $url . http_build_query($queryEdit, '', '&');
+
+		$actions = array();
+//		$actions['delete'] = '<a ' . AVH_Common::attributes(array('href' => $urlDelete,'class' => 'delete','title' => 'Delete this competition')) . '>' . 'Delete' . '</a>';
+		$actions['edit'] = '<a ' . AVH_Common::attributes(array('href' => $urlEdit,'title' => 'Edit this entry')) . '>' . 'Edit' . '</a>';
+
+		echo '<div class="row-actions">';
+		$sep = '';
+		foreach ( $actions as $action => $link ) {
+			echo "<span class='set_$action'>$sep$link</span>";
+			$sep = ' | ';
+		}
+		echo '</div>';
 	}
 
 	function column_score ($entry)

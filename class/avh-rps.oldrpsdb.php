@@ -467,13 +467,24 @@ class AVH_RPS_OldRpsDb
 		return $_return;
 	}
 
-	public function getEntryInfo ($id)
+	public function getEntryInfo ($id, $output = ARRAY_A)
 	{
 		$sql = $this->_rpsdb->prepare("SELECT *
 			FROM entries
 			WHERE ID = %s", $id);
-		$_return = $this->_rpsdb->get_row($sql, ARRAY_A);
-		return $_return;
+		$result = $this->_rpsdb->get_row($sql);
+		if ( $output == OBJECT ) {
+			return $result;
+		} elseif ( $output == ARRAY_A ) {
+			$resultArray = get_object_vars($result);
+			return $resultArray;
+		} elseif ( $output == ARRAY_N ) {
+			$resultArray = array_values(get_object_vars($result));
+			return $resultArray;
+		} else {
+			return $result;
+		}
+		return $result;
 	}
 
 	public function getCompetitionByID ($id, $output = ARRAY_A)
@@ -539,7 +550,32 @@ class AVH_RPS_OldRpsDb
 		$_return = $this->_rpsdb->insert('entries', $data);
 		return $_return;
 	}
+	/**
+	 * Update an entry.
+	 *
+	 * If the $data parameter has 'ID' set to a value, then entry will be updated.
+	 *
+	 * @param array $data
+	 * @param bool $wp_error
+	 *        Optional. Allow return of WP_Error on failure.
+	 * @return object WP_Error on failure. The post ID on success.
+	 */
+	public function updateEntry ($data)
+	{
+		if ( !empty($data['ID']) ) {
+			$entry_ID = (int) $data['ID'];
+			$where = array('ID' => $entry_ID);
+			if ( !isset($data['Date_Modified']) ) {
+				$data['Date_Modified'] = current_time('mysql');
+			}
+			$data = stripslashes_deep($data);
+			if ( false === $this->_rpsdb->update('entries', $data, $where) ) {
+				return new WP_Error('db_update_error', 'Could not update entry in the database', $this->_rpsdb->last_error);
+			}
+		}
 
+		return TRUE;
+	}
 	public function updateEntriesTitle ($new_title, $new_file_name, $id)
 	{
 		$data = array('Title' => $new_title,'Server_File_Name' => $new_file_name,'Date_Modified' => current_time('mysql'));

@@ -772,7 +772,7 @@ final class AVH_RPS_Admin
 	}
 
 	/**
-	 * Handle the HTTP Request before the page of the menu Competition is displayed.
+	 * Handle the HTTP Request before the page of the menu Entries is displayed.
 	 * This is needed for the redirects.
 	 */
 	private function _handleRequestEntries ()
@@ -799,12 +799,12 @@ final class AVH_RPS_Admin
 			// }
 			// break;
 
-			// case 'edit':
-			// if ( empty($_REQUEST['entries']) ) {
-			// wp_redirect($this->_redirect);
-			// exit();
-			// }
-			// break;
+			case 'edit':
+				if ( empty($_REQUEST['entry']) ) {
+					wp_redirect($this->_redirect);
+					exit();
+				}
+				break;
 			// case 'dodelete':
 			// check_admin_referer('delete-entries');
 			// if ( empty($_REQUEST['entries']) ) {
@@ -850,6 +850,10 @@ final class AVH_RPS_Admin
 		{
 			case 'delete':
 				$this->_displayPageEntriesDelete();
+				break;
+
+			case 'edit':
+				$this->_displayPageEntriesEdit();
 				break;
 
 			default:
@@ -908,6 +912,90 @@ final class AVH_RPS_Admin
 		echo '<div id="ajax-response"></div>';
 		$this->_printAdminFooter();
 		echo '</div>';
+	}
+
+	private function _displayPageEntriesEdit ()
+	{
+		global $wpdb;
+		$option_name = 'entry-edit';
+		$updated = false;
+
+		if ( isset($_POST['update']) ) {
+			check_admin_referer($option_name . '-' . $_POST['entry']);
+			if ( !current_user_can('rps_edit_entries') ) {
+				wp_die(__('Cheatin&#8217; uh?'));
+			}
+			$updated = $this->_updateEntry();
+		}
+
+		$vars = ( array('action','redirect','entry','wp_http_referer') );
+		for ( $i = 0; $i < count($vars); $i += 1 ) {
+			$var = $vars[$i];
+			if ( empty($_POST[$var]) ) {
+				if ( empty($_GET[$var]) )
+					$$var = '';
+				else
+					$$var = $_GET[$var];
+			} else {
+				$$var = $_POST[$var];
+			}
+		}
+
+		$wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
+		$entry = $this->_rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
+
+		// @var $classForm AVH_Form
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+
+		$this->admin_header('Edit Entry');
+
+		if ( isset($_POST['update']) ) {
+			echo '<div id="message" class="updated">';
+			if ( $updated ) {
+				echo '<p><strong>Entry updated.</strong></p>';
+			} else {
+				echo '<p><strong>Entry not updated.</strong></p>';
+			}
+			if ( $wp_http_referer ) {
+				echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Entries</a></p>';
+			}
+			echo '</div>';
+		}
+
+		$classForm->setOption_name($option_name);
+		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
+		echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-entryedit'));
+		echo $classForm->open_table();
+
+		$_user = get_user_by('id', $entry->Member_ID);
+		echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
+		echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
+		echo $classForm->text('Title', '', 'title', $entry->Title);
+		echo $classForm->close_table();
+		echo $classForm->submit('submit', 'Update Entry', array('class' => 'button-primary'));
+		if ( $wp_http_referer ) {
+			echo $classForm->hidden('wp_http_referer', esc_url($wp_http_referer));
+		}
+		echo $classForm->hidden('entry', $entry->ID);
+		echo $classForm->hidden('update', true);
+		echo $classForm->settings_fields('edit', $option_name . '-' . $entry->ID);
+		echo $classForm->close();
+		$this->admin_footer();
+	}
+
+	private function _updateEntry ()
+	{
+		$formOptions = $_POST['entry-edit'];
+		$id = (int) $_POST['entry'];
+		$entry = $this->_rpsdb->getEntryInfo($id);
+
+		$return = FALSE;
+		$formOptionsNew['title'] = empty($formOptions['title']) ? $entry['Title'] : $formOptions['title'];
+		if ( $entry['Title'] != $formOptionsNew['title'] ) {
+			$data = array('ID' => $id, 'Title' => $formOptionsNew['title']);
+			$return = $this->_rpsdb->updateEntry($data);
+		}
+		return $return;
 	}
 
 	/**
