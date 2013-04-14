@@ -437,7 +437,7 @@ final class AVH_RPS_Admin
 		}
 		echo $classForm->hidden('competition', $competition->ID);
 		echo $classForm->hidden('update', true);
-		echo $classForm->hidden('action','edit');
+		echo $classForm->hidden('action', 'edit');
 		$classForm->setNonce_action($competition->ID);
 		echo $classForm->nonce_field();
 		echo $classForm->close();
@@ -743,7 +743,7 @@ final class AVH_RPS_Admin
 
 		echo $classForm->close_table();
 		echo $classForm->submit('submit', 'Add Competition', array('class' => 'button-primary'));
-		echo $classForm->hidden('action','add');
+		echo $classForm->hidden('action', 'add');
 		$classForm->setNonce_action(get_current_user_id());
 		echo $classForm->nonce_field();
 		echo $classForm->close();
@@ -782,52 +782,48 @@ final class AVH_RPS_Admin
 	 */
 	private function _handleRequestEntries ()
 	{
-		if ( empty($_REQUEST) ) {
-			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr(stripslashes($_SERVER['REQUEST_URI'])) . '" />';
-		}
+
 		if ( isset($_REQUEST['wp_http_referer']) ) {
-			$this->_redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
-			$this->_referer = '<input type="hidden" name="wp_http_referer" value="' . esc_attr($this->_redirect) . '" />';
+			$redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
 		} else {
-			$this->_redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
-			$this->_referer = '';
+			$redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_ENTRIES;
 		}
 
 		$doAction = $this->_entries_list->current_action();
 		switch ( $doAction )
 		{
-			// case 'delete':
-			// check_admin_referer('bulk-entries');
-			// if ( empty($_REQUEST['entries']) && empty($_REQUEST['entries']) ) {
-			// wp_redirect($this->_redirect);
-			// exit();
-			// }
-			// break;
-
-			case 'edit':
-				if ( empty($_REQUEST['entry']) ) {
-					wp_redirect($this->_redirect);
+			case 'delete':
+				check_admin_referer('bulk-entries');
+				if ( empty($_REQUEST['entries']) && empty($_REQUEST['entries']) ) {
+					wp_redirect($redirect);
 					exit();
 				}
 				break;
-			// case 'dodelete':
-			// check_admin_referer('delete-entries');
-			// if ( empty($_REQUEST['entries']) ) {
-			// wp_redirect($this->_redirect);
-			// exit();
-			// }
-			// $competitionIds = $_REQUEST['entries'];
 
-			// $deleteCount = 0;
+			case 'edit':
+				if ( empty($_REQUEST['entry']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				break;
+			case 'dodelete':
+				check_admin_referer('delete-entries');
+				if ( empty($_REQUEST['entries']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$entryIds = $_REQUEST['entries'];
 
-			// foreach ( (array) $competitionIds as $id ) {
-			// $id = (int) $id;
-			// $this->_rpsdb->deleteCompetition($id);
-			// ++$deleteCount;
-			// }
-			// $redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'dodelete'), $redirect);
-			// wp_redirect($this->_redirect);
-			// break;
+				$deleteCount = 0;
+
+				foreach ( (array) $entryIds as $id ) {
+					$id = (int) $id;
+					$this->_rpsdb->deleteEntry($id);
+					++$deleteCount;
+				}
+				$redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'del_many'), $redirect);
+				wp_redirect($redirect);
+				break;
 
 			default:
 				if ( !empty($_GET['_wp_http_referer']) ) {
@@ -919,6 +915,53 @@ final class AVH_RPS_Admin
 		echo '</div>';
 	}
 
+	/**
+	 * Display the page to confirm the deletion of the selected entries.
+	 */
+	private function _displayPageEntriesDelete ()
+	{
+		global $wpdb;
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+
+		if ( empty($_REQUEST['entries']) ) {
+			$entryIdsArray = array(intval($_REQUEST['entries']));
+		} else {
+			$entryIdsArray = (array) $_REQUEST['entries'];
+		}
+
+		$this->admin_header('Delete Entries');
+		echo $classForm->open('', array('method' => 'post','id' => 'updateentries','name' => 'updateentries'));
+
+		echo '<p>' . _n('You have specified this entry for deletion:', 'You have specified these entries for deletion:', count($entryIdsArray)) . '</p>';
+
+		$goDelete = 0;
+		foreach ( $entryIdsArray as $entryID ) {
+
+			$entry = $this->_rpsdb->getEntryInfo($entryID, OBJECT);
+			if ( $entry !== NULL ) {
+				$user = get_user_by('id', $entry->Member_ID);
+				$competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID, OBJECT);
+				echo "<li>";
+				echo $classForm->hidden('entries[]', $entryID);
+				printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'), $entryID, $entry->Title, $user->first_name, $user->last_name, $competition->Theme, mysql2date(get_option('date_format'), $competition->Competition_Date));
+				echo "</li>\n";
+				$goDelete++;
+			}
+		}
+		if ( $goDelete ) {
+			echo $classForm->hidden('action', 'dodelete');
+			echo $classForm->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
+		} else {
+			echo '<p>There are no valid entries to delete</p>';
+		}
+
+		wp_nonce_field('delete-entries');
+		echo $this->_referer;
+
+		echo $classForm->close();
+		$this->admin_footer();
+	}
+
 	private function _displayPageEntriesEdit ()
 	{
 		global $wpdb;
@@ -928,10 +971,9 @@ final class AVH_RPS_Admin
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 		$classForm->setOption_name('entry-edit');
 
-
 		if ( isset($_POST['update']) ) {
 			$classForm->setNonce_action($_POST['entry']);
-			check_admin_referer($classForm->getNonce_action() );
+			check_admin_referer($classForm->getNonce_action());
 			if ( !current_user_can('rps_edit_entries') ) {
 				wp_die(__('Cheatin&#8217; uh?'));
 			}
