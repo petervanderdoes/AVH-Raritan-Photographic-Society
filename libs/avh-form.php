@@ -9,6 +9,7 @@ if ( !class_exists('AVH_Form') ) {
 		// @var Use tables to create Form
 		private $_use_table = false;
 		private $_option_name;
+		private $_nonce;
 
 		/**
 		 * Generates an opening HTML form tag.
@@ -27,8 +28,6 @@ if ( !class_exists('AVH_Form') ) {
 		 * @param array $attributes
 		 *        html attributes
 		 * @return string
-		 * @uses Request::instance
-		 * @uses URL::site
 		 * @uses AVH_Common::attributes
 		 */
 		public function open ($action = NULL, array $attributes = NULL)
@@ -65,10 +64,30 @@ if ( !class_exists('AVH_Form') ) {
 			return "\n</table>\n";
 		}
 
+		/**
+		 * Create the nonce field.
+		 * Instead of using the standard WordPress function, we duplicate the function but using the methods of this class.
+		 * This will create a more standard looking HTML output.
+		 *
+		 * @param string $nonce
+		 * @param boolean $referer
+		 * @return string
+		 */
+		public function nonce_field ($referer = true)
+		{
+			$nonce_field = $this->hidden('_wpnonce', wp_create_nonce($this->_nonce), array(), FALSE);
+			if ( $referer ) {
+				$ref = $_SERVER['REQUEST_URI'];
+				$nonce_field .= $this->hidden('_wp_http_referer', $ref, array(), FALSE);
+			}
+
+			return $nonce_field;
+		}
+
 		public function settings_fields ($action, $nonce)
 		{
 			$_return = $this->hidden('action', $action);
-			$_return .= wp_nonce_field($nonce, '_wpnonce', TRUE, FALSE);
+			$_return .= $this->nonce_field();
 			return $_return;
 		}
 
@@ -524,6 +543,20 @@ if ( !class_exists('AVH_Form') ) {
 		public function setOption_name ($_option_name)
 		{
 			$this->_option_name = $_option_name;
+		}
+
+		public function getOption_name () {
+			return $this->_option_name;
+		}
+
+		public function setNonce_action ($_nonce)
+		{
+			$this->_nonce = $this->_option_name . '-' . $_nonce;
+		}
+
+		public function getNonce_action()
+		{
+			return $this->_nonce;
 		}
 	} // End form
 }
