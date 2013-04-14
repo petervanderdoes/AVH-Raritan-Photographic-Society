@@ -75,10 +75,10 @@ if ( !class_exists('AVH_Form') ) {
 		 */
 		public function nonce_field ($referer = true)
 		{
-			$nonce_field = $this->hidden('_wpnonce', wp_create_nonce($this->_nonce), array(), FALSE);
+			$nonce_field = $this->hidden('_wpnonce', wp_create_nonce($this->_nonce));
 			if ( $referer ) {
 				$ref = $_SERVER['REQUEST_URI'];
-				$nonce_field .= $this->hidden('_wp_http_referer', $ref, array(), FALSE);
+				$nonce_field .= $this->hidden('_wp_http_referer', $ref);
 			}
 
 			return $nonce_field;
