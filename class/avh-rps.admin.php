@@ -41,7 +41,6 @@ final class AVH_RPS_Admin
 	private $_add_disabled_notice = false;
 	private $_hooks = array();
 	private $_referer;
-	private $_redirect;
 
 	/**
 	 * PHP5 Constructor
@@ -343,6 +342,11 @@ final class AVH_RPS_Admin
 	private function _displayPageCompetitionEdit ()
 	{
 		global $wpdb;
+
+		// @var $classForm AVH_Form
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+		$classForm->setOption_name('competition-edit');
+
 		if ( isset($_POST['update']) ) {
 			$this->_updateCompetition();
 		}
@@ -358,7 +362,7 @@ final class AVH_RPS_Admin
 				$$var = $_POST[$var];
 			}
 		}
-		$option_name = 'competition-edit';
+
 		$wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
 
 		$competition = $this->_rpsdb->getCompetitionByID2($_REQUEST['competition']);
@@ -366,9 +370,6 @@ final class AVH_RPS_Admin
 		$formOptions['date'] = mysql2date('Y-m-d', $competition->Competition_Date);
 		$formOptions['close-date'] = mysql2date('Y-m-d', $competition->Close_Date);
 		$formOptions['close-time'] = mysql2date('H:i:II', $competition->Close_Date);
-
-		// @var $classForm AVH_Form
-		$classForm = $this->_classes->load_class('Form', 'system', false);
 
 		$this->admin_header('Edit Competition');
 
@@ -381,7 +382,6 @@ final class AVH_RPS_Admin
 			echo '</div>';
 		}
 
-		$classForm->setOption_name($option_name);
 		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
 		echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-competitionedit'));
 		echo $classForm->open_table();
@@ -437,7 +437,9 @@ final class AVH_RPS_Admin
 		}
 		echo $classForm->hidden('competition', $competition->ID);
 		echo $classForm->hidden('update', true);
-		echo $classForm->settings_fields('edit', $option_name);
+		echo $classForm->hidden('action','edit');
+		$classForm->setNonce_action($competition->ID);
+		echo $classForm->nonce_field();
 		echo $classForm->close();
 		echo '<script type="text/javascript">' . "\n";
 		echo 'jQuery(function($) {' . "\n";
@@ -584,6 +586,10 @@ final class AVH_RPS_Admin
 	public function menuCompetitionAdd ()
 	{
 		$option_name = 'competition_add';
+		// @var $classForm AVH_Form
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+		$classForm->setOption_name('competition_add');
+
 		// @format_off
 		$formDefaultOptions = array (
 				'date' => '',
@@ -605,9 +611,10 @@ final class AVH_RPS_Admin
 			switch ( $_POST['action'] )
 			{
 				case 'add':
-					check_admin_referer($option_name, '_wpnonce_' . $option_name);
+					$classForm->setNonce_action(get_current_user_id());
+					check_admin_referer($classForm->getNonce_action());
 					$formNewOptions = $formDefaultOptions;
-					$formOptions = $_POST[$option_name];
+					$formOptions = $_POST[$classForm->getOption_name()];
 
 					$mediumArray = array();
 					$classArray = array();
@@ -696,11 +703,7 @@ final class AVH_RPS_Admin
 			}
 		}
 
-		// @var $classForm AVH_Form
-		$classForm = $this->_classes->load_class('Form', 'system', false);
-
 		$this->admin_header('Add Competition');
-		$classForm->setOption_name($option_name);
 
 		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionadd'));
 		echo $classForm->open_table();
@@ -740,7 +743,9 @@ final class AVH_RPS_Admin
 
 		echo $classForm->close_table();
 		echo $classForm->submit('submit', 'Add Competition', array('class' => 'button-primary'));
-		echo $classForm->settings_fields('add', $option_name);
+		echo $classForm->hidden('action','add');
+		$classForm->setNonce_action(get_current_user_id());
+		echo $classForm->nonce_field();
 		echo $classForm->close();
 		echo '<script type="text/javascript">' . "\n";
 		echo 'jQuery(function($) {' . "\n";
@@ -917,11 +922,16 @@ final class AVH_RPS_Admin
 	private function _displayPageEntriesEdit ()
 	{
 		global $wpdb;
-		$option_name = 'entry-edit';
+
 		$updated = false;
+		// @var $classForm AVH_Form
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+		$classForm->setOption_name('entry-edit');
+
 
 		if ( isset($_POST['update']) ) {
-			check_admin_referer($option_name . '-' . $_POST['entry']);
+			$classForm->setNonce_action($_POST['entry']);
+			check_admin_referer($classForm->getNonce_action() );
 			if ( !current_user_can('rps_edit_entries') ) {
 				wp_die(__('Cheatin&#8217; uh?'));
 			}
@@ -944,9 +954,6 @@ final class AVH_RPS_Admin
 		$wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
 		$entry = $this->_rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
 
-		// @var $classForm AVH_Form
-		$classForm = $this->_classes->load_class('Form', 'system', false);
-
 		$this->admin_header('Edit Entry');
 
 		if ( isset($_POST['update']) ) {
@@ -962,7 +969,6 @@ final class AVH_RPS_Admin
 			echo '</div>';
 		}
 
-		$classForm->setOption_name($option_name);
 		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
 		echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-entryedit'));
 		echo $classForm->open_table();
@@ -978,7 +984,9 @@ final class AVH_RPS_Admin
 		}
 		echo $classForm->hidden('entry', $entry->ID);
 		echo $classForm->hidden('update', true);
-		echo $classForm->settings_fields('edit', $option_name . '-' . $entry->ID);
+		echo $classForm->hidden('action', 'edit');
+		$classForm->setNonce_action($entry->ID);
+		echo $classForm->nonce_field();
 		echo $classForm->close();
 		$this->admin_footer();
 	}
@@ -992,7 +1000,7 @@ final class AVH_RPS_Admin
 		$return = FALSE;
 		$formOptionsNew['title'] = empty($formOptions['title']) ? $entry['Title'] : $formOptions['title'];
 		if ( $entry['Title'] != $formOptionsNew['title'] ) {
-			$data = array('ID' => $id, 'Title' => $formOptionsNew['title']);
+			$data = array('ID' => $id,'Title' => $formOptionsNew['title']);
 			$return = $this->_rpsdb->updateEntry($data);
 		}
 		return $return;
