@@ -238,16 +238,15 @@ class AVH_RPS_EntriesList extends WP_List_Table
 		$this->display_tablenav('bottom');
 	}
 
-	function single_row ($a_competition)
+	function single_row ($a_entry)
 	{
-		$competition = $a_competition;
-		$status = ( $competition->Closed == "Y" ? '' : 'closed' );
-		echo '<tr id="competition-' . $competition->ID . '" class="' . $status . '">';
-		echo $this->single_row_columns($competition);
+		$entry = $a_entry;
+		echo '<tr id="entry-' . $competition->ID . '">';
+		echo $this->single_row_columns($entry);
 		echo "</tr>";
 	}
 
-	function column_cb ($competition)
+	function column_cb ($entry)
 	{
 		echo "<input type='checkbox' name='entries[]' value='$entry->ID' />";
 	}
