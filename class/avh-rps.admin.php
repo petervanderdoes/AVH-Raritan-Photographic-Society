@@ -61,7 +61,6 @@ final class AVH_RPS_Admin
 	{
 		// Loads the CORE class
 		$this->_core = $this->_classes->load_class('Core', 'plugin', true);
-		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
 
 		// Admin URL and Pagination
 		$this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
@@ -132,7 +131,7 @@ final class AVH_RPS_Admin
 	public function actionLoadPagehookCompetition ()
 	{
 		global $current_screen;
-
+		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
 		$this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
 		$this->_handleRequestCompetition();
 
@@ -570,8 +569,9 @@ final class AVH_RPS_Admin
 	public function actionLoadPagehookCompetitionAdd ()
 	{
 		global $current_screen;
-
+		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
 		$this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+
 		add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
 		// WordPress core Styles and Scripts
 		wp_enqueue_script('common');
@@ -759,6 +759,7 @@ final class AVH_RPS_Admin
 	{
 		global $current_screen;
 
+		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
 		$this->_entries_list = $this->_classes->load_class('EntriesList', 'plugin', true);
 		$this->_handleRequestEntries();
 
