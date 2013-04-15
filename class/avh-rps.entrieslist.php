@@ -42,7 +42,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
 		if ( empty($default_status) )
 			$default_status = 'all';
 		$status = isset($_REQUEST['avhrps_entries_list_status']) ? $_REQUEST['avhrps_entries_list_status'] : $default_status;
-		if ( !in_array($status, array('all','open','closed','search')) ) {
+		if ( !in_array($status, array('all','search')) ) {
 			$status = 'all';
 		}
 		if ( $status != $default_status && 'search' != $status ) {
@@ -63,8 +63,8 @@ class AVH_RPS_EntriesList extends WP_List_Table
 	{
 		global $post_id, $entry_status, $search, $comment_type;
 
-		$entry_status = isset($_REQUEST['entry_status']) ? $_REQUEST['entry_status'] : 'open';
-		if ( !in_array($entry_status, array('all','open','closed')) ) {
+		$entry_status = isset($_REQUEST['entry_status']) ? $_REQUEST['entry_status'] : 'all';
+		if ( !in_array($entry_status, array('all')) ) {
 			$entry_status = 'all';
 		}
 
@@ -145,27 +145,24 @@ class AVH_RPS_EntriesList extends WP_List_Table
 
 	function get_views ()
 	{
-		// global $totals, $entry_status;
+		global $totals, $entry_status;
 
-		// // $total_ips = $this->_ipcachedb->getIpCache(array ( 'count' => true, 'offset' => 0, 'number' => 0 ));
-		// $num_competitions = $this->_rpsdb->countCompetitions();
-		// $status_links = array();
-		// $stati = array('all' => _nx_noop('All', 'All', 'competitions'),'open' => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>', 'Open <span class="count">(<span class="open-count">%s</span>)</span>'),'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>', 'Closed <span class="count">(<span class="closed-count">%s</span>)</span>'));
+		$status_links = array();
+		$stati = array('all' => _nx_noop('All', 'All', 'entries'));
 
-		// $link = 'admin.php?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
+		$link = 'admin.php?page=' . AVH_RPS_Define::MENU_SLUG_ENTRIES;
 
-		// foreach ( $stati as $status => $label ) {
-		// $class = ( $status == $competition_status ) ? ' class="current"' : '';
+		foreach ( $stati as $status => $label ) {
+		$class = ( $status == $entry_status ) ? ' class="current"' : '';
 
-		// if ( !isset($num_competitions->$status) ) {
-		// $num_competitions->$status = 10;
-		// }
-		// $link = add_query_arg('competition_status', $status, $link);
-		// // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
-		// $status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_competitions->$status), number_format_i18n($num_competitions->$status)) . '</a>';
-		// }
+		if ($status != 'all') {
+			$link = add_query_arg('entry_status', $status, $link);
+		}
+		// I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
+		$status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_competitions->$status)) . '</a>';
+		}
 
-		// return $status_links;
+		return $status_links;
 	}
 
 	function get_bulk_actions ()
@@ -275,7 +272,9 @@ class AVH_RPS_EntriesList extends WP_List_Table
 	function column_name ($entry)
 	{
 		$_user = get_user_by('id', $entry->Member_ID);
-		echo $_user->first_name . ' ' . $_user->last_name;
+		$queryUser = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'user_id' => $_user->ID);
+		$urlUser=admin_url('admin.php') .'?' . http_build_query($queryUser, '', '&');
+		echo '<a  ' . AVH_Common::attributes(array('href' => $urlUser,'title' => 'Entries for '.$_user->first_name . ' ' . $_user->last_name)) . '>' . $_user->first_name . ' ' . $_user->last_name . '</a>';
 	}
 
 	function column_title ($entry)
@@ -286,15 +285,15 @@ class AVH_RPS_EntriesList extends WP_List_Table
 		$queryReferer = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
 		$wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
-//		$nonceDelete = wp_create_nonce('bulk-competitions');
-//		$queryDelete = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
-//		$urlDelete = $url . http_build_query($queryDelete, '', '&');
+		$nonceDelete = wp_create_nonce('bulk-entries');
+		$queryDelete = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'entry' => $entry->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
+		$urlDelete = $url . http_build_query($queryDelete, '', '&');
 
 		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'entry' => $entry->ID,'action' => 'edit','wp_http_referer' => $wp_http_referer);
 		$urlEdit = $url . http_build_query($queryEdit, '', '&');
 
 		$actions = array();
-//		$actions['delete'] = '<a ' . AVH_Common::attributes(array('href' => $urlDelete,'class' => 'delete','title' => 'Delete this competition')) . '>' . 'Delete' . '</a>';
+		$actions['delete'] = '<a ' . AVH_Common::attributes(array('href' => $urlDelete,'class' => 'delete','title' => 'Delete this competition')) . '>' . 'Delete' . '</a>';
 		$actions['edit'] = '<a ' . AVH_Common::attributes(array('href' => $urlEdit,'title' => 'Edit this entry')) . '>' . 'Edit' . '</a>';
 
 		echo '<div class="row-actions">';

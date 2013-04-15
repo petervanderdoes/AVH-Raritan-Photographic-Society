@@ -794,7 +794,7 @@ final class AVH_RPS_Admin
 		{
 			case 'delete':
 				check_admin_referer('bulk-entries');
-				if ( empty($_REQUEST['entries']) && empty($_REQUEST['entries']) ) {
+				if ( empty($_REQUEST['entries']) && empty($_REQUEST['entry']) ) {
 					wp_redirect($redirect);
 					exit();
 				}
@@ -924,7 +924,7 @@ final class AVH_RPS_Admin
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 
 		if ( empty($_REQUEST['entries']) ) {
-			$entryIdsArray = array(intval($_REQUEST['entries']));
+			$entryIdsArray = array(intval($_REQUEST['entry']));
 		} else {
 			$entryIdsArray = (array) $_REQUEST['entries'];
 		}
