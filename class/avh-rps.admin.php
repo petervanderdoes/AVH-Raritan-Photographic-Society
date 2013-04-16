@@ -1343,69 +1343,6 @@ final class AVH_RPS_Admin
 	}
 
 	/**
-	 * Ouput formatted options
-	 *
-	 * @param array $option_data
-	 * @return string
-	 */
-	private function _printOptions ($option_data, $option_actual)
-	{
-		// Generate output
-		$output = '';
-		$output .= "\n" . '<table class="form-table avhfdas-options">' . "\n";
-		foreach ( $option_data as $option ) {
-			$section = substr($option[0], strpos($option[0], '[') + 1);
-			$section = substr($section, 0, strpos($section, ']['));
-			$option_key = rtrim($option[0], ']');
-			$option_key = substr($option_key, strpos($option_key, '][') + 2);
-			// Helper
-			if ( $option[2] == 'helper' ) {
-				$output .= '<tr style="vertical-align: top;"><td class="helper" colspan="2">' . $option[4] . '</td></tr>' . "\n";
-				continue;
-			}
-			switch ( $option[2] )
-			{
-				case 'checkbox':
-					$input_type = '<input type="checkbox" id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr($option[3]) . '" ' . checked('1', $option_actual[$section][$option_key], false) . ' />' . "\n";
-					$explanation = $option[4];
-					break;
-				case 'dropdown':
-					$selvalue = explode('/', $option[3]);
-					$seltext = explode('/', $option[4]);
-					$seldata = '';
-					foreach ( (array) $selvalue as $key => $sel ) {
-						$seldata .= '<option value="' . $sel . '" ' . selected($sel, $option_actual[$section][$option_key], false) . ' >' . ucfirst($seltext[$key]) . '</option>' . "\n";
-					}
-					$input_type = '<select id="' . $option[0] . '" name="' . $option[0] . '">' . $seldata . '</select>' . "\n";
-					$explanation = $option[5];
-					break;
-				case 'text-color':
-					$input_type = '<input type="text" ' . ( ( $option[3] > 50 ) ? ' style="width: 95%" ' : '' ) . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '" size="' . $option[3] . '" /><div class="box_color ' . $option[0] . '"></div>' . "\n";
-					$explanation = $option[4];
-					break;
-				case 'textarea':
-					$input_type = '<textarea rows="' . $option[5] . '" ' . ( ( $option[3] > 50 ) ? ' style="width: 95%" ' : '' ) . 'id="' . $option[0] . '" name="' . $option[0] . '" size="' . $option[3] . '" />' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '</textarea>';
-					$explanation = $option[4];
-					break;
-				case 'text':
-				default:
-					$input_type = '<input type="text" ' . ( ( $option[3] > 50 ) ? ' style="width: 95%" ' : '' ) . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '" size="' . $option[3] . '" />' . "\n";
-					$explanation = $option[4];
-					break;
-			}
-			// Additional Information
-			$extra = '';
-			if ( $explanation ) {
-				$extra = '<br /><span class="description">' . __($explanation) . '</span>' . "\n";
-			}
-			// Output
-			$output .= '<tr style="vertical-align: top;"><th align="left" scope="row"><label for="' . $option[0] . '">' . __($option[1]) . '</label></th><td>' . $input_type . '	' . $extra . '</td></tr>' . "\n";
-		}
-		$output .= '</table>' . "\n";
-		return $output;
-	}
-
-	/**
 	 * Display error message at bottom of comments.
 	 *
 	 * @param string $msg
