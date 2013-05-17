@@ -64,15 +64,25 @@ class AVH_RPS_Public
 		add_shortcode('rps_scores_current_user', array($this,'shortcodeRpsScoresCurrentUser'));
 		add_shortcode('rps_all_scores', array($this,'shortcodeRpsAllScores'));
 
-		add_action('pre-header-my-print-entries', array($this,'actionPreHeader_RpsMyEntries'));
-		add_action('pre-header-my-digital-entries', array($this,'actionPreHeader_RpsMyEntries'));
+		// add_action('pre-header-my-print-entries', array($this,'actionPreHeader_RpsMyEntries'));
+		// add_action('pre-header-my-digital-entries', array($this,'actionPreHeader_RpsMyEntries'));
+		add_action('wp', array($this,'actionPreHeader_RpsMyEntries'));
+		add_action('wp', array($this,'actionPreHeader_RpsMyEntries'));
+
 		add_shortcode('rps_my_entries', array($this,'shortcodeRpsMyEntries'));
 
-		add_action('pre-header-edit-title', array($this,'actionPreHeader_RpsEditTitle'));
+		add_action('wp', array($this,'actionPreHeader_RpsEditTitle'));
 		add_shortcode('rps_edit_title', array($this,'shortcodeRpsEditTitle'));
 
-		add_action('pre-header-upload-image', array($this,'actionPreHeader_RpsUploadEntry'));
+		add_action('wp', array($this,'actionPreHeader_RpsUploadEntry'));
 		add_shortcode('rps_upload_image', array($this,'shortcodeRpsUploadEntry'));
+
+		add_action("after_setup_theme", array($this,'actionAfterThemeSetup'), 14);
+	}
+
+	public function actionAfterThemeSetup ()
+	{
+		add_action('rps_showcase', array($this,'actionShowcase_competition_thumbnails'));
 	}
 
 	public function actionInit_InitRunTime ()
@@ -99,6 +109,56 @@ class AVH_RPS_Public
 				default:
 					break;
 			}
+		}
+	}
+
+	public function actionShowcase_competition_thumbnails ($ctr)
+	{
+		if ( is_front_page() ) {
+			$image = array();
+			$seasons = $this->_rpsdb->getSeasonList();
+			$from_season = $seasons[count($seasons) - 3];
+
+			$season_start_year = substr($from_season, 0, 4);
+			$season = sprintf("%d-%02s-%02s", $season_start_year, $this->_settings->club_season_start_month_num, 1);
+
+			echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
+
+			echo '<div class="suf-gradient suf-tile-topmost">';
+			echo '<h3>Showcase</h3>';
+			echo '</div>';
+
+			echo '<div class="rps-sc-text entry-content">';
+			echo '<ul>';
+			$entries = $this->_rpsdb->getEightsAndHigher('', $season);
+			$images = array_rand($entries, 5);
+			foreach ( $images as $key ) {
+				$recs = $entries[$key];
+				// Grab a new record from the database
+				$dateParts = explode(" ", $recs['Competition_Date']);
+				$comp_date = $dateParts[0];
+				$medium = $recs['Medium'];
+				$classification = $recs['Classification'];
+				$comp = "$classification<br>$medium";
+				$title = $recs['Title'];
+				$last_name = $recs['LastName'];
+				$first_name = $recs['FirstName'];
+				$award = $recs['Award'];
+				// Display this thumbnail in the the next available column
+				echo '<li class="suf-widget">';
+				echo '<div class="dbx-box">';
+				echo '	<div class="image">';
+				echo '	<a href="' . $this->_core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+				echo '	<img class="thumb_img" src="' . $this->_core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+				echo '	</div>';
+				// echo " <div class='rps_showcase_title'>$title</div>";
+				echo "</div>\n";
+
+				echo '</li>';
+			}
+			echo '</ul>';
+			echo '</div>';
+			echo '</div>';
 		}
 	}
 
@@ -170,7 +230,7 @@ class AVH_RPS_Public
 		echo '</script>';
 
 		echo '<span class="competion-monthly-winners-form"> Monthly Award Winners for ';
-		$action = site_url('/' . get_page_uri($post->ID));
+		$action = home_url('/' . get_page_uri($post->ID));
 		$form = '';
 		$form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
 		$form .= '<input name="submit_control" type="hidden">' . "\n";
@@ -301,7 +361,7 @@ class AVH_RPS_Public
 		$this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1);
 
 		// Start building the form
-		$action = site_url('/' . get_page_uri($post->ID));
+		$action = home_url('/' . get_page_uri($post->ID));
 		$form = '';
 		$form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
 		$form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '" />';
@@ -359,7 +419,7 @@ class AVH_RPS_Public
 				}
 
 				$a = realpath($recs['Server_File_Name']);
-				$image_url = site_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+				$image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
 
 				if ( $prev_date == $dateParts[0] ) {
 					$dateParts[0] = "";
@@ -436,7 +496,7 @@ class AVH_RPS_Public
 
 			// Start the big table
 
-			$action = site_url('/' . get_page_uri($post->ID));
+			$action = home_url('/' . get_page_uri($post->ID));
 			$form = '';
 			$form .= '<form name="all_scores_form" method="post" action="' . $action . '">';
 			$form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '"/>';
@@ -649,87 +709,90 @@ class AVH_RPS_Public
 	public function actionPreHeader_RpsMyEntries ()
 	{
 		global $post;
-		$this->_settings->comp_date = "";
-		$this->_settings->classification = "";
-		$this->_settings->medium = "";
-		$this->_errmsg = '';
 
-		$page = explode('-', $post->post_name);
-		$this->_settings->medium_subset = $page[1];
-		if ( isset($_POST['submit_control']) ) {
-			// @TODO Nonce check
-
-			$this->_settings->comp_date = $_POST['comp_date'];
-			$this->_settings->classification = $_POST['classification'];
-			$this->_settings->medium = $_POST['medium'];
-			$t = time() + ( 2 * 24 * 3600 );
-			$url = parse_url(get_bloginfo('url'));
-			setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $t, '/', $url['host']);
-
-			if ( isset($_POST['EntryID']) ) {
-				$entry_array = $_POST['EntryID'];
-			}
-			$medium_subset = $_POST['medium_subset'];
-			$medium_param = "?medium=" . strtolower($medium_subset);
-
-			switch ( $_POST['submit_control'] )
-			{
-
-				case 'select_comp':
-					$this->_settings->comp_date = $_POST['select_comp'];
-					break;
-
-				case 'select_medium':
-					$this->_settings->medium = $_POST['select_medium'];
-					break;
-
-				case 'add':
-					if ( !$this->_rpsdb->getCompetionClosed() ) {
-						$_query = array('m' => $this->_settings->medium_subset);
-						$_query = build_query($_query);
-						$loc = '/upload-image/?' . $_query;
-						wp_redirect($loc);
-					}
-					break;
-
-				case 'edit':
-					if ( !$this->_rpsdb->getCompetionClosed() ) {
-						if ( is_array($entry_array) ) {
-							foreach ( $entry_array as $id ) {
-								// @TODO Add Nonce
-								$_query = array('id' => $id,'m' => $this->_settings->medium_subset);
-								$_query = build_query($_query);
-								$loc = '/edit-title/?' . $_query;
-								wp_redirect($loc);
-							}
-						}
-					}
-					break;
-
-				case 'delete':
-					if ( !$this->_rpsdb->getCompetionClosed() ) {
-						$this->_deleteCompetitionEntries($entry_array);
-					}
-					break;
-			}
-		}
-
-		// Get the currently selected competition
-		if ( !$_POST ) {
-			if ( isset($_COOKIE['RPS_MyEntries']) ) {
-				list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
-			}
-		}
-		$this->_settings->validComp = $this->_validateSelectedComp($this->_settings->comp_date, $this->_settings->medium);
-		if ( $this->_settings->validComp === false ) {
+		if ( $post->ID == 56 || $post->ID == 58 ) {
 			$this->_settings->comp_date = "";
 			$this->_settings->classification = "";
 			$this->_settings->medium = "";
-			$this->_errmsg = 'There are no competitions available to enter';
-			// Invalidate any existing cookie
-			$past = time() - ( 24 * 3600 );
-			$url = parse_url(get_bloginfo(url));
-			setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $past, '/', $url['host']);
+			$this->_errmsg = '';
+
+			$page = explode('-', $post->post_name);
+			$this->_settings->medium_subset = $page[1];
+			if ( isset($_POST['submit_control']) ) {
+				// @TODO Nonce check
+
+				$this->_settings->comp_date = $_POST['comp_date'];
+				$this->_settings->classification = $_POST['classification'];
+				$this->_settings->medium = $_POST['medium'];
+				$t = time() + ( 2 * 24 * 3600 );
+				$url = parse_url(get_bloginfo('url'));
+				setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $t, '/', $url['host']);
+
+				if ( isset($_POST['EntryID']) ) {
+					$entry_array = $_POST['EntryID'];
+				}
+				$medium_subset = $_POST['medium_subset'];
+				$medium_param = "?medium=" . strtolower($medium_subset);
+
+				switch ( $_POST['submit_control'] )
+				{
+
+					case 'select_comp':
+						$this->_settings->comp_date = $_POST['select_comp'];
+						break;
+
+					case 'select_medium':
+						$this->_settings->medium = $_POST['select_medium'];
+						break;
+
+					case 'add':
+						if ( !$this->_rpsdb->getCompetionClosed() ) {
+							$_query = array('m' => $this->_settings->medium_subset);
+							$_query = build_query($_query);
+							$loc = '/upload-image/?' . $_query;
+							wp_redirect($loc);
+						}
+						break;
+
+					case 'edit':
+						if ( !$this->_rpsdb->getCompetionClosed() ) {
+							if ( is_array($entry_array) ) {
+								foreach ( $entry_array as $id ) {
+									// @TODO Add Nonce
+									$_query = array('id' => $id,'m' => $this->_settings->medium_subset);
+									$_query = build_query($_query);
+									$loc = '/edit-title/?' . $_query;
+									wp_redirect($loc);
+								}
+							}
+						}
+						break;
+
+					case 'delete':
+						if ( !$this->_rpsdb->getCompetionClosed() ) {
+							$this->_deleteCompetitionEntries($entry_array);
+						}
+						break;
+				}
+			}
+
+			// Get the currently selected competition
+			if ( !$_POST ) {
+				if ( isset($_COOKIE['RPS_MyEntries']) ) {
+					list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
+				}
+			}
+			$this->_settings->validComp = $this->_validateSelectedComp($this->_settings->comp_date, $this->_settings->medium);
+			if ( $this->_settings->validComp === false ) {
+				$this->_settings->comp_date = "";
+				$this->_settings->classification = "";
+				$this->_settings->medium = "";
+				$this->_errmsg = 'There are no competitions available to enter';
+				// Invalidate any existing cookie
+				$past = time() - ( 24 * 3600 );
+				$url = parse_url(get_bloginfo(url));
+				setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $past, '/', $url['host']);
+			}
 		}
 	}
 
@@ -760,7 +823,7 @@ class AVH_RPS_Public
 			echo '<div id="errmsg">' . $this->_errmsg . '</div>';
 		}
 		// Start the form
-		$action = site_url('/' . get_page_uri($post->ID));
+		$action = home_url('/' . get_page_uri($post->ID));
 		$form = '';
 		echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
 		echo '<input type="hidden" name="submit_control">' . "\n";
@@ -773,7 +836,7 @@ class AVH_RPS_Public
 
 		// Form Heading
 		if ( $this->_settings->validComp ) {
-			echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for" . $this->_settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->_settings->comp_date)) . "</th></tr>\n";
+			echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->_settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->_settings->comp_date)) . "</th></tr>\n";
 		} else {
 			echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
 		}
@@ -796,7 +859,7 @@ class AVH_RPS_Public
 		echo "<td width=\"33%\" align=\"right\"><b>Competition Date:&nbsp;&nbsp;</b></td>\n";
 		echo "<td width=\"64%\" align=\"left\">\n";
 
-		echo "<SELECT name=\"select_comp\" style=\"width:300px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_comp')\">\n";
+		echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
 		// Load the values into the dropdown list
 		$prev_date = "";
 		for ( $i = 0; $i < count($this->_open_comp_date); $i++ ) {
@@ -807,7 +870,7 @@ class AVH_RPS_Public
 				} else {
 					$selected = "";
 				}
-				echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"" . $this->_open_comp_date[$i] . "\"$selected>" . strftime('%d-%b-%Y', strtotime($this->_open_comp_date[$i])) . " " . $this->_open_comp_theme[$i] . "</OPTION>\n";
+				echo "<OPTION value=\"" . $this->_open_comp_date[$i] . "\"$selected>" . strftime('%d-%b-%Y', strtotime($this->_open_comp_date[$i])) . " " . $this->_open_comp_theme[$i] . "</OPTION>\n";
 			}
 			$prev_date = $this->_open_comp_date[$i];
 		}
@@ -817,7 +880,7 @@ class AVH_RPS_Public
 		// Competition medium dropdown list
 		echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
 		echo "<td width=\"64%\" align=\"left\">\n";
-		echo "<SELECT name=\"select_medium\" style=\"width:150px;font-family:'Courier New', Courier, monospace\" onchange=\"submit_form('select_medium')\">\n";
+		echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
 		// Load the values into the dropdown list
 		for ( $i = 0; $i < count($this->_open_comp_date); $i++ ) {
 			if ( $this->_open_comp_date[$i] == $this->_settings->comp_date ) {
@@ -826,7 +889,7 @@ class AVH_RPS_Public
 				} else {
 					$selected = "";
 				}
-				echo "<OPTION style=\"font-family:'Courier New', Courier, monospace\" value=\"" . $this->_open_comp_medium[$i] . "\"$selected>" . $this->_open_comp_medium[$i] . "</OPTION>\n";
+				echo "<OPTION value=\"" . $this->_open_comp_medium[$i] . "\"$selected>" . $this->_open_comp_medium[$i] . "</OPTION>\n";
 			}
 		}
 		echo "</SELECT>\n";
@@ -883,24 +946,24 @@ class AVH_RPS_Public
 			// Thumbnail column
 			$user = wp_get_current_user();
 			$a = realpath($recs['Server_File_Name']);
-			$image_url = site_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+			$image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
 			echo "<td align=\"center\" width=\"10%\">\n";
-			echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
-			echo '<a href="' . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">\n";
+			//echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
+			echo '<a href="' . $image_url . '" rel="'.$this->_settings->comp_date . '" title="'.$recs['Title'].' ' . $this->_settings->classification . ' ' . $this->_settings->medium . '">'."\n";
 			echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
 			echo "</a></td>\n";
 
 			// Title column
 			echo '<td align="left" width="40%">';
-			echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
-			echo "<a href=\"" . $image_url . "\" rel=\"lightbox[" . $this->_settings->comp_date . "]\" title=\"{$recs['Title']} / " . $this->_settings->classification . " " . $this->_settings->medium . "\">" . htmlentities($recs['Title']) . "</a></td>\n";
+			//echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
+			echo htmlentities($recs['Title']) . "</td>\n";
 			// File Name
 			echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
 
 			// Image width and height columns. The height and width values are suppressed if the Client_File_Name is
 			// empty i.e. no image uploaded for a print competition.
-			if ( file_exists(ABSPATH . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name'])) ) {
-				$size = getimagesize(ABSPATH . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+			if ( file_exists($_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name'])) ) {
+				$size = getimagesize($_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
 			} else {
 				$size[0] = 0;
 				$size[1] = 0;
@@ -966,63 +1029,67 @@ class AVH_RPS_Public
 
 	public function actionPreHeader_RpsEditTitle ()
 	{
-		if ( !empty($_POST) ) {
-			$redirect_to = $_POST['wp_get_referer'];
-			$this->_medium_subset = $_POST['m'];
-			$this->_entry_id = $_POST['id'];
+		global $post;
 
-			// Just return to the My Images page is the user clicked Cancel
-			if ( isset($_POST['cancel']) ) {
-
-				wp_redirect($redirect_to);
-				exit();
-			}
-
-			if ( isset($_POST['m']) ) {
-
-				if ( get_magic_quotes_gpc() ) {
-					$server_file_name = stripslashes($_POST['server_file_name']);
-					$new_title = stripslashes(trim($_POST['new_title']));
-				} else {
-					$server_file_name = $_POST['server_file_name'];
-					$new_title = trim($_POST['new_title']);
-				}
-			}
-			// makes sure they filled in the title field
-			if ( !$_POST['new_title'] || trim($_POST['new_title']) == "" ) {
-				$this->_errmsg = 'You must provide an image title.<br><br>';
-			} else {
-				$recs = $this->_rpsdb->getCompetitionByID($this->_entry_id);
-				if ( $recs == NULL ) {
-					wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);
-				}
-
-				$dateParts = explode(" ", $recs['Competition_Date']);
-				$comp_date = $dateParts[0];
-				$classification = $recs['Classification'];
-				$medium = $recs['Medium'];
-
-				// Rename the image file on the server file system
-				$ext = ".jpg";
-				$path = '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
-				$old_file_parts = pathinfo($server_file_name);
-				$old_file_name = $old_file_parts['filename'];
-				$current_user = wp_get_current_user();
-				$new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login;
-				$new_file_name = sanitize_file_name($new_title) . '+' . $current_user->user_login . $ext;
-				if ( !$this->_core->rps_rename_image_file($path, $old_file_name, $new_file_name_noext, $ext) ) {
-					die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
-				}
-
-				// Update the Title and File Name in the database
-				$_result = $this->_rpsdb->updateEntriesTitle($new_title, $path . '/' . $new_file_name, $this->_entry_id);
-				if ( $_result === false ) {
-					wp_die("Failed to UPDATE entry record from database");
-				}
-
+		if ( $post->ID == 75 ) {
+			if ( !empty($_POST) ) {
 				$redirect_to = $_POST['wp_get_referer'];
-				wp_redirect($redirect_to);
-				exit();
+				$this->_medium_subset = $_POST['m'];
+				$this->_entry_id = $_POST['id'];
+
+				// Just return to the My Images page is the user clicked Cancel
+				if ( isset($_POST['cancel']) ) {
+
+					wp_redirect($redirect_to);
+					exit();
+				}
+
+				if ( isset($_POST['m']) ) {
+
+					if ( get_magic_quotes_gpc() ) {
+						$server_file_name = stripslashes($_POST['server_file_name']);
+						$new_title = stripslashes(trim($_POST['new_title']));
+					} else {
+						$server_file_name = $_POST['server_file_name'];
+						$new_title = trim($_POST['new_title']);
+					}
+				}
+				// makes sure they filled in the title field
+				if ( !$_POST['new_title'] || trim($_POST['new_title']) == "" ) {
+					$this->_errmsg = 'You must provide an image title.<br><br>';
+				} else {
+					$recs = $this->_rpsdb->getCompetitionByID($this->_entry_id);
+					if ( $recs == NULL ) {
+						wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);
+					}
+
+					$dateParts = explode(" ", $recs['Competition_Date']);
+					$comp_date = $dateParts[0];
+					$classification = $recs['Classification'];
+					$medium = $recs['Medium'];
+
+					// Rename the image file on the server file system
+					$ext = ".jpg";
+					$path = '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+					$old_file_parts = pathinfo($server_file_name);
+					$old_file_name = $old_file_parts['filename'];
+					$current_user = wp_get_current_user();
+					$new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login;
+					$new_file_name = sanitize_file_name($new_title) . '+' . $current_user->user_login . $ext;
+					if ( !$this->_core->rps_rename_image_file($path, $old_file_name, $new_file_name_noext, $ext) ) {
+						die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
+					}
+
+					// Update the Title and File Name in the database
+					$_result = $this->_rpsdb->updateEntriesTitle($new_title, $path . '/' . $new_file_name, $this->_entry_id);
+					if ( $_result === false ) {
+						wp_die("Failed to UPDATE entry record from database");
+					}
+
+					$redirect_to = $_POST['wp_get_referer'];
+					wp_redirect($redirect_to);
+					exit();
+				}
 			}
 		}
 	}
@@ -1052,7 +1119,7 @@ class AVH_RPS_Public
 			echo $this->_errmsg;
 			echo '</div>';
 		}
-		$action = site_url('/' . get_page_uri($post->ID));
+		$action = home_url('/' . get_page_uri($post->ID));
 		echo '<form action="' . $action . $medium_param . '" method="post">';
 
 		echo '<table class="form_frame" width="80%">';
@@ -1083,145 +1150,149 @@ class AVH_RPS_Public
 
 	public function actionPreHeader_RpsUploadEntry ()
 	{
-		if ( isset($_GET['post']) ) {
-			$redirect_to = $_POST['wp_get_referer'];
+		global $post;
 
-			// Just return if user clicked Cancel
-			if ( isset($_POST['cancel']) ) {
-				wp_redirect($redirect_to);
-				exit();
-			}
+		if ( $post->ID == 89 ) {
+			if ( isset($_GET['post']) ) {
+				$redirect_to = $_POST['wp_get_referer'];
 
-			// First we have to dispose of a "bug?". If a file is uploaded and the size of the file exceeds
-			// the value of 'post_max_size' in php.ini, the $_POST and $_FILES arrays will be cleared.
-			// Detect this situation by comparing the length of the http content received with post_max_size
-			if ( isset($_SERVER['CONTENT_LENGTH']) ) {
-				if ( $_SERVER['CONTENT_LENGTH'] > $this->_core->avh_ShortHandToBytes(ini_get('post_max_size')) ) {
-					$this->_errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
-				} else {
-					if ( !$this->_checkUploadEntryTitle() ) {
-						return;
-					}
+				// Just return if user clicked Cancel
+				if ( isset($_POST['cancel']) ) {
+					wp_redirect($redirect_to);
+					exit();
+				}
 
-					// Verify that the uploaded image is a JPEG
-					$uploaded_file_name = $_FILES['file_name']['tmp_name'];
-					$size_info = getimagesize($uploaded_file_name);
-					if ( $size_info[2] != IMAGETYPE_JPEG ) {
-						$this->_errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
-						return;
-					}
-
-					// Retrieve and parse the selected competition cookie
-					if ( isset($_COOKIE['RPS_MyEntries']) ) {
-						list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
+				// First we have to dispose of a "bug?". If a file is uploaded and the size of the file exceeds
+				// the value of 'post_max_size' in php.ini, the $_POST and $_FILES arrays will be cleared.
+				// Detect this situation by comparing the length of the http content received with post_max_size
+				if ( isset($_SERVER['CONTENT_LENGTH']) ) {
+					if ( $_SERVER['CONTENT_LENGTH'] > $this->_core->avh_ShortHandToBytes(ini_get('post_max_size')) ) {
+						$this->_errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
 					} else {
-						$this->_errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
-						return;
-					}
+						if ( !$this->_checkUploadEntryTitle() ) {
+							return;
+						}
 
-					$recs = $this->_rpsdb->getIdmaxEntries();
-					if ( $recs ) {
-						$comp_id = $recs['ID'];
-						$max_entries = $recs['Max_Entries'];
-					} else {
-						$d = $this->comp_date;
-						$c = $this->classification;
-						$m = $this->medium;
-						$this->_errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
-						return;
-					}
+						// Verify that the uploaded image is a JPEG
+						$uploaded_file_name = $_FILES['file_name']['tmp_name'];
+						$size_info = getimagesize($uploaded_file_name);
+						if ( $size_info[2] != IMAGETYPE_JPEG ) {
+							$this->_errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+							return;
+						}
 
-					// Prepare the title and client file name for storing in the database
-					if ( !get_magic_quotes_gpc() ) {
-						$title = addslashes(trim($_POST['title']));
-						$client_file_name = addslashes(basename($_FILES['file_name']['name']));
-					} else {
-						$title = trim($_POST['title']);
-						$client_file_name = basename($_FILES['file_name']['name']);
-					}
-
-					// Before we go any further, make sure the title is not a duplicate of
-					// an entry already submitted to this competition. Dupliacte title result in duplicate
-					// file names on the server
-					if ( $this->_rpsdb->checkDuplicateTitle($comp_id, $title) ) {
-						$this->_errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
-						return;
-					}
-
-					// Do a final check that the user hasn't exceeded the maximum images per competition.
-					// If we don't check this at the last minute it may be possible to exceed the
-					// maximum images per competition by having two upload windows open simultaneously.
-					$max_per_id = $this->_rpsdb->checkMaxEntriesOnId($comp_id);
-					if ( $max_per_id >= $max_entries ) {
-						$this->_errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
-						return;
-					}
-
-					$max_per_date = $this->_rpsdb->checkMaxEntriesOnDate();
-					if ( $max_per_date >= $this->_settings->club_max_entries_per_member_per_date ) {
-						$x = $this->_settings->club_max_entries_per_member_per_date;
-						$this->_errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
-						return;
-					}
-
-					// Move the file to its final location
-					$comp_date = $this->_settings->comp_date;
-					$classification = $this->_settings->classification;
-					$medium = $this->_settings->medium;
-					$path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
-
-					$title2 = stripslashes(trim($_POST['title']));
-					$user = wp_get_current_user();
-					$dest_name = sanitize_file_name($title2) . '+' . $user->user_login;
-					$full_path = $path . '/' . $dest_name;
-					// Need to create the destination folder?
-					if ( !is_dir($path) )
-						mkdir($path, 0755);
-
-						// If the .jpg file is too big resize it
-					if ( $size_info[0] > $this->_settings->max_width_entry || $size_info[1] > $this->_settings->max_height_entry ) {
-						// If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
-						if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->max_width_entry / $this->_settings->max_height_entry ) {
-							// Set the maximum width to ensure the height does not exceed the maximum height
-							$size = $this->_settings->max_height_entry * $size_info[0] / $size_info[1];
+						// Retrieve and parse the selected competition cookie
+						if ( isset($_COOKIE['RPS_MyEntries']) ) {
+							list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
 						} else {
-							// if its landscape and the aspect ratio is greater than the projector
-							if ( $size_info[0] > $size_info[1] ) {
-								// Set the maximum width to the width of the projector
-								$size = $this->_settings->max_width_entry;
+							$this->_errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
+							return;
+						}
 
-								// If its a portrait image
+						$recs = $this->_rpsdb->getIdmaxEntries();
+						if ( $recs ) {
+							$comp_id = $recs['ID'];
+							$max_entries = $recs['Max_Entries'];
+						} else {
+							$d = $this->comp_date;
+							$c = $this->classification;
+							$m = $this->medium;
+							$this->_errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
+							return;
+						}
+
+						// Prepare the title and client file name for storing in the database
+						if ( !get_magic_quotes_gpc() ) {
+							$title = addslashes(trim($_POST['title']));
+							$client_file_name = addslashes(basename($_FILES['file_name']['name']));
+						} else {
+							$title = trim($_POST['title']);
+							$client_file_name = basename($_FILES['file_name']['name']);
+						}
+
+						// Before we go any further, make sure the title is not a duplicate of
+						// an entry already submitted to this competition. Dupliacte title result in duplicate
+						// file names on the server
+						if ( $this->_rpsdb->checkDuplicateTitle($comp_id, $title) ) {
+							$this->_errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
+							return;
+						}
+
+						// Do a final check that the user hasn't exceeded the maximum images per competition.
+						// If we don't check this at the last minute it may be possible to exceed the
+						// maximum images per competition by having two upload windows open simultaneously.
+						$max_per_id = $this->_rpsdb->checkMaxEntriesOnId($comp_id);
+						if ( $max_per_id >= $max_entries ) {
+							$this->_errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
+							return;
+						}
+
+						$max_per_date = $this->_rpsdb->checkMaxEntriesOnDate();
+						if ( $max_per_date >= $this->_settings->club_max_entries_per_member_per_date ) {
+							$x = $this->_settings->club_max_entries_per_member_per_date;
+							$this->_errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
+							return;
+						}
+
+						// Move the file to its final location
+						$comp_date = $this->_settings->comp_date;
+						$classification = $this->_settings->classification;
+						$medium = $this->_settings->medium;
+						$path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+
+						$title2 = stripslashes(trim($_POST['title']));
+						$user = wp_get_current_user();
+						$dest_name = sanitize_file_name($title2) . '+' . $user->user_login;
+						$full_path = $path . '/' . $dest_name;
+						// Need to create the destination folder?
+						if ( !is_dir($path) )
+							mkdir($path, 0755);
+
+							// If the .jpg file is too big resize it
+						if ( $size_info[0] > $this->_settings->max_width_entry || $size_info[1] > $this->_settings->max_height_entry ) {
+							// If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
+							if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->max_width_entry / $this->_settings->max_height_entry ) {
+								// Set the maximum width to ensure the height does not exceed the maximum height
+								$size = $this->_settings->max_height_entry * $size_info[0] / $size_info[1];
 							} else {
-								// Set the maximum height to the height of the projector
-								$size = $this->_settings->max_height_entry;
+								// if its landscape and the aspect ratio is greater than the projector
+								if ( $size_info[0] > $size_info[1] ) {
+									// Set the maximum width to the width of the projector
+									$size = $this->_settings->max_width_entry;
+
+									// If its a portrait image
+								} else {
+									// Set the maximum height to the height of the projector
+									$size = $this->_settings->max_height_entry;
+								}
+							}
+							// Resize the image and deposit it in the destination directory
+							if ( !$this->_core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, '') );
+							{
+								$this->_errmsg = "There is a problem resizing the picture for the use of the projector.";
+								return;
+							}
+							$resized = 1;
+
+							// The uploaded image does not need to be resized so just move it to the destination directory
+						} else {
+							$resized = 0;
+							if ( !move_uploaded_file($uploaded_file_name, $full_path . '.jpg') ) {
+								$this->_errmsg = "Failed to move uploaded file to destination folder";
+								return;
 							}
 						}
-						// Resize the image and deposit it in the destination directory
-						if ( !$this->_core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, '') );
-						{
-							$this->_errmsg = "There is a problem resizing the picture for the use of the projector.";
+						$server_file_name = str_replace($_SERVER['DOCUMENT_ROOT'], '', $full_path . '.jpg');
+						$data = array('Competition_ID' => $comp_id,'Title' => $title,'Client_File_Name' => $client_file_name,'Server_File_Name' => $server_file_name);
+						$_result = $this->_rpsdb->addEntry($data);
+						if ( $_result === false ) {
+							$this->_errmsg = "Failed to INSERT entry record into database";
 							return;
 						}
-						$resized = 1;
-
-						// The uploaded image does not need to be resized so just move it to the destination directory
-					} else {
-						$resized = 0;
-						if ( !move_uploaded_file($uploaded_file_name, $full_path . '.jpg') ) {
-							$this->_errmsg = "Failed to move uploaded file to destination folder";
-							return;
-						}
+						$query = build_query(array('resized' => $resized));
+						wp_redirect($redirect_to . '/?' . $query);
+						exit();
 					}
-					$server_file_name = str_replace(ABSPATH, '/', $full_path . '.jpg');
-					$data = array('Competition_ID' => $comp_id,'Title' => $title,'Client_File_Name' => $client_file_name,'Server_File_Name' => $server_file_name);
-					$_result = $this->_rpsdb->addEntry($data);
-					if ( $_result === false ) {
-						$this->_errmsg = "Failed to INSERT entry record into database";
-						return;
-					}
-					$query = build_query(array('resized' => $resized));
-					wp_redirect($redirect_to . '/?' . $query);
-					exit();
 				}
 			}
 		}
@@ -1247,7 +1318,7 @@ class AVH_RPS_Public
 			echo '</div>';
 		}
 
-		$action = site_url('/' . get_page_uri($post->ID));
+		$action = home_url('/' . get_page_uri($post->ID));
 		echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
 
 		echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
@@ -1479,7 +1550,7 @@ class AVH_RPS_Public
 					$award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
 					$award_node->AppendChild($dom->CreateTextNode($award));
 					// Convert the absolute server file name into a URL
-					$image_url = site_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
+					$image_url = home_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
 					$url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
 					$url_node->AppendChild($dom->CreateTextNode($image_url));
 				}
@@ -1730,7 +1801,7 @@ class AVH_RPS_Public
 					$this->_errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
 				} else {
 
-					$server_file_name = ABSPATH . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
+					$server_file_name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
 					// Delete the record from the database
 					$result = $this->_rpsdb->deleteEntry($id);
 					if ( $result === FALSE ) {
@@ -1746,7 +1817,7 @@ class AVH_RPS_Public
 						$comp_date = $this->_settings->comp_date;
 						$classification = $this->_settings->classification;
 						$medium = $this->_settings->medium;
-						$path = ABSPATH . 'Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+						$path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
 
 						$old_file_parts = pathinfo($server_file_name);
 						$old_file_name = $old_file_parts['filename'];

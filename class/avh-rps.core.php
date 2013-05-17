@@ -137,9 +137,9 @@ class AVH_RPS_Core
 		$this->saveOptions($options);
 	}
 
-	function rpsCreateThumbnail ($row, $size)
+	function rpsCreateThumbnail ($row, $size, $show_maker=TRUE)
 	{
-		if ( $size >= 400 ) {
+		if ( $size >= 400 && $show_maker) {
 			$maker = $row['FirstName'] . " " . $row['LastName'];
 		}
 		$dateParts = explode(" ", $row['Competition_Date']);
@@ -150,7 +150,8 @@ class AVH_RPS_Core
 			mkdir("$path/thumbnails", 0755);
 
 		if ( !file_exists("$path/thumbnails/$file_name" . "_$size.jpg") ) {
-			$this->rpsResizeImage($row['Server_File_Name'], "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
+			$name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']);
+			$this->rpsResizeImage($name, "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
 		}
 	}
 
@@ -211,16 +212,16 @@ class AVH_RPS_Core
 	function rpsGetThumbnailUrl ($row, $size)
 	{
 		$file_parts = pathinfo(str_replace('/home/rarit0/public_html/', '', $row['Server_File_Name']));
-		$thumb_dir = ABSPATH . '/' . $file_parts['dirname'] . '/thumbnails';
+		$thumb_dir = $_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/thumbnails';
 		if ( !is_dir($thumb_dir) )
 			mkdir($thumb_dir, 0755);
 
 		if ( !file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg') ) {
-			$this->rpsResizeImage(ABSPATH . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
+			$this->rpsResizeImage($_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
 		}
 
 		$p = explode('/', $file_parts['dirname']);
-		$path = site_url() . '/';
+		$path = home_url() . '/';
 		foreach ( $p as $part ) {
 			$path .= rawurlencode($part) . '/';
 		}
@@ -232,7 +233,7 @@ class AVH_RPS_Core
 	public function rps_rename_image_file ($path, $old_name, $new_name, $ext)
 	{
 		$thumbnails = array();
-		$path = ABSPATH . $path;
+		$path = $_SERVER['DOCUMENT_ROOT'] . $path;
 		// Rename the main image file
 		$status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
 		if ( $status ) {

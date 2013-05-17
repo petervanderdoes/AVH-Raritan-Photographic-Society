@@ -163,6 +163,30 @@ class AVH_RPS_OldRpsDb
 		return $_return;
 	}
 
+	public function getEightsAndHigher ($classification, $season)
+	{
+		$sql = $this->_rpsdb->prepare("SELECT c.Competition_Date, c.Classification,
+				if(c.Classification = 'Beginner',1,
+				if(c.Classification = 'Advanced',2,
+				if(c.Classification = 'Salon',3,0))) as \"Class_Code\",
+				c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
+			FROM competitions c, entries e
+				WHERE c.ID = e.Competition_ID AND
+					c.Competition_Date >= %s AND
+					e.Score >= 8
+				ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score", $season );
+		$_x = $this->_rpsdb->get_results($sql, ARRAY_A);
+		foreach ( $_x as $_rec ) {
+			$user_info = get_userdata($_rec['Member_ID']);
+			$_rec['FirstName'] = $user_info->user_firstname;
+			$_rec['LastName'] = $user_info->user_lastname;
+			$_rec['Username'] = $user_info->user_login;
+			$_return[] = $_rec;
+		}
+
+		return $_return;
+	}
+
 	public function getScoresCurrentUser ()
 	{
 		$sql = $this->_rpsdb->prepare("SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
@@ -550,6 +574,7 @@ class AVH_RPS_OldRpsDb
 		$_return = $this->_rpsdb->insert('entries', $data);
 		return $_return;
 	}
+
 	/**
 	 * Update an entry.
 	 *
@@ -576,6 +601,7 @@ class AVH_RPS_OldRpsDb
 
 		return TRUE;
 	}
+
 	public function updateEntriesTitle ($new_title, $new_file_name, $id)
 	{
 		$data = array('Title' => $new_title,'Server_File_Name' => $new_file_name,'Date_Modified' => current_time('mysql'));
