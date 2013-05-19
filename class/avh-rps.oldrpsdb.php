@@ -33,7 +33,7 @@ class AVH_RPS_OldRpsDb
 		$this->_classes = AVH_RPS_Classes::getInstance();
 
 		$this->_core = $this->_classes->load_class('Core', 'plugin', true);
-		$this->_rpsdb = new wpdb('avirtu2_rarit1', '1Hallo@Done#', 'avirtu2_raritdata', 'localhost');
+		$this->_rpsdb = new wpdb(RPS_DB_USER, RPS_DB_PASSWORD, RPS_DB_NAME, DB_HOST);
 		$this->_rpsdb->show_errors();
 	}
 
@@ -673,10 +673,10 @@ class RPSPDO extends PDO
 	public function __construct ()
 	{
 		$this->engine = 'mysql';
-		$this->host = 'localhost';
-		$this->database = 'avirtu2_raritdata';
-		$this->user = 'avirtu2_rarit1';
-		$this->pass = '1Hallo@Done#';
+		$this->host = DB_HOST;
+		$this->database = RPS_DB_NAME;
+		$this->user = RPS_DB_USER;
+		$this->pass = RPS_DB_PASSWORD;
 		$dns = $this->engine . ':dbname=' . $this->database . ";host=" . $this->host;
 		parent::__construct($dns, $this->user, $this->pass);
 	}
