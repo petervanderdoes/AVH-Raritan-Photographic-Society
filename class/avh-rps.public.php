@@ -842,15 +842,21 @@ class AVH_RPS_Public
 		}
 		echo "<tr><td align=\"center\" colspan=\"6\">\n";
 		echo "<table width=\"100%\">\n";
+		$theme_uri_images = get_stylesheet_directory_uri().'/images';
+		echo '<tr>';
+		echo '<td width="25%">';
+		//echo '<span class="rps-comp-medium">' . $this->_settings->medium . '</span>';
 		if ( $this->_settings->medium == "Color Digital" ) {
-			echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+			$img='/thumb-comp-digital-color.jpg';
 		} elseif ( $this->_settings->medium == "Color Prints" ) {
-			echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/color_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+			$img='/thumb-comp-print-color.jpg';
 		} elseif ( $this->_settings->medium == "B&W Digital" ) {
-			echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_projector.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+			$img='/thumb-comp-digital-bw.jpg';
 		} else {
-			echo "<tr><td width=\"25%\" align=\"center\"><img src=\"/img/digital/bw_print.gif\"><br><b>" . $this->_settings->medium . "</b></td>\n";
+			$img='/thumb-comp-print-bw.jpg';
 		}
+		echo '<img src="'. $this->_settings->getSetting('plugin_url') . '/images'.$img.'">';
+		echo '</td>';
 		echo "<td width=\"75%\">\n";
 		echo "<table width=\"100%\">\n";
 
