@@ -1,13 +1,13 @@
 <?php
-/*
-Plugin Name: AVH RPS Competition
-Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
-Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
-Version: 1.0.0
-Author: Peter van der Does
-Author URI: http://blog.avirtualhome.com/
-
-Copyright 2011 Peter van der Does (email : peter@avirtualhome.com)
+/**
+ * Plugin Name: AVH RPS Competition
+ * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
+ * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
+ * Version: 1.0.0
+ * Author: Peter van der Does
+ * Author URI: http://blog.avirtualhome.com/
+ *
+ * Copyright 2011 Peter van der Does (email : peter@avirtualhome.com)
 */
 if ( !defined('AVH_FRAMEWORK') ) {
 	define('AVH_FRAMEWORK', true);
