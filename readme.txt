@@ -1,10 +1,10 @@
 === AVH RPS Competition ===
 Contributors: petervanderdoes
 Donate link: http://blog.avirtualhome.com/wordpress-plugins/
-Tags: spam, block, blacklist, whitelist, comment, anti-spam, comments
-Requires at least: 3.1
-Tested up to: 3.1.3
-Stable tag: 1.0
+Tags:
+Requires at least: 3.4
+Tested up to: 3.4.1
+Stable tag: 0.0.0
 
 The AVH RPS Competition plugin was written to manage the competitions of the Raritan Photographic Society.
 
@@ -28,5 +28,5 @@ None
 
 == Changelog ==
 
-= Version 1.0 =
+= Version 1.0.0-rc.1 =
 * Initial version

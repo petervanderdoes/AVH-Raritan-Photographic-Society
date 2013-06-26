@@ -158,6 +158,11 @@ table.avhfdas-options {
 	width: 1px;
 }
 
+#rps-competitionedit .ui-datepicker-trigger {
+	margin-left: 5px;
+	vertical-align: text-bottom;
+}
+
 /* IP Cache Log List */
 #the-ipcache-list td {
 	vertical-align: top;

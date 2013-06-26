@@ -1,20 +1,23 @@
 <?php
-if (! defined('AVH_FRAMEWORK'))
+if ( !defined('AVH_FRAMEWORK') )
 	die('You are not allowed to call this page directly.');
-if (! class_exists('AVH_Settings_Registry')) {
+if ( !class_exists('AVH_Settings_Registry') ) {
 
 	abstract class AVH_Settings_Registry
 	{
 		/**
 		 * Our array of settings
+		 *
 		 * @access protected
 		 */
-		private $_settings = array ();
+		private $_settings = array();
 
 		/**
 		 * Stores settings in the registry
+		 *
 		 * @param string $data
-		 * @param string $key The key for the array
+		 * @param string $key
+		 *        The key for the array
 		 * @return void
 		 */
 		public function storeSetting ($key, $data)
@@ -25,7 +28,9 @@ if (! class_exists('AVH_Settings_Registry')) {
 
 		/**
 		 * Gets a setting from the registry
-		 * @param string $key The key in the array
+		 *
+		 * @param string $key
+		 *        The key in the array
 		 * @return mixed
 		 */
 		public function getSetting ($key)
@@ -35,7 +40,9 @@ if (! class_exists('AVH_Settings_Registry')) {
 
 		/**
 		 * Removes a setting from the registry
-		 * @param string $key The key for the array
+		 *
+		 * @param string $key
+		 *        The key for the array
 		 */
 		public function removeSetting ($key)
 		{
@@ -43,20 +50,20 @@ if (! class_exists('AVH_Settings_Registry')) {
 		}
 	}
 }
-if (! class_exists('AVH_Class_Registry')) {
+if ( !class_exists('AVH_Class_Registry') ) {
 
 	/**
 	 * Class registry
-	 *
 	 */
 	abstract class AVH_Class_Registry
 	{
 		/**
 		 * Our array of objects
+		 *
 		 * @access protected
 		 * @var array
 		 */
-		private $_objects = array ();
+		private $_objects = array();
 		private $_dir;
 		private $_class_file_prefix;
 		private $_class_name_prefix;
@@ -64,17 +71,21 @@ if (! class_exists('AVH_Class_Registry')) {
 		/**
 		 * Loads a class
 		 *
-		 * @param string $class Name of the class you want to load
-		 * @param string $type What kind of class, System, Plugin
-		 * @param boolean $store Store the class in the registry
+		 * @param string $class
+		 *        Name of the class you want to load
+		 * @param string $type
+		 *        What kind of class, System, Plugin
+		 * @param boolean $store
+		 *        Store the class in the registry
 		 * @return object
 		 */
 		public function load_class ($class, $type = 'system', $store = false)
 		{
-			if (isset($this->_objects[$class])) {
-				return ($this->_objects[$class]);
+			if ( isset($this->_objects[$class]) ) {
+				return ( $this->_objects[$class] );
 			}
-			switch ($type) {
+			switch ( $type )
+			{
 				case 'plugin':
 					$in = '/class';
 					$file = $this->_class_file_prefix . $class . '.php';
@@ -84,10 +95,10 @@ if (! class_exists('AVH_Class_Registry')) {
 					$in = '/libs';
 					$file = 'avh-' . $class . '.php';
 			}
-			require_once ($this->_dir . $in . '/' . strtolower($file));
-			$name = ('system' == $type) ? 'AVH_' . $class : $this->_class_name_prefix . $class;
+			require_once ( $this->_dir . $in . '/' . strtolower($file) );
+			$name = ( 'system' == $type ) ? 'AVH_' . $class : $this->_class_name_prefix . $class;
 			$object = $this->instantiate_class(new $name());
-			if ($store) {
+			if ( $store ) {
 				$this->_objects[$class] = $object;
 			}
 			return $object;
@@ -101,9 +112,10 @@ if (! class_exists('AVH_Class_Registry')) {
 		 *
 		 * Use: $obj =& instantiate_class(new Foo());
 		 *
-		 * @access	public
-		 * @param	object
-		 * @return	object
+		 * @access public
+		 * @param
+		 *        object
+		 * @return object
 		 */
 		protected function instantiate_class (&$class_object)
 		{
@@ -111,7 +123,9 @@ if (! class_exists('AVH_Class_Registry')) {
 		}
 
 		/**
-		 * @param $dir the $dir to set
+		 *
+		 * @param string $dir
+		 *        The directory to set
 		 */
 		public function setDir ($dir)
 		{
@@ -119,26 +133,28 @@ if (! class_exists('AVH_Class_Registry')) {
 		}
 
 		/**
-		 * @param $class Unique Identifier
-		 * @param $class_prefix the $class_prefix to set
+		 *
+		 * @param string $prefix
+		 *        The class file prefix to set
 		 */
-		public function setClassFilePrefix ($class_prefix)
+		public function setClassFilePrefix ($prefix)
 		{
-			$this->_class_file_prefix = $class_prefix;
+			$this->_class_file_prefix = $prefix;
 		}
 
 		/**
-		 * @param $class Unique Identifier
-		 * @param $class_name_prefix the $class_name_prefix to set
+		 *
+		 * @param string $prefix
+		 *        The class name prefix to set
 		 */
-		public function setClassNamePrefix ($class_name_prefix)
+		public function setClassNamePrefix ($prefix)
 		{
-			$this->_class_name_prefix = $class_name_prefix;
+			$this->_class_name_prefix = $prefix;
 		}
 
 		public function setClassProperties ($properties)
 		{
-			$default_properties = array ( 'type' => 'system', 'store' => false );
+			$default_properties = array('type' => 'system','store' => false);
 		}
 	}
 }

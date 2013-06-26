@@ -2,32 +2,35 @@
 
 /**
  * Create seperate Settings Registry for the plugin.
+ *
  * @author pdoes
  *
  */
 final class AVH_RPS_Settings extends AVH_Settings_Registry
 {
 
-	//prevent directly access.
+	// prevent directly access.
 	public function __construct ()
 	{}
 
-	//prevent clone.
+	// prevent clone.
 	public function __clone ()
 	{}
 	/**
 	 * The instance of the registry
+	 *
 	 * @access private
 	 */
 	private static $_instance = null;
 
 	/**
 	 * Singleton method to access the Registry
+	 *
 	 * @access public
 	 */
 	public static function getInstance ()
 	{
-		if (self::$_instance === null) {
+		if ( self::$_instance === null ) {
 			self::$_instance = new self();
 		}
 		return self::$_instance;
@@ -36,32 +39,35 @@ final class AVH_RPS_Settings extends AVH_Settings_Registry
 
 /**
  * Create seperate Classes registry for the plugin
+ *
  * @author pdoes
  *
  */
 final class AVH_RPS_Classes extends AVH_Class_Registry
 {
 
-	//prevent directly access.
+	// prevent directly access.
 	public function __construct ()
 	{}
 
-	//prevent clone.
+	// prevent clone.
 	public function __clone ()
 	{}
 	/**
 	 * The instance of the registry
+	 *
 	 * @access private
 	 */
 	private static $_instance = null;
 
 	/**
 	 * Singleton method to access the Registry
+	 *
 	 * @access public
 	 */
 	public static function getInstance ()
 	{
-		if (self::$_instance === null) {
+		if ( self::$_instance === null ) {
 			self::$_instance = new self();
 		}
 		return self::$_instance;

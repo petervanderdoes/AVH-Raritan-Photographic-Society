@@ -2,9 +2,9 @@
 
 final class AVH_RPS_Admin
 {
+	/* @var $classForm AVH_Form */
 	/**
 	 * Message management
-	 *
 	 */
 	private $_message = '';
 	private $_status = '';
@@ -14,24 +14,33 @@ final class AVH_RPS_Admin
 	 */
 	private $_core;
 	/**
+	 *
 	 * @var AVH_RPS_Settings
 	 */
 	private $_settings;
 	/**
+	 *
 	 * @var AVH_RPS_Classes
 	 */
 	private $_classes;
 	/**
-	 * @var AVH_RPS_DB
+	 *
+	 * @var AVH_RPS_OldRPSDb
 	 */
-	private $_db;
-	private $_add_disabled_notice = false;
-	private $_hooks = array ();
-	
+	private $_rpsdb;
 	/**
-	 * @var AVH_RPS_IpcacheList
+	 *
+	 * @var AVH_RPS_CompetitionList
 	 */
-	private $_ip_cache_list;
+	private $_competition_list;
+	/**
+	 *
+	 * @var AVH_RPS_EntriesList
+	 */
+	private $_entries_list;
+	private $_add_disabled_notice = false;
+	private $_hooks = array();
+	private $_referer;
 
 	/**
 	 * PHP5 Constructor
@@ -42,20 +51,29 @@ final class AVH_RPS_Admin
 	{
 		// The Settings Registery
 		$this->_settings = AVH_RPS_Settings::getInstance();
+
 		// The Classes Registery
 		$this->_classes = AVH_RPS_Classes::getInstance();
-		// Initialize the plugin
+		add_action('init', array($this,'handleActionInit'));
+	}
+
+	public function handleActionInit ()
+	{
+		// Loads the CORE class
 		$this->_core = $this->_classes->load_class('Core', 'plugin', true);
+
 		// Admin URL and Pagination
 		$this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
-		if (isset($_GET['pagination'])) {
+		if ( isset($_GET['pagination']) ) {
 			$this->_core->actual_page = (int) $_GET['pagination'];
 		}
-		$this->installPlugin();
-		// Admin Capabilities
-		//add_action('init', array ( &$this, 'actionInitRoles' ));
+
+		$this->actionInit_Roles();
+		$this->actionInit_UserFields();
+
 		// Admin menu
-		add_action('admin_menu', array ( &$this, 'actionAdminMenu' ));
+		add_action('admin_menu', array($this,'actionAdminMenu'));
+
 		return;
 	}
 
@@ -64,1283 +82,978 @@ final class AVH_RPS_Admin
 	 *
 	 * @WordPress Action init
 	 */
-	public function actionInitRoles ()
+	public function actionInit_Roles ()
 	{
+		// Get the administrator role.
 		$role = get_role('administrator');
-		if ($role != null && ! $role->has_cap('role_avh_fdas')) {
-			$role->add_cap('role_avh_fdas');
+
+		// If the administrator role exists, add required capabilities for the plugin.
+		if ( !empty($role) ) {
+
+			// Role management capabilities.
+			$role->add_cap('rps_edit_competition_classification');
+			$role->add_cap('rps_edit_competitions');
+			$role->add_cap('rps_edit_entries');
 		}
-		if ($role != null && ! $role->has_cap('role_admin_avh_fdas')) {
-			$role->add_cap('role_admin_avh_fdas');
-		}
-		// Clean var
-		unset($role);
+	}
+
+	public function actionInit_UserFields ()
+	{
+		add_action('edit_user_profile', array($this,'actionUser_Profile'));
+		add_action('show_user_profile', array($this,'actionUser_Profile'));
+		add_action('personal_options_update', array($this,'actionProfile_Update_Save'));
+		add_action('edit_user_profile_update', array($this,'actionProfile_Update_Save'));
 	}
 
 	/**
 	 * Add the Tools and Options to the Management and Options page repectively
 	 *
 	 * @WordPress Action admin_menu
-	 *
 	 */
 	public function actionAdminMenu ()
 	{
-		add_menu_page('AVH RPS', 'AVH RPS', '', AVH_RPS_Define::MENU_SLUG, array ( &$this, 'menuOverview' ));
+		wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
+		wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
 
+		add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', AVH_RPS_Define::MENU_POSITION_COMPETITION);
+
+		$this->_hooks['avhrps_menu_competition'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
+		$this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
+
+		add_action('load-' . $this->_hooks['avhrps_menu_competition'], array($this,'actionLoadPagehookCompetition'));
+		add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array($this,'actionLoadPagehookCompetitionAdd'));
+
+		add_menu_page('All Entries', 'Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'), '', AVH_RPS_Define::MENU_POSITION_ENTRIES);
+		$this->_hooks['avhrps_menu_entries'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
+		add_action('load-' . $this->_hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
 	}
 
-	/**
-	 * This function is called when there's an update of the plugin available @ WordPress
-	 */
-	public function actionInPluginUpdateMessage ()
-	{
-		$response = wp_remote_get(AVH_RPS_Define::PLUGIN_README_URL, array (
-																			'user-agent' => 'WordPress/AVH ' . AVH_RPS_Define::PLUGIN_VERSION . '; ' . get_bloginfo('url') ));
-		if (! is_wp_error($response) || is_array($response)) {
-			$data = $response['body'];
-			$matches = null;
-			if (preg_match('~==\s*Changelog\s*==\s*=\s*Version\s*[0-9.]+\s*=(.*)(=\s*Version\s*[0-9.]+\s*=|$)~Uis', $data, $matches)) {
-				$changelog = (array) preg_split('~[\r\n]+~', trim($matches[1]));
-				$prev_version = null;
-				preg_match('([0-9.]+)', $matches[2], $prev_version);
-				echo '<div style="color: #f00;">What\'s new in this version:</div><div style="font-weight: normal;">';
-				$ul = false;
-				foreach ($changelog as $index => $line) {
-					if (preg_match('~^\s*\*\s*~', $line)) {
-						if (! $ul) {
-							echo '<ul style="list-style: disc; margin-left: 20px;">';
-							$ul = true;
-						}
-						$line = preg_replace('~^\s*\*\s*~', '', htmlspecialchars($line));
-						echo '<li style="width: 50%; margin: 0; float: left; ' . ($index % 2 == 0 ? 'clear: left;' : '') . '">' . $line . '</li>';
-					} else {
-						if ($ul) {
-							echo '</ul><div style="clear: left;"></div>';
-							$ul = false;
-						}
-						echo '<p style="margin: 5px 0;">' . htmlspecialchars($line) . '</p>';
-					}
-				}
-				if ($ul) {
-					echo '</ul><div style="clear: left;"></div>';
-				}
-				if ($prev_version[0] != AVH_RPS_Define::PLUGIN_VERSION) {
-					echo '<div style="color: #f00; font-weight: bold;">';
-					echo '<br />';
-					echo sprintf(__('The installed version, %s, is more than one version behind.', 'avh-fdas'), AVH_RPS_Define::PLUGIN_VERSION);
-					echo '<br />';
-					echo __('More changes have been made since the currently installed version, consider checking the changelog.', 'avh-fdas');
-					echo '</div><div style="clear: left;"></div>';
-				}
-				echo '</div>';
-			}
-		}
-	}
-
-	/**
-	 * This function allows the upgrade notice not to appear
-	 * @param $option
-	 */
-	public function filterDisableUpgrade ($option)
-	{
-		$this_plugin = $this->_settings->plugin_basename;
-		// Allow upgrade for version 2
-		if (version_compare($option->response[$this_plugin]->new_version, '2', '>='))
-			return $option;
-		if (isset($option->response[$this_plugin])) {
-			//Clear its download link:
-			$option->response[$this_plugin]->package = '';
-			//Add a notice message
-			if ($this->_add_disabled_notice == false) {
-				add_action("in_plugin_update_message-$this->plugin_name", create_function('', 'echo \'<br /><span style="color:red">' . __('You need to have PHP 5.2 or higher for the new version !!!', 'avh-fdas') . '</span>\';'));
-				$this->_add_disabled_notice = true;
-			}
-		}
-		return $option;
-	}
-
-	/**
-	 * Setup everything needed for the Overview page
-	 *
-	 */
-	public function actionLoadPagehookOverview ()
-	{
-		add_meta_box('avhfdasBoxStats', __('Statistics', 'avh-fdas'), array ( &$this, 'metaboxMenuOverview' ), $this->_hooks['avhfdas_menu_overview'], 'normal', 'core');
-		add_filter('screen_layout_columns', array ( &$this, 'filterScreenLayoutColumns' ), 10, 2);
-		// WordPress core Styles and Scripts
-		wp_enqueue_script('common');
-		wp_enqueue_script('wp-lists');
-		wp_enqueue_script('postbox');
-		wp_admin_css('css/dashboard');
-		// Plugin Style and Scripts
-		wp_enqueue_script('avhfdas-admin-js');
-		wp_enqueue_style('avhfdas-admin-css');
-	}
-
-	/**
-	 * Menu Page Overview
-	 *
-	 * @return none
-	 */
-	public function menuOverview ()
-	{
-//		global $screen_layout_columns;
-//		// This box can't be unselectd in the the Screen Options
-//		add_meta_box('avhfdasBoxDonations', __('Donations', 'avh-fdas'), array ( &$this, 'metaboxDonations' ), $this->_hooks['avhfdas_menu_overview'], 'normal', 'core');
-//		$hide2 = '';
-//		switch ($screen_layout_columns) {
-//			case 2:
-//				$width = 'width:49%;';
-//				break;
-//			default:
-//				$width = 'width:98%;';
-//				$hide2 = 'display:none;';
-//		}
-//		echo '<div class="wrap avhfdas-wrap">';
-//		echo $this->_displayIcon('index');
-//		echo '<h2>AVH First Defense Against Spam: ' . __('Overview', 'avh-fdas') . '</h2>';
-//		echo '	<div id="dashboard-widgets-wrap">';
-//		echo '		<div id="dashboard-widgets" class="metabox-holder">';
-//		echo '			<div class="postbox-container" style="' . $width . '">' . "\n";
-//		do_meta_boxes($this->_hooks['avhfdas_menu_overview'], 'normal', '');
-//		echo '			</div>';
-//		echo '			<div class="postbox-container" style="' . $hide2 . $width . '">' . "\n";
-//		do_meta_boxes($this->_hooks['avhfdas_menu_overview'], 'side', '');
-//		echo '			</div>';
-//		echo '		</div>';
-//		echo '<form style="display: none" method="get" action="">';
-//		echo '<p>';
-//		wp_nonce_field('closedpostboxes', 'closedpostboxesnonce', false);
-//		wp_nonce_field('meta-box-order', 'meta-box-order-nonce', false);
-//		echo '</p>';
-//		echo '</form>';
-//		echo '<br class="clear"/>';
-//		echo '	</div>'; //dashboard-widgets-wrap
-//		echo '</div>'; // wrap
-//		$this->_printAdminFooter();
-	}
-
-	/**
-	 * Metabox Overview of settings
-	 *
-	 */
-	public function metaboxMenuOverview ()
-	{
-		global $wpdb;
-		echo '<p class="sub">';
-		_e('Spam Statistics for the last 12 months', 'avh-fdas');
-		echo '</p>';
-		echo '<div class="table">';
-		echo '<table>';
-		echo '<tbody>';
-		echo '<tr class="first">';
-		$data = $this->_core->getData();
-		$spam_count = $data['counters'];
-		krsort($spam_count);
-		$have_spam_count_data = false;
-		$output = '';
-		$counter = 0;
-		foreach ($spam_count as $key => $value) {
-			
-			if ('190001' == $key || $counter >= 12) {
-				continue;
-			}
-			
-			$have_spam_count_data = true;
-			$date = date_i18n('Y - F', mktime(0, 0, 0, substr($key, 4, 2), 1, substr($key, 0, 4)));
-			$output .= '<td class="first b">' . $value . '</td>';
-			$output .= '<td class="t">' . sprintf(__('Spam stopped in %s', 'avh-fdas'), $date) . '</td>';
-			$output .= '<td class="b"></td>';
-			$output .= '<td class="last"></td>';
-			$output .= '</tr>';
-			
-			$counter ++;
-		}
-		if (! $have_spam_count_data) {
-			$output .= '<td class="first b">' . __('No statistics yet', 'avh-fdas') . '</td>';
-			$output .= '<td class="t"></td>';
-			$output .= '<td class="b"></td>';
-			$output .= '<td class="last"></td>';
-			$output .= '</tr>';
-		}
-		echo $output;
-		echo '</tbody></table></div>';
-		echo '<div class="versions">';
-		echo '<p>';
-		$use_sfs = $this->_core->getOptionElement('general', 'use_sfs');
-		$use_php = $this->_core->getOptionElement('general', 'use_php');
-		$use_sh = $this->_core->getOptionElement('general', 'use_sh');
-		if ($use_sfs || $use_php || $use_sh) {
-			echo __('Checking with ', 'avh-fdas');
-			$x = 0;
-			echo ($use_sfs ? '<span class="b">Stop Forum Spam</span>' : '');
-			if ($use_php) {
-				if ($use_sfs) {
-					echo ($use_sh ? ', ' : __(' and ', 'avh-fdas'));
-				}
-				echo '<span class="b">Project Honey Pot</span>';
-			}
-			if ($use_sh) {
-				if ($use_php || $use_sfs) {
-					echo __(' and ', 'avh-fdas');
-				} else {
-					echo ' ';
-				}
-				echo '<span class="b">Spamhaus</span>';
-			}
-		
-		}
-		echo '</p></div>';
-		echo '<p class="sub">';
-		_e('IP Cache Statistics', 'avh-fdas');
-		echo '</p>';
-		echo '<br/>';
-		echo '<div class="versions">';
-		echo '<p>';
-		echo 'IP caching is ';
-		if (0 == $this->_core->getOptionElement('general', 'useipcache')) {
-			echo '<span class="b">disabled</span>';
-			echo '</p></div>';
-		} else {
-			echo '<span class="b">enabled</span>';
-			echo '</p></div>';
-			$count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(ip) from $wpdb->avhfdasipcache"));
-			$count_clean = $wpdb->get_var($wpdb->prepare("SELECT COUNT(ip) from $wpdb->avhfdasipcache WHERE spam=0"));
-			$count_spam = $wpdb->get_var($wpdb->prepare("SELECT COUNT(ip) from $wpdb->avhfdasipcache WHERE spam=1"));
-			if (false === $count) {
-				$count = 0;
-			}
-			if (false === $count_clean) {
-				$count_clean = 0;
-			}
-			if (false === $count_spam) {
-				$count_spam = 0;
-			}
-			$output = '';
-			echo '<div class="table">';
-			echo '<table>';
-			echo '<tbody>';
-			echo '<tr class="first">';
-			$output .= '<td class="first b">' . $count . '</td>';
-			$text = _n('IP', 'IP\'s', $count, 'avh-fdas');
-			$output .= '<td class="t">' . sprintf(__('Total of %s in the cache', 'avh-fdas'), $text) . ' </td>';
-			$output .= '<td class="b"></td>';
-			$output .= '<td class="last"></td>';
-			$output .= '</tr>';
-			$output .= '<td class="first b">' . $count_clean . '</td>';
-			$text = _n('IP', 'IP\'s', $count_clean, 'avh-fdas');
-			$output .= '<td class="t">' . sprintf(__('Total of %s classified as ham', 'avh-fdas'), $text) . '</td>';
-			$output .= '<td class="b"></td>';
-			$output .= '<td class="last"></td>';
-			$output .= '</tr>';
-			$output .= '<td class="first b">' . $count_spam . '</td>';
-			$text = _n('IP', 'IP\'s', $count_spam, 'avh-fdas');
-			$output .= '<td class="t">' . sprintf(__('Total of %s classified as spam', 'avh-fdas'), $text) . '</td>';
-			$output .= '<td class="b"></td>';
-			$output .= '<td class="last"></td>';
-			$output .= '</tr>';
-			echo $output;
-		}
-		echo '</tbody></table></div>';
-	}
-
-	/**
-	 * Setup the General page
-	 *
-	 */
-	public function actionLoadPagehookGeneral ()
-	{
-		add_meta_box('avhfdasBoxGeneral', 'General', array ( &$this, 'metaboxGeneral' ), $this->_hooks['avhfdas_menu_general'], 'normal', 'core');
-		add_meta_box('avhfdasBoxIPCache', 'IP Caching', array ( &$this, 'metaboxIPCache' ), $this->_hooks['avhfdas_menu_general'], 'normal', 'core');
-		add_meta_box('avhfdasBoxCron', 'Cron', array ( &$this, 'metaboxCron' ), $this->_hooks['avhfdas_menu_general'], 'normal', 'core');
-		add_meta_box('avhfdasBoxBlackList', 'Blacklist', array ( &$this, 'metaboxBlackList' ), $this->_hooks['avhfdas_menu_general'], 'side', 'core');
-		add_meta_box('avhfdasBoxWhiteList', 'Whitelist', array ( &$this, 'metaboxWhiteList' ), $this->_hooks['avhfdas_menu_general'], 'side', 'core');
-		add_filter('screen_layout_columns', array ( &$this, 'filterScreenLayoutColumns' ), 10, 2);
-		// WordPress core Styles and Scripts
-		wp_enqueue_script('common');
-		wp_enqueue_script('wp-lists');
-		wp_enqueue_script('postbox');
-		wp_admin_css('css/dashboard');
-		// Plugin Style and Scripts
-		wp_enqueue_script('avhfdas-admin-js');
-		wp_enqueue_style('avhfdas-admin-css');
-	}
-
-	/**
-	 * Menu Page general options
-	 *
-	 * @return none
-	 */
-	public function menuGeneralOptions ()
-	{
-		global $screen_layout_columns;
-		$options_general[] = array ( 'avhfdas[general][diewithmessage]', __('Show message', 'avh-fdas'), 'checkbox', 1,
-									__('Show a message when the connection has been terminated.', 'avh-fdas') );
-		$options_general[] = array ( 'avhfdas[general][emailsecuritycheck]', __('Email on failed security check:', 'avh-fdas'),
-									'checkbox', 1,
-									__('Receive an email when a comment is posted and the security check failed.', 'avh-fdas') );
-		$options_general[] = array ( 'avhfdas[general][commentnonce]', __('Use comment nonce:', 'avh-fdas'), 'checkbox', 1,
-									__('Block spammers that access wp-comments-post.php directly by using a comment security check. An email can be send when the check fails.', 'avh-fdas') );
-		$options_cron[] = array ( 'avhfdas[general][cron_nonces_email]', __('Email result of nonces clean up', 'avh-fdas'),
-								'checkbox', 1,
-								__('Receive an email with the total number of nonces that are deleted. The nonces are used to secure the links found in the emails.', 'avh-fdas') );
-		$options_cron[] = array ( 'avhfdas[general][cron_ipcache_email]', __('Email result of IP cache clean up', 'avh-fdas'),
-								'checkbox', 1,
-								__('Receive an email with the total number of IP\'s that are deleted from the IP caching system.', 'avh-fdas') );
-		$options_blacklist[] = array ( 'avhfdas[general][useblacklist]', __('Use internal blacklist', 'avh-fdas'), 'checkbox', 1,
-									__('Check the internal blacklist first. If the IP is found terminate the connection, even when the Termination threshold is a negative number.', 'avh-fdas') );
-		$options_blacklist[] = array ( 'avhfdas[general][addblacklist]', __('Add to blacklist link', 'avh-fdas'), 'checkbox', 1,
-									__('Adds ability to add IP\'s from comments marked as spam', 'avh-fdas') );
-		$options_blacklist[] = array ( 'avhfdas[lists][blacklist]', __('Blacklist IP\'s:', 'avh-fdas'), 'textarea', 15,
-									__('Each IP should be on a separate line<br />Ranges can be defines as well in the following two formats<br />IP to IP. i.e. 192.168.1.100-192.168.1.105<br />Network in CIDR format. i.e. 192.168.1.0/24', 'avh-fdas'),
-									15 );
-		$options_whitelist[] = array ( 'avhfdas[general][usewhitelist]', __('Use internal whitelist', 'avh-fdas'), 'checkbox', 1,
-									__('Check the internal whitelist first. If the IP is found don\t do any further checking.', 'avh-fdas') );
-		$options_whitelist[] = array ( 'avhfdas[lists][whitelist]', __('Whitelist IP\'s', 'avh-fdas'), 'textarea', 15,
-									__('Each IP should be on a seperate line<br />Ranges can be defines as well in the following two formats<br />IP to IP. i.e. 192.168.1.100-192.168.1.105<br />Network in CIDR format. i.e. 192.168.1.0/24', 'avh-fdas'),
-									15 );
-		$options_ipcache[] = array ( 'avhfdas[general][useipcache]', __('Use IP Caching', 'avh-fdas'), 'checkbox', 1,
-									__('Cache the IP\'s that meet the 3rd party termination threshold and the IP\'s that are not detected by the 3rd party. The connection will be terminated if an IP is found in the cache that was perviously determined to be a spammer', 'avh-fdas') );
-		$options_ipcache[] = array ( 'avhfdas[ipcache][email]', __('Email', 'avh-fdas'), 'checkbox', 1,
-									__('Send an email when a connection is terminate based on the IP found in the cache', 'avh-fdas') );
-		$options_ipcache[] = array ( 'avhfdas[ipcache][daystokeep]', __('Days to keep in cache', 'avh-fdas'), 'text', 3,
-									__('Keep the IP in cache for the selected days.', 'avh-fdas') );
-		if (isset($_POST['updateoptions'])) {
-			check_admin_referer('avh_fdas_generaloptions');
-			$formoptions = $_POST['avhfdas'];
-			$options = $this->_core->getOptions();
-			$data = $this->_core->getData();
-			$all_data = array_merge($options_general, $options_blacklist, $options_whitelist, $options_ipcache, $options_cron);
-			foreach ($all_data as $option) {
-				$section = substr($option[0], strpos($option[0], '[') + 1);
-				$section = substr($section, 0, strpos($section, ']['));
-				$option_key = rtrim($option[0], ']');
-				$option_key = substr($option_key, strpos($option_key, '][') + 2);
-				switch ($section) {
-					case 'general':
-					case 'ipcache':
-						$current_value = $options[$section][$option_key];
-						break;
-					case 'lists':
-						$current_value = $data[$section][$option_key];
-						break;
-				}
-				// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to 0.
-				$newval = (isset($formoptions[$section][$option_key]) ? esc_attr($formoptions[$section][$option_key]) : 0);
-				if ($newval != $current_value) { // Only process changed fields.
-					// Sort the lists
-					if ('blacklist' == $option_key || 'whitelist' == $option_key) {
-						$b = explode("\r\n", $newval);
-						natsort($b);
-						$newval = implode("\r\n", $b);
-						unset($b);
-					}
-					switch ($section) {
-						case 'general':
-						case 'ipcache':
-							$options[$section][$option_key] = $newval;
-							break;
-						case 'lists':
-							$data[$section][$option_key] = $newval;
-							break;
-					}
-				}
-			}
-			// Add or remove the Cron Job: avhfdas_clean_ipcache - defined in Public Class
-			if ($options['general']['useipcache']) {
-				// Add Cron Job if it's not scheduled
-				if (! wp_next_scheduled('avhfdas_clean_ipcache')) {
-					wp_schedule_event(time(), 'daily', 'avhfdas_clean_ipcache');
-				}
-			} else {
-				// Remove Cron Job if it's scheduled
-				if (wp_next_scheduled('avhfdas_clean_ipcache')) {
-					wp_clear_scheduled_hook('avhfdas_clean_ipcache');
-				}
-			}
-			$this->_core->saveOptions($options);
-			$this->_core->saveData($data);
-			$this->_message = __('Options saved', 'avh-fdas');
-			$this->_status = 'updated fade';
-		}
-		// Show messages if needed.
-		if (isset($_REQUEST['m'])) {
-			switch ($_REQUEST['m']) {
-				case AVH_RPS_Define::REPORTED_DELETED:
-					$this->_status = 'updated fade';
-					$this->_message = sprintf(__('IP [%s] Reported and deleted', 'avh-fdas'), esc_attr($_REQUEST['i']));
-					break;
-				case AVH_RPS_Define::ADDED_BLACKLIST:
-					$this->_status = 'updated fade';
-					$this->_message = sprintf(__('IP [%s] has been added to the blacklist', 'avh-fdas'), esc_attr($_REQUEST['i']));
-					break;
-				case AVH_RPS_Define::REPORTED:
-					$this->_status = 'updated fade';
-					$this->_message = sprintf(__('IP [%s] reported.', 'avh-fdas'), esc_attr($_REQUEST['i']));
-					break;
-				case AVH_RPS_Define::ERROR_INVALID_REQUEST:
-					$this->_status = 'error';
-					$this->_message = sprintf(__('Invalid request.', 'avh-fdas'));
-					break;
-				case AVH_RPS_Define::ERROR_NOT_REPORTED:
-					$this->_status = 'error';
-					$this->_message = sprintf(__('IP [%s] not reported. Probably already processed.', 'avh-fdas'), esc_attr($_REQUEST['i']));
-					break;
-				case AVH_RPS_Define::ERROR_EXISTS_IN_BLACKLIST:
-					$this->_status = 'error';
-					$this->_message = sprintf(__('IP [%s] already exists in the blacklist.', 'avh-fdas'), esc_attr($_REQUEST['i']));
-					break;
-				default:
-					$this->_status = 'error';
-					$this->_message = 'Unknown message request';
-			}
-		}
-		$this->_displayMessage();
-		$actual_options = array_merge($this->_core->getOptions(), $this->_core->getData());
-		$hide2 = '';
-		switch ($screen_layout_columns) {
-			case 2:
-				$width = 'width:49%;';
-				break;
-			default:
-				$width = 'width:98%;';
-				$hide2 = 'display:none;';
-		}
-		$data['options_general'] = $options_general;
-		$data['options_cron'] = $options_cron;
-		$data['options_blacklist'] = $options_blacklist;
-		$data['options_whitelist'] = $options_whitelist;
-		$data['options_ipcache'] = $options_ipcache;
-		$data['actual_options'] = $actual_options;
-		echo '<div class="wrap avhfdas-wrap">';
-		echo '<div class="wrap">';
-		echo $this->_displayIcon('options-general');
-		echo '<h2>AVH First Defense Against Spam: ' . __('General Options', 'avh-fdas') . '</h2>';
-		echo '<form name="avhfdas-generaloptions" id="avhfdas-generaloptions" method="POST" action="admin.php?page=' . AVH_RPS_Define::MENU_SLUG_GENERAL . '" accept-charset="utf-8" >';
-		wp_nonce_field('avh_fdas_generaloptions');
-		wp_nonce_field('closedpostboxes', 'closedpostboxesnonce', false);
-		wp_nonce_field('meta-box-order', 'meta-box-order-nonce', false);
-		echo '	<div id="dashboard-widgets-wrap">';
-		echo '		<div id="dashboard-widgets" class="metabox-holder">';
-		echo '			<div class="postbox-container" style="' . $width . '">' . "\n";
-		do_meta_boxes($this->_hooks['avhfdas_menu_general'], 'normal', $data);
-		echo '			</div>';
-		echo '			<div class="postbox-container" style="' . $hide2 . $width . '">' . "\n";
-		do_meta_boxes($this->_hooks['avhfdas_menu_general'], 'side', $data);
-		echo '			</div>';
-		echo '		</div>';
-		echo '<br class="clear"/>';
-		echo '	</div>'; //dashboard-widgets-wrap
-		echo '</div>'; // wrap
-		echo '<p class="submit"><input	class="button-primary"	type="submit" name="updateoptions" value="' . __('Save Changes', 'avh-fdas') . '" /></p>';
-		echo '</form>';
-		$this->_printAdminFooter();
-	}
-
-	/**
-	 * Metabox Display the General Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxGeneral ($data)
-	{
-		echo $this->_printOptions($data['options_general'], $data['actual_options']);
-	}
-
-	/**
-	 * Metabox Display the Blacklist Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxBlackList ($data)
-	{
-		echo $this->_printOptions($data['options_blacklist'], $data['actual_options']);
-	}
-
-	/**
-	 * Metabox Display the Whitelist Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxWhiteList ($data)
-	{
-		echo $this->_printOptions($data['options_whitelist'], $data['actual_options']);
-	}
-
-	/**
-	 * Metabox Display the IP cache Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxIPCache ($data)
-	{
-		echo '<p>' . __('To use IP caching you must enable it below and set the options. IP\'s are stored in the database so if you have a high traffic website the database can grow quickly', 'avh-fdas');
-		echo $this->_printOptions($data['options_ipcache'], $data['actual_options']);
-	}
-
-	/**
-	 * Metabox Display the cron Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxCron ($data)
-	{
-		echo '<p>' . __('Once a day cron jobs of this plugin run. You can select to receive an email with additional information about the jobs that ran.', 'avh-fdas');
-		echo $this->_printOptions($data['options_cron'], $data['actual_options']);
-	}
-
-	/**
-	 * Setup everything needed for the 3rd party menu
-	 *
-	 */
-	public function actionLoadPagehook3rdParty ()
-	{
-		add_meta_box('avhfdasBoxSFS', 'Stop Forum Spam', array ( &$this, 'metaboxMenu3rdParty_SFS' ), $this->_hooks['avhfdas_menu_3rd_party'], 'normal', 'core');
-		add_meta_box('avhfdasBoxPHP', 'Project Honey Pot', array ( &$this, 'metaboxMenu3rdParty_PHP' ), $this->_hooks['avhfdas_menu_3rd_party'], 'side', 'core');
-		add_meta_box('avhfdasBoxSH', 'Spamhaus', array ( &$this, 'metaboxMenu3rdParty_SH' ), $this->_hooks['avhfdas_menu_3rd_party'], 'normal', 'core');
-		add_filter('screen_layout_columns', array ( &$this, 'filterScreenLayoutColumns' ), 10, 2);
-		// WordPress core Styles and Scripts
-		wp_enqueue_script('common');
-		wp_enqueue_script('wp-lists');
-		wp_enqueue_script('postbox');
-		wp_admin_css('css/dashboard');
-		// Plugin Style and Scripts
-		wp_enqueue_script('avhfdas-admin-js');
-		wp_enqueue_style('avhfdas-admin-css');
-	}
-
-	/**
-	 * Menu Page Third Party Options
-	 *
-	 * @return none
-	 */
-	public function menu3rdPartyOptions ()
-	{
-		global $screen_layout_columns;
-		$options_sfs[] = array ( 'avhfdas[general][use_sfs]', __('Check with Stop Forum Spam', 'avh-fdas'), 'checkbox', 1,
-								__('If checked, the visitor\'s IP will be checked with Stop Forum Spam', 'avh-fdas') );
-		$options_sfs[] = array ( 'avhfdas[sfs][whentoemail]', __('Email threshold', 'avh-fdas'), 'text', 3,
-								__('When the frequency of the spammer in the stopforumspam database equals or exceeds this threshold an email is send.<BR />A negative number means an email will never be send.', 'avh-fdas') );
-		$options_sfs[] = array ( 'avhfdas[sfs][whentodie]', __('Termination threshold', 'avh-fdas'), 'text', 3,
-								__('When the frequency of the spammer in the stopforumspam database equals or exceeds this threshold the connection is terminated.<BR />A negative number means the connection will never be terminated.<BR /><strong>This option will always be the last one checked.</strong>', 'avh-fdas') );
-		$options_sfs[] = array ( 'avhfdas[sfs][sfsapikey]', __('API Key', 'avh-fdas'), 'text', 15,
-								__('You need a Stop Forum Spam API key to report spam.', 'avh-fdas') );
-		$options_sfs[] = array ( 'avhfdas[sfs][error]', __('Email error', 'avh-fdas'), 'checkbox', 1,
-								__('Receive an email when the call to Stop Forum Spam Fails', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[general][use_php]', __('Check with Honey Pot Project', 'avh-fdas'), 'checkbox', 1,
-								__('If checked, the visitor\'s IP will be checked with Honey Pot Project', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[php][phpapikey]', __('API Key:', 'avh-fdas'), 'text', 15,
-								__('You need a Project Honey Pot API key to check the Honey Pot Project database.', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[php][whentoemailtype]', __('Email type threshold:', 'avh-fdas'), 'dropdown',
-								'0/1/2/3/4/5/6/7',
-								'Search Engine/Suspicious/Harvester/Suspicious & Harvester/Comment Spammer/Suspicious & Comment Spammer/Harvester & Comment Spammer/Suspicious & Harvester & Comment Spammer',
-								__('When the type of the spammer in the Project Honey Pot database equals or exceeds this threshold an email is send.<BR />Both the type threshold and the score threshold have to be reached in order to receive an email.', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[php][whentoemail]', __('Email score threshold', 'avh-fdas'), 'text', 3,
-								__('When the score of the spammer in the Project Honey Pot database equals or exceeds this threshold an email is send.<BR />A negative number means an email will never be send.', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[php][whentodietype]', __('Termination type threshold', 'avh-fdas'), 'dropdown',
-								'-1/0/1/2/3/4/5/6/7',
-								'Never/Search Engine/Suspicious/Harvester/Suspicious & Harvester/Comment Spammer/Suspicious & Comment Spammer/Harvester & Comment Spammer/Suspicious & Harvester & Comment Spammer',
-								__('When the type of the spammer in the Project Honey Pot database equals or exceeds this threshold an email is send.<br />Both the type threshold and the score threshold have to be reached in order to termnate the connection.', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[php][whentodie]', __('Termination score threshold', 'avh-fdas'), 'text', 3,
-								__('When the score of the spammer in the Project Honey Pot database equals or exceeds this threshold the connection is terminated.<BR />A negative number means the connection will never be terminated.<BR /><strong>This option will always be the last one checked.</strong>', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[php][usehoneypot]', __('Use Honey Pot', 'avh-fdas'), 'checkbox', 1,
-								__('If you have set up a Honey Pot you can select to have the URL below to be added to the message when terminating the connection.<BR />You have to select <em>Show Message</em> in the General Options for this to work.', 'avh-fdas') );
-		$options_php[] = array ( 'avhfdas[php][honeypoturl]', __('Honey Pot URL', 'avh-fdas'), 'text', 30,
-								__('The link to the Honey Pot as suggested by Project Honey Pot.', 'avh-fdas') );
-		$options_sh[] = array ( 'avhfdas[general][use_sh]', __('Check with Spamhaus', 'avh-fdas'), 'checkbox', 1,
-								__('If checked, the visitor\'s IP will be checked at Spamhaus', 'avh-fdas') );
-		$options_sh[] = array ( 'avhfdas[spamhaus][email]', __('Email', 'avh-fdas'), 'checkbox', 1,
-								__('Send an email when a connection is terminate based on the IP found in the cache', 'avh-fdas') );
-		
-		if (isset($_POST['updateoptions'])) {
-			check_admin_referer('avh_fdas_options');
-			$formoptions = $_POST['avhfdas'];
-			$options = $this->_core->getOptions();
-			$all_data = array_merge($options_sfs, $options_php, $options_sh);
-			foreach ($all_data as $option) {
-				$section = substr($option[0], strpos($option[0], '[') + 1);
-				$section = substr($section, 0, strpos($section, ']['));
-				$option_key = rtrim($option[0], ']');
-				$option_key = substr($option_key, strpos($option_key, '][') + 2);
-				$current_value = $options[$section][$option_key];
-				// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to 0.
-				$newval = (isset($formoptions[$section][$option_key]) ? $formoptions[$section][$option_key] : 0);
-				if ('sfs' == $section && ('whentoemail' == $option_key || 'whentodie' == $option_key)) {
-					$newval = (int) $newval;
-				}
-				if ('php' == $section && ('whentoemail' == $option_key || 'whentodie' == $option_key)) {
-					$newval = (int) $newval;
-				}
-				if ($newval != $current_value) { // Only process changed fields
-					$options[$section][$option_key] = $newval;
-				}
-			}
-			$note = '';
-			if (('' === trim($options['php']['phpapikey'])) && 1 == $options['general']['use_php']) {
-				$options['general']['use_php'] = 0;
-				$note = '<br \><br \>' . __('You can not use Project Honey Pot without an API key. Use of Project Honey Pot has been disabled', 'avh-fdas');
-			}
-			$this->_core->saveOptions($options);
-			$this->_message = __('Options saved', 'avh-fdas');
-			$this->_message .= $note;
-			$this->_status = 'updated fade';
-			$this->_displayMessage();
-		}
-		$actual_options = array_merge($this->_core->getOptions(), $this->_core->getData());
-		$hide2 = '';
-		switch ($screen_layout_columns) {
-			case 2:
-				$width = 'width:49%;';
-				break;
-			default:
-				$width = 'width:98%;';
-				$hide2 = 'display:none;';
-		}
-		$data['options_sfs'] = $options_sfs;
-		$data['options_php'] = $options_php;
-		$data['options_sh'] = $options_sh;
-		$data['actual_options'] = $actual_options;
-		echo '<div class="wrap avhfdas-wrap">';
-		echo '<div class="wrap">';
-		echo $this->_displayIcon('options-general');
-		echo '<h2>AVH First Defense Against Spam: ' . __('3rd Party Options', 'avh-fdas') . '</h2>';
-		echo '<form name="avhfdas-options" id="avhfdas-options" method="POST" action="admin.php?page=' . AVH_RPS_Define::MENU_SLUG_3RD_PARTY . '" accept-charset="utf-8" >';
-		wp_nonce_field('avh_fdas_options');
-		wp_nonce_field('closedpostboxes', 'closedpostboxesnonce', false);
-		wp_nonce_field('meta-box-order', 'meta-box-order-nonce', false);
-		echo '	<div id="dashboard-widgets-wrap">';
-		echo '		<div id="dashboard-widgets" class="metabox-holder">';
-		echo '			<div class="postbox-container" style="' . $width . '">' . "\n";
-		do_meta_boxes($this->_hooks['avhfdas_menu_3rd_party'], 'normal', $data);
-		echo '			</div>';
-		echo '			<div class="postbox-container" style="' . $hide2 . $width . '">' . "\n";
-		do_meta_boxes($this->_hooks['avhfdas_menu_3rd_party'], 'side', $data);
-		echo '			</div>';
-		echo '		</div>';
-		echo '<br class="clear"/>';
-		echo '	</div>'; //dashboard-widgets-wrap
-		echo '</div>'; // wrap
-		echo '<p class="submit"><input class="button-primary" type="submit" name="updateoptions" value="' . __('Save Changes', 'avh-fdas') . '" /></p>';
-		echo '</form>';
-		$this->_printAdminFooter();
-	}
-
-	/**
-	 * Metabox Display the 3rd Party Stop Forum Spam Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxMenu3rdParty_SFS ($data)
-	{
-		echo '<p>' . __('To check a visitor at Stop Forum Spam you must enable it below. Set the options to your own liking.', 'avh-fdas');
-		echo $this->_printOptions($data['options_sfs'], $data['actual_options']);
-	
-		//echo '<p>' . __( 'Currently the plugin can not check with Stop Forum Spam untill a better solution has been coded.' );
-	//echo  __( 'I apologize for this and will be looking for a solutin in the short run.' ).'</p>';
-	}
-
-	/**
-	 * Metabox Display the 3rd Party Project Honey Pot Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxMenu3rdParty_PHP ($data)
-	{
-		echo '<p>' . __('To check a visitor at Project Honey Pot you must enable it below, you must also have an API key. You can get an API key by signing up for free at the <a href="http://www.projecthoneypot.org/create_account.php" target="_blank">Honey Pot Project</a>. Set the options to your own liking.', 'avh-fdas');
-		echo $this->_printOptions($data['options_php'], $data['actual_options']);
-	}
-
-	/**
-	 * Metabox Display the 3rd Party Project Honey Pot Options
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxMenu3rdParty_SH ($data)
-	{
-		//echo '<p>' . __('To check a visitor at Spamhaus you must enable it below.', 'avh-fdas');
-		echo $this->_printOptions($data['options_sh'], $data['actual_options']);
-	}
-
-	/**
-	 * Setup everything needed for the FAQ page
-	 *
-	 */
-	public function actionLoadPagehookFaq ()
-	{
-		add_meta_box('avhfdasBoxFAQ', __('F.A.Q.', 'avh-fdas'), array ( &$this, 'metaboxFAQ' ), $this->_hooks['avhfdas_menu_faq'], 'normal', 'core');
-		add_filter('screen_layout_columns', array ( &$this, 'filterScreenLayoutColumns' ), 10, 2);
-		// WordPress core Styles and Scripts
-		wp_enqueue_script('common');
-		wp_enqueue_script('wp-lists');
-		wp_enqueue_script('postbox');
-		wp_admin_css('css/dashboard');
-		// Plugin Style and Scripts
-		wp_enqueue_script('avhfdas-admin-js');
-		wp_enqueue_style('avhfdas-admin-css');
-	}
-
-	/**
-	 * Menu Page FAQ
-	 *
-	 * @return none
-	 */
-	public function menuFaq ()
-	{
-		global $screen_layout_columns;
-		// This box can't be unselectd in the the Screen Options
-		add_meta_box('avhfdasBoxDonations', __('Donations', 'avh-fdas'), array ( &$this, 'metaboxDonations' ), $this->_hooks['avhfdas_menu_faq'], 'side', 'core');
-		$hide2 = '';
-		switch ($screen_layout_columns) {
-			case 2:
-				$width = 'width:49%;';
-				break;
-			default:
-				$width = 'width:98%;';
-				$hide2 = 'display:none;';
-		}
-		echo '<div class="wrap avhfdas-wrap">';
-		echo $this->_displayIcon('index');
-		echo '<h2>AVH First Defense Against Spam: ' . __('Spam Overview', 'avh-fdas') . '</h2>';
-		echo '	<div id="dashboard-widgets-wrap">';
-		echo '		<div id="dashboard-widgets" class="metabox-holder">';
-		echo '			<div class="postbox-container" style="' . $width . '">' . "\n";
-		do_meta_boxes($this->_hooks['avhfdas_menu_faq'], 'normal', '');
-		echo '			</div>';
-		echo '			<div class="postbox-container" style="' . $hide2 . $width . '">' . "\n";
-		do_meta_boxes($this->_hooks['avhfdas_menu_faq'], 'side', '');
-		echo '			</div>';
-		echo '		</div>';
-		echo '<form style="display: none" method="get" action="">';
-		echo '<p>';
-		wp_nonce_field('closedpostboxes', 'closedpostboxesnonce', false);
-		wp_nonce_field('meta-box-order', 'meta-box-order-nonce', false);
-		echo '</p>';
-		echo '</form>';
-		echo '<br class="clear"/>';
-		echo '	</div>'; //dashboard-widgets-wrap
-		echo '</div>'; // wrap
-		$this->_printAdminFooter();
-	}
-
-	/**
-	 * Metabox Display the FAQ
-	 * @param $data array The data is filled menu setup
-	 * @return none
-	 */
-	public function metaboxFAQ ()
-	{
-		echo '<p>';
-		echo '<span class="b">Usage terms of the 3rd Parties</span><br />';
-		echo 'Please read the usage terms of the 3rd party you are activating.<br />';
-		echo '<ul>';
-		echo '<li><a href="http://www.stopforumspam.com/apis" target="_blank">Stop Forum Spam.</a>';
-		echo '<li><a href="http://www.projecthoneypot.org/terms_of_service_use.php" target="_blank">Project Honey Pot.</a>';
-		echo '<li><a href="http://www.spamhaus.org/organization/dnsblusage.html" target="_blank">Spamhaus.</a>';
-		echo '</ul>';
-		echo '<p>';
-		echo '<span class="b">Why is there an IP caching system?</span><br />';
-		echo 'Stop Forum spam has set a limit on the amount of API calls you can make a day, currently it iset at 5000 calls a day.<br />';
-		echo 'This means that if you don\'t use the Blacklist and/or Whitelist you are limited to 5000 visits/day on your site. To overcome this possible problem I wrote an IP caching system.<br />';
-		echo '</p>';
-		echo '<p>';
-		echo 'The following IP\'s are cached locally:<br />';
-		echo '<ul>';
-		echo '<li>Every IP identified as spam and triggering the terminate-the-connection threshold.</li>';
-		echo '<li>Every clean IP.</li>';
-		echo '</ul>';
-		echo '</p>';
-		echo '<p>';
-		echo 'Only returning IP\'s that were previously identified as spammer and who\'s connection was terminated will update their last seen date in the caching system.<br />';
-		echo 'Every day, once a day, a routine runs to remove the IP\'s who\'s last seen date is X amount of days older than the date the routine runs. You can set the days in the adminstration section of the plugin.<br />';
-		echo 'You can check the statistics to see how many IP\'s are in the database. If you have a busy site, with a lot of unique visitors, you might have to play with the "Days to keep in cache" setting to keep the size under control.<br />';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">In what order is an IP checked and what action is taken?</span><br />';
-		echo 'The plugin checks the visiting IP in the following order, only if that feature is enabled of course.<br />';
-		echo '<ul>';
-		echo '<li>Whitelist - If found skip the rest of the checks.</li>';
-		echo '<li>Blacklist - If found terminate the connection.</li>';
-		echo '<li>IP Caching - If found and spam terminate connection, if found and clean skip the rest of the checks.</li>';
-		echo '<li>3rd Parties - If found determine action based on result.</li>';
-		echo '</ul>';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">Is this plugin enough to block all spam?</span><br />';
-		echo 'Unfortunately not.<br />';
-		echo 'I don\'t believe there is one solution to block all spam. Personally I have great success with the plugin in combination with Akismet.<br />';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">Does it conflicts with other spam solutions?</span><br />';
-		echo 'I\'m currently not aware of any conflicts with other anti-spam solutions.<br />';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">How do I define a range in the blacklist or white list?</span><br />';
-		echo 'You can define two sorts of ranges:';
-		echo '<ul>';
-		echo '<li>From IP to IP. i.e. 192.168.1.100-192.168.1.105</li>';
-		echo '<li>A network in CIDR format. i.e. 192.168.1.0/24</li>';
-		echo '</ul>';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">How do I report a spammer to Stop Forum Spam?</span><br />';
-		echo 'You need to have an API key from Stop Forum Spam. If you do on the Edit Comments pages there is an extra option called, Report & Delete, in the messages identified as spam.<br />';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">How do I get a Stop Forum Spam API key?</span><br />';
-		echo 'You will have to sign up on their site, <a href="http://www.stopforumspam.com/signup" target="_blank">http://www.stopforumspam.com/signup</a>.<br />';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">How do I get a Project Honey Pot API key?</span><br />';
-		echo 'You will have to sign up on their site, <a href="http://www.projecthoneypot.org/create_account.php" target="_blank">http://www.projecthoneypot.org/create_account.php</a>.<br />';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">What are some score examples for Project Honey Pot?</span><br />';
-		echo 'The Threat Rating is a logarithmic score -- much like the Richter\'s scale for measuring earthquakes.';
-		echo 'A Threat Rating of 25 can be interpreted as the equivalent of sending 100 spam messages to a honey pot trap.<br />';
-		echo '<div class="table">';
-		echo '<table>';
-		echo '<tbody>';
-		echo '<tr class="first">';
-		echo '<th>Threat Rating</th><th>IP that is as threatening as one that has sent</th>';
-		echo '</tr>';
-		echo '<tr>';
-		echo '<td class="first">25</td><td class="t">100 spam messages</td>';
-		echo '</tr>';
-		echo '<tr>';
-		echo '<td class="first">50</td><td class="t">10,000 spam messages</td>';
-		echo '</tr>';
-		echo '<tr>';
-		echo '<td class="first">75</td><td class="t">1,000,000 spam messages</td>';
-		echo '</tr>';
-		echo '</tbody></table></div>';
-		echo '</p>';
-	}
-
-	/**
-	 * Setup everything needed for the IP Cache page
-	 *
-	 */
-	public function actionLoadPagehookIpCacheLog ()
+	public function actionLoadPagehookCompetition ()
 	{
 		global $current_screen;
-		
-		$this->_ip_cache_list = $this->_classes->load_class('IPCacheList', 'plugin', true);
-		add_filter('screen_layout_columns', array ( &$this, 'filterScreenLayoutColumns' ), 10, 2);
+		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+		$this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+		$this->_handleRequestCompetition();
+
+		add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
 		// WordPress core Styles and Scripts
+		wp_enqueue_script('jquery-ui-datepicker');
 		wp_enqueue_script('common');
 		wp_enqueue_script('wp-lists');
 		wp_enqueue_script('postbox');
-		wp_admin_css('css/dashboard');
+		wp_enqueue_style('css/dashboard');
 		// Plugin Style and Scripts
-		wp_enqueue_script('avhfdas-admin-js');
-		wp_enqueue_script('avhfdas-ipcachelog-js');
-		
-		wp_enqueue_style('avhfdas-admin-css');
-		
-		add_screen_option('per_page', array ( 'label' => _x('IP\'s', 'ip\'s per page (screen options)'), 'default' => 20,
-											'option' => 'ipcachelog_per_page' ));
-		add_contextual_help($current_screen, '<p>' . __('You can manage IP\'s added to the IP cache Log. This screen is customizable in the same ways as other management screens, and you can act on IP\'s using the on-hover action links or the Bulk Actions.') . '</p>');
+		// wp_enqueue_script('avhrps-competition-js');
+
+		wp_enqueue_style('avhrps-admin-css');
+		wp_enqueue_style('avhrps-jquery-css');
+
+		// add_screen_option('per_page', array ( 'label' => _x('IP\'s', 'ip\'s per page (screen options)'), 'default' => 20, 'option' => 'ipcachelog_per_page' ));
+		// add_contextual_help($current_screen, '<p>' . __('You can manage IP\'s added to the IP cache Log. This screen is customizable in the same ways as other management screens, and you can act on IP\'s using the on-hover action links or the Bulk Actions.') . '</p>');
 	}
 
 	/**
-	 *
-	 * Handles the Get and Post after a submit on the IP cache Log page
-	 * @WordPress Action load-$page_hook
+	 * Handle the HTTP Request before the page of the menu Competition is displayed.
+	 * This is needed for the redirects.
 	 */
-	public function actionLoadPagehookHandlePostGetIpCacheLog ()
+	private function _handleRequestCompetition ()
 	{
-		$this->_ip_cache_list = $this->_classes->load_class('IPCacheList', 'plugin', true);
-		
-		$pagenum = $this->_ip_cache_list->get_pagenum();
-		$doaction = $this->_ip_cache_list->current_action();
-		
-		if ($doaction) {
-			switch ($doaction) {
-				
-				case 'delete':
-				case 'blacklist':
-				case 'ham':
-				case 'spam':
-					// These are the BULK actions
-					check_admin_referer('bulk-ips');
-					
-					if (isset($_REQUEST['delete_ips'])) {
-						$ips = $_REQUEST['delete_ips'];
-					} elseif (wp_get_referer()) {
-						wp_redirect(wp_get_referer());
-						exit();
-					}
-					$redirect_to = remove_query_arg(array ( $doaction ), wp_get_referer());
-					$redirect_to = add_query_arg('paged', $pagenum, $redirect_to);
-					switch ($doaction) {
-						case 'delete':
-							$deleted = 0;
-							foreach ($ips as $ip) {
-								$this->_db->deleteIp($ip);
-								$deleted ++;
-							}
-							
-							if ($deleted) {
-								$redirect_to = add_query_arg(array ( 'deleted' => $deleted ), $redirect_to);
-							}
-							
-							wp_redirect($redirect_to);
-							exit();
-							break;
-						case 'blacklist':
-							$blacklisted = 0;
-							$blacklist = $this->_core->getDataElement('lists', 'blacklist');
-							if (! empty($blacklist)) {
-								$b = explode("\r\n", $blacklist);
-							} else {
-								$b = array ();
-							}
-							foreach ($ips as $ip) {
-								
-								$ip = long2ip($ip);
-								if (! (in_array($ip, $b))) {
-									array_push($b, $ip);
-									$this->_db->deleteIp($ip);
-									$blacklisted ++;
-								}
-							}
-							if ($blacklisted) {
-								$this->_setBlacklistOption($b);
-								$redirect_to = add_query_arg(array ( 'blacklisted' => $blacklisted ), $redirect_to);
-							}
-							
-							wp_redirect($redirect_to);
-							exit();
-							break;
-						case 'ham':
-						case 'spam':
-							$hamspammed = 0;
-							$new_status = ($doaction == 'ham' ? 0 : 1);
-							foreach ($ips as $ip) {
-								
-								$result = $this->_db->updateIpCache(array ( 'ip' => $ip, 'spam' => $new_status ));
-								$hamspammed ++;
-							
-							}
-							if ($hamspammed) {
-								$arg = ($doaction == 'ham' ? 'hammed' : 'spammed');
-								$redirect_to = add_query_arg(array ( $arg => $hamspammed ), $redirect_to);
-							}
-							
-							wp_redirect($redirect_to);
-							exit();
-							break;
-					
-					}
-					break;
-				
-				case 'spamip':
-				case 'hamip':
-				case 'blacklistip':
-				case 'deleteip':
-					// These are the ROW actions
-					$redirect_to = remove_query_arg(array ( $doaction ), wp_get_referer());
-					$redirect_to = add_query_arg('paged', $pagenum, $redirect_to);
-					$ip = absint($_GET['i']);
-					switch ($doaction) {
-						case 'spamip':
-						case 'hamip':
-							check_admin_referer('hamspam-ip_' . $ip);
-							$new_status = ($doaction == 'hamip' ? 0 : 1);
-							$result = $this->_db->updateIpCache(array ( 'ip' => $ip, 'spam' => $new_status ));
-							if ($result) {
-								$arg = ($doaction == 'hamip' ? 'hammed' : 'spammed');
-								$redirect_to = add_query_arg(array ( $arg => 1 ), $redirect_to);
-							}
-							wp_redirect($redirect_to);
-							exit();
-							break;
-						case 'blacklistip':
-							$blacklist = $this->_core->getDataElement('lists', 'blacklist');
-							if (! empty($blacklist)) {
-								$b = explode("\r\n", $blacklist);
-							} else {
-								$b = array ();
-							}
-							$ip_human = long2ip($ip);
-							if (! (in_array($ip_human, $b))) {
-								array_push($b, $ip_human);
-								$this->_db->deleteIp($ip);
-								$this->_setBlacklistOption($b);
-								$redirect_to = add_query_arg(array ( 'blacklisted' => 1 ), $redirect_to);
-							}
-							wp_redirect($redirect_to);
-							exit();
-							break;
-						case 'deleteip':
-							$result = $this->_db->deleteIp($ip);
-							if ($result) {
-								$redirect_to = add_query_arg(array ( 'deleted' => 1 ), $redirect_to);
-							}
-							$redirect_to = add_query_arg(array ( 'deleted' => $deleted ), $redirect_to);
-					
-					}
-					break;
-			
-			}
-		} elseif (! empty($_GET['_wp_http_referer'])) {
-			wp_redirect(remove_query_arg(array ( '_wp_http_referer', '_wpnonce' ), stripslashes($_SERVER['REQUEST_URI'])));
-			exit();
+		if ( isset($_REQUEST['wp_http_referer']) ) {
+			$redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
+		} else {
+			$redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
 		}
-		
-		if (isset($_REQUEST['deleted']) || isset($_REQUEST['blacklisted']) || isset($_REQUEST['hammed']) || isset($_REQUEST['spammed'])) {
-			$deleted = isset($_REQUEST['deleted']) ? (int) $_REQUEST['deleted'] : 0;
-			$blacklisted = isset($_REQUEST['blacklisted']) ? (int) $_REQUEST['blacklisted'] : 0;
-			$hammed = isset($_REQUEST['hammed']) ? (int) $_REQUEST['hammed'] : 0;
-			$spammed = isset($_REQUEST['spammed']) ? (int) $_REQUEST['spammed'] : 0;
-			
-			if ($deleted > 0) {
-				$this->_ip_cache_list->messages[] = sprintf(_n('%s IP permanently deleted', '%s IP\'s deleted', $deleted), $deleted);
-			}
-			
-			if ($blacklisted > 0) {
-				$this->_ip_cache_list->messages[] = sprintf(_n('%s IP added to the blacklist', '%s IP\'s added to the blacklist', $blacklisted), $blacklisted);
-			}
-			
-			if ($hammed > 0) {
-				$this->_ip_cache_list->messages[] = sprintf(_n('%s IP marked as ham', '%s IP\'s marked as ham', $hammed), $hammed);
-			}
-			
-			if ($spammed > 0) {
-				$this->_ip_cache_list->messages[] = sprintf(_n('%s IP marked as spam', '%s IP\'s marked as spam', $spammed), $spammed);
-			}
-		
-		}
-		$this->_ip_cache_list->prepare_items();
-		
-		$total_pages = $this->_ip_cache_list->get_pagination_arg('total_pages');
-		if ($pagenum > $total_pages && $total_pages > 0) {
-			wp_redirect(add_query_arg('paged', $total_pages));
-			exit();
+
+		$doAction = $this->_competition_list->current_action();
+		switch ( $doAction )
+		{
+			case 'delete':
+			case 'open':
+			case 'close':
+				check_admin_referer('bulk-competitions');
+				if ( empty($_REQUEST['competitions']) && empty($_REQUEST['competition']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				break;
+
+			case 'edit':
+				if ( empty($_REQUEST['competition']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				break;
+
+			case 'dodelete':
+				check_admin_referer('delete-competitions');
+				if ( empty($_REQUEST['competitions']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$competitionIds = $_REQUEST['competitions'];
+
+				$deleteCount = 0;
+
+				foreach ( (array) $competitionIds as $id ) {
+					$id = (int) $id;
+					$this->_rpsdb->deleteCompetition($id);
+					++$deleteCount;
+				}
+				$redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'del_many'), $redirect);
+				wp_redirect($redirect);
+				break;
+
+			case 'doopen':
+				check_admin_referer('open-competitions');
+				if ( empty($_REQUEST['competitions']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$competitionIds = $_REQUEST['competitions'];
+				$count = 0;
+
+				foreach ( (array) $competitionIds as $id ) {
+					$data['ID'] = (int) $id;
+					$data['Closed'] = 'N';
+					$this->_rpsdb->insertCompetition($data);
+					++$count;
+				}
+				$redirect = add_query_arg(array('count' => $count,'update' => 'open_many'), $redirect);
+				wp_redirect($redirect);
+				break;
+
+			case 'doclose':
+				check_admin_referer('close-competitions');
+				if ( empty($_REQUEST['competitions']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$competitionIds = $_REQUEST['competitions'];
+				$count = 0;
+
+				foreach ( (array) $competitionIds as $id ) {
+					$data['ID'] = (int) $id;
+					$data['Closed'] = 'Y';
+					$this->_rpsdb->insertCompetition($data);
+					++$count;
+				}
+				$redirect = add_query_arg(array('count' => $count,'update' => 'close_many'), $redirect);
+				wp_redirect($redirect);
+				break;
+
+			default:
+				if ( !empty($_GET['_wp_http_referer']) ) {
+					wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
+					exit();
+				}
+				$pagenum = $this->_competition_list->get_pagenum();
+				$this->_competition_list->prepare_items();
+				$total_pages = $this->_competition_list->get_pagination_arg('total_pages');
+				if ( $pagenum > $total_pages && $total_pages > 0 ) {
+					wp_redirect(add_query_arg('paged', $total_pages));
+					exit();
+				}
+				break;
 		}
 	}
 
 	/**
-	 *
-	 * Displays the IP cache Log
+	 * Display the page for the menu Competition
 	 */
-	public function menuIpCacheLog ()
+	public function menuCompetition ()
 	{
-		global $screen_layout_columns, $ip_status;
-		if (! empty($this->_ip_cache_list->messages)) {
-			echo '<div id="moderated" class="updated"><p>' . implode("<br/>\n", $this->_ip_cache_list->messages) . '</p></div>';
+		$doAction = $this->_competition_list->current_action();
+		switch ( $doAction )
+		{
+			case 'delete':
+				$this->_displayPageCompetitionDelete();
+				break;
+
+			case 'edit':
+				$this->_displayPageCompetitionEdit();
+				break;
+
+			case 'open':
+				$this->_displayPageCompetitionOpenClose('open');
+				break;
+
+			case 'close':
+				$this->_displayPageCompetitionOpenClose('close');
+				break;
+
+			default:
+				$this->_displayPageCompetitionList();
+				break;
 		}
-		$_SERVER['REQUEST_URI'] = remove_query_arg(array ( 'error', 'deleted', '_error_nonce' ), $_SERVER['REQUEST_URI']);
-		$this->_ip_cache_list->prepare_items();
-		
-		$total_pages = $this->_ip_cache_list->get_pagination_arg('total_pages');
-		$pagenum = $this->_ip_cache_list->get_pagenum();
-		if ($pagenum > $total_pages && $total_pages > 0) {
-			wp_redirect(add_query_arg('paged', $total_pages));
-			exit();
+	}
+
+	/**
+	 * Display the page to confirm the deletion of the selected competitions.
+	 *
+	 * @param string $redirect
+	 * @param string $referer
+	 *
+	 */
+	private function _displayPageCompetitionDelete ()
+	{
+		global $wpdb;
+
+		if ( empty($_REQUEST['competitions']) ) {
+			$competitionIdsArray = array(intval($_REQUEST['competition']));
+		} else {
+			$competitionIdsArray = (array) $_REQUEST['competitions'];
 		}
-		
-		echo '<div class="wrap avhfdas-wrap">';
+
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+
+		$this->admin_header('Delete Competitions');
+		echo $classForm->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
+		wp_nonce_field('delete-competitions');
+		echo $this->_referer;
+
+		echo '<p>' . _n('You have specified this competition for deletion:', 'You have specified these competitions for deletion:', count($competitionIdsArray)) . '</p>';
+
+		$goDelete = 0;
+		foreach ( $competitionIdsArray as $competitionID ) {
+
+			$sqlWhere = $wpdb->prepare('Competition_ID=%d', $competitionID);
+			$entries = $this->_rpsdb->getEntries(array('where' => $sqlWhere,'count' => TRUE));
+			$sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
+			$competition = $this->_rpsdb->getCompetitions(array('where' => $sqlWhere));
+			$competition = $competition[0];
+			if ( $entries !== "0" ) {
+				echo "<li>" . sprintf(__('ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium, $entries) . "</li>\n";
+			} else {
+				echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
+				$goDelete++;
+			}
+		}
+		if ( $goDelete ) {
+			echo $classForm->hidden('action', 'dodelete');
+			echo $classForm->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
+		} else {
+			echo '<p>There are no valid competitions to delete</p>';
+		}
+		echo $classForm->close();
+		$this->admin_footer();
+	}
+
+	private function _displayPageCompetitionEdit ()
+	{
+		global $wpdb;
+
+		// @var $classForm AVH_Form
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+		$classForm->setOption_name('competition-edit');
+
+		if ( isset($_POST['update']) ) {
+			$this->_updateCompetition();
+		}
+		$vars = ( array('action','redirect','competition','wp_http_referer') );
+		for ( $i = 0; $i < count($vars); $i += 1 ) {
+			$var = $vars[$i];
+			if ( empty($_POST[$var]) ) {
+				if ( empty($_GET[$var]) )
+					$$var = '';
+				else
+					$$var = $_GET[$var];
+			} else {
+				$$var = $_POST[$var];
+			}
+		}
+
+		$wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
+
+		$competition = $this->_rpsdb->getCompetitionByID2($_REQUEST['competition']);
+
+		$formOptions['date'] = mysql2date('Y-m-d', $competition->Competition_Date);
+		$formOptions['close-date'] = mysql2date('Y-m-d', $competition->Close_Date);
+		$formOptions['close-time'] = mysql2date('H:i:II', $competition->Close_Date);
+
+		$this->admin_header('Edit Competition');
+
+		if ( isset($_POST['update']) ) {
+			echo '<div id="message" class="updated">';
+			echo '<p><strong>Competition updated.</strong></p>';
+			if ( $wp_http_referer ) {
+				echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Competitions</a></p>';
+			}
+			echo '</div>';
+		}
+
+		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
+		echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-competitionedit'));
+		echo $classForm->open_table();
+		echo $classForm->text('Date', '', 'date', $formOptions['date']);
+		echo $classForm->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
+		echo $classForm->text('Closing Date', '', 'close-date', $formOptions['close-date']);
+
+		for ( $hour = 0; $hour <= 23; $hour++ ) {
+			$time_val = sprintf("%02d:00:00", $hour);
+			$time_text = date("g:i a", strtotime($time_val));
+			$time[$time_val] = $time_text;
+		}
+		echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
+
+		// @format_off
+		$_medium = array ( 'medium_bwd'		=> 'B&W Digital',
+							'medium_cd'		=> 'Color Digital',
+							'medium_bwp'	=> 'B&W Print',
+							'medium_cp'		=> 'Color Print'
+					);
+		$selectedMedium=array_search($competition->Medium, $_medium);
+		// @format_on
+		echo $classForm->select('Medium', '', 'medium', $_medium, $selectedMedium);
+
+		// @format_off
+		$_classification = array ( 'class_b' => 'Beginner',
+									'class_a' => 'Advanced',
+									'class_s' => 'Salon',
+			);
+		// @format_on
+		$selectedClassification = array_search($competition->Classification, $_classification);
+		echo $classForm->select('Classification', '', 'classification', $_classification, $selectedClassification);
+
+		$_max_entries = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5','6' => '6','7' => '7','8' => '8','9' => '9','10' => '10');
+		echo $classForm->select('Max Entries', '', 'max_entries', $_max_entries, $competition->Max_Entries);
+
+		$_judges = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5');
+		echo $classForm->select('No. Judges', '', 'judges', $_judges, $competition->Num_Judges);
+
+		$_special_event = array('special_event' => array('text' => '','checked' => $competition->Special_Event));
+		echo $classForm->checkboxes('Special Event', '', key($_special_event), $_special_event);
+
+		$_closed = array('closed' => array('text' => '','checked' => ( $competition->Closed == 'Y' ? TRUE : FALSE )));
+		echo $classForm->checkboxes('Closed', '', key($_closed), $_closed);
+
+		$_scored = array('scored' => array('text' => '','checked' => ( $competition->Scored == 'Y' ? TRUE : FALSE )));
+		echo $classForm->checkboxes('Scored', '', key($_scored), $_scored);
+
+		echo $classForm->close_table();
+		echo $classForm->submit('submit', 'Update Competition', array('class' => 'button-primary'));
+		if ( $wp_http_referer ) {
+			echo $classForm->hidden('wp_http_referer', esc_url($wp_http_referer));
+		}
+		echo $classForm->hidden('competition', $competition->ID);
+		echo $classForm->hidden('update', true);
+		echo $classForm->hidden('action', 'edit');
+		$classForm->setNonce_action($competition->ID);
+		echo $classForm->nonce_field();
+		echo $classForm->close();
+		echo '<script type="text/javascript">' . "\n";
+		echo 'jQuery(function($) {' . "\n";
+		echo ' $.datepicker.setDefaults({' . "\n";
+		echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
+		echo '   showButtonPanel: true, ' . "\n";
+		echo '   buttonImageOnly: true, ' . "\n";
+		echo '   buttonImage: "' . $this->_settings->getSetting('plugin_url') . '/images/calendar.png", ' . "\n";
+		echo '   showOn: "both"' . "\n";
+		echo ' });' . "\n";
+		echo '	$( "#date" ).datepicker();' . "\n";
+		echo '	$( "#close-date" ).datepicker();' . "\n";
+		echo '});', "\n";
+		echo "</script>";
+		$this->admin_footer();
+	}
+
+	/**
+	 * Display the page to confirm the deletion of the selected competitions.
+	 *
+	 * @param string $redirect
+	 * @param string $referer
+	 *
+	 */
+	private function _displayPageCompetitionOpenClose ($action)
+	{
+		global $wpdb;
+
+		if ( $action == 'open' ) {
+			$title = 'Open Competitions';
+			$action_verb = 'openend';
+		}
+		if ( $action == 'close ' ) {
+			$title = 'Close Competitions';
+			$action_verb = 'closed';
+		}
+
+		if ( empty($_REQUEST['competitions']) ) {
+			$competitionIdsArray = array(intval($_REQUEST['competition']));
+		} else {
+			$competitionIdsArray = (array) $_REQUEST['competitions'];
+		}
+
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+
+		$this->admin_header($title);
+		echo $classForm->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
+		wp_nonce_field($action . '-competitions');
+		echo $this->_referer;
+
+		echo '<p>' . _n('You have specified this competition to be ' . $action_verb . ':', 'You have specified these competitions to be ' . $action_verb . '::', count($competitionIdsArray)) . '</p>';
+
+		foreach ( $competitionIdsArray as $competitionID ) {
+			$sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
+			$competition = $this->_rpsdb->getCompetitions(array('where' => $sqlWhere));
+			$competition = $competition[0];
+			echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
+		}
+
+		echo $classForm->hidden('action', 'do' . $action);
+		echo $classForm->submit('openclose', 'Confirm', array('class' => 'button-secondary'));
+
+		echo $classForm->close();
+		$this->admin_footer();
+	}
+
+	/**
+	 * Display the competion in a list
+	 */
+	private function _displayPageCompetitionList ()
+	{
+		global $screen_layout_columns;
+
+		$messages = array();
+		if ( isset($_GET['update']) ) {
+			switch ( $_GET['update'] )
+			{
+				case 'del':
+				case 'del_many':
+					$deleteCount = isset($_GET['deleteCount']) ? (int) $_GET['deleteCount'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+					break;
+				case 'open_many':
+					$openCount = isset($_GET['count']) ? (int) $_GET['count'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition opened.', '%s competitions opened.', $openCount), number_format_i18n($openCount)) . '</p></div>';
+					break;
+				case 'close_many':
+					$closeCount = isset($_GET['count']) ? (int) $_GET['count'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition closed.', '%s competitions closed.', $closeCount), number_format_i18n($closeCount)) . '</p></div>';
+					break;
+			}
+		}
+
+		if ( !empty($messages) ) {
+			foreach ( $messages as $msg )
+				echo $msg;
+		}
+
+		echo '<div class="wrap avhrps-wrap">';
 		echo $this->_displayIcon('index');
-		echo '<h2>AVH First Defense Against Spam: ' . __('IP Cache Log', 'avh-fdas');
-		
-		if (isset($_REQUEST['s']) && $_REQUEST['s']) {
+		echo '<h2>Competitions: ' . __('All Competitions', 'avh-rps');
+
+		if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
 			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');
 		}
 		echo '</h2>';
-		
-		$this->_ip_cache_list->views();
-		echo '<form id="ipcachelist-form" action="" method="get">';
-		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_IP_CACHE . '"';
-		echo '<input type="hidden" name="ip_status" value="' . esc_attr($ip_status) . '" />';
-		echo '<input type="hidden" name="pagegen_timestamp" value="' . esc_attr(current_time('mysql', 1)) . '" />';
-		
-		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_ip_cache_list->get_pagination_arg('total_items')) . '" />';
-		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_ip_cache_list->get_pagination_arg('per_page')) . '" />';
-		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_ip_cache_list->get_pagination_arg('page')) . '" />';
-		
-		if (isset($_REQUEST['paged'])) {
+
+		$this->_competition_list->views();
+		echo '<form id="rps-competition-form" action="" method="get">';
+		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_COMPETITION . '">';
+
+		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_competition_list->get_pagination_arg('total_items')) . '" />';
+		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('per_page')) . '" />';
+		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('page')) . '" />';
+
+		if ( isset($_REQUEST['paged']) ) {
 			echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
 		}
-		$this->_ip_cache_list->search_box(__('Find IP', 'avh-fdas'), 'find_ip');
-		$this->_ip_cache_list->display();
+		// $this->_competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
+		$this->_competition_list->display();
 		echo '</form>';
-		
-		echo '</div>'; // wrap
+
 		echo '<div id="ajax-response"></div>';
 		$this->_printAdminFooter();
+		echo '</div>';
 	}
 
-	public function actionAjaxIpcacheLog ()
+	public function actionLoadPagehookCompetitionAdd ()
 	{
-		$id = isset($_POST['id']) ? $_POST['id'] : 0;
-		switch ($_POST['action']) {
-			case 'dim-ipcachelog':
-				check_ajax_referer('hamspam-ip_' . $id);
-				$status = isset($_POST['new_status']) ? $_POST['new_status'] : false;
-				if (false === $status) {
-					$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog',
-													'id' => new WP_Error('invalid_status', __('Unknown status parameter', 'avh-fdas')) ));
-					$x->send();
-				}
-				$result = $this->_db->updateIpCache(array ( 'ip' => $id, 'spam' => $status ));
-				if (false === $result) {
-					$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog',
-													'id' => new WP_Error('error_updating', __('Error updating the ipcache database table.', 'avh-fdas')) ));
-					$x->send();
-				}
-				die((string) time());
-			case 'delete-ipcachelog':
-				switch ($_POST['f']) {
-					case 'hs': // Marking the IP as ham or spam
-						check_ajax_referer('hamspam-ip_' . $id);
-						$status = isset($_POST['ns']) ? $_POST['ns'] : false;
-						if (false === $status) {
-							$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog',
-															'id' => new WP_Error('invalid_status', __('Unknown status parameter', 'avh-fdas')) ));
-							$x->send();
+		global $current_screen;
+		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+		$this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+
+		add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
+		// WordPress core Styles and Scripts
+		wp_enqueue_script('common');
+		wp_enqueue_script('jquery-ui-datepicker');
+		// Plugin Style and Scripts
+		// wp_enqueue_script('avhrps-competition-js');
+
+		wp_enqueue_style('avhrps-admin-css');
+		wp_enqueue_style('avhrps-jquery-css');
+	}
+
+	public function menuCompetitionAdd ()
+	{
+		$option_name = 'competition_add';
+		// @var $classForm AVH_Form
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+		$classForm->setOption_name('competition_add');
+
+		// @format_off
+		$formDefaultOptions = array (
+				'date' => '',
+				'theme' => '',
+				'medium_bwd' => TRUE,
+				'medium_cd' => TRUE,
+				'medium_bwp' => TRUE,
+				'medium_cp' => TRUE,
+				'class_b' => TRUE,
+				'class_a' => TRUE,
+				'class_s' => TRUE,
+				'max_entries' => '2',
+				'judges' => '1',
+				'special_event' => FALSE
+			);
+		// @format_on
+		$formOptions = $formDefaultOptions;
+		if ( isset($_POST['action']) ) {
+			switch ( $_POST['action'] )
+			{
+				case 'add':
+					$classForm->setNonce_action(get_current_user_id());
+					check_admin_referer($classForm->getNonce_action());
+					$formNewOptions = $formDefaultOptions;
+					$formOptions = $_POST[$classForm->getOption_name()];
+
+					$mediumArray = array();
+					$classArray = array();
+					$errorMsgArray = array();
+					foreach ( $formDefaultOptions as $optionKey => $optionValue ) {
+
+						// Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to FALSE.
+						$newval = ( isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : FALSE );
+						$current_value = $formDefaultOptions[$optionKey];
+						switch ( $optionKey )
+						{
+							case 'date':
+								// Validate
+								break;
+
+							case 'theme':
+								// Validate
+								break;
 						}
-						$result = $this->_db->updateIpCache(array ( 'ip' => $id, 'spam' => $status ));
-						if (false === $result) {
-							$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog',
-															'id' => new WP_Error('error_updating', __('Error updating the ipcache database table.', 'avh-fdas')) ));
-							$x->send();
-						}
-						die((string) time());
-						break;
-					
-					case 'bl': // Adding the IP to the local Blacklist
-						check_ajax_referer('blacklist-ip_' . $id);
-						$blacklist = $this->_core->getDataElement('lists', 'blacklist');
-						if (! empty($blacklist)) {
-							$b = explode("\r\n", $blacklist);
-						} else {
-							$b = array ();
-						}
-						$ip = long2ip($id);
-						if (! (in_array($ip, $b))) {
-							array_push($b, $ip);
-							$this->_setBlacklistOption($b);
-							$result = $this->_db->deleteIp($id);
-							if (false === $result) {
-								$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog', 'position' => - 1,
-																'id' => new WP_Error('error_deleting', __('Error deleting the IP from the databse table.')) ));
-								$x->send();
+						if ( substr($optionKey, 0, 7) == 'medium_' ) {
+							$formNewOptions[$optionKey] = (bool) $newval;
+							if ( $formNewOptions[$optionKey] ) {
+								$mediumArray[] = $optionKey;
+								continue;
 							}
-						} else {
-							$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog', 'position' => - 1,
-															'id' => new WP_Error('exists_blacklist', sprintf(__('IP %s already exists in the blacklist.'), $ip)) ));
-							$x->send();
 						}
-						
-						$this->_AjaxIpcacheLogResponse($id);
-						die('0');
-						break;
-					
-					case 'dl': // Delete the IP from the Database.
-						check_ajax_referer('delete-ip_' . $id);
-						$result = $this->_db->deleteIp($id);
-						if (false === $result) {
-							$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog',
-															'id' => new WP_Error('error_deleting', __('Error deleting the IP from the databse table.')) ));
-							$x->send();
+						if ( substr($optionKey, 0, 6) == 'class_' ) {
+							$formNewOptions[$optionKey] = (bool) $newval;
+							if ( $formNewOptions[$optionKey] ) {
+								$classArray[] = $optionKey;
+								continue;
+							}
 						}
-						$this->_AjaxIpcacheLogResponse($id);
-						die('0');
-						break;
+						$formNewOptions[$optionKey] = $newval;
+					}
+
+					if ( empty($mediumArray) ) {
+						$errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
+					}
+
+					if ( empty($classArray) ) {
+						$errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
+					}
+
+					if ( empty($errorMsgArray) ) {
+						$this->_message = 'Competition Added';
+						$this->_status = 'updated';
+
+						// @format_off
+				// @TODO: This is needed because of the old program, someday it needs to be cleaned up.
+				$medium_convert = array(
+							'medium_bwd'	=> 'B&W Digital',
+							'medium_cd'		=> 'Color Digital',
+							'medium_bwp'	=> 'B&W Print',
+							'medium_cp'		=> 'Color Print'
+					);
+
+				$classification_convert = array (
+						'class_b' => 'Beginner',
+						'class_a' => 'Advanced',
+						'class_s' => 'Salon'
+				);
+				// @format_on
+						$data['Competition_Date'] = $formNewOptions['date'];
+						$data['Theme'] = $formNewOptions['theme'];
+						$data['Max_Entries'] = $formNewOptions['max_entries'];
+						$data['Num_Judges'] = $formNewOptions['judges'];
+						$data['Special_Event'] = ( $formNewOptions['special_event'] ? 'Y' : 'N' );
+						foreach ( $mediumArray as $medium ) {
+							$data['Medium'] = $medium_convert[$medium];
+							foreach ( $classArray as $classification ) {
+								$data['Classification'] = $classification_convert[$classification];
+								$competition_ID = $this->_rpsdb->insertCompetition($data);
+								if ( is_wp_error($competition_ID) ) {
+									wp_die($competition_ID);
+								}
+							}
+						}
+					} else {
+						$this->_message = $errorMsgArray;
+						$this->_status = 'error';
+					}
+					$this->_displayMessage();
+					$formOptions = $formNewOptions;
+					break;
+			}
+		}
+
+		$this->admin_header('Add Competition');
+
+		echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionadd'));
+		echo $classForm->open_table();
+		echo $classForm->text('Date', '', 'date', $formOptions['date']);
+		echo $classForm->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
+
+		// @format_off
+		$_medium = array ( 'medium_bwd' => array ( 'text' => 'B&W Digital', 'checked' => $formOptions['medium_bwd'] ),
+							'medium_cd' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cd'] ),
+							'medium_bwp' => array ( 'text' => 'B&W Print', 'checked' => $formOptions['medium_bwp'] ),
+							'medium_cp' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cp'] )
+						);
+		// @format_on
+		echo $classForm->checkboxes('Medium', '', key($_medium), $_medium);
+		unset($_medium);
+
+		// @format_off
+		$_classification = array ( 'class_b' => array ( 'text' => 'Beginner', 'checked' => $formOptions['class_b'] ),
+									'class_a' => array ( 'text' => 'Advanced', 'checked' => $formOptions['class_a'] ),
+									'class_s' => array ( 'text' => 'Salon', 'checked' => $formOptions['class_s'] )
+							);
+		// @format_on
+		echo $classForm->checkboxes('Classification', '', key($_classification), $_classification);
+		unset($_classification);
+
+		$_max_entries = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5','6' => '6','7' => '7','8' => '8','9' => '9','10' => '10');
+		echo $classForm->select('Max Entries', '', 'max_entries', $_max_entries, $formOptions['max_entries']);
+		unset($_max_entries);
+
+		$_judges = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5');
+		echo $classForm->select('No. Judges', '', 'judges', $_judges, $formOptions['judges']);
+		unset($_judges);
+
+		$_special_event = array('special_event' => array('text' => '','checked' => $formOptions['special_event']));
+		echo $classForm->checkboxes('Special Event', '', key($_special_event), $_special_event);
+		unset($_special_event);
+
+		echo $classForm->close_table();
+		echo $classForm->submit('submit', 'Add Competition', array('class' => 'button-primary'));
+		echo $classForm->hidden('action', 'add');
+		$classForm->setNonce_action(get_current_user_id());
+		echo $classForm->nonce_field();
+		echo $classForm->close();
+		echo '<script type="text/javascript">' . "\n";
+		echo 'jQuery(function($) {' . "\n";
+		echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
+		echo '});', "\n";
+		echo "</script>";
+		$this->admin_footer();
+	}
+
+	public function actionLoadPagehookEntries ()
+	{
+		global $current_screen;
+
+		$this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+		$this->_entries_list = $this->_classes->load_class('EntriesList', 'plugin', true);
+		$this->_handleRequestEntries();
+
+		add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
+		// WordPress core Styles and Scripts
+		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script('common');
+		wp_enqueue_script('wp-lists');
+		wp_enqueue_script('postbox');
+		wp_enqueue_style('css/dashboard');
+		// Plugin Style and Scripts
+		// wp_enqueue_script('avhrps-competition-js');
+
+		wp_enqueue_style('avhrps-admin-css');
+		wp_enqueue_style('avhrps-jquery-css');
+	}
+
+	/**
+	 * Handle the HTTP Request before the page of the menu Entries is displayed.
+	 * This is needed for the redirects.
+	 */
+	private function _handleRequestEntries ()
+	{
+
+		if ( isset($_REQUEST['wp_http_referer']) ) {
+			$redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
+		} else {
+			$redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_ENTRIES;
+		}
+
+		$doAction = $this->_entries_list->current_action();
+		switch ( $doAction )
+		{
+			case 'delete':
+				check_admin_referer('bulk-entries');
+				if ( empty($_REQUEST['entries']) && empty($_REQUEST['entry']) ) {
+					wp_redirect($redirect);
+					exit();
 				}
-		}
-		$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog', 'position' => - 1,
-										'id' => new WP_Error('invalid_call', __('Invalid AJAX call')) ));
-		$x->send();
-	}
-
-	/**
-	 * Sends back current IP cache total total and new page links if they need to be updated.
-	 *
-	 * Contrary to normal success AJAX response ("1"), die with time() on success.
-	 *
-	 * @param int $comment_id
-	 * @return die
-	 */
-	private function _AjaxIpcacheLogResponse ($ip, $delta = -1)
-	{
-		$total = (int) @$_POST['_total'];
-		$per_page = (int) @$_POST['_per_page'];
-		$page = (int) @$_POST['_page'];
-		$url = esc_url_raw(@$_POST['_url']);
-		// JS didn't send us everything we need to know. Just die with success message
-		if (! $total || ! $per_page || ! $page || ! $url)
-			die((string) time());
-		
-		$total += $delta;
-		if ($total < 0)
-			$total = 0;
-		
-		$time = time(); // The time since the last comment count
-		
-
-		$x = new WP_Ajax_Response(array ( 'what' => 'ipcachelog', 'id' => $ip,
-										'supplemental' => array (
-																'total_items_i18n' => sprintf(_n('1 item', '%s items', $total), number_format_i18n($total)),
-																'total_pages' => ceil($total / $per_page),
-																'total_pages_i18n' => number_format_i18n(ceil($total / $per_page)),
-																'total' => $total, 'time' => $time ) ));
-		$x->send();
-	}
-
-	/**
-	 * Donation Metabox
-	 * @return unknown_type
-	 */
-	public function metaboxDonations ()
-	{
-		echo '<p>If you enjoy this plug-in please consider a donation. There are several ways you can show your appreciation</p>';
-		echo '<p>';
-		echo '<span class="b">Amazon</span><br />';
-		echo 'If you decide to buy something from Amazon click the button.<br />';
-		echo '<a href="https://www.amazon.com/?&tag=avh-donation-20" target="_blank" title="Amazon Homepage"><img alt="Amazon Button" src="' . $this->_settings->graphics_url . '/us_banner_logow_120x60.gif" /></a></p>';
-		echo '<p>';
-		echo 'You can send me something from my <a href="http://www.amazon.com/gp/Settings/wishlist/1U3DTWZ72PI7W?tag=avh-donation-20">Amazon Wish List</a>';
-		echo '</p>';
-		echo '<p>';
-		echo '<span class="b">Through Paypal.</span><br />';
-		echo 'Click on the Donate button and you will be directed to Paypal where you can make your donation and you don\'t need to have a Paypal account to make a donation.<br />';
-		echo '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=S85FXJ9EBHAF2&lc=US&item_name=AVH%20Plugins&item_number=fdas&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank" title="Donate">';
-		echo '<img src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donate"/></a>';
-		echo '</p>';
-	}
-
-	/**
-	 * Sets the amount of columns wanted for a particuler screen
-	 *
-	 * @WordPress filter screen_meta_screen
-	 * @param $screen
-	 * @return strings
-	 */
-	public function filterScreenLayoutColumns ($columns, $screen)
-	{
-		switch ($screen) {
-			case $this->_hooks['avhfdas_menu_overview']:
-				$columns[$this->_hooks['avhfdas_menu_overview']] = 2;
 				break;
-			case $this->_hooks['avhfdas_menu_general']:
-				$columns[$this->_hooks['avhfdas_menu_general']] = 2;
+
+			case 'edit':
+				if ( empty($_REQUEST['entry']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
 				break;
-			case $this->_hooks['avhfdas_menu_3rd_party']:
-				$columns[$this->_hooks['avhfdas_menu_3rd_party']] = 2;
+			case 'dodelete':
+				check_admin_referer('delete-entries');
+				if ( empty($_REQUEST['entries']) ) {
+					wp_redirect($redirect);
+					exit();
+				}
+				$entryIds = $_REQUEST['entries'];
+
+				$deleteCount = 0;
+
+				foreach ( (array) $entryIds as $id ) {
+					$id = (int) $id;
+					$this->_rpsdb->deleteEntry($id);
+					++$deleteCount;
+				}
+				$redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'del_many'), $redirect);
+				wp_redirect($redirect);
 				break;
-			case $this->_hooks['avhfdas_menu_faq']:
-				$columns[$this->_hooks['avhfdas_menu_faq']] = 2;
+
+			default:
+				if ( !empty($_GET['_wp_http_referer']) ) {
+					wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
+					exit();
+				}
+				$pagenum = $this->_entries_list->get_pagenum();
+				$this->_entries_list->prepare_items();
+				$total_pages = $this->_entries_list->get_pagination_arg('total_pages');
+				if ( $pagenum > $total_pages && $total_pages > 0 ) {
+					wp_redirect(add_query_arg('paged', $total_pages));
+					exit();
+				}
 				break;
 		}
-		return $columns;
+	}
+
+	/**
+	 * Display the page for the menu Entries
+	 */
+	public function menuEntries ()
+	{
+		$doAction = $this->_entries_list->current_action();
+		switch ( $doAction )
+		{
+			case 'delete':
+				$this->_displayPageEntriesDelete();
+				break;
+
+			case 'edit':
+				$this->_displayPageEntriesEdit();
+				break;
+
+			default:
+				$this->_displayPageEntriesList();
+				break;
+		}
+	}
+
+	/**
+	 * Display the entries in a list
+	 */
+	private function _displayPageEntriesList ()
+	{
+		global $screen_layout_columns;
+
+		$messages = array();
+		if ( isset($_GET['update']) ) {
+			switch ( $_GET['update'] )
+			{
+				case 'del':
+				case 'del_many':
+					$deleteCount = isset($_GET['deleteCount']) ? (int) $_GET['deleteCount'] : 0;
+					$messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+					break;
+			}
+		}
+
+		if ( !empty($messages) ) {
+			foreach ( $messages as $msg )
+				echo $msg;
+		}
+
+		echo '<div class="wrap avhrps-wrap">';
+		echo $this->_displayIcon('index');
+		echo '<h2>Entries: ' . __('All Entries', 'avh-rps');
+
+		if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
+			printf('<span class="subtitle">' . sprintf(__('Search results for &#8220;%s&#8221;'), wp_html_excerpt(esc_html(stripslashes($_REQUEST['s'])), 50)) . '</span>');
+		}
+		echo '</h2>';
+
+		$this->_entries_list->views();
+		echo '<form id="rps-entries-form" action="" method="get">';
+		echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_ENTRIES . '">';
+
+		echo '<input type="hidden" name="_total" value="' . esc_attr($this->_entries_list->get_pagination_arg('total_items')) . '" />';
+		echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('per_page')) . '" />';
+		echo '<input type="hidden" name="_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('page')) . '" />';
+
+		if ( isset($_REQUEST['paged']) ) {
+			echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
+		}
+		$this->_entries_list->display();
+		echo '</form>';
+
+		echo '<div id="ajax-response"></div>';
+		$this->_printAdminFooter();
+		echo '</div>';
+	}
+
+	/**
+	 * Display the page to confirm the deletion of the selected entries.
+	 */
+	private function _displayPageEntriesDelete ()
+	{
+		global $wpdb;
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+
+		if ( empty($_REQUEST['entries']) ) {
+			$entryIdsArray = array(intval($_REQUEST['entry']));
+		} else {
+			$entryIdsArray = (array) $_REQUEST['entries'];
+		}
+
+		$this->admin_header('Delete Entries');
+		echo $classForm->open('', array('method' => 'post','id' => 'updateentries','name' => 'updateentries'));
+
+		echo '<p>' . _n('You have specified this entry for deletion:', 'You have specified these entries for deletion:', count($entryIdsArray)) . '</p>';
+
+		$goDelete = 0;
+		foreach ( $entryIdsArray as $entryID ) {
+
+			$entry = $this->_rpsdb->getEntryInfo($entryID, OBJECT);
+			if ( $entry !== NULL ) {
+				$user = get_user_by('id', $entry->Member_ID);
+				$competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID, OBJECT);
+				echo "<li>";
+				echo $classForm->hidden('entries[]', $entryID);
+				printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'), $entryID, $entry->Title, $user->first_name, $user->last_name, $competition->Theme, mysql2date(get_option('date_format'), $competition->Competition_Date));
+				echo "</li>\n";
+				$goDelete++;
+			}
+		}
+		if ( $goDelete ) {
+			echo $classForm->hidden('action', 'dodelete');
+			echo $classForm->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
+		} else {
+			echo '<p>There are no valid entries to delete</p>';
+		}
+
+		wp_nonce_field('delete-entries');
+		echo $this->_referer;
+
+		echo $classForm->close();
+		$this->admin_footer();
+	}
+
+	private function _displayPageEntriesEdit ()
+	{
+		global $wpdb;
+
+		$updated = false;
+		// @var $classForm AVH_Form
+		$classForm = $this->_classes->load_class('Form', 'system', false);
+		$classForm->setOption_name('entry-edit');
+
+		if ( isset($_POST['update']) ) {
+			$classForm->setNonce_action($_POST['entry']);
+			check_admin_referer($classForm->getNonce_action());
+			if ( !current_user_can('rps_edit_entries') ) {
+				wp_die(__('Cheatin&#8217; uh?'));
+			}
+			$updated = $this->_updateEntry();
+		}
+
+		$vars = ( array('action','redirect','entry','wp_http_referer') );
+		for ( $i = 0; $i < count($vars); $i += 1 ) {
+			$var = $vars[$i];
+			if ( empty($_POST[$var]) ) {
+				if ( empty($_GET[$var]) )
+					$$var = '';
+				else
+					$$var = $_GET[$var];
+			} else {
+				$$var = $_POST[$var];
+			}
+		}
+
+		$wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
+		$entry = $this->_rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
+
+		$this->admin_header('Edit Entry');
+
+		if ( isset($_POST['update']) ) {
+			echo '<div id="message" class="updated">';
+			if ( $updated ) {
+				echo '<p><strong>Entry updated.</strong></p>';
+			} else {
+				echo '<p><strong>Entry not updated.</strong></p>';
+			}
+			if ( $wp_http_referer ) {
+				echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Entries</a></p>';
+			}
+			echo '</div>';
+		}
+
+		$queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
+		echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-entryedit'));
+		echo $classForm->open_table();
+
+		$_user = get_user_by('id', $entry->Member_ID);
+		echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
+		echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
+		echo $classForm->text('Title', '', 'title', $entry->Title);
+		echo $classForm->close_table();
+		echo $classForm->submit('submit', 'Update Entry', array('class' => 'button-primary'));
+		if ( $wp_http_referer ) {
+			echo $classForm->hidden('wp_http_referer', esc_url($wp_http_referer));
+		}
+		echo $classForm->hidden('entry', $entry->ID);
+		echo $classForm->hidden('update', true);
+		echo $classForm->hidden('action', 'edit');
+		$classForm->setNonce_action($entry->ID);
+		echo $classForm->nonce_field();
+		echo $classForm->close();
+		$this->admin_footer();
+	}
+
+	private function _updateEntry ()
+	{
+		$formOptions = $_POST['entry-edit'];
+		$id = (int) $_POST['entry'];
+		$entry = $this->_rpsdb->getEntryInfo($id);
+
+		$return = FALSE;
+		$formOptionsNew['title'] = empty($formOptions['title']) ? $entry['Title'] : $formOptions['title'];
+		if ( $entry['Title'] != $formOptionsNew['title'] ) {
+			$data = array('ID' => $id,'Title' => $formOptionsNew['title']);
+			$return = $this->_rpsdb->updateEntry($data);
+		}
+		return $return;
 	}
 
 	/**
 	 * Adds Settings next to the plugin actions
 	 *
 	 * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
+	 *
 	 * @param array $links
 	 * @return array
 	 *
@@ -1355,38 +1068,6 @@ final class AVH_RPS_Admin
 	}
 
 	/**
-	 * Adds an extra option on the comment row
-	 *
-	 * @WordPress Filter comment_row_actions
-	 * @param array $actions
-	 * @param class $comment
-	 * @return array
-	 * @since 1.0
-	 */
-	public function filterCommentRowActions ($actions, $comment)
-	{
-		$apikey = $this->_core->getOptionElement('sfs', 'sfsapikey');
-		$add_to_blacklist = $this->_core->getOptionElement('general', 'addblacklist');
-		
-		if ((isset($comment->comment_approved) && 'spam' == $comment->comment_approved) && ('' != $apikey || 1 == $add_to_blacklist)) {
-			if ('' != $apikey) {
-				$link_text = __('Report', 'avhfdas');
-			}
-			if (1 == $add_to_blacklist) {
-				$link_text .= __(', Blacklist', 'avh-fdas');
-			}
-			$link_text .= __(' & Delete', 'avhfdas');
-			if (AVH_Common::getWordpressVersion() > 3.0) {
-				$report_url = esc_url(wp_nonce_url("admin.php?avhfdas_ajax_action=avh-fdas-reportcomment&id=$comment->comment_ID", "report-comment_$comment->comment_ID"));
-			} else {
-				$report_url = clean_url(wp_nonce_url("admin.php?avhfdas_ajax_action=avh-fdas-reportcomment&id=$comment->comment_ID", "report-comment_$comment->comment_ID"));
-			}
-			$actions['report'] = '<a class=\'delete:the-comment-list:comment-' . $comment->comment_ID . ':e7e7d3:action=avh-fdas-reportcomment vim-d vim-destructive\' href="' . $report_url . '">' . $link_text . '</a>';
-		}
-		return $actions;
-	}
-
-	/**
 	 * Used when we set our own screen options.
 	 *
 	 * The filter needs to be set during construct otherwise it's not regonized.
@@ -1398,12 +1079,12 @@ final class AVH_RPS_Admin
 	public function filterSetScreenOption ($error_value, $option, $value)
 	{
 		$return = $error_value;
-		
-		switch ($option) {
-			case 'ipcachelog_per_page':
+		switch ( $option )
+		{
+			case 'competitions_per_page':
 				$value = (int) $value;
 				$return = $value;
-				if ($value < 1 || $value > 999) {
+				if ( $value < 1 || $value > 999 ) {
 					$return = $error_value;
 				}
 				break;
@@ -1415,337 +1096,301 @@ final class AVH_RPS_Admin
 	}
 
 	/**
-	 * Checks if the user clicked on the Report & Delete link.
+	 * Sets the amount of columns wanted for a particuler screen
 	 *
-	 * @WordPress Action wp_ajax_avh-fdas-reportcomment
+	 * @WordPress filter screen_meta_screen
 	 *
+	 * @param
+	 *        $screen
+	 * @return strings
 	 */
-	public function actionAjaxReportComment ()
+	public function filterScreenLayoutColumns ($columns, $screen)
 	{
-		global $wpdb;
-		if ('avh-fdas-reportcomment' == $_REQUEST['action']) {
-			$comment_id = absint($_REQUEST['id']);
-			check_ajax_referer('report-comment_' . $comment_id);
-			if (! $comment = get_comment($comment_id)) {
-				$this->_comment_footer_die(__('Oops, no comment with this ID.') . sprintf(' <a href="%s">' . __('Go back') . '</a>!', 'edit-comments.php'));
-			}
-			if (! current_user_can('edit_post', $comment->comment_post_ID)) {
-				$this->_comment_footer_die(__('You are not allowed to edit comments on this post.'));
-			}
-			$options = $this->_core->getOptions();
-			// If we use IP Cache and the Reported IP isn't spam, delete it from the IP cache.
-			if (1 == $options['general']['useipcache']) {
-				$ip_info = $this->_db->getIP($comment->comment_author_IP, OBJECT);
-				if (is_object($ip_info) && 0 == $ip_info->spam) {
-					$comment_date = get_comment_date('Y-m-d H:i:s', $comment_id);
-					$result = $this->_db->updateIpCache(array ( 'ip' => $comment->comment_author_IP, 'spam' => 1,
-																'lastseen' => $comment_date ));
-				}
-			}
-			if ($options['sfs']['sfsapikey'] != '') {
-				$this->_handleReportSpammer($comment->comment_author, $comment->comment_author_email, $comment->comment_author_IP);
-			}
-			if (1 == $options['general']['addblacklist']) {
-				$blacklist = $this->_core->getDataElement('lists', 'blacklist');
-				if (! empty($blacklist)) {
-					$b = explode("\r\n", $blacklist);
+		switch ( $screen )
+		{
+			// case $this->_hooks['avhrps_menu_competition']:
+			// $columns[$this->_hooks['avhfdas_menu_overview']] = 1;
+			// break;
+			// case $this->_hooks['avhrps_menu_competition_add']:
+			// $columns[$this->_hooks['avhfdas_menu_general']] = 1;
+			// break;
+		}
+		return $columns;
+	}
+
+	public function actionUser_Profile ($user_id)
+	{
+		$userID = $user_id->ID;
+		$_rps_class_bw = get_user_meta($userID, 'rps_class_bw', true);
+		$_rps_class_color = get_user_meta($userID, 'rps_class_color', true);
+		$_rps_class_print_bw = get_user_meta($userID, 'rps_class_print_bw', true);
+		$_rps_class_print_color = get_user_meta($userID, 'rps_class_print_color', true);
+
+		$_classification = array('beginner' => 'Beginner','advanced' => 'Advanced','salon' => 'Salon');
+		echo '<h3 id="rps">Competition Classification</h3>';
+		echo '<table class="form-table">';
+
+		echo '<tr>';
+		echo '<th>Classification Digital B&W</th>';
+		echo '<td>';
+		if ( current_user_can('rps_edit_competition_classification') ) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_bw" id="rps_class_bw">';
+			foreach ( $_classification as $key => $value ) {
+				if ( $key === $_rps_class_bw ) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
 				} else {
-					$b = array ();
-				}
-				if (! (in_array($comment->comment_author_IP, $b))) {
-					array_push($b, $comment->comment_author_IP);
-					$this->_setBlacklistOption($b);
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
 				}
 			}
-			// Delete the comment
-			$r = wp_delete_comment($comment->comment_ID);
-			die($r ? '1' : '0');
-		}
-	}
-
-	/**
-	 * Handles the admin_action emailreportspammer call.
-	 *
-	 * @WordPress Action admin_action_emailreportspammer
-	 * @since 1.2
-	 *
-	 */
-	public function actionHandleEmailReportingUrl ()
-	{
-		if (! (isset($_REQUEST['action']) && 'emailreportspammer' == $_REQUEST['action'])) {
-			return;
-		}
-		$a = esc_html($_REQUEST['a']);
-		$e = esc_html($_REQUEST['e']);
-		$i = esc_html($_REQUEST['i']);
-		$extra = '&m=' . AVH_RPS_Define::ERROR_INVALID_REQUEST . '&i=' . $i;
-		if (AVH_Security::verifyNonce($_REQUEST['_avhnonce'], $a . $e . $i)) {
-			$all = get_option($this->_core->getDbNonces());
-			$extra = '&m=' . AVH_RPS_Define::ERROR_NOT_REPORTED . '&i=' . $i;
-			if (isset($all[$_REQUEST['_avhnonce']])) {
-				$this->_handleReportSpammer($a, $e, $i);
-				unset($all[$_REQUEST['_avhnonce']]);
-				update_option($this->_core->db_nonce, $all);
-				$extra = '&m=' . AVH_RPS_Define::REPORTED . '&i=' . $i;
-			}
-			unset($all);
-		}
-		wp_redirect(admin_url('admin.php?page=' . AVH_RPS_Define::MENU_SLUG_GENERAL . $extra));
-	}
-
-	/**
-	 * Do the HTTP call to and report the spammer
-	 *
-	 * @param unknown_type $username
-	 * @param unknown_type $email
-	 * @param unknown_type $ip_addr
-	 */
-	private function _handleReportSpammer ($username, $email, $ip_addr)
-	{
-		$email = empty($email) ? 'meseaffibia@gmail.com' : $email;
-		$url = 'http://www.stopforumspam.com/add.php';
-		$call = wp_remote_post($url, array (
-											'body' => array ( 'username' => $username, 'ip_addr' => $ip_addr, 'email' => $email,
-															'api_key' => $this->_core->getOptionElement('sfs', 'sfsapikey') ) ));
-		if (is_wp_error($call) || 200 != $call['response']['code']) {
-			$to = get_option('admin_email');
-			$subject = sprintf('[%s] AVH First Defense Against Spam - ' . __('Error reporting spammer', 'avh-fdas'), wp_specialchars_decode(get_option('blogname'), ENT_QUOTES));
-			if (is_wp_error($call)) {
-				$message = $call->get_error_messages();
-			} else {
-				$message[] = $call['body'];
-			}
-			AVH_Common::sendMail($to, $subject, $message, $this->_settings->getSetting('mail_footer'));
-		}
-	}
-
-	/**
-	 * Handles the admin_action_blacklist call
-	 *
-	 * @WordPress Action admin_action_blacklist
-	 *
-	 */
-	public function actionHandleBlacklistUrl ()
-	{
-		if (! (isset($_REQUEST['action']) && 'blacklist' == $_REQUEST['action'])) {
-			return;
-		}
-		$ip = $_REQUEST['i'];
-		if (AVH_Security::verifyNonce($_REQUEST['_avhnonce'], $ip)) {
-			$blacklist = $this->_core->getDataElement('lists', 'blacklist');
-			if (! empty($blacklist)) {
-				$b = explode("\r\n", $blacklist);
-			} else {
-				$b = array ();
-			}
-			if (! (in_array($ip, $b))) {
-				array_push($b, $ip);
-				$this->_setBlacklistOption($b);
-				wp_redirect(admin_url('admin.php?page=' . AVH_RPS_Define::MENU_SLUG_GENERAL . '&m=' . AVH_RPS_Define::ADDED_BLACKLIST . '&i=' . $ip));
-			} else {
-				wp_redirect(admin_url('admin.php?page=' . AVH_RPS_Define::MENU_SLUG_GENERAL . '&m=' . AVH_RPS_Define::ERROR_EXISTS_IN_BLACKLIST . '&i=' . $ip));
-			}
+			echo $p . $r;
+			echo '</select>';
 		} else {
-			wp_redirect(admin_url('admin.php?page=' . AVH_RPS_Define::MENU_SLUG_GENERAL . '&m=' . AVH_RPS_Define::ERROR_INVALID_REQUEST));
+			echo $_classification[$_rps_class_bw];
 		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '<tr>';
+		echo '<th>Classification Digital Color</th>';
+		echo '<td>';
+		if ( current_user_can('rps_edit_competition_classification') ) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_color" id="rps_class_color">';
+			foreach ( $_classification as $key => $value ) {
+				if ( $key === $_rps_class_color ) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
+				} else {
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
+				}
+			}
+			echo $p . $r;
+			echo '</select>';
+		} else {
+			echo $_classification[$_rps_class_color];
+		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '<tr>';
+		echo '<th>Classification Print B&W</th>';
+		echo '<td>';
+		if ( current_user_can('rps_edit_competition_classification') ) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_print_bw" id="rps_class_print_bw">';
+			foreach ( $_classification as $key => $value ) {
+				if ( $key === $_rps_class_print_bw ) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
+				} else {
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
+				}
+			}
+			echo $p . $r;
+			echo '</select>';
+		} else {
+			echo $_classification[$_rps_class_print_bw];
+		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '<tr>';
+		echo '<th>Classification Print Color</th>';
+		echo '<td>';
+		if ( current_user_can('rps_edit_competition_classification') ) {
+			$p = '';
+			$r = '';
+			echo '<select name="rps_class_print_color" id="rps_class_print_color">';
+			foreach ( $_classification as $key => $value ) {
+				if ( $key === $_rps_class_print_color ) {
+					$p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
+				} else {
+					$r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
+				}
+			}
+			echo $p . $r;
+			echo '</select>';
+		} else {
+			echo $_classification[$_rps_class_print_color];
+		}
+		echo '</td>';
+		echo '</tr>';
+
+		echo '</table>';
 	}
 
-	/**
-	 * Update the blacklist in the proper format
-	 *
-	 * @param array $b
-	 */
-	private function _setBlacklistOption ($blacklist)
+	public function actionProfile_Update_Save ($user_id)
 	{
-		$data = $this->_core->getData();
-		natsort($blacklist);
-		$blacklist_formatted = implode("\r\n", $blacklist);
-		$data['lists']['blacklist'] = $blacklist_formatted;
-		$this->_core->saveData($data);
+		$userID = $user_id;
+		if ( isset($_POST['rps_class_bw']) ) {
+			$_rps_class_bw = $_POST["rps_class_bw"];
+		} else {
+			$_rps_class_bw = get_user_meta($userID, 'rps_class_bw', true);
+		}
+		if ( isset($_POST['rps_class_color']) ) {
+			$_rps_class_color = $_POST['rps_class_color'];
+		} else {
+			$_rps_class_color = get_user_meta($userID, 'rps_class_color', true);
+		}
+		if ( isset($_POST['rps_class_print_bw']) ) {
+			$_rps_class_print_bw = $_POST["rps_class_print_bw"];
+		} else {
+			$_rps_class_print_bw = get_user_meta($userID, 'rps_class_print_bw', true);
+		}
+		if ( isset($_POST['rps_class_print_color']) ) {
+			$_rps_class_print_color = $_POST['rps_class_print_color'];
+		} else {
+			$_rps_class_print_color = get_user_meta($userID, 'rps_class_print_color', true);
+		}
+
+		update_user_meta($userID, "rps_class_bw", $_rps_class_bw);
+		update_user_meta($userID, "rps_class_color", $_rps_class_color);
+		update_user_meta($userID, "rps_class_print_bw", $_rps_class_print_bw);
+		update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
 	}
 
-	/**
-	 * Update the whitelist in the proper format
-	 *
-	 * @param array $b
-	 */
-	private function _setWhitelistOption ($b)
+	private function _updateCompetition ()
 	{
-		$data = $this->_core->getData();
-		natsort($b);
-		$x = implode("\r\n", $b);
-		$data['lists']['whitelist'] = $x;
-		$this->_core->saveData($data);
-	}
+		$formOptions = $_POST['competition-edit'];
 
-	/**
-	 * Called on activation of the plugin.
-	 *
-	 */
-	public function installPlugin ()
-	{
-		global $wpdb;
-		// Add Cron Job, the action is added in the Public class.
-		if (! wp_next_scheduled('avhfdas_clean_nonce')) {
-			wp_schedule_event(time(), 'daily', 'avhfdas_clean_nonce');
-		}
-		// Setup nonces db in options
-		if (! (get_option($this->_core->getDbNonces()))) {
-			update_option($this->_core->getDbNonces(), $this->_core->getDefaultNonces());
-			wp_cache_flush(); // Delete cache
-		}
-		// Setup the DB Tables
-		$charset_collate = '';
-		if (version_compare(mysql_get_server_info(), '4.1.0', '>=')) {
-			if (! empty($wpdb->charset))
-				$charset_collate = 'DEFAULT CHARACTER SET ' . $wpdb->charset;
-			if (! empty($wpdb->collate))
-				$charset_collate .= ' COLLATE ' . $wpdb->collate;
-		}
-		if ($wpdb->get_var('show tables like \'' . $wpdb->avhfdasipcache . '\'') === null) {
-			$sql = 'CREATE TABLE `' . $wpdb->avhfdasipcache . '` (
-  					`ip` int(10) unsigned NOT null,
-  					`added` datetime NOT null DEFAULT \'0000-00-00 00:00:00\',
-  					`lastseen` datetime NOT null DEFAULT \'0000-00-00 00:00:00\',
-  					`spam` tinyint(1) NOT null,
-  					PRIMARY KEY (`ip`),
-  					KEY `added` (`added`),
-  					KEY `lastseen` (`lastseen`)
-					) ' . $charset_collate . ';';
-			$result = $wpdb->query($sql);
-		}
-	}
+		$formOptionsNew['date'] = $formOptions['date'];
+		$formOptionsNew['close-date'] = $formOptions['close-date'];
+		$formOptionsNew['close-time'] = $formOptions['close-time'];
+		$formOptionsNew['theme'] = $formOptions['theme'];
+		$formOptionsNew['medium'] = $formOptions['medium'];
+		$formOptionsNew['classification'] = $formOptions['classification'];
+		$formOptionsNew['max_entries'] = $formOptions['max_entries'];
+		$formOptionsNew['judges'] = $formOptions['judges'];
+		$formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
+		$formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
+		$formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
+		// @format_off
+		$_medium = array ( 'medium_bwd'		=> 'B&W Digital',
+							'medium_cd'		=> 'Color Digital',
+							'medium_bwp'	=> 'B&W Print',
+							'medium_cp'		=> 'Color Print'
+					);
+		$selectedMedium=array_search($competition->Medium, $_medium);
+		// @format_on
 
-	/**
-	 * Called on deactivation of the plugin.
-	 *
-	 */
-	public function deactivatePlugin ()
-	{
-		// Remove the administrative capilities
-		$role = get_role('administrator');
-		if ($role != null && $role->has_cap('role_avh_fdas')) {
-			$role->remove_cap('role_avh_fdas');
-		}
-		if ($role != null && $role->has_cap('role_admin_avh_fdas')) {
-			$role->remove_cap('role_admin_avh_fdas');
-		}
-		// Deactivate the cron action as the the plugin is deactivated.
-		wp_clear_scheduled_hook('avhfdas_clean_nonce');
-		wp_clear_scheduled_hook('avhfdas_clean_ipcache');
+		// @format_off
+		$_classification = array ( 'class_b' => 'Beginner',
+									'class_a' => 'Advanced',
+									'class_s' => 'Salon',
+			);
+		// @format_on
+		$data['ID'] = $_REQUEST['competition'];
+		$data['Competition_Date'] = $formOptionsNew['date'];
+		$data['Close_Date'] = $formOptionsNew['close-date'];
+		$data['Theme'] = $formOptionsNew['theme'];
+		$data['Max_Entries'] = $formOptionsNew['max_entries'];
+		$data['Num_Judges'] = $formOptionsNew['judges'];
+		$data['Special_Event'] = ( $formOptionsNew['special_event'] ? 'Y' : 'N' );
+		$data['Closed'] = ( $formOptionsNew['closed'] ? 'Y' : 'N' );
+		$data['Scored'] = ( $formOptionsNew['scored'] ? 'Y' : 'N' );
+		$data['Medium'] = $_medium[$formOptionsNew['medium']];
+		$data['Classification'] = $_classification[$formOptionsNew['classification']];
+		$competition_ID = $this->_rpsdb->insertCompetition($data);
 	}
+	// ############ Admin WP Helper ##############
 
-	############## Admin WP Helper ##############
 	/**
 	 * Display plugin Copyright
-	 *
 	 */
 	private function _printAdminFooter ()
 	{
-		echo '<div class="clear">';
+		echo '<div class="clear"></div>';
 		echo '<p class="footer_avhfdas">';
-		printf('&copy; Copyright 2010 <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH First Defense Against Spam version %s', AVH_RPS_Define::PLUGIN_VERSION);
+		printf('&copy; Copyright 2012 <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s', AVH_RPS_Define::PLUGIN_VERSION);
 		echo '</p>';
 	}
 
 	/**
 	 * Display WP alert
-	 *
 	 */
 	private function _displayMessage ()
 	{
-		if ($this->_message != '') {
+		$message = '';
+		if ( is_array($this->_message) ) {
+			foreach ( $this->_message as $key => $_msg ) {
+				$message .= $_msg . "<br>";
+			}
+		} else {
 			$message = $this->_message;
+		}
+
+		if ( $message != '' ) {
 			$status = $this->_status;
 			$this->_message = $this->_status = ''; // Reset
-		}
-		if (isset($message)) {
-			$status = ($status != '') ? $status : 'updated fade';
+			$status = ( $status != '' ) ? $status : 'updated fade';
 			echo '<div id="message"	class="' . $status . '">';
 			echo '<p><strong>' . $message . '</strong></p></div>';
 		}
 	}
 
 	/**
-	 * Displays the icon needed. Using this instead of core in case we ever want to show our own icons
+	 * Displays the icon needed.
+	 * Using this instead of core in case we ever want to show our own icons
+	 *
 	 * @param $icon strings
 	 * @return string
 	 */
 	private function _displayIcon ($icon)
 	{
-		return ('<div class="icon32" id="icon-' . $icon . '"><br/></div>');
-	}
-
-	/**
-	 * Ouput formatted options
-	 *
-	 * @param array $option_data
-	 * @return string
-	 */
-	private function _printOptions ($option_data, $option_actual)
-	{
-		// Generate output
-		$output = '';
-		$output .= "\n" . '<table class="form-table avhfdas-options">' . "\n";
-		foreach ($option_data as $option) {
-			$section = substr($option[0], strpos($option[0], '[') + 1);
-			$section = substr($section, 0, strpos($section, ']['));
-			$option_key = rtrim($option[0], ']');
-			$option_key = substr($option_key, strpos($option_key, '][') + 2);
-			// Helper
-			if ($option[2] == 'helper') {
-				$output .= '<tr style="vertical-align: top;"><td class="helper" colspan="2">' . $option[4] . '</td></tr>' . "\n";
-				continue;
-			}
-			switch ($option[2]) {
-				case 'checkbox':
-					$input_type = '<input type="checkbox" id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr($option[3]) . '" ' . checked('1', $option_actual[$section][$option_key], false) . ' />' . "\n";
-					$explanation = $option[4];
-					break;
-				case 'dropdown':
-					$selvalue = explode('/', $option[3]);
-					$seltext = explode('/', $option[4]);
-					$seldata = '';
-					foreach ((array) $selvalue as $key => $sel) {
-						$seldata .= '<option value="' . $sel . '" ' . selected($sel, $option_actual[$section][$option_key], false) . ' >' . ucfirst($seltext[$key]) . '</option>' . "\n";
-					}
-					$input_type = '<select id="' . $option[0] . '" name="' . $option[0] . '">' . $seldata . '</select>' . "\n";
-					$explanation = $option[5];
-					break;
-				case 'text-color':
-					$input_type = '<input type="text" ' . (($option[3] > 50) ? ' style="width: 95%" ' : '') . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '" size="' . $option[3] . '" /><div class="box_color ' . $option[0] . '"></div>' . "\n";
-					$explanation = $option[4];
-					break;
-				case 'textarea':
-					$input_type = '<textarea rows="' . $option[5] . '" ' . (($option[3] > 50) ? ' style="width: 95%" ' : '') . 'id="' . $option[0] . '" name="' . $option[0] . '" size="' . $option[3] . '" />' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '</textarea>';
-					$explanation = $option[4];
-					break;
-				case 'text':
-				default:
-					$input_type = '<input type="text" ' . (($option[3] > 50) ? ' style="width: 95%" ' : '') . 'id="' . $option[0] . '" name="' . $option[0] . '" value="' . esc_attr(stripcslashes($option_actual[$section][$option_key])) . '" size="' . $option[3] . '" />' . "\n";
-					$explanation = $option[4];
-					break;
-			}
-			// Additional Information
-			$extra = '';
-			if ($explanation) {
-				$extra = '<br /><span class="description">' . __($explanation) . '</span>' . "\n";
-			}
-			// Output
-			$output .= '<tr style="vertical-align: top;"><th align="left" scope="row"><label for="' . $option[0] . '">' . __($option[1]) . '</label></th><td>' . $input_type . '	' . $extra . '</td></tr>' . "\n";
-		}
-		$output .= '</table>' . "\n";
-		return $output;
+		return ( '<div class="icon32" id="icon-' . $icon . '"><br/></div>' );
 	}
 
 	/**
 	 * Display error message at bottom of comments.
 	 *
-	 * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
+	 * @param string $msg
+	 *        Error Message. Assumed to contain HTML and be sanitized.
 	 */
 	private function _comment_footer_die ($msg)
 	{
 		echo "<div class='wrap'><p>$msg</p></div>";
 		die();
+	}
+
+	/**
+	 * Generates the header for admin pages
+	 *
+	 * @param string $title
+	 *        The title to show in the main heading.
+	 * @param bool $form
+	 *        Whether or not the form should be included.
+	 * @param string $option
+	 *        The long name of the option to use for the current page.
+	 * @param string $optionshort
+	 *        The short name of the option to use for the current page.
+	 * @param bool $contains_files
+	 *        Whether the form should allow for file uploads.
+	 */
+	function admin_header ($title)
+	{
+		echo '<div class="wrap">';
+		echo $this->_displayIcon('options-general');
+		echo '<h2 id="rps-title">' . $title . '</h2>';
+		echo '<div id="rps_content_top" class="postbox-container" style="width:100%;">';
+		echo '<div class="metabox-holder">';
+		echo '<div class="meta-box-sortables">';
+	}
+
+	/**
+	 * Generates the footer for admin pages
+	 *
+	 * @param bool $submit
+	 *        Whether or not a submit button should be shown.
+	 * @param text $text
+	 *        The text to be shown in the submit button.
+	 */
+	function admin_footer ()
+	{
+		echo '</div></div></div>';
+		// $this->admin_sidebar();
+		$this->_printAdminFooter();
+		echo '</div>';
 	}
 }
