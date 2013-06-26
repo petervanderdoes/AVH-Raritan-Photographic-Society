@@ -191,9 +191,8 @@ class AVH_RPS_OldRpsDb
 	{
 		$sql = $this->_rpsdb->prepare("SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
 		e.Score, e.Award
-		FROM competitions as c, members as m, entries as e
+		FROM competitions as c, entries as e
 		WHERE c.ID = e.Competition_ID AND
-		m.ID = e.Member_ID AND
 		c.Competition_Date >= %s AND
 		c.Competition_Date < %s AND
 		e.Member_ID = %s

@@ -446,7 +446,7 @@ class AVH_RPS_Public
 				if ( $award > "" ) {
 					$score_award .= " / $award";
 				}
-				echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><div id='rps_colorbox_title'>" . htmlentities($title) . "<br />$comp_date / $medium{$score_award}</div><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+				echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
 				echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
 				echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
 			}
