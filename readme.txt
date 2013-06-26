@@ -28,5 +28,5 @@ None
 
 == Changelog ==
 
-= Version 0.1.0-dev.100 =
+= Version 1.0.0-rc.1 =
 * Initial version
