@@ -201,7 +201,7 @@ class AVH_RPS_Public
 
         $scores = $this->_rpsdb->getMonthlyScores();
 
-        if (is_array($scores)) {
+        if (is_array($scores) && (! empty($scores))) {
             $scored_competitions = true;
         } else {
             $scored_competitions = false;
