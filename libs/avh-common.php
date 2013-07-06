@@ -9,7 +9,7 @@ if ( !class_exists('AVH_Common') ) {
 		 *
 		 * @var array preferred order of attributes
 		 */
-		// @format_off
+		// @formatter:off
 		public static $attribute_order = array
 		(
 		'action',
@@ -41,7 +41,7 @@ if ( !class_exists('AVH_Common') ) {
 		'readonly',
 		'disabled',
 		);
-		// @format_on
+		// @formatter:on
 		/**
 		 * Sends the email
 		 */

@@ -150,7 +150,7 @@ class AVH_RPS_Core
 			mkdir("$path/thumbnails", 0755);
 
 		if ( !file_exists("$path/thumbnails/$file_name" . "_$size.jpg") ) {
-			$name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']);
+			$name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']);
 			$this->rpsResizeImage($name, "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
 		}
 	}
