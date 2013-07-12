@@ -230,6 +230,7 @@ class AVH_RPS_OldRpsDb
 		$sql = $this->_rpsdb->prepare($_sql, $_class1, '%' . $subset_detail . '%');
 		$bw_set = $this->_rpsdb->get_results($sql, ARRAY_A);
 		$_return = array_merge($color_set, $bw_set);
+		sort ($_return);
 		return $_return;
 	}
 
