@@ -32,22 +32,10 @@ None
 * Preparation for new development cycle.
 
 = Version 1.2.1 =
-* Preparation for new development cycle.
+* Bugfix: Competitions show up in duplicates
 
 = Version 1.2.0 =
-* Preparation for new development cycle.
-
-= Version 1.1.1 =
-* Preparation for new development cycle.
-
-= Version 1.1.0 =
-* Preparation for new development cycle.
-
-= Version 1.0.1 =
-* Preparation for new development cycle.
+* When a member has two different classifications the submission form is wrong.
 
 = Version 1.0.0 =
-* Preparation for new development cycle.
-
-= Version 1.0.0-rc.1 =
 * Initial version
