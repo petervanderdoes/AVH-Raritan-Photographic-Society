@@ -724,7 +724,7 @@ class AVH_RPS_Public
     {
         global $post;
 
-        if ($post->ID == 56 || $post->ID == 58) {
+        if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
             $this->_settings->comp_date = "";
             $this->_settings->classification = "";
             $this->_settings->medium = "";
@@ -1050,7 +1050,7 @@ class AVH_RPS_Public
     {
         global $post;
 
-        if ($post->ID == 75) {
+        if (is_object($post) && $post->ID == 75) {
             if (! empty($_POST)) {
                 $redirect_to = $_POST['wp_get_referer'];
                 $this->_medium_subset = $_POST['m'];
@@ -1093,7 +1093,7 @@ class AVH_RPS_Public
                     $old_file_parts = pathinfo($server_file_name);
                     $old_file_name = $old_file_parts['filename'];
                     $current_user = wp_get_current_user();
-                    $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login;
+                    $new_file_name_noext = sanitize_file_name($_POST['new_title']) . '+' . $current_user->user_login;
                     $new_file_name = sanitize_file_name($new_title) . '+' . $current_user->user_login . $ext;
                     if (! $this->_core->rps_rename_image_file($path, $old_file_name, $new_file_name_noext, $ext)) {
                         die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
@@ -1171,7 +1171,7 @@ class AVH_RPS_Public
     {
         global $post;
 
-        if ($post->ID == 89) {
+        if (is_object($post) && $post->ID == 89) {
             if (isset($_GET['post'])) {
                 $redirect_to = $_POST['wp_get_referer'];
 

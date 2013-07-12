@@ -212,17 +212,24 @@ class AVH_RPS_OldRpsDb
 			$and_medium_subset = '';
 		}
 		$user = get_userdata($this->_user_id);
+
 		$_class1 = $user->rps_class_bw;
 		$_class2 = $user->rps_class_color;
 		// Select the list of open competitions that match this member's classification(s)
 		$_sql = "SELECT c.Competition_Date, c.Classification, c.Medium, c.Theme, c.Closed
 			FROM competitions c
-			WHERE c.Classification IN  (%s,%s)
+			WHERE c.Classification IN  (%s)
 				AND c.Closed = 'N'";
 		$_sql .= $and_medium_subset;
 		$_sql .= " GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium";
-		$sql = $this->_rpsdb->prepare($_sql, $_class1, $_class2, '%' . $subset . '%');
-		$_return = $this->_rpsdb->get_results($sql, ARRAY_A);
+
+		$subset_detail = 'color '.$subset;
+		$sql = $this->_rpsdb->prepare($_sql, $_class2, '%' . $subset_detail . '%');
+		$color_set = $this->_rpsdb->get_results($sql, ARRAY_A);
+		$subset_detail = 'b&w '.$subset;
+		$sql = $this->_rpsdb->prepare($_sql, $_class1, '%' . $subset_detail . '%');
+		$bw_set = $this->_rpsdb->get_results($sql, ARRAY_A);
+		$_return = array_merge($color_set, $bw_set);
 		return $_return;
 	}
 
