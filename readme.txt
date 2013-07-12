@@ -28,7 +28,7 @@ None
 
 == Changelog ==
 
-= Version 1.2.0-dev.1 =
+= Version 1.2.0-rc.1 =
 * Preparation for new development cycle.
 
 = Version 1.1.1 =
