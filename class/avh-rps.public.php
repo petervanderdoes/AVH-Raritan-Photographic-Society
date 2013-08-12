@@ -56,6 +56,8 @@ class AVH_RPS_Public
         $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
         $this->_core_options = $this->_core->getOptions();
 
+        $this->_rpsdb->setCompetitionClose();
+
         add_action('wp_loaded', array($this, 'actionInit_InitRunTime'));
         // Public actions and filters
         add_action('template_redirect', array($this, 'actionTemplate_Redirect_RPSWindowsClient'));
@@ -66,7 +68,7 @@ class AVH_RPS_Public
 
         // add_action('pre-header-my-print-entries', array($this,'actionPreHeader_RpsMyEntries'));
         // add_action('pre-header-my-digital-entries', array($this,'actionPreHeader_RpsMyEntries'));
-        add_action('wp', array($this, 'actionPreHeader_RpsMyEntries'));
+        // add_action('wp', array($this, 'actionPreHeader_RpsMyEntries'));
         add_action('wp', array($this, 'actionPreHeader_RpsMyEntries'));
 
         add_shortcode('rps_my_entries', array($this, 'shortcodeRpsMyEntries'));
@@ -928,7 +930,7 @@ class AVH_RPS_Public
             $close_date = $this->_rpsdb->getCompetitionCloseDate();
             if (! empty($close_date)) {
                 $close_epoch = strtotime($close_date);
-                $time_to_close = $close_epoch - time();
+                $time_to_close = $close_epoch - current_time('timestamp');
                 if ($time_to_close >= 0 && $time_to_close <= 604800) {
                     echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date("F j, Y", $close_epoch) . " at " . date("g:ia (T)", $close_epoch) . "</td></tr>\n";
                 }
