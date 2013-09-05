@@ -395,22 +395,22 @@ final class AVH_RPS_Admin
 		}
 		echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
 
-		// @formatter:off
+		// @format_off
 		$_medium = array ( 'medium_bwd'		=> 'B&W Digital',
 							'medium_cd'		=> 'Color Digital',
 							'medium_bwp'	=> 'B&W Print',
 							'medium_cp'		=> 'Color Print'
 					);
 		$selectedMedium=array_search($competition->Medium, $_medium);
-		// @formatter:on
+		// @format_on
 		echo $classForm->select('Medium', '', 'medium', $_medium, $selectedMedium);
 
-		// @formatter:off
+		// @format_off
 		$_classification = array ( 'class_b' => 'Beginner',
 									'class_a' => 'Advanced',
 									'class_s' => 'Salon',
 			);
-		// @formatter:on
+		// @format_on
 		$selectedClassification = array_search($competition->Classification, $_classification);
 		echo $classForm->select('Classification', '', 'classification', $_classification, $selectedClassification);
 
@@ -590,7 +590,7 @@ final class AVH_RPS_Admin
 		$classForm = $this->_classes->load_class('Form', 'system', false);
 		$classForm->setOption_name('competition_add');
 
-		// @formatter:off
+		// @format_off
 		$formDefaultOptions = array (
 				'date' => '',
 				'theme' => '',
@@ -605,7 +605,7 @@ final class AVH_RPS_Admin
 				'judges' => '1',
 				'special_event' => FALSE
 			);
-		// @formatter:on
+		// @format_on
 		$formOptions = $formDefaultOptions;
 		if ( isset($_POST['action']) ) {
 			switch ( $_POST['action'] )
@@ -663,7 +663,7 @@ final class AVH_RPS_Admin
 						$this->_message = 'Competition Added';
 						$this->_status = 'updated';
 
-						// @formatter:off
+						// @format_off
 				// @TODO: This is needed because of the old program, someday it needs to be cleaned up.
 				$medium_convert = array(
 							'medium_bwd'	=> 'B&W Digital',
@@ -677,7 +677,7 @@ final class AVH_RPS_Admin
 						'class_a' => 'Advanced',
 						'class_s' => 'Salon'
 				);
-				// @formatter:on
+				// @format_on
 						$data['Competition_Date'] = $formNewOptions['date'];
 						$data['Theme'] = $formNewOptions['theme'];
 						$data['Max_Entries'] = $formNewOptions['max_entries'];
@@ -710,22 +710,22 @@ final class AVH_RPS_Admin
 		echo $classForm->text('Date', '', 'date', $formOptions['date']);
 		echo $classForm->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
 
-		// @formatter:off
+		// @format_off
 		$_medium = array ( 'medium_bwd' => array ( 'text' => 'B&W Digital', 'checked' => $formOptions['medium_bwd'] ),
 							'medium_cd' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cd'] ),
 							'medium_bwp' => array ( 'text' => 'B&W Print', 'checked' => $formOptions['medium_bwp'] ),
 							'medium_cp' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cp'] )
 						);
-		// @formatter:on
+		// @format_on
 		echo $classForm->checkboxes('Medium', '', key($_medium), $_medium);
 		unset($_medium);
 
-		// @formatter:off
+		// @format_off
 		$_classification = array ( 'class_b' => array ( 'text' => 'Beginner', 'checked' => $formOptions['class_b'] ),
 									'class_a' => array ( 'text' => 'Advanced', 'checked' => $formOptions['class_a'] ),
 									'class_s' => array ( 'text' => 'Salon', 'checked' => $formOptions['class_s'] )
 							);
-		// @formatter:on
+		// @format_on
 		echo $classForm->checkboxes('Classification', '', key($_classification), $_classification);
 		unset($_classification);
 
@@ -1266,21 +1266,21 @@ final class AVH_RPS_Admin
 		$formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
 		$formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
 		$formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
-		// @formatter:off
+		// @format_off
 		$_medium = array ( 'medium_bwd'		=> 'B&W Digital',
 							'medium_cd'		=> 'Color Digital',
 							'medium_bwp'	=> 'B&W Print',
 							'medium_cp'		=> 'Color Print'
 					);
 		$selectedMedium=array_search($competition->Medium, $_medium);
-		// @formatter:on
+		// @format_on
 
-		// @formatter:off
+		// @format_off
 		$_classification = array ( 'class_b' => 'Beginner',
 									'class_a' => 'Advanced',
 									'class_s' => 'Salon',
 			);
-		// @formatter:on
+		// @format_on
 		$data['ID'] = $_REQUEST['competition'];
 		$data['Competition_Date'] = $formOptionsNew['date'];
 		$data['Close_Date'] = $formOptionsNew['close-date'];
