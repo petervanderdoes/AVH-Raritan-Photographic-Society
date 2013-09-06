@@ -29,7 +29,7 @@ None
 == Changelog ==
 
 = Version 1.2.2-rc.1 =
-* Preparation for new development cycle.
+* Enhancement: Close competitions when needed.
 
 = Version 1.2.1 =
 * Bugfix: Competitions show up in duplicates
