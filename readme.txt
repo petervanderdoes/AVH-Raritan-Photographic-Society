@@ -4,7 +4,7 @@ Donate link: http://blog.avirtualhome.com/wordpress-plugins/
 Tags:
 Requires at least: 3.4
 Tested up to: 3.4.1
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 
 The AVH RPS Competition plugin was written to manage the competitions of the Raritan Photographic Society.
 
@@ -28,23 +28,14 @@ None
 
 == Changelog ==
 
+= Version 1.2.2 =
+* Enhancement: Close competitions when needed.
+
 = Version 1.2.1 =
-* Preparation for new development cycle.
+* Bugfix: Competitions show up in duplicates
 
 = Version 1.2.0 =
-* Preparation for new development cycle.
-
-= Version 1.1.1 =
-* Preparation for new development cycle.
-
-= Version 1.1.0 =
-* Preparation for new development cycle.
-
-= Version 1.0.1 =
-* Preparation for new development cycle.
+* When a member has two different classifications the submission form is wrong.
 
 = Version 1.0.0 =
-* Preparation for new development cycle.
-
-= Version 1.0.0-rc.1 =
 * Initial version

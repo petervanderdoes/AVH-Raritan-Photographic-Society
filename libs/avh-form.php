@@ -545,7 +545,8 @@ if ( !class_exists('AVH_Form') ) {
 			$this->_option_name = $_option_name;
 		}
 
-		public function getOption_name () {
+		public function getOption_name ()
+		{
 			return $this->_option_name;
 		}
 
@@ -554,7 +555,7 @@ if ( !class_exists('AVH_Form') ) {
 			$this->_nonce = $this->_option_name . '-' . $_nonce;
 		}
 
-		public function getNonce_action()
+		public function getNonce_action ()
 		{
 			return $this->_nonce;
 		}
