@@ -932,7 +932,7 @@ class AVH_RPS_Public
                 $close_epoch = strtotime($close_date);
                 $time_to_close = $close_epoch - current_time('timestamp');
                 if ($time_to_close >= 0 && $time_to_close <= 604800) {
-                    echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . date("F j, Y", $close_epoch) . " at " . date("g:ia (T)", $close_epoch) . "</td></tr>\n";
+                    echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . mysql2date("F j, Y", $close_epoch) . " at " . mysql2date('H:i a', $close_epoch) . "</td></tr>\n";
                 }
             }
         }
