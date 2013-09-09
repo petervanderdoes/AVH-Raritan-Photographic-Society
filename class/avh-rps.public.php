@@ -1288,11 +1288,12 @@ class AVH_RPS_Public
                                 }
                             }
                             // Resize the image and deposit it in the destination directory
-                            if (! $this->_core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, ''));
-                            {
-                                $this->_errmsg = "There is a problem resizing the picture for the use of the projector.";
-                                return;
-                            }
+                            $this->_core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, '');
+                            //if (! $this->_core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, ''));
+                            //{
+                            //    $this->_errmsg = "There is a problem resizing the picture for the use of the projector.";
+                            //    return;
+                            //}
                             $resized = 1;
 
                             // The uploaded image does not need to be resized so just move it to the destination directory
