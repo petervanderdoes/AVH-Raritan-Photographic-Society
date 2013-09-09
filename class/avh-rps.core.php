@@ -161,7 +161,7 @@ class AVH_RPS_Core
 
 		// Open the original image
 		if ( !file_exists($image_name) ) {
-			return;
+			return false;
 		}
 		$original_img = imagecreatefromjpeg($image_name);
 		// Calculate the height and width of the resized image
@@ -207,6 +207,8 @@ class AVH_RPS_Core
 
 		// Free up memory
 		imagedestroy($thumb_img);
+
+		return true;
 	}
 
 	function rpsGetThumbnailUrl ($row, $size)
