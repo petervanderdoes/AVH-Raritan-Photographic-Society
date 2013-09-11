@@ -398,7 +398,7 @@ class AVH_RPS_OldRpsDb
             if ( !isset($data['Close_Date']) ) {
                 $data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
                 $date_array = getdate($data['Close_Date']);
-                $data['Close_Date'] = date('Y-m-d H:i:s', mktime(18, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
+                $data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
             }
             if ( !isset($data['Max_Entries']) ) {
                 $data['Max_Entries'] = 2;
