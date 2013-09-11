@@ -399,7 +399,8 @@ final class AVH_RPS_Admin
             $time_text = date("g:i a", strtotime($time_val));
             $time[$time_val] = $time_text;
         }
-        echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
+        // echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
+        echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
 
         // @format_off
         $_medium = array ( 'medium_bwd'		=> 'B&W Digital',
@@ -1288,7 +1289,7 @@ final class AVH_RPS_Admin
         // @format_on
         $data['ID'] = $_REQUEST['competition'];
         $data['Competition_Date'] = $formOptionsNew['date'];
-        $data['Close_Date'] = $formOptionsNew['close-date'];
+        $data['Close_Date'] = $formOptionsNew['close-date'] . ' ' . $formOptionsNew['close-time'];
         $data['Theme'] = $formOptionsNew['theme'];
         $data['Max_Entries'] = $formOptionsNew['max_entries'];
         $data['Num_Judges'] = $formOptionsNew['judges'];
