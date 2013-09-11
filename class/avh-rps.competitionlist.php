@@ -74,7 +74,11 @@ class AVH_RPS_CompetitionList extends WP_List_Table
 
         $search = ( isset($_REQUEST['s']) ) ? $_REQUEST['s'] : '';
 
-        $orderby = ( isset($_REQUEST['orderby']) ) ? $_REQUEST['orderby'] : 'Competition_Date DESC, Class_Code ASC, Medium ASC';
+        if ( $competition_status == 'open' ) {
+            $orderby = ( isset($_REQUEST['orderby']) ) ? $_REQUEST['orderby'] : 'Competition_Date ASC, Class_Code ASC, Medium ASC';
+        } else {
+            $orderby = ( isset($_REQUEST['orderby']) ) ? $_REQUEST['orderby'] : 'Competition_Date DESC, Class_Code ASC, Medium ASC';
+        }
         $order = ( isset($_REQUEST['order']) ) ? $_REQUEST['order'] : '';
 
         $competitions_per_page = $this->get_per_page($competition_status);
