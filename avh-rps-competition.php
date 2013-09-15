@@ -12,8 +12,8 @@
 if ( !defined('AVH_FRAMEWORK') ) {
     define('AVH_FRAMEWORK', true);
 }
-$_dir = pathinfo(__FILE__, PATHINFO_DIRNAME);
-$_basename = plugin_basename(__FILE__);
+$_dir = pathinfo($plugin, PATHINFO_DIRNAME);
+$_basename = plugin_basename($plugin);
 require_once ( $_dir . '/libs/avh-registry.php' );
 require_once ( $_dir . '/libs/avh-common.php' );
 require_once ( $_dir . '/libs/avh-security.php' );
