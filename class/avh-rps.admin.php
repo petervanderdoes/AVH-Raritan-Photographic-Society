@@ -79,6 +79,7 @@ final class AVH_RPS_Admin
 
         // Admin menu
         add_action('admin_menu', array($this,'actionAdminMenu'));
+        add_action('wp_ajax_setscore', array($this,'handleAjax'));
 
         return;
     }
@@ -120,6 +121,7 @@ final class AVH_RPS_Admin
     {
         wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
         wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', $this->_settings->getSetting('plugin_url') . '/js/avh-rps.admin.ajax.js', array('jquery'),false,true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', AVH_RPS_Define::MENU_POSITION_COMPETITION);
 
@@ -143,13 +145,10 @@ final class AVH_RPS_Admin
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
-        wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('common');
         wp_enqueue_script('wp-lists');
-        wp_enqueue_script('postbox');
-        wp_enqueue_style('css/dashboard');
         // Plugin Style and Scripts
-        // wp_enqueue_script('avhrps-competition-js');
+        wp_enqueue_script( 'avhrps-comp-ajax');
 
         wp_enqueue_style('avhrps-admin-css');
         wp_enqueue_style('avhrps-jquery-css');
@@ -247,6 +246,24 @@ final class AVH_RPS_Admin
                 wp_redirect($redirect);
                 break;
 
+            case 'setscore':
+                if ( !empty($_REQUEST['competition']) ) {
+                    check_admin_referer('score_'.$_REQUEST['competition']);
+                    $data['ID'] = (int) $_REQUEST['competition'];
+                    $data['Scored'] = 'Y';
+                    $this->_rpsdb->insertCompetition($data);
+                }
+                wp_redirect($redirect);
+                break;
+            case 'Unsetscore':
+                    if ( !empty($_REQUEST['competition']) ) {
+                        check_admin_referer('score_'.$_REQUEST['competition']);
+                        $data['ID'] = (int) $_REQUEST['competition'];
+                        $data['Scored'] = 'N';
+                        $this->_rpsdb->insertCompetition($data);
+                    }
+                    wp_redirect($redirect);
+                    break;
             default:
                 if ( !empty($_GET['_wp_http_referer']) ) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
@@ -263,6 +280,29 @@ final class AVH_RPS_Admin
         }
     }
 
+    public function handleAjax() {
+        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+        if (isset($_POST['scored'])) {
+            if ($_POST['scored'] == 'Yes') {
+                $data['ID'] = (int) $_POST['id'];
+                $data['Scored'] = 'N';
+                $result = $this->_rpsdb->insertCompetition($data);
+                $response = json_encode(array ('text' => 'N', 'scored'=>'No', 'scoredtext' => 'Yes'));
+            }
+            if ($_POST['scored'] == 'No') {
+                $data['ID'] = (int) $_POST['id'];
+                $data['Scored'] = 'Y';
+                $result = $this->_rpsdb->insertCompetition($data);
+                $response = json_encode(array ('text' => 'Y', 'scored'=>'Yes', 'scoredtext' => 'No'));
+            }
+            if (is_wp_error($result)) {
+                echo 'Error updating competition';
+            } else {
+                echo $response;
+            }
+        }
+        die();
+    }
     /**
      * Display the page for the menu Competition
      */
