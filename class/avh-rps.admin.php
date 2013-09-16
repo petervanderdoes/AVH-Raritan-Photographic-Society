@@ -81,6 +81,7 @@ final class AVH_RPS_Admin
         add_action('admin_menu', array($this,'actionAdminMenu'));
         add_action('wp_ajax_setscore', array($this,'handleAjax'));
 
+        add_filter('user_row_actions',array($this,'filterRPS_user_action_links'),10,2);
         return;
     }
 
@@ -1093,6 +1094,18 @@ final class AVH_RPS_Admin
             $return = $this->_rpsdb->updateEntry($data);
         }
         return $return;
+    }
+
+    /**
+     * Add row action link to users list to display all their entries.
+     * @param unknown $actions
+     * @param unknown $user
+     * @return string
+     */
+    function filterRPS_user_action_links( $actions, $user ) {
+        $link = admin_url(). "?page=avh-rps-entries&user_id=".$user->ID;
+        $actions['entries'] = "<a href='$link'>Entries</a>";
+        return $actions;
     }
 
     /**
