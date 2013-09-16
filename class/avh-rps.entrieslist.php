@@ -242,7 +242,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
     function single_row($a_entry)
     {
         $entry = $a_entry;
-        echo '<tr id="entry-' . $competition->ID . '">';
+        echo '<tr id="entry-' . $entry->ID . '">';
         echo $this->single_row_columns($entry);
         echo "</tr>";
     }
