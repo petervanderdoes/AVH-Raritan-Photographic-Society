@@ -178,15 +178,8 @@ class AVH_RPS_OldRpsDb
                     e.Score >= 8
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score", $season);
         $_x = $this->_rpsdb->get_results($sql, ARRAY_A);
-        foreach ( $_x as $_rec ) {
-            $user_info = get_userdata($_rec['Member_ID']);
-            $_rec['FirstName'] = $user_info->user_firstname;
-            $_rec['LastName'] = $user_info->user_lastname;
-            $_rec['Username'] = $user_info->user_login;
-            $_return[] = $_rec;
-        }
 
-        return $_return;
+        return $_x;
     }
 
     public function getScoresCurrentUser()

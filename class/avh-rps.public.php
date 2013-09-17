@@ -137,8 +137,14 @@ class AVH_RPS_Public
             echo '<ul>';
             $entries = $this->_rpsdb->getEightsAndHigher('', $season);
             $images = array_rand($entries, 5);
+
             foreach ( $images as $key ) {
                 $recs = $entries[$key];
+                $user_info = get_userdata($recs['Member_ID']);
+                $recs['FirstName'] = $user_info->user_firstname;
+                $recs['LastName'] = $user_info->user_lastname;
+                $recs['Username'] = $user_info->user_login;
+
                 // Grab a new record from the database
                 $dateParts = explode(" ", $recs['Competition_Date']);
                 $comp_date = $dateParts[0];
