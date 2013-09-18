@@ -8,7 +8,7 @@ final class AVH_RPS_Define
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '1.3.0-dev.10';
+    const PLUGIN_VERSION = '1.2.6-rc.1';
     const PLUGIN_README_URL = '';
     const PLUGIN_FILE = 'avh-rps-competition/avh-rps-competition.php';
 
