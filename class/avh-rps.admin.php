@@ -1,5 +1,8 @@
 <?php
-use Rps\Competition\ListCompetition;
+use Rps\Competition;
+use Rps\Settings;
+use DI\Container;
+use Rps;
 
 class AVH_RPS_AdminInitialize
 {
@@ -9,44 +12,10 @@ class AVH_RPS_AdminInitialize
 
     static function load ()
     {
-        add_action('init', array(__CLASS__,'handleActionInit'));
+    // Room to initialize widgets.
+
     }
 
-    public function handleActionInit ()
-    {
-        $this->actionInit_Roles();
-        $this->actionInit_UserFields();
-
-        return;
-    }
-
-    /**
-     * Setup Roles
-     *
-     * @WordPress Action init
-     */
-    public function actionInit_Roles ()
-    {
-        // Get the administrator role.
-        $role = get_role('administrator');
-
-        // If the administrator role exists, add required capabilities for the plugin.
-        if ( !empty($role) ) {
-
-            // Role management capabilities.
-            $role->add_cap('rps_edit_competition_classification');
-            $role->add_cap('rps_edit_competitions');
-            $role->add_cap('rps_edit_entries');
-        }
-    }
-
-    public function actionInit_UserFields ()
-    {
-        add_action('edit_user_profile', array($this,'actionUser_Profile'));
-        add_action('show_user_profile', array($this,'actionUser_Profile'));
-        add_action('personal_options_update', array($this,'actionProfile_Update_Save'));
-        add_action('edit_user_profile_update', array($this,'actionProfile_Update_Save'));
-    }
 }
 
 final class AVH_RPS_Admin
@@ -90,6 +59,11 @@ final class AVH_RPS_Admin
 
     /**
      *
+     * @var Container
+     */
+    private $container;
+    /**
+     *
      * @var AVH_RPS_EntriesList
      */
     private $_entries_list;
@@ -102,17 +76,17 @@ final class AVH_RPS_Admin
      *
      * @return unknown_type
      */
-    public function __construct (ListCompetition $competition_list)
+    public function __construct ($container)
     {
         // The Settings Registery
-        $this->_settings = AVH_RPS_Settings::getInstance();
+        $this->_settings = $container->get('Rps\\Settings');
 
         // The Classes Registery
         $this->_classes = AVH_RPS_Classes::getInstance();
 
-        $this->_competition_list = $competition_list;
+        $this->container = $container;
         // Loads the CORE class
-        $this->_core = $this->_classes->load_class('Core', 'plugin', true);
+        $this->_core = $container->get('AVH_RPS_Core');
 
         // Admin URL and Pagination
         $this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
@@ -122,18 +96,56 @@ final class AVH_RPS_Admin
 
         // Admin menu
         add_action('admin_menu', array($this,'actionAdminMenu'));
-        add_action('wp_ajax_setscore', array($this,'handleAjax'));
+        add_action('admin_init', array($this,'handleActionInit'));
 
+        add_action('wp_ajax_setscore', array($this,'handleAjax'));
         add_filter('user_row_actions', array($this,'filterRPS_user_action_links'), 10, 2);
     }
 
+    public function handleActionInit ()
+    {
+        $this->actionInit_Roles();
+        $this->actionInit_UserFields();
+
+        return;
+    }
+
     /**
-     * Add the Tools and Options to the Management and Options page repectively
+     * Setup Roles
+     *
+     * @WordPress Action init
+     */
+    private function actionInit_Roles ()
+    {
+        // Get the administrator role.
+        $role = get_role('administrator');
+
+        // If the administrator role exists, add required capabilities for the plugin.
+        if ( !empty($role) ) {
+
+            // Role management capabilities.
+            $role->add_cap('rps_edit_competition_classification');
+            $role->add_cap('rps_edit_competitions');
+            $role->add_cap('rps_edit_entries');
+        }
+    }
+
+    private function actionInit_UserFields ()
+    {
+        add_action('edit_user_profile', array($this,'actionUser_Profile'));
+        add_action('show_user_profile', array($this,'actionUser_Profile'));
+        add_action('personal_options_update', array($this,'actionProfile_Update_Save'));
+        add_action('edit_user_profile_update', array($this,'actionProfile_Update_Save'));
+    }
+    /**
+     * Add the Tools and Options to the Management and Options page respectively
      *
      * @WordPress Action admin_menu
      */
     public function actionAdminMenu ()
     {
+        $this->_competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
+
         wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
         wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
         wp_register_script('avhrps-comp-ajax', $this->_settings->getSetting('plugin_url') . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
@@ -154,7 +166,7 @@ final class AVH_RPS_Admin
     public function actionLoadPagehookCompetition ()
     {
         global $current_screen;
-        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
         $this->_handleRequestCompetition();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
@@ -296,7 +308,7 @@ final class AVH_RPS_Admin
 
     public function handleAjax ()
     {
-        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
         if ( isset($_POST['scored']) ) {
             if ( $_POST['scored'] == 'Yes' ) {
                 $data['ID'] = (int) $_POST['id'];
@@ -632,8 +644,8 @@ final class AVH_RPS_Admin
     public function actionLoadPagehookCompetitionAdd ()
     {
         global $current_screen;
-        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
-        $this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
+        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
+        $this->_competition_list = $this->container->get('Rps\Competition\ListCompetition');
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -822,7 +834,7 @@ final class AVH_RPS_Admin
     {
         global $current_screen;
 
-        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
         $this->_entries_list = $this->_classes->load_class('EntriesList', 'plugin', true);
         $this->_handleRequestEntries();
 
@@ -1137,7 +1149,7 @@ final class AVH_RPS_Admin
      */
     public function filterPluginActions ($links)
     {
-        $folder = AVH_Common::getBaseDirectory($this->_settings->plugin_basename);
+        $folder = AVH_Common::getBaseDirectory($this->_settings->getSetting('plugin_basename'));
         $settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
         array_unshift($links, $settings_link); // before other links
         return $links;

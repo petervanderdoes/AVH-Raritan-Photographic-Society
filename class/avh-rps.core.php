@@ -1,4 +1,9 @@
 <?php
+use Rps\Competition;
+use Rps\Settings;
+use DI\Container;
+use Rps;
+
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
@@ -56,9 +61,9 @@ class AVH_RPS_Core
     /**
      * PHP5 constructor
      */
-    public function __construct()
+    public function __construct($settings)
     {
-        $this->_settings = AVH_RPS_Settings::getInstance();
+        $this->_settings = $settings;
         $this->_db_options = 'avhrps_options';
         $this->_db_version = 0;
         /**
@@ -100,9 +105,9 @@ class AVH_RPS_Core
         $this->_settings->storeSetting('digital_chair_email', 'digitalchair@raritanphoto.com');
 
         $this->_settings->storeSetting('siteurl', get_option('siteurl'));
-        $this->_settings->storeSetting('graphics_url', plugins_url('images', $this->_settings->plugin_basename));
-        $this->_settings->storeSetting('js_url', plugins_url('js', $this->_settings->plugin_basename));
-        $this->_settings->storeSetting('css_url', plugins_url('css', $this->_settings->plugin_basename));
+        $this->_settings->storeSetting('graphics_url', plugins_url('images', $this->_settings->getSetting('plugin_basename')));
+        $this->_settings->storeSetting('js_url', plugins_url('js', $this->_settings->getSetting('plugin_basename')));
+        $this->_settings->storeSetting('css_url', plugins_url('css', $this->_settings->getSetting('plugin_basename')));
         $this->_settings->storeSetting('validComp', '');
         $this->_settings->storeSetting('comp_date', '');
         $this->_settings->storeSetting('classification', '');
@@ -193,12 +198,12 @@ class AVH_RPS_Core
 
         // If this is the 400px image, write the copyright notice onto the image
         if ( !( empty($maker) ) ) {
-            $dateParts = explode("-", $this->_settings->comp_date);
+            $dateParts = explode("-", $this->_settings->getSetting('comp_date'));
             $year = $dateParts[0];
             $black = imagecolorallocate($thumb_img, 0, 0, 0);
             $white = imagecolorallocate($thumb_img, 255, 255, 255);
             $font = 5;
-            $text = "Copyright " . substr($this->_settings->comp_date, 0, 4) . " $maker";
+            $text = "Copyright " . substr($this->_settings->getSetting('comp_date'), 0, 4) . " $maker";
             $width = imagesx($thumb_img);
             $height = imagesy($thumb_img);
             $textLength = imagefontwidth($font) * strlen($text);

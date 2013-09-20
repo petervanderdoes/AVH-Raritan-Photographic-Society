@@ -31,15 +31,14 @@ class AVH_RPS_EntriesList extends WP_List_Table
     public $messages;
     public $screen;
 
-    function __construct()
+    function __construct($settings, $_rpsdb, $core)
     {
 
-        // Get The Registry
-        $this->_settings = AVH_RPS_Settings::getInstance();
+        $this->_settings = $settings;
         $this->_classes = AVH_RPS_Classes::getInstance();
         // Initialize the plugin
-        $this->_core = $this->_classes->load_class('Core', 'plugin', true);
-        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+        $this->_core = $core;
+        $this->_rpsdb = $_rpsdb;
 
         $this->screen = 'avh_rps_page_avh_rps_entries_';
         $default_status = get_user_option('avhrps_entries_list_last_view');
@@ -257,7 +256,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
         $_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
         $unix_date = mysql2date('U', $_competition->Competition_Date);
         $_competition_month = date('n', $unix_date);
-        if ( $_competition_month >= $this->_settings->club_season_start_month_num && $_competition_month <= $this->_settings->club_season_end_month_num ) {
+        if ( $_competition_month >= $this->_settings->getSetting('club_season_start_month_num') && $_competition_month <= $this->_settings->getSetting('club_season_end_month_num') ) {
             $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
         } else {
             $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);

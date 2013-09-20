@@ -33,13 +33,12 @@ require_once ( $_dir . '/libs/avh-security.php' );
 require_once ( $_dir . '/libs/avh-visitor.php' );
 
 use DI\ContainerBuilder;
-use Rps;
 
 class AVH_RPS_Client
 {
     private $container;
 
-    public function __construct ($_dir)
+    public function __construct ($_dir, $_basename)
     {
         $builder = new ContainerBuilder();
         $builder->setDefinitionCache(new Doctrine\Common\Cache\ArrayCache());
@@ -55,13 +54,17 @@ class AVH_RPS_Client
         $this->container = $builder->build();
         //@format_off
             $dependencies=array (
-            'AVH_RPS_OldRpsDb' => array(),
-            'WP_List_Table' => array(),
-            'ListCompetition' => [
-                'constructor' => ['AVH_RPS_OldRpsDb'],
+            'AVH_RPS_OldRpsDb' => [
+                'constructor' => ['Rps\\Settings','AVH_RPS_Core'],
             ],
-            'AVH_RPS_Admin' => [
-                'constructor' => ['\\Rps\\Competition\\List'],
+            'AVH_RPS_Define' => array(),
+            'Rps\\Competition\\ListCompetition' => [
+                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','AVH_RPS_Core'],
+            ],
+            'Rps\\Settings' => array(),
+            'AVH_RPS_Admin' => array(),
+            'AVH_RPS_Core' => [
+                'constructor' => ['Rps\\Settings'],
             ],
         );
         // @format_on
@@ -73,30 +76,33 @@ class AVH_RPS_Client
         $_classes->setClassNamePrefix('AVH_RPS_');
         unset($_classes);
 
-        $_settings = AVH_RPS_Settings::getInstance();
+        $_settings = $this->container->get('Rps\\Settings');
         $_settings->storeSetting('plugin_dir', $_dir);
         $_settings->storeSetting('plugin_basename', $_basename);
+        $_settings->storeSetting('plugin_url', plugins_url('', AVH_RPS_Define::PLUGIN_FILE));
 
         add_action('plugins_loaded', array($this,'init'));
     }
 
     public function init ()
     {
+        $_settings = $this->container->get('Rps\\Settings');
         if ( is_admin() ) {
             AVH_RPS_AdminInitialize::load();
             add_action('wp_loaded', array($this->admin()));
+        } else {
+            require_once ( $_settings->getSetting('plugin_dir') . '/class/avh-rps.public.php' );
+            $avhfdas_public = new AVH_RPS_Public($this->container);
         }
-        require_once ( $_settings->plugin_working_dir . '/class/avh-rps.public.php' );
-        $avhfdas_public = new AVH_RPS_Public();
     }
 
     public function admin() {
-        $avh_rps_admin = $this->container->get('AVH_RPS_Admin');
+        $avh_rps_admin = new AVH_RPS_Admin($this->container);
         // Activation Hook
-        register_activation_hook(PLUGIN_FILE, array($avh_rps_admin,'installPlugin'));
+        register_activation_hook(AVH_RPS_Define::PLUGIN_FILE, array($avh_rps_admin,'installPlugin'));
         // Deactivation Hook
-        register_deactivation_hook(PLUGIN_FILE, array($avh_rps_admin,'deactivatePlugin'));
+        register_deactivation_hook(AVH_RPS_Define::PLUGIN_FILE, array($avh_rps_admin,'deactivatePlugin'));
     }
 }
 
-new AVH_RPS_Client($_dir);
+new AVH_RPS_Client($_dir, $_basename);

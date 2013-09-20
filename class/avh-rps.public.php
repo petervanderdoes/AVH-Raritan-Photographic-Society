@@ -1,9 +1,20 @@
 <?php
+use Rps\Competition;
+use Rps\Settings;
+use DI\Container;
+use Rps;
+
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
 class AVH_RPS_Public
 {
+
+    /**
+     *
+     * @var Container
+     */
+    private $container;
 
     /**
      *
@@ -47,16 +58,17 @@ class AVH_RPS_Public
     /**
      * PHP5 Constructor
      */
-    public function __construct()
+    public function __construct($container)
     {
         // Get The Registry
-        $this->_settings = AVH_RPS_Settings::getInstance();
+        $this->container=$container;
+        $this->_settings = $this->container->get('Rps\\Settings');
         $this->_classes = AVH_RPS_Classes::getInstance();
         $this->_errmsg = '';
 
         // Initialize the plugin
-        $this->_core = $this->_classes->load_class('Core', 'plugin', true);
-        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+        $this->_core = $this->container->get('AVH_RPS_Core');
+        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
         $this->_core_options = $this->_core->getOptions();
 
         $this->_rpsdb->setCompetitionClose();
@@ -130,7 +142,7 @@ class AVH_RPS_Public
             $from_season = $seasons[count($seasons) - 3];
 
             $season_start_year = substr($from_season, 0, 4);
-            $season = sprintf("%d-%02s-%02s", $season_start_year, $this->_settings->club_season_start_month_num, 1);
+            $season = sprintf("%d-%02s-%02s", $season_start_year, $this->_settings-getSetting('>club_season_start_month_num'), 1);
 
             echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
@@ -193,7 +205,7 @@ class AVH_RPS_Public
 
         if ( isset($_POST['submit_control']) ) {
             $this->_settings->selected_season = esc_attr($_POST['selected_season']);
-            $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
+            $this->_settings->season_start_year = substr($this->_settings->getSetting('selected_season'), 0, 4);
             $this->_settings->selected_year = esc_attr($_POST['selected_year']);
             $this->_settings->selected_month = esc_attr($_POST['selected_month']);
 
@@ -201,7 +213,7 @@ class AVH_RPS_Public
             {
                 case 'new_season':
                     $this->_settings->selected_season = esc_attr($_POST['new_season']);
-                    $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
+                    $this->_settings->season_start_year = substr($this->_settings->getSetting('selected_season'), 0, 4);
                     $this->_settings->selected_month = "";
                     break;
                 case 'new_month':
@@ -210,12 +222,12 @@ class AVH_RPS_Public
             }
         }
         $seasons = $this->_rpsdb->getSeasonList();
-        if ( empty($this->_settings->selected_season) ) {
+        if ( empty($this->_settings->getSetting('selected_season')) ) {
             $this->_settings->selected_season = $seasons[count($seasons) - 1];
         }
-        $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year, $this->_settings->club_season_start_month_num, 1);
-        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1);
+        $this->_settings->season_start_year = substr($this->_settings->getSetting('selected_season'), 0, 4);
+        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('season_start_year'), $this->_settings->getSetting('club_season_start_month_num'), 1);
+        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('season_start_year') + 1, $this->_settings->getSetting('club_season_start_month_num'), 1);
 
         $scores = $this->_rpsdb->getMonthlyScores();
 
@@ -232,7 +244,7 @@ class AVH_RPS_Public
                 $themes[$key] = $recs['Theme'];
             }
 
-            if ( empty($this->_settings->selected_month) ) {
+            if ( empty($this->_settings->getSetting('selected_month')) ) {
                 end($months);
                 $this->_settings->selected_year = substr(key($months), 0, 4);
                 $this->_settings->selected_month = substr(key($months), 5, 2);
@@ -240,11 +252,11 @@ class AVH_RPS_Public
         }
 
         // Count the maximum number of awards in the selected competitions
-        $this->_settings->min_date = sprintf("%d-%02s-%02s", $this->_settings->selected_year, $this->_settings->selected_month, 1);
-        if ( $this->_settings->selected_month == 12 ) {
-            $this->_settings->max_date = sprintf("%d-%02s-%02s", $this->_settings->selected_year + 1, 1, 1);
+        $this->_settings->min_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('selected_year'), $this->_settings->getSetting('selected_month'), 1);
+        if ( $this->_settings->getSetting('selected_month') == 12 ) {
+            $this->_settings->max_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('selected_year') + 1, 1, 1);
         } else {
-            $this->_settings->max_date = sprintf("%d-%02s-%02s", $this->_settings->selected_year, $this->_settings->selected_month + 1, 1);
+            $this->_settings->max_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('selected_year'), $this->_settings->getSetting('selected_month') + 1, 1);
         }
 
         $max_num_awards = $this->_rpsdb->getMaxAwards();
@@ -262,15 +274,15 @@ class AVH_RPS_Public
         $form = '';
         $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
         $form .= '<input name="submit_control" type="hidden">' . "\n";
-        $form .= '<input name="selected_season" type="hidden" value="' . $this->_settings->selected_season . '">' . "\n";
-        $form .= '<input name="selected_year" type="hidden" value="' . $this->_settings->selected_year . '">' . "\n";
-        $form .= '<input name="selected_month" type="hidden" value="' . $this->_settings->selected_month . '">' . "\n";
+        $form .= '<input name="selected_season" type="hidden" value="' . $this->_settings->getSetting('selected_season') . '">' . "\n";
+        $form .= '<input name="selected_year" type="hidden" value="' . $this->_settings->getSetting('selected_year') . '">' . "\n";
+        $form .= '<input name="selected_month" type="hidden" value="' . $this->_settings->getSetting('selected_month') . '">' . "\n";
 
         if ( $scored_competitions ) {
             // Drop down list for months
             $form .= '<select name="new_month" onchange="submit_form(\'new_month\')">' . "\n";
             foreach ( $months as $key => $month ) {
-                $selected = ( substr($key, 5, 2) == $this->_settings->selected_month ) ? " selected" : "";
+                $selected = ( substr($key, 5, 2) == $this->_settings-getSetting('>selected_month') ) ? " selected" : "";
                 $form .= '<option value="' . $key . '"' . $selected . '>' . $month . '</option>' . "\n";
             }
             $form .= "</select>\n";
@@ -279,7 +291,7 @@ class AVH_RPS_Public
         // Drop down list for season
         $form .= '<select name="new_season" onChange="submit_form(\'new_season\')">' . "\n";
         foreach ( $seasons as $season ) {
-            $selected = ( $season == $this->_settings->selected_season ) ? " selected" : "";
+            $selected = ( $season == $this->_settings->getSetting('selected_season') ) ? " selected" : "";
             $form .= '<option value="' . $season . '"' . $selected . '>' . $season . '</option>' . "\n";
         }
         $form .= '</select>' . "\n";
@@ -289,7 +301,7 @@ class AVH_RPS_Public
         echo '</span>';
 
         if ( $scored_competitions ) {
-            $this_month = sprintf("%d-%02s", $this->_settings->selected_year, $this->_settings->selected_month);
+            $this_month = sprintf("%d-%02s", $this->_settings->getSetting('selected_year'), $this->_settings->getSetting('selected_month'));
             echo '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
 
             echo "<table class=\"thumb_grid\">\n";
@@ -386,21 +398,21 @@ class AVH_RPS_Public
         }
         // Get the list of seasons
         $seasons = $this->_rpsdb->getSeasonList();
-        if ( empty($this->_settings->selected_season) ) {
+        if ( empty($this->_settings->getSetting('selected_season')) ) {
             $this->_settings->selected_season = $seasons[count($seasons) - 1];
         }
-        $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year, $this->_settings->club_season_start_month_num, 1);
-        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1);
+        $this->_settings->season_start_year = substr($this->_settings->getSetting('selected_season'), 0, 4);
+        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('season_start_year'), $this->_settings->getSetting('club_season_start_month_num'), 1);
+        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('season_start_year') + 1, $this->_settings->getSetting('club_season_start_month_num'), 1);
 
         // Start building the form
         $action = home_url('/' . get_page_uri($post->ID));
         $form = '';
         $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
-        $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '" />';
+        $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->getSetting('selected_season') . '" />';
         $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
         foreach ( $seasons as $this_season ) {
-            if ( $this_season == $this->_settings->selected_season ) {
+            if ( $this_season == $this->_settings->getSetting('selected_season') ) {
                 $selected = " SELECTED";
             } else {
                 $selected = "";
@@ -497,13 +509,13 @@ class AVH_RPS_Public
 
         $seasons = $this->_rpsdb->getSeasonListOneEntry();
         arsort($seasons);
-        if ( !isset($this->_settings->selected_season) ) {
+        if ( !isset($this->_settings->getSetting('selected_season')) ) {
             $this->_settings->selected_season = $seasons[count($seasons) - 1];
         }
 
-        $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year, 9, 1);
-        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year + 1, 9, 1);
+        $this->_settings->season_start_year = substr($this->_settings->getSetting('selected_season'), 0, 4);
+        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('season_start_year'), 9, 1);
+        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->getSetting('season_start_year') + 1, 9, 1);
 
         $competition_dates = $this->_rpsdb->getClubCompetitionDates();
         // Build an array of competition dates in "MM/DD" format for column titles.
@@ -532,10 +544,10 @@ class AVH_RPS_Public
             $action = home_url('/' . get_page_uri($post->ID));
             $form = '';
             $form .= '<form name="all_scores_form" method="post" action="' . $action . '">';
-            $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '"/>';
+            $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->getSetting('selected_season') . '"/>';
             $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
             foreach ( $seasons as $this_season ) {
-                if ( $this_season == $this->_settings->selected_season ) {
+                if ( $this_season == $this->_settings->getSetting('selected_season') ) {
                     $selected = " SELECTED";
                 } else {
                     $selected = "";
@@ -654,7 +666,7 @@ class AVH_RPS_Public
 
                         // Display the category title
                         echo '<tr><td align="left" class="form_title" colspan="' . ( $total_max_entries + 3 ) . '">';
-                        echo $medium . ' scores for ' . $this->_settings->selected_season . ' season';
+                        echo $medium . ' scores for ' . $this->_settings->getSetting('selected_season') . ' season';
                         echo '</td></tr>' . "\n";
 
                         // Display the first row column headers
@@ -759,7 +771,7 @@ class AVH_RPS_Public
                 $this->_settings->medium = $_POST['medium'];
                 $t = time() + ( 2 * 24 * 3600 );
                 $url = parse_url(get_bloginfo('url'));
-                setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $t, '/', $url['host']);
+                setcookie("RPS_MyEntries", $this->_settings->getSetting('comp_date') . "|" . $this->_settings->getSetting('classification') . "|" . $this->_settings->getSetting('medium'), $t, '/', $url['host']);
 
                 if ( isset($_POST['EntryID']) ) {
                     $entry_array = $_POST['EntryID'];
@@ -780,7 +792,7 @@ class AVH_RPS_Public
 
                     case 'add':
                         if ( !$this->_rpsdb->getCompetionClosed() ) {
-                            $_query = array('m' => $this->_settings->medium_subset);
+                            $_query = array('m' => $this->_settings->getSetting('medium_subset'));
                             $_query = build_query($_query);
                             $loc = '/upload-image/?' . $_query;
                             wp_redirect($loc);
@@ -792,7 +804,7 @@ class AVH_RPS_Public
                             if ( is_array($entry_array) ) {
                                 foreach ( $entry_array as $id ) {
                                     // @TODO Add Nonce
-                                    $_query = array('id' => $id,'m' => $this->_settings->medium_subset);
+                                    $_query = array('id' => $id,'m' => $this->_settings->getSetting('medium_subset'));
                                     $_query = build_query($_query);
                                     $loc = '/edit-title/?' . $_query;
                                     wp_redirect($loc);
@@ -815,8 +827,8 @@ class AVH_RPS_Public
                     list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
                 }
             }
-            $this->_settings->validComp = $this->_validateSelectedComp($this->_settings->comp_date, $this->_settings->medium);
-            if ( $this->_settings->validComp === false ) {
+            $this->_settings->validComp = $this->_validateSelectedComp($this->_settings->getSetting('comp_date'), $this->_settings->getSetting('medium'));
+            if ( $this->_settings->getSetting('validComp') === false ) {
                 $this->_settings->comp_date = "";
                 $this->_settings->classification = "";
                 $this->_settings->medium = "";
@@ -824,7 +836,7 @@ class AVH_RPS_Public
                 // Invalidate any existing cookie
                 $past = time() - ( 24 * 3600 );
                 $url = parse_url(get_bloginfo(url));
-                setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $past, '/', $url['host']);
+                setcookie("RPS_MyEntries", $this->_settings->getSetting('comp_date') . "|" . $this->_settings->getSetting('classification') . "|" . $this->_settings->getSetting('medium'), $past, '/', $url['host']);
             }
         }
     }
@@ -860,16 +872,16 @@ class AVH_RPS_Public
         $form = '';
         echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
         echo '<input type="hidden" name="submit_control">' . "\n";
-        echo '<input type="hidden" name="comp_date" value="' . $this->_settings->comp_date . '">' . "\n";
-        echo '<input type="hidden" name="classification" value="' . $this->_settings->classification . '">' . "\n";
-        echo '<input type="hidden" name="medium" value="' . $this->_settings->medium . '">' . "\n";
-        echo '<input type="hidden" name="medium_subset" value="' . $this->_settings->medium_subset . '">' . "\n";
+        echo '<input type="hidden" name="comp_date" value="' . $this->_settings->getSetting('comp_date') . '">' . "\n";
+        echo '<input type="hidden" name="classification" value="' . $this->_settings->getSetting('classification') . '">' . "\n";
+        echo '<input type="hidden" name="medium" value="' . $this->_settings->getSetting('medium') . '">' . "\n";
+        echo '<input type="hidden" name="medium_subset" value="' . $this->_settings->getSetting('medium_subset') . '">' . "\n";
         echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce('avh-rps-myentries') . '" />' . "\n";
         echo '<table class="form_frame" width="90%">' . "\n";
 
         // Form Heading
-        if ( $this->_settings->validComp ) {
-            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->_settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->_settings->comp_date)) . "</th></tr>\n";
+        if ( $this->_settings->getSetting('validComp') ) {
+            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->_settings->getSetting('medium') . " on " . strftime('%d-%b-%Y', strtotime($this->_settings->getSetting('comp_date'))) . "</th></tr>\n";
         } else {
             echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
         }
@@ -878,16 +890,24 @@ class AVH_RPS_Public
         $theme_uri_images = get_stylesheet_directory_uri() . '/images';
         echo '<tr>';
         echo '<td width="25%">';
-        // echo '<span class="rps-comp-medium">' . $this->_settings->medium . '</span>';
-        if ( $this->_settings->medium == "Color Digital" ) {
-            $img = '/thumb-comp-digital-color.jpg';
-        } elseif ( $this->_settings->medium == "Color Prints" ) {
-            $img = '/thumb-comp-print-color.jpg';
-        } elseif ( $this->_settings->medium == "B&W Digital" ) {
-            $img = '/thumb-comp-digital-bw.jpg';
-        } else {
-            $img = '/thumb-comp-print-bw.jpg';
+        // echo '<span class="rps-comp-medium">' . $this->_settings->getSetting('medium') . '</span>';
+        switch ($this->_settings->getSetting('medium')) {
+            case "Color Digital":
+                $img = '/thumb-comp-digital-color.jpg';
+                break;
+            case "Color Prints":
+                $img = '/thumb-comp-print-color.jpg';
+                break;
+            case "B&W Digital":
+                $img = '/thumb-comp-digital-bw.jpg';
+                break;
+            case "B&W Prints":
+                $img = '/thumb-comp-print-bw.jpg';
+                break;
+            default:
+                $img = '';
         }
+
         echo '<img src="' . $this->_settings->getSetting('plugin_url') . '/images' . $img . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
@@ -903,7 +923,7 @@ class AVH_RPS_Public
         $prev_date = "";
         for ( $i = 0; $i < count($this->_open_comp_date); $i++ ) {
             if ( $this->_open_comp_date[$i] != $prev_date ) {
-                if ( $this->_settings->comp_date == $this->_open_comp_date[$i] ) {
+                if ( $this->_settings->getSetting('comp_date') == $this->_open_comp_date[$i] ) {
                     $selected = " SELECTED";
                     $theme = $this->_open_comp_theme[$i];
                 } else {
@@ -922,8 +942,8 @@ class AVH_RPS_Public
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
         // Load the values into the dropdown list
         for ( $i = 0; $i < count($this->_open_comp_date); $i++ ) {
-            if ( $this->_open_comp_date[$i] == $this->_settings->comp_date ) {
-                if ( $this->_settings->medium == $this->_open_comp_medium[$i] ) {
+            if ( $this->_open_comp_date[$i] == $this->_settings->getSetting('comp_date') ) {
+                if ( $this->_settings->getSetting('medium') == $this->_open_comp_medium[$i] ) {
                     $selected = " SELECTED";
                 } else {
                     $selected = "";
@@ -936,7 +956,7 @@ class AVH_RPS_Public
 
         // Display the Classification and Theme for the selected competition
         echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">" . $this->_settings->classification . "</td></tr>\n";
+        echo "<td width=\"64%\" align=\"left\">" . $this->_settings->getSetting('classification') . "</td></tr>\n";
         echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
         echo "<td width=\"64%\" align=\"left\">$theme</td></tr>\n";
 
@@ -944,7 +964,7 @@ class AVH_RPS_Public
         echo "</td></tr></table>\n";
 
         // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
-        if ( $this->_settings->comp_date != "" ) {
+        if ( $this->_settings->getSetting('comp_date') != "" ) {
             $close_date = $this->_rpsdb->getCompetitionCloseDate();
             if ( !empty($close_date) ) {
                 $close_epoch = strtotime($close_date);
@@ -987,14 +1007,14 @@ class AVH_RPS_Public
             $a = realpath($recs['Server_File_Name']);
             $image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
             echo "<td align=\"center\" width=\"10%\">\n";
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $this->_settings->comp_date . '" title="' . $recs['Title'] . ' ' . $this->_settings->classification . ' ' . $this->_settings->medium . '">' . "\n";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->getSetting('classification') . " " . $this->_settings->getSetting('medium') . "</div>";
+            echo '<a href="' . $image_url . '" rel="' . $this->_settings->getSetting('comp_date') . '" title="' . $recs['Title'] . ' ' . $this->_settings->getSetting('classification') . ' ' . $this->_settings->getSetting('medium') . '">' . "\n";
             echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
             echo '<td align="left" width="40%">';
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->getSetting('classification') . " " . $this->_settings->getSetting('medium') . "</div>";
             echo htmlentities($recs['Title']) . "</td>\n";
             // File Name
             echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
@@ -1052,7 +1072,7 @@ class AVH_RPS_Public
         // Buttons at the bottom of the list of submitted images
         echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
         // Don't show the Add button if the max number of images per member reached
-        if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->_settings->club_max_entries_per_member_per_date ) {
+        if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->_settings->getSetting('club_max_entries_per_member_per_date') ) {
             echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
         }
         if ( $numRows > 0 && $max_entries_per_member_per_comp > 0 ) {
@@ -1268,15 +1288,15 @@ class AVH_RPS_Public
 
                         $max_per_date = $this->_rpsdb->checkMaxEntriesOnDate();
                         if ( $max_per_date >= $this->_settings->club_max_entries_per_member_per_date ) {
-                            $x = $this->_settings->club_max_entries_per_member_per_date;
+                            $x = $this->_settings->getSetting('club_max_entries_per_member_per_date');
                             $this->_errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
                             return;
                         }
 
                         // Move the file to its final location
-                        $comp_date = $this->_settings->comp_date;
-                        $classification = $this->_settings->classification;
-                        $medium = $this->_settings->medium;
+                        $comp_date = $this->_settings->getSetting('comp_date');
+                        $classification = $this->_settings->getSetting('classification');
+                        $medium = $this->_settings->getSetting('medium');
                         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
 
                         $title2 = stripslashes(trim($_POST['title']));
@@ -1288,21 +1308,21 @@ class AVH_RPS_Public
                             mkdir($path, 0755);
 
                             // If the .jpg file is too big resize it
-                        if ( $size_info[0] > $this->_settings->max_width_entry || $size_info[1] > $this->_settings->max_height_entry ) {
+                        if ( $size_info[0] > $this->_settings->getSetting('max_width_entry') || $size_info[1] > $this->_settings->getSetting('max_height_entry') ) {
                             // If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
-                            if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->max_width_entry / $this->_settings->max_height_entry ) {
+                            if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->getSetting('max_width_entry') / $this->_settings->getSetting('max_height_entry') ) {
                                 // Set the maximum width to ensure the height does not exceed the maximum height
-                                $size = $this->_settings->max_height_entry * $size_info[0] / $size_info[1];
+                                $size = $this->_settings->getSetting('max_height_entry') * $size_info[0] / $size_info[1];
                             } else {
                                 // if its landscape and the aspect ratio is greater than the projector
                                 if ( $size_info[0] > $size_info[1] ) {
                                     // Set the maximum width to the width of the projector
-                                    $size = $this->_settings->max_width_entry;
+                                    $size = $this->_settings->getSetting('max_width_entry');
 
                                     // If its a portrait image
                                 } else {
                                     // Set the maximum height to the height of the projector
-                                    $size = $this->_settings->max_height_entry;
+                                    $size = $this->_settings->getSetting('max_height_entry');
                                 }
                             }
                             // Resize the image and deposit it in the destination directory
@@ -1856,9 +1876,9 @@ class AVH_RPS_Public
                         }
                         // Delete any thumbnails of this image
                         $ext = ".jpg";
-                        $comp_date = $this->_settings->comp_date;
-                        $classification = $this->_settings->classification;
-                        $medium = $this->_settings->medium;
+                        $comp_date = $this->_settings->getSetting('comp_date');
+                        $classification = $this->_settings->getSetting('classification');
+                        $medium = $this->_settings->getSetting('medium');
                         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
 
                         $old_file_parts = pathinfo($server_file_name);
@@ -1890,7 +1910,7 @@ class AVH_RPS_Public
      */
     private function _validateSelectedComp($date, $med)
     {
-        $open_competitions = $this->_rpsdb->getOpenCompetitions($this->_settings->medium_subset);
+        $open_competitions = $this->_rpsdb->getOpenCompetitions($this->_settings->getSetting('medium_subset'));
 
         if ( empty($open_competitions) ) {
             return false;
@@ -1947,7 +1967,7 @@ class AVH_RPS_Public
         // Save the currently selected competition in a cookie
         $hour = time() + ( 2 * 3600 );
         $url = parse_url(get_bloginfo('url'));
-        setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $hour, '/', $url['host']);
+        setcookie("RPS_MyEntries", $this->_settings->getSetting('comp_date') . "|" . $this->_settings->getSetting('classification') . "|" . $this->_settings->getSetting('medium'), $hour, '/', $url['host']);
         return true;
     }
 }

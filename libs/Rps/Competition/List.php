@@ -1,13 +1,15 @@
 <?php
 namespace Rps\Competition;
+use Rps\Settings;
 use Avh\Html\Html;
-use AVH_RPS_OldRpsDb;
-use \WP_List_Table;
+use \AVH_RPS_OldRpsDb;
+use \AVH_RPS_Classes;
+use \AVH_RPS_Define;
 
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
-class ListCompetition extends WP_List_Table
+class ListCompetition extends \WP_List_Table
 {
 
     /**
@@ -37,14 +39,14 @@ class ListCompetition extends WP_List_Table
     public $messages;
     public $screen;
 
-    function __construct (AVH_RPS_OldRpsDb $_rpsdb)
+    function __construct ($settings, $_rpsdb, $core)
     {
 
         // Get The Registry
-        $this->_settings = AVH_RPS_Settings::getInstance();
+        $this->_settings = $settings;
         $this->_classes = AVH_RPS_Classes::getInstance();
         // Initialize the plugin
-        $this->_core = $this->_classes->load_class('Core', 'plugin', true);
+        $this->_core = $core;
         $this->_rpsdb = $_rpsdb;
 
         $this->screen = 'avh_rps_page_avh_rps_competition_';

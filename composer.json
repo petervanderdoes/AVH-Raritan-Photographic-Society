@@ -4,7 +4,7 @@
     },
     "autoload": {
         "psr-0": { "Avh\\": "libs/",
-                    "Rps\\Competition\\": "libs/"},
+                    "Rps\\": "libs/"},
         "classmap": ["class/"]
     },
     "extra": {

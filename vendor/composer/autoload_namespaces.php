@@ -11,7 +11,7 @@ return array(
     'Zend\\Code\\' => array($vendorDir . '/zendframework/zend-code'),
     'UnitTests' => array($vendorDir . '/mnapoli/php-di/tests'),
     'Symfony\\Component\\Yaml\\' => array($vendorDir . '/symfony/yaml'),
-    'Rps\\Competition\\' => array($baseDir . '/libs'),
+    'Rps\\' => array($baseDir . '/libs'),
     'ProxyManager\\' => array($vendorDir . '/ocramius/proxy-manager/src'),
     'MyCLabs' => array($vendorDir . '/myclabs/php-enum/src'),
     'IntegrationTests' => array($vendorDir . '/mnapoli/php-di/tests'),

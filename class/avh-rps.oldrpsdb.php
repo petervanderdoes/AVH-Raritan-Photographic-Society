@@ -1,4 +1,9 @@
 <?php
+use Rps\Competition;
+use Rps\Settings;
+use DI\Container;
+use Rps;
+
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
@@ -28,13 +33,13 @@ class AVH_RPS_OldRpsDb
     /**
      * PHP5 constructor
      */
-    public function __construct()
+    public function __construct($settings, $core)
     {
         // Get The Registry
-        $this->_settings = AVH_RPS_Settings::getInstance();
+        $this->_settings = $settings;
         $this->_classes = AVH_RPS_Classes::getInstance();
 
-        $this->_core = $this->_classes->load_class('Core', 'plugin', true);
+        $this->_core = $core;
         $this->_rpsdb = new wpdb(RPS_DB_USER, RPS_DB_PASSWORD, RPS_DB_NAME, DB_HOST);
         $this->_rpsdb->show_errors();
     }
@@ -45,7 +50,7 @@ class AVH_RPS_OldRpsDb
             concat_WS("-",year(Competition_Date),substr(year(Competition_Date)+1,3,2)),
             concat_WS("-",year(Competition_Date)-1,substr(year(Competition_Date),3,2))) as "Season"
             FROM competitions
-            ORDER BY Season ' . $order, $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
+            ORDER BY Season ' . $order, $this->_settings->getSetting('club_season_start_month_num'), $this->_settings->getSetting('club_season_end_month_num'));
 
         $_result = $this->_rpsdb->get_results($sql, ARRAY_A);
         foreach ( $_result as $key => $value ) {
@@ -64,7 +69,7 @@ class AVH_RPS_OldRpsDb
             WHERE c.ID = e.Competition_ID
             GROUP BY Season
             HAVING count(e.ID) > 0
-            ORDER BY Season', $this->_settings->club_season_start_month_num, $this->_settings->club_season_end_month_num);
+            ORDER BY Season', $this->_settings->getSetting('club_season_start_month_num'), $this->_settings->getSetting('club_season_end_month_num'));
 
         $_result = $this->_rpsdb->get_results($sql, ARRAY_A);
         foreach ( $_result as $key => $value ) {
@@ -82,7 +87,7 @@ class AVH_RPS_OldRpsDb
                 Competition_Date < %s AND
                 Special_Event = "N"
             GROUP BY Competition_Date
-            ORDER BY Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date);
+            ORDER BY Competition_Date', $this->_settings->getSetting('season_start_date'), $this->_settings->getSetting('season_end_date'));
         $_return = $this->_rpsdb->get_results($sql, ARRAY_A);
         return $_return;
     }
@@ -98,7 +103,7 @@ class AVH_RPS_OldRpsDb
                 Competition_Date >= %s AND
                 Competition_Date < %s AND
                 Special_Event = "N"
-            ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date);
+            ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->_settings->getSetting('season_start_date'), $this->_settings->getSetting('season_end_date'));
 
         $_x = $this->_rpsdb->get_results($sql, ARRAY_A);
         foreach ( $_x as $key => $_rec ) {
@@ -120,7 +125,7 @@ class AVH_RPS_OldRpsDb
             FROM competitions
             WHERE Competition_Date >= %s AND
                 Competition_date < %s AND
-                Scored="Y" ORDER BY Competition_Date', $this->_settings->season_start_date, $this->_settings->season_end_date);
+                Scored="Y" ORDER BY Competition_Date', $this->_settings->getSetting('season_start_date'), $this->_settings->getSetting('season_end_date'));
         $_return = $this->_rpsdb->get_results($sql, ARRAY_A);
         return $_return;
     }
@@ -135,7 +140,7 @@ class AVH_RPS_OldRpsDb
                             c.Competition_Date < %s AND
                             Scored = 'Y' AND
                             e.Award IS NOT null
-                        GROUP BY c.Competition_Date, c.Classification, c.Medium) z", $this->_settings->min_date, $this->_settings->max_date);
+                        GROUP BY c.Competition_Date, c.Classification, c.Medium) z", $this->_settings->getSetting('min_date'), $this->_settings->getSetting('max_date'));
         $_return = $this->_rpsdb->get_var($sql);
         return $_return;
     }
@@ -152,7 +157,7 @@ class AVH_RPS_OldRpsDb
                     c.Competition_Date >= %s AND
                     c.Competition_Date < %s AND
                     e.Award Is Not Null
-                ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->_settings->min_date, $this->_settings->max_date);
+                ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->_settings->getSetting('min_date'), $this->_settings->getSetting('max_date'));
         $_x = $this->_rpsdb->get_results($sql, ARRAY_A);
         foreach ( $_x as $_rec ) {
             $user_info = get_userdata($_rec['Member_ID']);
@@ -191,7 +196,7 @@ class AVH_RPS_OldRpsDb
         c.Competition_Date >= %s AND
         c.Competition_Date < %s AND
         e.Member_ID = %s
-        ORDER BY c.Competition_Date, c.Medium", $this->_settings->season_start_date, $this->_settings->season_end_date, $this->_user_id);
+        ORDER BY c.Competition_Date, c.Medium", $this->_settings->getSetting('season_start_date'), $this->_settings->getSetting('season_end_date'), $this->_user_id);
         $_return = $this->_rpsdb->get_results($sql, ARRAY_A);
 
         return $_return;
@@ -418,7 +423,7 @@ class AVH_RPS_OldRpsDb
             FROM competitions
             WHERE Competition_Date = DATE(%s)
                 AND Classification = %s
-                AND Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium);
+                AND Medium = %s", $this->_settings->getSetting('comp_date'), $this->_settings->getSetting('classification'), $this->_settings->getSetting('medium'));
         $_return = $this->_rpsdb->get_var($sql);
         return $_return;
     }
@@ -429,7 +434,7 @@ class AVH_RPS_OldRpsDb
             FROM competitions
             WHERE Competition_Date = DATE(%s)
                 AND Classification = %s
-                AND Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium);
+                AND Medium = %s", $this->_settings->getSetting('comp_date'), $this->_settings->getSetting('classification'), $this->_settings->getSetting('medium'));
         $_closed = $this->_rpsdb->get_var($sql);
         if ( $_closed == "Y" ) {
             $_return = true;
@@ -454,7 +459,7 @@ class AVH_RPS_OldRpsDb
         $sql = $this->_rpsdb->prepare("SELECT Max_Entries FROM competitions
                 WHERE Competition_Date = DATE %s AND
                 Classification = %s AND
-                Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium);
+                Medium = %s", $this->_settings->getSetting('comp_date'), $this->_settings->getSetting('classification'), $this->_settings->getSetting('medium'));
         $_return = $this->_rpsdb->get_var($sql);
         return $_return;
     }
@@ -474,7 +479,7 @@ class AVH_RPS_OldRpsDb
                     FROM entries e, competitions c
                     WHERE e.Competition_ID = c.ID AND
                     c.Competition_Date = DATE(%s) AND
-                    e.Member_ID = %s", $this->_settings->comp_date, $this->_user_id);
+                    e.Member_ID = %s", $this->_settings->getSetting('comp_date'), $this->_user_id);
         $_return = $this->_rpsdb->get_var($sql);
         return $_return;
     }
@@ -485,7 +490,7 @@ class AVH_RPS_OldRpsDb
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND	entries.Member_ID=%s
-                AND competitions.Competition_Date = DATE %s ", $this->_user_id, $this->_settings->comp_date);
+                AND competitions.Competition_Date = DATE %s ", $this->_user_id, $this->_settings->getSetting('comp_date'));
         $_return = $this->_rpsdb->get_var($sql);
         return $_return;
     }
@@ -498,7 +503,7 @@ class AVH_RPS_OldRpsDb
                 AND entries.Member_ID = %s
                 AND competitions.Competition_Date = DATE %s
                 AND competitions.Classification = %s
-                AND competitions.Medium = %s", $this->_user_id, $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium);
+                AND competitions.Medium = %s", $this->_user_id, $this->_settings->getSetting('comp_date'), $this->_settings->getSetting('classification'), $this->_settings->getSetting('medium'));
         $_return = $this->_rpsdb->get_results($sql, ARRAY_A);
         return $_return;
     }
@@ -558,7 +563,7 @@ class AVH_RPS_OldRpsDb
             FROM competitions
             WHERE Competition_Date = DATE %s
                 AND Classification = %s
-                AND Medium = %s", $this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium);
+                AND Medium = %s", $this->_settings->getSetting('comp_date'), $this->_settings->getSetting('classification'), $this->_settings->getSetting('medium'));
         $_return = $this->_rpsdb->get_row($sql, ARRAY_A);
         return $_return;
     }
