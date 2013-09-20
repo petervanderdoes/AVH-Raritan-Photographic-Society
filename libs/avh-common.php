@@ -43,19 +43,7 @@ if ( !class_exists('AVH_Common') ) {
         'disabled',
         );
         // @format_on
-        /**
-         * Sends the email
-         */
-        public static function sendMail($to, $subject, $message, $footer = array())
-        {
-            $message = array_merge($message, $footer);
-            $msg = '';
-            foreach ( $message as $line ) {
-                $msg .= $line . "\r\n";
-            }
-            wp_mail($to, $subject, $msg);
-            return;
-        }
+
 
         /**
          * Returns the wordpress version

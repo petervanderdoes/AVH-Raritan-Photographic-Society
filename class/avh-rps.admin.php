@@ -1,4 +1,53 @@
 <?php
+use Rps\Competition\ListCompetition;
+
+class AVH_RPS_AdminInitialize
+{
+
+    public function __construct ()
+    {}
+
+    static function load ()
+    {
+        add_action('init', array(__CLASS__,'handleActionInit'));
+    }
+
+    public function handleActionInit ()
+    {
+        $this->actionInit_Roles();
+        $this->actionInit_UserFields();
+
+        return;
+    }
+
+    /**
+     * Setup Roles
+     *
+     * @WordPress Action init
+     */
+    public function actionInit_Roles ()
+    {
+        // Get the administrator role.
+        $role = get_role('administrator');
+
+        // If the administrator role exists, add required capabilities for the plugin.
+        if ( !empty($role) ) {
+
+            // Role management capabilities.
+            $role->add_cap('rps_edit_competition_classification');
+            $role->add_cap('rps_edit_competitions');
+            $role->add_cap('rps_edit_entries');
+        }
+    }
+
+    public function actionInit_UserFields ()
+    {
+        add_action('edit_user_profile', array($this,'actionUser_Profile'));
+        add_action('show_user_profile', array($this,'actionUser_Profile'));
+        add_action('personal_options_update', array($this,'actionProfile_Update_Save'));
+        add_action('edit_user_profile_update', array($this,'actionProfile_Update_Save'));
+    }
+}
 
 final class AVH_RPS_Admin
 {
@@ -35,7 +84,7 @@ final class AVH_RPS_Admin
 
     /**
      *
-     * @var AVH_RPS_CompetitionList
+     * @var ListCompetition
      */
     private $_competition_list;
 
@@ -53,18 +102,15 @@ final class AVH_RPS_Admin
      *
      * @return unknown_type
      */
-    public function __construct()
+    public function __construct (ListCompetition $competition_list)
     {
         // The Settings Registery
         $this->_settings = AVH_RPS_Settings::getInstance();
 
         // The Classes Registery
         $this->_classes = AVH_RPS_Classes::getInstance();
-        add_action('init', array($this,'handleActionInit'));
-    }
 
-    public function handleActionInit()
-    {
+        $this->_competition_list = $competition_list;
         // Loads the CORE class
         $this->_core = $this->_classes->load_class('Core', 'plugin', true);
 
@@ -74,43 +120,11 @@ final class AVH_RPS_Admin
             $this->_core->actual_page = (int) $_GET['pagination'];
         }
 
-        $this->actionInit_Roles();
-        $this->actionInit_UserFields();
-
         // Admin menu
         add_action('admin_menu', array($this,'actionAdminMenu'));
         add_action('wp_ajax_setscore', array($this,'handleAjax'));
 
-        add_filter('user_row_actions',array($this,'filterRPS_user_action_links'),10,2);
-        return;
-    }
-
-    /**
-     * Setup Roles
-     *
-     * @WordPress Action init
-     */
-    public function actionInit_Roles()
-    {
-        // Get the administrator role.
-        $role = get_role('administrator');
-
-        // If the administrator role exists, add required capabilities for the plugin.
-        if ( !empty($role) ) {
-
-            // Role management capabilities.
-            $role->add_cap('rps_edit_competition_classification');
-            $role->add_cap('rps_edit_competitions');
-            $role->add_cap('rps_edit_entries');
-        }
-    }
-
-    public function actionInit_UserFields()
-    {
-        add_action('edit_user_profile', array($this,'actionUser_Profile'));
-        add_action('show_user_profile', array($this,'actionUser_Profile'));
-        add_action('personal_options_update', array($this,'actionProfile_Update_Save'));
-        add_action('edit_user_profile_update', array($this,'actionProfile_Update_Save'));
+        add_filter('user_row_actions', array($this,'filterRPS_user_action_links'), 10, 2);
     }
 
     /**
@@ -118,11 +132,11 @@ final class AVH_RPS_Admin
      *
      * @WordPress Action admin_menu
      */
-    public function actionAdminMenu()
+    public function actionAdminMenu ()
     {
         wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
         wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', $this->_settings->getSetting('plugin_url') . '/js/avh-rps.admin.ajax.js', array('jquery'),false,true);
+        wp_register_script('avhrps-comp-ajax', $this->_settings->getSetting('plugin_url') . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', AVH_RPS_Define::MENU_POSITION_COMPETITION);
 
@@ -137,11 +151,10 @@ final class AVH_RPS_Admin
         add_action('load-' . $this->_hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
     }
 
-    public function actionLoadPagehookCompetition()
+    public function actionLoadPagehookCompetition ()
     {
         global $current_screen;
         $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
-        $this->_competition_list = $this->_classes->load_class('CompetitionList', 'plugin', true);
         $this->_handleRequestCompetition();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
@@ -149,7 +162,7 @@ final class AVH_RPS_Admin
         wp_enqueue_script('common');
         wp_enqueue_script('wp-lists');
         // Plugin Style and Scripts
-        wp_enqueue_script( 'avhrps-comp-ajax');
+        wp_enqueue_script('avhrps-comp-ajax');
 
         wp_enqueue_style('avhrps-admin-css');
         wp_enqueue_style('avhrps-jquery-css');
@@ -162,7 +175,7 @@ final class AVH_RPS_Admin
      * Handle the HTTP Request before the page of the menu Competition is displayed.
      * This is needed for the redirects.
      */
-    private function _handleRequestCompetition()
+    private function _handleRequestCompetition ()
     {
         if ( isset($_REQUEST['wp_http_referer']) ) {
             $redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
@@ -249,7 +262,7 @@ final class AVH_RPS_Admin
 
             case 'setscore':
                 if ( !empty($_REQUEST['competition']) ) {
-                    check_admin_referer('score_'.$_REQUEST['competition']);
+                    check_admin_referer('score_' . $_REQUEST['competition']);
                     $data['ID'] = (int) $_REQUEST['competition'];
                     $data['Scored'] = 'Y';
                     $this->_rpsdb->insertCompetition($data);
@@ -257,14 +270,14 @@ final class AVH_RPS_Admin
                 wp_redirect($redirect);
                 break;
             case 'Unsetscore':
-                    if ( !empty($_REQUEST['competition']) ) {
-                        check_admin_referer('score_'.$_REQUEST['competition']);
-                        $data['ID'] = (int) $_REQUEST['competition'];
-                        $data['Scored'] = 'N';
-                        $this->_rpsdb->insertCompetition($data);
-                    }
-                    wp_redirect($redirect);
-                    break;
+                if ( !empty($_REQUEST['competition']) ) {
+                    check_admin_referer('score_' . $_REQUEST['competition']);
+                    $data['ID'] = (int) $_REQUEST['competition'];
+                    $data['Scored'] = 'N';
+                    $this->_rpsdb->insertCompetition($data);
+                }
+                wp_redirect($redirect);
+                break;
             default:
                 if ( !empty($_GET['_wp_http_referer']) ) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
@@ -281,22 +294,23 @@ final class AVH_RPS_Admin
         }
     }
 
-    public function handleAjax() {
+    public function handleAjax ()
+    {
         $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
-        if (isset($_POST['scored'])) {
-            if ($_POST['scored'] == 'Yes') {
+        if ( isset($_POST['scored']) ) {
+            if ( $_POST['scored'] == 'Yes' ) {
                 $data['ID'] = (int) $_POST['id'];
                 $data['Scored'] = 'N';
                 $result = $this->_rpsdb->insertCompetition($data);
-                $response = json_encode(array ('text' => 'N', 'scored'=>'No', 'scoredtext' => 'Yes'));
+                $response = json_encode(array('text' => 'N','scored' => 'No','scoredtext' => 'Yes'));
             }
-            if ($_POST['scored'] == 'No') {
+            if ( $_POST['scored'] == 'No' ) {
                 $data['ID'] = (int) $_POST['id'];
                 $data['Scored'] = 'Y';
                 $result = $this->_rpsdb->insertCompetition($data);
-                $response = json_encode(array ('text' => 'Y', 'scored'=>'Yes', 'scoredtext' => 'No'));
+                $response = json_encode(array('text' => 'Y','scored' => 'Yes','scoredtext' => 'No'));
             }
-            if (is_wp_error($result)) {
+            if ( is_wp_error($result) ) {
                 echo 'Error updating competition';
             } else {
                 echo $response;
@@ -304,10 +318,11 @@ final class AVH_RPS_Admin
         }
         die();
     }
+
     /**
      * Display the page for the menu Competition
      */
-    public function menuCompetition()
+    public function menuCompetition ()
     {
         $doAction = $this->_competition_list->current_action();
         switch ( $doAction )
@@ -341,7 +356,7 @@ final class AVH_RPS_Admin
      * @param string $referer
      *
      */
-    private function _displayPageCompetitionDelete()
+    private function _displayPageCompetitionDelete ()
     {
         global $wpdb;
 
@@ -385,7 +400,7 @@ final class AVH_RPS_Admin
         $this->admin_footer();
     }
 
-    private function _displayPageCompetitionEdit()
+    private function _displayPageCompetitionEdit ()
     {
         global $wpdb;
 
@@ -511,7 +526,7 @@ final class AVH_RPS_Admin
      * @param string $referer
      *
      */
-    private function _displayPageCompetitionOpenClose($action)
+    private function _displayPageCompetitionOpenClose ($action)
     {
         global $wpdb;
 
@@ -556,7 +571,7 @@ final class AVH_RPS_Admin
     /**
      * Display the competion in a list
      */
-    private function _displayPageCompetitionList()
+    private function _displayPageCompetitionList ()
     {
         global $screen_layout_columns;
 
@@ -614,7 +629,7 @@ final class AVH_RPS_Admin
         echo '</div>';
     }
 
-    public function actionLoadPagehookCompetitionAdd()
+    public function actionLoadPagehookCompetitionAdd ()
     {
         global $current_screen;
         $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
@@ -631,7 +646,7 @@ final class AVH_RPS_Admin
         wp_enqueue_style('avhrps-jquery-css');
     }
 
-    public function menuCompetitionAdd()
+    public function menuCompetitionAdd ()
     {
         $option_name = 'competition_add';
         // @var $classForm AVH_Form
@@ -803,7 +818,7 @@ final class AVH_RPS_Admin
         $this->admin_footer();
     }
 
-    public function actionLoadPagehookEntries()
+    public function actionLoadPagehookEntries ()
     {
         global $current_screen;
 
@@ -829,7 +844,7 @@ final class AVH_RPS_Admin
      * Handle the HTTP Request before the page of the menu Entries is displayed.
      * This is needed for the redirects.
      */
-    private function _handleRequestEntries()
+    private function _handleRequestEntries ()
     {
         if ( isset($_REQUEST['wp_http_referer']) ) {
             $redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
@@ -892,7 +907,7 @@ final class AVH_RPS_Admin
     /**
      * Display the page for the menu Entries
      */
-    public function menuEntries()
+    public function menuEntries ()
     {
         $doAction = $this->_entries_list->current_action();
         switch ( $doAction )
@@ -914,7 +929,7 @@ final class AVH_RPS_Admin
     /**
      * Display the entries in a list
      */
-    private function _displayPageEntriesList()
+    private function _displayPageEntriesList ()
     {
         global $screen_layout_columns;
 
@@ -966,7 +981,7 @@ final class AVH_RPS_Admin
     /**
      * Display the page to confirm the deletion of the selected entries.
      */
-    private function _displayPageEntriesDelete()
+    private function _displayPageEntriesDelete ()
     {
         global $wpdb;
         $classForm = $this->_classes->load_class('Form', 'system', false);
@@ -1010,7 +1025,7 @@ final class AVH_RPS_Admin
         $this->admin_footer();
     }
 
-    private function _displayPageEntriesEdit()
+    private function _displayPageEntriesEdit ()
     {
         global $wpdb;
 
@@ -1081,7 +1096,7 @@ final class AVH_RPS_Admin
         $this->admin_footer();
     }
 
-    private function _updateEntry()
+    private function _updateEntry ()
     {
         $formOptions = $_POST['entry-edit'];
         $id = (int) $_POST['entry'];
@@ -1098,12 +1113,14 @@ final class AVH_RPS_Admin
 
     /**
      * Add row action link to users list to display all their entries.
+     *
      * @param unknown $actions
      * @param unknown $user
      * @return string
      */
-    function filterRPS_user_action_links( $actions, $user ) {
-        $link = admin_url(). "?page=avh-rps-entries&user_id=".$user->ID;
+    function filterRPS_user_action_links ($actions, $user)
+    {
+        $link = admin_url() . "?page=avh-rps-entries&user_id=" . $user->ID;
         $actions['entries'] = "<a href='$link'>Entries</a>";
         return $actions;
     }
@@ -1118,7 +1135,7 @@ final class AVH_RPS_Admin
      *
      * @since 1.0
      */
-    public function filterPluginActions($links)
+    public function filterPluginActions ($links)
     {
         $folder = AVH_Common::getBaseDirectory($this->_settings->plugin_basename);
         $settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
@@ -1135,7 +1152,7 @@ final class AVH_RPS_Admin
      * @param unknown_type $option
      * @param unknown_type $value
      */
-    public function filterSetScreenOption($error_value, $option, $value)
+    public function filterSetScreenOption ($error_value, $option, $value)
     {
         $return = $error_value;
         switch ( $option )
@@ -1163,7 +1180,7 @@ final class AVH_RPS_Admin
      *        $screen
      * @return strings
      */
-    public function filterScreenLayoutColumns($columns, $screen)
+    public function filterScreenLayoutColumns ($columns, $screen)
     {
         switch ( $screen )
         {
@@ -1177,7 +1194,7 @@ final class AVH_RPS_Admin
         return $columns;
     }
 
-    public function actionUser_Profile($user_id)
+    public function actionUser_Profile ($user_id)
     {
         $userID = $user_id->ID;
         $_rps_class_bw = get_user_meta($userID, 'rps_class_bw', true);
@@ -1280,7 +1297,7 @@ final class AVH_RPS_Admin
         echo '</table>';
     }
 
-    public function actionProfile_Update_Save($user_id)
+    public function actionProfile_Update_Save ($user_id)
     {
         $userID = $user_id;
         if ( isset($_POST['rps_class_bw']) ) {
@@ -1310,7 +1327,7 @@ final class AVH_RPS_Admin
         update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
     }
 
-    private function _updateCompetition()
+    private function _updateCompetition ()
     {
         $formOptions = $_POST['competition-edit'];
 
@@ -1358,7 +1375,7 @@ final class AVH_RPS_Admin
     /**
      * Display plugin Copyright
      */
-    private function _printAdminFooter()
+    private function _printAdminFooter ()
     {
         echo '<div class="clear"></div>';
         echo '<p class="footer_avhfdas">';
@@ -1369,7 +1386,7 @@ final class AVH_RPS_Admin
     /**
      * Display WP alert
      */
-    private function _displayMessage()
+    private function _displayMessage ()
     {
         $message = '';
         if ( is_array($this->_message) ) {
@@ -1396,7 +1413,7 @@ final class AVH_RPS_Admin
      * @param $icon strings
      * @return string
      */
-    private function _displayIcon($icon)
+    private function _displayIcon ($icon)
     {
         return ( '<div class="icon32" id="icon-' . $icon . '"><br/></div>' );
     }
@@ -1407,7 +1424,7 @@ final class AVH_RPS_Admin
      * @param string $msg
      *        Error Message. Assumed to contain HTML and be sanitized.
      */
-    private function _comment_footer_die($msg)
+    private function _comment_footer_die ($msg)
     {
         echo "<div class='wrap'><p>$msg</p></div>";
         die();
@@ -1427,7 +1444,7 @@ final class AVH_RPS_Admin
      * @param bool $contains_files
      *        Whether the form should allow for file uploads.
      */
-    function admin_header($title)
+    function admin_header ($title)
     {
         echo '<div class="wrap">';
         echo $this->_displayIcon('options-general');
@@ -1445,7 +1462,7 @@ final class AVH_RPS_Admin
      * @param text $text
      *        The text to be shown in the submit button.
      */
-    function admin_footer()
+    function admin_footer ()
     {
         echo '</div></div></div>';
         // $this->admin_sidebar();

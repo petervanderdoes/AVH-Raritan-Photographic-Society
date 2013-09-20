@@ -1,8 +1,13 @@
 <?php
+namespace Rps\Competition;
+use Avh\Html\Html;
+use AVH_RPS_OldRpsDb;
+use \WP_List_Table;
+
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
-class AVH_RPS_CompetitionList extends WP_List_Table
+class ListCompetition extends WP_List_Table
 {
 
     /**
@@ -28,10 +33,11 @@ class AVH_RPS_CompetitionList extends WP_List_Table
      * @var AVH_RPS_OldRpsDb
      */
     private $_rpsdb;
+
     public $messages;
     public $screen;
 
-    function __construct()
+    function __construct (AVH_RPS_OldRpsDb $_rpsdb)
     {
 
         // Get The Registry
@@ -39,7 +45,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         $this->_classes = AVH_RPS_Classes::getInstance();
         // Initialize the plugin
         $this->_core = $this->_classes->load_class('Core', 'plugin', true);
-        $this->_rpsdb = $this->_classes->load_class('OldRpsDb', 'plugin', true);
+        $this->_rpsdb = $_rpsdb;
 
         $this->screen = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');
@@ -58,12 +64,12 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         parent::__construct(array('plural' => 'competitions','singular' => 'competition','ajax' => false));
     }
 
-    function ajax_user_can()
+    function ajax_user_can ()
     {
         return true;
     }
 
-    function prepare_items()
+    function prepare_items ()
     {
         global $post_id, $competition_status, $search, $comment_type;
 
@@ -116,38 +122,38 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         $s = isset($_REQUEST['s']) ? $_REQUEST['s'] : '';
     }
 
-    function get_per_page($competition_status = 'open')
+    function get_per_page ($competition_status = 'open')
     {
         $competitions_per_page = $this->get_items_per_page('competitions_per_page');
         $competitions_per_page = apply_filters('competitions_per_page', $competitions_per_page, $competition_status);
         return $competitions_per_page;
     }
 
-    function no_items()
+    function no_items ()
     {
         _e('No competitions.');
     }
 
-    function get_columns()
+    function get_columns ()
     {
         global $status;
 
         return array('cb' => '<input type="checkbox" />','date' => 'Date','theme' => 'Theme','classification' => 'Classification','medium' => 'Medium','status' => 'Closed','scored' => 'Scored');
     }
 
-    function get_sortable_columns()
+    function get_sortable_columns ()
     {
         return array('');
     }
 
-    function display_tablenav($which)
+    function display_tablenav ($which)
     {
         global $status;
 
         parent::display_tablenav($which);
     }
 
-    function get_views()
+    function get_views ()
     {
         global $totals, $competition_status;
 
@@ -171,7 +177,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         return $status_links;
     }
 
-    function get_bulk_actions()
+    function get_bulk_actions ()
     {
         global $competition_status;
 
@@ -187,7 +193,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         return $actions;
     }
 
-    function extra_tablenav($which)
+    function extra_tablenav ($which)
     {
         global $status;
 
@@ -202,7 +208,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         }
     }
 
-    function current_action()
+    function current_action ()
     {
         if ( isset($_POST['clear-recent-list']) )
             return 'clear-recent-list';
@@ -210,7 +216,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         return parent::current_action();
     }
 
-    function display()
+    function display ()
     {
         extract($this->_args);
 
@@ -244,7 +250,7 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         $this->display_tablenav('bottom');
     }
 
-    function single_row($a_competition)
+    function single_row ($a_competition)
     {
         $competition = $a_competition;
         $status = ( $competition->Closed == "Y" ? '' : 'closed' );
@@ -253,12 +259,12 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         echo "</tr>";
     }
 
-    function column_cb($competition)
+    function column_cb ($competition)
     {
         echo "<input type='checkbox' name='competitions[]' value='$competition->ID' />";
     }
 
-    function column_date($competition)
+    function column_date ($competition)
     {
         global $competition_status;
 
@@ -290,8 +296,8 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         // }
 
         $actions = array();
-        $actions['delete'] = '<a ' . AVH_Common::attributes(array('href' => $urlDelete,'class' => 'delete','title' => 'Delete this competition')) . '>' . 'Delete' . '</a>';
-        $actions['edit'] = '<a ' . AVH_Common::attributes(array('href' => $urlEdit,'title' => 'Edit this competition')) . '>' . 'Edit' . '</a>';
+        $actions['delete'] = Html::anchor($urlDelete, 'Delete', array('class' => 'delete','title' => 'Delete this competition'));
+        $actions['edit'] = Html::anchor($urlEdit, 'Edit', array('title' => 'Edit this competition'));
 
         echo '<div class="row-actions">';
         $sep = '';
@@ -302,48 +308,48 @@ class AVH_RPS_CompetitionList extends WP_List_Table
         echo '</div>';
     }
 
-    function column_theme($competition)
+    function column_theme ($competition)
     {
         echo $competition->Theme;
     }
 
-    function column_classification($competition)
+    function column_classification ($competition)
     {
         echo $competition->Classification;
     }
 
-    function column_medium($competition)
+    function column_medium ($competition)
     {
         echo $competition->Medium;
     }
 
-    function column_status($competition)
+    function column_status ($competition)
     {
         echo $competition->Closed;
     }
 
-    function column_scored($competition)
+    function column_scored ($competition)
     {
-        echo '<span class="text">'.$competition->Scored.'</span>';
+        echo '<span class="text">' . $competition->Scored . '</span>';
 
         $url = admin_url('admin.php') . '?';
 
         $queryReferer = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
-        $nonceScore = wp_create_nonce('score_'.$competition->ID);
+        $nonceScore = wp_create_nonce('score_' . $competition->ID);
         $querySetScore = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'setscore','_wpnonce' => $nonceScore);
         $urlSetScore = $url . http_build_query($querySetScore, '', '&');
 
-        $nonceUnsetScore = wp_create_nonce('score_'.$competition->ID);
+        $nonceUnsetScore = wp_create_nonce('score_' . $competition->ID);
         $queryUnsetScore = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'unsetscore','_wpnonce' => $nonceScore);
         $urlUnsetScore = $url . http_build_query($queryUnsetScore, '', '&');
 
         $actions = array();
         if ( $competition->Scored == 'Y' ) {
-            $actions['score'] = '<a class="adm-scored" data-scored="Yes" data-id="'.$competition->ID.'">' . 'No' . '</a>';
+            $actions['score'] = '<a class="adm-scored" data-scored="Yes" data-id="' . $competition->ID . '">' . 'No' . '</a>';
         } else {
-            $actions['score'] = '<a class="adm-scored" data-scored="No" data-id="'.$competition->ID.'">' . 'Yes' . '</a>';
+            $actions['score'] = '<a class="adm-scored" data-scored="No" data-id="' . $competition->ID . '">' . 'Yes' . '</a>';
         }
 
         echo '<div class="row-actions">';
@@ -353,6 +359,5 @@ class AVH_RPS_CompetitionList extends WP_List_Table
             $sep = ' | ';
         }
         echo '</div>';
-
     }
 }
