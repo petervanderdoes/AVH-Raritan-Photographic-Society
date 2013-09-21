@@ -28,11 +28,6 @@ class AVH_RPS_Public
      */
     private $_settings;
 
-    /**
-     *
-     * @var AVH_Class_registry
-     */
-    private $_classes;
 
     /**
      *
@@ -63,7 +58,6 @@ class AVH_RPS_Public
         // Get The Registry
         $this->container=$container;
         $this->_settings = $this->container->get('Rps\\Settings');
-        $this->_classes = AVH_RPS_Classes::getInstance();
         $this->_errmsg = '';
 
         // Initialize the plugin

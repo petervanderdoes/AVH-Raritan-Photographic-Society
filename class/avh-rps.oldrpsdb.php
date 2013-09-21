@@ -21,11 +21,6 @@ class AVH_RPS_OldRpsDb
      */
     private $_settings;
 
-    /**
-     *
-     * @var AVH_Class_registry
-     */
-    private $_classes;
     private $_rpsdb;
     private $_user_id;
 
@@ -36,8 +31,6 @@ class AVH_RPS_OldRpsDb
     {
         // Get The Registry
         $this->_settings = $settings;
-        $this->_classes = AVH_RPS_Classes::getInstance();
-
         $this->_core = $core;
         $this->_rpsdb = new wpdb(RPS_DB_USER, RPS_DB_PASSWORD, RPS_DB_NAME, DB_HOST);
         $this->_rpsdb->show_errors();
@@ -553,7 +546,12 @@ class AVH_RPS_OldRpsDb
     {
         $where = $this->_rpsdb->prepare('ID=%d', $id);
         $result = $this->getCompetitions(array('where' => $where));
-        return $result[0];
+        if (empty( $result)) {
+            $return=false;
+        } else {
+            $return = $result[0];
+        }
+        return $return;
     }
 
     public function getIdmaxEntries()

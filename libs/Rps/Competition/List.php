@@ -3,7 +3,6 @@ namespace Rps\Competition;
 use Rps\Settings;
 use Avh\Html\Html;
 use \AVH_RPS_OldRpsDb;
-use \AVH_RPS_Classes;
 use \AVH_RPS_Define;
 
 if ( !defined('AVH_FRAMEWORK') )
@@ -26,12 +25,6 @@ class ListCompetition extends \WP_List_Table
 
     /**
      *
-     * @var AVH_Class_registry
-     */
-    private $_classes;
-
-    /**
-     *
      * @var AVH_RPS_OldRpsDb
      */
     private $_rpsdb;
@@ -44,7 +37,6 @@ class ListCompetition extends \WP_List_Table
 
         // Get The Registry
         $this->_settings = $settings;
-        $this->_classes = AVH_RPS_Classes::getInstance();
         // Initialize the plugin
         $this->_core = $core;
         $this->_rpsdb = $_rpsdb;

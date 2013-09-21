@@ -1,8 +1,14 @@
 <?php
+namespace Rps\Entries;
+use Rps\Settings;
+use Avh\Html\Html;
+use \AVH_RPS_OldRpsDb;
+use \AVH_RPS_Define;
+
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
-class AVH_RPS_EntriesList extends WP_List_Table
+class ListEntries extends \WP_List_Table
 {
 
     /**
@@ -19,23 +25,16 @@ class AVH_RPS_EntriesList extends WP_List_Table
 
     /**
      *
-     * @var AVH_Class_registry
-     */
-    private $_classes;
-
-    /**
-     *
      * @var AVH_RPS_OldRpsDb
      */
     private $_rpsdb;
+
     public $messages;
     public $screen;
 
     function __construct($settings, $_rpsdb, $core)
     {
-
         $this->_settings = $settings;
-        $this->_classes = AVH_RPS_Classes::getInstance();
         // Initialize the plugin
         $this->_core = $core;
         $this->_rpsdb = $_rpsdb;
@@ -150,6 +149,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
     {
         global $totals, $entry_status;
 
+        //$num_competitions = $this->_rpsdb->countEntries();
         $status_links = array();
         $stati = array('all' => _nx_noop('All', 'All', 'entries'));
 
@@ -162,7 +162,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
                 $link = add_query_arg('entry_status', $status, $link);
             }
             // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
-            $status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_competitions->$status)) . '</a>';
+            //$status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_entries->$status)) . '</a>';
         }
 
         return $status_links;
@@ -254,6 +254,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
     function column_season($entry)
     {
         $_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
+        if ($_competition != false ){
         $unix_date = mysql2date('U', $_competition->Competition_Date);
         $_competition_month = date('n', $unix_date);
         if ( $_competition_month >= $this->_settings->club_season_start_month_num && $_competition_month <= $this->_settings->club_season_end_month_num ) {
@@ -262,6 +263,9 @@ class AVH_RPS_EntriesList extends WP_List_Table
             $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
         }
         echo $_season_text;
+        } else {
+            echo "Unknown Season";
+        }
     }
 
     function column_competition($entry)
@@ -277,7 +281,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
         $_user = get_user_by('id', $entry->Member_ID);
         $queryUser = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'user_id' => $_user->ID);
         $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
-        echo '<a  ' . AVH_Common::attributes(array('href' => $urlUser,'title' => 'Entries for ' . $_user->first_name . ' ' . $_user->last_name)) . '>' . $_user->first_name . ' ' . $_user->last_name . '</a>';
+        echo Html::anchor($urlUser,$_user->first_name . ' ' . $_user->last_name, array('title'=>'Entries for '.$_user->first_name . ' ' . $_user->last_name ));
     }
 
     function column_title($entry)
@@ -296,8 +300,8 @@ class AVH_RPS_EntriesList extends WP_List_Table
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         $actions = array();
-        $actions['delete'] = '<a ' . AVH_Common::attributes(array('href' => $urlDelete,'class' => 'delete','title' => 'Delete this competition')) . '>' . 'Delete' . '</a>';
-        $actions['edit'] = '<a ' . AVH_Common::attributes(array('href' => $urlEdit,'title' => 'Edit this entry')) . '>' . 'Edit' . '</a>';
+        $actions['delete'] = Html::anchor($urlDelete,'Delete',array('class' => 'delete','title' => 'Delete this competition'));
+        $actions['edit'] = Html::anchor($urlEdit,'Edit',array('title' => 'Edit this entry'));
 
         echo '<div class="row-actions">';
         $sep = '';

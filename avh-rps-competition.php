@@ -61,6 +61,9 @@ class AVH_RPS_Client
             'Rps\\Competition\\ListCompetition' => [
                 'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','AVH_RPS_Core'],
             ],
+            'Rps\\Entries\\ListEntries' => [
+                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','AVH_RPS_Core'],
+            ],
             'Rps\\Settings' => array(),
             'AVH_RPS_Admin' => array(),
             'AVH_RPS_Core' => [

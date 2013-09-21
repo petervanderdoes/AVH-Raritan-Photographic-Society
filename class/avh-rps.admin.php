@@ -143,8 +143,6 @@ final class AVH_RPS_Admin
      */
     public function actionAdminMenu ()
     {
-        $this->_competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
-
         wp_register_style('avhrps-admin-css', $this->_settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
         wp_register_style('avhrps-jquery-css', $this->_settings->plugin_url . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
         wp_register_script('avhrps-comp-ajax', $this->_settings->plugin_url . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
@@ -166,6 +164,8 @@ final class AVH_RPS_Admin
     {
         global $current_screen;
         $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
+        $this->_competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
+
         $this->_handleRequestCompetition();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
@@ -834,7 +834,7 @@ final class AVH_RPS_Admin
         global $current_screen;
 
         $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
-        $this->_entries_list = $this->_classes->load_class('EntriesList', 'plugin', true);
+         $this->_entries_list = $this->container->get('Rps\\Entries\\ListEntries');
         $this->_handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
