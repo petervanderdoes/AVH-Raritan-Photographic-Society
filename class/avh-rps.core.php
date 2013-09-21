@@ -2,7 +2,6 @@
 use Rps\Competition;
 use Rps\Settings;
 use DI\Container;
-use Rps;
 
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');

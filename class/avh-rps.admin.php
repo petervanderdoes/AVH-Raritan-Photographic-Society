@@ -2,7 +2,6 @@
 use Rps\Competition;
 use Rps\Settings;
 use DI\Container;
-use Rps;
 
 class AVH_RPS_AdminInitialize
 {
