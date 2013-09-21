@@ -91,29 +91,29 @@ class AVH_RPS_Core
             update_option(avhrps_db_version, $this->_db_version);
         }
 
-        $this->_settings->storeSetting('club_name', "Raritan Photographic Society");
-        $this->_settings->storeSetting('club_short_name', "RPS");
-        $this->_settings->storeSetting('club_max_entries_per_member_per_date', 4);
-        $this->_settings->storeSetting('club_max_banquet_entries_per_member', 5);
-        $this->_settings->storeSetting('club_season_start_month_num', 9);
-        $this->_settings->storeSetting('club_season_end_month_num', 12);
+        $this->_settings->club_name = "Raritan Photographic Society";
+        $this->_settings->club_short_name = "RPS";
+        $this->_settings->club_max_entries_per_member_per_date = 4;
+        $this->_settings->club_max_banquet_entries_per_member = 5;
+        $this->_settings->club_season_start_month_num = 9;
+        $this->_settings->club_season_end_month_num = 12;
         // Database credentials
-        $this->_settings->storeSetting('host', 'localhost');
-        $this->_settings->storeSetting('dbname', 'avirtu2_raritdata');
-        $this->_settings->storeSetting('uname', 'avirtu2_rarit1');
-        $this->_settings->storeSetting('pw', '1Hallo@Done#');
-        $this->_settings->storeSetting('digital_chair_email', 'digitalchair@raritanphoto.com');
+        $this->_settings->host = 'localhost';
+        $this->_settings->dbname = 'avirtu2_raritdata';
+        $this->_settings->uname = 'avirtu2_rarit1';
+        $this->_settings->pw = '1Hallo@Done#';
+        $this->_settings->digital_chair_email = 'digitalchair@raritanphoto.com';
 
-        $this->_settings->storeSetting('siteurl', get_option('siteurl'));
-        $this->_settings->storeSetting('graphics_url', plugins_url('images', $this->_settings->getSetting('plugin_basename')));
-        $this->_settings->storeSetting('js_url', plugins_url('js', $this->_settings->getSetting('plugin_basename')));
-        $this->_settings->storeSetting('css_url', plugins_url('css', $this->_settings->getSetting('plugin_basename')));
-        $this->_settings->storeSetting('validComp', '');
-        $this->_settings->storeSetting('comp_date', '');
-        $this->_settings->storeSetting('classification', '');
-        $this->_settings->storeSetting('medium', '');
-        $this->_settings->storeSetting('max_width_entry', 1024);
-        $this->_settings->storeSetting('max_height_entry', 768);
+        $this->_settings->siteurl = get_option('siteurl');
+        $this->_settings->graphics_url = plugins_url('images', $this->_settings->plugin_basename);
+        $this->_settings->js_url = plugins_url('js', $this->_settings->plugin_basename);
+        $this->_settings->css_url = plugins_url('css', $this->_settings->plugin_basename);
+        $this->_settings->validComp = '';
+        $this->_settings->comp_date = '';
+        $this->_settings->classification = '';
+        $this->_settings->medium = '';
+        $this->_settings->max_width_entry = 1024;
+        $this->_settings->max_height_entry = 768;
     }
 
     /**
@@ -198,12 +198,12 @@ class AVH_RPS_Core
 
         // If this is the 400px image, write the copyright notice onto the image
         if ( !( empty($maker) ) ) {
-            $dateParts = explode("-", $this->_settings->getSetting('comp_date'));
+            $dateParts = explode("-", $this->_settings->comp_date);
             $year = $dateParts[0];
             $black = imagecolorallocate($thumb_img, 0, 0, 0);
             $white = imagecolorallocate($thumb_img, 255, 255, 255);
             $font = 5;
-            $text = "Copyright " . substr($this->_settings->getSetting('comp_date'), 0, 4) . " $maker";
+            $text = "Copyright " . substr($this->_settings->comp_date, 0, 4) . " $maker";
             $width = imagesx($thumb_img);
             $height = imagesy($thumb_img);
             $textLength = imagefontwidth($font) * strlen($text);

@@ -146,9 +146,9 @@ final class AVH_RPS_Admin
     {
         $this->_competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
 
-        wp_register_style('avhrps-admin-css', $this->_settings->getSetting('plugin_url') . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
-        wp_register_style('avhrps-jquery-css', $this->_settings->getSetting('plugin_url') . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', $this->_settings->getSetting('plugin_url') . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
+        wp_register_style('avhrps-admin-css', $this->_settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-jquery-css', $this->_settings->plugin_url . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', $this->_settings->plugin_url . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', AVH_RPS_Define::MENU_POSITION_COMPETITION);
 
@@ -521,7 +521,7 @@ final class AVH_RPS_Admin
         echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
-        echo '   buttonImage: "' . $this->_settings->getSetting('plugin_url') . '/images/calendar.png", ' . "\n";
+        echo '   buttonImage: "' . $this->_settings->plugin_url . '/images/calendar.png", ' . "\n";
         echo '   showOn: "both"' . "\n";
         echo ' });' . "\n";
         echo '	$( "#date" ).datepicker();' . "\n";
@@ -1149,7 +1149,7 @@ final class AVH_RPS_Admin
      */
     public function filterPluginActions ($links)
     {
-        $folder = AVH_Common::getBaseDirectory($this->_settings->getSetting('plugin_basename'));
+        $folder = AVH_Common::getBaseDirectory($this->_settings->plugin_basename);
         $settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
         array_unshift($links, $settings_link); // before other links
         return $links;

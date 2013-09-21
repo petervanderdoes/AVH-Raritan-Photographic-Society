@@ -256,7 +256,7 @@ class AVH_RPS_EntriesList extends WP_List_Table
         $_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
         $unix_date = mysql2date('U', $_competition->Competition_Date);
         $_competition_month = date('n', $unix_date);
-        if ( $_competition_month >= $this->_settings->getSetting('club_season_start_month_num') && $_competition_month <= $this->_settings->getSetting('club_season_end_month_num') ) {
+        if ( $_competition_month >= $this->_settings->club_season_start_month_num && $_competition_month <= $this->_settings->club_season_end_month_num ) {
             $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
         } else {
             $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);

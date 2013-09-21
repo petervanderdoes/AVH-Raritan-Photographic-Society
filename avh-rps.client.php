@@ -9,8 +9,8 @@ if ( !defined('AVH_FRAMEWORK') )
 function avh_RPS_init()
 {
     $_settings = AVH_RPS_Settings::getInstance();
-    $_settings->storeSetting('plugin_working_dir', pathinfo(__FILE__, PATHINFO_DIRNAME));
-    $_settings->storeSetting('plugin_url', plugins_url('', AVH_RPS_Define::PLUGIN_FILE));
+    $_settings->plugin_working_dir = pathinfo(__FILE__, PATHINFO_DIRNAME);
+    $_settings->plugin_url = plugins_url('', AVH_RPS_Define::PLUGIN_FILE);
     // Admin
     if ( is_admin() ) {
         require_once ( $_settings->plugin_working_dir . '/class/avh-rps.admin.php' );

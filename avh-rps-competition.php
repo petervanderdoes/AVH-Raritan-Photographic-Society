@@ -77,9 +77,9 @@ class AVH_RPS_Client
         unset($_classes);
 
         $_settings = $this->container->get('Rps\\Settings');
-        $_settings->storeSetting('plugin_dir', $_dir);
-        $_settings->storeSetting('plugin_basename', $_basename);
-        $_settings->storeSetting('plugin_url', plugins_url('', AVH_RPS_Define::PLUGIN_FILE));
+        $_settings->plugin_dir = $_dir;
+        $_settings->plugin_basename = $_basename;
+        $_settings->plugin_url = plugins_url('', AVH_RPS_Define::PLUGIN_FILE);
 
         add_action('plugins_loaded', array($this,'init'));
     }
@@ -91,7 +91,7 @@ class AVH_RPS_Client
             AVH_RPS_AdminInitialize::load();
             add_action('wp_loaded', array($this->admin()));
         } else {
-            require_once ( $_settings->getSetting('plugin_dir') . '/class/avh-rps.public.php' );
+            require_once ( $_settings->plugin_dir . '/class/avh-rps.public.php' );
             $avhfdas_public = new AVH_RPS_Public($this->container);
         }
     }
