@@ -377,7 +377,7 @@ final class AVH_RPS_Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $classForm = $this->_classes->load_class('Form', 'system', false);
+        $classForm = $this->container->get('Avh\Form\Form');
 
         $this->admin_header('Delete Competitions');
         echo $classForm->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
@@ -416,7 +416,7 @@ final class AVH_RPS_Admin
         global $wpdb;
 
         // @var $classForm AVH_Form
-        $classForm = $this->_classes->load_class('Form', 'system', false);
+        $classForm = $this->container->get('Avh\Form\Form');
         $classForm->setOption_name('competition-edit');
 
         if ( isset($_POST['update']) ) {
@@ -556,7 +556,7 @@ final class AVH_RPS_Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $classForm = $this->_classes->load_class('Form', 'system', false);
+        $classForm = $this->container->get('Avh\Form\Form');
 
         $this->admin_header($title);
         echo $classForm->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
@@ -661,7 +661,7 @@ final class AVH_RPS_Admin
     {
         $option_name = 'competition_add';
         // @var $classForm AVH_Form
-        $classForm = $this->_classes->load_class('Form', 'system', false);
+        $classForm = $this->container->get('Avh\Form\Form');
         $classForm->setOption_name('competition_add');
 
         // @format_off
@@ -995,7 +995,7 @@ final class AVH_RPS_Admin
     private function _displayPageEntriesDelete ()
     {
         global $wpdb;
-        $classForm = $this->_classes->load_class('Form', 'system', false);
+        $classForm = $this->container->get('Avh\Form\Form');
 
         if ( empty($_REQUEST['entries']) ) {
             $entryIdsArray = array(intval($_REQUEST['entry']));
@@ -1042,7 +1042,7 @@ final class AVH_RPS_Admin
 
         $updated = false;
         // @var $classForm AVH_Form
-        $classForm = $this->_classes->load_class('Form', 'system', false);
+        $classForm = $this->container->get('Avh\Form\Form');
         $classForm->setOption_name('entry-edit');
 
         if ( isset($_POST['update']) ) {

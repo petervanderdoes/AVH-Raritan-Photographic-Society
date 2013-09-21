@@ -1,348 +1,566 @@
 <?php
+namespace Avh\Form;
+use Avh\Html;
+
 if ( !defined('AVH_FRAMEWORK') )
-	die('You are not allowed to call this page directly.');
+    die('You are not allowed to call this page directly.');
+if ( !class_exists('Form') ) {
 
-/**
- * Form helper class.
- */
-if ( !class_exists(AVH2_Form) ) {
+    class Form
+    {
 
-	class AVH2_Form
-	{
+        // @var Use tables to create Form
+        private $_use_table = false;
+        private $_option_name;
+        private $_nonce;
 
-		/**
-		 * Creates a form input.
-		 * If no type is specified, a "text" type input will be returned.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param string $value
-		 *        input value
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _input ($name, $value = NULL, array $attributes = NULL)
-		{
-			// Set the input name
-			$attributes['name'] = $name;
+        /**
+         * Generates an opening HTML form tag.
+         *
+         * // Form will submit back to the current page using POST
+         * echo Form::open();
+         *
+         * // Form will submit to 'search' using GET
+         * echo Form::open('search', array('method' => 'get'));
+         *
+         * // When "file" inputs are present, you must include the "enctype"
+         * echo Form::open(null, array('enctype' => 'multipart/form-data'));
+         *
+         * @param mixed $action
+         *        form action, defaults to the current request URI, or [Request] class to use
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses Html::attributes
+         */
+        public function open ($action = null, array $attributes = null)
+        {
+            if ( !isset($attributes['method']) ) {
+                // Use POST method
+                $attributes['method'] = 'post';
+            }
 
-			// Set the input value
-			$attributes['value'] = $value;
+            return '<form action="' . $action . '"' . Html::attributes($attributes) . '>';
+        }
 
-			if ( !isset($attributes['type']) ) {
-				// Default type is text
-				$attributes['type'] = 'text';
-			}
+        /**
+         * Creates the closing form tag.
+         *
+         * echo Form::close();
+         *
+         * @return string
+         */
+        public function close ()
+        {
+            return '</form>';
+        }
 
-			return '<input' . AVH2_Html::attributes($attributes) . ' />';
-		}
+        public function open_table ()
+        {
+            $this->_use_table = true;
+            return "\n<table class='form-table'>\n";
+        }
 
-		/**
-		 * Creates a hidden form input.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param string $value
-		 *        input value
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _hidden ($name, $value = NULL, array $attributes = NULL)
-		{
-			$attributes['type'] = 'hidden';
+        public function close_table ()
+        {
+            $this->_use_table = false;
+            return "\n</table>\n";
+        }
 
-			return AVH2_Form::input($name, $value, $attributes);
-		}
+        /**
+         * Create the nonce field.
+         * Instead of using the standard WordPress function, we duplicate the function but using the methods of this class.
+         * This will create a more standard looking HTML output.
+         *
+         * @param string $nonce
+         * @param boolean $referer
+         * @return string
+         */
+        public function nonce_field ($referer = true)
+        {
+            $nonce_field = $this->hidden('_wpnonce', wp_create_nonce($this->_nonce));
+            if ( $referer ) {
+                $ref = $_SERVER['REQUEST_URI'];
+                $nonce_field .= $this->hidden('_wp_http_referer', $ref);
+            }
 
-		/**
-		 * Creates a password form input.
-		 *
-		 * @param string $name input name
-		 * @param string $value
-		 *        input value
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _password ($name, $value = NULL, array $attributes = NULL)
-		{
-			$attributes['type'] = 'password';
+            return $nonce_field;
+        }
 
-			return AVH2_Form::input($name, $value, $attributes);
-		}
+        public function settings_fields ($action, $nonce)
+        {
+            $_return = $this->hidden('action', $action);
+            $_return .= $this->nonce_field();
+            return $_return;
+        }
 
-		/**
-		 * Creates a file upload form input.
-		 * No input value can be specified.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _file ($name, array $attributes = NULL)
-		{
-			$attributes['type'] = 'file';
+        public function text ($label, $description, $name, $value = null, array $attributes = null)
+        {
+            $_label = $this->_label($name, $label);
+            $_field = $this->_input($name, $value, $attributes);
+            return $this->_output($_label, $_field);
+        }
 
-			return AVH2_Form::input($name, NULL, $attributes);
-		}
+        public function checkboxes ($label, $descripton, $name, array $options, array $attributes = null)
+        {
+            $_label = $this->_label($name, $label);
+            $_return = $this->_output_label($_label);
+            $_field = '';
+            foreach ( $options as $value => $attr ) {
+                $_checked = ( isset($attr['checked']) ? $attr['checked'] : false );
+                $_field .= $this->_checkbox($value, true, $_checked, $attributes);
+                $_field .= $this->_label($value, $attr['text']);
+                $_field .= '<br>';
+            }
+            $_return .= $this->_output_field($_field);
+            return $_return;
+        }
 
-		/**
-		 * Creates a checkbox form input.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param string $value
-		 *        input value
-		 * @param boolean $checked
-		 *        checked status
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _checkbox ($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
-		{
-			$attributes['type'] = 'checkbox';
+        public function select ($label, $description, $name, array $options = null, $selected = null, array $attributes = null)
+        {
+            $_label = $this->_label($name, $label);
+            $_field = $this->_select($name, $options, $selected, $attributes);
+            return $this->_output($_label, $_field);
+        }
 
-			if ( $checked === TRUE ) {
-				// Make the checkbox active
-				$attributes['checked'] = 'checked';
-			}
+        /**
+         * Creates a hidden form input.
+         *
+         * echo Form::hidden('csrf', $token);
+         *
+         * @param string $name
+         *        input name
+         * @param string $value
+         *        input value
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses $this->input
+         */
+        public function hidden ($name, $value = null, array $attributes = null, $use_option_name = false)
+        {
+            $attributes['type'] = 'hidden';
 
-			return AVH2_Form::input($name, $value, $attributes);
-		}
+            return $this->_input($name, $value, $attributes, $use_option_name);
+        }
 
-		/**
-		 * Creates a radio form input.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param string $value
-		 *        input value
-		 * @param boolean $checked
-		 *        checked status
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _radio ($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
-		{
-			$attributes['type'] = 'radio';
+        /**
+         * Creates a button form input.
+         * Note that the body of a button is NOT escaped,
+         * to allow images and other HTML to be used.
+         *
+         * echo Form::button('save', 'Save Profile', array('type' => 'submit'));
+         *
+         * @param string $name
+         *        input name
+         * @param string $body
+         *        input value
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses Html::attributes
+         */
+        public function button ($name, $body, array $attributes = null)
+        {
+            // Set the input name
+            $attributes['name'] = $name;
 
-			if ( $checked === TRUE ) {
-				// Make the radio active
-				$attributes['checked'] = 'checked';
-			}
+            return '<button' . Html::attributes($attributes) . '>' . $body . '</button>';
+        }
 
-			return AVH2_Form::input($name, $value, $attributes);
-		}
+        /**
+         * Creates a submit form input.
+         *
+         * echo Form::submit(null, 'Login');
+         *
+         * @param string $name
+         *        input name
+         * @param string $value
+         *        input value
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses Form::input
+         */
+        public function submit ($name, $value, array $attributes = null)
+        {
+            $attributes['type'] = 'submit';
+            return '<p class="submit">' . $this->_input($name, $value, $attributes) . '</p>';
+        }
 
-		/**
-		 * Creates a textarea form input.
-		 *
-		 * @param string $name
-		 *        textarea name
-		 * @param string $body
-		 *        textarea body
-		 * @param array $attributes
-		 *        html attributes
-		 * @param boolean $double_encode
-		 *        encode existing HTML characters
-		 * @return string
-		 */
-		protected static function _textarea ($name, $body = '', array $attributes = NULL, $double_encode = TRUE)
-		{
-			// Set the input name
-			$attributes['name'] = $name;
+        // ____________PRIVATE FUNCTIONS____________
 
-			// Add default rows and cols attributes (required)
-			$attributes += array('rows' => 10,'cols' => 50);
+        /**
+         * Creates a form input.
+         * If no type is specified, a "text" type input will
+         * be returned.
+         *
+         * echo Form::input('username', $username);
+         *
+         * @param string $name
+         *        input name
+         * @param string $value
+         *        input value
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses Html::attributes
+         */
+        private function _input ($name, $value = null, array $attributes = null, $use_option_name = true)
+        {
+            // Set the input name
+            if ( isset($this->_option_name) && $use_option_name ) {
+                $attributes['name'] = $this->_option_name . '[' . $name . ']';
+            } else {
+                $attributes['name'] = $name;
+            }
 
-			return '<textarea' . AVH2_Html::attributes($attributes) . '>' . esc_textarea($body) . '</textarea>';
-		}
+            // Set the input value
+            $attributes['value'] = $value;
 
-		/**
-		 * Creates a select form input.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param array $options
-		 *        available options
-		 * @param mixed $selected
-		 *        selected option string, or an array of
-		 *        selected options
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _select ($name, array $options = NULL, $selected = NULL, array $attributes = NULL)
-		{
-			// Set the input name
-			$attributes['name'] = $name;
+            if ( !isset($attributes['type']) ) {
+                // Default type is text
+                $attributes['type'] = 'text';
+            }
 
-			if ( is_array($selected) ) {
-				// This is a multi-select, god save us!
-				$attributes['multiple'] = 'multiple';
-			}
+            if ( !isset($attributes['id']) ) {
+                $attributes['id'] = $name;
+            }
 
-			if ( !is_array($selected) ) {
-				if ( $selected === NULL ) {
-					// Use an empty array
-					$selected = array();
-				} else {
-					// Convert the selected options to an array
-					$selected = array((string) $selected);
-				}
-			}
+            return '<input' . Html::attributes($attributes) . ' />';
+        }
 
-			if ( empty($options) ) {
-				// There are no options
-				$options = '';
-			} else {
-				foreach ( $options as $value => $name ) {
-					if ( is_array($name) ) {
-						// Create a new optgroup
-						$group = array('label' => $value);
+        /**
+         * Creates a password form input.
+         *
+         * echo Form::password('password');
+         *
+         * @param string $name
+         *        input name
+         * @param string $value
+         *        input value
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses $this->input
+         */
+        private function _password ($name, $value = null, array $attributes = null)
+        {
+            $attributes['type'] = 'password';
 
-						// Create a new list of options
-						$_options = array();
+            return $this->_input($name, $value, $attributes);
+        }
 
-						foreach ( $name as $_value => $_name ) {
-							// Force value to be string
-							$_value = (string) $_value;
+        /**
+         * Creates a file upload form input.
+         * No input value can be specified.
+         *
+         * echo Form::file('image');
+         *
+         * @param string $name
+         *        input name
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses $this->input
+         */
+        private function _file ($name, array $attributes = null)
+        {
+            $attributes['type'] = 'file';
 
-							// Create a new attribute set for this option
-							$option = array('value' => $_value);
+            return $this->_input($name, null, $attributes);
+        }
 
-							if ( in_array($_value, $selected) ) {
-								// This option is selected
-								$option['selected'] = 'selected';
-							}
+        /**
+         * Creates a checkbox form input.
+         *
+         * echo Form::checkbox('remember_me', 1, (bool) $remember);
+         *
+         * @param string $name
+         *        input name
+         * @param string $value
+         *        input value
+         * @param boolean $checked
+         *        checked status
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses $this->input
+         */
+        private function _checkbox ($name, $value = null, $checked = false, array $attributes = null)
+        {
+            $attributes['type'] = 'checkbox';
 
-							// Change the option to the HTML string
-							$_options[] = '<option' . AVH2_Html::attributes($option) . '>' . $_name . '</option>';
-						}
+            if ( $checked === true ) {
+                // Make the checkbox active
+                $attributes[] = 'checked';
+            }
 
-						// Compile the options into a string
-						$_options = "\n" . implode("\n", $_options) . "\n";
+            return $this->_input($name, $value, $attributes);
+        }
 
-						$options[$value] = '<optgroup' . AVH2_Html::attributes($group) . '>' . $_options . '</optgroup>';
-					} else {
-						// Force value to be string
-						$value = (string) $value;
+        /**
+         * Creates a radio form input.
+         *
+         * echo Form::radio('like_cats', 1, $cats);
+         * echo Form::radio('like_cats', 0, ! $cats);
+         *
+         * @param string $name
+         *        input name
+         * @param string $value
+         *        input value
+         * @param boolean $checked
+         *        checked status
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses $this->input
+         */
+        private function _radio ($name, $value = null, $checked = false, array $attributes = null)
+        {
+            $attributes['type'] = 'radio';
 
-						// Create a new attribute set for this option
-						$option = array('value' => $value);
+            if ( $checked === true ) {
+                // Make the radio active
+                $attributes[] = 'checked';
+            }
 
-						if ( in_array($value, $selected) ) {
-							// This option is selected
-							$option['selected'] = 'selected';
-						}
+            return $this->_input($name, $value, $attributes);
+        }
 
-						// Change the option to the HTML string
-						$options[$value] = '<option' . AVH2_Html::attributes($option) . '>' . $name . '</option>';
-					}
-				}
+        /**
+         * Creates a textarea form input.
+         *
+         * echo Form::textarea('about', $about);
+         *
+         * @param string $name
+         *        textarea name
+         * @param string $body
+         *        textarea body
+         * @param array $attributes
+         *        html attributes
+         * @param boolean $double_encode
+         *        encode existing HTML characters
+         * @return string
+         * @uses Html::attributes
+         */
+        private function _textarea ($name, $body = '', array $attributes = null, $double_encode = true)
+        {
+            // Set the input name
+            $attributes['name'] = $name;
 
-				// Compile the options into a single string
-				$options = "\n" . implode("\n", $options) . "\n";
-			}
+            // Add default rows and cols attributes (required)
+            $attributes += array('rows' => 10,'cols' => 50);
 
-			return '<select' . AVH2_Html::attributes($attributes) . '>' . $options . '</select>';
-		}
+            return '<textarea' . Html::attributes($attributes) . '>' . esc_textarea($body) . '</textarea>';
+        }
 
-		/**
-		 * Creates a submit form input.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param string $value
-		 *        input value
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _submit ($name, $value, array $attributes = NULL)
-		{
-			$attributes['type'] = 'submit';
+        /**
+         * Creates a select form input.
+         *
+         * echo Form::select('country', $countries, $country);
+         *
+         * [!!] Support for multiple selected options was added in v3.0.7.
+         *
+         * @param string $name
+         *        input name
+         * @param array $options
+         *        available options
+         * @param mixed $selected
+         *        selected option string, or an array of selected options
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses Html::attributes
+         */
+        private function _select ($name, array $options = null, $selected = null, array $attributes = null)
+        {
+            // Set the input name
+            if ( isset($this->_option_name) ) {
+                $attributes['name'] = $this->_option_name . '[' . $name . ']';
+            } else {
+                $attributes['name'] = $name;
+            }
 
-			return AVH2_Form::input($name, $value, $attributes);
-		}
+            if ( is_array($selected) ) {
+                // This is a multi-select, god save us!
+                $attributes[] = 'multiple';
+            }
 
-		/**
-		 * Creates a image form input.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param string $value
-		 *        input value
-		 * @param array $attributes
-		 *        html attributes
-		 * @param boolean $index
-		 *        add index file to URL?
-		 * @return string
-		 */
-		protected static function _image ($name, $value, array $attributes = NULL, $index = FALSE)
-		{
-			if ( !empty($attributes['src']) ) {
-				if ( strpos($attributes['src'], '://') === FALSE ) {
-					// Add the base URL
-					$attributes['src'] = URL::base($index) . $attributes['src'];
-				}
-			}
+            if ( !is_array($selected) ) {
+                if ( $selected === null ) {
+                    // Use an empty array
+                    $selected = array();
+                } else {
+                    // Convert the selected options to an array
+                    $selected = array((string) $selected);
+                }
+            }
 
-			$attributes['type'] = 'image';
+            if ( empty($options) ) {
+                // There are no options
+                $options = '';
+            } else {
+                foreach ( $options as $value => $name ) {
+                    if ( is_array($name) ) {
+                        // Create a new optgroup
+                        $group = array('label' => $value);
 
-			return AVH2_Form::input($name, $value, $attributes);
-		}
+                        // Create a new list of options
+                        $_options = array();
 
-		/**
-		 * Creates a button form input.
-		 * Note that the body of a button is NOT escaped, to allow images and
-		 * other HTML to be used.
-		 *
-		 * @param string $name
-		 *        input name
-		 * @param string $value
-		 *        input value
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _button ($name, $body, array $attributes = NULL)
-		{
-			// Set the input name
-			$attributes['name'] = $name;
+                        foreach ( $name as $_value => $_name ) {
+                            // Force value to be string
+                            $_value = (string) $_value;
 
-			return '<button' . AVH2_Html::attributes($attributes) . '>' . $body . '</button>';
-		}
+                            // Create a new attribute set for this option
+                            $option = array('value' => $_value);
 
-		/**
-		 * Creates a form label.
-		 * Label text is not automatically translated.
-		 *
-		 * @param string $input
-		 *        target input
-		 * @param string $text
-		 *        label text
-		 * @param array $attributes
-		 *        html attributes
-		 * @return string
-		 */
-		protected static function _label ($input, $text = NULL, array $attributes = NULL)
-		{
-			if ( $text === NULL ) {
-				// Use the input name as the text
-				$text = ucwords(preg_replace('/[\W_]+/', ' ', $input));
-			}
+                            if ( in_array($_value, $selected) ) {
+                                // This option is selected
+                                $option[] = 'selected';
+                            }
 
-			// Set the label target
-			$attributes['for'] = $input;
+                            // Change the option to the HTML string
+                            $_options[] = '<option' . Html::attributes($option) . '>' . esc_html($name) . '</option>';
+                        }
 
-			return '<label' . AVH2_Html::attributes($attributes) . '>' . $text . '</label>';
-		}
-	}
+                        // Compile the options into a string
+                        $_options = "\n" . implode("\n", $_options) . "\n";
+
+                        $options[$value] = '<optgroup' . Html::attributes($group) . '>' . $_options . '</optgroup>';
+                    } else {
+                        // Force value to be string
+                        $value = (string) $value;
+
+                        // Create a new attribute set for this option
+                        $option = array('value' => $value);
+
+                        if ( in_array($value, $selected) ) {
+                            // This option is selected
+                            $option[] = 'selected';
+                        }
+
+                        // Change the option to the HTML string
+                        $options[$value] = '<option' . Html::attributes($option) . '>' . esc_html($name) . '</option>';
+                    }
+                }
+
+                // Compile the options into a single string
+                $options = "\n" . implode("\n", $options) . "\n";
+            }
+
+            return '<select' . Html::attributes($attributes) . '>' . $options . '</select>';
+        }
+
+        /**
+         * Creates a image form input.
+         *
+         * echo Form::image(null, null, array('src' => 'media/img/login.png'));
+         *
+         * @param string $name
+         *        input name
+         * @param string $value
+         *        input value
+         * @param array $attributes
+         *        html attributes
+         * @param boolean $index
+         *        add index file to URL?
+         * @return string
+         * @uses $this->input
+         */
+        private function _image ($name, $value, array $attributes = null, $index = false)
+        {
+            if ( !empty($attributes['src']) ) {
+                if ( strpos($attributes['src'], '://') === false ) {
+                    // Add the base URL
+                    $attributes['src'] = URL::base($index) . $attributes['src'];
+                }
+            }
+
+            $attributes['type'] = 'image';
+
+            return $this->_input($name, $value, $attributes);
+        }
+
+        /**
+         * Creates a form label.
+         * Label text is not automatically translated.
+         *
+         * echo Form::label('username', 'Username');
+         *
+         * @param string $input
+         *        target input
+         * @param string $text
+         *        label text
+         * @param array $attributes
+         *        html attributes
+         * @return string
+         * @uses Html::attributes
+         */
+        private function _label ($input, $text = null, array $attributes = null)
+        {
+            if ( $text === null ) {
+                // Use the input name as the text
+                $text = ucwords(preg_replace('/[\W_]+/', ' ', $input));
+            }
+
+            // Set the label target
+            $attributes['for'] = $input;
+
+            return '<label' . Html::attributes($attributes) . '>' . $text . '</label>';
+        }
+
+        private function _output ($label, $field)
+        {
+            $_return = $this->_output_label($label);
+            $_return .= $this->_output_field($field);
+            return $_return;
+        }
+
+        private function _output_label ($label)
+        {
+            if ( $this->_use_table ) {
+                return "\n<tr>\n\t<th scope='row'>" . $label . "</th>";
+            } else {
+                return "\n" . $label;
+            }
+        }
+
+        private function _output_field ($field)
+        {
+            if ( $this->_use_table ) {
+                return "\n\t<td>\n\t\t" . $field . "\n\t</td>";
+            } else {
+                return "\n" . $field;
+            }
+        }
+
+        // __________________________________________
+        // ____________Setter and Getters____________
+        // __________________________________________
+        /**
+         *
+         * @param field_type $_option_name
+         */
+        public function setOption_name ($_option_name)
+        {
+            $this->_option_name = $_option_name;
+        }
+
+        public function getOption_name ()
+        {
+            return $this->_option_name;
+        }
+
+        public function setNonce_action ($_nonce)
+        {
+            $this->_nonce = $this->_option_name . '-' . $_nonce;
+        }
+
+        public function getNonce_action ()
+        {
+            return $this->_nonce;
+        }
+    } // End form
 }
