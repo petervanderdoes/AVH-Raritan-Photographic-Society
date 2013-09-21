@@ -782,7 +782,7 @@ class AVH_RPS_Public
                 switch ( $_POST['submit_control'] )
                 {
 
-                    case 'select_comp'
+                    case 'select_comp':
                         $this->_settings->comp_date = $_POST['select_comp'];
                         break;
 
