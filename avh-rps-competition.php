@@ -27,7 +27,6 @@ require __DIR__ . '/vendor/autoload.php';
 
 $_dir = pathinfo($plugin, PATHINFO_DIRNAME);
 $_basename = plugin_basename($plugin);
-require_once ( $_dir . '/libs/avh-registry.php' );
 require_once ( $_dir . '/libs/avh-common.php' );
 require_once ( $_dir . '/libs/avh-security.php' );
 require_once ( $_dir . '/libs/avh-visitor.php' );
@@ -72,12 +71,6 @@ class AVH_RPS_Client
         );
         // @format_on
         $this->container->addDefinitions($dependencies);
-
-        $_classes = AVH_RPS_Classes::getInstance();
-        $_classes->setDir($_dir);
-        $_classes->setClassFilePrefix('avh-rps.');
-        $_classes->setClassNamePrefix('AVH_RPS_');
-        unset($_classes);
 
         $_settings = $this->container->get('Rps\\Settings');
         $_settings->plugin_dir = $_dir;

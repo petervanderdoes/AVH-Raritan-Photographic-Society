@@ -40,12 +40,6 @@ final class AVH_RPS_Admin
 
     /**
      *
-     * @var AVH_RPS_Classes
-     */
-    private $_classes;
-
-    /**
-     *
      * @var AVH_RPS_OldRPSDb
      */
     private $_rpsdb;
@@ -79,13 +73,10 @@ final class AVH_RPS_Admin
     {
         // The Settings Registery
         $this->_settings = $container->get('Rps\\Settings');
-
-        // The Classes Registery
-        $this->_classes = AVH_RPS_Classes::getInstance();
-
-        $this->container = $container;
         // Loads the CORE class
         $this->_core = $container->get('AVH_RPS_Core');
+
+        $this->container = $container;
 
         // Admin URL and Pagination
         $this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
