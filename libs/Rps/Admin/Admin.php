@@ -1,28 +1,14 @@
 <?php
-use Rps\Competition;
+namespace Rps\Admin;
+use Rps\Competition\ListCompetition;
 use Rps\Settings;
+use Avh\Html\FormBuilder;
 use DI\Container;
+use \AVH_RPS_Define;
 
-class AVH_RPS_AdminInitialize
+final class Admin
 {
-
-    public function __construct ()
-    {}
-
-    static function load ()
-    {
-    // Room to initialize widgets.
-
-    }
-
-}
-
-final class AVH_RPS_Admin
-{
-    /* @var $formBuilder AVH_Form */
-    /**
-     * Message management
-     */
+    /* @var $formBuilder FormBuilder */
     private $_message = '';
     private $_status = '';
 
@@ -127,6 +113,7 @@ final class AVH_RPS_Admin
         add_action('personal_options_update', array($this,'actionProfile_Update_Save'));
         add_action('edit_user_profile_update', array($this,'actionProfile_Update_Save'));
     }
+
     /**
      * Add the Tools and Options to the Management and Options page respectively
      *
@@ -357,6 +344,7 @@ final class AVH_RPS_Admin
      * @param string $redirect
      * @param string $referer
      *
+     *
      */
     private function _displayPageCompetitionDelete ()
     {
@@ -369,6 +357,7 @@ final class AVH_RPS_Admin
         }
 
         $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+
 
         $this->admin_header('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
@@ -461,21 +450,21 @@ final class AVH_RPS_Admin
         echo $formBuilder->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
 
         // @format_off
-        $_medium = array ( 'medium_bwd'		=> 'B&W Digital',
-                            'medium_cd'		=> 'Color Digital',
-                            'medium_bwp'	=> 'B&W Print',
-                            'medium_cp'		=> 'Color Print'
-                    );
-        $selectedMedium=array_search($competition->Medium, $_medium);
-        // @format_on
+    $_medium = array ( 'medium_bwd'		=> 'B&W Digital',
+    'medium_cd'		=> 'Color Digital',
+    'medium_bwp'	=> 'B&W Print',
+    'medium_cp'		=> 'Color Print'
+    );
+    $selectedMedium=array_search($competition->Medium, $_medium);
+    // @format_on
         echo $formBuilder->select('Medium', '', 'medium', $_medium, $selectedMedium, array('autocomplete' => 'off'));
 
         // @format_off
-        $_classification = array ( 'class_b' => 'Beginner',
-                                    'class_a' => 'Advanced',
-                                    'class_s' => 'Salon',
-            );
-        // @format_on
+    $_classification = array ( 'class_b' => 'Beginner',
+    'class_a' => 'Advanced',
+    'class_s' => 'Salon',
+    );
+    // @format_on
         $selectedClassification = array_search($competition->Classification, $_classification);
         echo $formBuilder->select('Classification', '', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
 
@@ -656,21 +645,21 @@ final class AVH_RPS_Admin
         $formBuilder->setOption_name('competition_add');
 
         // @format_off
-        $formDefaultOptions = array (
-                'date' => '',
-                'theme' => '',
-                'medium_bwd' => true,
-                'medium_cd' => true,
-                'medium_bwp' => true,
-                'medium_cp' => true,
-                'class_b' => true,
-                'class_a' => true,
-                'class_s' => true,
+     $formDefaultOptions = array (
+     'date' => '',
+         'theme' => '',
+         'medium_bwd' => true,
+         'medium_cd' => true,
+         'medium_bwp' => true,
+         'medium_cp' => true,
+         'class_b' => true,
+         'class_a' => true,
+         'class_s' => true,
                 'max_entries' => '2',
                 'judges' => '1',
                 'special_event' => false
-            );
-        // @format_on
+     );
+     // @format_on
         $formOptions = $formDefaultOptions;
         if ( isset($_POST['action']) ) {
             switch ( $_POST['action'] )
@@ -729,20 +718,20 @@ final class AVH_RPS_Admin
                         $this->_status = 'updated';
 
                         // @format_off
-                // @TODO: This is needed because of the old program, someday it needs to be cleaned up.
-                $medium_convert = array(
-                            'medium_bwd'	=> 'B&W Digital',
-                            'medium_cd'		=> 'Color Digital',
-                            'medium_bwp'	=> 'B&W Print',
-                            'medium_cp'		=> 'Color Print'
-                    );
+ // @TODO: This is needed because of the old program, someday it needs to be cleaned up.
+ $medium_convert = array(
+ 'medium_bwd'	=> 'B&W Digital',
+ 'medium_cd'		=> 'Color Digital',
+ 'medium_bwp'	=> 'B&W Print',
+ 'medium_cp'		=> 'Color Print'
+ );
 
                 $classification_convert = array (
-                        'class_b' => 'Beginner',
-                        'class_a' => 'Advanced',
-                        'class_s' => 'Salon'
-                );
-                // @format_on
+                'class_b' => 'Beginner',
+ 'class_a' => 'Advanced',
+ 'class_s' => 'Salon'
+ );
+ // @format_on
                         $data['Competition_Date'] = $formNewOptions['date'];
                         $data['Theme'] = $formNewOptions['theme'];
                         $data['Max_Entries'] = $formNewOptions['max_entries'];
@@ -776,21 +765,21 @@ final class AVH_RPS_Admin
         echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
 
         // @format_off
-        $_medium = array ( 'medium_bwd' => array ( 'text' => 'B&W Digital', 'checked' => $formOptions['medium_bwd'] ),
-                            'medium_cd' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cd'] ),
-                            'medium_bwp' => array ( 'text' => 'B&W Print', 'checked' => $formOptions['medium_bwp'] ),
-                            'medium_cp' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cp'] )
-                        );
-        // @format_on
+ $_medium = array ( 'medium_bwd' => array ( 'text' => 'B&W Digital', 'checked' => $formOptions['medium_bwd'] ),
+ 'medium_cd' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cd'] ),
+ 'medium_bwp' => array ( 'text' => 'B&W Print', 'checked' => $formOptions['medium_bwp'] ),
+ 'medium_cp' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cp'] )
+ );
+ // @format_on
         echo $formBuilder->checkboxes('Medium', '', key($_medium), $_medium);
         unset($_medium);
 
         // @format_off
-        $_classification = array ( 'class_b' => array ( 'text' => 'Beginner', 'checked' => $formOptions['class_b'] ),
-                                    'class_a' => array ( 'text' => 'Advanced', 'checked' => $formOptions['class_a'] ),
-                                    'class_s' => array ( 'text' => 'Salon', 'checked' => $formOptions['class_s'] )
-                            );
-        // @format_on
+ $_classification = array ( 'class_b' => array ( 'text' => 'Beginner', 'checked' => $formOptions['class_b'] ),
+     'class_a' => array ( 'text' => 'Advanced', 'checked' => $formOptions['class_a'] ),
+     'class_s' => array ( 'text' => 'Salon', 'checked' => $formOptions['class_s'] )
+ );
+ // @format_on
         echo $formBuilder->checkboxes('Classification', '', key($_classification), $_classification);
         unset($_classification);
 
@@ -825,7 +814,7 @@ final class AVH_RPS_Admin
         global $current_screen;
 
         $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
-         $this->_entries_list = $this->container->get('Rps\\Entries\\ListEntries');
+        $this->_entries_list = $this->container->get('Rps\\Entries\\ListEntries');
         $this->_handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
@@ -1345,20 +1334,20 @@ final class AVH_RPS_Admin
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
         // @format_off
-        $_medium = array ( 'medium_bwd'		=> 'B&W Digital',
-                            'medium_cd'		=> 'Color Digital',
-                            'medium_bwp'	=> 'B&W Print',
-                            'medium_cp'		=> 'Color Print'
-                    );
-        $selectedMedium=array_search($competition->Medium, $_medium);
-        // @format_on
+            $_medium = array ( 'medium_bwd'		=> 'B&W Digital',
+            'medium_cd'		=> 'Color Digital',
+            'medium_bwp'	=> 'B&W Print',
+            'medium_cp'		=> 'Color Print'
+);
+$selectedMedium=array_search($competition->Medium, $_medium);
+// @format_on
 
         // @format_off
-        $_classification = array ( 'class_b' => 'Beginner',
-                                    'class_a' => 'Advanced',
-                                    'class_s' => 'Salon',
-            );
-        // @format_on
+$_classification = array ( 'class_b' => 'Beginner',
+'class_a' => 'Advanced',
+'class_s' => 'Salon',
+);
+// @format_on
         $data['ID'] = $_REQUEST['competition'];
         $data['Competition_Date'] = $formOptionsNew['date'];
         $data['Close_Date'] = $formOptionsNew['close-date'] . ' ' . $formOptionsNew['close-time'];
@@ -1472,3 +1461,4 @@ final class AVH_RPS_Admin
         echo '</div>';
     }
 }
+

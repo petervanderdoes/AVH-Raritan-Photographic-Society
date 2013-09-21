@@ -31,6 +31,8 @@ require_once ( $_dir . '/libs/avh-common.php' );
 require_once ( $_dir . '/libs/avh-security.php' );
 require_once ( $_dir . '/libs/avh-visitor.php' );
 
+use Rps\Admin\Initialize;
+use Rps\Admin\Admin;
 use DI\ContainerBuilder;
 
 class AVH_RPS_Client
@@ -64,7 +66,6 @@ class AVH_RPS_Client
                 'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','AVH_RPS_Core'],
             ],
             'Rps\\Settings' => array(),
-            'AVH_RPS_Admin' => array(),
             'AVH_RPS_Core' => [
                 'constructor' => ['Rps\\Settings'],
             ],
@@ -84,7 +85,7 @@ class AVH_RPS_Client
     {
         $_settings = $this->container->get('Rps\\Settings');
         if ( is_admin() ) {
-            AVH_RPS_AdminInitialize::load();
+            Initialize::load();
             add_action('wp_loaded', array($this->admin()));
         } else {
             require_once ( $_settings->plugin_dir . '/class/avh-rps.public.php' );
@@ -93,7 +94,7 @@ class AVH_RPS_Client
     }
 
     public function admin() {
-        $avh_rps_admin = new AVH_RPS_Admin($this->container);
+        $avh_rps_admin = new Admin($this->container);
         // Activation Hook
         register_activation_hook(AVH_RPS_Define::PLUGIN_FILE, array($avh_rps_admin,'installPlugin'));
         // Deactivation Hook
