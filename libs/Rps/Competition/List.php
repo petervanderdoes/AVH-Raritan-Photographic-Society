@@ -1,7 +1,7 @@
 <?php
 namespace Rps\Competition;
 use Rps\Settings;
-use Avh\Html\Html;
+use Avh\Html\HtmlBuilder;
 use \AVH_RPS_OldRpsDb;
 use \AVH_RPS_Define;
 
@@ -290,8 +290,8 @@ class ListCompetition extends \WP_List_Table
         // }
 
         $actions = array();
-        $actions['delete'] = Html::anchor($urlDelete, 'Delete', array('class' => 'delete','title' => 'Delete this competition'));
-        $actions['edit'] = Html::anchor($urlEdit, 'Edit', array('title' => 'Edit this competition'));
+        $actions['delete'] = HtmlBuilder::anchor($urlDelete, 'Delete', array('class' => 'delete','title' => 'Delete this competition'));
+        $actions['edit'] = HtmlBuilder::anchor($urlEdit, 'Edit', array('title' => 'Edit this competition'));
 
         echo '<div class="row-actions">';
         $sep = '';

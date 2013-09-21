@@ -19,7 +19,7 @@ class AVH_RPS_AdminInitialize
 
 final class AVH_RPS_Admin
 {
-    /* @var $classForm AVH_Form */
+    /* @var $formBuilder AVH_Form */
     /**
      * Message management
      */
@@ -368,10 +368,10 @@ final class AVH_RPS_Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $classForm = $this->container->get('Avh\Form\Form');
+        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
 
         $this->admin_header('Delete Competitions');
-        echo $classForm->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
+        echo $formBuilder->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
         wp_nonce_field('delete-competitions');
         echo $this->_referer;
 
@@ -393,12 +393,12 @@ final class AVH_RPS_Admin
             }
         }
         if ( $goDelete ) {
-            echo $classForm->hidden('action', 'dodelete');
-            echo $classForm->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
+            echo $formBuilder->hidden('action', 'dodelete');
+            echo $formBuilder->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
         } else {
             echo '<p>There are no valid competitions to delete</p>';
         }
-        echo $classForm->close();
+        echo $formBuilder->close();
         $this->admin_footer();
     }
 
@@ -406,9 +406,9 @@ final class AVH_RPS_Admin
     {
         global $wpdb;
 
-        // @var $classForm AVH_Form
-        $classForm = $this->container->get('Avh\Form\Form');
-        $classForm->setOption_name('competition-edit');
+        // @var $formBuilder AVH_Form
+        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder->setOption_name('competition-edit');
 
         if ( isset($_POST['update']) ) {
             $this->_updateCompetition();
@@ -446,19 +446,19 @@ final class AVH_RPS_Admin
         }
 
         $queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
-        echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-competitionedit'));
-        echo $classForm->open_table();
-        echo $classForm->text('Date', '', 'date', $formOptions['date']);
-        echo $classForm->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
-        echo $classForm->text('Closing Date', '', 'close-date', $formOptions['close-date']);
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-competitionedit'));
+        echo $formBuilder->open_table();
+        echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
+        echo $formBuilder->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
+        echo $formBuilder->text('Closing Date', '', 'close-date', $formOptions['close-date']);
 
         for ( $hour = 0; $hour <= 23; $hour++ ) {
             $time_val = sprintf("%02d:00:00", $hour);
             $time_text = date("g:i a", strtotime($time_val));
             $time[$time_val] = $time_text;
         }
-        // echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
-        echo $classForm->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
+        // echo $formBuilder->select('Closing Time', '', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
+        echo $formBuilder->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
 
         // @format_off
         $_medium = array ( 'medium_bwd'		=> 'B&W Digital',
@@ -468,7 +468,7 @@ final class AVH_RPS_Admin
                     );
         $selectedMedium=array_search($competition->Medium, $_medium);
         // @format_on
-        echo $classForm->select('Medium', '', 'medium', $_medium, $selectedMedium, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Medium', '', 'medium', $_medium, $selectedMedium, array('autocomplete' => 'off'));
 
         // @format_off
         $_classification = array ( 'class_b' => 'Beginner',
@@ -477,34 +477,34 @@ final class AVH_RPS_Admin
             );
         // @format_on
         $selectedClassification = array_search($competition->Classification, $_classification);
-        echo $classForm->select('Classification', '', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Classification', '', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
 
         $_max_entries = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5','6' => '6','7' => '7','8' => '8','9' => '9','10' => '10');
-        echo $classForm->select('Max Entries', '', 'max_entries', $_max_entries, $competition->Max_Entries, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Max Entries', '', 'max_entries', $_max_entries, $competition->Max_Entries, array('autocomplete' => 'off'));
 
         $_judges = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5');
-        echo $classForm->select('No. Judges', '', 'judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off'));
+        echo $formBuilder->select('No. Judges', '', 'judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off'));
 
         $_special_event = array('special_event' => array('text' => '','checked' => $competition->Special_Event));
-        echo $classForm->checkboxes('Special Event', '', key($_special_event), $_special_event);
+        echo $formBuilder->checkboxes('Special Event', '', key($_special_event), $_special_event);
 
         $_closed = array('closed' => array('text' => '','checked' => ( $competition->Closed == 'Y' ? true : false )));
-        echo $classForm->checkboxes('Closed', '', key($_closed), $_closed);
+        echo $formBuilder->checkboxes('Closed', '', key($_closed), $_closed);
 
         $_scored = array('scored' => array('text' => '','checked' => ( $competition->Scored == 'Y' ? true : false )));
-        echo $classForm->checkboxes('Scored', '', key($_scored), $_scored);
+        echo $formBuilder->checkboxes('Scored', '', key($_scored), $_scored);
 
-        echo $classForm->close_table();
-        echo $classForm->submit('submit', 'Update Competition', array('class' => 'button-primary'));
+        echo $formBuilder->close_table();
+        echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
         if ( $wp_http_referer ) {
-            echo $classForm->hidden('wp_http_referer', esc_url($wp_http_referer));
+            echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
         }
-        echo $classForm->hidden('competition', $competition->ID);
-        echo $classForm->hidden('update', true);
-        echo $classForm->hidden('action', 'edit');
-        $classForm->setNonce_action($competition->ID);
-        echo $classForm->nonce_field();
-        echo $classForm->close();
+        echo $formBuilder->hidden('competition', $competition->ID);
+        echo $formBuilder->hidden('update', true);
+        echo $formBuilder->hidden('action', 'edit');
+        $formBuilder->setNonce_action($competition->ID);
+        echo $formBuilder->nonce_field();
+        echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
         echo ' $.datepicker.setDefaults({' . "\n";
@@ -547,10 +547,10 @@ final class AVH_RPS_Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $classForm = $this->container->get('Avh\Form\Form');
+        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
 
         $this->admin_header($title);
-        echo $classForm->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
+        echo $formBuilder->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
         wp_nonce_field($action . '-competitions');
         echo $this->_referer;
 
@@ -563,10 +563,10 @@ final class AVH_RPS_Admin
             echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
         }
 
-        echo $classForm->hidden('action', 'do' . $action);
-        echo $classForm->submit('openclose', 'Confirm', array('class' => 'button-secondary'));
+        echo $formBuilder->hidden('action', 'do' . $action);
+        echo $formBuilder->submit('openclose', 'Confirm', array('class' => 'button-secondary'));
 
-        echo $classForm->close();
+        echo $formBuilder->close();
         $this->admin_footer();
     }
 
@@ -651,9 +651,9 @@ final class AVH_RPS_Admin
     public function menuCompetitionAdd ()
     {
         $option_name = 'competition_add';
-        // @var $classForm AVH_Form
-        $classForm = $this->container->get('Avh\Form\Form');
-        $classForm->setOption_name('competition_add');
+        // @var $formBuilder AVH_Form
+        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder->setOption_name('competition_add');
 
         // @format_off
         $formDefaultOptions = array (
@@ -676,10 +676,10 @@ final class AVH_RPS_Admin
             switch ( $_POST['action'] )
             {
                 case 'add':
-                    $classForm->setNonce_action(get_current_user_id());
-                    check_admin_referer($classForm->getNonce_action());
+                    $formBuilder->setNonce_action(get_current_user_id());
+                    check_admin_referer($formBuilder->getNonce_action());
                     $formNewOptions = $formDefaultOptions;
-                    $formOptions = $_POST[$classForm->getOption_name()];
+                    $formOptions = $_POST[$formBuilder->getOption_name()];
 
                     $mediumArray = array();
                     $classArray = array();
@@ -770,10 +770,10 @@ final class AVH_RPS_Admin
 
         $this->admin_header('Add Competition');
 
-        echo $classForm->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionadd'));
-        echo $classForm->open_table();
-        echo $classForm->text('Date', '', 'date', $formOptions['date']);
-        echo $classForm->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
+        echo $formBuilder->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionadd'));
+        echo $formBuilder->open_table();
+        echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
+        echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
 
         // @format_off
         $_medium = array ( 'medium_bwd' => array ( 'text' => 'B&W Digital', 'checked' => $formOptions['medium_bwd'] ),
@@ -782,7 +782,7 @@ final class AVH_RPS_Admin
                             'medium_cp' => array ( 'text' => 'Color Digital', 'checked' => $formOptions['medium_cp'] )
                         );
         // @format_on
-        echo $classForm->checkboxes('Medium', '', key($_medium), $_medium);
+        echo $formBuilder->checkboxes('Medium', '', key($_medium), $_medium);
         unset($_medium);
 
         // @format_off
@@ -791,27 +791,27 @@ final class AVH_RPS_Admin
                                     'class_s' => array ( 'text' => 'Salon', 'checked' => $formOptions['class_s'] )
                             );
         // @format_on
-        echo $classForm->checkboxes('Classification', '', key($_classification), $_classification);
+        echo $formBuilder->checkboxes('Classification', '', key($_classification), $_classification);
         unset($_classification);
 
         $_max_entries = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5','6' => '6','7' => '7','8' => '8','9' => '9','10' => '10');
-        echo $classForm->select('Max Entries', '', 'max_entries', $_max_entries, $formOptions['max_entries']);
+        echo $formBuilder->select('Max Entries', '', 'max_entries', $_max_entries, $formOptions['max_entries']);
         unset($_max_entries);
 
         $_judges = array('1' => '1','2' => '2','3' => '3','4' => '4','5' => '5');
-        echo $classForm->select('No. Judges', '', 'judges', $_judges, $formOptions['judges']);
+        echo $formBuilder->select('No. Judges', '', 'judges', $_judges, $formOptions['judges']);
         unset($_judges);
 
         $_special_event = array('special_event' => array('text' => '','checked' => $formOptions['special_event']));
-        echo $classForm->checkboxes('Special Event', '', key($_special_event), $_special_event);
+        echo $formBuilder->checkboxes('Special Event', '', key($_special_event), $_special_event);
         unset($_special_event);
 
-        echo $classForm->close_table();
-        echo $classForm->submit('submit', 'Add Competition', array('class' => 'button-primary'));
-        echo $classForm->hidden('action', 'add');
-        $classForm->setNonce_action(get_current_user_id());
-        echo $classForm->nonce_field();
-        echo $classForm->close();
+        echo $formBuilder->close_table();
+        echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
+        echo $formBuilder->hidden('action', 'add');
+        $formBuilder->setNonce_action(get_current_user_id());
+        echo $formBuilder->nonce_field();
+        echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
         echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
@@ -986,7 +986,7 @@ final class AVH_RPS_Admin
     private function _displayPageEntriesDelete ()
     {
         global $wpdb;
-        $classForm = $this->container->get('Avh\Form\Form');
+        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
 
         if ( empty($_REQUEST['entries']) ) {
             $entryIdsArray = array(intval($_REQUEST['entry']));
@@ -995,7 +995,7 @@ final class AVH_RPS_Admin
         }
 
         $this->admin_header('Delete Entries');
-        echo $classForm->open('', array('method' => 'post','id' => 'updateentries','name' => 'updateentries'));
+        echo $formBuilder->open('', array('method' => 'post','id' => 'updateentries','name' => 'updateentries'));
 
         echo '<p>' . _n('You have specified this entry for deletion:', 'You have specified these entries for deletion:', count($entryIdsArray)) . '</p>';
 
@@ -1007,15 +1007,15 @@ final class AVH_RPS_Admin
                 $user = get_user_by('id', $entry->Member_ID);
                 $competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID, OBJECT);
                 echo "<li>";
-                echo $classForm->hidden('entries[]', $entryID);
+                echo $formBuilder->hidden('entries[]', $entryID);
                 printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'), $entryID, $entry->Title, $user->first_name, $user->last_name, $competition->Theme, mysql2date(get_option('date_format'), $competition->Competition_Date));
                 echo "</li>\n";
                 $goDelete++;
             }
         }
         if ( $goDelete ) {
-            echo $classForm->hidden('action', 'dodelete');
-            echo $classForm->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
+            echo $formBuilder->hidden('action', 'dodelete');
+            echo $formBuilder->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
         } else {
             echo '<p>There are no valid entries to delete</p>';
         }
@@ -1023,7 +1023,7 @@ final class AVH_RPS_Admin
         wp_nonce_field('delete-entries');
         echo $this->_referer;
 
-        echo $classForm->close();
+        echo $formBuilder->close();
         $this->admin_footer();
     }
 
@@ -1032,13 +1032,13 @@ final class AVH_RPS_Admin
         global $wpdb;
 
         $updated = false;
-        // @var $classForm AVH_Form
-        $classForm = $this->container->get('Avh\Form\Form');
-        $classForm->setOption_name('entry-edit');
+        // @var $formBuilder AVH_Form
+        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder->setOption_name('entry-edit');
 
         if ( isset($_POST['update']) ) {
-            $classForm->setNonce_action($_POST['entry']);
-            check_admin_referer($classForm->getNonce_action());
+            $formBuilder->setNonce_action($_POST['entry']);
+            check_admin_referer($formBuilder->getNonce_action());
             if ( !current_user_can('rps_edit_entries') ) {
                 wp_die(__('Cheatin&#8217; uh?'));
             }
@@ -1077,24 +1077,24 @@ final class AVH_RPS_Admin
         }
 
         $queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
-        echo $classForm->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-entryedit'));
-        echo $classForm->open_table();
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-entryedit'));
+        echo $formBuilder->open_table();
 
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
         echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
-        echo $classForm->text('Title', '', 'title', $entry->Title);
-        echo $classForm->close_table();
-        echo $classForm->submit('submit', 'Update Entry', array('class' => 'button-primary'));
+        echo $formBuilder->text('Title', '', 'title', $entry->Title);
+        echo $formBuilder->close_table();
+        echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
         if ( $wp_http_referer ) {
-            echo $classForm->hidden('wp_http_referer', esc_url($wp_http_referer));
+            echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
         }
-        echo $classForm->hidden('entry', $entry->ID);
-        echo $classForm->hidden('update', true);
-        echo $classForm->hidden('action', 'edit');
-        $classForm->setNonce_action($entry->ID);
-        echo $classForm->nonce_field();
-        echo $classForm->close();
+        echo $formBuilder->hidden('entry', $entry->ID);
+        echo $formBuilder->hidden('update', true);
+        echo $formBuilder->hidden('action', 'edit');
+        $formBuilder->setNonce_action($entry->ID);
+        echo $formBuilder->nonce_field();
+        echo $formBuilder->close();
         $this->admin_footer();
     }
 

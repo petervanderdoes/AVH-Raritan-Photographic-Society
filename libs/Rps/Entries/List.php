@@ -1,7 +1,7 @@
 <?php
 namespace Rps\Entries;
 use Rps\Settings;
-use Avh\Html\Html;
+use Avh\Html\HtmlBuilder;
 use \AVH_RPS_OldRpsDb;
 use \AVH_RPS_Define;
 
@@ -281,7 +281,7 @@ class ListEntries extends \WP_List_Table
         $_user = get_user_by('id', $entry->Member_ID);
         $queryUser = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'user_id' => $_user->ID);
         $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
-        echo Html::anchor($urlUser,$_user->first_name . ' ' . $_user->last_name, array('title'=>'Entries for '.$_user->first_name . ' ' . $_user->last_name ));
+        echo HtmlBuilder::anchor($urlUser,$_user->first_name . ' ' . $_user->last_name, array('title'=>'Entries for '.$_user->first_name . ' ' . $_user->last_name ));
     }
 
     function column_title($entry)
@@ -300,8 +300,8 @@ class ListEntries extends \WP_List_Table
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         $actions = array();
-        $actions['delete'] = Html::anchor($urlDelete,'Delete',array('class' => 'delete','title' => 'Delete this competition'));
-        $actions['edit'] = Html::anchor($urlEdit,'Edit',array('title' => 'Edit this entry'));
+        $actions['delete'] = HtmlBuilder::anchor($urlDelete,'Delete',array('class' => 'delete','title' => 'Delete this competition'));
+        $actions['edit'] = HtmlBuilder::anchor($urlEdit,'Edit',array('title' => 'Edit this entry'));
 
         echo '<div class="row-actions">';
         $sep = '';
