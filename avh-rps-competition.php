@@ -33,6 +33,7 @@ require_once ( $_dir . '/libs/avh-visitor.php' );
 
 use Rps\Admin\Initialize;
 use Rps\Admin\Admin;
+use Rps\Frontend\Frontend;
 use DI\ContainerBuilder;
 
 class AVH_RPS_Client
@@ -88,8 +89,7 @@ class AVH_RPS_Client
             Initialize::load();
             add_action('wp_loaded', array($this->admin()));
         } else {
-            require_once ( $_settings->plugin_dir . '/class/avh-rps.public.php' );
-            $avhfdas_public = new AVH_RPS_Public($this->container);
+            new Frontend($this->container);
         }
     }
 

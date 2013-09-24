@@ -1,13 +1,11 @@
 <?php
+namespace Rps\Frontend;
 use Rps\Competition;
 use Rps\Settings;
 use DI\Container;
 use Rps;
 
-if ( !defined('AVH_FRAMEWORK') )
-    die('You are not allowed to call this page directly.');
-
-class AVH_RPS_Public
+class Frontend
 {
 
     /**
@@ -24,10 +22,9 @@ class AVH_RPS_Public
 
     /**
      *
-     * @var AVH_Settings_Registry
+     * @var Settings
      */
     private $_settings;
-
 
     /**
      *
@@ -53,13 +50,13 @@ class AVH_RPS_Public
     /**
      * PHP5 Constructor
      */
-    public function __construct($container)
+    public function __construct ($container)
     {
         // Get The Registry
-        $this->container=$container;
+        $this->container = $container;
         $this->_settings = $this->container->get('Rps\\Settings');
-        $this->_errmsg = '';
 
+        $this->_errmsg = '';
         // Initialize the plugin
         $this->_core = $this->container->get('AVH_RPS_Core');
         $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
@@ -91,17 +88,17 @@ class AVH_RPS_Public
         add_action("after_setup_theme", array($this,'actionAfterThemeSetup'), 14);
     }
 
-    public function actionAfterThemeSetup()
+    public function actionAfterThemeSetup ()
     {
         add_action('rps_showcase', array($this,'actionShowcase_competition_thumbnails'));
     }
 
-    public function actionInit_InitRunTime()
+    public function actionInit_InitRunTime ()
     {
         $this->_rpsdb->setUser_id(get_current_user_id());
     }
 
-    function actionTemplate_Redirect_RPSWindowsClient()
+    function actionTemplate_Redirect_RPSWindowsClient ()
     {
         if ( array_key_exists('rpswinclient', $_REQUEST) ) {
 
@@ -128,7 +125,7 @@ class AVH_RPS_Public
         }
     }
 
-    public function actionShowcase_competition_thumbnails($ctr)
+    public function actionShowcase_competition_thumbnails ($ctr)
     {
         if ( is_front_page() ) {
             $image = array();
@@ -184,7 +181,7 @@ class AVH_RPS_Public
         }
     }
 
-    public function shortcodeRpsMonthlyWinners($atts, $content = '')
+    public function shortcodeRpsMonthlyWinners ($atts, $content = '')
     {
         global $post;
         $months = array();
@@ -383,7 +380,7 @@ class AVH_RPS_Public
         echo "<br />\n";
     }
 
-    public function shortcodeRpsScoresCurrentUser($atts, $content = '')
+    public function shortcodeRpsScoresCurrentUser ($atts, $content = '')
     {
         global $post;
 
@@ -493,7 +490,7 @@ class AVH_RPS_Public
         }
     }
 
-    public function shortcodeRpsAllScores($atts, $content = '')
+    public function shortcodeRpsAllScores ($atts, $content = '')
     {
         global $post;
         if ( isset($_POST['selected_season_list']) ) {
@@ -745,7 +742,7 @@ class AVH_RPS_Public
         }
     }
 
-    public function actionPreHeader_RpsMyEntries()
+    public function actionPreHeader_RpsMyEntries ()
     {
         global $post;
 
@@ -838,7 +835,7 @@ class AVH_RPS_Public
         }
     }
 
-    public function shortcodeRpsMyEntries($atts, $content = '')
+    public function shortcodeRpsMyEntries ($atts, $content = '')
     {
         global $post;
 
@@ -888,7 +885,8 @@ class AVH_RPS_Public
         echo '<tr>';
         echo '<td width="25%">';
         // echo '<span class="rps-comp-medium">' . $this->_settings->medium . '</span>';
-        switch ($this->_settings->medium) {
+        switch ( $this->_settings->medium )
+        {
             case "Color Digital":
                 $img = '/thumb-comp-digital-color.jpg';
                 break;
@@ -1083,7 +1081,7 @@ class AVH_RPS_Public
         echo "</table>\n</form>\n<br />\n";
     }
 
-    public function actionPreHeader_RpsEditTitle()
+    public function actionPreHeader_RpsEditTitle ()
     {
         global $post;
 
@@ -1150,7 +1148,7 @@ class AVH_RPS_Public
         }
     }
 
-    public function shortcodeRpsEditTitle()
+    public function shortcodeRpsEditTitle ()
     {
         global $post;
         if ( isset($_GET['m']) ) {
@@ -1204,7 +1202,7 @@ class AVH_RPS_Public
         echo '</form>';
     }
 
-    public function actionPreHeader_RpsUploadEntry()
+    public function actionPreHeader_RpsUploadEntry ()
     {
         global $post;
 
@@ -1355,7 +1353,7 @@ class AVH_RPS_Public
         }
     }
 
-    public function shortcodeRpsUploadEntry()
+    public function shortcodeRpsUploadEntry ()
     {
         global $post;
         if ( isset($_GET['m']) ) {
@@ -1415,7 +1413,7 @@ class AVH_RPS_Public
     /**
      * Create a XML File with the competition dates
      */
-    private function _sendXmlCompetitionDates()
+    private function _sendXmlCompetitionDates ()
     {
         // Connect to the Database
         try {
@@ -1477,7 +1475,7 @@ class AVH_RPS_Public
     /**
      * Handles request by client to download images for a particular date,
      */
-    private function _sendCompetitions()
+    private function _sendCompetitions ()
     {
         $username = $_REQUEST['username'];
         $password = $_REQUEST['password'];
@@ -1510,7 +1508,7 @@ class AVH_RPS_Public
      * @param string $comp_date
      *        The competition date
      */
-    private function _sendXmlCompetitions($db, $requested_medium, $comp_date)
+    private function _sendXmlCompetitions ($db, $requested_medium, $comp_date)
     {
 
         /* @var $db RPSPDO */
@@ -1622,7 +1620,7 @@ class AVH_RPS_Public
     /**
      * Handle the uploaded score from the RPS Client.
      */
-    private function _doUploadScore()
+    private function _doUploadScore ()
     {
         $username = $_REQUEST['username'];
         $password = $_REQUEST['password'];
@@ -1695,7 +1693,7 @@ class AVH_RPS_Public
      * @param object $db
      *        Database handle.
      */
-    private function _handleUploadScoresFile($db, $file_name)
+    private function _handleUploadScoresFile ($db, $file_name)
     {
         $warning = '';
         $score = '';
@@ -1775,7 +1773,7 @@ class AVH_RPS_Public
      * @param string $errMsg
      *        The actual error message
      */
-    private function _doRESTError($errMsg)
+    private function _doRESTError ($errMsg)
     {
         $this->_doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
     }
@@ -1786,7 +1784,7 @@ class AVH_RPS_Public
      * @param string $message
      *        The actual messsage
      */
-    private function _doRESTSuccess($message)
+    private function _doRESTSuccess ($message)
     {
         $this->_doRESTResponse("ok", $message);
     }
@@ -1797,7 +1795,7 @@ class AVH_RPS_Public
      * @param string $status
      * @param string $message
      */
-    private function _doRESTResponse($status, $message)
+    private function _doRESTResponse ($status, $message)
     {
         echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
         echo '<rsp stat="' . $status . '">' . "\n";
@@ -1808,7 +1806,7 @@ class AVH_RPS_Public
     /**
      * Check the upload entry for errors.
      */
-    private function _checkUploadEntryTitle()
+    private function _checkUploadEntryTitle ()
     {
         $_upload_ok = false;
         if ( !isset($_POST['title']) || trim($_POST['title']) == "" ) {
@@ -1850,7 +1848,7 @@ class AVH_RPS_Public
      * @param array $entries
      *        Array of entries ID to delete.
      */
-    private function _deleteCompetitionEntries($entries)
+    private function _deleteCompetitionEntries ($entries)
     {
         if ( is_array($entries) ) {
             foreach ( $entries as $id ) {
@@ -1905,7 +1903,7 @@ class AVH_RPS_Public
      * @param unknown $med
      * @return boolean
      */
-    private function _validateSelectedComp($date, $med)
+    private function _validateSelectedComp ($date, $med)
     {
         $open_competitions = $this->_rpsdb->getOpenCompetitions($this->_settings->medium_subset);
 
