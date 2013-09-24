@@ -559,4 +559,3 @@ class FormBuilder
         return $this->_nonce;
     }
 } // End form
-}
