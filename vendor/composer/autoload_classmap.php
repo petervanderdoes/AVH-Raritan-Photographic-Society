@@ -6,14 +6,9 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'AVH_RPS_Admin' => $baseDir . '/class/avh-rps.admin.php',
-    'AVH_RPS_AdminInitialize' => $baseDir . '/class/avh-rps.admin.php',
-    'AVH_RPS_Classes' => $baseDir . '/class/avh-rps.registry.php',
     'AVH_RPS_Core' => $baseDir . '/class/avh-rps.core.php',
     'AVH_RPS_Define' => $baseDir . '/class/avh-rps.define.php',
     'AVH_RPS_OldRpsDb' => $baseDir . '/class/avh-rps.oldrpsdb.php',
-    'AVH_RPS_Public' => $baseDir . '/class/avh-rps.public.php',
-    'AVH_RPS_Settings' => $baseDir . '/class/avh-rps.registry.php',
     'Avh\\Html\\FormBuilder' => $baseDir . '/libs/Avh/Html/FormBuilder.php',
     'Avh\\Html\\HtmlBuilder' => $baseDir . '/libs/Avh/Html/HtmlBuilder.php',
     'Avh\\Mail\\Mailer' => $baseDir . '/libs/Avh/Mail/Mailer.php',
@@ -164,6 +159,7 @@ return array(
     'Rps\\Admin\\Initialize' => $baseDir . '/libs/Rps/Admin/Initialize.php',
     'Rps\\Competition\\ListCompetition' => $baseDir . '/libs/Rps/Competition/List.php',
     'Rps\\Entries\\ListEntries' => $baseDir . '/libs/Rps/Entries/List.php',
+    'Rps\\Frontend\\Frontend' => $baseDir . '/libs/Rps/Frontend/Frontend.php',
     'Rps\\Settings' => $baseDir . '/libs/Rps/Settings.php',
     'Symfony\\Component\\Yaml\\Dumper' => $vendorDir . '/symfony/yaml/Symfony/Component/Yaml/Dumper.php',
     'Symfony\\Component\\Yaml\\Escaper' => $vendorDir . '/symfony/yaml/Symfony/Component/Yaml/Escaper.php',
