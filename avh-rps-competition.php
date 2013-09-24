@@ -34,6 +34,7 @@ require_once ( $_dir . '/libs/avh-visitor.php' );
 use Rps\Admin\Initialize;
 use Rps\Admin\Admin;
 use Rps\Frontend\Frontend;
+use Rps\Common\Core;
 use DI\ContainerBuilder;
 
 class AVH_RPS_Client
@@ -57,17 +58,17 @@ class AVH_RPS_Client
         //@format_off
             $dependencies=array (
             'AVH_RPS_OldRpsDb' => [
-                'constructor' => ['Rps\\Settings','AVH_RPS_Core'],
+                'constructor' => ['Rps\\Settings','Rps\\Common\\Core'],
             ],
             'AVH_RPS_Define' => array(),
             'Rps\\Competition\\ListCompetition' => [
-                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','AVH_RPS_Core'],
+                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','Rps\\Common\\Core'],
             ],
             'Rps\\Entries\\ListEntries' => [
-                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','AVH_RPS_Core'],
+                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','Rps\\Common\\Core'],
             ],
             'Rps\\Settings' => array(),
-            'AVH_RPS_Core' => [
+            'Rps\\Common\\Core' => [
                 'constructor' => ['Rps\\Settings'],
             ],
         );

@@ -1,9 +1,9 @@
 <?php
 namespace Rps\Frontend;
-use Rps\Competition;
+use Rps\Competition\ListCompetition;
 use Rps\Settings;
+use Rps\Common\Core;
 use DI\Container;
-use Rps;
 
 class Frontend
 {
@@ -16,7 +16,7 @@ class Frontend
 
     /**
      *
-     * @var AVH_RPS_Core
+     * @var Core
      */
     private $_core;
 
@@ -58,7 +58,7 @@ class Frontend
 
         $this->_errmsg = '';
         // Initialize the plugin
-        $this->_core = $this->container->get('AVH_RPS_Core');
+        $this->_core = $this->container->get('Rps\\Common\\Core');
         $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
         $this->_core_options = $this->_core->getOptions();
 

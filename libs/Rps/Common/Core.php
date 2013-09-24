@@ -1,12 +1,13 @@
 <?php
-use Rps\Competition;
+namespace Rps\Common;
+use Rps\Competition\ListCompetition;
 use Rps\Settings;
 use DI\Container;
 
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
-class AVH_RPS_Core
+class Core
 {
 
     /**
@@ -53,7 +54,7 @@ class AVH_RPS_Core
 
     /**
      *
-     * @var AVH_RPS_Settings
+     * @var Settings
      */
     private $_settings;
 
@@ -529,4 +530,4 @@ class AVH_RPS_Core
     {
         return $this->_default_nonces;
     }
-} //End Class AVH_RPS_Core
+} //End Class Core

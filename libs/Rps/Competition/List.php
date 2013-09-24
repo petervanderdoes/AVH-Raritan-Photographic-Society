@@ -1,6 +1,7 @@
 <?php
 namespace Rps\Competition;
 use Rps\Settings;
+use Rps\Common\Core;
 use Avh\Html\HtmlBuilder;
 use \AVH_RPS_OldRpsDb;
 use \AVH_RPS_Define;
@@ -13,13 +14,13 @@ class ListCompetition extends \WP_List_Table
 
     /**
      *
-     * @var AVH_RPS_Core
+     * @var Core
      */
     private $_core;
 
     /**
      *
-     * @var AVH_Settings_Registry
+     * @var Settings
      */
     private $_settings;
 

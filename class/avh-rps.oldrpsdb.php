@@ -1,5 +1,6 @@
 <?php
-use Rps\Competition;
+use Rps\Common\Core;
+use Rps\Competition\ListCompetition;
 use Rps\Settings;
 use DI\Container;
 
@@ -11,13 +12,13 @@ class AVH_RPS_OldRpsDb
 
     /**
      *
-     * @var AVH_RPS_Core
+     * @var Core
      */
     private $_core;
 
     /**
      *
-     * @var AVH_Settings_Registry
+     * @var Settings
      */
     private $_settings;
 

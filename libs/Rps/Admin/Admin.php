@@ -1,6 +1,7 @@
 <?php
 namespace Rps\Admin;
 use Rps\Competition\ListCompetition;
+use Rps\Common\Core;
 use Rps\Settings;
 use Avh\Html\FormBuilder;
 use DI\Container;
@@ -14,13 +15,13 @@ final class Admin
 
     /**
      *
-     * @var AVH_RPS_Core
+     * @var Core
      */
     private $_core;
 
     /**
      *
-     * @var AVH_RPS_Settings
+     * @var Settings
      */
     private $_settings;
 
@@ -60,7 +61,7 @@ final class Admin
         // The Settings Registery
         $this->_settings = $container->get('Rps\\Settings');
         // Loads the CORE class
-        $this->_core = $container->get('AVH_RPS_Core');
+        $this->_core = $container->get('Rps\\Common\\Core');
 
         $this->container = $container;
 
