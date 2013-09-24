@@ -6,7 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'AVH_RPS_Core' => $baseDir . '/class/avh-rps.core.php',
     'AVH_RPS_Define' => $baseDir . '/class/avh-rps.define.php',
     'AVH_RPS_OldRpsDb' => $baseDir . '/class/avh-rps.oldrpsdb.php',
     'Avh\\Html\\FormBuilder' => $baseDir . '/libs/Avh/Html/FormBuilder.php',
@@ -157,6 +156,7 @@ return array(
     'RPSPDO' => $baseDir . '/class/avh-rps.oldrpsdb.php',
     'Rps\\Admin\\Admin' => $baseDir . '/libs/Rps/Admin/Admin.php',
     'Rps\\Admin\\Initialize' => $baseDir . '/libs/Rps/Admin/Initialize.php',
+    'Rps\\Common\\Core' => $baseDir . '/libs/Rps/Common/Core.php',
     'Rps\\Competition\\ListCompetition' => $baseDir . '/libs/Rps/Competition/List.php',
     'Rps\\Entries\\ListEntries' => $baseDir . '/libs/Rps/Entries/List.php',
     'Rps\\Frontend\\Frontend' => $baseDir . '/libs/Rps/Frontend/Frontend.php',
