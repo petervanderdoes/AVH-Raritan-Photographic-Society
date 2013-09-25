@@ -29,34 +29,8 @@ use ReflectionClass;
  * @author Marco Pivetta <ocramius@gmail.com>
  * @license MIT
  */
-class AccessInterceptorValueHolderFactory
+class AccessInterceptorValueHolderFactory extends AbstractBaseFactory
 {
-    /**
-     * @var \ProxyManager\Configuration
-     */
-    protected $configuration;
-
-    /**
-     * @var bool
-     */
-    protected $autoGenerate;
-
-    /**
-     * @var \ProxyManager\Inflector\ClassNameInflectorInterface
-     */
-    protected $inflector;
-
-    /**
-     * @param \ProxyManager\Configuration $configuration
-     */
-    public function __construct(Configuration $configuration)
-    {
-        $this->configuration = $configuration;
-        // localizing some properties for performance
-        $this->autoGenerate  = $this->configuration->doesAutoGenerateProxies();
-        $this->inflector     = $this->configuration->getClassNameInflector();
-    }
-
     /**
      * @param object     $instance           the object to be wrapped within the value holder
      * @param \Closure[] $prefixInterceptors an array (indexed by method name) of interceptor closures to be called
@@ -68,8 +42,16 @@ class AccessInterceptorValueHolderFactory
      */
     public function createProxy($instance, array $prefixInterceptors = array(), array $suffixInterceptors = array())
     {
-        $className      = get_class($instance);
-        $proxyClassName = $this->inflector->getProxyClassName($className);
+        $className = get_class($instance);
+
+        if (! isset($this->generatedClasses[$className])) {
+            $this->generatedClasses[$className] = $this->inflector->getProxyClassName(
+                $className,
+                array('factory' => get_class($this))
+            );
+        }
+
+        $proxyClassName = $this->generatedClasses[$className];
 
         if ($this->autoGenerate && ! class_exists($proxyClassName)) {
             $className = $this->inflector->getUserClassName($className);

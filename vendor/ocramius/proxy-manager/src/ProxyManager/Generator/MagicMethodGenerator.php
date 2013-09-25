@@ -16,26 +16,30 @@
  * and is licensed under the MIT license.
  */
 
-namespace ProxyManagerTestAsset;
+namespace ProxyManager\Generator;
+
+use ReflectionClass;
 
 /**
- * Base test class to catch instantiations of hydrators
+ * Method generator for magic methods
  *
  * @author Marco Pivetta <ocramius@gmail.com>
  * @license MIT
  */
-class HydratorMock
+class MagicMethodGenerator extends MethodGenerator
 {
-    /**
-     * @var mixed
-     */
-    public $reflectionProperties;
-
-    /**
-     * @param mixed $reflectionProperties
-     */
-    public function __construct($reflectionProperties)
+    public function __construct(ReflectionClass $originalClass, $name, array $parameters = array())
     {
-        $this->reflectionProperties = $reflectionProperties;
+        parent::__construct(
+            $name,
+            $parameters,
+            static::FLAG_PUBLIC,
+            null,
+            $originalClass->hasMethod($name) ? '{@inheritDoc}' : null
+        );
+
+        if ($originalClass->hasMethod($name)) {
+            $this->setReturnsReference($originalClass->getMethod($name)->returnsReference());
+        }
     }
 }

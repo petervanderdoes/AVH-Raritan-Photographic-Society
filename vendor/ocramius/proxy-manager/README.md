@@ -1,12 +1,17 @@
 # Proxy Manager
 
-[![Build Status](https://travis-ci.org/Ocramius/ProxyManager.png?branch=master)](https://travis-ci.org/Ocramius/ProxyManager) [![Dependency Status](https://www.versioneye.com/package/php--ocramius--proxy-manager/badge.png)](https://www.versioneye.com/package/php--ocramius--proxy-manager) [![Coverage Status](https://coveralls.io/repos/Ocramius/ProxyManager/badge.png?branch=master)](https://coveralls.io/r/Ocramius/ProxyManager)
-
 This library aims at providing abstraction for generating various kinds of [proxy classes](http://marco-pivetta.com/proxy-pattern-in-php/).
 
 Currently, this project supports generation of **Virtual Proxies** and **Smart References**. 
 Additionally, it can generate a small high-performance **Hydrator** class to optimize transition
 of data from and into your objects.
+
+[![Build Status](https://travis-ci.org/Ocramius/ProxyManager.png?branch=master)](https://travis-ci.org/Ocramius/ProxyManager)
+[![Coverage Status](https://coveralls.io/repos/Ocramius/ProxyManager/badge.png?branch=master)](https://coveralls.io/r/Ocramius/ProxyManager)
+[![Total Downloads](https://poser.pugx.org/ocramius/proxy-manager/downloads.png)](https://packagist.org/packages/ocramius/proxy-manager)
+[![Latest Stable Version](https://poser.pugx.org/ocramius/proxy-manager/v/stable.png)](https://packagist.org/packages/ocramius/proxy-manager)
+[![Latest Unstable Version](https://poser.pugx.org/ocramius/proxy-manager/v/unstable.png)](https://packagist.org/packages/ocramius/proxy-manager)
+[![Dependency Status](https://www.versioneye.com/package/php--ocramius--proxy-manager/badge.png)](https://www.versioneye.com/package/php--ocramius--proxy-manager)
 
 ## Installation
 
@@ -74,13 +79,41 @@ This feature is [planned](https://github.com/Ocramius/ProxyManager/issues/5).
 
 ## Ghost Objects
 
+
 Similar to value holder, a ghost object is usually created to handle lazy loading.
 
 The difference between a value holder and a ghost object is that the ghost object does not contain a real instance of
 the required object, but handles lazy loading by initializing its own inherited properties.
 
-Ghost objects are useful in cases where the overhead caused by accessing a proxy's methods must be very low, such as in
-the context of data mappers.
+ProxyManager can generate [lazy loading ghost objects](http://www.martinfowler.com/eaaCatalog/lazyLoad.html),
+which are proxies used to save performance and memory for large datasets and graphs representing relational data.
+Ghost objects are particularly useful when building data-mappers.
+
+Additionally, the overhead introduced by ghost objects is very low when compared to the memory and performance overhead
+caused by virtual proxies.
+
+```php
+$config  = new \ProxyManager\Configuration(); // customize this if needed for production
+$factory = new \ProxyManager\Factory\LazyLoadingGhostFactory($config);
+
+$proxy = $factory->createProxy(
+    'MyApp\HeavyComplexObject',
+    function ($proxy, $method, $parameters, & $initializer) {
+        $initializer   = null; // turning off further lazy initialization
+
+        // modify the proxy instance
+        $proxy->setFoo('foo');
+        $proxy->setBar('bar');
+
+        return true;
+    }
+);
+
+$proxy->doFoo();
+```
+
+See the [complete documentation about lazy loading ghost objects](https://github.com/Ocramius/ProxyManager/tree/master/docs/lazy-loading-ghost-object.md)
+in the `docs/` directory.
 
 This feature is [planned](https://github.com/Ocramius/ProxyManager/issues/6).
 

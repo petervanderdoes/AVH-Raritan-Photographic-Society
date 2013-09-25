@@ -29,47 +29,14 @@ use ReflectionClass;
  * @author Marco Pivetta <ocramius@gmail.com>
  * @license MIT
  */
-class HydratorFactory
+class HydratorFactory extends AbstractBaseFactory
 {
-    /**
-     * @var \ProxyManager\Configuration
-     */
-    protected $configuration;
-
-    /**
-     * @var bool
-     */
-    protected $autoGenerate;
-
-    /**
-     * @var \ProxyManager\Inflector\ClassNameInflectorInterface
-     */
-    protected $inflector;
-
     /**
      * Cached proxy class names
      *
      * @var \Zend\Stdlib\Hydrator\HydratorInterface[]
      */
     private $hydrators = array();
-
-    /**
-     * Cached reflection properties
-     *
-     * @var \ReflectionProperty[][]
-     */
-    private $reflectionProperties = array();
-
-    /**
-     * @param \ProxyManager\Configuration $configuration
-     */
-    public function __construct(Configuration $configuration)
-    {
-        $this->configuration = $configuration;
-        // localizing some properties for performance
-        $this->autoGenerate  = $this->configuration->doesAutoGenerateProxies();
-        $this->inflector     = $this->configuration->getClassNameInflector();
-    }
 
     /**
      * @param string $className
@@ -82,28 +49,18 @@ class HydratorFactory
             return $this->hydrators[$className];
         }
 
-        $reflection     = new ReflectionClass($this->inflector->getUserClassName($className));
-        $proxyClassName = $this->inflector->getProxyClassName($reflection->getName());
+        $realClassName  = $this->inflector->getUserClassName($className);
+        $proxyClassName = $this->inflector->getProxyClassName($realClassName, array('factory' => get_class($this)));
 
         if ($this->autoGenerate && ! class_exists($proxyClassName)) {
             $classGenerator = new ClassGenerator($proxyClassName);
             $generator      = new HydratorGenerator();
 
-            $generator->generate($reflection, $classGenerator);
+            $generator->generate(new ReflectionClass($realClassName), $classGenerator);
             $this->configuration->getGeneratorStrategy()->generate($classGenerator);
             $this->configuration->getProxyAutoloader()->__invoke($proxyClassName);
         }
 
-        /* @var $properties \ReflectionProperty[] */
-        $properties           = $reflection->getProperties();
-        $reflectionProperties = array();
-
-        foreach ($properties as $property) {
-            $reflectionProperties[$property->getName()] = $property;
-        }
-
-        $this->reflectionProperties[$className] = $reflectionProperties;
-
-        return $this->hydrators[$className] = new $proxyClassName($reflectionProperties);
+        return $this->hydrators[$className] = new $proxyClassName();
     }
 }

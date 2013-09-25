@@ -19,13 +19,15 @@
 namespace ProxyManagerTest\Functional;
 
 use PHPUnit_Framework_TestCase;
-use ProxyManager\Configuration;
 use ProxyManager\GeneratorStrategy\EvaluatingGeneratorStrategy;
 use ProxyManager\Proxy\ValueHolderInterface;
 use ProxyManager\ProxyGenerator\AccessInterceptorValueHolderGenerator;
 use ProxyManagerTestAsset\BaseClass;
+use ProxyManagerTestAsset\ClassWithPublicArrayProperty;
+use ProxyManagerTestAsset\ClassWithPublicProperties;
 use ReflectionClass;
 use ProxyManager\Generator\ClassGenerator;
+use ProxyManager\Generator\Util\UniqueIdentifierGenerator;
 
 /**
  * Tests for {@see \ProxyManager\ProxyGenerator\LazyLoadingValueHolderGenerator} produced objects
@@ -196,15 +198,73 @@ class AccessInterceptorValueHolderFunctionalTest extends PHPUnit_Framework_TestC
     }
 
     /**
+     * Verifies that accessing a public property containing an array behaves like in a normal context
+     */
+    public function testCanWriteToArrayKeysInPublicProperty()
+    {
+        $instance    = new ClassWithPublicArrayProperty();
+        $className   = get_class($instance);
+        $proxyName   = $this->generateProxy($className);
+        /* @var $proxy ClassWithPublicArrayProperty */
+        $proxy       = new $proxyName($instance);
+
+        $proxy->arrayProperty['foo'] = 'bar';
+
+        $this->assertSame('bar', $proxy->arrayProperty['foo']);
+
+        $proxy->arrayProperty = array('tab' => 'taz');
+
+        $this->assertSame(array('tab' => 'taz'), $proxy->arrayProperty);
+    }
+
+    /**
+     * Verifies that public properties retrieved via `__get` don't get modified in the object state
+     */
+    public function testWillNotModifyRetrievedPublicProperties()
+    {
+        $instance    = new ClassWithPublicProperties();
+        $className   = get_class($instance);
+        $proxyName   = $this->generateProxy($className);
+        /* @var $proxy ClassWithPublicProperties */
+        $proxy       = new $proxyName($instance);
+        $variable    = $proxy->property0;
+
+        $this->assertSame('property0', $variable);
+
+        $variable = 'foo';
+
+        $this->assertSame('property0', $proxy->property0);
+    }
+
+    /**
+     * Verifies that public properties references retrieved via `__get` modify in the object state
+     */
+    public function testWillModifyByRefRetrievedPublicProperties()
+    {
+        $instance    = new ClassWithPublicProperties();
+        $className   = get_class($instance);
+        $proxyName   = $this->generateProxy($className);
+        /* @var $proxy ClassWithPublicProperties */
+        $proxy       = new $proxyName($instance);
+        $variable    = & $proxy->property0;
+
+        $this->assertSame('property0', $variable);
+
+        $variable = 'foo';
+
+        $this->assertSame('foo', $proxy->property0);
+    }
+
+    /**
      * Generates a proxy for the given class name, and retrieves its class name
      *
-     * @param  string $parentClassName
+     * @param string $parentClassName
      *
      * @return string
      */
     private function generateProxy($parentClassName)
     {
-        $generatedClassName = __NAMESPACE__ . '\\Foo' . uniqid();
+        $generatedClassName = __NAMESPACE__ . '\\' . UniqueIdentifierGenerator::getIdentifier('Foo');
         $generator          = new AccessInterceptorValueHolderGenerator();
         $generatedClass     = new ClassGenerator($generatedClassName);
         $strategy           = new EvaluatingGeneratorStrategy();

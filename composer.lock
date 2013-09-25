@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "f215d8cf0d956b55a7b79abb6b43a85d",
+    "hash": "59bf62c8c54094ab89a2488d70bd021e",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -199,23 +199,23 @@
         },
         {
             "name": "mnapoli/php-di",
-            "version": "3.3.0",
+            "version": "3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mnapoli/PHP-DI.git",
-                "reference": "48de53e279dce1c8bf05c9cce455608a425b0283"
+                "reference": "14ea2c8e131689633b0d3da567a365a6a4cae5d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mnapoli/PHP-DI/zipball/48de53e279dce1c8bf05c9cce455608a425b0283",
-                "reference": "48de53e279dce1c8bf05c9cce455608a425b0283",
+                "url": "https://api.github.com/repos/mnapoli/PHP-DI/zipball/14ea2c8e131689633b0d3da567a365a6a4cae5d3",
+                "reference": "14ea2c8e131689633b0d3da567a365a6a4cae5d3",
                 "shasum": ""
             },
             "require": {
                 "doctrine/annotations": "1.*",
                 "doctrine/cache": "1.*",
                 "myclabs/php-enum": "1.*",
-                "ocramius/proxy-manager": "0.3.*",
+                "ocramius/proxy-manager": "~0.3",
                 "php": ">=5.3.0",
                 "symfony/yaml": "2.*"
             },
@@ -238,7 +238,7 @@
                 "dependency injection",
                 "di"
             ],
-            "time": "2013-07-30 16:04:56"
+            "time": "2013-09-24 17:33:08"
         },
         {
             "name": "myclabs/php-enum",
@@ -273,16 +273,16 @@
         },
         {
             "name": "ocramius/proxy-manager",
-            "version": "0.3.6",
+            "version": "0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ocramius/ProxyManager.git",
-                "reference": "24949099abe5c66e01bf8e1a666dc0a87dc55cd2"
+                "reference": "880ea3f2458d21781bcf3319b6756e69e9b322c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ocramius/ProxyManager/zipball/24949099abe5c66e01bf8e1a666dc0a87dc55cd2",
-                "reference": "24949099abe5c66e01bf8e1a666dc0a87dc55cd2",
+                "url": "https://api.github.com/repos/Ocramius/ProxyManager/zipball/880ea3f2458d21781bcf3319b6756e69e9b322c4",
+                "reference": "880ea3f2458d21781bcf3319b6756e69e9b322c4",
                 "shasum": ""
             },
             "require": {
@@ -331,7 +331,7 @@
                 "proxy pattern",
                 "service proxies"
             ],
-            "time": "2013-06-04 11:15:50"
+            "time": "2013-06-30 16:44:31"
         },
         {
             "name": "symfony/yaml",
