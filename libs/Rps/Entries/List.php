@@ -13,28 +13,28 @@ class ListEntries extends \WP_List_Table
      *
      * @var Core
      */
-    private $_core;
+    private $core;
 
     /**
      *
      * @var Settings
      */
-    private $_settings;
+    private $settings;
 
     /**
      *
      * @var RpsDb
      */
-    private $_rpsdb;
+    private $rpsdb;
     public $messages;
     public $screen;
 
     function __construct ($settings, $_rpsdb, $core)
     {
-        $this->_settings = $settings;
+        $this->settings = $settings;
         // Initialize the plugin
-        $this->_core = $core;
-        $this->_rpsdb = $_rpsdb;
+        $this->core = $core;
+        $this->rpsdb = $_rpsdb;
 
         $this->screen = 'avh_rps_page_avh_rps_entries_';
         $default_status = get_user_option('avhrps_entries_list_last_view');
@@ -100,11 +100,11 @@ class ListEntries extends \WP_List_Table
 
         $args = array('search' => $search,'offset' => $start,'number' => $number,'orderby' => $orderby,'order' => $order,'where' => $where);
 
-        $_entries = $this->_rpsdb->getEntries($args);
+        $_entries = $this->rpsdb->getEntries($args);
         $this->items = array_slice($_entries, 0, $entries_per_page);
         $this->extra_items = array_slice($_entries, $entries_per_page);
 
-        $total_entries = $this->_rpsdb->getEntries(array_merge($args, array('count' => true,'offset' => 0,'number' => 0)));
+        $total_entries = $this->rpsdb->getEntries(array_merge($args, array('count' => true,'offset' => 0,'number' => 0)));
 
         $this->set_pagination_args(array('total_items' => $total_entries,'per_page' => $entries_per_page));
 
@@ -146,7 +146,7 @@ class ListEntries extends \WP_List_Table
     {
         global $totals, $entry_status;
 
-        // $num_competitions = $this->_rpsdb->countEntries();
+        // $num_competitions = $this->rpsdb->countEntries();
         $status_links = array();
         $stati = array('all' => _nx_noop('All', 'All', 'entries'));
 
@@ -181,7 +181,7 @@ class ListEntries extends \WP_List_Table
 
         echo '<div class="alignleft actions">';
         if ( 'top' == $which ) {
-            $_seasons = $this->_rpsdb->getSeasonList('DESC');
+            $_seasons = $this->rpsdb->getSeasonList('DESC');
             $season = isset($_GET['filter-season']) ? $_GET['filter-season'] : 0;
             echo '<select name="filter-season">';
             echo '<option' . selected($season, 0, false) . ' value="0">' . __('Show all seasons') . '</option>';
@@ -250,11 +250,11 @@ class ListEntries extends \WP_List_Table
 
     function column_season ($entry)
     {
-        $_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
+        $_competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
         if ( $_competition != false ) {
             $unix_date = mysql2date('U', $_competition->Competition_Date);
             $_competition_month = date('n', $unix_date);
-            if ( $_competition_month >= $this->_settings->club_season_start_month_num && $_competition_month <= $this->_settings->club_season_end_month_num ) {
+            if ( $_competition_month >= $this->settings->club_season_start_month_num && $_competition_month <= $this->settings->club_season_end_month_num ) {
                 $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
             } else {
                 $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
@@ -268,7 +268,7 @@ class ListEntries extends \WP_List_Table
     function column_competition ($entry)
     {
         global $competition_status;
-        $_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
+        $_competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
         $competition_text = $_competition->Theme . ' - ' . $_competition->Medium . ' - ' . $_competition->Classification;
         echo $competition_text;
     }

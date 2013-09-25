@@ -9,15 +9,15 @@ class Core
      *
      * @var string
      */
-    private $_version;
-    private $_db_version;
+    private $version;
+    private $db_version;
 
     /**
      * Comments used in HTML do identify the plugin
      *
      * @var string
      */
-    private $_comment;
+    private $comment;
 
     /**
      * Paths and URI's of the WordPress information, 'home', 'siteurl', 'install_url', 'install_dir'
@@ -34,36 +34,36 @@ class Core
     /**
      * Properties used for the plugin options
      */
-    private $_db_options;
-    private $_default_options;
-    private $_default_options_general;
-    private $_options;
+    private $db_options;
+    private $default_options;
+    private $default_options_general;
+    private $options;
 
     /**
      * Properties used for the plugin data
      */
-    private $_db_data;
-    private $_default_data;
-    private $_data;
+    private $db_data;
+    private $default_data;
+    private $data;
 
     /**
      *
      * @var Settings
      */
-    private $_settings;
+    private $settings;
 
     /**
      * PHP5 constructor
      */
     public function __construct($settings)
     {
-        $this->_settings = $settings;
-        $this->_db_options = 'avhrps_options';
-        $this->_db_version = 0;
+        $this->settings = $settings;
+        $this->db_options = 'avhrps_options';
+        $this->db_version = 0;
         /**
          * Default options - General Purpose
          */
-        $this->_default_options = array();
+        $this->default_options = array();
         // add_action('init', array($this,'handleInitializePlugin'),10);
         $this->handleInitializePlugin();
 
@@ -75,39 +75,39 @@ class Core
         /**
          * Set the options for the program
          */
-        $this->_loadOptions();
-        // $this->_loadData();
+        $this->loadOptions();
+        // $this->loadData();
         // $this->_setTables();
         // Check if we have to do upgrades
         $old_db_version = get_option('avhrps_db_version', 0);
-        if ( $old_db_version < $this->_db_version ) {
-            $this->_doUpgrade($old_db_version);
-            update_option(avhrps_db_version, $this->_db_version);
+        if ( $old_db_version < $this->db_version ) {
+            $this->doUpgrade($old_db_version);
+            update_option(avhrps_db_version, $this->db_version);
         }
 
-        $this->_settings->club_name = "Raritan Photographic Society";
-        $this->_settings->club_short_name = "RPS";
-        $this->_settings->club_max_entries_per_member_per_date = 4;
-        $this->_settings->club_max_banquet_entries_per_member = 5;
-        $this->_settings->club_season_start_month_num = 9;
-        $this->_settings->club_season_end_month_num = 12;
+        $this->settings->club_name = "Raritan Photographic Society";
+        $this->settings->club_short_name = "RPS";
+        $this->settings->club_max_entries_per_member_per_date = 4;
+        $this->settings->club_max_banquet_entries_per_member = 5;
+        $this->settings->club_season_start_month_num = 9;
+        $this->settings->club_season_end_month_num = 12;
         // Database credentials
-        $this->_settings->host = 'localhost';
-        $this->_settings->dbname = 'avirtu2_raritdata';
-        $this->_settings->uname = 'avirtu2_rarit1';
-        $this->_settings->pw = '1Hallo@Done#';
-        $this->_settings->digital_chair_email = 'digitalchair@raritanphoto.com';
+        $this->settings->host = 'localhost';
+        $this->settings->dbname = 'avirtu2_raritdata';
+        $this->settings->uname = 'avirtu2_rarit1';
+        $this->settings->pw = '1Hallo@Done#';
+        $this->settings->digital_chair_email = 'digitalchair@raritanphoto.com';
 
-        $this->_settings->siteurl = get_option('siteurl');
-        $this->_settings->graphics_url = plugins_url('images', $this->_settings->plugin_basename);
-        $this->_settings->js_url = plugins_url('js', $this->_settings->plugin_basename);
-        $this->_settings->css_url = plugins_url('css', $this->_settings->plugin_basename);
-        $this->_settings->validComp = '';
-        $this->_settings->comp_date = '';
-        $this->_settings->classification = '';
-        $this->_settings->medium = '';
-        $this->_settings->max_width_entry = 1024;
-        $this->_settings->max_height_entry = 768;
+        $this->settings->siteurl = get_option('siteurl');
+        $this->settings->graphics_url = plugins_url('images', $this->settings->plugin_basename);
+        $this->settings->js_url = plugins_url('js', $this->settings->plugin_basename);
+        $this->settings->css_url = plugins_url('css', $this->settings->plugin_basename);
+        $this->settings->validComp = '';
+        $this->settings->comp_date = '';
+        $this->settings->classification = '';
+        $this->settings->medium = '';
+        $this->settings->max_width_entry = 1024;
+        $this->settings->max_height_entry = 768;
     }
 
     /**
@@ -125,7 +125,7 @@ class Core
     /**
      * Checks if running version is newer and do upgrades if necessary
      */
-    private function _doUpgrade($old_db_version)
+    private function doUpgrade($old_db_version)
     {
         $options = $this->getOptions();
         // Introduced dbversion starting with v2.1
@@ -133,7 +133,7 @@ class Core
         // list ($options, $data) = $this->_doUpgrade21($options, $data);
         // }
         // Add none existing sections and/or elements to the options
-        foreach ( $this->_default_options as $option => $value ) {
+        foreach ( $this->default_options as $option => $value ) {
             if ( !array_key_exists($option, $options) ) {
                 $options[$option] = $value;
                 continue;
@@ -192,12 +192,12 @@ class Core
 
         // If this is the 400px image, write the copyright notice onto the image
         if ( !( empty($maker) ) ) {
-            $dateParts = explode("-", $this->_settings->comp_date);
+            $dateParts = explode("-", $this->settings->comp_date);
             $year = $dateParts[0];
             $black = imagecolorallocate($thumb_img, 0, 0, 0);
             $white = imagecolorallocate($thumb_img, 255, 255, 255);
             $font = 5;
-            $text = "Copyright " . substr($this->_settings->comp_date, 0, 4) . " $maker";
+            $text = "Copyright " . substr($this->settings->comp_date, 0, 4) . " $maker";
             $width = imagesx($thumb_img);
             $height = imagesy($thumb_img);
             $textLength = imagefontwidth($font) * strlen($text);
@@ -351,9 +351,9 @@ class Core
      *
      * @param array $data
      */
-    private function _setOptions($options)
+    private function setOptions($options)
     {
-        $this->_options = $options;
+        $this->options = $options;
     }
 
     /**
@@ -361,7 +361,7 @@ class Core
      */
     public function getOptions()
     {
-        return ( $this->_options );
+        return ( $this->options );
     }
 
     /**
@@ -369,9 +369,9 @@ class Core
      */
     public function saveOptions($options)
     {
-        update_option($this->_db_options, $options);
+        update_option($this->db_options, $options);
         wp_cache_flush(); // Delete cache
-        $this->_setOptions($options);
+        $this->setOptions($options);
     }
 
     /**
@@ -380,14 +380,14 @@ class Core
      *
      * @return none
      */
-    private function _loadOptions()
+    private function loadOptions()
     {
-        $options = get_option($this->_db_options);
+        $options = get_option($this->db_options);
         if ( false === $options ) { // New installation
-            add_option($this->_db_options, $this->_default_options, '', 'yes');
-            $options = $this->_default_options;
+            add_option($this->db_options, $this->default_options, '', 'yes');
+            $options = $this->default_options;
         }
-        $this->_setOptions($options);
+        $this->setOptions($options);
     }
 
     /**
@@ -401,19 +401,19 @@ class Core
         if ( !$option )
             return false;
 
-        if ( !isset($this->_options) )
-            $this->_loadOptions();
+        if ( !isset($this->options) )
+            $this->loadOptions();
 
-        if ( !is_array($this->_options) || empty($this->_options[$option]) )
+        if ( !is_array($this->options) || empty($this->options[$option]) )
             return false;
 
-        return $this->_options[$option];
+        return $this->options[$option];
     }
 
     /**
      * Reset to default options and save in DB
      */
-    private function _resetToDefaultOptions()
+    private function resetToDefaultOptions()
     {}
 
     /**
@@ -427,9 +427,9 @@ class Core
      *
      * @param array $data
      */
-    private function _setData($data)
+    private function setData($data)
     {
-        $this->_data = $data;
+        $this->data = $data;
     }
 
     /**
@@ -438,7 +438,7 @@ class Core
      */
     public function getData()
     {
-        return ( $this->_data );
+        return ( $this->data );
     }
 
     /**
@@ -449,9 +449,9 @@ class Core
      */
     public function saveData($data)
     {
-        update_option($this->_db_data, $data);
+        update_option($this->db_data, $data);
         wp_cache_flush(); // Delete cache
-        $this->_setData($data);
+        $this->setData($data);
     }
 
     /**
@@ -459,13 +459,13 @@ class Core
      *
      * @return array
      */
-    private function _loadData()
+    private function loadData()
     {
-        $data = get_option($this->_db_data);
+        $data = get_option($this->db_data);
         if ( false === $data ) { // New installation
-            $this->_resetToDefaultData();
+            $this->resetToDefaultData();
         } else {
-            $this->_setData($data);
+            $this->setData($data);
         }
         return;
     }
@@ -481,8 +481,8 @@ class Core
      */
     public function getDataElement($option, $key)
     {
-        if ( $this->_data[$option][$key] ) {
-            $return = $this->_data[$option][$key];
+        if ( $this->data[$option][$key] ) {
+            $return = $this->data[$option][$key];
         } else {
             $return = false;
         }
@@ -492,10 +492,10 @@ class Core
     /**
      * Reset to default data and save in DB
      */
-    private function _resetToDefaultData()
+    private function resetToDefaultData()
     {
-        $this->_data = $this->_default_data;
-        $this->saveData($this->_default_data);
+        $this->data = $this->default_data;
+        $this->saveData($this->default_data);
     }
 
     /**
@@ -504,7 +504,7 @@ class Core
      */
     public function getComment($str = '')
     {
-        return $this->_comment . ' ' . trim($str) . ' -->';
+        return $this->comment . ' ' . trim($str) . ' -->';
     }
 
     /**

@@ -14,19 +14,19 @@ class ListCompetition extends \WP_List_Table
      *
      * @var Core
      */
-    private $_core;
+    private $core;
 
     /**
      *
      * @var Settings
      */
-    private $_settings;
+    private $settings;
 
     /**
      *
      * @var RpsDb
      */
-    private $_rpsdb;
+    private $rpsdb;
     public $messages;
     public $screen;
 
@@ -34,10 +34,10 @@ class ListCompetition extends \WP_List_Table
     {
 
         // Get The Registry
-        $this->_settings = $settings;
+        $this->settings = $settings;
         // Initialize the plugin
-        $this->_core = $core;
-        $this->_rpsdb = $_rpsdb;
+        $this->core = $core;
+        $this->rpsdb = $_rpsdb;
 
         $this->screen = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');
@@ -103,11 +103,11 @@ class ListCompetition extends \WP_List_Table
 
         $args = array('status' => $competition_status,'search' => $search,'offset' => $start,'number' => $number,'orderby' => $orderby,'order' => $order);
 
-        $_competitions = $this->_rpsdb->getCompetitions($args);
+        $_competitions = $this->rpsdb->getCompetitions($args);
         $this->items = array_slice($_competitions, 0, $competitions_per_page);
         $this->extra_items = array_slice($_competitions, $competitions_per_page);
 
-        $total_competitions = $this->_rpsdb->getCompetitions(array_merge($args, array('count' => true,'offset' => 0,'number' => 0)));
+        $total_competitions = $this->rpsdb->getCompetitions(array_merge($args, array('count' => true,'offset' => 0,'number' => 0)));
 
         $this->set_pagination_args(array('total_items' => $total_competitions,'per_page' => $competitions_per_page));
 
@@ -149,7 +149,7 @@ class ListCompetition extends \WP_List_Table
     {
         global $totals, $competition_status;
 
-        $num_competitions = $this->_rpsdb->countCompetitions();
+        $num_competitions = $this->rpsdb->countCompetitions();
         $status_links = array();
         $stati = array('all' => _nx_noop('All', 'All', 'competitions'),'open' => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>', 'Open <span class="count">(<span class="open-count">%s</span>)</span>'),'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>', 'Closed <span class="count">(<span class="closed-count">%s</span>)</span>'));
 

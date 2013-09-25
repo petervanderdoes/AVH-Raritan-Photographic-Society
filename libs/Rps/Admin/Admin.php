@@ -11,32 +11,32 @@ use Rps\Constants;
 final class Admin
 {
     /* @var $formBuilder FormBuilder */
-    private $_message = '';
-    private $_status = '';
+    private $message = '';
+    private $status = '';
 
     /**
      *
      * @var Core
      */
-    private $_core;
+    private $core;
 
     /**
      *
      * @var Settings
      */
-    private $_settings;
+    private $settings;
 
     /**
      *
      * @var RPSDb
      */
-    private $_rpsdb;
+    private $rpsdb;
 
     /**
      *
      * @var ListCompetition
      */
-    private $_competition_list;
+    private $competition_list;
 
     /**
      *
@@ -47,10 +47,10 @@ final class Admin
      *
      * @var AVH_RPS_EntriesList
      */
-    private $_entries_list;
-    private $_add_disabled_notice = false;
-    private $_hooks = array();
-    private $_referer;
+    private $entries_list;
+    private $add_disabled_notice = false;
+    private $hooks = array();
+    private $referer;
 
     /**
      * PHP5 Constructor
@@ -60,14 +60,14 @@ final class Admin
     public function __construct ($container)
     {
         // The Settings Registery
-        $this->_settings = $container->get('Rps\\Settings');
+        $this->settings = $container->get('Rps\\Settings');
         // Loads the CORE class
-        $this->_core = $container->get('Rps\\Common\\Core');
+        $this->core = $container->get('Rps\\Common\\Core');
         $this->container = $container;
         // Admin URL and Pagination
-        $this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
+        $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if ( isset($_GET['pagination']) ) {
-            $this->_core->actual_page = (int) $_GET['pagination'];
+            $this->core->actual_page = (int) $_GET['pagination'];
         }
 
         // Admin menu
@@ -91,7 +91,7 @@ final class Admin
      *
      * @WordPress Action init
      */
-    private function actionInit_Roles ()
+   public function actionInit_Roles ()
     {
         // Get the administrator role.
         $role = get_role('administrator');
@@ -106,7 +106,7 @@ final class Admin
         }
     }
 
-    private function actionInit_UserFields ()
+    public function actionInit_UserFields ()
     {
         add_action('edit_user_profile', array($this,'actionUser_Profile'));
         add_action('show_user_profile', array($this,'actionUser_Profile'));
@@ -121,30 +121,30 @@ final class Admin
      */
     public function actionAdminMenu ()
     {
-        wp_register_style('avhrps-admin-css', $this->_settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
-        wp_register_style('avhrps-jquery-css', $this->_settings->plugin_url . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', $this->_settings->plugin_url . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
+        wp_register_style('avhrps-admin-css', $this->settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-jquery-css', $this->settings->plugin_url . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', $this->settings->plugin_url . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
 
-        $this->_hooks['avhrps_menu_competition'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
-        $this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
+        $this->hooks['avhrps_menu_competition'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
+        $this->hooks['avhrps_menu_competition_add'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
 
-        add_action('load-' . $this->_hooks['avhrps_menu_competition'], array($this,'actionLoadPagehookCompetition'));
-        add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array($this,'actionLoadPagehookCompetitionAdd'));
+        add_action('load-' . $this->hooks['avhrps_menu_competition'], array($this,'actionLoadPagehookCompetition'));
+        add_action('load-' . $this->hooks['avhrps_menu_competition_add'], array($this,'actionLoadPagehookCompetitionAdd'));
 
         add_menu_page('All Entries', 'Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, array($this,'menuEntries'), '', Constants::MENU_POSITION_ENTRIES);
-        $this->_hooks['avhrps_menu_entries'] = add_submenu_page(Constants::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
-        add_action('load-' . $this->_hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
+        $this->hooks['avhrps_menu_entries'] = add_submenu_page(Constants::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
+        add_action('load-' . $this->hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
     }
 
     public function actionLoadPagehookCompetition ()
     {
         global $current_screen;
-        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
-        $this->_competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
+        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
+        $this->competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
 
-        $this->_handleRequestCompetition();
+        $this->handleRequestCompetition();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -164,7 +164,7 @@ final class Admin
      * Handle the HTTP Request before the page of the menu Competition is displayed.
      * This is needed for the redirects.
      */
-    private function _handleRequestCompetition ()
+    private function handleRequestCompetition ()
     {
         if ( isset($_REQUEST['wp_http_referer']) ) {
             $redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
@@ -172,7 +172,7 @@ final class Admin
             $redirect = admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION;
         }
 
-        $doAction = $this->_competition_list->current_action();
+        $doAction = $this->competition_list->current_action();
         switch ( $doAction )
         {
             case 'delete':
@@ -204,7 +204,7 @@ final class Admin
 
                 foreach ( (array) $competitionIds as $id ) {
                     $id = (int) $id;
-                    $this->_rpsdb->deleteCompetition($id);
+                    $this->rpsdb->deleteCompetition($id);
                     ++$deleteCount;
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'del_many'), $redirect);
@@ -223,7 +223,7 @@ final class Admin
                 foreach ( (array) $competitionIds as $id ) {
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'N';
-                    $this->_rpsdb->insertCompetition($data);
+                    $this->rpsdb->insertCompetition($data);
                     ++$count;
                 }
                 $redirect = add_query_arg(array('count' => $count,'update' => 'open_many'), $redirect);
@@ -242,7 +242,7 @@ final class Admin
                 foreach ( (array) $competitionIds as $id ) {
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'Y';
-                    $this->_rpsdb->insertCompetition($data);
+                    $this->rpsdb->insertCompetition($data);
                     ++$count;
                 }
                 $redirect = add_query_arg(array('count' => $count,'update' => 'close_many'), $redirect);
@@ -254,7 +254,7 @@ final class Admin
                     check_admin_referer('score_' . $_REQUEST['competition']);
                     $data['ID'] = (int) $_REQUEST['competition'];
                     $data['Scored'] = 'Y';
-                    $this->_rpsdb->insertCompetition($data);
+                    $this->rpsdb->insertCompetition($data);
                 }
                 wp_redirect($redirect);
                 break;
@@ -263,7 +263,7 @@ final class Admin
                     check_admin_referer('score_' . $_REQUEST['competition']);
                     $data['ID'] = (int) $_REQUEST['competition'];
                     $data['Scored'] = 'N';
-                    $this->_rpsdb->insertCompetition($data);
+                    $this->rpsdb->insertCompetition($data);
                 }
                 wp_redirect($redirect);
                 break;
@@ -272,9 +272,9 @@ final class Admin
                     wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
                     exit();
                 }
-                $pagenum = $this->_competition_list->get_pagenum();
-                $this->_competition_list->prepare_items();
-                $total_pages = $this->_competition_list->get_pagination_arg('total_pages');
+                $pagenum = $this->competition_list->get_pagenum();
+                $this->competition_list->prepare_items();
+                $total_pages = $this->competition_list->get_pagination_arg('total_pages');
                 if ( $pagenum > $total_pages && $total_pages > 0 ) {
                     wp_redirect(add_query_arg('paged', $total_pages));
                     exit();
@@ -285,18 +285,18 @@ final class Admin
 
     public function handleAjax ()
     {
-        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
+        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
         if ( isset($_POST['scored']) ) {
             if ( $_POST['scored'] == 'Yes' ) {
                 $data['ID'] = (int) $_POST['id'];
                 $data['Scored'] = 'N';
-                $result = $this->_rpsdb->insertCompetition($data);
+                $result = $this->rpsdb->insertCompetition($data);
                 $response = json_encode(array('text' => 'N','scored' => 'No','scoredtext' => 'Yes'));
             }
             if ( $_POST['scored'] == 'No' ) {
                 $data['ID'] = (int) $_POST['id'];
                 $data['Scored'] = 'Y';
-                $result = $this->_rpsdb->insertCompetition($data);
+                $result = $this->rpsdb->insertCompetition($data);
                 $response = json_encode(array('text' => 'Y','scored' => 'Yes','scoredtext' => 'No'));
             }
             if ( is_wp_error($result) ) {
@@ -313,27 +313,27 @@ final class Admin
      */
     public function menuCompetition ()
     {
-        $doAction = $this->_competition_list->current_action();
+        $doAction = $this->competition_list->current_action();
         switch ( $doAction )
         {
             case 'delete':
-                $this->_displayPageCompetitionDelete();
+                $this->displayPageCompetitionDelete();
                 break;
 
             case 'edit':
-                $this->_displayPageCompetitionEdit();
+                $this->displayPageCompetitionEdit();
                 break;
 
             case 'open':
-                $this->_displayPageCompetitionOpenClose('open');
+                $this->displayPageCompetitionOpenClose('open');
                 break;
 
             case 'close':
-                $this->_displayPageCompetitionOpenClose('close');
+                $this->displayPageCompetitionOpenClose('close');
                 break;
 
             default:
-                $this->_displayPageCompetitionList();
+                $this->displayPageCompetitionList();
                 break;
         }
     }
@@ -346,7 +346,7 @@ final class Admin
      *
      *
      */
-    private function _displayPageCompetitionDelete ()
+    private function displayPageCompetitionDelete ()
     {
         global $wpdb;
 
@@ -362,7 +362,7 @@ final class Admin
         $this->admin_header('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
         wp_nonce_field('delete-competitions');
-        echo $this->_referer;
+        echo $this->referer;
 
         echo '<p>' . _n('You have specified this competition for deletion:', 'You have specified these competitions for deletion:', count($competitionIdsArray)) . '</p>';
 
@@ -370,9 +370,9 @@ final class Admin
         foreach ( $competitionIdsArray as $competitionID ) {
 
             $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competitionID);
-            $entries = $this->_rpsdb->getEntries(array('where' => $sqlWhere,'count' => true));
+            $entries = $this->rpsdb->getEntries(array('where' => $sqlWhere,'count' => true));
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $this->_rpsdb->getCompetitions(array('where' => $sqlWhere));
+            $competition = $this->rpsdb->getCompetitions(array('where' => $sqlWhere));
             $competition = $competition[0];
             if ( $entries !== "0" ) {
                 echo "<li>" . sprintf(__('ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium, $entries) . "</li>\n";
@@ -391,7 +391,7 @@ final class Admin
         $this->admin_footer();
     }
 
-    private function _displayPageCompetitionEdit ()
+    private function displayPageCompetitionEdit ()
     {
         global $wpdb;
 
@@ -400,7 +400,7 @@ final class Admin
         $formBuilder->setOption_name('competition-edit');
 
         if ( isset($_POST['update']) ) {
-            $this->_updateCompetition();
+            $this->updateCompetition();
         }
         $vars = ( array('action','redirect','competition','wp_http_referer') );
         for ( $i = 0; $i < count($vars); $i += 1 ) {
@@ -417,7 +417,7 @@ final class Admin
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
 
-        $competition = $this->_rpsdb->getCompetitionByID2($_REQUEST['competition']);
+        $competition = $this->rpsdb->getCompetitionByID2($_REQUEST['competition']);
 
         $formOptions['date'] = mysql2date('Y-m-d', $competition->Competition_Date);
         $formOptions['close-date'] = mysql2date('Y-m-d', $competition->Close_Date);
@@ -500,7 +500,7 @@ final class Admin
         echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
-        echo '   buttonImage: "' . $this->_settings->plugin_url . '/images/calendar.png", ' . "\n";
+        echo '   buttonImage: "' . $this->settings->plugin_url . '/images/calendar.png", ' . "\n";
         echo '   showOn: "both"' . "\n";
         echo ' });' . "\n";
         echo '	$( "#date" ).datepicker();' . "\n";
@@ -517,7 +517,7 @@ final class Admin
      * @param string $referer
      *
      */
-    private function _displayPageCompetitionOpenClose ($action)
+    private function displayPageCompetitionOpenClose ($action)
     {
         global $wpdb;
 
@@ -541,13 +541,13 @@ final class Admin
         $this->admin_header($title);
         echo $formBuilder->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
         wp_nonce_field($action . '-competitions');
-        echo $this->_referer;
+        echo $this->referer;
 
         echo '<p>' . _n('You have specified this competition to be ' . $action_verb . ':', 'You have specified these competitions to be ' . $action_verb . '::', count($competitionIdsArray)) . '</p>';
 
         foreach ( $competitionIdsArray as $competitionID ) {
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $this->_rpsdb->getCompetitions(array('where' => $sqlWhere));
+            $competition = $this->rpsdb->getCompetitions(array('where' => $sqlWhere));
             $competition = $competition[0];
             echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
         }
@@ -562,7 +562,7 @@ final class Admin
     /**
      * Display the competion in a list
      */
-    private function _displayPageCompetitionList ()
+    private function displayPageCompetitionList ()
     {
         global $screen_layout_columns;
 
@@ -592,7 +592,7 @@ final class Admin
         }
 
         echo '<div class="wrap avhrps-wrap">';
-        echo $this->_displayIcon('index');
+        echo $this->displayIcon('index');
         echo '<h2>Competitions: ' . __('All Competitions', 'avh-rps');
 
         if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
@@ -600,31 +600,31 @@ final class Admin
         }
         echo '</h2>';
 
-        $this->_competition_list->views();
+        $this->competition_list->views();
         echo '<form id="rps-competition-form" action="" method="get">';
         echo '<input type="hidden" name="page" value="' . Constants::MENU_SLUG_COMPETITION . '">';
 
-        echo '<input type="hidden" name="_total" value="' . esc_attr($this->_competition_list->get_pagination_arg('total_items')) . '" />';
-        echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('per_page')) . '" />';
-        echo '<input type="hidden" name="_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('page')) . '" />';
+        echo '<input type="hidden" name="_total" value="' . esc_attr($this->competition_list->get_pagination_arg('total_items')) . '" />';
+        echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->competition_list->get_pagination_arg('per_page')) . '" />';
+        echo '<input type="hidden" name="_page" value="' . esc_attr($this->competition_list->get_pagination_arg('page')) . '" />';
 
         if ( isset($_REQUEST['paged']) ) {
             echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
         }
-        // $this->_competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
-        $this->_competition_list->display();
+        // $this->competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
+        $this->competition_list->display();
         echo '</form>';
 
         echo '<div id="ajax-response"></div>';
-        $this->_printAdminFooter();
+        $this->printAdminFooter();
         echo '</div>';
     }
 
     public function actionLoadPagehookCompetitionAdd ()
     {
         global $current_screen;
-        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
-        $this->_competition_list = $this->container->get('Rps\Competition\ListCompetition');
+        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
+        $this->competition_list = $this->container->get('Rps\Competition\ListCompetition');
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -714,8 +714,8 @@ final class Admin
                     }
 
                     if ( empty($errorMsgArray) ) {
-                        $this->_message = 'Competition Added';
-                        $this->_status = 'updated';
+                        $this->message = 'Competition Added';
+                        $this->status = 'updated';
 
                         // @format_off
  // @TODO: This is needed because of the old program, someday it needs to be cleaned up.
@@ -741,17 +741,17 @@ final class Admin
                             $data['Medium'] = $medium_convert[$medium];
                             foreach ( $classArray as $classification ) {
                                 $data['Classification'] = $classification_convert[$classification];
-                                $competition_ID = $this->_rpsdb->insertCompetition($data);
+                                $competition_ID = $this->rpsdb->insertCompetition($data);
                                 if ( is_wp_error($competition_ID) ) {
                                     wp_die($competition_ID);
                                 }
                             }
                         }
                     } else {
-                        $this->_message = $errorMsgArray;
-                        $this->_status = 'error';
+                        $this->message = $errorMsgArray;
+                        $this->status = 'error';
                     }
-                    $this->_displayMessage();
+                    $this->displayMessage();
                     $formOptions = $formNewOptions;
                     break;
             }
@@ -813,9 +813,9 @@ final class Admin
     {
         global $current_screen;
 
-        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
-        $this->_entries_list = $this->container->get('Rps\\Entries\\ListEntries');
-        $this->_handleRequestEntries();
+        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
+        $this->entries_list = $this->container->get('Rps\\Entries\\ListEntries');
+        $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -835,7 +835,7 @@ final class Admin
      * Handle the HTTP Request before the page of the menu Entries is displayed.
      * This is needed for the redirects.
      */
-    private function _handleRequestEntries ()
+    private function handleRequestEntries ()
     {
         if ( isset($_REQUEST['wp_http_referer']) ) {
             $redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
@@ -843,7 +843,7 @@ final class Admin
             $redirect = admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_ENTRIES;
         }
 
-        $doAction = $this->_entries_list->current_action();
+        $doAction = $this->entries_list->current_action();
         switch ( $doAction )
         {
             case 'delete':
@@ -872,7 +872,7 @@ final class Admin
 
                 foreach ( (array) $entryIds as $id ) {
                     $id = (int) $id;
-                    $this->_rpsdb->deleteEntry($id);
+                    $this->rpsdb->deleteEntry($id);
                     ++$deleteCount;
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount,'update' => 'del_many'), $redirect);
@@ -884,9 +884,9 @@ final class Admin
                     wp_redirect(remove_query_arg(array('_wp_http_referer','_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
                     exit();
                 }
-                $pagenum = $this->_entries_list->get_pagenum();
-                $this->_entries_list->prepare_items();
-                $total_pages = $this->_entries_list->get_pagination_arg('total_pages');
+                $pagenum = $this->entries_list->get_pagenum();
+                $this->entries_list->prepare_items();
+                $total_pages = $this->entries_list->get_pagination_arg('total_pages');
                 if ( $pagenum > $total_pages && $total_pages > 0 ) {
                     wp_redirect(add_query_arg('paged', $total_pages));
                     exit();
@@ -900,19 +900,19 @@ final class Admin
      */
     public function menuEntries ()
     {
-        $doAction = $this->_entries_list->current_action();
+        $doAction = $this->entries_list->current_action();
         switch ( $doAction )
         {
             case 'delete':
-                $this->_displayPageEntriesDelete();
+                $this->displayPageEntriesDelete();
                 break;
 
             case 'edit':
-                $this->_displayPageEntriesEdit();
+                $this->displayPageEntriesEdit();
                 break;
 
             default:
-                $this->_displayPageEntriesList();
+                $this->displayPageEntriesList();
                 break;
         }
     }
@@ -920,7 +920,7 @@ final class Admin
     /**
      * Display the entries in a list
      */
-    private function _displayPageEntriesList ()
+    private function displayPageEntriesList ()
     {
         global $screen_layout_columns;
 
@@ -942,7 +942,7 @@ final class Admin
         }
 
         echo '<div class="wrap avhrps-wrap">';
-        echo $this->_displayIcon('index');
+        echo $this->displayIcon('index');
         echo '<h2>Entries: ' . __('All Entries', 'avh-rps');
 
         if ( isset($_REQUEST['s']) && $_REQUEST['s'] ) {
@@ -950,29 +950,29 @@ final class Admin
         }
         echo '</h2>';
 
-        $this->_entries_list->views();
+        $this->entries_list->views();
         echo '<form id="rps-entries-form" action="" method="get">';
         echo '<input type="hidden" name="page" value="' . Constants::MENU_SLUG_ENTRIES . '">';
 
-        echo '<input type="hidden" name="_total" value="' . esc_attr($this->_entries_list->get_pagination_arg('total_items')) . '" />';
-        echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('per_page')) . '" />';
-        echo '<input type="hidden" name="_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('page')) . '" />';
+        echo '<input type="hidden" name="_total" value="' . esc_attr($this->entries_list->get_pagination_arg('total_items')) . '" />';
+        echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->entries_list->get_pagination_arg('per_page')) . '" />';
+        echo '<input type="hidden" name="_page" value="' . esc_attr($this->entries_list->get_pagination_arg('page')) . '" />';
 
         if ( isset($_REQUEST['paged']) ) {
             echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
         }
-        $this->_entries_list->display();
+        $this->entries_list->display();
         echo '</form>';
 
         echo '<div id="ajax-response"></div>';
-        $this->_printAdminFooter();
+        $this->printAdminFooter();
         echo '</div>';
     }
 
     /**
      * Display the page to confirm the deletion of the selected entries.
      */
-    private function _displayPageEntriesDelete ()
+    private function displayPageEntriesDelete ()
     {
         global $wpdb;
         $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
@@ -991,10 +991,10 @@ final class Admin
         $goDelete = 0;
         foreach ( $entryIdsArray as $entryID ) {
 
-            $entry = $this->_rpsdb->getEntryInfo($entryID, OBJECT);
+            $entry = $this->rpsdb->getEntryInfo($entryID, OBJECT);
             if ( $entry !== null ) {
                 $user = get_user_by('id', $entry->Member_ID);
-                $competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID, OBJECT);
+                $competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID, OBJECT);
                 echo "<li>";
                 echo $formBuilder->hidden('entries[]', $entryID);
                 printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'), $entryID, $entry->Title, $user->first_name, $user->last_name, $competition->Theme, mysql2date(get_option('date_format'), $competition->Competition_Date));
@@ -1010,13 +1010,13 @@ final class Admin
         }
 
         wp_nonce_field('delete-entries');
-        echo $this->_referer;
+        echo $this->referer;
 
         echo $formBuilder->close();
         $this->admin_footer();
     }
 
-    private function _displayPageEntriesEdit ()
+    private function displayPageEntriesEdit ()
     {
         global $wpdb;
 
@@ -1031,7 +1031,7 @@ final class Admin
             if ( !current_user_can('rps_edit_entries') ) {
                 wp_die(__('Cheatin&#8217; uh?'));
             }
-            $updated = $this->_updateEntry();
+            $updated = $this->updateEntry();
         }
 
         $vars = ( array('action','redirect','entry','wp_http_referer') );
@@ -1048,7 +1048,7 @@ final class Admin
         }
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
-        $entry = $this->_rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
+        $entry = $this->rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
 
         $this->admin_header('Edit Entry');
 
@@ -1071,7 +1071,7 @@ final class Admin
 
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
-        echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
+        echo "<img src=\"" . $this->core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
         echo $formBuilder->text('Title', '', 'title', $entry->Title);
         echo $formBuilder->close_table();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
@@ -1087,17 +1087,17 @@ final class Admin
         $this->admin_footer();
     }
 
-    private function _updateEntry ()
+    private function updateEntry ()
     {
         $formOptions = $_POST['entry-edit'];
         $id = (int) $_POST['entry'];
-        $entry = $this->_rpsdb->getEntryInfo($id);
+        $entry = $this->rpsdb->getEntryInfo($id);
 
         $return = false;
         $formOptionsNew['title'] = empty($formOptions['title']) ? $entry['Title'] : $formOptions['title'];
         if ( $entry['Title'] != $formOptionsNew['title'] ) {
             $data = array('ID' => $id,'Title' => $formOptionsNew['title']);
-            $return = $this->_rpsdb->updateEntry($data);
+            $return = $this->rpsdb->updateEntry($data);
         }
         return $return;
     }
@@ -1128,7 +1128,7 @@ final class Admin
      */
     public function filterPluginActions ($links)
     {
-        $folder = AVH_Common::getBaseDirectory($this->_settings->plugin_basename);
+        $folder = AVH_Common::getBaseDirectory($this->settings->plugin_basename);
         $settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
         array_unshift($links, $settings_link); // before other links
         return $links;
@@ -1175,11 +1175,11 @@ final class Admin
     {
         switch ( $screen )
         {
-            // case $this->_hooks['avhrps_menu_competition']:
-            // $columns[$this->_hooks['avhfdas_menu_overview']] = 1;
+            // case $this->hooks['avhrps_menu_competition']:
+            // $columns[$this->hooks['avhfdas_menu_overview']] = 1;
             // break;
-            // case $this->_hooks['avhrps_menu_competition_add']:
-            // $columns[$this->_hooks['avhfdas_menu_general']] = 1;
+            // case $this->hooks['avhrps_menu_competition_add']:
+            // $columns[$this->hooks['avhfdas_menu_general']] = 1;
             // break;
         }
         return $columns;
@@ -1318,7 +1318,7 @@ final class Admin
         update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
     }
 
-    private function _updateCompetition ()
+    private function updateCompetition ()
     {
         $formOptions = $_POST['competition-edit'];
 
@@ -1359,14 +1359,14 @@ $_classification = array ( 'class_b' => 'Beginner',
         $data['Scored'] = ( $formOptionsNew['scored'] ? 'Y' : 'N' );
         $data['Medium'] = $_medium[$formOptionsNew['medium']];
         $data['Classification'] = $_classification[$formOptionsNew['classification']];
-        $competition_ID = $this->_rpsdb->insertCompetition($data);
+        $competition_ID = $this->rpsdb->insertCompetition($data);
     }
     // ############ Admin WP Helper ##############
 
     /**
      * Display plugin Copyright
      */
-    private function _printAdminFooter ()
+    private function printAdminFooter ()
     {
         echo '<div class="clear"></div>';
         echo '<p class="footer_avhfdas">';
@@ -1377,20 +1377,20 @@ $_classification = array ( 'class_b' => 'Beginner',
     /**
      * Display WP alert
      */
-    private function _displayMessage ()
+    private function displayMessage ()
     {
         $message = '';
-        if ( is_array($this->_message) ) {
-            foreach ( $this->_message as $key => $_msg ) {
+        if ( is_array($this->message) ) {
+            foreach ( $this->message as $key => $_msg ) {
                 $message .= $_msg . "<br>";
             }
         } else {
-            $message = $this->_message;
+            $message = $this->message;
         }
 
         if ( $message != '' ) {
-            $status = $this->_status;
-            $this->_message = $this->_status = ''; // Reset
+            $status = $this->status;
+            $this->message = $this->status = ''; // Reset
             $status = ( $status != '' ) ? $status : 'updated fade';
             echo '<div id="message"	class="' . $status . '">';
             echo '<p><strong>' . $message . '</strong></p></div>';
@@ -1404,7 +1404,7 @@ $_classification = array ( 'class_b' => 'Beginner',
      * @param $icon strings
      * @return string
      */
-    private function _displayIcon ($icon)
+    private function displayIcon ($icon)
     {
         return ( '<div class="icon32" id="icon-' . $icon . '"><br/></div>' );
     }
@@ -1415,7 +1415,7 @@ $_classification = array ( 'class_b' => 'Beginner',
      * @param string $msg
      *        Error Message. Assumed to contain HTML and be sanitized.
      */
-    private function _comment_footer_die ($msg)
+    private function comment_footer_die ($msg)
     {
         echo "<div class='wrap'><p>$msg</p></div>";
         die();
@@ -1438,7 +1438,7 @@ $_classification = array ( 'class_b' => 'Beginner',
     function admin_header ($title)
     {
         echo '<div class="wrap">';
-        echo $this->_displayIcon('options-general');
+        echo $this->displayIcon('options-general');
         echo '<h2 id="rps-title">' . $title . '</h2>';
         echo '<div id="rps_content_top" class="postbox-container" style="width:100%;">';
         echo '<div class="metabox-holder">';
@@ -1457,7 +1457,7 @@ $_classification = array ( 'class_b' => 'Beginner',
     {
         echo '</div></div></div>';
         // $this->admin_sidebar();
-        $this->_printAdminFooter();
+        $this->printAdminFooter();
         echo '</div>';
     }
 }

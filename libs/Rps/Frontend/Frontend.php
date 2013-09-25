@@ -21,20 +21,20 @@ class Frontend
      *
      * @var Core
      */
-    private $_core;
+    private $core;
 
     /**
      *
      * @var Settings
      */
-    private $_settings;
+    private $settings;
 
     /**
      *
      * @var RpsDb
      */
-    private $_rpsdb;
-    private $_core_options;
+    private $rpsdb;
+    private $core_options;
 
     // Properties of the logged in user
     private $member_id;
@@ -47,7 +47,7 @@ class Frontend
     private $club_officer;
     // Other commonly used globals
     private $digital_chair_email;
-    private $_errmsg;
+    private $errmsg;
     private $url_params;
 
     /**
@@ -57,15 +57,15 @@ class Frontend
     {
         // Get The Registry
         $this->container = $container;
-        $this->_settings = $this->container->get('Rps\\Settings');
+        $this->settings = $this->container->get('Rps\\Settings');
 
-        $this->_errmsg = '';
+        $this->errmsg = '';
         // Initialize the plugin
-        $this->_core = $this->container->get('Rps\\Common\\Core');
-        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
-        $this->_core_options = $this->_core->getOptions();
+        $this->core = $this->container->get('Rps\\Common\\Core');
+        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
+        $this->core_options = $this->core->getOptions();
 
-        $this->_rpsdb->setCompetitionClose();
+        $this->rpsdb->setCompetitionClose();
 
         add_action('wp_loaded', array($this,'actionInit_InitRunTime'));
         // Public actions and filters
@@ -98,7 +98,7 @@ class Frontend
 
     public function actionInit_InitRunTime ()
     {
-        $this->_rpsdb->setUser_id(get_current_user_id());
+        $this->rpsdb->setUser_id(get_current_user_id());
     }
 
     function actionTemplate_Redirect_RPSWindowsClient ()
@@ -115,13 +115,13 @@ class Frontend
             switch ( $_REQUEST['rpswinclient'] )
             {
                 case 'getcompdate':
-                    $this->_sendXmlCompetitionDates();
+                    $this->sendXmlCompetitionDates();
                     break;
                 case 'download':
-                    $this->_sendCompetitions();
+                    $this->sendCompetitions();
                     break;
                 case 'uploadscore':
-                    $this->_doUploadScore();
+                    $this->doUploadScore();
                 default:
                     break;
             }
@@ -132,11 +132,11 @@ class Frontend
     {
         if ( is_front_page() ) {
             $image = array();
-            $seasons = $this->_rpsdb->getSeasonList();
+            $seasons = $this->rpsdb->getSeasonList();
             $from_season = $seasons[count($seasons) - 3];
 
             $season_start_year = substr($from_season, 0, 4);
-            $season = sprintf("%d-%02s-%02s", $season_start_year, $this->_settings->club_season_start_month_num, 1);
+            $season = sprintf("%d-%02s-%02s", $season_start_year, $this->settings->club_season_start_month_num, 1);
 
             echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
@@ -146,7 +146,7 @@ class Frontend
 
             echo '<div class="rps-sc-text entry-content">';
             echo '<ul>';
-            $entries = $this->_rpsdb->getEightsAndHigher('', $season);
+            $entries = $this->rpsdb->getEightsAndHigher('', $season);
             $images = array_rand($entries, 5);
 
             foreach ( $images as $key ) {
@@ -170,8 +170,8 @@ class Frontend
                 echo '<li class="suf-widget">';
                 echo '<div class="dbx-box">';
                 echo '	<div class="image">';
-                echo '	<a href="' . $this->_core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '	<img class="thumb_img" src="' . $this->_core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+                echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
                 echo '	</div>';
                 // echo " <div class='rps_showcase_title'>$title</div>";
                 echo "</div>\n";
@@ -190,40 +190,40 @@ class Frontend
         $months = array();
         $themes = array();
 
-        $this->_settings->selected_season = '';
-        $this->_settings->season_start_date = "";
-        $this->_settings->season_end_date = "";
-        $this->_settings->season_start_year = "";
-        $this->_settings->selected_year = "";
-        $this->_settings->selected_month = "";
+        $this->settings->selected_season = '';
+        $this->settings->season_start_date = "";
+        $this->settings->season_end_date = "";
+        $this->settings->season_start_year = "";
+        $this->settings->selected_year = "";
+        $this->settings->selected_month = "";
 
         if ( isset($_POST['submit_control']) ) {
-            $this->_settings->selected_season = esc_attr($_POST['selected_season']);
-            $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-            $this->_settings->selected_year = esc_attr($_POST['selected_year']);
-            $this->_settings->selected_month = esc_attr($_POST['selected_month']);
+            $this->settings->selected_season = esc_attr($_POST['selected_season']);
+            $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+            $this->settings->selected_year = esc_attr($_POST['selected_year']);
+            $this->settings->selected_month = esc_attr($_POST['selected_month']);
 
             switch ( $_POST['submit_control'] )
             {
                 case 'new_season':
-                    $this->_settings->selected_season = esc_attr($_POST['new_season']);
-                    $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-                    $this->_settings->selected_month = "";
+                    $this->settings->selected_season = esc_attr($_POST['new_season']);
+                    $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+                    $this->settings->selected_month = "";
                     break;
                 case 'new_month':
-                    $this->_settings->selected_year = substr(esc_attr($_POST['new_month']), 0, 4);
-                    $this->_settings->selected_month = substr(esc_attr($_POST['new_month']), 5, 2);
+                    $this->settings->selected_year = substr(esc_attr($_POST['new_month']), 0, 4);
+                    $this->settings->selected_month = substr(esc_attr($_POST['new_month']), 5, 2);
             }
         }
-        $seasons = $this->_rpsdb->getSeasonList();
-        if ( empty($this->_settings->selected_season) ) {
-            $this->_settings->selected_season = $seasons[count($seasons) - 1];
+        $seasons = $this->rpsdb->getSeasonList();
+        if ( empty($this->settings->selected_season) ) {
+            $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
-        $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year, $this->_settings->club_season_start_month_num, 1);
-        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1);
+        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
+        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
 
-        $scores = $this->_rpsdb->getMonthlyScores();
+        $scores = $this->rpsdb->getMonthlyScores();
 
         if ( is_array($scores) && ( !empty($scores) ) ) {
             $scored_competitions = true;
@@ -238,22 +238,22 @@ class Frontend
                 $themes[$key] = $recs['Theme'];
             }
 
-            if ( empty($this->_settings->selected_month) ) {
+            if ( empty($this->settings->selected_month) ) {
                 end($months);
-                $this->_settings->selected_year = substr(key($months), 0, 4);
-                $this->_settings->selected_month = substr(key($months), 5, 2);
+                $this->settings->selected_year = substr(key($months), 0, 4);
+                $this->settings->selected_month = substr(key($months), 5, 2);
             }
         }
 
         // Count the maximum number of awards in the selected competitions
-        $this->_settings->min_date = sprintf("%d-%02s-%02s", $this->_settings->selected_year, $this->_settings->selected_month, 1);
-        if ( $this->_settings->selected_month == 12 ) {
-            $this->_settings->max_date = sprintf("%d-%02s-%02s", $this->_settings->selected_year + 1, 1, 1);
+        $this->settings->min_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month, 1);
+        if ( $this->settings->selected_month == 12 ) {
+            $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year + 1, 1, 1);
         } else {
-            $this->_settings->max_date = sprintf("%d-%02s-%02s", $this->_settings->selected_year, $this->_settings->selected_month + 1, 1);
+            $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month + 1, 1);
         }
 
-        $max_num_awards = $this->_rpsdb->getMaxAwards();
+        $max_num_awards = $this->rpsdb->getMaxAwards();
 
         // Start displaying the form
         echo '<script type="text/javascript">';
@@ -268,15 +268,15 @@ class Frontend
         $form = '';
         $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
         $form .= '<input name="submit_control" type="hidden">' . "\n";
-        $form .= '<input name="selected_season" type="hidden" value="' . $this->_settings->selected_season . '">' . "\n";
-        $form .= '<input name="selected_year" type="hidden" value="' . $this->_settings->selected_year . '">' . "\n";
-        $form .= '<input name="selected_month" type="hidden" value="' . $this->_settings->selected_month . '">' . "\n";
+        $form .= '<input name="selected_season" type="hidden" value="' . $this->settings->selected_season . '">' . "\n";
+        $form .= '<input name="selected_year" type="hidden" value="' . $this->settings->selected_year . '">' . "\n";
+        $form .= '<input name="selected_month" type="hidden" value="' . $this->settings->selected_month . '">' . "\n";
 
         if ( $scored_competitions ) {
             // Drop down list for months
             $form .= '<select name="new_month" onchange="submit_form(\'new_month\')">' . "\n";
             foreach ( $months as $key => $month ) {
-                $selected = ( substr($key, 5, 2) == $this->_settings->selected_month ) ? " selected" : "";
+                $selected = ( substr($key, 5, 2) == $this->settings->selected_month ) ? " selected" : "";
                 $form .= '<option value="' . $key . '"' . $selected . '>' . $month . '</option>' . "\n";
             }
             $form .= "</select>\n";
@@ -285,7 +285,7 @@ class Frontend
         // Drop down list for season
         $form .= '<select name="new_season" onChange="submit_form(\'new_season\')">' . "\n";
         foreach ( $seasons as $season ) {
-            $selected = ( $season == $this->_settings->selected_season ) ? " selected" : "";
+            $selected = ( $season == $this->settings->selected_season ) ? " selected" : "";
             $form .= '<option value="' . $season . '"' . $selected . '>' . $season . '</option>' . "\n";
         }
         $form .= '</select>' . "\n";
@@ -295,7 +295,7 @@ class Frontend
         echo '</span>';
 
         if ( $scored_competitions ) {
-            $this_month = sprintf("%d-%02s", $this->_settings->selected_year, $this->_settings->selected_month);
+            $this_month = sprintf("%d-%02s", $this->settings->selected_year, $this->settings->selected_month);
             echo '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
 
             echo "<table class=\"thumb_grid\">\n";
@@ -318,7 +318,7 @@ class Frontend
                 }
                 echo "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
             }
-            $award_winners = $this->_rpsdb->getWinners();
+            $award_winners = $this->rpsdb->getWinners();
             // Iterate through all the award winners and display each thumbnail in a grid
             $row = 0;
             $column = 0;
@@ -357,13 +357,13 @@ class Frontend
                     echo "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
                 }
                 // Display this thumbnail in the the next available column
-                $this->_core->rpsCreateThumbnail($recs, 75);
-                $this->_core->rpsCreateThumbnail($recs, 400);
+                $this->core->rpsCreateThumbnail($recs, 75);
+                $this->core->rpsCreateThumbnail($recs, 400);
                 echo "<td align=\"center\" class=\"thumb_cell\">\n";
                 echo "  <div class=\"thumb_canvas\">\n";
                 echo "<div id='rps_colorbox_title'>$title<br />Award: $award</div>";
-                echo "    <a href=\"" . $this->_core->rpsGetThumbnailUrl($recs, 400) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title\">\n";
-                echo "    <img class=\"thumb_img\" src=\"" . $this->_core->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
+                echo "    <a href=\"" . $this->core->rpsGetThumbnailUrl($recs, 400) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title\">\n";
+                echo "    <img class=\"thumb_img\" src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
                 echo "  </div>\n</td>\n";
                 $prev_comp = $comp;
                 $column += 1;
@@ -388,25 +388,25 @@ class Frontend
         global $post;
 
         if ( isset($_POST['selected_season_list']) ) {
-            $this->_settings->selected_season = $_POST['selected_season_list'];
+            $this->settings->selected_season = $_POST['selected_season_list'];
         }
         // Get the list of seasons
-        $seasons = $this->_rpsdb->getSeasonList();
-        if ( empty($this->_settings->selected_season) ) {
-            $this->_settings->selected_season = $seasons[count($seasons) - 1];
+        $seasons = $this->rpsdb->getSeasonList();
+        if ( empty($this->settings->selected_season) ) {
+            $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
-        $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year, $this->_settings->club_season_start_month_num, 1);
-        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year + 1, $this->_settings->club_season_start_month_num, 1);
+        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
+        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
 
         // Start building the form
         $action = home_url('/' . get_page_uri($post->ID));
         $form = '';
         $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
-        $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '" />';
+        $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '" />';
         $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
         foreach ( $seasons as $this_season ) {
-            if ( $this_season == $this->_settings->selected_season ) {
+            if ( $this_season == $this->settings->selected_season ) {
                 $selected = " SELECTED";
             } else {
                 $selected = "";
@@ -430,7 +430,7 @@ class Frontend
         echo '<th class="form_frame_header">Title</th>';
         echo '<th class="form_frame_header" width="8%">Score</th>';
         echo '<th class="form_frame_header" width="8%">Award</th></tr>';
-        $scores = $this->_rpsdb->getScoresCurrentUser();
+        $scores = $this->rpsdb->getScoresCurrentUser();
 
         // Bail out if not entries found
         if ( empty($scores) ) {
@@ -497,21 +497,21 @@ class Frontend
     {
         global $post;
         if ( isset($_POST['selected_season_list']) ) {
-            $this->_settings->selected_season = $_POST['selected_season_list'];
+            $this->settings->selected_season = $_POST['selected_season_list'];
         }
         $award_map = array('1st' => '1','2nd' => '2','3rd' => '3','HM' => 'H');
 
-        $seasons = $this->_rpsdb->getSeasonListOneEntry();
+        $seasons = $this->rpsdb->getSeasonListOneEntry();
         arsort($seasons);
-        if ( !isset($this->_settings->selected_season) ) {
-            $this->_settings->selected_season = $seasons[count($seasons) - 1];
+        if ( !isset($this->settings->selected_season) ) {
+            $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
 
-        $this->_settings->season_start_year = substr($this->_settings->selected_season, 0, 4);
-        $this->_settings->season_start_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year, 9, 1);
-        $this->_settings->season_end_date = sprintf("%d-%02s-%02s", $this->_settings->season_start_year + 1, 9, 1);
+        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, 9, 1);
+        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, 9, 1);
 
-        $competition_dates = $this->_rpsdb->getClubCompetitionDates();
+        $competition_dates = $this->rpsdb->getClubCompetitionDates();
         // Build an array of competition dates in "MM/DD" format for column titles.
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
@@ -526,8 +526,8 @@ class Frontend
             $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
         }
 
-        $club_competition_results_unsorted = $this->_rpsdb->getClubCompetitionResults();
-        $club_competition_results = $this->_core->avh_array_msort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC),'Class_Code' => array(SORT_ASC),'LastName' => array(SORT_ASC),'FirstName' => array(SORT_ASC),'Competition_Date' => array(SORT_ASC)));
+        $club_competition_results_unsorted = $this->rpsdb->getClubCompetitionResults();
+        $club_competition_results = $this->core->avh_array_msort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC),'Class_Code' => array(SORT_ASC),'LastName' => array(SORT_ASC),'FirstName' => array(SORT_ASC),'Competition_Date' => array(SORT_ASC)));
         // Bail out if no entries found
         if ( empty($club_competition_results) ) {
             echo 'No entries submitted';
@@ -538,10 +538,10 @@ class Frontend
             $action = home_url('/' . get_page_uri($post->ID));
             $form = '';
             $form .= '<form name="all_scores_form" method="post" action="' . $action . '">';
-            $form .= '<input type="hidden" name="selected_season" value="' . $this->_settings->selected_season . '"/>';
+            $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '"/>';
             $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
             foreach ( $seasons as $this_season ) {
-                if ( $this_season == $this->_settings->selected_season ) {
+                if ( $this_season == $this->settings->selected_season ) {
                     $selected = " SELECTED";
                 } else {
                     $selected = "";
@@ -660,7 +660,7 @@ class Frontend
 
                         // Display the category title
                         echo '<tr><td align="left" class="form_title" colspan="' . ( $total_max_entries + 3 ) . '">';
-                        echo $medium . ' scores for ' . $this->_settings->selected_season . ' season';
+                        echo $medium . ' scores for ' . $this->settings->selected_season . ' season';
                         echo '</td></tr>' . "\n";
 
                         // Display the first row column headers
@@ -750,22 +750,22 @@ class Frontend
         global $post;
 
         if ( is_object($post) && ( $post->ID == 56 || $post->ID == 58 ) ) {
-            $this->_settings->comp_date = "";
-            $this->_settings->classification = "";
-            $this->_settings->medium = "";
-            $this->_errmsg = '';
+            $this->settings->comp_date = "";
+            $this->settings->classification = "";
+            $this->settings->medium = "";
+            $this->errmsg = '';
 
             $page = explode('-', $post->post_name);
-            $this->_settings->medium_subset = $page[1];
+            $this->settings->medium_subset = $page[1];
             if ( isset($_POST['submit_control']) ) {
                 // @TODO Nonce check
 
-                $this->_settings->comp_date = $_POST['comp_date'];
-                $this->_settings->classification = $_POST['classification'];
-                $this->_settings->medium = $_POST['medium'];
+                $this->settings->comp_date = $_POST['comp_date'];
+                $this->settings->classification = $_POST['classification'];
+                $this->settings->medium = $_POST['medium'];
                 $t = time() + ( 2 * 24 * 3600 );
                 $url = parse_url(get_bloginfo('url'));
-                setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $t, '/', $url['host']);
+                setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $t, '/', $url['host']);
 
                 if ( isset($_POST['EntryID']) ) {
                     $entry_array = $_POST['EntryID'];
@@ -777,16 +777,16 @@ class Frontend
                 {
 
                     case 'select_comp':
-                        $this->_settings->comp_date = $_POST['select_comp'];
+                        $this->settings->comp_date = $_POST['select_comp'];
                         break;
 
                     case 'select_medium':
-                        $this->_settings->medium = $_POST['select_medium'];
+                        $this->settings->medium = $_POST['select_medium'];
                         break;
 
                     case 'add':
-                        if ( !$this->_rpsdb->getCompetionClosed() ) {
-                            $_query = array('m' => $this->_settings->medium_subset);
+                        if ( !$this->rpsdb->getCompetionClosed() ) {
+                            $_query = array('m' => $this->settings->medium_subset);
                             $_query = build_query($_query);
                             $loc = '/upload-image/?' . $_query;
                             wp_redirect($loc);
@@ -794,11 +794,11 @@ class Frontend
                         break;
 
                     case 'edit':
-                        if ( !$this->_rpsdb->getCompetionClosed() ) {
+                        if ( !$this->rpsdb->getCompetionClosed() ) {
                             if ( is_array($entry_array) ) {
                                 foreach ( $entry_array as $id ) {
                                     // @TODO Add Nonce
-                                    $_query = array('id' => $id,'m' => $this->_settings->medium_subset);
+                                    $_query = array('id' => $id,'m' => $this->settings->medium_subset);
                                     $_query = build_query($_query);
                                     $loc = '/edit-title/?' . $_query;
                                     wp_redirect($loc);
@@ -808,8 +808,8 @@ class Frontend
                         break;
 
                     case 'delete':
-                        if ( !$this->_rpsdb->getCompetionClosed() ) {
-                            $this->_deleteCompetitionEntries($entry_array);
+                        if ( !$this->rpsdb->getCompetionClosed() ) {
+                            $this->deleteCompetitionEntries($entry_array);
                         }
                         break;
                 }
@@ -819,21 +819,21 @@ class Frontend
             if ( !$_POST ) {
                 if ( isset($_COOKIE['RPS_MyEntries']) ) {
                     list ($comp_date, $classification, $medium) = explode("|", $_COOKIE['RPS_MyEntries']);
-                    $this->_settings->comp_date = $comp_date;
-                    $this->_settings->classification = $classification;
-                    $this->_settings->medium = $medium;
+                    $this->settings->comp_date = $comp_date;
+                    $this->settings->classification = $classification;
+                    $this->settings->medium = $medium;
                 }
             }
-            $this->_settings->validComp = $this->_validateSelectedComp($this->_settings->comp_date, $this->_settings->medium);
-            if ( $this->_settings->validComp === false ) {
-                $this->_settings->comp_date = "";
-                $this->_settings->classification = "";
-                $this->_settings->medium = "";
-                $this->_errmsg = 'There are no competitions available to enter';
+            $this->settings->validComp = $this->validateSelectedComp($this->settings->comp_date, $this->settings->medium);
+            if ( $this->settings->validComp === false ) {
+                $this->settings->comp_date = "";
+                $this->settings->classification = "";
+                $this->settings->medium = "";
+                $this->errmsg = 'There are no competitions available to enter';
                 // Invalidate any existing cookie
                 $past = time() - ( 24 * 3600 );
                 $url = parse_url(get_bloginfo(url));
-                setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $past, '/', $url['host']);
+                setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $past, '/', $url['host']);
             }
         }
     }
@@ -859,26 +859,26 @@ class Frontend
         echo '</script>' . "\n";
 
         extract(shortcode_atts(array('medium' => 'digital'), $atts));
-        $this->_settings->medium_subset = $medium;
+        $this->settings->medium_subset = $medium;
 
-        if ( !empty($this->_errmsg) ) {
-            echo '<div id="errmsg">' . $this->_errmsg . '</div>';
+        if ( !empty($this->errmsg) ) {
+            echo '<div id="errmsg">' . $this->errmsg . '</div>';
         }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
         $form = '';
         echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
         echo '<input type="hidden" name="submit_control">' . "\n";
-        echo '<input type="hidden" name="comp_date" value="' . $this->_settings->comp_date . '">' . "\n";
-        echo '<input type="hidden" name="classification" value="' . $this->_settings->classification . '">' . "\n";
-        echo '<input type="hidden" name="medium" value="' . $this->_settings->medium . '">' . "\n";
-        echo '<input type="hidden" name="medium_subset" value="' . $this->_settings->medium_subset . '">' . "\n";
+        echo '<input type="hidden" name="comp_date" value="' . $this->settings->comp_date . '">' . "\n";
+        echo '<input type="hidden" name="classification" value="' . $this->settings->classification . '">' . "\n";
+        echo '<input type="hidden" name="medium" value="' . $this->settings->medium . '">' . "\n";
+        echo '<input type="hidden" name="medium_subset" value="' . $this->settings->medium_subset . '">' . "\n";
         echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce('avh-rps-myentries') . '" />' . "\n";
         echo '<table class="form_frame" width="90%">' . "\n";
 
         // Form Heading
-        if ( $this->_settings->validComp ) {
-            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->_settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->_settings->comp_date)) . "</th></tr>\n";
+        if ( $this->settings->validComp ) {
+            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->settings->comp_date)) . "</th></tr>\n";
         } else {
             echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
         }
@@ -887,8 +887,8 @@ class Frontend
         $theme_uri_images = get_stylesheet_directory_uri() . '/images';
         echo '<tr>';
         echo '<td width="25%">';
-        // echo '<span class="rps-comp-medium">' . $this->_settings->medium . '</span>';
-        switch ( $this->_settings->medium )
+        // echo '<span class="rps-comp-medium">' . $this->settings->medium . '</span>';
+        switch ( $this->settings->medium )
         {
             case "Color Digital":
                 $img = '/thumb-comp-digital-color.jpg';
@@ -906,7 +906,7 @@ class Frontend
                 $img = '';
         }
 
-        echo '<img src="' . $this->_settings->plugin_url . '/images' . $img . '">';
+        echo '<img src="' . $this->settings->plugin_url . '/images' . $img . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
         echo "<table width=\"100%\">\n";
@@ -921,7 +921,7 @@ class Frontend
         $prev_date = "";
         for ( $i = 0; $i < count($this->_open_comp_date); $i++ ) {
             if ( $this->_open_comp_date[$i] != $prev_date ) {
-                if ( $this->_settings->comp_date == $this->_open_comp_date[$i] ) {
+                if ( $this->settings->comp_date == $this->_open_comp_date[$i] ) {
                     $selected = " SELECTED";
                     $theme = $this->_open_comp_theme[$i];
                 } else {
@@ -940,8 +940,8 @@ class Frontend
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
         // Load the values into the dropdown list
         for ( $i = 0; $i < count($this->_open_comp_date); $i++ ) {
-            if ( $this->_open_comp_date[$i] == $this->_settings->comp_date ) {
-                if ( $this->_settings->medium == $this->_open_comp_medium[$i] ) {
+            if ( $this->_open_comp_date[$i] == $this->settings->comp_date ) {
+                if ( $this->settings->medium == $this->_open_comp_medium[$i] ) {
                     $selected = " SELECTED";
                 } else {
                     $selected = "";
@@ -954,7 +954,7 @@ class Frontend
 
         // Display the Classification and Theme for the selected competition
         echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">" . $this->_settings->classification . "</td></tr>\n";
+        echo "<td width=\"64%\" align=\"left\">" . $this->settings->classification . "</td></tr>\n";
         echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
         echo "<td width=\"64%\" align=\"left\">$theme</td></tr>\n";
 
@@ -962,8 +962,8 @@ class Frontend
         echo "</td></tr></table>\n";
 
         // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
-        if ( $this->_settings->comp_date != "" ) {
-            $close_date = $this->_rpsdb->getCompetitionCloseDate();
+        if ( $this->settings->comp_date != "" ) {
+            $close_date = $this->rpsdb->getCompetitionCloseDate();
             if ( !empty($close_date) ) {
                 $close_epoch = strtotime($close_date);
                 $time_to_close = $close_epoch - current_time('timestamp');
@@ -984,12 +984,12 @@ class Frontend
         echo '</tr>';
 
         // Retrieve the maximum number of entries per member for this competition
-        $max_entries_per_member_per_comp = $this->_rpsdb->getCompetitionMaxEntries();
+        $max_entries_per_member_per_comp = $this->rpsdb->getCompetitionMaxEntries();
 
         // Retrive the total number of entries submitted by this member for this competition date
-        $total_entries_submitted = $this->_rpsdb->getCompetitionEntriesUser();
+        $total_entries_submitted = $this->rpsdb->getCompetitionEntriesUser();
 
-        $entries = $this->_rpsdb->getCompetitionSubmittedEntriesUser();
+        $entries = $this->rpsdb->getCompetitionSubmittedEntriesUser();
         // Build the rows of submitted images
         $numRows = 0;
         $numOversize = 0;
@@ -1005,14 +1005,14 @@ class Frontend
             $a = realpath($recs['Server_File_Name']);
             $image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
             echo "<td align=\"center\" width=\"10%\">\n";
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $this->_settings->comp_date . '" title="' . $recs['Title'] . ' ' . $this->_settings->classification . ' ' . $this->_settings->medium . '">' . "\n";
-            echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
+            echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs['Title'] . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
+            echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
             echo '<td align="left" width="40%">';
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->_settings->classification . " " . $this->_settings->medium . "</div>";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
             echo htmlentities($recs['Title']) . "</td>\n";
             // File Name
             echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
@@ -1070,7 +1070,7 @@ class Frontend
         // Buttons at the bottom of the list of submitted images
         echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
         // Don't show the Add button if the max number of images per member reached
-        if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->_settings->club_max_entries_per_member_per_date ) {
+        if ( $numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->club_max_entries_per_member_per_date ) {
             echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
         }
         if ( $numRows > 0 && $max_entries_per_member_per_comp > 0 ) {
@@ -1113,9 +1113,9 @@ class Frontend
                 }
                 // makes sure they filled in the title field
                 if ( !$_POST['new_title'] || trim($_POST['new_title']) == "" ) {
-                    $this->_errmsg = 'You must provide an image title.<br><br>';
+                    $this->errmsg = 'You must provide an image title.<br><br>';
                 } else {
-                    $recs = $this->_rpsdb->getCompetitionByID($this->_entry_id);
+                    $recs = $this->rpsdb->getCompetitionByID($this->_entry_id);
                     if ( $recs == null ) {
                         wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);
                     }
@@ -1133,12 +1133,12 @@ class Frontend
                     $current_user = wp_get_current_user();
                     $new_file_name_noext = sanitize_file_name($_POST['new_title']) . '+' . $current_user->user_login;
                     $new_file_name = sanitize_file_name($new_title) . '+' . $current_user->user_login . $ext;
-                    if ( !$this->_core->rps_rename_image_file($path, $old_file_name, $new_file_name_noext, $ext) ) {
+                    if ( !$this->core->rps_rename_image_file($path, $old_file_name, $new_file_name_noext, $ext) ) {
                         die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
                     }
 
                     // Update the Title and File Name in the database
-                    $_result = $this->_rpsdb->updateEntriesTitle($new_title, $path . '/' . $new_file_name, $this->_entry_id);
+                    $_result = $this->rpsdb->updateEntriesTitle($new_title, $path . '/' . $new_file_name, $this->_entry_id);
                     if ( $_result === false ) {
                         wp_die("Failed to UPDATE entry record from database");
                     }
@@ -1165,15 +1165,15 @@ class Frontend
         }
         $entry_id = $_GET['id'];
 
-        $recs = $this->_rpsdb->getEntryInfo($entry_id);
+        $recs = $this->rpsdb->getEntryInfo($entry_id);
         $title = $recs['Title'];
         $server_file_name = $recs['Server_File_Name'];
 
         $relative_path = str_replace('/home/rarit0/public_html', '', $server_file_name);
 
-        if ( isset($this->_errmsg) ) {
+        if ( isset($this->errmsg) ) {
             echo '<div id="errmsg">';
-            echo $this->_errmsg;
+            echo $this->errmsg;
             echo '</div>';
         }
         $action = home_url('/' . get_page_uri($post->ID));
@@ -1185,7 +1185,7 @@ class Frontend
         echo '<table>';
         echo '<tr><td align="center" colspan="2">';
 
-        echo "<img src=\"" . $this->_core->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
+        echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
         echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . htmlentities($title) . '">';
@@ -1223,10 +1223,10 @@ class Frontend
                 // the value of 'post_max_size' in php.ini, the $_POST and $_FILES arrays will be cleared.
                 // Detect this situation by comparing the length of the http content received with post_max_size
                 if ( isset($_SERVER['CONTENT_LENGTH']) ) {
-                    if ( $_SERVER['CONTENT_LENGTH'] > $this->_core->avh_ShortHandToBytes(ini_get('post_max_size')) ) {
-                        $this->_errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
+                    if ( $_SERVER['CONTENT_LENGTH'] > $this->core->avh_ShortHandToBytes(ini_get('post_max_size')) ) {
+                        $this->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                     } else {
-                        if ( !$this->_checkUploadEntryTitle() ) {
+                        if ( !$this->checkUploadEntryTitle() ) {
                             return;
                         }
 
@@ -1234,19 +1234,19 @@ class Frontend
                         $uploaded_file_name = $_FILES['file_name']['tmp_name'];
                         $size_info = getimagesize($uploaded_file_name);
                         if ( $size_info[2] != IMAGETYPE_JPEG ) {
-                            $this->_errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+                            $this->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                             return;
                         }
 
                         // Retrieve and parse the selected competition cookie
                         if ( isset($_COOKIE['RPS_MyEntries']) ) {
-                            list ($this->_settings->comp_date, $this->_settings->classification, $this->_settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
+                            list ($this->settings->comp_date, $this->settings->classification, $this->settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
                         } else {
-                            $this->_errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
+                            $this->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
                             return;
                         }
 
-                        $recs = $this->_rpsdb->getIdmaxEntries();
+                        $recs = $this->rpsdb->getIdmaxEntries();
                         if ( $recs ) {
                             $comp_id = $recs['ID'];
                             $max_entries = $recs['Max_Entries'];
@@ -1254,7 +1254,7 @@ class Frontend
                             $d = $this->comp_date;
                             $c = $this->classification;
                             $m = $this->medium;
-                            $this->_errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
+                            $this->errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
                             return;
                         }
 
@@ -1270,31 +1270,31 @@ class Frontend
                         // Before we go any further, make sure the title is not a duplicate of
                         // an entry already submitted to this competition. Dupliacte title result in duplicate
                         // file names on the server
-                        if ( $this->_rpsdb->checkDuplicateTitle($comp_id, $title) ) {
-                            $this->_errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
+                        if ( $this->rpsdb->checkDuplicateTitle($comp_id, $title) ) {
+                            $this->errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
                             return;
                         }
 
                         // Do a final check that the user hasn't exceeded the maximum images per competition.
                         // If we don't check this at the last minute it may be possible to exceed the
                         // maximum images per competition by having two upload windows open simultaneously.
-                        $max_per_id = $this->_rpsdb->checkMaxEntriesOnId($comp_id);
+                        $max_per_id = $this->rpsdb->checkMaxEntriesOnId($comp_id);
                         if ( $max_per_id >= $max_entries ) {
-                            $this->_errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
+                            $this->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
                             return;
                         }
 
-                        $max_per_date = $this->_rpsdb->checkMaxEntriesOnDate();
-                        if ( $max_per_date >= $this->_settings->club_max_entries_per_member_per_date ) {
-                            $x = $this->_settings->club_max_entries_per_member_per_date;
-                            $this->_errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
+                        $max_per_date = $this->rpsdb->checkMaxEntriesOnDate();
+                        if ( $max_per_date >= $this->settings->club_max_entries_per_member_per_date ) {
+                            $x = $this->settings->club_max_entries_per_member_per_date;
+                            $this->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
                             return;
                         }
 
                         // Move the file to its final location
-                        $comp_date = $this->_settings->comp_date;
-                        $classification = $this->_settings->classification;
-                        $medium = $this->_settings->medium;
+                        $comp_date = $this->settings->comp_date;
+                        $classification = $this->settings->classification;
+                        $medium = $this->settings->medium;
                         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
 
                         $title2 = stripslashes(trim($_POST['title']));
@@ -1306,28 +1306,28 @@ class Frontend
                             mkdir($path, 0755);
 
                             // If the .jpg file is too big resize it
-                        if ( $size_info[0] > $this->_settings->max_width_entry || $size_info[1] > $this->_settings->max_height_entry ) {
+                        if ( $size_info[0] > $this->settings->max_width_entry || $size_info[1] > $this->settings->max_height_entry ) {
                             // If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
-                            if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->_settings->max_width_entry / $this->_settings->max_height_entry ) {
+                            if ( $size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->settings->max_width_entry / $this->settings->max_height_entry ) {
                                 // Set the maximum width to ensure the height does not exceed the maximum height
-                                $size = $this->_settings->max_height_entry * $size_info[0] / $size_info[1];
+                                $size = $this->settings->max_height_entry * $size_info[0] / $size_info[1];
                             } else {
                                 // if its landscape and the aspect ratio is greater than the projector
                                 if ( $size_info[0] > $size_info[1] ) {
                                     // Set the maximum width to the width of the projector
-                                    $size = $this->_settings->max_width_entry;
+                                    $size = $this->settings->max_width_entry;
 
                                     // If its a portrait image
                                 } else {
                                     // Set the maximum height to the height of the projector
-                                    $size = $this->_settings->max_height_entry;
+                                    $size = $this->settings->max_height_entry;
                                 }
                             }
                             // Resize the image and deposit it in the destination directory
-                            $this->_core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, '');
-                            // if (! $this->_core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, ''));
+                            $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, '');
+                            // if (! $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, ''));
                             // {
-                            // $this->_errmsg = "There is a problem resizing the picture for the use of the projector.";
+                            // $this->errmsg = "There is a problem resizing the picture for the use of the projector.";
                             // return;
                             // }
                             $resized = 1;
@@ -1336,15 +1336,15 @@ class Frontend
                         } else {
                             $resized = 0;
                             if ( !move_uploaded_file($uploaded_file_name, $full_path . '.jpg') ) {
-                                $this->_errmsg = "Failed to move uploaded file to destination folder";
+                                $this->errmsg = "Failed to move uploaded file to destination folder";
                                 return;
                             }
                         }
                         $server_file_name = str_replace($_SERVER['DOCUMENT_ROOT'], '', $full_path . '.jpg');
                         $data = array('Competition_ID' => $comp_id,'Title' => $title,'Client_File_Name' => $client_file_name,'Server_File_Name' => $server_file_name);
-                        $_result = $this->_rpsdb->addEntry($data);
+                        $_result = $this->rpsdb->addEntry($data);
                         if ( $_result === false ) {
-                            $this->_errmsg = "Failed to INSERT entry record into database";
+                            $this->errmsg = "Failed to INSERT entry record into database";
                             return;
                         }
                         $query = build_query(array('resized' => $resized));
@@ -1370,9 +1370,9 @@ class Frontend
         }
 
         // Error messages
-        if ( isset($this->_errmsg) ) {
+        if ( isset($this->errmsg) ) {
             echo '<div id="errmsg">';
-            echo $this->_errmsg;
+            echo $this->errmsg;
             echo '</div>';
         }
 
@@ -1416,13 +1416,13 @@ class Frontend
     /**
      * Create a XML File with the competition dates
      */
-    private function _sendXmlCompetitionDates ()
+    private function sendXmlCompetitionDates ()
     {
         // Connect to the Database
         try {
             $db = new RPSPDO();
         } catch (\PDOException $e) {
-            $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
             die($e->getMessage());
         }
 
@@ -1451,7 +1451,7 @@ class Frontend
             }
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->_doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
+            $this->doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
             die($e->getMessage());
         }
 
@@ -1478,25 +1478,25 @@ class Frontend
     /**
      * Handles request by client to download images for a particular date,
      */
-    private function _sendCompetitions ()
+    private function sendCompetitions ()
     {
         $username = $_REQUEST['username'];
         $password = $_REQUEST['password'];
         try {
             $db = new RPSPDO();
         } catch (\PDOException $e) {
-            $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
             die($e->getMessage());
         }
         if ( $db !== false ) {
             $user = wp_authenticate($username, $password);
             if ( is_wp_error($user) ) {
                 $a = strip_tags($user->get_error_message());
-                $this->_doRESTError($a);
+                $this->doRESTError($a);
                 die();
             }
             // @todo Check if the user has the role needed.
-            $this->_sendXmlCompetitions($db, $_REQUEST['medium'], $_REQUEST['comp_date']);
+            $this->sendXmlCompetitions($db, $_REQUEST['medium'], $_REQUEST['comp_date']);
         }
         die();
     }
@@ -1511,7 +1511,7 @@ class Frontend
      * @param string $comp_date
      *        The competition date
      */
-    private function _sendXmlCompetitions ($db, $requested_medium, $comp_date)
+    private function sendXmlCompetitions ($db, $requested_medium, $comp_date)
     {
 
         /* @var $db RPSPDO */
@@ -1535,7 +1535,7 @@ class Frontend
             $sth_competitions->bindParam(':compdate', $comp_date);
             $sth_competitions->execute();
         } catch (\Exception $e) {
-            $this->_doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
+            $this->doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
             die();
         }
         // Create a Competitions node
@@ -1575,7 +1575,7 @@ class Frontend
                 $sth_entries->bindParam(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
                 $sth_entries->execute();
             } catch (\Exception $e) {
-                $this->_doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
+                $this->doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
                 die();
             }
             $all_records_entries = $sth_entries->fetchAll();
@@ -1585,7 +1585,7 @@ class Frontend
             // Iterate through all the entries for this competition
             foreach ( $all_records_entries as $record_entries ) {
                 $user = get_user_by('id', $record_entries['Member_ID']);
-                if ( $this->_core->isPaidMember($user->ID) ) {
+                if ( $this->core->isPaidMember($user->ID) ) {
                     $entry_id = $record_entries['ID'];
                     $first_name = $user->first_name;
                     $last_name = $user->last_name;
@@ -1623,7 +1623,7 @@ class Frontend
     /**
      * Handle the uploaded score from the RPS Client.
      */
-    private function _doUploadScore ()
+    private function doUploadScore ()
     {
         $username = $_REQUEST['username'];
         $password = $_REQUEST['password'];
@@ -1638,7 +1638,7 @@ class Frontend
             $user = wp_authenticate($username, $password);
             if ( is_wp_error($user) ) {
                 $a = strip_tags($user->get_error_message());
-                $this->_doRESTError("Unable to authenticate: $a");
+                $this->doRESTError("Unable to authenticate: $a");
                 die();
             }
         }
@@ -1648,25 +1648,25 @@ class Frontend
             case UPLOAD_ERR_OK:
                 break;
             case UPLOAD_ERR_INI_SIZE:
-                $this->_doRESTError("The uploaded file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . ") in php.ini.");
+                $this->doRESTError("The uploaded file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . ") in php.ini.");
                 die();
             case UPLOAD_ERR_FORM_SIZE:
-                $this->_doRESTError("The uploaded file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB allowed by this form.");
+                $this->doRESTError("The uploaded file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB allowed by this form.");
                 die();
             case UPLOAD_ERR_PARTIAL:
-                $this->_doRESTError("The uploaded file was only partially uploaded.");
+                $this->doRESTError("The uploaded file was only partially uploaded.");
                 die();
             case UPLOAD_ERR_NO_FILE:
-                $this->_doRESTError("No file was uploaded.");
+                $this->doRESTError("No file was uploaded.");
                 die();
             case UPLOAD_ERR_NO_TMP_DIR:
-                $this->_doRESTError("Missing a temporary folder.");
+                $this->doRESTError("Missing a temporary folder.");
                 die();
             case UPLOAD_ERR_CANT_WRITE:
-                $this->_doRESTError("Failed to write file to disk");
+                $this->doRESTError("Failed to write file to disk");
                 die();
             default:
-                $this->_doRESTError("Unknown File Upload Error");
+                $this->doRESTError("Unknown File Upload Error");
                 die();
         }
 
@@ -1675,11 +1675,11 @@ class Frontend
         $dest_name = "scores_" . $comp_date . ".xml";
         $file_name = $path . '/' . $dest_name;
         if ( !move_uploaded_file($_FILES['file']['tmp_name'], $file_name) ) {
-            $this->_doRESTError("Failed to store scores XML file in destination folder.");
+            $this->doRESTError("Failed to store scores XML file in destination folder.");
             die();
         }
 
-        $warning = $this->_handleUploadScoresFile($db, $file_name);
+        $warning = $this->handleUploadScoresFile($db, $file_name);
 
         // Remove the uploaded .xml file
         unlink($file_name);
@@ -1696,7 +1696,7 @@ class Frontend
      * @param object $db
      *        Database handle.
      */
-    private function _handleUploadScoresFile ($db, $file_name)
+    private function handleUploadScoresFile ($db, $file_name)
     {
         $warning = '';
         $score = '';
@@ -1704,7 +1704,7 @@ class Frontend
         $entry_id = '';
 
         if ( !$xml = simplexml_load_file($file_name) ) {
-            $this->_doRESTError("Failed to open scores XML file");
+            $this->doRESTError("Failed to open scores XML file");
             die();
         }
         try {
@@ -1737,7 +1737,7 @@ class Frontend
                             try {
                                 $sth->execute();
                             } catch (\PDOException $e) {
-                                $this->_doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
+                                $this->doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
                                 die();
                             }
                             if ( $sth->rowCount() < 1 ) {
@@ -1759,11 +1759,11 @@ class Frontend
                 if ( !$rs = mysql_query($sql) )
                     throw new \Exception(mysql_error());
             } catch (\Exception $e) {
-                $this->_doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
+                $this->doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
                 die();
             }
             if ( mysql_affected_rows() < 1 ) {
-                $this->_doRESTError("No rows updated when setting Scored flag to Y in database for $comp_date / $classification");
+                $this->doRESTError("No rows updated when setting Scored flag to Y in database for $comp_date / $classification");
                 die();
             }
         }
@@ -1776,9 +1776,9 @@ class Frontend
      * @param string $errMsg
      *        The actual error message
      */
-    private function _doRESTError ($errMsg)
+    private function doRESTError ($errMsg)
     {
-        $this->_doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
+        $this->doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
     }
 
     /**
@@ -1787,9 +1787,9 @@ class Frontend
      * @param string $message
      *        The actual messsage
      */
-    private function _doRESTSuccess ($message)
+    private function doRESTSuccess ($message)
     {
-        $this->_doRESTResponse("ok", $message);
+        $this->doRESTResponse("ok", $message);
     }
 
     /**
@@ -1798,7 +1798,7 @@ class Frontend
      * @param string $status
      * @param string $message
      */
-    private function _doRESTResponse ($status, $message)
+    private function doRESTResponse ($status, $message)
     {
         echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
         echo '<rsp stat="' . $status . '">' . "\n";
@@ -1809,11 +1809,11 @@ class Frontend
     /**
      * Check the upload entry for errors.
      */
-    private function _checkUploadEntryTitle ()
+    private function checkUploadEntryTitle ()
     {
         $_upload_ok = false;
         if ( !isset($_POST['title']) || trim($_POST['title']) == "" ) {
-            $this->_errmsg = 'Please enter your image title in the Title field.';
+            $this->errmsg = 'Please enter your image title in the Title field.';
         } else {
             switch ( $_FILES['file_name']['error'] )
             {
@@ -1821,25 +1821,25 @@ class Frontend
                     $_upload_ok = true;
                     break;
                 case UPLOAD_ERR_INI_SIZE:
-                    $this->_errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
+                    $this->errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
                     break;
                 case UPLOAD_ERR_FORM_SIZE:
-                    $this->_errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
+                    $this->errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
                     break;
                 case UPLOAD_ERR_PARTIAL:
-                    $this->_errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 case UPLOAD_ERR_NO_FILE:
-                    $this->_errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+                    $this->errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                     break;
                 case UPLOAD_ERR_NO_TMP_DIR:
-                    $this->_errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 case UPLOAD_ERR_CANT_WRITE:
-                    $this->_errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 default:
-                    $this->_errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
             }
         }
         return $_upload_ok;
@@ -1851,21 +1851,21 @@ class Frontend
      * @param array $entries
      *        Array of entries ID to delete.
      */
-    private function _deleteCompetitionEntries ($entries)
+    private function deleteCompetitionEntries ($entries)
     {
         if ( is_array($entries) ) {
             foreach ( $entries as $id ) {
 
-                $recs = $this->_rpsdb->getEntryInfo($id);
+                $recs = $this->rpsdb->getEntryInfo($id);
                 if ( $recs == false ) {
-                    $this->_errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
+                    $this->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {
 
                     $server_file_name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
                     // Delete the record from the database
-                    $result = $this->_rpsdb->deleteEntry($id);
+                    $result = $this->rpsdb->deleteEntry($id);
                     if ( $result === false ) {
-                        $this->_errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
+                        $this->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
                     } else {
 
                         // Delete the file from the server file system
@@ -1874,9 +1874,9 @@ class Frontend
                         }
                         // Delete any thumbnails of this image
                         $ext = ".jpg";
-                        $comp_date = $this->_settings->comp_date;
-                        $classification = $this->_settings->classification;
-                        $medium = $this->_settings->medium;
+                        $comp_date = $this->settings->comp_date;
+                        $classification = $this->settings->classification;
+                        $medium = $this->settings->medium;
                         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
 
                         $old_file_parts = pathinfo($server_file_name);
@@ -1906,9 +1906,9 @@ class Frontend
      * @param unknown $med
      * @return boolean
      */
-    private function _validateSelectedComp ($date, $med)
+    private function validateSelectedComp ($date, $med)
     {
-        $open_competitions = $this->_rpsdb->getOpenCompetitions($this->_settings->medium_subset);
+        $open_competitions = $this->rpsdb->getOpenCompetitions($this->settings->medium_subset);
 
         if ( empty($open_competitions) ) {
             return false;
@@ -1959,13 +1959,13 @@ class Frontend
             $index = 0;
         }
         // Establish the (possibly adjusted) selected competition
-        $this->_settings->comp_date = $this->_open_comp_date[$index];
-        $this->_settings->classification = $this->_open_comp_class[$index];
-        $this->_settings->medium = $this->_open_comp_medium[$index];
+        $this->settings->comp_date = $this->_open_comp_date[$index];
+        $this->settings->classification = $this->_open_comp_class[$index];
+        $this->settings->medium = $this->_open_comp_medium[$index];
         // Save the currently selected competition in a cookie
         $hour = time() + ( 2 * 3600 );
         $url = parse_url(get_bloginfo('url'));
-        setcookie("RPS_MyEntries", $this->_settings->comp_date . "|" . $this->_settings->classification . "|" . $this->_settings->medium, $hour, '/', $url['host']);
+        setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $hour, '/', $url['host']);
         return true;
     }
 }
