@@ -9,33 +9,27 @@
  *
  * Copyright 2011 Peter van der Does (email : peter@avirtualhome.com)
  */
-if ( !defined('AVH_FRAMEWORK') ) {
-    define('AVH_FRAMEWORK', true);
-}
-/*
- |--------------------------------------------------------------------------
-| Register The Composer Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader
-| for our application. We just need to utilize it! We'll require it
-| into the script here so that we do not have to worry about the
-| loading of any our classes "manually". Feels great to relax.
-|
-*/
-require __DIR__ . '/vendor/autoload.php';
-
-$_dir = pathinfo($plugin, PATHINFO_DIRNAME);
-$_basename = plugin_basename($plugin);
-require_once ( $_dir . '/libs/avh-common.php' );
-require_once ( $_dir . '/libs/avh-security.php' );
-require_once ( $_dir . '/libs/avh-visitor.php' );
-
 use Rps\Constants;
 use Rps\Admin\Initialize;
 use Rps\Admin\Admin;
 use Rps\Frontend\Frontend;
 use DI\ContainerBuilder;
+
+/**
+ * |--------------------------------------------------------------------------
+ * | Register The Composer Auto Loader
+ * |--------------------------------------------------------------------------
+ * |
+ * | Composer provides a convenient, automatically generated class loader
+ * | for our application. We just need to utilize it! We'll require it
+ * | into the script here so that we do not have to worry about the
+ * | loading of any our classes "manually". Feels great to relax.
+ * |
+ */
+require __DIR__ . '/vendor/autoload.php';
+
+$_dir = pathinfo($plugin, PATHINFO_DIRNAME);
+$_basename = plugin_basename($plugin);
 
 class AVH_RPS_Client
 {
@@ -93,7 +87,8 @@ class AVH_RPS_Client
         }
     }
 
-    public function admin() {
+    public function admin ()
+    {
         $avh_rps_admin = new Admin($this->container);
         // Activation Hook
         register_activation_hook(Constants::PLUGIN_FILE, array($avh_rps_admin,'installPlugin'));

@@ -6,9 +6,6 @@ use Rps\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
 use Rps\Constants;
 
-if ( !defined('AVH_FRAMEWORK') )
-    die('You are not allowed to call this page directly.');
-
 class ListEntries extends \WP_List_Table
 {
 
@@ -29,11 +26,10 @@ class ListEntries extends \WP_List_Table
      * @var RpsDb
      */
     private $_rpsdb;
-
     public $messages;
     public $screen;
 
-    function __construct($settings, $_rpsdb, $core)
+    function __construct ($settings, $_rpsdb, $core)
     {
         $this->_settings = $settings;
         // Initialize the plugin
@@ -57,12 +53,12 @@ class ListEntries extends \WP_List_Table
         parent::__construct(array('plural' => 'entries','singular' => 'entry','ajax' => false));
     }
 
-    function ajax_user_can()
+    function ajax_user_can ()
     {
         return true;
     }
 
-    function prepare_items()
+    function prepare_items ()
     {
         global $post_id, $entry_status, $search, $comment_type;
 
@@ -115,42 +111,42 @@ class ListEntries extends \WP_List_Table
         $s = isset($_REQUEST['s']) ? $_REQUEST['s'] : '';
     }
 
-    function get_per_page($entry_status = 'all')
+    function get_per_page ($entry_status = 'all')
     {
         $entries_per_page = $this->get_items_per_page('entries_per_page');
         $entries_per_page = apply_filters('entries_per_page', $entries_per_page, $entry_status);
         return $entries_per_page;
     }
 
-    function no_items()
+    function no_items ()
     {
         _e('No entries.');
     }
 
-    function get_columns()
+    function get_columns ()
     {
         global $status;
 
         return array('cb' => '<input type="checkbox" />','season' => 'Season','competition' => 'Competition','name' => 'Photographer','title' => 'Title','score' => 'Score','award' => 'Award');
     }
 
-    function get_sortable_columns()
+    function get_sortable_columns ()
     {
         return array('');
     }
 
-    function display_tablenav($which)
+    function display_tablenav ($which)
     {
         global $status;
 
         parent::display_tablenav($which);
     }
 
-    function get_views()
+    function get_views ()
     {
         global $totals, $entry_status;
 
-        //$num_competitions = $this->_rpsdb->countEntries();
+        // $num_competitions = $this->_rpsdb->countEntries();
         $status_links = array();
         $stati = array('all' => _nx_noop('All', 'All', 'entries'));
 
@@ -163,13 +159,13 @@ class ListEntries extends \WP_List_Table
                 $link = add_query_arg('entry_status', $status, $link);
             }
             // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
-            //$status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_entries->$status)) . '</a>';
+            // $status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_entries->$status)) . '</a>';
         }
 
         return $status_links;
     }
 
-    function get_bulk_actions()
+    function get_bulk_actions ()
     {
         global $competition_status;
 
@@ -179,7 +175,7 @@ class ListEntries extends \WP_List_Table
         return $actions;
     }
 
-    function extra_tablenav($which)
+    function extra_tablenav ($which)
     {
         global $status;
 
@@ -197,7 +193,7 @@ class ListEntries extends \WP_List_Table
         echo '</div>';
     }
 
-    function current_action()
+    function current_action ()
     {
         if ( isset($_POST['clear-recent-list']) )
             return 'clear-recent-list';
@@ -207,7 +203,7 @@ class ListEntries extends \WP_List_Table
         return parent::current_action();
     }
 
-    function display()
+    function display ()
     {
         extract($this->_args);
 
@@ -239,7 +235,7 @@ class ListEntries extends \WP_List_Table
         $this->display_tablenav('bottom');
     }
 
-    function single_row($a_entry)
+    function single_row ($a_entry)
     {
         $entry = $a_entry;
         echo '<tr id="entry-' . $entry->ID . '">';
@@ -247,29 +243,29 @@ class ListEntries extends \WP_List_Table
         echo "</tr>";
     }
 
-    function column_cb($entry)
+    function column_cb ($entry)
     {
         echo "<input type='checkbox' name='entries[]' value='$entry->ID' />";
     }
 
-    function column_season($entry)
+    function column_season ($entry)
     {
         $_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
-        if ($_competition != false ){
-        $unix_date = mysql2date('U', $_competition->Competition_Date);
-        $_competition_month = date('n', $unix_date);
-        if ( $_competition_month >= $this->_settings->club_season_start_month_num && $_competition_month <= $this->_settings->club_season_end_month_num ) {
-            $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
-        } else {
-            $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
-        }
-        echo $_season_text;
+        if ( $_competition != false ) {
+            $unix_date = mysql2date('U', $_competition->Competition_Date);
+            $_competition_month = date('n', $unix_date);
+            if ( $_competition_month >= $this->_settings->club_season_start_month_num && $_competition_month <= $this->_settings->club_season_end_month_num ) {
+                $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
+            } else {
+                $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
+            }
+            echo $_season_text;
         } else {
             echo "Unknown Season";
         }
     }
 
-    function column_competition($entry)
+    function column_competition ($entry)
     {
         global $competition_status;
         $_competition = $this->_rpsdb->getCompetitionByID2($entry->Competition_ID);
@@ -277,15 +273,15 @@ class ListEntries extends \WP_List_Table
         echo $competition_text;
     }
 
-    function column_name($entry)
+    function column_name ($entry)
     {
         $_user = get_user_by('id', $entry->Member_ID);
         $queryUser = array('page' => Constants::MENU_SLUG_ENTRIES,'user_id' => $_user->ID);
         $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
-        echo HtmlBuilder::anchor($urlUser,$_user->first_name . ' ' . $_user->last_name, array('title'=>'Entries for '.$_user->first_name . ' ' . $_user->last_name ));
+        echo HtmlBuilder::anchor($urlUser, $_user->first_name . ' ' . $_user->last_name, array('title' => 'Entries for ' . $_user->first_name . ' ' . $_user->last_name));
     }
 
-    function column_title($entry)
+    function column_title ($entry)
     {
         echo $entry->Title;
         $url = admin_url('admin.php') . '?';
@@ -301,8 +297,8 @@ class ListEntries extends \WP_List_Table
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         $actions = array();
-        $actions['delete'] = HtmlBuilder::anchor($urlDelete,'Delete',array('class' => 'delete','title' => 'Delete this competition'));
-        $actions['edit'] = HtmlBuilder::anchor($urlEdit,'Edit',array('title' => 'Edit this entry'));
+        $actions['delete'] = HtmlBuilder::anchor($urlDelete, 'Delete', array('class' => 'delete','title' => 'Delete this competition'));
+        $actions['edit'] = HtmlBuilder::anchor($urlEdit, 'Edit', array('title' => 'Edit this entry'));
 
         echo '<div class="row-actions">';
         $sep = '';
@@ -313,12 +309,12 @@ class ListEntries extends \WP_List_Table
         echo '</div>';
     }
 
-    function column_score($entry)
+    function column_score ($entry)
     {
         echo $entry->Score;
     }
 
-    function column_award($entry)
+    function column_award ($entry)
     {
         echo $entry->Award;
     }

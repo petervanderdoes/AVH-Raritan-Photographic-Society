@@ -4,10 +4,8 @@ use Rps\Settings;
 use Rps\Common\Core;
 use Rps\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
+use Avh\Utility\AVH_Common;
 use Rps\Constants;
-
-if ( !defined('AVH_FRAMEWORK') )
-    die('You are not allowed to call this page directly.');
 
 class ListCompetition extends \WP_List_Table
 {
@@ -29,7 +27,6 @@ class ListCompetition extends \WP_List_Table
      * @var RpsDb
      */
     private $_rpsdb;
-
     public $messages;
     public $screen;
 
