@@ -2,9 +2,7 @@
 namespace Rps\Db;
 
 use Rps\Common\Core;
-use Rps\Competition\ListCompetition;
 use Rps\Settings;
-use DI\Container;
 use PDO;
 use wpdb;
 
@@ -362,7 +360,7 @@ class RpsDb
             }
             $data = stripslashes_deep($data);
             if ( false === $this->_rpsdb->update('competitions', $data, $where) ) {
-                return new WP_Error('db_update_error', 'Could not update competition into the database', $this->_rpsdb->last_error);
+                return new \WP_Error('db_update_error', 'Could not update competition into the database', $this->_rpsdb->last_error);
             }
         } else {
             $competition_ID = 0;
@@ -406,7 +404,7 @@ class RpsDb
             }
             $data = stripslashes_deep($data);
             if ( false === $this->_rpsdb->insert('competitions', $data) ) {
-                return new WP_Error('db_insert_error', __('Could not insert competition into the database'), $this->_rpsdb->last_error);
+                return new \WP_Error('db_insert_error', __('Could not insert competition into the database'), $this->_rpsdb->last_error);
             }
             $competition_ID = (int) $this->_rpsdb->insert_id;
         }
@@ -614,7 +612,7 @@ class RpsDb
             }
             $data = stripslashes_deep($data);
             if ( false === $this->_rpsdb->update('entries', $data, $where) ) {
-                return new WP_Error('db_update_error', 'Could not update entry in the database', $this->_rpsdb->last_error);
+                return new \WP_Error('db_update_error', 'Could not update entry in the database', $this->_rpsdb->last_error);
             }
         }
 

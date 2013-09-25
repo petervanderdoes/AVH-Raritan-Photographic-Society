@@ -35,7 +35,6 @@ use Rps\Constants;
 use Rps\Admin\Initialize;
 use Rps\Admin\Admin;
 use Rps\Frontend\Frontend;
-use Rps\Common\Core;
 use DI\ContainerBuilder;
 
 class AVH_RPS_Client
@@ -61,7 +60,6 @@ class AVH_RPS_Client
             'Rps\\Db\\RpsDb' => [
                 'constructor' => ['Rps\\Settings','Rps\\Common\\Core'],
             ],
-            'Rps\\Constants' => array(),
             'Rps\\Competition\\ListCompetition' => [
                 'constructor' => ['Rps\\Settings', 'Rps\\Db\\RpsDb','Rps\\Common\\Core'],
             ],

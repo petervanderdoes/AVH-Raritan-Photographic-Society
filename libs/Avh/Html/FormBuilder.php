@@ -36,7 +36,7 @@ class FormBuilder
             $attributes['method'] = 'post';
         }
 
-        return '<form action="' . $action . '"' . Html::attributes($attributes) . '>';
+        return '<form action="' . $action . '"' . HtmlBuilder::attributes($attributes) . '>';
     }
 
     /**
@@ -161,7 +161,7 @@ class FormBuilder
         // Set the input name
         $attributes['name'] = $name;
 
-        return '<button' . Html::attributes($attributes) . '>' . $body . '</button>';
+        return '<button' . HtmlBuilder::attributes($attributes) . '>' . $body . '</button>';
     }
 
     /**
@@ -223,7 +223,7 @@ class FormBuilder
             $attributes['id'] = $name;
         }
 
-        return '<input' . Html::attributes($attributes) . ' />';
+        return '<input' . HtmlBuilder::attributes($attributes) . ' />';
     }
 
     /**
@@ -348,7 +348,7 @@ class FormBuilder
         // Add default rows and cols attributes (required)
         $attributes += array('rows' => 10,'cols' => 50);
 
-        return '<textarea' . Html::attributes($attributes) . '>' . esc_textarea($body) . '</textarea>';
+        return '<textarea' . HtmlBuilder::attributes($attributes) . '>' . esc_textarea($body) . '</textarea>';
     }
 
     /**
@@ -418,13 +418,13 @@ class FormBuilder
                         }
 
                         // Change the option to the HTML string
-                        $_options[] = '<option' . Html::attributes($option) . '>' . esc_html($name) . '</option>';
+                        $_options[] = '<option' .HtmlBuilder::attributes($option) . '>' . esc_html($name) . '</option>';
                     }
 
                     // Compile the options into a string
                     $_options = "\n" . implode("\n", $_options) . "\n";
 
-                    $options[$value] = '<optgroup' . Html::attributes($group) . '>' . $_options . '</optgroup>';
+                    $options[$value] = '<optgroup' . HtmlBuilder::attributes($group) . '>' . $_options . '</optgroup>';
                 } else {
                     // Force value to be string
                     $value = (string) $value;
@@ -438,7 +438,7 @@ class FormBuilder
                     }
 
                     // Change the option to the HTML string
-                    $options[$value] = '<option' . Html::attributes($option) . '>' . esc_html($name) . '</option>';
+                    $options[$value] = '<option' . HtmlBuilder::attributes($option) . '>' . esc_html($name) . '</option>';
                 }
             }
 
@@ -446,7 +446,7 @@ class FormBuilder
             $options = "\n" . implode("\n", $options) . "\n";
         }
 
-        return '<select' . Html::attributes($attributes) . '>' . $options . '</select>';
+        return '<select' . HtmlBuilder::attributes($attributes) . '>' . $options . '</select>';
     }
 
     /**
@@ -469,8 +469,8 @@ class FormBuilder
     {
         if ( !empty($attributes['src']) ) {
             if ( strpos($attributes['src'], '://') === false ) {
-                // Add the base URL
-                $attributes['src'] = URL::base($index) . $attributes['src'];
+                // @todo Add the base URL
+                //$attributes['src'] = URL::base($index) . $attributes['src'];
             }
         }
 
@@ -504,7 +504,7 @@ class FormBuilder
         // Set the label target
         $attributes['for'] = $input;
 
-        return '<label' . Html::attributes($attributes) . '>' . $text . '</label>';
+        return '<label' . HtmlBuilder::attributes($attributes) . '>' . $text . '</label>';
     }
 
     private function _output ($label, $field)

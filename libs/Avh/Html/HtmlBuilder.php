@@ -140,7 +140,7 @@ class HtmlBuilder
     {
         if ( strpos($file, '://') === FALSE ) {
             // Add the base URL
-            $file = AVH2_PluginController::$base_url . $file;
+            $file = AVH_PluginController::$base_url . $file;
         }
 
         // Add the image link

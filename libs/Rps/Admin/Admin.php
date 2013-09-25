@@ -3,8 +3,8 @@ namespace Rps\Admin;
 use Rps\Competition\ListCompetition;
 use Rps\Common\Core;
 use Rps\Settings;
-use Rps\Db\RpsDb;
 use Avh\Html\FormBuilder;
+use Avh\Utility\AVH_Common;
 use DI\Container;
 use Rps\Constants;
 
@@ -63,9 +63,7 @@ final class Admin
         $this->_settings = $container->get('Rps\\Settings');
         // Loads the CORE class
         $this->_core = $container->get('Rps\\Common\\Core');
-
         $this->container = $container;
-
         // Admin URL and Pagination
         $this->_core->admin_base_url = $this->_settings->siteurl . '/wp-admin/admin.php?page=';
         if ( isset($_GET['pagination']) ) {

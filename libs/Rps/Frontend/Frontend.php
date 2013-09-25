@@ -1,10 +1,12 @@
 <?php
 namespace Rps\Frontend;
-use Rps\Competition\ListCompetition;
 use Rps\Settings;
 use Rps\Db\RpsDb;
+use Rps\Db\RPSPDO;
 use Rps\Common\Core;
 use DI\Container;
+use PDO;
+use DOMDocument;
 
 class Frontend
 {
@@ -1419,7 +1421,7 @@ class Frontend
         // Connect to the Database
         try {
             $db = new RPSPDO();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
             die($e->getMessage());
         }
@@ -1441,14 +1443,14 @@ class Frontend
             $sth = $db->prepare($select . $where);
             if ( $_GET['closed'] ) {
                 $_closed = $_GET['closed'];
-                $sth->bindParam(':closed', $_closed, PDO::PARAM_STR, 1);
+                $sth->bindParam(':closed', $_closed, \PDO::PARAM_STR, 1);
             }
             if ( $_GET['scored'] ) {
                 $_scored = $_GET['scored'];
-                $sth->bindParam(':scored', $_scored, PDO::PARAM_STR, 1);
+                $sth->bindParam(':scored', $_scored, \PDO::PARAM_STR, 1);
             }
             $sth->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->_doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
             die($e->getMessage());
         }
@@ -1461,12 +1463,12 @@ class Frontend
         $root->appendChild($stat);
         $value = $dom->CreateTextNode("ok");
         $stat->appendChild($value);
-        $recs = $sth->fetch(PDO::FETCH_ASSOC);
+        $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         while ( $recs != false ) {
             $dateParts = split(" ", $recs['Competition_Date']);
             $comp_date = $root->appendChild($dom->createElement('Competition_Date'));
             $comp_date->appendChild($dom->createTextNode($dateParts[0]));
-            $recs = $sth->fetch(PDO::FETCH_ASSOC);
+            $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         }
         echo $dom->saveXML();
         $db = null;
@@ -1482,7 +1484,7 @@ class Frontend
         $password = $_REQUEST['password'];
         try {
             $db = new RPSPDO();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
             die($e->getMessage());
         }
@@ -1514,7 +1516,7 @@ class Frontend
 
         /* @var $db RPSPDO */
         // Start building the XML response
-        $dom = new DOMDocument('1.0');
+        $dom = new \DOMDocument('1.0');
         // Create the root node
         $rsp = $dom->CreateElement('rsp');
         $rsp = $dom->AppendChild($rsp);
@@ -1532,14 +1534,14 @@ class Frontend
             $sth_competitions = $db->prepare($sql);
             $sth_competitions->bindParam(':compdate', $comp_date);
             $sth_competitions->execute();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->_doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
             die();
         }
         // Create a Competitions node
         $xml_competions = $rsp->AppendChild($dom->CreateElement('Competitions'));
         // Iterate through all the matching Competitions and create corresponding Competition nodes
-        $record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
+        $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ( $record_competitions !== false ) {
             $comp_id = $record_competitions['ID'];
             $dateParts = split(" ", $record_competitions['Competition_Date']);
@@ -1570,9 +1572,9 @@ class Frontend
                         WHERE entries.Competition_ID = :comp_id
                         ORDER BY entries.Title";
                 $sth_entries = $db->prepare($sql);
-                $sth_entries->bindParam(':comp_id', $comp_id, PDO::PARAM_INT, 11);
+                $sth_entries->bindParam(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
                 $sth_entries->execute();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->_doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
                 die();
             }
@@ -1611,7 +1613,7 @@ class Frontend
                     $url_node->AppendChild($dom->CreateTextNode($image_url));
                 }
             }
-            $record_competitions = $sth_competitions->fetch(PDO::FETCH_ASSOC);
+            $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         }
         // Send the completed XML response back to the client
         // header('Content-Type: text/xml');
@@ -1628,7 +1630,7 @@ class Frontend
         $comp_date = $_REQUEST['date'];
         try {
             $db = new RPSPDO();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
             die();
         }
@@ -1711,7 +1713,7 @@ class Frontend
             $sth->bindParam(':score', $score, PDO::PARAM_STR);
             $sth->bindParam(':award', $award, PDO::PARAM_STR);
             $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->_doRESTError("Error - " . $e->getMessage() . " - $sql");
             die();
         }
@@ -1734,7 +1736,7 @@ class Frontend
                         if ( $score != "" ) {
                             try {
                                 $sth->execute();
-                            } catch (PDOException $e) {
+                            } catch (\PDOException $e) {
                                 $this->_doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
                                 die();
                             }
@@ -1755,8 +1757,8 @@ class Frontend
                 Classification='$classification' AND
                 Medium = '$medium'";
                 if ( !$rs = mysql_query($sql) )
-                    throw new Exception(mysql_error());
-            } catch (Exception $e) {
+                    throw new \Exception(mysql_error());
+            } catch (\Exception $e) {
                 $this->_doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
                 die();
             }

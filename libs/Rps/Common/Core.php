@@ -1,17 +1,11 @@
 <?php
 namespace Rps\Common;
-use Rps\Competition\ListCompetition;
 use Rps\Settings;
-use DI\Container;
-
-if ( !defined('AVH_FRAMEWORK') )
-    die('You are not allowed to call this page directly.');
 
 class Core
 {
 
     /**
-     * Version of AVH First Defense Against Spam
      *
      * @var string
      */
