@@ -4,12 +4,6 @@
     },
     "autoload": {
         "psr-0": { "Avh\\": "libs/",
-                    "Rps\\": "libs/"},
-        "classmap": ["class/"]
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.1.x-dev"
-        }
+                    "Rps\\": "libs/"}
     }
 }
