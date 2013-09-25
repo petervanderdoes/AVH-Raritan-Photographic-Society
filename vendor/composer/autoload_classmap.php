@@ -7,7 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'AVH_RPS_Define' => $baseDir . '/class/avh-rps.define.php',
-    'AVH_RPS_OldRpsDb' => $baseDir . '/class/avh-rps.oldrpsdb.php',
     'Avh\\Html\\FormBuilder' => $baseDir . '/libs/Avh/Html/FormBuilder.php',
     'Avh\\Html\\HtmlBuilder' => $baseDir . '/libs/Avh/Html/HtmlBuilder.php',
     'Avh\\Mail\\Mailer' => $baseDir . '/libs/Avh/Mail/Mailer.php',
@@ -175,11 +174,12 @@ return array(
     'ProxyManager\\Proxy\\SmartReferenceInterface' => $vendorDir . '/ocramius/proxy-manager/src/ProxyManager/Proxy/SmartReferenceInterface.php',
     'ProxyManager\\Proxy\\ValueHolderInterface' => $vendorDir . '/ocramius/proxy-manager/src/ProxyManager/Proxy/ValueHolderInterface.php',
     'ProxyManager\\Proxy\\VirtualProxyInterface' => $vendorDir . '/ocramius/proxy-manager/src/ProxyManager/Proxy/VirtualProxyInterface.php',
-    'RPSPDO' => $baseDir . '/class/avh-rps.oldrpsdb.php',
     'Rps\\Admin\\Admin' => $baseDir . '/libs/Rps/Admin/Admin.php',
     'Rps\\Admin\\Initialize' => $baseDir . '/libs/Rps/Admin/Initialize.php',
     'Rps\\Common\\Core' => $baseDir . '/libs/Rps/Common/Core.php',
     'Rps\\Competition\\ListCompetition' => $baseDir . '/libs/Rps/Competition/List.php',
+    'Rps\\Db\\RPSPDO' => $baseDir . '/libs/Rps/Db/RpsDb.php',
+    'Rps\\Db\\RpsDb' => $baseDir . '/libs/Rps/Db/RpsDb.php',
     'Rps\\Entries\\ListEntries' => $baseDir . '/libs/Rps/Entries/List.php',
     'Rps\\Frontend\\Frontend' => $baseDir . '/libs/Rps/Frontend/Frontend.php',
     'Rps\\Settings' => $baseDir . '/libs/Rps/Settings.php',
