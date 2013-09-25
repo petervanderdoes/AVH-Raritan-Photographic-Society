@@ -5,6 +5,8 @@ use Rps\Common\Core;
 use Rps\Competition\ListCompetition;
 use Rps\Settings;
 use DI\Container;
+use PDO;
+use wpdb;
 
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
@@ -35,7 +37,7 @@ class RpsDb
         // Get The Registry
         $this->_settings = $settings;
         $this->_core = $core;
-        $this->_rpsdb = new wpdb(RPS_DB_USER, RPS_DB_PASSWORD, RPS_DB_NAME, DB_HOST);
+        $this->_rpsdb = new \wpdb(RPS_DB_USER, RPS_DB_PASSWORD, RPS_DB_NAME, DB_HOST);
         $this->_rpsdb->show_errors();
     }
 
@@ -679,7 +681,7 @@ class RpsDb
         $this->_user_id = $_user_id;
     }
 } // End Class RpsDb
-class RPSPDO extends PDO
+class RPSPDO extends \PDO
 {
     private $engine;
     private $host;
