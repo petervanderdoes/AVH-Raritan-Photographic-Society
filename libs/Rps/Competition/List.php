@@ -2,8 +2,8 @@
 namespace Rps\Competition;
 use Rps\Settings;
 use Rps\Common\Core;
+use Rps\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
-use \AVH_RPS_OldRpsDb;
 use \AVH_RPS_Define;
 
 if ( !defined('AVH_FRAMEWORK') )
@@ -26,7 +26,7 @@ class ListCompetition extends \WP_List_Table
 
     /**
      *
-     * @var AVH_RPS_OldRpsDb
+     * @var RpsDb
      */
     private $_rpsdb;
 

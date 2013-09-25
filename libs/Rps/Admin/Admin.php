@@ -3,6 +3,7 @@ namespace Rps\Admin;
 use Rps\Competition\ListCompetition;
 use Rps\Common\Core;
 use Rps\Settings;
+use Rps\Db\RpsDb;
 use Avh\Html\FormBuilder;
 use DI\Container;
 use \AVH_RPS_Define;
@@ -27,7 +28,7 @@ final class Admin
 
     /**
      *
-     * @var AVH_RPS_OldRPSDb
+     * @var RPSDb
      */
     private $_rpsdb;
 
@@ -142,7 +143,7 @@ final class Admin
     public function actionLoadPagehookCompetition ()
     {
         global $current_screen;
-        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
+        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
         $this->_competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
 
         $this->_handleRequestCompetition();
@@ -286,7 +287,7 @@ final class Admin
 
     public function handleAjax ()
     {
-        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
+        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
         if ( isset($_POST['scored']) ) {
             if ( $_POST['scored'] == 'Yes' ) {
                 $data['ID'] = (int) $_POST['id'];
@@ -624,7 +625,7 @@ final class Admin
     public function actionLoadPagehookCompetitionAdd ()
     {
         global $current_screen;
-        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
+        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
         $this->_competition_list = $this->container->get('Rps\Competition\ListCompetition');
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
@@ -814,7 +815,7 @@ final class Admin
     {
         global $current_screen;
 
-        $this->_rpsdb = $this->container->get('AVH_RPS_OldRpsDb');
+        $this->_rpsdb = $this->container->get('Rps\\Db\\RpsDb');
         $this->_entries_list = $this->container->get('Rps\\Entries\\ListEntries');
         $this->_handleRequestEntries();
 

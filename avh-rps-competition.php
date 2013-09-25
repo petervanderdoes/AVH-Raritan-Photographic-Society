@@ -57,15 +57,15 @@ class AVH_RPS_Client
         $this->container = $builder->build();
         //@format_off
             $dependencies=array (
-            'AVH_RPS_OldRpsDb' => [
+            'Rps\\Db\\RpsDb' => [
                 'constructor' => ['Rps\\Settings','Rps\\Common\\Core'],
             ],
             'AVH_RPS_Define' => array(),
             'Rps\\Competition\\ListCompetition' => [
-                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','Rps\\Common\\Core'],
+                'constructor' => ['Rps\\Settings', 'Rps\\Db\\RpsDb','Rps\\Common\\Core'],
             ],
             'Rps\\Entries\\ListEntries' => [
-                'constructor' => ['Rps\\Settings', 'AVH_RPS_OldRpsDb','Rps\\Common\\Core'],
+                'constructor' => ['Rps\\Settings', 'Rps\\Db\\RpsDb','Rps\\Common\\Core'],
             ],
             'Rps\\Settings' => array(),
             'Rps\\Common\\Core' => [

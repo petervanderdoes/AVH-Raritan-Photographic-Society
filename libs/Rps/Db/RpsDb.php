@@ -1,4 +1,6 @@
 <?php
+namespace Rps\Db;
+
 use Rps\Common\Core;
 use Rps\Competition\ListCompetition;
 use Rps\Settings;
@@ -7,7 +9,7 @@ use DI\Container;
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
 
-class AVH_RPS_OldRpsDb
+class RpsDb
 {
 
     /**
@@ -676,7 +678,7 @@ class AVH_RPS_OldRpsDb
     {
         $this->_user_id = $_user_id;
     }
-} // End Class AVH_RPS_OldRpsDb
+} // End Class RpsDb
 class RPSPDO extends PDO
 {
     private $engine;
