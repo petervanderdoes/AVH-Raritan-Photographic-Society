@@ -1,8 +1,7 @@
 <?php
-if ( !defined('AVH_FRAMEWORK') )
-    die('You are not allowed to call this page directly.');
+namespace Rps;
 
-final class AVH_RPS_Define
+final class Constants
 {
 
     /**

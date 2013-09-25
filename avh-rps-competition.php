@@ -31,6 +31,7 @@ require_once ( $_dir . '/libs/avh-common.php' );
 require_once ( $_dir . '/libs/avh-security.php' );
 require_once ( $_dir . '/libs/avh-visitor.php' );
 
+use Rps\Constants;
 use Rps\Admin\Initialize;
 use Rps\Admin\Admin;
 use Rps\Frontend\Frontend;
@@ -60,7 +61,7 @@ class AVH_RPS_Client
             'Rps\\Db\\RpsDb' => [
                 'constructor' => ['Rps\\Settings','Rps\\Common\\Core'],
             ],
-            'AVH_RPS_Define' => array(),
+            'Rps\\Constants' => array(),
             'Rps\\Competition\\ListCompetition' => [
                 'constructor' => ['Rps\\Settings', 'Rps\\Db\\RpsDb','Rps\\Common\\Core'],
             ],
@@ -78,7 +79,7 @@ class AVH_RPS_Client
         $_settings = $this->container->get('Rps\\Settings');
         $_settings->plugin_dir = $_dir;
         $_settings->plugin_basename = $_basename;
-        $_settings->plugin_url = plugins_url('', AVH_RPS_Define::PLUGIN_FILE);
+        $_settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
         add_action('plugins_loaded', array($this,'init'));
     }
@@ -97,9 +98,9 @@ class AVH_RPS_Client
     public function admin() {
         $avh_rps_admin = new Admin($this->container);
         // Activation Hook
-        register_activation_hook(AVH_RPS_Define::PLUGIN_FILE, array($avh_rps_admin,'installPlugin'));
+        register_activation_hook(Constants::PLUGIN_FILE, array($avh_rps_admin,'installPlugin'));
         // Deactivation Hook
-        register_deactivation_hook(AVH_RPS_Define::PLUGIN_FILE, array($avh_rps_admin,'deactivatePlugin'));
+        register_deactivation_hook(Constants::PLUGIN_FILE, array($avh_rps_admin,'deactivatePlugin'));
     }
 }
 

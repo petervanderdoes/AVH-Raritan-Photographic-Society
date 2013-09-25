@@ -6,7 +6,7 @@ use Rps\Settings;
 use Rps\Db\RpsDb;
 use Avh\Html\FormBuilder;
 use DI\Container;
-use \AVH_RPS_Define;
+use Rps\Constants;
 
 final class Admin
 {
@@ -123,20 +123,20 @@ final class Admin
      */
     public function actionAdminMenu ()
     {
-        wp_register_style('avhrps-admin-css', $this->_settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), AVH_RPS_Define::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-admin-css', $this->_settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
         wp_register_style('avhrps-jquery-css', $this->_settings->plugin_url . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
         wp_register_script('avhrps-comp-ajax', $this->_settings->plugin_url . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
 
-        add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', AVH_RPS_Define::MENU_POSITION_COMPETITION);
+        add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this,'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
 
-        $this->_hooks['avhrps_menu_competition'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
-        $this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
+        $this->_hooks['avhrps_menu_competition'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this,'menuCompetition'));
+        $this->_hooks['avhrps_menu_competition_add'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION, 'Add Competition', 'Add Competition', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION_ADD, array($this,'menuCompetitionAdd'));
 
         add_action('load-' . $this->_hooks['avhrps_menu_competition'], array($this,'actionLoadPagehookCompetition'));
         add_action('load-' . $this->_hooks['avhrps_menu_competition_add'], array($this,'actionLoadPagehookCompetitionAdd'));
 
-        add_menu_page('All Entries', 'Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'), '', AVH_RPS_Define::MENU_POSITION_ENTRIES);
-        $this->_hooks['avhrps_menu_entries'] = add_submenu_page(AVH_RPS_Define::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', AVH_RPS_Define::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
+        add_menu_page('All Entries', 'Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, array($this,'menuEntries'), '', Constants::MENU_POSITION_ENTRIES);
+        $this->_hooks['avhrps_menu_entries'] = add_submenu_page(Constants::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, array($this,'menuEntries'));
         add_action('load-' . $this->_hooks['avhrps_menu_entries'], array($this,'actionLoadPagehookEntries'));
     }
 
@@ -171,7 +171,7 @@ final class Admin
         if ( isset($_REQUEST['wp_http_referer']) ) {
             $redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
         } else {
-            $redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
+            $redirect = admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION;
         }
 
         $doAction = $this->_competition_list->current_action();
@@ -436,7 +436,7 @@ final class Admin
             echo '</div>';
         }
 
-        $queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
+        $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION);
         echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-competitionedit'));
         echo $formBuilder->open_table();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
@@ -604,7 +604,7 @@ final class Admin
 
         $this->_competition_list->views();
         echo '<form id="rps-competition-form" action="" method="get">';
-        echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_COMPETITION . '">';
+        echo '<input type="hidden" name="page" value="' . Constants::MENU_SLUG_COMPETITION . '">';
 
         echo '<input type="hidden" name="_total" value="' . esc_attr($this->_competition_list->get_pagination_arg('total_items')) . '" />';
         echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_competition_list->get_pagination_arg('per_page')) . '" />';
@@ -761,7 +761,7 @@ final class Admin
 
         $this->admin_header('Add Competition');
 
-        echo $formBuilder->open(admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionadd'));
+        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post','id' => 'rps-competitionadd'));
         echo $formBuilder->open_table();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
         echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
@@ -842,7 +842,7 @@ final class Admin
         if ( isset($_REQUEST['wp_http_referer']) ) {
             $redirect = remove_query_arg(array('wp_http_referer','updated','delete_count'), stripslashes($_REQUEST['wp_http_referer']));
         } else {
-            $redirect = admin_url('admin.php') . '?page=' . AVH_RPS_Define::MENU_SLUG_ENTRIES;
+            $redirect = admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_ENTRIES;
         }
 
         $doAction = $this->_entries_list->current_action();
@@ -954,7 +954,7 @@ final class Admin
 
         $this->_entries_list->views();
         echo '<form id="rps-entries-form" action="" method="get">';
-        echo '<input type="hidden" name="page" value="' . AVH_RPS_Define::MENU_SLUG_ENTRIES . '">';
+        echo '<input type="hidden" name="page" value="' . Constants::MENU_SLUG_ENTRIES . '">';
 
         echo '<input type="hidden" name="_total" value="' . esc_attr($this->_entries_list->get_pagination_arg('total_items')) . '" />';
         echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->_entries_list->get_pagination_arg('per_page')) . '" />';
@@ -1067,7 +1067,7 @@ final class Admin
             echo '</div>';
         }
 
-        $queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
+        $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES);
         echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post','id' => 'rps-entryedit'));
         echo $formBuilder->open_table();
 
@@ -1372,7 +1372,7 @@ $_classification = array ( 'class_b' => 'Beginner',
     {
         echo '<div class="clear"></div>';
         echo '<p class="footer_avhfdas">';
-        printf('&copy; Copyright 2012 <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s', AVH_RPS_Define::PLUGIN_VERSION);
+        printf('&copy; Copyright 2012 <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s', Constants::PLUGIN_VERSION);
         echo '</p>';
     }
 

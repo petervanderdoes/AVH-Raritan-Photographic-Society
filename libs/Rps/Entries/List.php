@@ -4,7 +4,7 @@ use Rps\Settings;
 use Rps\Common\Core;
 use Rps\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
-use \AVH_RPS_Define;
+use Rps\Constants;
 
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
@@ -154,7 +154,7 @@ class ListEntries extends \WP_List_Table
         $status_links = array();
         $stati = array('all' => _nx_noop('All', 'All', 'entries'));
 
-        $link = 'admin.php?page=' . AVH_RPS_Define::MENU_SLUG_ENTRIES;
+        $link = 'admin.php?page=' . Constants::MENU_SLUG_ENTRIES;
 
         foreach ( $stati as $status => $label ) {
             $class = ( $status == $entry_status ) ? ' class="current"' : '';
@@ -280,7 +280,7 @@ class ListEntries extends \WP_List_Table
     function column_name($entry)
     {
         $_user = get_user_by('id', $entry->Member_ID);
-        $queryUser = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'user_id' => $_user->ID);
+        $queryUser = array('page' => Constants::MENU_SLUG_ENTRIES,'user_id' => $_user->ID);
         $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
         echo HtmlBuilder::anchor($urlUser,$_user->first_name . ' ' . $_user->last_name, array('title'=>'Entries for '.$_user->first_name . ' ' . $_user->last_name ));
     }
@@ -290,14 +290,14 @@ class ListEntries extends \WP_List_Table
         echo $entry->Title;
         $url = admin_url('admin.php') . '?';
 
-        $queryReferer = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES);
+        $queryReferer = array('page' => Constants::MENU_SLUG_ENTRIES);
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
         $nonceDelete = wp_create_nonce('bulk-entries');
-        $queryDelete = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'entry' => $entry->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
+        $queryDelete = array('page' => Constants::MENU_SLUG_ENTRIES,'entry' => $entry->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
         $urlDelete = $url . http_build_query($queryDelete, '', '&');
 
-        $queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_ENTRIES,'entry' => $entry->ID,'action' => 'edit','wp_http_referer' => $wp_http_referer);
+        $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES,'entry' => $entry->ID,'action' => 'edit','wp_http_referer' => $wp_http_referer);
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         $actions = array();

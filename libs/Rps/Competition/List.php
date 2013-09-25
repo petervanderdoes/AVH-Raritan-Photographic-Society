@@ -4,7 +4,7 @@ use Rps\Settings;
 use Rps\Common\Core;
 use Rps\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
-use \AVH_RPS_Define;
+use Rps\Constants;
 
 if ( !defined('AVH_FRAMEWORK') )
     die('You are not allowed to call this page directly.');
@@ -156,7 +156,7 @@ class ListCompetition extends \WP_List_Table
         $status_links = array();
         $stati = array('all' => _nx_noop('All', 'All', 'competitions'),'open' => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>', 'Open <span class="count">(<span class="open-count">%s</span>)</span>'),'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>', 'Closed <span class="count">(<span class="closed-count">%s</span>)</span>'));
 
-        $link = 'admin.php?page=' . AVH_RPS_Define::MENU_SLUG_COMPETITION;
+        $link = 'admin.php?page=' . Constants::MENU_SLUG_COMPETITION;
 
         foreach ( $stati as $status => $label ) {
             $class = ( $status == $competition_status ) ? ' class="current"' : '';
@@ -269,23 +269,23 @@ class ListCompetition extends \WP_List_Table
         $user_ID = get_current_user_id();
         $url = admin_url('admin.php') . '?';
 
-        $queryReferer = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
+        $queryReferer = array('page' => Constants::MENU_SLUG_COMPETITION);
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
         $nonceDelete = wp_create_nonce('bulk-competitions');
-        $queryDelete = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
+        $queryDelete = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'delete','_wpnonce' => $nonceDelete);
         $urlDelete = $url . http_build_query($queryDelete, '', '&');
 
-        $queryEdit = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'edit','wp_http_referer' => $wp_http_referer);
+        $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'edit','wp_http_referer' => $wp_http_referer);
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         // We'll not add these for now, maybe later. There is no real need to open/close a single part of a competition anyway.
         // if ( $competition->Closed == 'Y' ) {
-        // $queryOpen = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'open','wp_http_referer' => $wp_http_referer);
+        // $queryOpen = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'open','wp_http_referer' => $wp_http_referer);
         // $urlOpen = $url . http_build_query($queryOpen, '', '&');
         // $actions['open'] = '<a ' . AVH_Common::attributes(array('href' => $urlOpen,'title' => 'Open this competition')) . '>' . 'Open' . '</a>';
         // } else {
-        // $queryClose = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'close','wp_http_referer' => $wp_http_referer);
+        // $queryClose = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'close','wp_http_referer' => $wp_http_referer);
         // $urlClose = $url . http_build_query($queryClose, '', '&');
         // $actions['close'] = '<a ' . AVH_Common::attributes(array('href' => $urlClose,'title' => 'Close this competition')) . '>' . 'Close' . '</a>';
         // }
@@ -329,15 +329,15 @@ class ListCompetition extends \WP_List_Table
 
         $url = admin_url('admin.php') . '?';
 
-        $queryReferer = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION);
+        $queryReferer = array('page' => Constants::MENU_SLUG_COMPETITION);
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
         $nonceScore = wp_create_nonce('score_' . $competition->ID);
-        $querySetScore = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'setscore','_wpnonce' => $nonceScore);
+        $querySetScore = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'setscore','_wpnonce' => $nonceScore);
         $urlSetScore = $url . http_build_query($querySetScore, '', '&');
 
         $nonceUnsetScore = wp_create_nonce('score_' . $competition->ID);
-        $queryUnsetScore = array('page' => AVH_RPS_Define::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'unsetscore','_wpnonce' => $nonceScore);
+        $queryUnsetScore = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'unsetscore','_wpnonce' => $nonceScore);
         $urlUnsetScore = $url . http_build_query($queryUnsetScore, '', '&');
 
         $actions = array();
