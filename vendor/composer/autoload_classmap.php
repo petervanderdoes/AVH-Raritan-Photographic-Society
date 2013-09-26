@@ -10,6 +10,7 @@ return array(
     'Avh\\Html\\HtmlBuilder' => $baseDir . '/libs/Avh/Html/HtmlBuilder.php',
     'Avh\\Mail\\Mailer' => $baseDir . '/libs/Avh/Mail/Mailer.php',
     'Avh\\Network\\AVH_Visitor' => $baseDir . '/libs/Avh/Network/Visitor.php',
+    'Avh\\Utility\\AVH_Common' => $baseDir . '/libs/Avh/Utility/Common.php',
     'Avh\\Utility\\AVH_Settings' => $baseDir . '/libs/Avh/Utility/Settings.php',
     'DI\\Annotation\\Inject' => $vendorDir . '/mnapoli/php-di/src/DI/Annotation/Inject.php',
     'DI\\Annotation\\Injectable' => $vendorDir . '/mnapoli/php-di/src/DI/Annotation/Injectable.php',
