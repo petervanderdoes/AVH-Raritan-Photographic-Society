@@ -5,7 +5,7 @@ use Rps\Competition\ListCompetition;
 use Rps\Common\Core;
 use Rps\Settings;
 use Avh\Html\FormBuilder;
-use Avh\Utility\AVH_Common;
+use Avh\Utility\Common;
 use DI\Container;
 use Rps\Constants;
 
@@ -1150,7 +1150,7 @@ final class Admin
      */
     public function filterPluginActions($links)
     {
-        $folder = AVH_Common::getBaseDirectory($this->settings->plugin_basename);
+        $folder = Common::getBaseDirectory($this->settings->plugin_basename);
         $settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
         array_unshift($links, $settings_link); // before other links
         return $links;

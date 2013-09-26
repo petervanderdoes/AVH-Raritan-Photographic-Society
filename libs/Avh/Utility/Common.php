@@ -1,7 +1,7 @@
 <?php
 namespace Avh\Utility;
 
-final class AVH_Common
+final class Common
 {
 
     /**

@@ -1,5 +1,7 @@
 <?php
+namespace Avh\Controller;
 
+use Avh\Utility\Common;
 /**
  * AVH_UR_PluginController
  *
@@ -9,11 +11,11 @@
  */
 
 /**
- * Class AVH2_PluginController
+ * Class AVH_PluginController
  *
  * Provide some functions to create a WordPress plugin
  */
-class AVH2_PluginController
+class AVH_PluginController
 {
 
     protected $requirements_error_msg = '';

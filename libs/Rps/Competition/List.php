@@ -5,7 +5,7 @@ use Rps\Settings;
 use Rps\Common\Core;
 use Rps\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
-use Avh\Utility\AVH_Common;
+use Avh\Utility\Common;
 use Rps\Constants;
 
 class ListCompetition extends \WP_List_Table
@@ -283,11 +283,11 @@ class ListCompetition extends \WP_List_Table
         // if ( $competition->Closed == 'Y' ) {
         // $queryOpen = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'open','wp_http_referer' => $wp_http_referer);
         // $urlOpen = $url . http_build_query($queryOpen, '', '&');
-        // $actions['open'] = '<a ' . AVH_Common::attributes(array('href' => $urlOpen,'title' => 'Open this competition')) . '>' . 'Open' . '</a>';
+        // $actions['open'] = '<a ' . Common::attributes(array('href' => $urlOpen,'title' => 'Open this competition')) . '>' . 'Open' . '</a>';
         // } else {
         // $queryClose = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'close','wp_http_referer' => $wp_http_referer);
         // $urlClose = $url . http_build_query($queryClose, '', '&');
-        // $actions['close'] = '<a ' . AVH_Common::attributes(array('href' => $urlClose,'title' => 'Close this competition')) . '>' . 'Close' . '</a>';
+        // $actions['close'] = '<a ' . Common::attributes(array('href' => $urlClose,'title' => 'Close this competition')) . '>' . 'Close' . '</a>';
         // }
 
         $actions = array();

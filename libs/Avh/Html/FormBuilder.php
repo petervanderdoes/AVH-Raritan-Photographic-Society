@@ -88,9 +88,9 @@ class FormBuilder
 
     public function settings_fields($action, $nonce)
     {
-        $_return = $this->hidden('action', $action);
-        $_return .= $this->nonce_field();
-        return $_return;
+        $return = $this->hidden('action', $action);
+        $return .= $this->nonce_field();
+        return $return;
     }
 
     public function text($label, $description, $name, $value = null, array $attributes = null)

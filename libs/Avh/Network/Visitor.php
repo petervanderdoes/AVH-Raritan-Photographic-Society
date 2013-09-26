@@ -1,7 +1,7 @@
 <?php
 namespace Avh\Network;
 
-use Avh\Utility\AVH_Common;
+use Avh\Utility\Common;
 
 final class AVH_Visitor
 {
@@ -28,7 +28,7 @@ final class AVH_Visitor
         $_ip = array_values(array_unique($_ip));
         $_return = null;
         // In PHP 5.3 and up the function filter_var can be used, much quicker as the regular expression check
-        if (AVH_Common::isPHP('5.3')) {
+        if (Common::isPHP('5.3')) {
             foreach ($_ip as $_i) {
                 if (filter_var($_i, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE)) {
                     $_return = $_i;
