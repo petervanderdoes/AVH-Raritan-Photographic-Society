@@ -59,7 +59,7 @@ class HtmlBuilder
      * Note that the title is not escaped, to allow
      * HTML elements within links (images, etc).
      *
-     * echo AVH2_Html::anchor('/user/profile', 'My Profile');
+     * echo HtmlBuilder::anchor('/user/profile', 'My Profile');
      *
      * @param string $uri
      *            URL or URI string
@@ -68,7 +68,7 @@ class HtmlBuilder
      * @param array $attributes
      *            HTML anchor attributes
      * @return string
-     * @uses AVH2_Html::attributes
+     * @uses HtmlBuilder::attributes
      */
     public static function anchor($uri, $title = NULL, array $attributes = NULL)
     {
@@ -103,7 +103,7 @@ class HtmlBuilder
      * Note that the title is not escaped,
      * to allow HTML elements within links (images, etc).
      *
-     * echo AVH2_Html::mailto($address);
+     * echo HtmlBuilder::mailto($address);
      *
      * @param string $email
      *            email address to send to
@@ -112,7 +112,7 @@ class HtmlBuilder
      * @param
      *            array %attributes HTML anchor attributes
      * @return string
-     * @uses AVH2_Html::attributes
+     * @uses HtmlBuilder::attributes
      */
     public static function mailto($email, $title = NULL, array $attributes = NULL)
     {
@@ -127,7 +127,7 @@ class HtmlBuilder
     /**
      * Creates a image link.
      *
-     * echo AVH2_Html::image('media/img/logo.png', array('alt' => 'My Company'));
+     * echo HtmlBuilder::image('media/img/logo.png', array('alt' => 'My Company'));
      *
      * @param string $file
      *            file name
@@ -135,7 +135,7 @@ class HtmlBuilder
      *            default attributes
      * @return string
      * @uses URL::base
-     * @uses AVH2_Html::attributes
+     * @uses HtmlBuilder::attributes
      */
     public static function image($file, array $attributes = NULL)
     {
@@ -154,7 +154,7 @@ class HtmlBuilder
      * Compiles an array of HTML attributes into an attribute string.
      * Attributes will be sorted using AVH2_Html::$attribute_order for consistency.
      *
-     * echo '<div'.AVH2_Html::attributes($attrs).'>'.$content.'</div>';
+     * echo '<div'.HtmlBuilder::attributes($attrs).'>'.$content.'</div>';
      *
      * @param array $attributes
      *            attribute list
@@ -165,33 +165,33 @@ class HtmlBuilder
         if (empty($attributes))
             return '';
 
-        $_sorted = array();
-        foreach (self::$attribute_order as $_key) {
-            if (isset($attributes[$_key])) {
+        $sorted = array();
+        foreach (self::$attribute_order as $key) {
+            if (isset($attributes[$key])) {
                 // Add the attribute to the sorted list
-                $_sorted[$_key] = $attributes[$_key];
+                $sorted[$key] = $attributes[$key];
             }
         }
 
         // Combine the sorted attributes
-        $attributes = $_sorted + $attributes;
+        $attributes = $sorted + $attributes;
 
-        $_compiled = '';
-        foreach ($attributes as $_key => $_value) {
-            if ($_value === NULL) {
+        $compiled = '';
+        foreach ($attributes as $key => $value) {
+            if ($value === NULL) {
                 // Skip attributes that have NULL values
                 continue;
             }
 
-            if (is_int($_key)) {
+            if (is_numeric($key)) {
                 // Assume non-associative keys are mirrored attributes
-                $_key = $_value;
+                $key = $value;
             }
 
             // Add the attribute value
-            $_compiled .= ' ' . $_key . '="' . esc_attr($_value) . '"';
+            $compiled .= ' ' . $key . '="' . esc_attr($value) . '"';
         }
 
-        return $_compiled;
+        return $compiled;
     }
 }
