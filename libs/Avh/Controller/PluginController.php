@@ -11,11 +11,11 @@ use Avh\Utility\Common;
  */
 
 /**
- * Class AVH_PluginController
+ * Class PluginController
  *
  * Provide some functions to create a WordPress plugin
  */
-class AVH_PluginController
+class PluginController
 {
 
     protected $requirements_error_msg = '';
@@ -170,7 +170,7 @@ class AVH_PluginController
      */
     public function actionIn_plugin_update_message()
     {
-        $_response = wp_remote_get($this->settings->plugin_readme_url, array('user-agent' => 'WordPress/' . AVH2_Common::getWordpressVersion() . ' ' . $this->settings->plugin_name . '/' . $this->settings->plugin_version));
+        $_response = wp_remote_get($this->settings->plugin_readme_url, array('user-agent' => 'WordPress/' . Common::getWordpressVersion() . ' ' . $this->settings->plugin_name . '/' . $this->settings->plugin_version));
         if (! is_wp_error($_response) || is_array($_response)) {
             $_data = $_response['body'];
             $_matches = null;
