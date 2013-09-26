@@ -9,14 +9,14 @@ final class AVH_Security
      * Creates a random, one time use token.
      *
      * @param string|int $action
-     *        Scalar value to add context to the nonce.
+     *            Scalar value to add context to the nonce.
      * @return string The one use form token
      *
      */
-    public static function createNonce ($action = -1)
+    public static function createNonce($action = -1)
     {
         $_tick = wp_nonce_tick();
-        return substr(wp_hash($_tick . $action, 'nonce'), -12, 10);
+        return substr(wp_hash($_tick . $action, 'nonce'), - 12, 10);
     }
 
     /**
@@ -28,19 +28,19 @@ final class AVH_Security
      * $action remain the same, the independent variable is the time.
      *
      * @param string $nonce
-     *        Nonce that was used in the form to verify
+     *            Nonce that was used in the form to verify
      * @param string|int $action
-     *        Should give context to what is taking place and be the same when nonce was created.
+     *            Should give context to what is taking place and be the same when nonce was created.
      * @return bool Whether the nonce check passed or failed.
      */
-    public static function verifyNonce ($nonce, $action = -1)
+    public static function verifyNonce($nonce, $action = -1)
     {
         $_return = false;
         $_tick = wp_nonce_tick();
         // Nonce generated 0-12 hours ago
-        if ( substr(wp_hash($_tick . $action, 'nonce'), -12, 10) == $nonce ) {
+        if (substr(wp_hash($_tick . $action, 'nonce'), - 12, 10) == $nonce) {
             $_return = 1;
-        } elseif ( substr(wp_hash(( $_tick - 1 ) . $action, 'nonce'), -12, 10) == $nonce ) { // Nonce generated 12-24 hours ago
+        } elseif (substr(wp_hash(($_tick - 1) . $action, 'nonce'), - 12, 10) == $nonce) { // Nonce generated 12-24 hours ago
             $_return = 2;
         }
         return $_return;

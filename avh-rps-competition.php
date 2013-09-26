@@ -33,23 +33,24 @@ $_basename = plugin_basename($plugin);
 
 class AVH_RPS_Client
 {
+
     private $container;
 
-    public function __construct ($_dir, $_basename)
+    public function __construct($_dir, $_basename)
     {
         $builder = new ContainerBuilder();
         $builder->setDefinitionCache(new Doctrine\Common\Cache\ArrayCache());
         $builder->useReflection(false);
         $builder->useAnnotations(false);
         // $builder->writeProxiesToFile(true, 'tmp/proxies');
-        if ( defined(WP_LOCAL_DEV) && WP_LOCAL_DEV == true ) {
+        if (defined(WP_LOCAL_DEV) && WP_LOCAL_DEV == true) {
             $builder->setDefinitionsValidation(true);
         } else {
             $builder->setDefinitionsValidation(false);
         }
 
         $this->container = $builder->build();
-        //@format_off
+        //@formatter:off
             $dependencies=array (
             'Rps\\Db\\RpsDb' => [
                 'constructor' => ['Rps\\Settings','Rps\\Common\\Core'],
@@ -65,7 +66,7 @@ class AVH_RPS_Client
                 'constructor' => ['Rps\\Settings'],
             ],
         );
-        // @format_on
+        // @formatter:on
         $this->container->addDefinitions($dependencies);
 
         $_settings = $this->container->get('Rps\\Settings');
@@ -76,10 +77,10 @@ class AVH_RPS_Client
         add_action('plugins_loaded', array($this,'init'));
     }
 
-    public function init ()
+    public function init()
     {
         $_settings = $this->container->get('Rps\\Settings');
-        if ( is_admin() ) {
+        if (is_admin()) {
             Initialize::load();
             add_action('wp_loaded', array($this->admin()));
         } else {
@@ -87,7 +88,7 @@ class AVH_RPS_Client
         }
     }
 
-    public function admin ()
+    public function admin()
     {
         $avh_rps_admin = new Admin($this->container);
         // Activation Hook

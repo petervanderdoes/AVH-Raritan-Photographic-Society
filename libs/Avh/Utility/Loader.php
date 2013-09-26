@@ -13,35 +13,43 @@
  */
 class AVH_Loader
 {
-    private static $_objects;
-    private static $_dir;
-    private static $_class_file_prefix;
-    private static $_class_name_prefix;
-    private static $_class_name;
-    private static $_class_file;
+
+    private static $objects;
+
+    private static $dir;
+
+    private static $class_file_prefix;
+
+    private static $class_name_prefix;
+
+    private static $class_name;
+
+    private static $class_file;
+
     const NAMESPACE_SEPERATOR = '\\';
+
     const PREFIX_SPERATOR = '_';
 
     /**
      * Get an instance of a class.
      *
      * @param string $class
-     *        The class name
+     *            The class name
      * @param boolean $store
      * @return object
      */
-    public static function getInstance ($class, $store = true)
+    public static function getInstance($class, $store = true)
     {
-        self::_setClassLoaderProperties($class);
-        if ( isset(self::$_objects[self::$_class_name]) ) {
-            return ( self::$_objects[self::$_class_name] );
+        self::setClassLoaderProperties($class);
+        if (isset(self::$objects[self::$class_name])) {
+            return (self::$objects[self::$class_name]);
         }
-        if ( !class_exists(self::$_class_name) ) {
-            require_once ( self::$_dir . self::$_class_file );
+        if (! class_exists(self::$class_name)) {
+            require_once (self::$dir . self::$class_file);
         }
-        $_object = new self::$_class_name();
-        if ( $store ) {
-            self::$_objects[self::$_class_name] = $_object;
+        $_object = new self::$class_name();
+        if ($store) {
+            self::$objects[self::$class_name] = $_object;
         }
         return $_object;
     }
@@ -53,59 +61,59 @@ class AVH_Loader
      * @param string $class
      * @param string $type
      */
-    public static function loadClass ($class)
+    public static function loadClass($class)
     {
-        self::_setClassLoaderProperties($class);
+        self::setClassLoaderProperties($class);
 
-        if ( !class_exists(self::$_class_name) ) {
-            require_once ( self::$_dir . self::$_class_file );
+        if (! class_exists(self::$class_name)) {
+            require_once (self::$dir . self::$class_file);
         }
     }
 
     /**
      * Sets the internal properties needed
      *
-     * It sets the class name (self::$_class_name) and where to load the
-     * file from (self::$_class_file)
+     * It sets the class name (self::$class_name) and where to load the
+     * file from (self::$class_file)
      *
      * @param string $class
-     *        Name of the class you want to load
+     *            Name of the class you want to load
      */
-    private static function _setClassLoaderProperties ($class)
+    private static function setClassLoaderProperties($class)
     {
         $_file = str_replace(self::NAMESPACE_SEPERATOR, DIRECTORY_SEPARATOR, $class) . '.php';
         list ($type) = explode(self::NAMESPACE_SEPERATOR, $class, 2);
         $_class = end(explode(self::NAMESPACE_SEPERATOR, $class));
-        $_name = ( 'Avh' == $type ) ? 'AVH2_' . $_class : self::$_class_name_prefix . $_class;
-        self::$_class_name = $_name;
-        self::$_class_file = $_file;
+        $_name = ('Avh' == $type) ? 'AVH2_' . $_class : self::$class_name_prefix . $_class;
+        self::$class_name = $_name;
+        self::$class_file = $_file;
     }
 
     /**
      *
      * @param string $dir
-     *        Directory to set
+     *            Directory to set
      */
-    public static function setDir ($dir)
+    public static function setDir($dir)
     {
-        self::$_dir = trailingslashit($dir);
+        self::$dir = trailingslashit($dir);
     }
 
     /**
      *
      * @param string $class_name_prefix
-     *        the class name prefix to set
+     *            the class name prefix to set
      */
-    public static function setClassNamePrefix ($class_name_prefix)
+    public static function setClassNamePrefix($class_name_prefix)
     {
-        self::$_class_name_prefix = $class_name_prefix;
+        self::$class_name_prefix = $class_name_prefix;
     }
 
     /**
      *
      * @param array $properties
      */
-    public static function setClassProperties ($properties)
+    public static function setClassProperties($properties)
     {
         $default_properties = array('type' => 'system','store' => false);
     }

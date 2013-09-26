@@ -1,5 +1,6 @@
 <?php
 namespace Rps;
+
 use Avh\Utility\AVH_Settings;
 
 /**
@@ -12,11 +13,10 @@ final class Settings extends AVH_Settings
 {
 
     // prevent directly access.
-    public function __construct ()
+    public function __construct()
     {}
 
     // prevent clone.
-    public function __clone ()
+    public function __clone()
     {}
-
 }
