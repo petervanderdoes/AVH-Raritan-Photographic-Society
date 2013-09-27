@@ -28,15 +28,15 @@ use DI\ContainerBuilder;
  */
 require __DIR__ . '/vendor/autoload.php';
 
-$_dir = pathinfo($plugin, PATHINFO_DIRNAME);
-$_basename = plugin_basename($plugin);
+$rps_dir = pathinfo($plugin, PATHINFO_DIRNAME);
+$rps_basename = plugin_basename($plugin);
 
 class AVH_RPS_Client
 {
 
     private $container;
 
-    public function __construct($_dir, $_basename)
+    public function __construct($dir, $basename)
     {
         $builder = new ContainerBuilder();
         $builder->setDefinitionCache(new Doctrine\Common\Cache\ArrayCache());
@@ -51,7 +51,7 @@ class AVH_RPS_Client
 
         $this->container = $builder->build();
         //@formatter:off
-            $dependencies=array (
+        $dependencies=array (
             'Rps\\Db\\RpsDb' => [
                 'constructor' => ['Rps\\Settings','Rps\\Common\\Core'],
             ],
@@ -69,17 +69,16 @@ class AVH_RPS_Client
         // @formatter:on
         $this->container->addDefinitions($dependencies);
 
-        $_settings = $this->container->get('Rps\\Settings');
-        $_settings->plugin_dir = $_dir;
-        $_settings->plugin_basename = $_basename;
-        $_settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
+        $settings = $this->container->get('Rps\\Settings');
+        $settings->plugin_dir = $dir;
+        $settings->plugin_basename = $basename;
+        $settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
         add_action('plugins_loaded', array($this,'init'));
     }
 
     public function init()
     {
-        $_settings = $this->container->get('Rps\\Settings');
         if (is_admin()) {
             Initialize::load();
             add_action('wp_loaded', array($this->admin()));
@@ -90,12 +89,8 @@ class AVH_RPS_Client
 
     public function admin()
     {
-        $avh_rps_admin = new Admin($this->container);
-        // Activation Hook
-        register_activation_hook(Constants::PLUGIN_FILE, array($avh_rps_admin,'installPlugin'));
-        // Deactivation Hook
-        register_deactivation_hook(Constants::PLUGIN_FILE, array($avh_rps_admin,'deactivatePlugin'));
+        new Admin($this->container);
     }
 }
 
-new AVH_RPS_Client($_dir, $_basename);
+new AVH_RPS_Client($rps_dir, $rps_basename);

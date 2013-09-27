@@ -14,12 +14,6 @@ class Frontend
 
     /**
      *
-     * @var Container
-     */
-    private $container;
-
-    /**
-     *
      * @var Core
      */
     private $core;
@@ -68,12 +62,12 @@ class Frontend
     {
         // Get The Registry
         $this->container = $container;
-        $this->settings = $this->container->get('Rps\\Settings');
+        $this->settings = $container->get('Rps\\Settings');
 
         $this->errmsg = '';
         // Initialize the plugin
-        $this->core = $this->container->get('Rps\\Common\\Core');
-        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
+        $this->core = $container->get('Rps\\Common\\Core');
+        $this->rpsdb = $container->get('Rps\\Db\\RpsDb');
         $this->core_options = $this->core->getOptions();
 
         $this->rpsdb->setCompetitionClose();
