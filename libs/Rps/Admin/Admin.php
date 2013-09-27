@@ -147,8 +147,8 @@ final class Admin
     public function actionLoadPagehookCompetition()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
-        $this->competition_list = $this->container->get('Rps\\Competition\\ListCompetition');
+        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
+        $this->competition_list = $this->container->resolve('\Rps\Competition\ListCompetition');
 
         $this->handleRequestCompetition();
 
@@ -290,7 +290,7 @@ final class Admin
 
     public function handleAjax()
     {
-        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
+        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
         if (isset($_POST['scored'])) {
             if ($_POST['scored'] == 'Yes') {
                 $data['ID'] = (int) $_POST['id'];
@@ -360,7 +360,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
 
         $this->admin_header('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
@@ -399,7 +399,7 @@ final class Admin
         global $wpdb;
 
         // @var $formBuilder AVH_Form
-        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
         $formBuilder->setOption_name('competition-edit');
 
         if (isset($_POST['update'])) {
@@ -541,7 +541,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
 
         $this->admin_header($title);
         echo $formBuilder->open('', array('method' => 'post','id' => 'updatecompetitions','name' => 'updatecompetitions'));
@@ -627,8 +627,8 @@ final class Admin
     public function actionLoadPagehookCompetitionAdd()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
-        $this->competition_list = $this->container->get('Rps\Competition\ListCompetition');
+        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
+        $this->competition_list = $this->container->resolve('\Rps\Competition\ListCompetition');
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -645,7 +645,7 @@ final class Admin
     {
         $option_name = 'competition_add';
         // @var $formBuilder AVH_Form
-        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
         $formBuilder->setOption_name('competition_add');
 
         // @formatter:off
@@ -838,8 +838,8 @@ final class Admin
     {
         global $current_screen;
 
-        $this->rpsdb = $this->container->get('Rps\\Db\\RpsDb');
-        $this->entries_list = $this->container->get('Rps\\Entries\\ListEntries');
+        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
+        $this->entries_list = $this->container->resolve('\Rps\Entries\ListEntries');
         $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
@@ -997,7 +997,7 @@ final class Admin
     private function displayPageEntriesDelete()
     {
         global $wpdb;
-        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
 
         if (empty($_REQUEST['entries'])) {
             $entryIdsArray = array(intval($_REQUEST['entry']));
@@ -1044,7 +1044,7 @@ final class Admin
 
         $updated = false;
         // @var $formBuilder AVH_Form
-        $formBuilder = $this->container->get('Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOption_name('entry-edit');
 
         if (isset($_POST['update'])) {

@@ -6,18 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Zend\\Stdlib\\' => array($vendorDir . '/zendframework/zend-stdlib'),
-    'Zend\\EventManager\\' => array($vendorDir . '/zendframework/zend-eventmanager'),
-    'Zend\\Code\\' => array($vendorDir . '/zendframework/zend-code'),
-    'UnitTests' => array($vendorDir . '/mnapoli/php-di/tests'),
-    'Symfony\\Component\\Yaml\\' => array($vendorDir . '/symfony/yaml'),
     'Rps\\' => array($baseDir . '/libs'),
-    'ProxyManager\\' => array($vendorDir . '/ocramius/proxy-manager/src'),
-    'MyCLabs' => array($vendorDir . '/myclabs/php-enum/src'),
-    'IntegrationTests' => array($vendorDir . '/mnapoli/php-di/tests'),
-    'Doctrine\\Common\\Lexer\\' => array($vendorDir . '/doctrine/lexer/lib'),
-    'Doctrine\\Common\\Cache\\' => array($vendorDir . '/doctrine/cache/lib'),
-    'Doctrine\\Common\\Annotations\\' => array($vendorDir . '/doctrine/annotations/lib'),
-    'DI' => array($vendorDir . '/mnapoli/php-di/src'),
+    'League\\Di\\' => array($vendorDir . '/league/di/src', $vendorDir . '/league/di/test'),
     'Avh\\' => array($baseDir . '/libs'),
 );

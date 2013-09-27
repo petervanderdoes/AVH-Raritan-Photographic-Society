@@ -13,7 +13,7 @@ use Rps\Constants;
 use Rps\Admin\Initialize;
 use Rps\Admin\Admin;
 use Rps\Frontend\Frontend;
-use DI\ContainerBuilder;
+use League\Di\Container;
 
 /**
  * |--------------------------------------------------------------------------
@@ -38,38 +38,15 @@ class AVH_RPS_Client
 
     public function __construct($dir, $basename)
     {
-        $builder = new ContainerBuilder();
-        $builder->setDefinitionCache(new Doctrine\Common\Cache\ArrayCache());
-        $builder->useReflection(false);
-        $builder->useAnnotations(false);
-        // $builder->writeProxiesToFile(true, 'tmp/proxies');
-        if (defined(WP_LOCAL_DEV) && WP_LOCAL_DEV == true) {
-            $builder->setDefinitionsValidation(true);
-        } else {
-            $builder->setDefinitionsValidation(false);
-        }
+        $this->container = new League\Di\Container;
 
-        $this->container = $builder->build();
-        //@formatter:off
-        $dependencies=array (
-            'Rps\\Db\\RpsDb' => [
-                'constructor' => ['Rps\\Settings','Rps\\Common\\Core'],
-            ],
-            'Rps\\Competition\\ListCompetition' => [
-                'constructor' => ['Rps\\Settings', 'Rps\\Db\\RpsDb','Rps\\Common\\Core'],
-            ],
-            'Rps\\Entries\\ListEntries' => [
-                'constructor' => ['Rps\\Settings', 'Rps\\Db\\RpsDb','Rps\\Common\\Core'],
-            ],
-            'Rps\\Settings' => array(),
-            'Rps\\Common\\Core' => [
-                'constructor' => ['Rps\\Settings'],
-            ],
-        );
-        // @formatter:on
-        $this->container->addDefinitions($dependencies);
+        //$this->container->bind('\Rps\Settings');
+        $this->container->bind('\Rps\Common\Core')->addArg('\Rps\Settings');
+        $this->container->bind('\Rps\Db\RpsDb')->addArg('\Rps\Settings','\Rps\Common\Core');
+        $this->container->bind('\Rps\Competition\ListCompetition')->addArg('\Rps\Settings', '\Rps\Db\RpsDb','\Rps\Common\Core');
+        $this->container->bind('\Rps\Entries\ListEntries')->addArg('\Rps\Settings', '\Rps\Db\RpsDb','\Rps\Common\Core');
 
-        $settings = $this->container->get('Rps\\Settings');
+        $settings = $this->container->resolve('\Rps\Settings');
         $settings->plugin_dir = $dir;
         $settings->plugin_basename = $basename;
         $settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);

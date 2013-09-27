@@ -1,6 +1,6 @@
 {
     "require": {
-        "mnapoli/php-di": "~3.4"
+        "league/di": "dev-develop"
     },
     "autoload": {
         "psr-0": { "Avh\\": "libs/",
