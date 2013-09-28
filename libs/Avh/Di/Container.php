@@ -4,13 +4,14 @@ use Closure;
 use ArrayAccess;
 use ReflectionMethod;
 use ReflectionClass;
+use Avh\Di\ContainerInterface;
 
 /**
  * Container
  *
  * A Dependency Injection Container.
  */
-class Container implements ArrayAccess
+class Container implements ContainerInterface, ArrayAccess
 {
     /**
      * The instance of the container

@@ -28,7 +28,7 @@ class RpsDb
     /**
      * PHP5 constructor
      */
-    public function __construct($settings, $core)
+    public function __construct(Settings $settings, Core $core)
     {
         // Get The Registry
         $this->settings = $settings;
