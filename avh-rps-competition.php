@@ -33,19 +33,18 @@ $rps_basename = plugin_basename($plugin);
 
 class AVH_RPS_Client
 {
-
     private $container;
     private $settings;
 
-    public function __construct($dir, $basename)
+    public function __construct ($dir, $basename)
     {
-        $this->container = new Container;
+        $this->container = new Container();
 
-        $this->container->bind('\Rps\Settings');
-        $this->container->bind('\Rps\Common\Core')->addArg('\Rps\Settings');
-        $this->container->bind('\Rps\Db\RpsDb')->addArg('\Rps\Settings','\Rps\Common\Core');
-        $this->container->bind('\Rps\Competition\ListCompetition')->addArg('\Rps\Settings', '\Rps\Db\RpsDb','\Rps\Common\Core');
-        $this->container->bind('\Rps\Entries\ListEntries')->addArg('\Rps\Settings', '\Rps\Db\RpsDb','\Rps\Common\Core');
+        $this->container->register('\Rps\Settings', null, true);
+        $this->container->register('\Rps\Common\Core')->withArgument('\Rps\Settings');
+        $this->container->register('\Rps\Db\RpsDb')->withArguments(array('\Rps\Settings', '\Rps\Common\Core'));
+        $this->container->register('\Rps\Competition\ListCompetition')->withArguments(array('\Rps\Settings', '\Rps\Db\RpsDb', '\Rps\Common\Core'));
+        $this->container->register('\Rps\Entries\ListEntries')->withArguments(array('\Rps\Settings', '\Rps\Db\RpsDb', '\Rps\Common\Core'));
 
         $this->settings = $this->container->resolve('\Rps\Settings');
         $this->settings->plugin_dir = $dir;
@@ -55,9 +54,9 @@ class AVH_RPS_Client
         add_action('plugins_loaded', array($this,'init'));
     }
 
-    public function init()
+    public function init ()
     {
-        if (is_admin()) {
+        if ( is_admin() ) {
             Initialize::load();
             add_action('wp_loaded', array($this->admin()));
         } else {
@@ -65,8 +64,9 @@ class AVH_RPS_Client
         }
     }
 
-    public function admin()
+    public function admin ()
     {
+        new Admin($this->container);
     }
 }
 
