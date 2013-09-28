@@ -13,7 +13,7 @@ use Rps\Constants;
 use Rps\Admin\Initialize;
 use Rps\Admin\Admin;
 use Rps\Frontend\Frontend;
-use League\Di\Container;
+use Avh\Di\Container;
 
 /**
  * |--------------------------------------------------------------------------
@@ -35,21 +35,22 @@ class AVH_RPS_Client
 {
 
     private $container;
+    private $settings;
 
     public function __construct($dir, $basename)
     {
-        $this->container = new League\Di\Container;
+        $this->container = new Container;
 
-        //$this->container->bind('\Rps\Settings');
+        $this->container->bind('\Rps\Settings');
         $this->container->bind('\Rps\Common\Core')->addArg('\Rps\Settings');
         $this->container->bind('\Rps\Db\RpsDb')->addArg('\Rps\Settings','\Rps\Common\Core');
         $this->container->bind('\Rps\Competition\ListCompetition')->addArg('\Rps\Settings', '\Rps\Db\RpsDb','\Rps\Common\Core');
         $this->container->bind('\Rps\Entries\ListEntries')->addArg('\Rps\Settings', '\Rps\Db\RpsDb','\Rps\Common\Core');
 
-        $settings = $this->container->resolve('\Rps\Settings');
-        $settings->plugin_dir = $dir;
-        $settings->plugin_basename = $basename;
-        $settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
+        $this->settings = $this->container->resolve('\Rps\Settings');
+        $this->settings->plugin_dir = $dir;
+        $this->settings->plugin_basename = $basename;
+        $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
         add_action('plugins_loaded', array($this,'init'));
     }
@@ -66,7 +67,6 @@ class AVH_RPS_Client
 
     public function admin()
     {
-        new Admin($this->container);
     }
 }
 

@@ -63,13 +63,15 @@ final class Admin
      *
      * @return unknown_type
      */
-    public function __construct($container)
+    public function __construct(\Avh\Di\Container $container)
     {
+        $this->container = $container;
+
         // The Settings Registery
-        $this->settings = $container->get('Rps\\Settings');
+        $this->settings = $this->container->resolve('Rps\Settings');
+
         // Loads the CORE class
         $this->core = $container->get('Rps\\Common\\Core');
-        $this->container = $container;
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {

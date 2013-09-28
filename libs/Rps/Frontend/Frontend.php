@@ -5,7 +5,6 @@ use Rps\Settings;
 use Rps\Db\RpsDb;
 use Rps\Db\RPSPDO;
 use Rps\Common\Core;
-use DI\Container;
 use PDO;
 use DOMDocument;
 
@@ -58,11 +57,11 @@ class Frontend
     /**
      * PHP5 Constructor
      */
-    public function __construct($container)
+    public function __construct(\Avh\Di\Container $container)
     {
         // Get The Registry
         $this->container = $container;
-        $this->settings = $container->resolve('\Rps\Settings');
+        $this->settings = $this->container->resolve('\Rps\Settings');
 
         $this->errmsg = '';
         // Initialize the plugin
