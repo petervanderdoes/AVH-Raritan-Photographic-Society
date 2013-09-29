@@ -99,6 +99,11 @@ class AVH_RPS_Public
     {
         if ( array_key_exists('rpswinclient', $_REQUEST) ) {
 
+            define('DONOTCACHEPAGE', true);
+            global $hyper_cache_stop;
+            $hyper_cache_stop = true;
+            add_filter('w3tc_can_print_comment', '__return_false' );
+
             // Properties of the logged in user
             status_header(200);
             switch ( $_REQUEST['rpswinclient'] )
@@ -1609,7 +1614,7 @@ class AVH_RPS_Public
             $db = new RPSPDO();
         } catch (PDOException $e) {
             $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
-            die($e->getMessage());
+            die();
         }
         if ( $db !== false ) {
             $user = wp_authenticate($username, $password);
@@ -1664,6 +1669,7 @@ class AVH_RPS_Public
         // Return success to the client
         $warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
         $this->_doRESTSuccess($warning);
+        die();
     }
 
     /**
@@ -1675,9 +1681,22 @@ class AVH_RPS_Public
     private function _handleUploadScoresFile($db, $file_name)
     {
         $warning = '';
+        $score = '';
+        $award = '';
+        $entry_id = '';
 
         if ( !$xml = simplexml_load_file($file_name) ) {
             $this->_doRESTError("Failed to open scores XML file");
+            die();
+        }
+        try {
+            $sql = "UPDATE `entries` SET `Score` = :score, `Date_Modified` = NOW(), `Award` = :award WHERE `ID` = :entryid";
+            $sth = $db->prepare($sql);
+            $sth->bindParam(':score', $score, PDO::PARAM_STR);
+            $sth->bindParam(':award', $award, PDO::PARAM_STR);
+            $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
+        } catch (PDOException $e) {
+            $this->_doRESTError("Error - " . $e->getMessage() . " - $sql");
             die();
         }
 
@@ -1685,6 +1704,7 @@ class AVH_RPS_Public
             $comp_date = $comp->Date;
             $classification = $comp->Classification;
             $medium = $comp->Medium;
+
             foreach ( $comp->Entries as $entries ) {
                 foreach ( $entries->Entry as $entry ) {
                     $entry_id = $entry->ID;
@@ -1697,19 +1717,6 @@ class AVH_RPS_Public
                     if ( $entry_id != "" ) {
                         if ( $score != "" ) {
                             try {
-                                $placeholders = array();
-                                $sql = "UPDATE entries SET Score=$score,Date_Modified=NOW()";
-                                if ( $award != "" ) {
-                                    $sql .= ", Award=:award";
-                                    $placeholders[] = array(':award' => array('value' => $award,'data_type' => PDO::PARAM_STR,'length' => 4));
-                                }
-                                $sql .= " WHERE ID=:entry_id";
-                                $placeholders[] = array(':entry_id' => array('value' => $entry_id,'data_type' => PDO::PARAM_INT,'length' => 11));
-
-                                $sth = $db->prepare($sql);
-                                foreach ( $placeholders as $placeholder => $info ) {
-                                    $sth->bindValue($placeholder, $info['value'], $info['data_type'], $info['length']);
-                                }
                                 $sth->execute();
                             } catch (PDOException $e) {
                                 $this->_doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
