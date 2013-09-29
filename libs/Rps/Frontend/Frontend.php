@@ -842,6 +842,12 @@ class Frontend
     {
         global $post;
 
+        // Default values
+        $medium='digital';
+
+        extract( $atts, EXTR_OVERWRITE);
+        $this->settings->medium_subset = $medium;
+
         echo '<script language="javascript">' . "\n";
         echo '	function confirmSubmit() {' . "\n";
         echo '		var agree=confirm("You are about to delete one or more entries.  Are you sure?");' . "\n";
@@ -857,9 +863,6 @@ class Frontend
         echo '	document.MyEntries.submit();' . "\n";
         echo '}' . "\n";
         echo '</script>' . "\n";
-
-        extract(shortcode_atts(array('medium' => 'digital'), $atts));
-        $this->settings->medium_subset = $medium;
 
         if (! empty($this->errmsg)) {
             echo '<div id="errmsg">' . $this->errmsg . '</div>';
