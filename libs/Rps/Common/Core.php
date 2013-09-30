@@ -62,7 +62,7 @@ class Core
     /**
      * PHP5 constructor
      */
-    public function __construct($settings)
+    public function __construct(Settings $settings)
     {
         $this->settings = $settings;
         $this->db_options = 'avhrps_options';

@@ -32,7 +32,7 @@ class ListCompetition extends \WP_List_Table
 
     public $screen;
 
-    public function __construct($settings, $_rpsdb, $core)
+    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core)
     {
 
         // Get The Registry

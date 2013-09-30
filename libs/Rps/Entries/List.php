@@ -32,7 +32,7 @@ class ListEntries extends \WP_List_Table
 
     public $screen;
 
-    public function __construct($settings, $_rpsdb, $core)
+    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core)
     {
         $this->settings = $settings;
         // Initialize the plugin
