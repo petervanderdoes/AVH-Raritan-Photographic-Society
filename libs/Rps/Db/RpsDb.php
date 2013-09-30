@@ -132,7 +132,7 @@ class RpsDb
                             c.Competition_Date >= %s AND
                             c.Competition_Date < %s AND
                             Scored = 'Y' AND
-                            e.Award IS NOT null
+                            e.Award <> ''
                         GROUP BY c.Competition_Date, c.Classification, c.Medium) z", $this->settings->min_date, $this->settings->max_date);
         $_return = $this->rpsdb->get_var($sql);
         return $_return;
@@ -149,7 +149,7 @@ class RpsDb
                 WHERE c.ID = e.Competition_ID and
                     c.Competition_Date >= %s AND
                     c.Competition_Date < %s AND
-                    e.Award Is Not Null
+                    e.Award <> ''
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->settings->min_date, $this->settings->max_date);
         $_x = $this->rpsdb->get_results($sql, ARRAY_A);
         foreach ($_x as $_rec) {
