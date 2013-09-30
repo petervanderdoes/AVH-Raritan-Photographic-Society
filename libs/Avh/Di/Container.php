@@ -23,7 +23,7 @@ class Container implements ContainerInterface, ArrayAccess
     /**
      * Sad but true static instance
      *
-     * @var Orno\Di\Container
+     * @var Avh\Di\Container
      */
     protected static $instance = null;
 

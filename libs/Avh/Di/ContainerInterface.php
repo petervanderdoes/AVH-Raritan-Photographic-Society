@@ -18,7 +18,7 @@ interface ContainerInterface
      * @param mixed $alias
      * @param mixed $object
      * @param boolean $shared
-     * @return \Orno\Di\Definition
+     * @return \Avh\Di\Definition
      */
     public function register ($alias, $object = null, $shared = false);
 

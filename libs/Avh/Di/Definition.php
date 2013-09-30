@@ -46,7 +46,7 @@ class Definition
      * Constructor
      *
      * @param string $class
-     * @param \Orno\Di\ContainerInterface $container
+     * @param \Avh\Di\ContainerInterface $container
      * @param boolean $auto
      */
     public function __construct ($class = null, ContainerInterface $container, $auto = false)
@@ -164,7 +164,7 @@ class Definition
      * Sets a constructor argument for the definition
      *
      * @param mixed $argument
-     * @return \Orno\Di\Definition
+     * @return \Avh\Di\Definition
      */
     public function withArgument ($argument)
     {
@@ -179,7 +179,7 @@ class Definition
      * Proxy to withArgument method, accepts an array of arguments
      *
      * @param array $arguments
-     * @return \Orno\Di\Definition
+     * @return \Avh\Di\Definition
      */
     public function withArguments (array $arguments)
     {
@@ -209,7 +209,7 @@ class Definition
      *
      * @param string $method
      * @param array $arguments
-     * @return \Orno\Di\Definition
+     * @return \Avh\Di\Definition
      */
     public function withMethodCall ($method, array $arguments = array())
     {
@@ -224,7 +224,7 @@ class Definition
      * Proxy to withMethodCall method, accepts array of method calls with method arguments
      *
      * @param array $methods
-     * @return \Orno\Di\Definition
+     * @return \Avh\Di\Definition
      */
     public function withMethodCalls (array $methods = array())
     {

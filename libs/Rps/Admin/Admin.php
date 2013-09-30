@@ -6,7 +6,7 @@ use Rps\Common\Core;
 use Rps\Settings;
 use Avh\Html\FormBuilder;
 use Avh\Utility\Common;
-use DI\Container;
+use Avh\Di\Container;
 use Rps\Constants;
 
 final class Admin
