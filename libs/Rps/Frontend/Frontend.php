@@ -1731,7 +1731,11 @@ class Frontend
                     $last_name = html_entity_decode($entry->Last_Name);
                     $title = html_entity_decode($entry->Title);
                     $score = html_entity_decode($entry->Score);
-                    $award = html_entity_decode($entry->Award);
+                    if (empty($entry->Award)) {
+                        $award = null;
+                    } else {
+                        $award = html_entity_decode($entry->Award);
+                    }
 
                     if ($entry_id != "") {
                         if ($score != "") {
