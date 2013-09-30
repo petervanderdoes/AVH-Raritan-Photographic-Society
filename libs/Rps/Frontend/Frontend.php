@@ -330,7 +330,7 @@ class Frontend
                 $prev_comp = $comp;
 
                 // Grab a new record from the database
-                $dateParts = split(" ", $recs['Competition_Date']);
+                $dateParts = explode(" ", $recs['Competition_Date']);
                 $comp_date = $dateParts[0];
                 $medium = $recs['Medium'];
                 $classification = $recs['Classification'];
@@ -1467,7 +1467,7 @@ class Frontend
         $stat->appendChild($value);
         $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         while ($recs != false) {
-            $dateParts = split(" ", $recs['Competition_Date']);
+            $dateParts = explode(" ", $recs['Competition_Date']);
             $comp_date = $root->appendChild($dom->createElement('Competition_Date'));
             $comp_date->appendChild($dom->createTextNode($dateParts[0]));
             $recs = $sth->fetch(\PDO::FETCH_ASSOC);
@@ -1546,7 +1546,7 @@ class Frontend
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ($record_competitions !== false) {
             $comp_id = $record_competitions['ID'];
-            $dateParts = split(" ", $record_competitions['Competition_Date']);
+            $dateParts = explode(" ", $record_competitions['Competition_Date']);
             $date = $dateParts[0];
             $theme = $record_competitions['Theme'];
             $medium = $record_competitions['Medium'];
