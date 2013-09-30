@@ -71,7 +71,7 @@ final class Admin
         $this->settings = $this->container->resolve('Rps\Settings');
 
         // Loads the CORE class
-        $this->core = $container->get('Rps\\Common\\Core');
+        $this->core = $container->resolve('Rps\Common\Core');
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {
