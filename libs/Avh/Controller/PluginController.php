@@ -2,6 +2,7 @@
 namespace Avh\Controller;
 
 use Avh\Utility\Common;
+
 /**
  * AVH_UR_PluginController
  *
@@ -47,7 +48,7 @@ class PluginController
      *
      * @return object
      */
-    public function __construct(AVH2_Settings $settings, AVH2_Options $options)
+    public function __construct($settings, $options)
     {
         $this->settings = $settings;
         $this->options = $options;

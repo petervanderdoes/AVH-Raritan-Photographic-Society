@@ -1,4 +1,5 @@
 <?php
+namespace Avh\Utility;
 
 /**
  * This class is based of the options class of the scbFramework

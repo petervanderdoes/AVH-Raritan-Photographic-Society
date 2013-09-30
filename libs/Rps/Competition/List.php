@@ -5,7 +5,6 @@ use Rps\Settings;
 use Rps\Common\Core;
 use Rps\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
-use Avh\Utility\Common;
 use Rps\Constants;
 
 class ListCompetition extends \WP_List_Table
