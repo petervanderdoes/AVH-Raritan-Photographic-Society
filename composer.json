@@ -1,7 +1,4 @@
 {
-    "require": {
-        "league/di": "dev-develop"
-    },
     "autoload": {
         "psr-0": { "Avh\\": "libs/",
                     "Rps\\": "libs/"}

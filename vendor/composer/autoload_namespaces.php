@@ -7,6 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Rps\\' => array($baseDir . '/libs'),
-    'League\\Di\\' => array($vendorDir . '/league/di/src', $vendorDir . '/league/di/test'),
     'Avh\\' => array($baseDir . '/libs'),
 );
