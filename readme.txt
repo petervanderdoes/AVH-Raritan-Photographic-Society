@@ -28,7 +28,7 @@ None
 
 == Changelog ==
 
-= Version 1.3.0-dev.41 =
+= Version 1.3.0-dev.55 =
 * Preparation for new development cycle.
 
 = Version 1.2.6 =
