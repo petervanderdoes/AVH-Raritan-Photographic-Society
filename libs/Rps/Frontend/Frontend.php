@@ -358,8 +358,6 @@ class Frontend
                     echo "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
                 }
                 // Display this thumbnail in the the next available column
-                $this->core->rpsCreateThumbnail($recs, 75);
-                $this->core->rpsCreateThumbnail($recs, 400);
                 echo "<td align=\"center\" class=\"thumb_cell\">\n";
                 echo "  <div class=\"thumb_canvas\">\n";
                 echo "<div id='rps_colorbox_title'>$first_name $last_name</div>";
