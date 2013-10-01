@@ -6,6 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Rps\\' => array($baseDir . '/libs'),
+    'RpsCompetition\\' => array($baseDir . '/app'),
     'Avh\\' => array($baseDir . '/libs'),
 );

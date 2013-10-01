@@ -1,6 +1,6 @@
 {
     "autoload": {
         "psr-0": { "Avh\\": "libs/",
-                    "Rps\\": "libs/"}
+                    "RpsCompetition\\": "app/"}
     }
 }
