@@ -1,7 +1,7 @@
 <?php
-namespace Rps\Common;
+namespace RpsCompetition\Common;
 
-use Rps\Settings;
+use RpsCompetition\Settings;
 
 class Core
 {

@@ -9,10 +9,10 @@
  *
  * Copyright 2011 Peter van der Does (email : peter@avirtualhome.com)
  */
-use Rps\Constants;
-use Rps\Admin\Initialize;
-use Rps\Admin\Admin;
-use Rps\Frontend\Frontend;
+use RpsCompetition\Constants;
+use RpsCompetition\Admin\Initialize;
+use RpsCompetition\Admin\Admin;
+use RpsCompetition\Frontend\Frontend;
 use Avh\Di\Container;
 
 /**
@@ -40,13 +40,13 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->register('\Rps\Settings', null, true);
-        $this->container->register('\Rps\Common\Core')->withArgument('\Rps\Settings');
-        $this->container->register('\Rps\Db\RpsDb')->withArguments(array('\Rps\Settings', '\Rps\Common\Core'));
-        $this->container->register('\Rps\Competition\ListCompetition')->withArguments(array('\Rps\Settings', '\Rps\Db\RpsDb', '\Rps\Common\Core'));
-        $this->container->register('\Rps\Entries\ListEntries')->withArguments(array('\Rps\Settings', '\Rps\Db\RpsDb', '\Rps\Common\Core'));
+        $this->container->register('\RpsCompetition\Settings', null, true);
+        $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
+        $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Competition\ListCompetition')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Entries\ListEntries')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
 
-        $this->settings = $this->container->resolve('\Rps\Settings');
+        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
         $this->settings->plugin_dir = $dir;
         $this->settings->plugin_basename = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);

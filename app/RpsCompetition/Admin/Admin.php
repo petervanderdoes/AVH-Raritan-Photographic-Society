@@ -1,13 +1,13 @@
 <?php
-namespace Rps\Admin;
+namespace RpsCompetition\Admin;
 
-use Rps\Competition\ListCompetition;
-use Rps\Common\Core;
-use Rps\Settings;
+use RpsCompetition\Competition\ListCompetition;
+use RpsCompetition\Common\Core;
+use RpsCompetition\Settings;
 use Avh\Html\FormBuilder;
 use Avh\Utility\Common;
 use Avh\Di\Container;
-use Rps\Constants;
+use RpsCompetition\Constants;
 
 final class Admin
 {
@@ -68,10 +68,10 @@ final class Admin
         $this->container = $container;
 
         // The Settings Registery
-        $this->settings = $this->container->resolve('Rps\Settings');
+        $this->settings = $this->container->resolve('RpsCompetition\Settings');
 
         // Loads the CORE class
-        $this->core = $container->resolve('Rps\Common\Core');
+        $this->core = $container->resolve('RpsCompetition\Common\Core');
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {
@@ -149,8 +149,8 @@ final class Admin
     public function actionLoadPagehookCompetition()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\Rps\Competition\ListCompetition');
+        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
+        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListCompetition');
 
         $this->handleRequestCompetition();
 
@@ -292,7 +292,7 @@ final class Admin
 
     public function handleAjax()
     {
-        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
+        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
         if (isset($_POST['scored'])) {
             if ($_POST['scored'] == 'Yes') {
                 $data['ID'] = (int) $_POST['id'];
@@ -629,8 +629,8 @@ final class Admin
     public function actionLoadPagehookCompetitionAdd()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\Rps\Competition\ListCompetition');
+        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
+        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListCompetition');
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -840,8 +840,8 @@ final class Admin
     {
         global $current_screen;
 
-        $this->rpsdb = $this->container->resolve('\Rps\Db\RpsDb');
-        $this->entries_list = $this->container->resolve('\Rps\Entries\ListEntries');
+        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
+        $this->entries_list = $this->container->resolve('\RpsCompetition\Entries\ListEntries');
         $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this,'filterScreenLayoutColumns'), 10, 2);

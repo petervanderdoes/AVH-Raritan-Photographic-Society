@@ -1,8 +1,8 @@
 <?php
-namespace Rps\Db;
+namespace RpsCompetition\Db;
 
-use Rps\Common\Core;
-use Rps\Settings;
+use RpsCompetition\Common\Core;
+use RpsCompetition\Settings;
 use PDO;
 use wpdb;
 

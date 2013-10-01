@@ -1,11 +1,11 @@
 <?php
-namespace Rps\Competition;
+namespace RpsCompetition\Competition;
 
-use Rps\Settings;
-use Rps\Common\Core;
-use Rps\Db\RpsDb;
+use RpsCompetition\Settings;
+use RpsCompetition\Common\Core;
+use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
-use Rps\Constants;
+use RpsCompetition\Constants;
 
 class ListCompetition extends \WP_List_Table
 {

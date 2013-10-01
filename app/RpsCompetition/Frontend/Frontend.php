@@ -1,10 +1,10 @@
 <?php
-namespace Rps\Frontend;
+namespace RpsCompetition\Frontend;
 
-use Rps\Settings;
-use Rps\Db\RpsDb;
-use Rps\Db\RPSPDO;
-use Rps\Common\Core;
+use RpsCompetition\Settings;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\RPSPDO;
+use RpsCompetition\Common\Core;
 use PDO;
 use DOMDocument;
 
@@ -61,12 +61,12 @@ class Frontend
     {
         // Get The Registry
         $this->container = $container;
-        $this->settings = $this->container->resolve('\Rps\Settings');
+        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
 
         $this->errmsg = '';
         // Initialize the plugin
-        $this->core = $container->resolve('\Rps\Common\Core');
-        $this->rpsdb = $container->resolve('\Rps\Db\RpsDb');
+        $this->core = $container->resolve('\RpsCompetition\Common\Core');
+        $this->rpsdb = $container->resolve('\RpsCompetition\Db\RpsDb');
         $this->core_options = $this->core->getOptions();
 
         $this->rpsdb->setCompetitionClose();

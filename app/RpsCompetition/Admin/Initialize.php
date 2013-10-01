@@ -1,5 +1,5 @@
 <?php
-namespace Rps\Admin;
+namespace RpsCompetition\Admin;
 
 class Initialize
 {
