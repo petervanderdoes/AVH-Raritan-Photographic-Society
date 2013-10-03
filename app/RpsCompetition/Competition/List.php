@@ -317,7 +317,7 @@ class ListCompetition extends \WP_List_Table
         echo $competition->Medium;
     }
 
-    public public function column_status($competition)
+    public function column_status($competition)
     {
         echo $competition->Closed;
     }
