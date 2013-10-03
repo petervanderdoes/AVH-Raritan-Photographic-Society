@@ -1,5 +1,5 @@
 <?php
-namespace Rps;
+namespace RpsCompetition;
 
 final class Constants
 {

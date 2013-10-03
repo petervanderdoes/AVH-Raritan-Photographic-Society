@@ -1,6 +1,7 @@
 <?php
 namespace Avh\Utility;
 
+use Avh\Utility\Common;
 /**
  * This class is based of the options class of the scbFramework
  */
@@ -34,7 +35,7 @@ final class AVH_Options
 
         if ($file) {
             register_activation_hook($file, array($this,'handleAction_activate_'));
-            AVH2_Common::addUninstallHook($file, array('AVH2_Options','delete'));
+            Common::addUninstallHook($file, array('AVH_Options','delete'));
         }
     }
 

@@ -139,11 +139,6 @@ class HtmlBuilder
      */
     public static function image($file, array $attributes = NULL)
     {
-        if (strpos($file, '://') === FALSE) {
-            // Add the base URL
-            $file = AVH_PluginController::$base_url . $file;
-        }
-
         // Add the image link
         $attributes['src'] = $file;
 

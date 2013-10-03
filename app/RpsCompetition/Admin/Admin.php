@@ -4,10 +4,10 @@ namespace RpsCompetition\Admin;
 use RpsCompetition\Competition\ListCompetition;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Settings;
+use RpsCompetition\Constants;
 use Avh\Html\FormBuilder;
 use Avh\Utility\Common;
 use Avh\Di\Container;
-use RpsCompetition\Constants;
 
 final class Admin
 {

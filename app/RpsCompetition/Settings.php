@@ -1,5 +1,5 @@
 <?php
-namespace Rps;
+namespace RpsCompetition;
 
 use Avh\Utility\AVH_Settings;
 

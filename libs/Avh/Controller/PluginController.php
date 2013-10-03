@@ -56,7 +56,7 @@ class PluginController
         // Move some of the saved settings to local, this makes things easier to read and probably speed things up as
         // well.
         $this->pluginfile = $this->settings->plugin_file;
-        $this->textdomain = $this->settings->text - domain;
+        $this->textdomain = $this->settings->text_domain;
         self::$base_url = $this->settings->plugin_url;
     }
 
