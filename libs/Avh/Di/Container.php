@@ -46,7 +46,7 @@ class Container implements ContainerInterface, ArrayAccess
      *
      * @param array $config
      */
-    public function __construct (array $config = array())
+    public function __construct(array $config = array())
     {
         self::$instance = $this;
 
@@ -60,7 +60,7 @@ class Container implements ContainerInterface, ArrayAccess
      *
      * @return Container $this
      */
-    public static function getContainer ()
+    public static function getContainer()
     {
         if ( is_null(self::$instance) ) {
             self::$instance = new self();
@@ -77,7 +77,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param array $config
      * @return Container $this
      */
-    public function setConfig (array $config = array())
+    public function setConfig(array $config = array())
     {
         foreach ( $config as $alias => $options ) {
             $shared = ( array_key_exists('shared', $options) ) ?  : false;
@@ -112,7 +112,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param boolean $auto
      * @return void
      */
-    public function register ($alias, $object = null, $shared = false, $auto = false)
+    public function register($alias, $object = null, $shared = false, $auto = false)
     {
         // if $object is null we assume the $alias is a class name that
         // needs to be registered
@@ -148,7 +148,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param string $key
      * @return boolean
      */
-    public function registered ($key)
+    public function registered($key)
     {
         return array_key_exists($key, $this->values);
     }
@@ -162,7 +162,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param array $args
      * @return mixed
      */
-    public function resolve ($alias, array $args = array())
+    public function resolve($alias, array $args = array())
     {
         $object = null;
         $closure = false;
@@ -207,7 +207,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param string $object
      * @return object
      */
-    public function build ($object)
+    public function build($object)
     {
         $reflection = new ReflectionClass($object);
         $construct = $reflection->getConstructor();
@@ -237,7 +237,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param array $params
      * @return array
      */
-    public function dependencies ($object, $params)
+    public function dependencies($object, $params)
     {
         $dependencies = array();
 
@@ -285,7 +285,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param string $object
      * @return array boolean
      */
-    public function getConstructorParams ($object)
+    public function getConstructorParams($object)
     {
         $docCommentClass = ( new ReflectionMethod($object, '__construct') );
         $docComment = $docCommentClass->getDocComment();
@@ -303,7 +303,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param string $key
      * @return mixed
      */
-    public function offsetGet ($key)
+    public function offsetGet($key)
     {
         return $this->resolve($key);
     }
@@ -317,7 +317,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param mixed $value
      * @return void
      */
-    public function offsetSet ($key, $value)
+    public function offsetSet($key, $value)
     {
         $this->register($key, $value);
     }
@@ -330,7 +330,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param string $key
      * @return void
      */
-    public function offsetUnset ($key)
+    public function offsetUnset($key)
     {
         unset($this->values[$key]);
     }
@@ -343,7 +343,7 @@ class Container implements ContainerInterface, ArrayAccess
      * @param string $key
      * @return boolean
      */
-    public function offsetExists ($key)
+    public function offsetExists($key)
     {
         return $this->registered($key);
     }
@@ -357,7 +357,7 @@ class Container implements ContainerInterface, ArrayAccess
      *        Container\Di\ContainerInterface
      * @return void
      */
-    public function setContainer (ContainerInterface $container)
+    public function setContainer(ContainerInterface $container)
     {
         $this->container = $container;
     }

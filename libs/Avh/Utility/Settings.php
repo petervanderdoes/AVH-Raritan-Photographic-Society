@@ -13,7 +13,7 @@ abstract class AVH_Settings
 
     public function __get($key)
     {
-        if (isset($this->_settings[$key])) {
+        if ( isset($this->_settings[$key]) ) {
             $_return = $this->_settings[$key];
         } else {
             $_return = null;
@@ -28,7 +28,7 @@ abstract class AVH_Settings
 
     public function __unset($key)
     {
-        if (isset($this->_settings[$key])) {
+        if ( isset($this->_settings[$key]) ) {
             unset($this->_settings[$key]);
         }
     }

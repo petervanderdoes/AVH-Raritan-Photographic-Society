@@ -49,7 +49,7 @@ class Definition
      * @param \Avh\Di\ContainerInterface $container
      * @param boolean $auto
      */
-    public function __construct ($class = null, ContainerInterface $container, $auto = false)
+    public function __construct($class = null, ContainerInterface $container, $auto = false)
     {
         $this->class = $class;
         $this->container = $container;
@@ -63,7 +63,7 @@ class Definition
      *
      * @return object
      */
-    public function __invoke ()
+    public function __invoke()
     {
         $object = null;
 
@@ -83,7 +83,7 @@ class Definition
      *
      * @return object
      */
-    public function handleConstructorInjection ()
+    public function handleConstructorInjection()
     {
         if ( $this->hasArguments() ) {
             $reflectionClass = new ReflectionClass($this->class);
@@ -117,7 +117,7 @@ class Definition
      * @param object $object
      * @return object
      */
-    public function handleMethodCalls ($object)
+    public function handleMethodCalls($object)
     {
         if ( $this->hasMethodCalls() ) {
             foreach ( $this->methods as $method ) {
@@ -153,7 +153,7 @@ class Definition
      *
      * @return boolean
      */
-    public function hasClass ()
+    public function hasClass()
     {
         return ( !is_null($this->class) );
     }
@@ -166,7 +166,7 @@ class Definition
      * @param mixed $argument
      * @return \Avh\Di\Definition
      */
-    public function withArgument ($argument)
+    public function withArgument($argument)
     {
         $this->arguments[] = $argument;
 
@@ -181,7 +181,7 @@ class Definition
      * @param array $arguments
      * @return \Avh\Di\Definition
      */
-    public function withArguments (array $arguments)
+    public function withArguments(array $arguments)
     {
         foreach ( $arguments as $argument ) {
             $this->withArgument($argument);
@@ -197,7 +197,7 @@ class Definition
      *
      * @return boolean
      */
-    public function hasArguments ()
+    public function hasArguments()
     {
         return ( !empty($this->arguments) );
     }
@@ -211,9 +211,9 @@ class Definition
      * @param array $arguments
      * @return \Avh\Di\Definition
      */
-    public function withMethodCall ($method, array $arguments = array())
+    public function withMethodCall($method, array $arguments = array())
     {
-        $this->methods[] = array('method' => $method,'arguments' => $arguments);
+        $this->methods[] = array('method' => $method, 'arguments' => $arguments);
 
         return $this;
     }
@@ -226,7 +226,7 @@ class Definition
      * @param array $methods
      * @return \Avh\Di\Definition
      */
-    public function withMethodCalls (array $methods = array())
+    public function withMethodCalls(array $methods = array())
     {
         foreach ( $methods as $method => $arguments ) {
             $this->withMethodCall($method, $arguments);
@@ -242,7 +242,7 @@ class Definition
      *
      * @return boolean
      */
-    public function hasMethodCalls ()
+    public function hasMethodCalls()
     {
         return ( !empty($this->methods) );
     }

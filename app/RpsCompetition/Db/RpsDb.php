@@ -1,6 +1,5 @@
 <?php
 namespace RpsCompetition\Db;
-
 use RpsCompetition\Common\Core;
 use RpsCompetition\Settings;
 use PDO;
@@ -20,9 +19,7 @@ class RpsDb
      * @var Settings
      */
     private $settings;
-
     private $rpsdb;
-
     private $user_id;
 
     /**
@@ -46,7 +43,7 @@ class RpsDb
             ORDER BY Season ' . $order, $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
 
         $_result = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_result as $key => $value) {
+        foreach ( $_result as $key => $value ) {
             $_seasons[$key] = $value['Season'];
         }
         return $_seasons;
@@ -65,7 +62,7 @@ class RpsDb
             ORDER BY Season', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
 
         $_result = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_result as $key => $value) {
+        foreach ( $_result as $key => $value ) {
             $_seasons[$key] = $value['Season'];
         }
         return $_seasons;
@@ -99,7 +96,7 @@ class RpsDb
             ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->settings->season_start_date, $this->settings->season_end_date);
 
         $_x = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_x as $key => $_rec) {
+        foreach ( $_x as $key => $_rec ) {
             $user_info = get_userdata($_rec['Member_ID']);
             $_rec['FirstName'] = $user_info->user_firstname;
             $_rec['LastName'] = $user_info->user_lastname;
@@ -152,7 +149,7 @@ class RpsDb
                     e.Award <> ''
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->settings->min_date, $this->settings->max_date);
         $_x = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_x as $_rec) {
+        foreach ( $_x as $_rec ) {
             $user_info = get_userdata($_rec['Member_ID']);
             $_rec['FirstName'] = $user_info->user_firstname;
             $_rec['LastName'] = $user_info->user_lastname;
@@ -199,7 +196,7 @@ class RpsDb
     {
 
         // Select the list of open competitions that match this member's classification(s)
-        if ($subset) {
+        if ( $subset ) {
             $and_medium_subset = " AND c.Medium like %s";
         } else {
             $and_medium_subset = '';
@@ -229,15 +226,15 @@ class RpsDb
 
     public function getCompetitions($query_vars, $output = OBJECT)
     {
-        $defaults = array('status' => '','search' => '','offset' => '','number' => '','orderby' => 'ID','order' => 'ASC','count' => false);
+        $defaults = array('status' => '', 'search' => '', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
         $this->_query_vars = wp_parse_args($query_vars, $defaults);
         extract($this->_query_vars, EXTR_SKIP);
 
         $number = absint($number);
         $offset = absint($offset);
 
-        if (! empty($number)) {
-            if ($offset) {
+        if ( !empty($number) ) {
+            if ( $offset ) {
                 $limits = 'LIMIT ' . $offset . ',' . $number;
             } else {
                 $limits = 'LIMIT ' . $number;
@@ -246,7 +243,7 @@ class RpsDb
             $limits = '';
         }
 
-        if ($count) {
+        if ( $count ) {
             $fields = 'COUNT(*)';
             $orderby = 'ID';
             $order = '';
@@ -255,7 +252,8 @@ class RpsDb
         }
 
         $join = '';
-        switch ($status) {
+        switch ( $status )
+        {
             case 'open':
                 $where = 'Closed = "N"';
                 break;
@@ -270,17 +268,17 @@ class RpsDb
         }
         $query = "SELECT $fields FROM competitions $join WHERE $where ORDER BY $orderby $order $limits";
 
-        if ($count) {
+        if ( $count ) {
             return $this->rpsdb->get_var($query);
         }
 
         $_result = $this->rpsdb->get_results($query);
-        if ($output == OBJECT) {
+        if ( $output == OBJECT ) {
             return $_result;
-        } elseif ($output == ARRAY_A) {
+        } elseif ( $output == ARRAY_A ) {
             $_result_array = get_object_vars($_result);
             return $_result_array;
-        } elseif ($output == ARRAY_N) {
+        } elseif ( $output == ARRAY_N ) {
             $_result_array = array_values(get_object_vars($_result));
             return $_result_array;
         } else {
@@ -290,17 +288,17 @@ class RpsDb
 
     public function getEntries($query_vars, $output = OBJECT)
     {
-        $defaults = array('join' => '','where' => '1=1','fields' => '*','offset' => '','number' => '','orderby' => 'ID','order' => 'ASC','count' => false);
+        $defaults = array('join' => '', 'where' => '1=1', 'fields' => '*', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
         $this->_query_vars = wp_parse_args($query_vars, $defaults);
         extract($this->_query_vars, EXTR_SKIP);
 
-        $order = ('ASC' == strtoupper($order)) ? 'ASC' : 'DESC';
+        $order = ( 'ASC' == strtoupper($order) ) ? 'ASC' : 'DESC';
 
         $number = absint($number);
         $offset = absint($offset);
 
-        if (! empty($number)) {
-            if ($offset) {
+        if ( !empty($number) ) {
+            if ( $offset ) {
                 $limits = 'LIMIT ' . $offset . ',' . $number;
             } else {
                 $limits = 'LIMIT ' . $number;
@@ -309,24 +307,24 @@ class RpsDb
             $limits = '';
         }
 
-        if ($count) {
+        if ( $count ) {
             $fields = 'COUNT(*)';
             $orderby = 'ID';
         }
 
         $query = "SELECT $fields FROM entries $join WHERE $where ORDER BY $orderby $order $limits";
 
-        if ($count) {
+        if ( $count ) {
             return $this->rpsdb->get_var($query);
         }
 
         $_result = $this->rpsdb->get_results($query);
-        if ($output == OBJECT) {
+        if ( $output == OBJECT ) {
             return $_result;
-        } elseif ($output == ARRAY_A) {
+        } elseif ( $output == ARRAY_A ) {
             $_result_array = get_object_vars($_result);
             return $_result_array;
-        } elseif ($output == ARRAY_N) {
+        } elseif ( $output == ARRAY_N ) {
             $_result_array = array_values(get_object_vars($_result));
             return $_result_array;
         } else {
@@ -341,66 +339,66 @@ class RpsDb
      *
      * @param array $data
      * @param bool $wp_error
-     *            Optional. Allow return of WP_Error on failure.
+     *        Optional. Allow return of WP_Error on failure.
      * @return object WP_Error on failure. The post ID on success.
      */
     public function insertCompetition($data)
     {
         // Are we updating or creating?
         $update = false;
-        if (! empty($data['ID'])) {
+        if ( !empty($data['ID']) ) {
             $update = true;
             $competition_ID = (int) $data['ID'];
             $where = array('ID' => $competition_ID);
-            if (! isset($data['Date_Modified'])) {
+            if ( !isset($data['Date_Modified']) ) {
                 $data['Date_Modified'] = current_time('mysql');
             }
             $data = stripslashes_deep($data);
-            if (false === $this->rpsdb->update('competitions', $data, $where)) {
+            if ( false === $this->rpsdb->update('competitions', $data, $where) ) {
                 return new \WP_Error('db_update_error', 'Could not update competition into the database', $this->rpsdb->last_error);
             }
         } else {
             $competition_ID = 0;
-            if (! isset($data['Competition_Date'])) {
+            if ( !isset($data['Competition_Date']) ) {
                 $data['Competition_Date'] = current_time('mysql');
             }
-            if (! isset($data['Medium'])) {
+            if ( !isset($data['Medium']) ) {
                 $data['Medium'] = '';
             }
-            if (! isset($data['Classification'])) {
+            if ( !isset($data['Classification']) ) {
                 $data['Classification'] = '';
             }
-            if (! isset($data['Theme'])) {
+            if ( !isset($data['Theme']) ) {
                 $data['Theme'] = '';
             }
-            if (! isset($data['Date_Created'])) {
+            if ( !isset($data['Date_Created']) ) {
                 $data['Date_Created'] = current_time('mysql');
             }
-            if (! isset($data['Date_Modified'])) {
+            if ( !isset($data['Date_Modified']) ) {
                 $data['Date_Modified'] = current_time('mysql');
             }
-            if (! isset($data['Closed'])) {
+            if ( !isset($data['Closed']) ) {
                 $data['Closed'] = 'N';
             }
-            if (! isset($data['Scored'])) {
+            if ( !isset($data['Scored']) ) {
                 $data['Scored'] = 'N';
             }
-            if (! isset($data['Close_Date'])) {
+            if ( !isset($data['Close_Date']) ) {
                 $data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
                 $date_array = getdate($data['Close_Date']);
                 $data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
             }
-            if (! isset($data['Max_Entries'])) {
+            if ( !isset($data['Max_Entries']) ) {
                 $data['Max_Entries'] = 2;
             }
-            if (! isset($data['Num_Judges'])) {
+            if ( !isset($data['Num_Judges']) ) {
                 $data['Num_Judges'] = 1;
             }
-            if (! isset($data['Special_Event'])) {
+            if ( !isset($data['Special_Event']) ) {
                 $data['Special_Event'] = 'N';
             }
             $data = stripslashes_deep($data);
-            if (false === $this->rpsdb->insert('competitions', $data)) {
+            if ( false === $this->rpsdb->insert('competitions', $data) ) {
                 return new \WP_Error('db_insert_error', __('Could not insert competition into the database'), $this->rpsdb->last_error);
             }
             $competition_ID = (int) $this->rpsdb->insert_id;
@@ -428,7 +426,7 @@ class RpsDb
                 AND Classification = %s
                 AND Medium = %s", $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
         $_closed = $this->rpsdb->get_var($sql);
-        if ($_closed == "Y") {
+        if ( $_closed == "Y" ) {
             $_return = true;
         } else {
             $_return = false;
@@ -506,12 +504,12 @@ class RpsDb
             FROM entries
             WHERE ID = %s", $id);
         $result = $this->rpsdb->get_row($sql);
-        if ($output == OBJECT) {
+        if ( $output == OBJECT ) {
             return $result;
-        } elseif ($output == ARRAY_A) {
+        } elseif ( $output == ARRAY_A ) {
             $resultArray = get_object_vars($result);
             return $resultArray;
-        } elseif ($output == ARRAY_N) {
+        } elseif ( $output == ARRAY_N ) {
             $resultArray = array_values(get_object_vars($result));
             return $resultArray;
         } else {
@@ -528,12 +526,12 @@ class RpsDb
                 AND e.ID = %s", $id);
         $result = $this->rpsdb->get_row($sql);
 
-        if ($output == OBJECT) {
+        if ( $output == OBJECT ) {
             return $result;
-        } elseif ($output == ARRAY_A) {
+        } elseif ( $output == ARRAY_A ) {
             $resultArray = get_object_vars($result);
             return $resultArray;
-        } elseif ($output == ARRAY_N) {
+        } elseif ( $output == ARRAY_N ) {
             $resultArray = array_values(get_object_vars($result));
             return $resultArray;
         } else {
@@ -546,7 +544,7 @@ class RpsDb
     {
         $where = $this->rpsdb->prepare('ID=%d', $id);
         $result = $this->getCompetitions(array('where' => $where));
-        if (empty($result)) {
+        if ( empty($result) ) {
             $return = false;
         } else {
             $return = $result[0];
@@ -573,7 +571,7 @@ class RpsDb
                 AND Member_ID = %s
                 AND Title = %s", $id, $this->user_id, $title);
         $_return = $this->rpsdb->get_var($sql);
-        if ($_return > 0) {
+        if ( $_return > 0 ) {
             $_return = true;
         } else {
             $_return = false;
@@ -596,19 +594,19 @@ class RpsDb
      *
      * @param array $data
      * @param bool $wp_error
-     *            Optional. Allow return of WP_Error on failure.
+     *        Optional. Allow return of WP_Error on failure.
      * @return object WP_Error on failure. The post ID on success.
      */
     public function updateEntry($data)
     {
-        if (! empty($data['ID'])) {
+        if ( !empty($data['ID']) ) {
             $entry_ID = (int) $data['ID'];
             $where = array('ID' => $entry_ID);
-            if (! isset($data['Date_Modified'])) {
+            if ( !isset($data['Date_Modified']) ) {
                 $data['Date_Modified'] = current_time('mysql');
             }
             $data = stripslashes_deep($data);
-            if (false === $this->rpsdb->update('entries', $data, $where)) {
+            if ( false === $this->rpsdb->update('entries', $data, $where) ) {
                 return new \WP_Error('db_update_error', 'Could not update entry in the database', $this->rpsdb->last_error);
             }
         }
@@ -618,7 +616,7 @@ class RpsDb
 
     public function updateEntriesTitle($new_title, $new_file_name, $id)
     {
-        $data = array('Title' => $new_title,'Server_File_Name' => $new_file_name,'Date_Modified' => current_time('mysql'));
+        $data = array('Title' => $new_title, 'Server_File_Name' => $new_file_name, 'Date_Modified' => current_time('mysql'));
         $_where = array('ID' => $id);
         $_return = $this->rpsdb->update('entries', $data, $_where);
         return $_return;
@@ -647,18 +645,18 @@ class RpsDb
         $count = $this->rpsdb->get_results("SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed", ARRAY_A);
 
         $total = 0;
-        $status = array('N' => 'open','Y' => 'closed');
+        $status = array('N' => 'open', 'Y' => 'closed');
         $known_types = array_keys($status);
-        foreach ((array) $count as $row) {
+        foreach ( (array) $count as $row ) {
             // Don't count post-trashed toward totals
             $total += $row['num_competitions'];
-            if (in_array($row['Closed'], $known_types))
+            if ( in_array($row['Closed'], $known_types) )
                 $stats[$status[$row['Closed']]] = (int) $row['num_competitions'];
         }
 
         $stats['all'] = $total;
-        foreach ($status as $key) {
-            if (empty($stats[$key]))
+        foreach ( $status as $key ) {
+            if ( empty($stats[$key]) )
                 $stats[$key] = 0;
         }
 
@@ -678,15 +676,10 @@ class RpsDb
 } // End Class RpsDb
 class RPSPDO extends \PDO
 {
-
     private $engine;
-
     private $host;
-
     private $database;
-
     private $user;
-
     private $pass;
 
     public function __construct()

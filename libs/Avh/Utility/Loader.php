@@ -13,42 +13,34 @@
  */
 class AVH_Loader
 {
-
     private static $objects;
-
     private static $dir;
-
     private static $class_file_prefix;
-
     private static $class_name_prefix;
-
     private static $class_name;
-
     private static $class_file;
-
     const NAMESPACE_SEPERATOR = '\\';
-
     const PREFIX_SPERATOR = '_';
 
     /**
      * Get an instance of a class.
      *
      * @param string $class
-     *            The class name
+     *        The class name
      * @param boolean $store
      * @return object
      */
     public static function getInstance($class, $store = true)
     {
         self::setClassLoaderProperties($class);
-        if (isset(self::$objects[self::$class_name])) {
-            return (self::$objects[self::$class_name]);
+        if ( isset(self::$objects[self::$class_name]) ) {
+            return ( self::$objects[self::$class_name] );
         }
-        if (! class_exists(self::$class_name)) {
-            require_once (self::$dir . self::$class_file);
+        if ( !class_exists(self::$class_name) ) {
+            require_once ( self::$dir . self::$class_file );
         }
         $_object = new self::$class_name();
-        if ($store) {
+        if ( $store ) {
             self::$objects[self::$class_name] = $_object;
         }
         return $_object;
@@ -65,8 +57,8 @@ class AVH_Loader
     {
         self::setClassLoaderProperties($class);
 
-        if (! class_exists(self::$class_name)) {
-            require_once (self::$dir . self::$class_file);
+        if ( !class_exists(self::$class_name) ) {
+            require_once ( self::$dir . self::$class_file );
         }
     }
 
@@ -77,14 +69,14 @@ class AVH_Loader
      * file from (self::$class_file)
      *
      * @param string $class
-     *            Name of the class you want to load
+     *        Name of the class you want to load
      */
     private static function setClassLoaderProperties($class)
     {
         $_file = str_replace(self::NAMESPACE_SEPERATOR, DIRECTORY_SEPARATOR, $class) . '.php';
         list ($type) = explode(self::NAMESPACE_SEPERATOR, $class, 2);
         $_class = end(explode(self::NAMESPACE_SEPERATOR, $class));
-        $_name = ('Avh' == $type) ? 'AVH2_' . $_class : self::$class_name_prefix . $_class;
+        $_name = ( 'Avh' == $type ) ? 'AVH2_' . $_class : self::$class_name_prefix . $_class;
         self::$class_name = $_name;
         self::$class_file = $_file;
     }
@@ -92,7 +84,7 @@ class AVH_Loader
     /**
      *
      * @param string $dir
-     *            Directory to set
+     *        Directory to set
      */
     public static function setDir($dir)
     {
@@ -102,7 +94,7 @@ class AVH_Loader
     /**
      *
      * @param string $class_name_prefix
-     *            the class name prefix to set
+     *        the class name prefix to set
      */
     public static function setClassNamePrefix($class_name_prefix)
     {
@@ -115,6 +107,6 @@ class AVH_Loader
      */
     public static function setClassProperties($properties)
     {
-        $default_properties = array('type' => 'system','store' => false);
+        $default_properties = array('type' => 'system', 'store' => false);
     }
 }

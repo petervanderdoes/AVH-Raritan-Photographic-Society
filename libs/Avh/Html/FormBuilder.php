@@ -1,6 +1,5 @@
 <?php
 namespace Avh\Html;
-
 use Avh\Html\HtmlBuilder;
 
 class FormBuilder
@@ -8,9 +7,7 @@ class FormBuilder
 
     // @var Use tables to create FormBuilder
     private $use_table = false;
-
     private $option_name;
-
     private $nonce;
 
     /**
@@ -26,15 +23,15 @@ class FormBuilder
      * echo FormBuilder::open(null, array('enctype' => 'multipart/form-data'));
      *
      * @param mixed $action
-     *            form action, defaults to the current request URI, or [Request] class to use
+     *        form action, defaults to the current request URI, or [Request] class to use
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses HtmlBuilder::attributes
      */
     public function open($action = null, array $attributes = null)
     {
-        if (! isset($attributes['method'])) {
+        if ( !isset($attributes['method']) ) {
             // Use POST method
             $attributes['method'] = 'post';
         }
@@ -78,7 +75,7 @@ class FormBuilder
     public function nonce_field($referer = true)
     {
         $nonce_field = $this->hidden('_wpnonce', wp_create_nonce($this->nonce));
-        if ($referer) {
+        if ( $referer ) {
             $ref = $_SERVER['REQUEST_URI'];
             $nonce_field .= $this->hidden('_wp_http_referer', $ref);
         }
@@ -105,8 +102,8 @@ class FormBuilder
         $_label = $this->label($name, $label);
         $_return = $this->output_label($_label);
         $_field = '';
-        foreach ($options as $value => $attr) {
-            $_checked = (isset($attr['checked']) ? $attr['checked'] : false);
+        foreach ( $options as $value => $attr ) {
+            $_checked = ( isset($attr['checked']) ? $attr['checked'] : false );
             $_field .= $this->checkbox($value, true, $_checked, $attributes);
             $_field .= $this->label($value, $attr['text']);
             $_field .= '<br>';
@@ -128,11 +125,11 @@ class FormBuilder
      * echo FormBuilder::hidden('csrf', $token);
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $value
-     *            input value
+     *        input value
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses $this->input
      */
@@ -151,11 +148,11 @@ class FormBuilder
      * echo FormBuilder::button('save', 'Save Profile', array('type' => 'submit'));
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $body
-     *            input value
+     *        input value
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses HtmlBuilder::attributes
      */
@@ -173,11 +170,11 @@ class FormBuilder
      * echo FormBuilder::submit(null, 'Login');
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $value
-     *            input value
+     *        input value
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses FormBuilder::input
      */
@@ -197,18 +194,18 @@ class FormBuilder
      * echo FormBuilder::input('username', $username);
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $value
-     *            input value
+     *        input value
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses HtmlBuilder::attributes
      */
     private function input($name, $value = null, array $attributes = null, $use_option_name = true)
     {
         // Set the input name
-        if (isset($this->option_name) && $use_option_name) {
+        if ( isset($this->option_name) && $use_option_name ) {
             $attributes['name'] = $this->option_name . '[' . $name . ']';
         } else {
             $attributes['name'] = $name;
@@ -217,12 +214,12 @@ class FormBuilder
         // Set the input value
         $attributes['value'] = $value;
 
-        if (! isset($attributes['type'])) {
+        if ( !isset($attributes['type']) ) {
             // Default type is text
             $attributes['type'] = 'text';
         }
 
-        if (! isset($attributes['id'])) {
+        if ( !isset($attributes['id']) ) {
             $attributes['id'] = $name;
         }
 
@@ -235,11 +232,11 @@ class FormBuilder
      * echo FormBuilder::password('password');
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $value
-     *            input value
+     *        input value
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses $this->input
      */
@@ -257,9 +254,9 @@ class FormBuilder
      * echo FormBuilder::file('image');
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses $this->input
      */
@@ -276,13 +273,13 @@ class FormBuilder
      * echo FormBuilder::checkbox('remember_me', 1, (bool) $remember);
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $value
-     *            input value
+     *        input value
      * @param boolean $checked
-     *            checked status
+     *        checked status
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses $this->input
      */
@@ -290,7 +287,7 @@ class FormBuilder
     {
         $attributes['type'] = 'checkbox';
 
-        if ($checked === true) {
+        if ( $checked === true ) {
             // Make the checkbox active
             $attributes[] = 'checked';
         }
@@ -305,13 +302,13 @@ class FormBuilder
      * echo FormBuilder::radio('like_cats', 0, ! $cats);
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $value
-     *            input value
+     *        input value
      * @param boolean $checked
-     *            checked status
+     *        checked status
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses $this->input
      */
@@ -319,7 +316,7 @@ class FormBuilder
     {
         $attributes['type'] = 'radio';
 
-        if ($checked === true) {
+        if ( $checked === true ) {
             // Make the radio active
             $attributes[] = 'checked';
         }
@@ -333,13 +330,13 @@ class FormBuilder
      * echo FormBuilder::textarea('about', $about);
      *
      * @param string $name
-     *            textarea name
+     *        textarea name
      * @param string $body
-     *            textarea body
+     *        textarea body
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @param boolean $double_encode
-     *            encode existing HTML characters
+     *        encode existing HTML characters
      * @return string
      * @uses HtmlBuilder::attributes
      */
@@ -349,7 +346,7 @@ class FormBuilder
         $attributes['name'] = $name;
 
         // Add default rows and cols attributes (required)
-        $attributes += array('rows' => 10,'cols' => 50);
+        $attributes += array('rows' => 10, 'cols' => 50);
 
         return '<textarea' . HtmlBuilder::attributes($attributes) . '>' . esc_textarea($body) . '</textarea>';
     }
@@ -362,32 +359,32 @@ class FormBuilder
      * [!!] Support for multiple selected options was added in v3.0.7.
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param array $options
-     *            available options
+     *        available options
      * @param mixed $selected
-     *            selected option string, or an array of selected options
+     *        selected option string, or an array of selected options
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses HtmlBuilder::attributes
      */
     private function getSelect($name, array $options = null, $selected = null, array $attributes = null)
     {
         // Set the input name
-        if (isset($this->option_name)) {
+        if ( isset($this->option_name) ) {
             $attributes['name'] = $this->option_name . '[' . $name . ']';
         } else {
             $attributes['name'] = $name;
         }
 
-        if (is_array($selected)) {
+        if ( is_array($selected) ) {
             // This is a multi-select, god save us!
             $attributes[] = 'multiple';
         }
 
-        if (! is_array($selected)) {
-            if ($selected === null) {
+        if ( !is_array($selected) ) {
+            if ( $selected === null ) {
                 // Use an empty array
                 $selected = array();
             } else {
@@ -396,26 +393,26 @@ class FormBuilder
             }
         }
 
-        if (empty($options)) {
+        if ( empty($options) ) {
             // There are no options
             $options = '';
         } else {
-            foreach ($options as $value => $name) {
-                if (is_array($name)) {
+            foreach ( $options as $value => $name ) {
+                if ( is_array($name) ) {
                     // Create a new optgroup
                     $group = array('label' => $value);
 
                     // Create a new list of options
                     $_options = array();
 
-                    foreach ($name as $_value => $_name) {
+                    foreach ( $name as $_value => $_name ) {
                         // Force value to be string
                         $_value = (string) $_value;
 
                         // Create a new attribute set for this option
                         $option = array('value' => $_value);
 
-                        if (in_array($_value, $selected)) {
+                        if ( in_array($_value, $selected) ) {
                             // This option is selected
                             $option[] = 'selected';
                         }
@@ -435,7 +432,7 @@ class FormBuilder
                     // Create a new attribute set for this option
                     $option = array('value' => $value);
 
-                    if (in_array($value, $selected)) {
+                    if ( in_array($value, $selected) ) {
                         // This option is selected
                         $option[] = 'selected';
                     }
@@ -458,20 +455,20 @@ class FormBuilder
      * echo FormBuilder::image(null, null, array('src' => 'media/img/login.png'));
      *
      * @param string $name
-     *            input name
+     *        input name
      * @param string $value
-     *            input value
+     *        input value
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @param boolean $index
-     *            add index file to URL?
+     *        add index file to URL?
      * @return string
      * @uses $this->input
      */
     private function image($name, $value, array $attributes = null, $index = false)
     {
-        if (! empty($attributes['src'])) {
-            if (strpos($attributes['src'], '://') === false) {
+        if ( !empty($attributes['src']) ) {
+            if ( strpos($attributes['src'], '://') === false ) {
                 // @todo Add the base URL
                 // $attributes['src'] = URL::base($index) . $attributes['src'];
             }
@@ -489,17 +486,17 @@ class FormBuilder
      * echo FormBuilder::label('username', 'Username');
      *
      * @param string $input
-     *            target input
+     *        target input
      * @param string $text
-     *            label text
+     *        label text
      * @param array $attributes
-     *            html attributes
+     *        html attributes
      * @return string
      * @uses HtmlBuilder::attributes
      */
     private function label($input, $text = null, array $attributes = null)
     {
-        if ($text === null) {
+        if ( $text === null ) {
             // Use the input name as the text
             $text = ucwords(preg_replace('/[\W_]+/', ' ', $input));
         }
@@ -519,7 +516,7 @@ class FormBuilder
 
     private function output_label($label)
     {
-        if ($this->use_table) {
+        if ( $this->use_table ) {
             return "\n<tr>\n\t<th scope='row'>" . $label . "</th>";
         } else {
             return "\n" . $label;
@@ -528,7 +525,7 @@ class FormBuilder
 
     private function output_field($field)
     {
-        if ($this->use_table) {
+        if ( $this->use_table ) {
             return "\n\t<td>\n\t\t" . $field . "\n\t</td>";
         } else {
             return "\n" . $field;

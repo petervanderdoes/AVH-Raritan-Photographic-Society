@@ -1,13 +1,12 @@
 <?php
 namespace Avh\Utility;
-
 use Avh\Utility\Common;
+
 /**
  * This class is based of the options class of the scbFramework
  */
 final class AVH_Options
 {
-
     protected $_key; // the option name
     protected $_defaults; // the default values
 
@@ -23,19 +22,19 @@ final class AVH_Options
      * Create a new set of options
      *
      * @param string $key
-     *            Option name
+     *        Option name
      * @param string $file
      * @param array $defaults
-     *            An associative array of default values (optional)
+     *        An associative array of default values (optional)
      */
     public function load($option_name, $file, $defaults = array())
     {
         $this->_key = $option_name;
         $this->_defaults = $defaults;
 
-        if ($file) {
-            register_activation_hook($file, array($this,'handleAction_activate_'));
-            Common::addUninstallHook($file, array('AVH_Options','delete'));
+        if ( $file ) {
+            register_activation_hook($file, array($this, 'handleAction_activate_'));
+            Common::addUninstallHook($file, array('AVH_Options', 'delete'));
         }
     }
 
@@ -43,13 +42,13 @@ final class AVH_Options
      * Get option values for one, many or all fields
      *
      * @param string|array $field
-     *            The field(s) to get
+     *        The field(s) to get
      * @return mixed Whatever is in those fields
      */
     public function getOptions($field = '')
     {
         $_data = get_option($this->_key, false);
-        if (false === $_data) {
+        if ( false === $_data ) {
             $_data = array_merge($this->_defaults, $_data);
         }
         return $this->get($field, $_data);
@@ -59,14 +58,14 @@ final class AVH_Options
      * Set all data fields, certain fields or a single field
      *
      * @param string|array $field
-     *            The field to update or an associative array
+     *        The field to update or an associative array
      * @param mixed $value
-     *            The new value ( ignored if $field is array )
+     *        The new value ( ignored if $field is array )
      * @return null
      */
     public function setOptions($field, $value = '')
     {
-        if (is_array($field))
+        if ( is_array($field) )
             $_newdata = $field;
         else
             $_newdata = array($field => $value);
@@ -141,14 +140,14 @@ final class AVH_Options
      */
     private function get($field, $data)
     {
-        if (empty($field))
+        if ( empty($field) )
             return $data;
 
-        if (is_string($field))
+        if ( is_string($field) )
             return $data[$field];
 
-        foreach ($field as $key)
-            if (isset($data[$key]))
+        foreach ( $field as $key )
+            if ( isset($data[$key]) )
                 $_result[] = $data[$key];
 
         return $_result;

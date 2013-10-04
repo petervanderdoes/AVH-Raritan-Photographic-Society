@@ -13,9 +13,9 @@ final class Common
     public static function getWordpressVersion()
     {
         static $_version = null;
-        if (! isset($_version)) {
+        if ( !isset($_version) ) {
             // Include WordPress version
-            require (ABSPATH . WPINC . '/version.php');
+            require ( ABSPATH . WPINC . '/version.php' );
             $_version = (float) $wp_version;
         }
         return $_version;
@@ -25,15 +25,15 @@ final class Common
      * Determines if the current version of PHP is greater then the supplied value
      *
      * @param $version string
-     *            Defaults to 5.0.0
+     *        Defaults to 5.0.0
      * @return bool
      */
     public static function isPHP($version = '5.0.0')
     {
         static $_is_php = null;
         $version = (string) $version;
-        if (! isset($_is_php[$version])) {
-            $_is_php[$version] = (version_compare(PHP_VERSION, $version) < 0) ? false : true;
+        if ( !isset($_is_php[$version]) ) {
+            $_is_php[$version] = ( version_compare(PHP_VERSION, $version) < 0 ) ? false : true;
         }
         return $_is_php[$version];
     }
@@ -74,7 +74,7 @@ final class Common
      */
     public static function getIp2long($ip)
     {
-        if (is_numeric($ip)) {
+        if ( is_numeric($ip) ) {
             $_return = sprintf("%u", floatval($ip));
         } else {
             $_return = sprintf("%u", floatval(ip2long($ip)));
@@ -89,11 +89,11 @@ final class Common
      *
      * @param string $file
      * @param callback $callback
-     *            The callback to run when the hook is called. Must be a static method or function.
+     *        The callback to run when the hook is called. Must be a static method or function.
      */
     public static function addUninstallHook($file, $callback)
     {
-        if (is_array($callback) && is_object($callback[0])) {
+        if ( is_array($callback) && is_object($callback[0]) ) {
             _doing_it_wrong(__FUNCTION__, __('Only a static class method or function can be used in an uninstall hook.'), '3.1');
             return;
         }

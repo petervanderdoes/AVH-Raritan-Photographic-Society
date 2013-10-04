@@ -33,41 +33,41 @@ $rps_basename = plugin_basename($plugin);
 
 class AVH_RPS_Client
 {
-    private $container;
-    private $settings;
+	private $container;
+	private $settings;
 
-    public function __construct ($dir, $basename)
-    {
-        $this->container = new Container();
+	public function __construct($dir, $basename)
+	{
+		$this->container = new Container();
+		
+		$this->container->register('\RpsCompetition\Settings', null, true);
+		$this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
+		$this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
+		$this->container->register('\RpsCompetition\Competition\ListCompetition')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+		$this->container->register('\RpsCompetition\Entries\ListEntries')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+		
+		$this->settings = $this->container->resolve('\RpsCompetition\Settings');
+		$this->settings->plugin_dir = $dir;
+		$this->settings->plugin_basename = $basename;
+		$this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
+		
+		add_action('plugins_loaded', array($this, 'init'));
+	}
 
-        $this->container->register('\RpsCompetition\Settings', null, true);
-        $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
-        $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Competition\ListCompetition')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Entries\ListEntries')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+	public function init()
+	{
+		if ( is_admin() ) {
+			Initialize::load();
+			add_action('wp_loaded', array($this->admin()));
+		} else {
+			new Frontend($this->container);
+		}
+	}
 
-        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
-        $this->settings->plugin_dir = $dir;
-        $this->settings->plugin_basename = $basename;
-        $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
-
-        add_action('plugins_loaded', array($this,'init'));
-    }
-
-    public function init ()
-    {
-        if ( is_admin() ) {
-            Initialize::load();
-            add_action('wp_loaded', array($this->admin()));
-        } else {
-            new Frontend($this->container);
-        }
-    }
-
-    public function admin ()
-    {
-        new Admin($this->container);
-    }
+	public function admin()
+	{
+		new Admin($this->container);
+	}
 }
 
 new AVH_RPS_Client($rps_dir, $rps_basename);

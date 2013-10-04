@@ -1,5 +1,4 @@
 <?php
-
 namespace Avh\Di;
 
 /**
@@ -20,7 +19,7 @@ interface ContainerInterface
      * @param boolean $shared
      * @return \Avh\Di\Definition
      */
-    public function register ($alias, $object = null, $shared = false);
+    public function register($alias, $object = null, $shared = false);
 
     /**
      * Resolve
@@ -30,5 +29,5 @@ interface ContainerInterface
      * @param string $alias
      * @return object
      */
-    public function resolve ($alias);
+    public function resolve($alias);
 }

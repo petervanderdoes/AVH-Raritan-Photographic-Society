@@ -8,7 +8,7 @@ final class AVH_DB
      *
      * @access public
      * @param string $table
-     *            table name
+     *        table name
      * @return array
      */
     public function getFieldNames($table = '')
@@ -16,14 +16,14 @@ final class AVH_DB
         global $wpdb;
 
         $_retval = wp_cache_get('field_names_' . $table, 'avhec');
-        if (false === $_retval) {
+        if ( false === $_retval ) {
             $sql = $this->getQueryShowColumns($table);
 
             $_result = $wpdb->get_results($sql, ARRAY_A);
 
             $_retval = array();
-            foreach ($_result as $row) {
-                if (isset($row['Field'])) {
+            foreach ( $_result as $row ) {
+                if ( isset($row['Field']) ) {
                     $_retval[] = $row['Field'];
                 }
             }
@@ -43,7 +43,7 @@ final class AVH_DB
      */
     public function field_exists($field_name, $table_name)
     {
-        return (in_array($field_name, $this->getFieldNames($table_name)));
+        return ( in_array($field_name, $this->getFieldNames($table_name)) );
     }
 
     /**
@@ -53,7 +53,7 @@ final class AVH_DB
      *
      * @access public
      * @param string $table
-     *            The table name
+     *        The table name
      * @return string
      */
     private function getQueryShowColumns($table = '')

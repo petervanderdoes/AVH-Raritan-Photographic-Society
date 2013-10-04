@@ -29,7 +29,7 @@ class ListCompetition extends \WP_List_Table
     public $messages;
     public $screen;
 
-    public function __construct (Settings $settings, RpsDb $_rpsdb, Core $core)
+    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core)
     {
 
         // Get The Registry
@@ -55,12 +55,12 @@ class ListCompetition extends \WP_List_Table
         parent::__construct(array('plural' => 'competitions', 'singular' => 'competition', 'ajax' => false));
     }
 
-    public function ajax_user_can ()
+    public function ajax_user_can()
     {
         return true;
     }
 
-    public function prepare_items ()
+    public function prepare_items()
     {
         global $post_id, $competition_status, $search, $comment_type;
 
@@ -113,38 +113,38 @@ class ListCompetition extends \WP_List_Table
         $s = isset($_REQUEST['s']) ? $_REQUEST['s'] : '';
     }
 
-    public function get_per_page ($competition_status = 'open')
+    public function get_per_page($competition_status = 'open')
     {
         $competitions_per_page = $this->get_items_per_page('competitions_per_page');
         $competitions_per_page = apply_filters('competitions_per_page', $competitions_per_page, $competition_status);
         return $competitions_per_page;
     }
 
-    public function no_items ()
+    public function no_items()
     {
         _e('No competitions.');
     }
 
-    public function get_columns ()
+    public function get_columns()
     {
         global $status;
 
         return array('cb' => '<input type="checkbox" />', 'date' => 'Date', 'theme' => 'Theme', 'classification' => 'Classification', 'medium' => 'Medium', 'status' => 'Closed', 'scored' => 'Scored', 'entries' => 'Entries');
     }
 
-    public function get_sortable_columns ()
+    public function get_sortable_columns()
     {
         return array('');
     }
 
-    public function display_tablenav ($which)
+    public function display_tablenav($which)
     {
         global $status;
 
         parent::display_tablenav($which);
     }
 
-    public function get_views ()
+    public function get_views()
     {
         global $totals, $competition_status;
 
@@ -168,7 +168,7 @@ class ListCompetition extends \WP_List_Table
         return $status_links;
     }
 
-    public function get_bulk_actions ()
+    public function get_bulk_actions()
     {
         global $competition_status;
 
@@ -184,7 +184,7 @@ class ListCompetition extends \WP_List_Table
         return $actions;
     }
 
-    public function extra_tablenav ($which)
+    public function extra_tablenav($which)
     {
         global $status;
 
@@ -199,7 +199,7 @@ class ListCompetition extends \WP_List_Table
         }
     }
 
-    function current_action ()
+    function current_action()
     {
         if ( isset($_POST['clear-recent-list']) )
             return 'clear-recent-list';
@@ -207,7 +207,7 @@ class ListCompetition extends \WP_List_Table
         return parent::current_action();
     }
 
-    public function display ()
+    public function display()
     {
         extract($this->_args);
 
@@ -241,7 +241,7 @@ class ListCompetition extends \WP_List_Table
         $this->display_tablenav('bottom');
     }
 
-    public function single_row ($a_competition)
+    public function single_row($a_competition)
     {
         $competition = $a_competition;
         $status = ( $competition->Closed == "Y" ? '' : 'closed' );
@@ -250,12 +250,12 @@ class ListCompetition extends \WP_List_Table
         echo "</tr>";
     }
 
-    public function column_cb ($competition)
+    public function column_cb($competition)
     {
         echo "<input type='checkbox' name='competitions[]' value='$competition->ID' />";
     }
 
-    public function column_date ($competition)
+    public function column_date($competition)
     {
         global $competition_status;
 
@@ -299,27 +299,27 @@ class ListCompetition extends \WP_List_Table
         echo '</div>';
     }
 
-    public function column_theme ($competition)
+    public function column_theme($competition)
     {
         echo $competition->Theme;
     }
 
-    public function column_classification ($competition)
+    public function column_classification($competition)
     {
         echo $competition->Classification;
     }
 
-    public function column_medium ($competition)
+    public function column_medium($competition)
     {
         echo $competition->Medium;
     }
 
-    public function column_status ($competition)
+    public function column_status($competition)
     {
         echo $competition->Closed;
     }
 
-    public function column_scored ($competition)
+    public function column_scored($competition)
     {
         echo '<span class="text">' . $competition->Scored . '</span>';
 
@@ -352,12 +352,12 @@ class ListCompetition extends \WP_List_Table
         echo '</div>';
     }
 
-    public function column_entries ($competition)
+    public function column_entries($competition)
     {
         global $wpdb;
 
         $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competition->ID);
-        $entries = $this->rpsdb->getEntries(array('where' => $sqlWhere,'count' => true));
+        $entries = $this->rpsdb->getEntries(array('where' => $sqlWhere, 'count' => true));
         echo $entries;
     }
 }
