@@ -1,5 +1,6 @@
 <?php
 namespace Avh\Di;
+
 use Closure;
 use ArrayAccess;
 use ReflectionMethod;
@@ -13,6 +14,7 @@ use Avh\Di\ContainerInterface;
  */
 class Container implements ContainerInterface, ArrayAccess
 {
+
     /**
      * The instance of the container
      *
@@ -50,7 +52,7 @@ class Container implements ContainerInterface, ArrayAccess
     {
         self::$instance = $this;
 
-        if ( !empty($config) ) {
+        if (! empty($config)) {
             $this->setConfig($config);
         }
     }
@@ -62,7 +64,7 @@ class Container implements ContainerInterface, ArrayAccess
      */
     public static function getContainer()
     {
-        if ( is_null(self::$instance) ) {
+        if (is_null(self::$instance)) {
             self::$instance = new self();
         }
 
@@ -79,20 +81,20 @@ class Container implements ContainerInterface, ArrayAccess
      */
     public function setConfig(array $config = array())
     {
-        foreach ( $config as $alias => $options ) {
-            $shared = ( array_key_exists('shared', $options) ) ?  : false;
+        foreach ($config as $alias => $options) {
+            $shared = (array_key_exists('shared', $options)) ?  : false;
 
-            $object = ( array_key_exists('object', $options) ) ? $options['object'] : $alias;
+            $object = (array_key_exists('object', $options)) ? $options['object'] : $alias;
 
-            $object = ( $options instanceof Closure ) ? $options : $alias;
+            $object = ($options instanceof Closure) ? $options : $alias;
 
             $object = $this->register($alias, $object, $shared);
 
-            if ( array_key_exists('arguments', $options) ) {
+            if (array_key_exists('arguments', $options)) {
                 $object->withArguments((array) $options['arguments']);
             }
 
-            if ( array_key_exists('methods', $options) ) {
+            if (array_key_exists('methods', $options)) {
                 $object->withMethodCalls((array) $options['methods']);
             }
         }
@@ -116,16 +118,16 @@ class Container implements ContainerInterface, ArrayAccess
     {
         // if $object is null we assume the $alias is a class name that
         // needs to be registered
-        if ( is_null($object) ) {
+        if (is_null($object)) {
             $object = $alias;
         }
 
         // do we want to store this object as a singleton?
-        $this->values[$alias]['shared'] = ( $shared === true ) ?  : false;
+        $this->values[$alias]['shared'] = ($shared === true) ?  : false;
 
         // if the $object is a string and $autoResolve is turned off we get a new
         // Definition instance to allow further configuration of our object
-        if ( is_string($object) ) {
+        if (is_string($object)) {
             $object = new Definition($object, $this, $auto);
         }
 
@@ -135,7 +137,7 @@ class Container implements ContainerInterface, ArrayAccess
 
         // if the $object has been set as a Definition, return the instance of
         // definition for any further runtime configuration
-        if ( $object instanceof Definition ) {
+        if ($object instanceof Definition) {
             return $object;
         }
     }
@@ -170,29 +172,29 @@ class Container implements ContainerInterface, ArrayAccess
 
         // if the requested item is not registered with the container already
         // then we register it for easier resolution
-        if ( !array_key_exists($alias, $this->values) ) {
+        if (! array_key_exists($alias, $this->values)) {
             $this->register($alias, $alias, false, true);
         }
 
         // if the item is currently stored as a shared item we just return it
-        if ( array_key_exists($alias, $this->shared) ) {
+        if (array_key_exists($alias, $this->shared)) {
             return $this->shared[$alias];
         }
 
         // if the item is a factory closure we call the function with args
-        if ( $this->values[$alias]['object'] instanceof Closure ) {
+        if ($this->values[$alias]['object'] instanceof Closure) {
             $object = call_user_func_array($this->values[$alias]['object'], $args);
             $closure = true;
         }
 
         // if the item is an instance of Definition we invoke it
-        if ( $this->values[$alias]['object'] instanceof Definition ) {
+        if ($this->values[$alias]['object'] instanceof Definition) {
             $object = $this->values[$alias]['object']();
             $definition = true;
         }
 
         // do we need to save it as a shared item?
-        if ( $this->values[$alias]['shared'] === true ) {
+        if ($this->values[$alias]['shared'] === true) {
             $this->shared[$alias] = $object;
         }
 
@@ -213,7 +215,7 @@ class Container implements ContainerInterface, ArrayAccess
         $construct = $reflection->getConstructor();
 
         // if the $object has no constructor we just return the object
-        if ( is_null($construct) ) {
+        if (is_null($construct)) {
             return new $object();
         }
 
@@ -241,19 +243,19 @@ class Container implements ContainerInterface, ArrayAccess
     {
         $dependencies = array();
 
-        foreach ( $params as $param ) {
+        foreach ($params as $param) {
             $dependency = $param->getClass();
             $dependencyName = $dependency->getName();
 
             // has the dependency been registered to an alias with the container?
             // e.g. Interface to Implementation
-            if ( array_key_exists($dependencyName, $this->values) ) {
+            if (array_key_exists($dependencyName, $this->values)) {
                 $dependencies[] = $this->resolve($dependencyName);
                 continue;
             }
 
             // if the type hint is instantiable we just resolve it
-            if ( $dependency->isInstantiable() ) {
+            if ($dependency->isInstantiable()) {
                 $dependencies[] = $this->resolve($dependencyName);
                 continue;
             }
@@ -263,9 +265,9 @@ class Container implements ContainerInterface, ArrayAccess
             $matches = $this->getConstructorParams($object);
 
             // loop through constructor parameters and match any annotations to resolve
-            if ( $matches !== false ) {
-                foreach ( $matches['name'] as $key => $val ) {
-                    if ( $val === $param->getName() ) {
+            if ($matches !== false) {
+                foreach ($matches['name'] as $key => $val) {
+                    if ($val === $param->getName()) {
                         $dependencies[] = $this->resolve($matches['type'][$key]);
                         break;
                     }
@@ -287,7 +289,7 @@ class Container implements ContainerInterface, ArrayAccess
      */
     public function getConstructorParams($object)
     {
-        $docCommentClass = ( new ReflectionMethod($object, '__construct') );
+        $docCommentClass = (new ReflectionMethod($object, '__construct'));
         $docComment = $docCommentClass->getDocComment();
 
         $result = preg_match_all('/@param[\t\s]*(?P<type>[^\t\s]*)[\t\s]*\$(?P<name>[^\t\s]*)/sim', $docComment, $matches);
@@ -354,7 +356,7 @@ class Container implements ContainerInterface, ArrayAccess
      * Inject an instance of the ContainerInterface to override the container being used
      *
      * @param
-     *        Container\Di\ContainerInterface
+     *            Container\Di\ContainerInterface
      * @return void
      */
     public function setContainer(ContainerInterface $container)

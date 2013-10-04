@@ -1,5 +1,6 @@
 <?php
 namespace Avh\Di;
+
 use ReflectionClass;
 use ReflectionMethod;
 use Avh\Di\ContainerInterface;
@@ -67,7 +68,7 @@ class Definition
     {
         $object = null;
 
-        if ( !$this->hasClass() ) {
+        if (! $this->hasClass()) {
             throw new \RuntimeException('The definition has no class associated with it');
         }
 
@@ -85,12 +86,12 @@ class Definition
      */
     public function handleConstructorInjection()
     {
-        if ( $this->hasArguments() ) {
+        if ($this->hasArguments()) {
             $reflectionClass = new ReflectionClass($this->class);
             $arguments = array();
 
-            foreach ( $this->arguments as $arg ) {
-                if ( is_string($arg) && ( class_exists($arg) || $this->container->registered($arg) ) ) {
+            foreach ($this->arguments as $arg) {
+                if (is_string($arg) && (class_exists($arg) || $this->container->registered($arg))) {
                     $arguments[] = $this->container->resolve($arg);
                     continue;
                 }
@@ -99,7 +100,7 @@ class Definition
 
             $object = $reflectionClass->newInstanceArgs($arguments);
         } else {
-            if ( $this->auto === false ) {
+            if ($this->auto === false) {
                 $object = new $this->class();
             } else {
                 $object = $this->container->build($this->class);
@@ -119,19 +120,19 @@ class Definition
      */
     public function handleMethodCalls($object)
     {
-        if ( $this->hasMethodCalls() ) {
-            foreach ( $this->methods as $method ) {
+        if ($this->hasMethodCalls()) {
+            foreach ($this->methods as $method) {
                 $reflectionMethod = new ReflectionMethod($object, $method['method']);
 
                 $methodArgs = array();
 
-                foreach ( (array) $method['arguments'] as $arg => $params ) {
-                    if ( is_string($arg) && $this->container->registered($arg) ) {
+                foreach ((array) $method['arguments'] as $arg => $params) {
+                    if (is_string($arg) && $this->container->registered($arg)) {
                         $methodArgs[] = $this->container->resolve($arg, (array) $params);
                         continue;
                     }
 
-                    if ( is_integer($arg) && is_string($params) && $this->container->registered($params) ) {
+                    if (is_integer($arg) && is_string($params) && $this->container->registered($params)) {
                         $methodArgs[] = $this->container->resolve($params);
                         continue;
                     }
@@ -155,7 +156,7 @@ class Definition
      */
     public function hasClass()
     {
-        return ( !is_null($this->class) );
+        return (! is_null($this->class));
     }
 
     /**
@@ -183,7 +184,7 @@ class Definition
      */
     public function withArguments(array $arguments)
     {
-        foreach ( $arguments as $argument ) {
+        foreach ($arguments as $argument) {
             $this->withArgument($argument);
         }
 
@@ -199,7 +200,7 @@ class Definition
      */
     public function hasArguments()
     {
-        return ( !empty($this->arguments) );
+        return (! empty($this->arguments));
     }
 
     /**
@@ -228,7 +229,7 @@ class Definition
      */
     public function withMethodCalls(array $methods = array())
     {
-        foreach ( $methods as $method => $arguments ) {
+        foreach ($methods as $method => $arguments) {
             $this->withMethodCall($method, $arguments);
         }
 
@@ -244,6 +245,6 @@ class Definition
      */
     public function hasMethodCalls()
     {
-        return ( !empty($this->methods) );
+        return (! empty($this->methods));
     }
 }

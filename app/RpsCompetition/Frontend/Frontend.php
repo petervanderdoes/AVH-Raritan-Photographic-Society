@@ -1717,8 +1717,8 @@ class Frontend
             $classification = $comp->Classification;
             $medium = $comp->Medium;
 
-            foreach ( $comp->Entries as $entries ) {
-                foreach ( $entries->Entry as $entry ) {
+            foreach ($comp->Entries as $entries) {
+                foreach ($entries->Entry as $entry) {
                     $entry_id = $entry->ID;
                     $first_name = html_entity_decode($entry->First_Name);
                     $last_name = html_entity_decode($entry->Last_Name);

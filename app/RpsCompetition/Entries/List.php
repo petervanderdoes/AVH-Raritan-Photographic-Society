@@ -41,7 +41,7 @@ class ListEntries extends \WP_List_Table
         if ( empty($default_status) )
             $default_status = 'all';
         $status = isset($_REQUEST['avhrps_entries_list_status']) ? $_REQUEST['avhrps_entries_list_status'] : $default_status;
-        if ( !in_array($status, array('all', 'search')) ) {
+        if (! in_array($status, array('all', 'search'))) {
             $status = 'all';
         }
         if ( $status != $default_status && 'search' != $status ) {
