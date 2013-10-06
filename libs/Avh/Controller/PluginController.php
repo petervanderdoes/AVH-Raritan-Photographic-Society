@@ -78,7 +78,7 @@ class PluginController
     public function actionInit()
     {
         if (! isset($this->textdomain)) {
-            load_plugin_textdomain($this->textdomain, FALSE, $this->settings->plugin_dir . '/lang');
+            load_plugin_textdomain($this->textdomain, false, $this->settings->plugin_dir . '/lang');
         }
 
         // Register Styles and Scripts
@@ -104,15 +104,19 @@ class PluginController
      */
     protected function getStyleName($style = '')
     {
-        $_minified = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
-        if (empty($style))
+        if (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG) {
+            $minified = '';
+        } else {
+            $minified = '.min';
+        }
+        if (empty($style)) {
             if (is_admin()) {
-                $_full_style_name = $this->settings->file_prefix . 'admin' . $_minified;
+                $_full_style_name = $this->settings->file_prefix . 'admin' . $minified;
             } else {
-                $_full_style_name = $this->settings->file_prefix . 'public' . $_minified;
+                $_full_style_name = $this->settings->file_prefix . 'public' . $minified;
             }
-        else {
-            $_full_style_name = $this->settings->file_prefix . $style . $_minified;
+        } else {
+            $_full_style_name = $this->settings->file_prefix . $style . $minified;
         }
         return $_full_style_name;
     }
@@ -154,16 +158,16 @@ class PluginController
         if (is_admin()) {
             register_deactivation_hook($this->pluginfile, array($this, 'deactivation'));
             register_activation_hook($this->pluginfile, array($this, 'installPlugin'));
-            add_action('in_plugin_update_message-' . basename($this->pluginfile), array($this, 'actionIn_plugin_update_message'));
+            add_action('in_plugin_update_message-' . basename($this->pluginfile), array($this, 'actionInPluginUpdateMessage'));
         }
     }
 
     /**
-     * set_update_notice
+     * setUpdateNotice
      *
      * @param string $msg
      */
-    public function set_update_notice($msg)
+    public function setUpdateNotice($msg)
     {
         $this->update_notice = $msg;
     }
@@ -171,7 +175,7 @@ class PluginController
     /**
      * This function is called when there's an update of the plugin available @ WordPress
      */
-    public function actionIn_plugin_update_message()
+    public function actionInPluginUpdateMessage()
     {
         $_response = wp_remote_get($this->settings->plugin_readme_url, array('user-agent' => 'WordPress/' . Common::getWordpressVersion() . ' ' . $this->settings->plugin_name . '/' . $this->settings->plugin_version));
         if (! is_wp_error($_response) || is_array($_response)) {
@@ -218,7 +222,7 @@ class PluginController
     /**
      * Display a specific message in the plugin update message.
      */
-    public function plugin_update_notice()
+    public function displayPluginUpdateNotice()
     {
         if ($this->update_notice != '') {
             echo '<span class="spam">' . strip_tags(__($this->update_notice, $this->textdomain), '<br><a><b><i><span>') . '</span>';
@@ -231,7 +235,7 @@ class PluginController
      * @param string $links
      * @return none
      */
-    public function filter_plugin_actions($links)
+    public function filterPluginActions($links)
     {
         if ($this->options_page_id != '') {
             $_settings_link = '<a href="' . admin_url('options-general.php?page=' . $this->options_page_id) . '">' . __('Settings') . '</a>';
@@ -248,7 +252,7 @@ class PluginController
      * @param string $title
      * @param string $content
      */
-    public function display_box($id, $title, $content)
+    public function displayBox($id, $title, $content)
     {
         echo '<div id="' . $id . '" class="postbox">';
         echo '<div class="handlediv" title="Click to toggle">';
@@ -268,7 +272,7 @@ class PluginController
     /**
      * Add a menu and a page
      */
-    public function add_page(array $args)
+    public function addPage(array $args)
     {
 
         // @formatter:off
@@ -304,7 +308,7 @@ class PluginController
     /**
      * Run the admin menu hook
      */
-    public function admin_menu()
+    public function adminMenu()
     {
 
         // @formatter:off
@@ -331,8 +335,9 @@ class PluginController
                 if ($_page['type'] == 'menu') {
                     $_hook = add_menu_page(__($_page['page_title'], $this->textdomain), __($_page['menu_title'], $this->textdomain), $_page['access_level'], $_id, array($this, $_page['display_callback']), $_page['icon_url'], $_page['position']);
                 } else {
-                    if ($_page['type'] != 'submenu')
+                    if ($_page['type'] != 'submenu') {
                         $_page['parent_id'] = $_page_list[$_page['type']];
+                    }
 
                     $_hook = add_submenu_page($_page['parent_id'], __($_page['page_title'], $this->textdomain), __($_page['menu_title'], $this->textdomain), $_page['access_level'], $_id, array($this, $_page['display_callback']));
 
@@ -356,7 +361,7 @@ class PluginController
 
                 // Add the link into the plugin page
                 if ($this->options_page_id == $_id) {
-                    add_filter('plugin_action_links_' . plugin_basename($this->pluginfile), array($this, 'filter_plugin_actions'));
+                    add_filter('plugin_action_links_' . plugin_basename($this->pluginfile), array($this, 'filterPluginActions'));
                 }
             }
             unset($this->pages);
@@ -398,7 +403,7 @@ class PluginController
      *
      * @param string $button_name
      */
-    public function add_tinyMCE_button($button_name, $tinymce_plugin_path, $js_file_name = 'editor_plugin.js')
+    public function addTinyMceButton($button_name, $tinymce_plugin_path, $js_file_name = 'editor_plugin.js')
     {
         $_index = sizeof($this->tinyMCE_buttons);
         $this->tinyMCE_buttons[$_index]->name = $button_name;
@@ -412,7 +417,7 @@ class PluginController
      * @param array $buttons
      * @return array
      */
-    public function register_button($buttons)
+    public function registerButton($buttons)
     {
         foreach ($this->tinyMCE_buttons as $_value) {
             array_push($buttons, $_value->name);
@@ -426,7 +431,7 @@ class PluginController
      * @param array $plugin_array
      * @return $plugin_array
      */
-    public function add_tinymce_plugin(array $plugin_array)
+    public function addTinyMcePlugin(array $plugin_array)
     {
         foreach ($this->tinyMCE_buttons as $_value) {
             $plugin_array[$_value->name] = $this->settings->plugin_url . $_value->path . '/' . $_value->js_file;
@@ -434,8 +439,8 @@ class PluginController
         return $plugin_array;
     }
 
-    public function tiny_mce_version($version)
+    public function tinyMceVersion($version)
     {
         return ++ $version;
     }
-} // End of class
+}

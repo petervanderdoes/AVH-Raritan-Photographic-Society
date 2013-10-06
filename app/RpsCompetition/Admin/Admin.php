@@ -83,13 +83,13 @@ final class Admin
         add_action('admin_init', array($this, 'handleActionInit'));
 
         add_action('wp_ajax_setscore', array($this, 'handleAjax'));
-        add_filter('user_row_actions', array($this, 'filterRPS_user_action_links'), 10, 2);
+        add_filter('user_row_actions', array($this, 'filterRpsUserActionLinks'), 10, 2);
     }
 
     public function handleActionInit()
     {
-        $this->actionInit_Roles();
-        $this->actionInit_UserFields();
+        $this->actionInitRoles();
+        $this->actionInitUserFields();
 
         return;
     }
@@ -99,7 +99,7 @@ final class Admin
      *
      * @WordPress Action init
      */
-    public function actionInit_Roles()
+    public function actionInitRoles()
     {
         // Get the administrator role.
         $role = get_role('administrator');
@@ -114,12 +114,12 @@ final class Admin
         }
     }
 
-    public function actionInit_UserFields()
+    public function actionInitUserFields()
     {
-        add_action('edit_user_profile', array($this, 'actionUser_Profile'));
-        add_action('show_user_profile', array($this, 'actionUser_Profile'));
-        add_action('personal_options_update', array($this, 'actionProfile_Update_Save'));
-        add_action('edit_user_profile_update', array($this, 'actionProfile_Update_Save'));
+        add_action('edit_user_profile', array($this, 'actionUserProfile'));
+        add_action('show_user_profile', array($this, 'actionUserProfile'));
+        add_action('personal_options_update', array($this, 'actionProfileUpdateSave'));
+        add_action('edit_user_profile_update', array($this, 'actionProfileUpdateSave'));
     }
 
     /**
@@ -364,7 +364,7 @@ final class Admin
 
         $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
 
-        $this->admin_header('Delete Competitions');
+        $this->displayAdminHeader('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions'));
         wp_nonce_field('delete-competitions');
         echo $this->referer;
@@ -393,7 +393,7 @@ final class Admin
             echo '<p>There are no valid competitions to delete</p>';
         }
         echo $formBuilder->close();
-        $this->admin_footer();
+        $this->displayAdminFooter();
     }
 
     private function displayPageCompetitionEdit()
@@ -411,10 +411,11 @@ final class Admin
         for ($i = 0; $i < count($vars); $i += 1) {
             $var = $vars[$i];
             if (empty($_POST[$var])) {
-                if (empty($_GET[$var]))
+                if (empty($_GET[$var])) {
                     $$var = '';
-                else
+                } else {
                     $$var = $_GET[$var];
+                }
             } else {
                 $$var = $_POST[$var];
             }
@@ -428,7 +429,7 @@ final class Admin
         $formOptions['close-date'] = mysql2date('Y-m-d', $competition->Close_Date);
         $formOptions['close-time'] = mysql2date('H:i:s', $competition->Close_Date);
 
-        $this->admin_header('Edit Competition');
+        $this->displayAdminHeader('Edit Competition');
 
         if (isset($_POST['update'])) {
             echo '<div id="message" class="updated">';
@@ -441,7 +442,7 @@ final class Admin
 
         $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION);
         echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit'));
-        echo $formBuilder->open_table();
+        echo $formBuilder->openTable();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
         echo $formBuilder->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
         echo $formBuilder->text('Closing Date', '', 'close-date', $formOptions['close-date']);
@@ -490,7 +491,7 @@ final class Admin
         $_scored = array('scored' => array('text' => '', 'checked' => ($competition->Scored == 'Y' ? true : false)));
         echo $formBuilder->checkboxes('Scored', '', key($_scored), $_scored);
 
-        echo $formBuilder->close_table();
+        echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
         if ($wp_http_referer) {
             echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
@@ -499,7 +500,7 @@ final class Admin
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
         $formBuilder->setNonce_action($competition->ID);
-        echo $formBuilder->nonce_field();
+        echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
@@ -514,7 +515,7 @@ final class Admin
         echo '	$( "#close-date" ).datepicker();' . "\n";
         echo '});', "\n";
         echo "</script>";
-        $this->admin_footer();
+        $this->displayAdminFooter();
     }
 
     /**
@@ -545,7 +546,7 @@ final class Admin
 
         $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
 
-        $this->admin_header($title);
+        $this->displayAdminHeader($title);
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions'));
         wp_nonce_field($action . '-competitions');
         echo $this->referer;
@@ -563,7 +564,7 @@ final class Admin
         echo $formBuilder->submit('openclose', 'Confirm', array('class' => 'button-secondary'));
 
         echo $formBuilder->close();
-        $this->admin_footer();
+        $this->displayAdminFooter();
     }
 
     /**
@@ -593,8 +594,9 @@ final class Admin
         }
 
         if (! empty($messages)) {
-            foreach ($messages as $msg)
+            foreach ($messages as $msg) {
                 echo $msg;
+            }
         }
 
         echo '<div class="wrap avhrps-wrap">';
@@ -761,10 +763,10 @@ final class Admin
             }
         }
 
-        $this->admin_header('Add Competition');
+        $this->displayAdminHeader('Add Competition');
 
         echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd'));
-        echo $formBuilder->open_table();
+        echo $formBuilder->openTable();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
         echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
 
@@ -822,18 +824,18 @@ final class Admin
         echo $formBuilder->checkboxes('Special Event', '', key($_special_event), $_special_event);
         unset($_special_event);
 
-        echo $formBuilder->close_table();
+        echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
         echo $formBuilder->hidden('action', 'add');
         $formBuilder->setNonce_action(get_current_user_id());
-        echo $formBuilder->nonce_field();
+        echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
         echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
         echo '});', "\n";
         echo "</script>";
-        $this->admin_footer();
+        $this->displayAdminFooter();
     }
 
     public function actionLoadPagehookEntries()
@@ -961,8 +963,9 @@ final class Admin
         }
 
         if (! empty($messages)) {
-            foreach ($messages as $msg)
+            foreach ($messages as $msg) {
                 echo $msg;
+            }
         }
 
         echo '<div class="wrap avhrps-wrap">';
@@ -1007,7 +1010,7 @@ final class Admin
             $entryIdsArray = (array) $_REQUEST['entries'];
         }
 
-        $this->admin_header('Delete Entries');
+        $this->displayAdminHeader('Delete Entries');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updateentries', 'name' => 'updateentries'));
 
         echo '<p>' . _n('You have specified this entry for deletion:', 'You have specified these entries for deletion:', count($entryIdsArray)) . '</p>';
@@ -1037,7 +1040,7 @@ final class Admin
         echo $this->referer;
 
         echo $formBuilder->close();
-        $this->admin_footer();
+        $this->displayAdminFooter();
     }
 
     private function displayPageEntriesEdit()
@@ -1062,10 +1065,11 @@ final class Admin
         for ($i = 0; $i < count($vars); $i += 1) {
             $var = $vars[$i];
             if (empty($_POST[$var])) {
-                if (empty($_GET[$var]))
+                if (empty($_GET[$var])) {
                     $$var = '';
-                else
+                } else {
                     $$var = $_GET[$var];
+                }
             } else {
                 $$var = $_POST[$var];
             }
@@ -1074,7 +1078,7 @@ final class Admin
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
         $entry = $this->rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
 
-        $this->admin_header('Edit Entry');
+        $this->displayAdminHeader('Edit Entry');
 
         if (isset($_POST['update'])) {
             echo '<div id="message" class="updated">';
@@ -1091,13 +1095,13 @@ final class Admin
 
         $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES);
         echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-entryedit'));
-        echo $formBuilder->open_table();
+        echo $formBuilder->openTable();
 
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
         echo $formBuilder->text('Title', '', 'title', $entry->Title);
-        echo $formBuilder->close_table();
+        echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
         if ($wp_http_referer) {
             echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
@@ -1106,9 +1110,9 @@ final class Admin
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
         $formBuilder->setNonce_action($entry->ID);
-        echo $formBuilder->nonce_field();
+        echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
-        $this->admin_footer();
+        $this->displayAdminFooter();
     }
 
     private function updateEntry()
@@ -1133,7 +1137,7 @@ final class Admin
      * @param unknown $user
      * @return string
      */
-    public function filterRPS_user_action_links($actions, $user)
+    public function filterRpsUserActionLinks($actions, $user)
     {
         $link = admin_url() . "?page=avh-rps-entries&user_id=" . $user->ID;
         $actions['entries'] = "<a href='$link'>Entries</a>";
@@ -1207,7 +1211,7 @@ final class Admin
         return $columns;
     }
 
-    public function actionUser_Profile($user_id)
+    public function actionUserProfile($user_id)
     {
         $userID = $user_id->ID;
         $_rps_class_bw = get_user_meta($userID, 'rps_class_bw', true);
@@ -1310,7 +1314,7 @@ final class Admin
         echo '</table>';
     }
 
-    public function actionProfile_Update_Save($user_id)
+    public function actionProfileUpdateSave($user_id)
     {
         $userID = $user_id;
         if (isset($_POST['rps_class_bw'])) {
@@ -1427,7 +1431,7 @@ final class Admin
      * @param string $msg
      *            Error Message. Assumed to contain HTML and be sanitized.
      */
-    private function comment_footer_die($msg)
+    private function displayCommentFooterDie($msg)
     {
         echo "<div class='wrap'><p>$msg</p></div>";
         die();
@@ -1447,7 +1451,7 @@ final class Admin
      * @param bool $contains_files
      *            Whether the form should allow for file uploads.
      */
-    public function admin_header($title)
+    public function displayAdminHeader($title)
     {
         echo '<div class="wrap">';
         echo $this->displayIcon('options-general');
@@ -1465,7 +1469,7 @@ final class Admin
      * @param text $text
      *            The text to be shown in the submit button.
      */
-    public function admin_footer()
+    public function displayAdminFooter()
     {
         echo '</div></div></div>';
         // $this->admin_sidebar();
@@ -1473,4 +1477,3 @@ final class Admin
         echo '</div>';
     }
 }
-

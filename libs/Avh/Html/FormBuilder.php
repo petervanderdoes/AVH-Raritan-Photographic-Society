@@ -51,13 +51,13 @@ class FormBuilder
         return '</form>';
     }
 
-    public function open_table()
+    public function openTable()
     {
         $this->use_table = true;
         return "\n<table class='form-table'>\n";
     }
 
-    public function close_table()
+    public function closeTable()
     {
         $this->use_table = false;
         return "\n</table>\n";
@@ -72,7 +72,7 @@ class FormBuilder
      * @param boolean $referer
      * @return string
      */
-    public function nonce_field($referer = true)
+    public function fieldNonce($referer = true)
     {
         $nonce_field = $this->hidden('_wpnonce', wp_create_nonce($this->nonce));
         if ( $referer ) {
@@ -83,10 +83,10 @@ class FormBuilder
         return $nonce_field;
     }
 
-    public function settings_fields($action, $nonce)
+    public function fieldSettings($action, $nonce)
     {
         $return = $this->hidden('action', $action);
-        $return .= $this->nonce_field();
+        $return .= $this->fieldNonce();
         return $return;
     }
 
@@ -100,7 +100,7 @@ class FormBuilder
     public function checkboxes($label, $descripton, $name, array $options, array $attributes = null)
     {
         $_label = $this->label($name, $label);
-        $_return = $this->output_label($_label);
+        $_return = $this->outputLabel($_label);
         $_field = '';
         foreach ( $options as $value => $attr ) {
             $_checked = ( isset($attr['checked']) ? $attr['checked'] : false );
@@ -108,7 +108,7 @@ class FormBuilder
             $_field .= $this->label($value, $attr['text']);
             $_field .= '<br>';
         }
-        $_return .= $this->output_field($_field);
+        $_return .= $this->outputField($_field);
         return $_return;
     }
 
@@ -509,12 +509,12 @@ class FormBuilder
 
     private function output($label, $field)
     {
-        $_return = $this->output_label($label);
-        $_return .= $this->output_field($field);
+        $_return = $this->outputLabel($label);
+        $_return .= $this->outputField($field);
         return $_return;
     }
 
-    private function output_label($label)
+    private function outputLabel($label)
     {
         if ( $this->use_table ) {
             return "\n<tr>\n\t<th scope='row'>" . $label . "</th>";
@@ -523,7 +523,7 @@ class FormBuilder
         }
     }
 
-    private function output_field($field)
+    private function outputField($field)
     {
         if ( $this->use_table ) {
             return "\n\t<td>\n\t\t" . $field . "\n\t</td>";
@@ -539,23 +539,23 @@ class FormBuilder
      *
      * @param field_type $option_name
      */
-    public function setOption_name($_option_name)
+    public function setOptionName($_option_name)
     {
         $this->option_name = $_option_name;
     }
 
-    public function getOption_name()
+    public function getOptionName()
     {
         return $this->option_name;
     }
 
-    public function setNonce_action($_nonce)
+    public function setNonceAction($_nonce)
     {
         $this->nonce = $this->option_name . '-' . $_nonce;
     }
 
-    public function getNonce_action()
+    public function getNonceAction()
     {
         return $this->nonce;
     }
-} // End form
+}

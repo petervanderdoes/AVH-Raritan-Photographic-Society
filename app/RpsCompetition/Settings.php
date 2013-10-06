@@ -13,9 +13,11 @@ final class Settings extends AVH_Settings
 
     // prevent directly access.
     public function __construct()
-    {}
+    {
+    }
 
     // prevent clone.
     public function __clone()
-    {}
+    {
+    }
 }

@@ -6,11 +6,11 @@ use Avh\Utility\Common;
 /**
  * This class is based of the options class of the scbFramework
  */
-final class AVH_Options
+final class Options
 {
 
-    protected $_key; // the option name
-    protected $_defaults; // the default values
+    protected $option_key; // the option name
+    protected $option_defaults; // the default values
 
     // prevent directly access.
     public function __construct()
@@ -33,12 +33,12 @@ final class AVH_Options
      */
     public function load($option_name, $file, $defaults = array())
     {
-        $this->_key = $option_name;
-        $this->_defaults = $defaults;
+        $this->option_key = $option_name;
+        $this->option_defaults = $defaults;
 
         if ($file) {
-            register_activation_hook($file, array($this, 'handleAction_activate_'));
-            Common::addUninstallHook($file, array('AVH_Options', 'delete'));
+            register_activation_hook($file, array($this, 'handleActionActivate'));
+            Common::addUninstallHook($file, array('Options', 'delete'));
         }
     }
 
@@ -51,9 +51,9 @@ final class AVH_Options
      */
     public function getOptions($field = '')
     {
-        $_data = get_option($this->_key, false);
+        $_data = get_option($this->option_key, false);
         if (false === $_data) {
-            $_data = array_merge($this->_defaults, $_data);
+            $_data = array_merge($this->option_defaults, $_data);
         }
         return $this->get($field, $_data);
     }
@@ -69,10 +69,11 @@ final class AVH_Options
      */
     public function setOptions($field, $value = '')
     {
-        if (is_array($field))
+        if (is_array($field)) {
             $_newdata = $field;
-        else
+        } else {
             $_newdata = array($field => $value);
+        }
 
         $this->update($_newdata);
     }
@@ -84,7 +85,7 @@ final class AVH_Options
      */
     public function resetOptions()
     {
-        $this->update($this->_defaults);
+        $this->update($this->option_defaults);
     }
 
     /**
@@ -94,7 +95,7 @@ final class AVH_Options
     {
         $_data = $this->getOptions();
         $_data = $this->clean($_data);
-        update_option($this->_key, $_data);
+        update_option($this->option_key, $_data);
     }
 
     /**
@@ -105,7 +106,7 @@ final class AVH_Options
     private function update($newdata)
     {
         $_all_data = array_merge($this->getOptions(), $newdata);
-        update_option($this->_key, $_all_data);
+        update_option($this->option_key, $_all_data);
     }
 
     /**
@@ -113,15 +114,15 @@ final class AVH_Options
      */
     public function deleteOptions()
     {
-        delete_option($this->_key);
+        delete_option($this->option_key);
     }
 
     /**
      * Add the options to the WordPress DB
      */
-    public function handleAction_activate_()
+    public function handleActionActivate()
     {
-        add_option($this->_key, $this->_defaults);
+        add_option($this->option_key, $this->option_defaults);
     }
 
     /**
@@ -132,7 +133,7 @@ final class AVH_Options
      */
     private function clean($data)
     {
-        return wp_array_slice_assoc($data, array_keys($this->_defaults));
+        return wp_array_slice_assoc($data, array_keys($this->option_defaults));
     }
 
     /**
@@ -144,16 +145,19 @@ final class AVH_Options
      */
     private function get($field, $data)
     {
-        if (empty($field))
+        if (empty($field)) {
             return $data;
+        }
 
-        if (is_string($field))
+        if (is_string($field)) {
             return $data[$field];
+        }
 
-        foreach ($field as $key)
-            if (isset($data[$key]))
+        foreach ($field as $key) {
+            if (isset($data[$key])) {
                 $_result[] = $data[$key];
-
+            }
+        }
         return $_result;
     }
 }

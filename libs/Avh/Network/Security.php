@@ -1,6 +1,7 @@
 <?php
+namespace Avh\Network;
 
-final class AVH_Security
+final class Security
 {
 
     /**

@@ -3,7 +3,7 @@ namespace Avh\Network;
 
 use Avh\Utility\Common;
 
-final class AVH_Visitor
+final class Visitor
 {
 
     /**

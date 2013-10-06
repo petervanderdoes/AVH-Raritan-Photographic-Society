@@ -5,7 +5,8 @@ class Initialize
 {
 
     public function __construct()
-    {}
+    {
+    }
 
     public static function load()
     {

@@ -50,7 +50,8 @@ class HtmlBuilder
      *
      * @var boolean automatically target external URLs to a new window?
      */
-    public static $windowed_urls = FALSE;
+    public static $windowed_urls = false;
+
     private $base_uri;
 
     /**
@@ -61,31 +62,31 @@ class HtmlBuilder
      * echo HtmlBuilder::anchor('/user/profile', 'My Profile');
      *
      * @param string $uri
-     *        URL or URI string
+     *            URL or URI string
      * @param string $title
-     *        link text
+     *            link text
      * @param array $attributes
-     *        HTML anchor attributes
+     *            HTML anchor attributes
      * @return string
      * @uses HtmlBuilder::attributes
      */
-    public static function anchor($uri, $title = NULL, array $attributes = NULL)
+    public static function anchor($uri, $title = null, array $attributes = null)
     {
-        if ( $title === NULL ) {
+        if ($title === null) {
             // Use the URI as the title
             $title = $uri;
         }
 
-        if ( $uri === '' ) {
+        if ($uri === '') {
             // Only use the base URL
             $uri = home_url('/');
         } else {
-            if ( strpos($uri, '://') !== FALSE ) {
-                if ( self::$windowed_urls === TRUE and empty($attributes['target']) ) {
+            if (strpos($uri, '://') !== false) {
+                if (self::$windowed_urls === true and empty($attributes['target'])) {
                     // Make the link open in a new window
                     $attributes['target'] = '_blank';
                 }
-            } elseif ( $uri[0] !== '#' ) {
+            } elseif ($uri[0] !== '#') {
                 // Make the URI absolute for non-id anchors
                 $uri = plugin_dir_url($uri);
             }
@@ -105,17 +106,17 @@ class HtmlBuilder
      * echo HtmlBuilder::mailto($address);
      *
      * @param string $email
-     *        email address to send to
+     *            email address to send to
      * @param string $title
-     *        link text
+     *            link text
      * @param
-     *        array %attributes HTML anchor attributes
+     *            array %attributes HTML anchor attributes
      * @return string
      * @uses HtmlBuilder::attributes
      */
-    public static function mailto($email, $title = NULL, array $attributes = NULL)
+    public static function mailto($email, $title = null, array $attributes = null)
     {
-        if ( $title === NULL ) {
+        if ($title === null) {
             // Use the email address as the title
             $title = $email;
         }
@@ -129,14 +130,14 @@ class HtmlBuilder
      * echo HtmlBuilder::image('media/img/logo.png', array('alt' => 'My Company'));
      *
      * @param string $file
-     *        file name
+     *            file name
      * @param array $attributes
-     *        default attributes
+     *            default attributes
      * @return string
      * @uses URL::base
      * @uses HtmlBuilder::attributes
      */
-    public static function image($file, array $attributes = NULL)
+    public static function image($file, array $attributes = null)
     {
         // Add the image link
         $attributes['src'] = $file;
@@ -151,17 +152,18 @@ class HtmlBuilder
      * echo '<div'.HtmlBuilder::attributes($attrs).'>'.$content.'</div>';
      *
      * @param array $attributes
-     *        attribute list
+     *            attribute list
      * @return string
      */
-    public static function attributes(array $attributes = NULL)
+    public static function attributes(array $attributes = null)
     {
-        if ( empty($attributes) )
+        if (empty($attributes)) {
             return '';
+        }
 
         $sorted = array();
-        foreach ( self::$attribute_order as $key ) {
-            if ( isset($attributes[$key]) ) {
+        foreach (self::$attribute_order as $key) {
+            if (isset($attributes[$key])) {
                 // Add the attribute to the sorted list
                 $sorted[$key] = $attributes[$key];
             }
@@ -171,13 +173,13 @@ class HtmlBuilder
         $attributes = $sorted + $attributes;
 
         $compiled = '';
-        foreach ( $attributes as $key => $value ) {
-            if ( $value === NULL ) {
-                // Skip attributes that have NULL values
+        foreach ($attributes as $key => $value) {
+            if ($value === null) {
+                // Skip attributes that have null values
                 continue;
             }
 
-            if ( is_numeric($key) ) {
+            if (is_numeric($key)) {
                 // Assume non-associative keys are mirrored attributes
                 $key = $value;
             }

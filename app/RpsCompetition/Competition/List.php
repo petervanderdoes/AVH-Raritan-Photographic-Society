@@ -43,8 +43,9 @@ class ListCompetition extends \WP_List_Table
 
         $this->screen = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');
-        if (empty($default_status))
+        if (empty($default_status)) {
             $default_status = 'all';
+        }
         $status = isset($_REQUEST['avhrps_competition_list_status']) ? $_REQUEST['avhrps_competition_list_status'] : $default_status;
         if (! in_array($status, array('all', 'open', 'closed', 'search'))) {
             $status = 'all';
@@ -202,7 +203,7 @@ class ListCompetition extends \WP_List_Table
         }
     }
 
-    function current_action()
+    public function current_action()
     {
         if (isset($_POST['clear-recent-list']))
             return 'clear-recent-list';

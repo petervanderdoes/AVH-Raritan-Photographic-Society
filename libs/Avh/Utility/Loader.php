@@ -1,4 +1,5 @@
 <?php
+namespace Avh\Utility;
 
 /**
  * Semi-Autoloader.
@@ -11,7 +12,7 @@
  * @link PSR-0
  *       https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md
  */
-class AVH_Loader
+class Loader
 {
     private static $objects;
     private static $dir;

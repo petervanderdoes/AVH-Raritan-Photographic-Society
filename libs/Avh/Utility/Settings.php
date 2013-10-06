@@ -1,7 +1,7 @@
 <?php
 namespace Avh\Utility;
 
-abstract class AVH_Settings
+abstract class Settings
 {
 
     /**
@@ -9,12 +9,12 @@ abstract class AVH_Settings
      *
      * @access protected
      */
-    private $_settings = array();
+    private $settings = array();
 
     public function __get($key)
     {
-        if ( isset($this->_settings[$key]) ) {
-            $_return = $this->_settings[$key];
+        if (isset($this->settings[$key])) {
+            $_return = $this->settings[$key];
         } else {
             $_return = null;
         }
@@ -23,18 +23,18 @@ abstract class AVH_Settings
 
     public function __set($key, $data)
     {
-        $this->_settings[$key] = $data;
+        $this->settings[$key] = $data;
     }
 
     public function __unset($key)
     {
-        if ( isset($this->_settings[$key]) ) {
-            unset($this->_settings[$key]);
+        if (isset($this->settings[$key])) {
+            unset($this->settings[$key]);
         }
     }
 
     public function __isset($key)
     {
-        return isset($this->_settings[$key]);
+        return isset($this->settings[$key]);
     }
 }

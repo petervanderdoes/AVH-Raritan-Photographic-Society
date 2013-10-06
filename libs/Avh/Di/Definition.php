@@ -50,7 +50,7 @@ class Definition
      * @param \Avh\Di\ContainerInterface $container
      * @param boolean $auto
      */
-    public function __construct($class = null, ContainerInterface $container, $auto = false)
+    public function __construct($class, ContainerInterface $container, $auto = false)
     {
         $this->class = $class;
         $this->container = $container;
