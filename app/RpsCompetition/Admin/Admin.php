@@ -86,6 +86,10 @@ final class Admin
         add_filter('user_row_actions', array($this, 'filterRpsUserActionLinks'), 10, 2);
     }
 
+    /**
+     * Runs during the action init.
+     *
+     */
     public function handleActionInit()
     {
         $this->actionInitRoles();
@@ -114,6 +118,9 @@ final class Admin
         }
     }
 
+    /**
+     * Add the actions needed for to extended the user profile
+     */
     public function actionInitUserFields()
     {
         add_action('edit_user_profile', array($this, 'actionUserProfile'));
@@ -146,6 +153,9 @@ final class Admin
         add_action('load-' . $this->hooks['avhrps_menu_entries'], array($this, 'actionLoadPagehookEntries'));
     }
 
+    /**
+     * Setup all that is needed for the page Competition
+     */
     public function actionLoadPagehookCompetition()
     {
         global $current_screen;
@@ -290,6 +300,10 @@ final class Admin
         }
     }
 
+    /**
+     * Handle the Ajax callback
+     *
+     */
     public function handleAjax()
     {
         $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
@@ -347,10 +361,6 @@ final class Admin
     /**
      * Display the page to confirm the deletion of the selected competitions.
      *
-     * @param string $redirect
-     * @param string $referer
-     *
-     *
      */
     private function displayPageCompetitionDelete()
     {
@@ -396,6 +406,10 @@ final class Admin
         $this->displayAdminFooter();
     }
 
+    /**
+     * Display the page to edit a competition.
+     *
+     */
     private function displayPageCompetitionEdit()
     {
         global $wpdb;
@@ -519,7 +533,7 @@ final class Admin
     }
 
     /**
-     * Display the page to confirm the deletion of the selected competitions.
+     * Display the page to open or close competitions
      *
      * @param string $redirect
      * @param string $referer
@@ -569,6 +583,7 @@ final class Admin
 
     /**
      * Display the competion in a list
+     *
      */
     private function displayPageCompetitionList()
     {
@@ -628,6 +643,9 @@ final class Admin
         echo '</div>';
     }
 
+    /**
+     * Setup all that is needed for the page "Add competition"
+     */
     public function actionLoadPagehookCompetitionAdd()
     {
         global $current_screen;
@@ -645,6 +663,10 @@ final class Admin
         wp_enqueue_style('avhrps-jquery-css');
     }
 
+    /**
+     * Show the page to add a competition
+     *
+     */
     public function menuCompetitionAdd()
     {
         $option_name = 'competition_add';
@@ -838,6 +860,9 @@ final class Admin
         $this->displayAdminFooter();
     }
 
+    /**
+     * Setup all that is needed for the page "Entries"
+     */
     public function actionLoadPagehookEntries()
     {
         global $current_screen;
@@ -1043,6 +1068,10 @@ final class Admin
         $this->displayAdminFooter();
     }
 
+    /**
+     * Display the page to edit Entries
+     *
+     */
     private function displayPageEntriesEdit()
     {
         global $wpdb;
@@ -1115,6 +1144,11 @@ final class Admin
         $this->displayAdminFooter();
     }
 
+    /**
+     * Update an entry after a POST
+     *
+     * @return boolean
+     */
     private function updateEntry()
     {
         $formOptions = $_POST['entry-edit'];
@@ -1211,6 +1245,11 @@ final class Admin
         return $columns;
     }
 
+    /**
+     * Show the Classification meta on the user profile page.
+     *
+     * @param int $user_id
+     */
     public function actionUserProfile($user_id)
     {
         $userID = $user_id->ID;
@@ -1314,6 +1353,11 @@ final class Admin
         echo '</table>';
     }
 
+    /**
+     * Update the user meta concerning Classification when a user is updated.
+     *
+     * @param int $user_id
+     */
     public function actionProfileUpdateSave($user_id)
     {
         $userID = $user_id;
@@ -1344,6 +1388,10 @@ final class Admin
         update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
     }
 
+    /**
+     * Update a comeptition after a POST
+     *
+     */
     private function updateCompetition()
     {
         $formOptions = $_POST['competition-edit'];
