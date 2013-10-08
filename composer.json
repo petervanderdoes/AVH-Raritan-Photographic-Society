@@ -1,6 +1,24 @@
 {
-    "autoload": {
-        "psr-0": { "Avh\\": "libs/",
-                    "RpsCompetition\\": "app/"}
-    }
+	"name" : "RPS Competition Plugin",
+	"type" : "wordpress-plugin",
+	"authors" : [{
+			"name" : "Peter van der Does",
+			"email" : "peter@avirtualhome.com",
+			"homepage" : "blog.avirtualhome.com",
+			"role" : "Project Manager"
+		}
+	],
+	"keywords" : [
+		"RPS"
+	],
+	"license" : [
+		"BSD-3-Clause-Clear"
+	],
+	"autoload" : {
+		"psr-0" : {
+			"RpsCompetition\\" : "app/",
+			"Avh\\" : "libs/"
+		}
+	},
+	"minimum-stability" : "stable"
 }
