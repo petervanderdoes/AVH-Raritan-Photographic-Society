@@ -749,7 +749,7 @@ class Frontend
     {
         global $wpdb;
 
-        $category = 'Beginner';
+        $class = 'Beginner';
         $award = '1';
         $date = '';
         extract($atts, EXTR_OVERWRITE);
@@ -757,13 +757,13 @@ class Frontend
         $competiton_date = date('Y-m-d H:i:s', strtotime($date));
         $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
 
-        $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $category);
+        $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $class);
 
         echo '<section class="rps-showcase-category-winner">';
         echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
         echo '<div class="suf-gradient suf-tile-topmost">';
-        echo '<h3>' . $category . '</h3>';
+        echo '<h3>' . $class . '</h3>';
         echo '</div>';
 
         echo '<div class="rps-sc-text entry-content">';
