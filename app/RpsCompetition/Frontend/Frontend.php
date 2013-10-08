@@ -759,15 +759,15 @@ class Frontend
 
         $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $class);
 
-        echo '<section class="rps-showcase-category-winner">';
-        echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
+        $return = '<section class="rps-showcase-category-winner">';
+        $return .= '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
-        echo '<div class="suf-gradient suf-tile-topmost">';
-        echo '<h3>' . $class . '</h3>';
-        echo '</div>';
+        $return .= '<div class="suf-gradient suf-tile-topmost">';
+        $return .= '<h3>' . $class . '</h3>';
+        $return .= '</div>';
 
-        echo '<div class="rps-sc-text entry-content">';
-        echo '<ul>';
+        $return .= '<div class="rps-sc-text entry-content">';
+        $return .= '<ul>';
         foreach ($entries as $entry) {
             $dateParts = explode(" ", $entry['Competition_Date']);
             $comp_date = $dateParts[0];
@@ -779,18 +779,20 @@ class Frontend
             $first_name = $entry['FirstName'];
             $award = $entry['Award'];
 
-            echo '<li class="suf-widget">';
-            echo '	<div class="image">';
-            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>';
-            echo '	</div>';
-            echo "<div class='winner-heading'>$title<br />$first_name $last_name</div>";
-            echo '</li>';
+            $return .= '<li class="suf-widget">';
+            $return .= '	<div class="image">';
+            $return .= '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            $return .= '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>';
+            $return .= '	</div>';
+            $return .= "<div class='winner-heading'>$title<br />$first_name $last_name</div>";
+            $return .= '</li>';
 
         }
-        echo '</ul>';
-        echo '</div>';
-        echo '</section>';
+        $return .= '</ul>';
+        $return .= '</div>';
+        $return .= '</section>';
+
+        return $return;
     }
 
     public function actionPreHeader_RpsMyEntries()
