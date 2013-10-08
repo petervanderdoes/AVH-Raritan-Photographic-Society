@@ -70,6 +70,7 @@ class Frontend
         $this->core_options = $this->core->getOptions();
 
         $this->rpsdb->setCompetitionClose();
+        $shortcode=$container->resolve('\RpsCompetiton\Frontend\Shortcodes');
 
         add_action('wp_loaded', array($this, 'actionInit_InitRunTime'));
         // Public actions and filters
@@ -78,7 +79,7 @@ class Frontend
         add_shortcode('rps_monthly_winners', array($this, 'shortcodeRpsMonthlyWinners'));
         add_shortcode('rps_scores_current_user', array($this, 'shortcodeRpsScoresCurrentUser'));
         add_shortcode('rps_all_scores', array($this, 'shortcodeRpsAllScores'));
-        add_shortcode('rps_category_winners', array($this, 'shortcodeRpsCategoryWinners'));
+        add_shortcode('rps_category_winners', array('\RpsCompetition\Shortcodes\CategoryWinners', 'bootstrap'));
 
         // add_action('pre-header-my-print-entries', array($this,'actionPreHeader_RpsMyEntries'));
         // add_action('pre-header-my-digital-entries', array($this,'actionPreHeader_RpsMyEntries'));
@@ -753,7 +754,7 @@ class Frontend
         return ob_get_clean();
     }
 
-    public function shortcodeRpsCategoryWinners($atts)
+    public function shortcodeRpsCategoryWinners($atts, $content, $tag)
     {
         ob_start();
         global $wpdb;

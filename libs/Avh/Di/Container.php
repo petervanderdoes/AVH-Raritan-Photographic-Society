@@ -12,13 +12,13 @@ use Avh\Di\ContainerInterface;
  *
  * A Dependency Injection Container.
  */
-class Container implements ContainerInterface, ArrayAccess
+class Container implements ContainerInterface, \ArrayAccess
 {
 
     /**
      * The instance of the container
      *
-     * @var Container\Di\Container
+     * @var Avh\Di\Container
      */
     public $container = null;
 
@@ -259,42 +259,9 @@ class Container implements ContainerInterface, ArrayAccess
                 $dependencies[] = $this->resolve($dependencyName);
                 continue;
             }
-
-            // if we've got this far we can check the @param annotations from the
-            // constructors DocComment to try and resolve a concrete implementation
-            $matches = $this->getConstructorParams($object);
-
-            // loop through constructor parameters and match any annotations to resolve
-            if ($matches !== false) {
-                foreach ($matches['name'] as $key => $val) {
-                    if ($val === $param->getName()) {
-                        $dependencies[] = $this->resolve($matches['type'][$key]);
-                        break;
-                    }
-                }
-            }
         }
 
         return $dependencies;
-    }
-
-    /**
-     * Get Constructor Parameters
-     *
-     * Accepts an object in string or object form and returns an
-     * array of param matches from the constructor doc block
-     *
-     * @param string $object
-     * @return array boolean
-     */
-    public function getConstructorParams($object)
-    {
-        $docCommentClass = (new ReflectionMethod($object, '__construct'));
-        $docComment = $docCommentClass->getDocComment();
-
-        $result = preg_match_all('/@param[\t\s]*(?P<type>[^\t\s]*)[\t\s]*\$(?P<name>[^\t\s]*)/sim', $docComment, $matches);
-
-        return $result > 0 ? $matches : false;
     }
 
     /**
