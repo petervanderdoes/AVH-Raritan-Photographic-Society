@@ -78,6 +78,7 @@ class Frontend
         add_shortcode('rps_monthly_winners', array($this, 'shortcodeRpsMonthlyWinners'));
         add_shortcode('rps_scores_current_user', array($this, 'shortcodeRpsScoresCurrentUser'));
         add_shortcode('rps_all_scores', array($this, 'shortcodeRpsAllScores'));
+        add_shortcode('rps_category_winners', array($this, 'shortcodeRpsCategoryWinners'));
 
         // add_action('pre-header-my-print-entries', array($this,'actionPreHeader_RpsMyEntries'));
         // add_action('pre-header-my-digital-entries', array($this,'actionPreHeader_RpsMyEntries'));
@@ -742,6 +743,54 @@ class Frontend
             // We're all done
             echo "</table>";
         }
+    }
+
+    public function shortcodeRpsCategoryWinners($atts)
+    {
+        global $wpdb;
+
+        $category = 'Beginner';
+        $award = '1';
+        $date = '';
+        extract($atts, EXTR_OVERWRITE);
+
+        $competiton_date = date('Y-m-d H:i:s', strtotime($date));
+        $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
+
+        $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $category);
+
+        echo '<section class="rps-showcase-category-winner">';
+        echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
+
+        echo '<div class="suf-gradient suf-tile-topmost">';
+        echo '<h3>' . $category . '</h3>';
+        echo '</div>';
+
+        echo '<div class="rps-sc-text entry-content">';
+        echo '<ul>';
+        foreach ($entries as $entry) {
+            $dateParts = explode(" ", $entry['Competition_Date']);
+            $comp_date = $dateParts[0];
+            $medium = $entry['Medium'];
+            $classification = $entry['Classification'];
+            $comp = "$classification<br>$medium";
+            $title = $entry['Title'];
+            $last_name = $entry['LastName'];
+            $first_name = $entry['FirstName'];
+            $award = $entry['Award'];
+
+            echo '<li class="suf-widget">';
+            echo '	<div class="image">';
+            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>';
+            echo '	</div>';
+            echo "<div class='winner-heading'>$title<br />$first_name $last_name</div>";
+            echo '</li>';
+
+        }
+        echo '</ul>';
+        echo '</div>';
+        echo '</section>';
     }
 
     public function actionPreHeader_RpsMyEntries()
