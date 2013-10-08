@@ -1288,7 +1288,7 @@ class Frontend
                 // the value of 'post_max_size' in php.ini, the $_POST and $_FILES arrays will be cleared.
                 // Detect this situation by comparing the length of the http content received with post_max_size
                 if (isset($_SERVER['CONTENT_LENGTH'])) {
-                    if ($_SERVER['CONTENT_LENGTH'] > $this->core->avh_ShortHandToBytes(ini_get('post_max_size'))) {
+                    if ($_SERVER['CONTENT_LENGTH'] > $this->core->getShorthandToBytes(ini_get('post_max_size'))) {
                         $this->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                     } else {
                         if (! $this->checkUploadEntryTitle()) {
