@@ -190,6 +190,7 @@ class Frontend
 
     public function shortcodeRpsMonthlyWinners($atts, $content = '')
     {
+        ob_start();
         global $post;
         $months = array();
         $themes = array();
@@ -381,10 +382,13 @@ class Frontend
             echo 'There are no scored competitions for the selected season.';
         }
         echo "<br />\n";
+
+        return ob_get_clean();
     }
 
     public function shortcodeRpsScoresCurrentUser($atts, $content = '')
     {
+        ob_clean();
         global $post;
 
         if (isset($_POST['selected_season_list'])) {
@@ -491,10 +495,13 @@ class Frontend
             }
             echo "</table>";
         }
+
+        return ob_get_clean();
     }
 
     public function shortcodeRpsAllScores($atts, $content = '')
     {
+        ob_start();
         global $post;
         if (isset($_POST['selected_season_list'])) {
             $this->settings->selected_season = $_POST['selected_season_list'];
@@ -743,10 +750,12 @@ class Frontend
             // We're all done
             echo "</table>";
         }
+        return ob_get_clean();
     }
 
     public function shortcodeRpsCategoryWinners($atts)
     {
+        ob_start();
         global $wpdb;
 
         $class = 'Beginner';
@@ -759,15 +768,15 @@ class Frontend
 
         $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $class);
 
-        $return = '<section class="rps-showcase-category-winner">';
-        $return .= '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
+        echo '<section class="rps-showcase-category-winner">';
+        echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
-        $return .= '<div class="suf-gradient suf-tile-topmost">';
-        $return .= '<h3>' . $class . '</h3>';
-        $return .= '</div>';
+        echo '<div class="suf-gradient suf-tile-topmost">';
+        echo '<h3>' . $class . '</h3>';
+        echo '</div>';
 
-        $return .= '<div class="rps-sc-text entry-content">';
-        $return .= '<ul>';
+        echo '<div class="rps-sc-text entry-content">';
+        echo '<ul>';
         foreach ($entries as $entry) {
             $dateParts = explode(" ", $entry['Competition_Date']);
             $comp_date = $dateParts[0];
@@ -779,20 +788,19 @@ class Frontend
             $first_name = $entry['FirstName'];
             $award = $entry['Award'];
 
-            $return .= '<li class="suf-widget">';
-            $return .= '	<div class="image">';
-            $return .= '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            $return .= '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>';
-            $return .= '	</div>';
-            $return .= "<div class='winner-heading'>$title<br />$first_name $last_name</div>";
-            $return .= '</li>';
-
+            echo '<li class="suf-widget">';
+            echo '	<div class="image">';
+            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>';
+            echo '	</div>';
+            echo "<div class='winner-heading'>$title<br />$first_name $last_name</div>";
+            echo '</li>';
         }
-        $return .= '</ul>';
-        $return .= '</div>';
-        $return .= '</section>';
+        echo '</ul>';
+        echo '</div>';
+        echo '</section>';
 
-        return $return;
+        return ob_get_clean();
     }
 
     public function actionPreHeader_RpsMyEntries()
@@ -891,6 +899,7 @@ class Frontend
     {
         global $post;
 
+        ob_start();
         // Default values
         $medium = 'digital';
 
@@ -1133,6 +1142,8 @@ class Frontend
 
         // All done, close out the table and the form
         echo "</table>\n</form>\n<br />\n";
+
+        return ob_get_clean();
     }
 
     public function actionPreHeader_RpsEditTitle()
@@ -1204,6 +1215,7 @@ class Frontend
 
     public function shortcodeRpsEditTitle()
     {
+        ob_start();
         global $post;
         if (isset($_GET['m'])) {
             if ($_GET['m'] == "prints") {
@@ -1254,6 +1266,8 @@ class Frontend
         echo '</td></tr>';
         echo '</table>';
         echo '</form>';
+
+        return ob_get_clean();
     }
 
     public function actionPreHeader_RpsUploadEntry()
@@ -1409,6 +1423,7 @@ class Frontend
 
     public function shortcodeRpsUploadEntry()
     {
+        ob_start();
         global $post;
         if (isset($_GET['m'])) {
             if ($_GET['m'] == "prints") {
@@ -1460,6 +1475,7 @@ class Frontend
         echo '</td></tr>';
         echo '</table>';
         echo '</form>';
+        return ob_get_clean();
     }
 
     // ----- Private Functions --------
