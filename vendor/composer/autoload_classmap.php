@@ -20,7 +20,7 @@ return array(
     'Avh\\Utility\\Loader' => $baseDir . '/libs/Avh/Utility/Loader.php',
     'Avh\\Utility\\Options' => $baseDir . '/libs/Avh/Utility/Options.php',
     'Avh\\Utility\\Settings' => $baseDir . '/libs/Avh/Utility/Settings.php',
-    'Avh\\Utility\\ShortcodeAbstract' => $baseDir . '/libs/Avh/Utility/ShortcodeAbstract.php',
+    'Avh\\Utility\\ShortcodesAbstract' => $baseDir . '/libs/Avh/Utility/ShortcodesAbstract.php',
     'RpsCompetition\\Admin\\Admin' => $baseDir . '/app/RpsCompetition/Admin/Admin.php',
     'RpsCompetition\\Admin\\Initialize' => $baseDir . '/app/RpsCompetition/Admin/Initialize.php',
     'RpsCompetition\\Common\\Core' => $baseDir . '/app/RpsCompetition/Common/Core.php',
