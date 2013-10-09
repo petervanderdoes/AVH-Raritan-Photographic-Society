@@ -88,7 +88,6 @@ final class Admin
 
     /**
      * Runs during the action init.
-     *
      */
     public function handleActionInit()
     {
@@ -109,7 +108,7 @@ final class Admin
         $role = get_role('administrator');
 
         // If the administrator role exists, add required capabilities for the plugin.
-        if (! empty($role)) {
+        if (!empty($role)) {
 
             // Role management capabilities.
             $role->add_cap('rps_edit_competition_classification');
@@ -267,7 +266,7 @@ final class Admin
                 break;
 
             case 'setscore':
-                if (! empty($_REQUEST['competition'])) {
+                if (!empty($_REQUEST['competition'])) {
                     check_admin_referer('score_' . $_REQUEST['competition']);
                     $data['ID'] = (int) $_REQUEST['competition'];
                     $data['Scored'] = 'Y';
@@ -276,7 +275,7 @@ final class Admin
                 wp_redirect($redirect);
                 break;
             case 'Unsetscore':
-                if (! empty($_REQUEST['competition'])) {
+                if (!empty($_REQUEST['competition'])) {
                     check_admin_referer('score_' . $_REQUEST['competition']);
                     $data['ID'] = (int) $_REQUEST['competition'];
                     $data['Scored'] = 'N';
@@ -285,7 +284,7 @@ final class Admin
                 wp_redirect($redirect);
                 break;
             default:
-                if (! empty($_GET['_wp_http_referer'])) {
+                if (!empty($_GET['_wp_http_referer'])) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
                     exit();
                 }
@@ -302,7 +301,6 @@ final class Admin
 
     /**
      * Handle the Ajax callback
-     *
      */
     public function handleAjax()
     {
@@ -360,7 +358,6 @@ final class Admin
 
     /**
      * Display the page to confirm the deletion of the selected competitions.
-     *
      */
     private function displayPageCompetitionDelete()
     {
@@ -408,13 +405,12 @@ final class Admin
 
     /**
      * Display the page to edit a competition.
-     *
      */
     private function displayPageCompetitionEdit()
     {
         global $wpdb;
 
-        // @var $formBuilder AVH_Form
+        // @var $formBuilder FormBuilder
         $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
         $formBuilder->setOption_name('competition-edit');
 
@@ -583,7 +579,6 @@ final class Admin
 
     /**
      * Display the competion in a list
-     *
      */
     private function displayPageCompetitionList()
     {
@@ -608,7 +603,7 @@ final class Admin
             }
         }
 
-        if (! empty($messages)) {
+        if (!empty($messages)) {
             foreach ($messages as $msg) {
                 echo $msg;
             }
@@ -665,7 +660,6 @@ final class Admin
 
     /**
      * Show the page to add a competition
-     *
      */
     public function menuCompetitionAdd()
     {
@@ -933,7 +927,7 @@ final class Admin
                 break;
 
             default:
-                if (! empty($_GET['_wp_http_referer'])) {
+                if (!empty($_GET['_wp_http_referer'])) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($_SERVER['REQUEST_URI'])));
                     exit();
                 }
@@ -987,7 +981,7 @@ final class Admin
             }
         }
 
-        if (! empty($messages)) {
+        if (!empty($messages)) {
             foreach ($messages as $msg) {
                 echo $msg;
             }
@@ -1070,7 +1064,6 @@ final class Admin
 
     /**
      * Display the page to edit Entries
-     *
      */
     private function displayPageEntriesEdit()
     {
@@ -1084,7 +1077,7 @@ final class Admin
         if (isset($_POST['update'])) {
             $formBuilder->setNonce_action($_POST['entry']);
             check_admin_referer($formBuilder->getNonce_action());
-            if (! current_user_can('rps_edit_entries')) {
+            if (!current_user_can('rps_edit_entries')) {
                 wp_die(__('Cheatin&#8217; uh?'));
             }
             $updated = $this->updateEntry();
@@ -1161,20 +1154,22 @@ final class Admin
             $data = array('ID' => $id, 'Title' => $formOptionsNew['title']);
             $return = $this->rpsdb->updateEntry($data);
         }
+
         return $return;
     }
 
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param unknown $actions
-     * @param unknown $user
+     * @param  unknown $actions
+     * @param  unknown $user
      * @return string
      */
     public function filterRpsUserActionLinks($actions, $user)
     {
         $link = admin_url() . "?page=avh-rps-entries&user_id=" . $user->ID;
         $actions['entries'] = "<a href='$link'>Entries</a>";
+
         return $actions;
     }
 
@@ -1183,7 +1178,7 @@ final class Admin
      *
      * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
      *
-     * @param array $links
+     * @param  array $links
      * @return array
      *
      * @since 1.0
@@ -1193,6 +1188,7 @@ final class Admin
         $folder = Common::getBaseDirectory($this->settings->plugin_basename);
         $settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
         array_unshift($links, $settings_link); // before other links
+
         return $links;
     }
 
@@ -1220,6 +1216,7 @@ final class Admin
                 $return = $error_value;
                 break;
         }
+
         return $return;
     }
 
@@ -1242,6 +1239,7 @@ final class Admin
             // $columns[$this->hooks['avhfdas_menu_general']] = 1;
             // break;
         }
+
         return $columns;
     }
 
@@ -1390,7 +1388,6 @@ final class Admin
 
     /**
      * Update a comeptition after a POST
-     *
      */
     private function updateCompetition()
     {

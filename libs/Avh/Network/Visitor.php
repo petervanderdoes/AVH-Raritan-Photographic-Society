@@ -53,6 +53,7 @@ final class Visitor
         if (null === $_return) {
             $_return = '0.0.0.0';
         }
+
         return $_return;
     }
 }

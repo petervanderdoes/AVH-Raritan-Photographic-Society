@@ -36,7 +36,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     /**
      * Display the given awards for the given classification.
      *
-     * @param array $atts
+     * @param array  $atts
      * @param string $content
      * @param string $tag
      */
@@ -50,7 +50,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         extract($atts, EXTR_OVERWRITE);
 
         $competiton_date = date('Y-m-d H:i:s', strtotime($date));
-        $award_map = array('1' => '1st','2' => '2nd','3' => '3rd','H' => 'HM');
+        $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
 
         $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $class);
 
@@ -127,7 +127,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         $scores = $this->rpsdb->getMonthlyScores();
 
-        if (is_array($scores) && (! empty($scores))) {
+        if (is_array($scores) && (!empty($scores))) {
             $scored_competitions = true;
         } else {
             $scored_competitions = false;
@@ -288,11 +288,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         if (isset($_POST['selected_season_list'])) {
             $this->settings->selected_season = $_POST['selected_season_list'];
         }
-        $award_map = array('1st' => '1','2nd' => '2','3rd' => '3','HM' => 'H');
+        $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
 
         $seasons = $this->rpsdb->getSeasonListOneEntry();
         arsort($seasons);
-        if (! isset($this->settings->selected_season)) {
+        if (!isset($this->settings->selected_season)) {
             $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
 
@@ -316,7 +316,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
 
         $club_competition_results_unsorted = $this->rpsdb->getClubCompetitionResults();
-        $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC),'Class_Code' => array(SORT_ASC),'LastName' => array(SORT_ASC),'FirstName' => array(SORT_ASC),'Competition_Date' => array(SORT_ASC)));
+        $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -690,7 +690,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<input type="hidden" name="title" value="' . $title . '" />';
         echo '<input type="hidden" name="server_file_name" value="' . $server_file_name . '" />';
         echo '<input type="hidden" name="m" value="' . strtolower($medium_subset) . '" />';
-        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m','id'), wp_get_referer()) . '" />';
+        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
         echo '</td></tr>';
         echo '</table>';
         echo '</td></tr>';
@@ -724,7 +724,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '}' . "\n";
         echo '</script>' . "\n";
 
-        if (! empty($this->errmsg)) {
+        if (!empty($this->errmsg)) {
             echo '<div id="errmsg">' . $this->errmsg . '</div>';
         }
         // Start the form
@@ -826,7 +826,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
         if ($this->settings->comp_date != "") {
             $close_date = $this->rpsdb->getCompetitionCloseDate();
-            if (! empty($close_date)) {
+            if (!empty($close_date)) {
                 $close_epoch = strtotime($close_date);
                 $time_to_close = $close_epoch - current_time('timestamp');
                 if ($time_to_close >= 0 && $time_to_close <= 604800) {

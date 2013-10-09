@@ -82,33 +82,33 @@ class Frontend
         $shortcode->register('rps_edit_title', 'displayEditTitle');
         $shortcode->register('rps_upload_image', 'displayUploadEntry');
 
-        add_action('wp_loaded', array($this,'actionInit_InitRunTime'));
+        add_action('wp_loaded', array($this, 'actionWpLoaded'));
         // Public actions and filters
-        add_action('template_redirect', array($this,'actionTemplate_Redirect_RPSWindowsClient'));
+        add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
 
-        // add_action('pre-header-my-print-entries', array($this,'actionPreHeader_RpsMyEntries'));
-        // add_action('pre-header-my-digital-entries', array($this,'actionPreHeader_RpsMyEntries'));
-        // add_action('wp', array($this, 'actionPreHeader_RpsMyEntries'));
-        add_action('wp', array($this,'actionPreHeader_RpsMyEntries'));
+        // add_action('pre-header-my-print-entries', array($this,'actionPreHeaderRpsMyEntries'));
+        // add_action('pre-header-my-digital-entries', array($this,'actionPreHeaderRpsMyEntries'));
+        // add_action('wp', array($this, 'actionPreHeaderRpsMyEntries'));
+        add_action('wp', array($this, 'actionPreHeaderRpsMyEntries'));
 
-        add_action('wp', array($this,'actionPreHeader_RpsEditTitle'));
+        add_action('wp', array($this, 'actionPreHeaderRpsEditTitle'));
 
-        add_action('wp', array($this,'actionPreHeader_RpsUploadEntry'));
+        add_action('wp', array($this, 'actionPreHeaderRpsUploadEntry'));
 
-        add_action("after_setup_theme", array($this,'actionAfterThemeSetup'), 14);
+        add_action("after_setup_theme", array($this, 'actionAfterThemeSetup'), 14);
     }
 
     public function actionAfterThemeSetup()
     {
-        add_action('rps_showcase', array($this,'actionShowcase_competition_thumbnails'));
+        add_action('rps_showcase', array($this, 'actionShowcaseCompetitionThumbnails'));
     }
 
-    public function actionInit_InitRunTime()
+    public function actionWpLoaded()
     {
-        $this->rpsdb->setUser_id(get_current_user_id());
+        $this->rpsdb->setUserId(get_current_user_id());
     }
 
-    public function actionTemplate_Redirect_RPSWindowsClient()
+    public function actionTemplateRedirectRpsWindowsClient()
     {
         if (array_key_exists('rpswinclient', $_REQUEST)) {
 
@@ -128,13 +128,14 @@ class Frontend
                     break;
                 case 'uploadscore':
                     $this->doUploadScore();
+                    break;
                 default:
                     break;
             }
         }
     }
 
-    public function actionShowcase_competition_thumbnails($ctr)
+    public function actionShowcaseCompetitionThumbnails($ctr)
     {
         if (is_front_page()) {
             $image = array();
@@ -190,7 +191,7 @@ class Frontend
         }
     }
 
-    public function actionPreHeader_RpsMyEntries()
+    public function actionPreHeaderRpsMyEntries()
     {
         global $post;
 
@@ -229,7 +230,7 @@ class Frontend
                         break;
 
                     case 'add':
-                        if (! $this->rpsdb->getCompetionClosed()) {
+                        if (!$this->rpsdb->getCompetionClosed()) {
                             $_query = array('m' => $this->settings->medium_subset);
                             $_query = build_query($_query);
                             $loc = '/upload-image/?' . $_query;
@@ -238,11 +239,11 @@ class Frontend
                         break;
 
                     case 'edit':
-                        if (! $this->rpsdb->getCompetionClosed()) {
+                        if (!$this->rpsdb->getCompetionClosed()) {
                             if (is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
-                                    $_query = array('id' => $id,'m' => $this->settings->medium_subset);
+                                    $_query = array('id' => $id, 'm' => $this->settings->medium_subset);
                                     $_query = build_query($_query);
                                     $loc = '/edit-title/?' . $_query;
                                     wp_redirect($loc);
@@ -252,7 +253,7 @@ class Frontend
                         break;
 
                     case 'delete':
-                        if (! $this->rpsdb->getCompetionClosed()) {
+                        if (!$this->rpsdb->getCompetionClosed()) {
                             $this->deleteCompetitionEntries($entry_array);
                         }
                         break;
@@ -260,7 +261,7 @@ class Frontend
             }
 
             // Get the currently selected competition
-            if (! $_POST) {
+            if (!$_POST) {
                 if (isset($_COOKIE['RPS_MyEntries'])) {
                     list ($comp_date, $classification, $medium) = explode("|", $_COOKIE['RPS_MyEntries']);
                     $this->settings->comp_date = $comp_date;
@@ -276,18 +277,18 @@ class Frontend
                 $this->errmsg = 'There are no competitions available to enter';
                 // Invalidate any existing cookie
                 $past = time() - (24 * 3600);
-                $url = parse_url(get_bloginfo(url));
+                $url = parse_url(get_bloginfo('url'));
                 setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $past, '/', $url['host']);
             }
         }
     }
 
-    public function actionPreHeader_RpsEditTitle()
+    public function actionPreHeaderRpsEditTitle()
     {
         global $post;
 
         if (is_object($post) && $post->ID == 75) {
-            if (! empty($_POST)) {
+            if (!empty($_POST)) {
                 $redirect_to = $_POST['wp_get_referer'];
                 $this->_medium_subset = $_POST['m'];
                 $this->_entry_id = $_POST['id'];
@@ -310,7 +311,7 @@ class Frontend
                     }
                 }
                 // makes sure they filled in the title field
-                if (! $_POST['new_title'] || trim($_POST['new_title']) == "") {
+                if (!$_POST['new_title'] || trim($_POST['new_title']) == "") {
                     $this->errmsg = 'You must provide an image title.<br><br>';
                 } else {
                     $recs = $this->rpsdb->getCompetitionByID($this->_entry_id);
@@ -331,7 +332,7 @@ class Frontend
                     $current_user = wp_get_current_user();
                     $new_file_name_noext = sanitize_file_name($_POST['new_title']) . '+' . $current_user->user_login;
                     $new_file_name = sanitize_file_name($new_title) . '+' . $current_user->user_login . $ext;
-                    if (! $this->core->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
+                    if (!$this->core->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
                         die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
                     }
 
@@ -349,7 +350,7 @@ class Frontend
         }
     }
 
-    public function actionPreHeader_RpsUploadEntry()
+    public function actionPreHeaderRpsUploadEntry()
     {
         global $post;
 
@@ -370,7 +371,7 @@ class Frontend
                     if ($_SERVER['CONTENT_LENGTH'] > $this->core->getShorthandToBytes(ini_get('post_max_size'))) {
                         $this->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                     } else {
-                        if (! $this->checkUploadEntryTitle()) {
+                        if (!$this->checkUploadEntryTitle()) {
                             return;
                         }
 
@@ -379,6 +380,7 @@ class Frontend
                         $size_info = getimagesize($uploaded_file_name);
                         if ($size_info[2] != IMAGETYPE_JPEG) {
                             $this->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+
                             return;
                         }
 
@@ -387,6 +389,7 @@ class Frontend
                             list ($this->settings->comp_date, $this->settings->classification, $this->settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
                         } else {
                             $this->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
+
                             return;
                         }
 
@@ -399,11 +402,12 @@ class Frontend
                             $c = $this->classification;
                             $m = $this->medium;
                             $this->errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
+
                             return;
                         }
 
                         // Prepare the title and client file name for storing in the database
-                        if (! get_magic_quotes_gpc()) {
+                        if (!get_magic_quotes_gpc()) {
                             $title = addslashes(trim($_POST['title']));
                             $client_file_name = addslashes(basename($_FILES['file_name']['name']));
                         } else {
@@ -416,6 +420,7 @@ class Frontend
                         // file names on the server
                         if ($this->rpsdb->checkDuplicateTitle($comp_id, $title)) {
                             $this->errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
+
                             return;
                         }
 
@@ -425,6 +430,7 @@ class Frontend
                         $max_per_id = $this->rpsdb->checkMaxEntriesOnId($comp_id);
                         if ($max_per_id >= $max_entries) {
                             $this->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
+
                             return;
                         }
 
@@ -432,6 +438,7 @@ class Frontend
                         if ($max_per_date >= $this->settings->club_max_entries_per_member_per_date) {
                             $x = $this->settings->club_max_entries_per_member_per_date;
                             $this->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
+
                             return;
                         }
 
@@ -446,10 +453,11 @@ class Frontend
                         $dest_name = sanitize_file_name($title2) . '+' . $user->user_login;
                         $full_path = $path . '/' . $dest_name;
                         // Need to create the destination folder?
-                        if (! is_dir($path))
+                        if (!is_dir($path)) {
                             mkdir($path, 0755);
+                        }
 
-                            // If the .jpg file is too big resize it
+                        // If the .jpg file is too big resize it
                         if ($size_info[0] > $this->settings->max_width_entry || $size_info[1] > $this->settings->max_height_entry) {
                             // If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
                             if ($size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->settings->max_width_entry / $this->settings->max_height_entry) {
@@ -479,16 +487,18 @@ class Frontend
                             // The uploaded image does not need to be resized so just move it to the destination directory
                         } else {
                             $resized = 0;
-                            if (! move_uploaded_file($uploaded_file_name, $full_path . '.jpg')) {
+                            if (!move_uploaded_file($uploaded_file_name, $full_path . '.jpg')) {
                                 $this->errmsg = "Failed to move uploaded file to destination folder";
+
                                 return;
                             }
                         }
                         $server_file_name = str_replace($_SERVER['DOCUMENT_ROOT'], '', $full_path . '.jpg');
-                        $data = array('Competition_ID' => $comp_id,'Title' => $title,'Client_File_Name' => $client_file_name,'Server_File_Name' => $server_file_name);
+                        $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
                         $_result = $this->rpsdb->addEntry($data);
                         if ($_result === false) {
                             $this->errmsg = "Failed to INSERT entry record into database";
+
                             return;
                         }
                         $query = build_query(array('resized' => $resized));
@@ -612,7 +622,7 @@ class Frontend
         $rsp->SetAttribute('stat', 'ok');
 
         $medium_clause = '';
-        if (! (empty($requested_medium))) {
+        if (!(empty($requested_medium))) {
             $medium_clause = ($requested_medium == "prints") ? " AND Medium like '%Prints' " : " AND Medium like '%Digital' ";
         }
         $sql = "SELECT ID, Competition_Date, Theme, Medium, Classification
@@ -738,31 +748,38 @@ class Frontend
             case UPLOAD_ERR_INI_SIZE:
                 $this->doRESTError("The uploaded file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . ") in php.ini.");
                 die();
+                break;
             case UPLOAD_ERR_FORM_SIZE:
                 $this->doRESTError("The uploaded file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB allowed by this form.");
                 die();
+                break;
             case UPLOAD_ERR_PARTIAL:
                 $this->doRESTError("The uploaded file was only partially uploaded.");
                 die();
+                break;
             case UPLOAD_ERR_NO_FILE:
                 $this->doRESTError("No file was uploaded.");
                 die();
+                break;
             case UPLOAD_ERR_NO_TMP_DIR:
                 $this->doRESTError("Missing a temporary folder.");
                 die();
+                break;
             case UPLOAD_ERR_CANT_WRITE:
                 $this->doRESTError("Failed to write file to disk");
                 die();
+                break;
             default:
                 $this->doRESTError("Unknown File Upload Error");
                 die();
+                break;
         }
 
         // Move the file to its final location
         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions';
         $dest_name = "scores_" . $comp_date . ".xml";
         $file_name = $path . '/' . $dest_name;
-        if (! move_uploaded_file($_FILES['file']['tmp_name'], $file_name)) {
+        if (!move_uploaded_file($_FILES['file']['tmp_name'], $file_name)) {
             $this->doRESTError("Failed to store scores XML file in destination folder.");
             die();
         }
@@ -791,7 +808,7 @@ class Frontend
         $award = '';
         $entry_id = '';
 
-        if (! $xml = simplexml_load_file($file_name)) {
+        if (!$xml = simplexml_load_file($file_name)) {
             $this->doRESTError("Failed to open scores XML file");
             die();
         }
@@ -848,8 +865,9 @@ class Frontend
                 WHERE Competition_Date='$comp_date' AND
                 Classification='$classification' AND
                 Medium = '$medium'";
-                if (! $rs = mysql_query($sql))
+                if (!$rs = mysql_query($sql)) {
                     throw new \Exception(mysql_error());
+                }
             } catch (\Exception $e) {
                 $this->doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
                 die();
@@ -859,6 +877,7 @@ class Frontend
                 die();
             }
         }
+
         return $warning;
     }
 
@@ -904,7 +923,7 @@ class Frontend
     private function checkUploadEntryTitle()
     {
         $_upload_ok = false;
-        if (! isset($_POST['title']) || trim($_POST['title']) == "") {
+        if (!isset($_POST['title']) || trim($_POST['title']) == "") {
             $this->errmsg = 'Please enter your image title in the Title field.';
         } else {
             switch ($_FILES['file_name']['error']) {
@@ -933,6 +952,7 @@ class Frontend
                     $this->errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
             }
         }
+
         return $_upload_ok;
     }
 
@@ -993,8 +1013,8 @@ class Frontend
     /**
      * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
      *
-     * @param string $date
-     * @param unknown $med
+     * @param  string  $date
+     * @param  unknown $med
      * @return boolean
      */
     private function validateSelectedComp($date, $med)
@@ -1007,8 +1027,8 @@ class Frontend
 
         // Read the competition attributes into a series of arrays
         $index = 0;
-        $date_index = - 1;
-        $medium_index = - 1;
+        $date_index = -1;
+        $medium_index = -1;
         foreach ($open_competitions as $recs) {
             // Append this competition to the arrays
             $dateParts = explode(" ", $recs['Competition_Date']);
@@ -1057,6 +1077,7 @@ class Frontend
         $hour = time() + (2 * 3600);
         $url = parse_url(get_bloginfo('url'));
         setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $hour, '/', $url['host']);
+
         return true;
     }
 }

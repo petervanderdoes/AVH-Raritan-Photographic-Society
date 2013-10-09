@@ -33,6 +33,7 @@ $rps_basename = plugin_basename($plugin);
 
 class AVH_RPS_Client
 {
+
     /**
      *
      * @var Avh\Di\Container
@@ -41,28 +42,28 @@ class AVH_RPS_Client
 
     private $settings;
 
-    public function __construct ($dir, $basename)
+    public function __construct($dir, $basename)
     {
         $this->container = new Container();
 
         $this->container->register('\RpsCompetition\Settings', null, true);
         $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
-        $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings','\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Competition\ListCompetition')->withArguments(array('\RpsCompetition\Settings','\RpsCompetition\Db\RpsDb','\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Entries\ListEntries')->withArguments(array('\RpsCompetition\Settings','\RpsCompetition\Db\RpsDb','\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Frontend\Shortcodes')->withArguments(array('\RpsCompetition\Settings','\RpsCompetition\Db\RpsDb','\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Competition\ListCompetition')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Entries\ListEntries')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Frontend\Shortcodes')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
 
         $this->settings = $this->container->resolve('\RpsCompetition\Settings');
         $this->settings->plugin_dir = $dir;
         $this->settings->plugin_basename = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
-        add_action('plugins_loaded', array($this,'init'));
+        add_action('plugins_loaded', array($this, 'init'));
     }
 
-    public function init ()
+    public function init()
     {
-        if ( is_admin() ) {
+        if (is_admin()) {
             Initialize::load();
             add_action('wp_loaded', array($this->admin()));
         } else {
@@ -70,7 +71,7 @@ class AVH_RPS_Client
         }
     }
 
-    public function admin ()
+    public function admin()
     {
         new Admin($this->container);
     }

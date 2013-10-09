@@ -141,7 +141,7 @@ class Core
         // }
         // Add none existing sections and/or elements to the options
         foreach ($this->default_options as $option => $value) {
-            if (! array_key_exists($option, $options)) {
+            if (!array_key_exists($option, $options)) {
                 $options[$option] = $value;
                 continue;
             }
@@ -158,11 +158,11 @@ class Core
         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'];
         $file_name = $row['Title'] . '+' . $row['Username'];
 
-        if (! is_dir("$path/thumbnails")) {
+        if (!is_dir("$path/thumbnails")) {
             mkdir("$path/thumbnails", 0755);
         }
 
-        if (! file_exists("$path/thumbnails/$file_name" . "_$size.jpg")) {
+        if (!file_exists("$path/thumbnails/$file_name" . "_$size.jpg")) {
             $name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']);
             $this->rpsResizeImage($name, "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
         }
@@ -173,13 +173,13 @@ class Core
         $maker = trim($maker);
 
         // Open the original image
-        if (! file_exists($image_name)) {
+        if (!file_exists($image_name)) {
             return false;
         }
         $original_img = imagecreatefromjpeg($image_name);
         // Calculate the height and width of the resized image
         $dimensions = GetImageSize($image_name);
-        if (! (false === $dimensions)) {
+        if (!(false === $dimensions)) {
             $w = $dimensions[0];
             $h = $dimensions[1];
             if ($w > $h) { // Landscape image
@@ -199,7 +199,7 @@ class Core
         imagecopyresampled($thumb_img, $original_img, 0, 0, 0, 0, $nw, $nh, $w, $h);
 
         // If this is the 400px image, write the copyright notice onto the image
-        if (! (empty($maker))) {
+        if (!(empty($maker))) {
             $dateParts = explode("-", $this->settings->comp_date);
             $year = $dateParts[0];
             $black = imagecolorallocate($thumb_img, 0, 0, 0);
@@ -229,11 +229,11 @@ class Core
         $file_parts = pathinfo(str_replace('/home/rarit0/public_html/', '', $row['Server_File_Name']));
         $thumb_dir = $_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/thumbnails';
 
-        if (! is_dir($thumb_dir)) {
+        if (!is_dir($thumb_dir)) {
             mkdir($thumb_dir, 0755);
         }
 
-        if (! file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg')) {
+        if (!file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg')) {
             $this->rpsResizeImage($_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
         }
 
@@ -270,6 +270,7 @@ class Core
                 }
             }
         }
+
         return $status;
     }
 
@@ -301,18 +302,20 @@ class Core
                     $keys[$k] = substr($k, 1);
                 }
                 $k = $keys[$k];
-                if (! isset($ret[$k]))
+                if (!isset($ret[$k])) {
                     $ret[$k] = $array[$k];
+                }
                 $ret[$k][$col] = $array[$k][$col];
             }
             $first = false;
         }
+
         return $ret;
     }
 
     public function getShorthandToBytes($size_str)
     {
-        switch (substr($size_str, - 1)) {
+        switch (substr($size_str, -1)) {
             case 'M':
             case 'm':
                 return (int) $size_str * 1048576;
@@ -402,19 +405,22 @@ class Core
     /**
      * Get the value for an option element.
      *
-     * @param string $option
+     * @param  string $option
      * @return mixed
      */
     public function getOption($option)
     {
-        if (! $option)
+        if (!$option) {
             return false;
+        }
 
-        if (! isset($this->options))
+        if (!isset($this->options)) {
             $this->loadOptions();
+        }
 
-        if (! is_array($this->options) || empty($this->options[$option]))
+        if (!is_array($this->options) || empty($this->options[$option])) {
             return false;
+        }
 
         return $this->options[$option];
     }
@@ -477,6 +483,7 @@ class Core
         } else {
             $this->setData($data);
         }
+
         return;
     }
 
@@ -484,8 +491,8 @@ class Core
      * Get the value of a data element.
      * If there is no value return false
      *
-     * @param string $option
-     * @param string $key
+     * @param  string $option
+     * @param  string $key
      * @return mixed
      * @since 0.1
      */
@@ -496,6 +503,7 @@ class Core
         } else {
             $return = false;
         }
+
         return ($return);
     }
 

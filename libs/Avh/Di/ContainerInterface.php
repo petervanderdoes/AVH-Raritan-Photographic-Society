@@ -14,9 +14,9 @@ interface ContainerInterface
      *
      * Register an item with the container
      *
-     * @param mixed $alias
-     * @param mixed $object
-     * @param boolean $shared
+     * @param  mixed              $alias
+     * @param  mixed              $object
+     * @param  boolean            $shared
      * @return \Avh\Di\Definition
      */
     public function register($alias, $object = null, $shared = false);
@@ -26,7 +26,7 @@ interface ContainerInterface
      *
      * Resolve an item from the container
      *
-     * @param string $alias
+     * @param  string $alias
      * @return object
      */
     public function resolve($alias);

@@ -77,7 +77,7 @@ class PluginController
      */
     public function actionInit()
     {
-        if (! isset($this->textdomain)) {
+        if (!isset($this->textdomain)) {
             load_plugin_textdomain($this->textdomain, false, $this->settings->plugin_dir . '/lang');
         }
 
@@ -118,6 +118,7 @@ class PluginController
         } else {
             $_full_style_name = $this->settings->file_prefix . $style . $minified;
         }
+
         return $_full_style_name;
     }
 
@@ -141,6 +142,7 @@ class PluginController
         } else {
             $_full_script_name = $this->settings->file_prefix . $script . $_minified;
         }
+
         return $_full_script_name;
     }
 
@@ -178,7 +180,7 @@ class PluginController
     public function actionInPluginUpdateMessage()
     {
         $_response = wp_remote_get($this->settings->plugin_readme_url, array('user-agent' => 'WordPress/' . Common::getWordpressVersion() . ' ' . $this->settings->plugin_name . '/' . $this->settings->plugin_version));
-        if (! is_wp_error($_response) || is_array($_response)) {
+        if (!is_wp_error($_response) || is_array($_response)) {
             $_data = $_response['body'];
             $_matches = null;
             if (preg_match('~==\s*Changelog\s*==\s*=\s*Version\s*[0-9.]+\s*=(.*)(=\s*Version\s*[0-9.]+\s*=|$)~Uis', $_data, $_matches)) {
@@ -189,7 +191,7 @@ class PluginController
                 $_ul = false;
                 foreach ($_changelog as $_index => $_line) {
                     if (preg_match('~^\s*\*\s*~', $_line)) {
-                        if (! $_ul) {
+                        if (!$_ul) {
                             echo '<ul style="list-style: disc; margin-left: 20px;">';
                             $_ul = true;
                         }
@@ -232,7 +234,7 @@ class PluginController
     /**
      * Add a "settings" link to access to the option page from the plugin list
      *
-     * @param string $links
+     * @param  string $links
      * @return none
      */
     public function filterPluginActions($links)
@@ -241,6 +243,7 @@ class PluginController
             $_settings_link = '<a href="' . admin_url('options-general.php?page=' . $this->options_page_id) . '">' . __('Settings') . '</a>';
             array_unshift($links, $_settings_link);
         }
+
         return $links;
     }
 
@@ -299,6 +302,7 @@ class PluginController
             if ($_values['option_link']) {
                 $this->options_page_id = $_values['id'];
             }
+
             return ($_values['id']);
         } else {
             return (false);
@@ -371,9 +375,9 @@ class PluginController
     /**
      * Returns the pagehook name
      *
-     * @param string $page_id
-     * @param string $function
-     * @return mixed If pagehook does not exists return false other return the page hook name
+     * @param  string $page_id
+     * @param  string $function
+     * @return mixed  If pagehook does not exists return false other return the page hook name
      */
     protected function getPageHook($page_id = '', $function = '')
     {
@@ -393,7 +397,7 @@ class PluginController
     protected function addCapability($capability, $role)
     {
         $_role_object = get_role($role);
-        if ($_role_object != null && ! $_role_object->has_cap($capability)) {
+        if ($_role_object != null && !$_role_object->has_cap($capability)) {
             $_role_object->add_cap($capability);
         }
     }
@@ -414,7 +418,7 @@ class PluginController
     /**
      * Insert button in wordpress post editor
      *
-     * @param array $buttons
+     * @param  array $buttons
      * @return array
      */
     public function registerButton($buttons)
@@ -422,6 +426,7 @@ class PluginController
         foreach ($this->tinyMCE_buttons as $_value) {
             array_push($buttons, $_value->name);
         }
+
         return $buttons;
     }
 
@@ -436,6 +441,7 @@ class PluginController
         foreach ($this->tinyMCE_buttons as $_value) {
             $plugin_array[$_value->name] = $this->settings->plugin_url . $_value->path . '/' . $_value->js_file;
         }
+
         return $plugin_array;
     }
 

@@ -1,12 +1,13 @@
 <?php
 namespace RpsCompetition\Entries;
+
 use RpsCompetition\Settings;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
 use RpsCompetition\Constants;
 
-class ListEntries extends \WP_List_Table
+class List extends \WP_List_Table
 {
 
     /**
@@ -26,7 +27,9 @@ class ListEntries extends \WP_List_Table
      * @var RpsDb
      */
     private $rpsdb;
+
     public $messages;
+
     public $screen;
 
     public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core)
@@ -38,13 +41,14 @@ class ListEntries extends \WP_List_Table
 
         $this->screen = 'avh_rps_page_avh_rps_entries_';
         $default_status = get_user_option('avhrps_entries_list_last_view');
-        if ( empty($default_status) )
+        if (empty($default_status)) {
             $default_status = 'all';
+        }
         $status = isset($_REQUEST['avhrps_entries_list_status']) ? $_REQUEST['avhrps_entries_list_status'] : $default_status;
-        if (! in_array($status, array('all', 'search'))) {
+        if (!in_array($status, array('all', 'search'))) {
             $status = 'all';
         }
-        if ( $status != $default_status && 'search' != $status ) {
+        if ($status != $default_status && 'search' != $status) {
             update_user_meta(get_current_user_id(), 'avhrps_entries_list_last_view', $status);
         }
 
@@ -63,38 +67,38 @@ class ListEntries extends \WP_List_Table
         global $post_id, $entry_status, $search, $comment_type;
 
         $entry_status = isset($_REQUEST['entry_status']) ? $_REQUEST['entry_status'] : 'all';
-        if ( !in_array($entry_status, array('all')) ) {
+        if (!in_array($entry_status, array('all'))) {
             $entry_status = 'all';
         }
 
-        $search = ( isset($_REQUEST['s']) ) ? $_REQUEST['s'] : '';
+        $search = (isset($_REQUEST['s'])) ? $_REQUEST['s'] : '';
 
-        $orderby = ( isset($_REQUEST['orderby']) ) ? $_REQUEST['orderby'] : 'Competition_ID';
-        $order = ( isset($_REQUEST['order']) ) ? $_REQUEST['order'] : '';
+        $orderby = (isset($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'Competition_ID';
+        $order = (isset($_REQUEST['order'])) ? $_REQUEST['order'] : '';
 
         $entries_per_page = $this->get_per_page($entry_status);
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        if ( isset($_REQUEST['number']) ) {
+        if (isset($_REQUEST['number'])) {
             $number = (int) $_REQUEST['number'];
         } else {
             $number = $entries_per_page + min(8, $entries_per_page); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
         }
 
         $where = '1=1';
-        if ( isset($_REQUEST['user_id']) ) {
+        if (isset($_REQUEST['user_id'])) {
             $where = 'Member_ID=' . $_REQUEST['user_id'];
         }
         $page = $this->get_pagenum();
 
-        if ( isset($_REQUEST['start']) ) {
+        if (isset($_REQUEST['start'])) {
             $start = $_REQUEST['start'];
         } else {
-            $start = ( $page - 1 ) * $entries_per_page;
+            $start = ($page - 1) * $entries_per_page;
         }
 
-        if ( $doing_ajax && isset($_REQUEST['offset']) ) {
+        if ($doing_ajax && isset($_REQUEST['offset'])) {
             $start += $_REQUEST['offset'];
         }
 
@@ -115,6 +119,7 @@ class ListEntries extends \WP_List_Table
     {
         $entries_per_page = $this->get_items_per_page('entries_per_page');
         $entries_per_page = apply_filters('entries_per_page', $entries_per_page, $entry_status);
+
         return $entries_per_page;
     }
 
@@ -152,10 +157,10 @@ class ListEntries extends \WP_List_Table
 
         $link = 'admin.php?page=' . Constants::MENU_SLUG_ENTRIES;
 
-        foreach ( $stati as $status => $label ) {
-            $class = ( $status == $entry_status ) ? ' class="current"' : '';
+        foreach ($stati as $status => $label) {
+            $class = ($status == $entry_status) ? ' class="current"' : '';
 
-            if ( $status != 'all' ) {
+            if ($status != 'all') {
                 $link = add_query_arg('entry_status', $status, $link);
             }
             // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
@@ -180,12 +185,12 @@ class ListEntries extends \WP_List_Table
         global $status;
 
         echo '<div class="alignleft actions">';
-        if ( 'top' == $which ) {
+        if ('top' == $which) {
             $_seasons = $this->rpsdb->getSeasonList('DESC');
             $season = isset($_GET['filter-season']) ? $_GET['filter-season'] : 0;
             echo '<select name="filter-season">';
             echo '<option' . selected($season, 0, false) . ' value="0">' . __('Show all seasons') . '</option>';
-            foreach ( $_seasons as $_season ) {
+            foreach ($_seasons as $_season) {
                 echo '<option' . selected($season, $_season, false) . ' value="' . esc_attr($_season) . '">' . $_season . '</option>';
             }
             submit_button(__('Filter'), 'button', false, false, array('id' => 'entries-query-submit'));
@@ -195,9 +200,9 @@ class ListEntries extends \WP_List_Table
 
     public function current_action()
     {
-        if ( isset($_POST['clear-recent-list']) )
+        if (isset($_POST['clear-recent-list']))
             return 'clear-recent-list';
-        if ( isset($_POST['filter-season']) )
+        if (isset($_POST['filter-season']))
             return 'filter-season';
 
         return parent::current_action();
@@ -251,10 +256,10 @@ class ListEntries extends \WP_List_Table
     public function column_season($entry)
     {
         $_competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
-        if ( $_competition != false ) {
+        if ($_competition != false) {
             $unix_date = mysql2date('U', $_competition->Competition_Date);
             $_competition_month = date('n', $unix_date);
-            if ( $_competition_month >= $this->settings->club_season_start_month_num && $_competition_month <= $this->settings->club_season_end_month_num ) {
+            if ($_competition_month >= $this->settings->club_season_start_month_num && $_competition_month <= $this->settings->club_season_end_month_num) {
                 $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
             } else {
                 $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
@@ -302,7 +307,7 @@ class ListEntries extends \WP_List_Table
 
         echo '<div class="row-actions">';
         $sep = '';
-        foreach ( $actions as $action => $link ) {
+        foreach ($actions as $action => $link) {
             echo "<span class='set_$action'>$sep$link</span>";
             $sep = ' | ';
         }

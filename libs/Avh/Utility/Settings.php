@@ -18,6 +18,7 @@ abstract class Settings
         } else {
             $_return = null;
         }
+
         return $_return;
     }
 

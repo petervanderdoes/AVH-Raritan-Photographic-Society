@@ -46,9 +46,9 @@ class Definition
     /**
      * Constructor
      *
-     * @param string $class
+     * @param string                     $class
      * @param \Avh\Di\ContainerInterface $container
-     * @param boolean $auto
+     * @param boolean                    $auto
      */
     public function __construct($class, ContainerInterface $container, $auto = false)
     {
@@ -68,7 +68,7 @@ class Definition
     {
         $object = null;
 
-        if (! $this->hasClass()) {
+        if (!$this->hasClass()) {
             throw new \RuntimeException('The definition has no class associated with it');
         }
 
@@ -115,7 +115,7 @@ class Definition
      *
      * Invokes all methods that are associated with the definition
      *
-     * @param object $object
+     * @param  object $object
      * @return object
      */
     public function handleMethodCalls($object)
@@ -156,7 +156,7 @@ class Definition
      */
     public function hasClass()
     {
-        return (! is_null($this->class));
+        return (!is_null($this->class));
     }
 
     /**
@@ -164,7 +164,7 @@ class Definition
      *
      * Sets a constructor argument for the definition
      *
-     * @param mixed $argument
+     * @param  mixed              $argument
      * @return \Avh\Di\Definition
      */
     public function withArgument($argument)
@@ -179,7 +179,7 @@ class Definition
      *
      * Proxy to withArgument method, accepts an array of arguments
      *
-     * @param array $arguments
+     * @param  array              $arguments
      * @return \Avh\Di\Definition
      */
     public function withArguments(array $arguments)
@@ -200,7 +200,7 @@ class Definition
      */
     public function hasArguments()
     {
-        return (! empty($this->arguments));
+        return (!empty($this->arguments));
     }
 
     /**
@@ -208,8 +208,8 @@ class Definition
      *
      * Sets a method call for the definition
      *
-     * @param string $method
-     * @param array $arguments
+     * @param  string             $method
+     * @param  array              $arguments
      * @return \Avh\Di\Definition
      */
     public function withMethodCall($method, array $arguments = array())
@@ -224,7 +224,7 @@ class Definition
      *
      * Proxy to withMethodCall method, accepts array of method calls with method arguments
      *
-     * @param array $methods
+     * @param  array              $methods
      * @return \Avh\Di\Definition
      */
     public function withMethodCalls(array $methods = array())
@@ -245,6 +245,6 @@ class Definition
      */
     public function hasMethodCalls()
     {
-        return (! empty($this->methods));
+        return (!empty($this->methods));
     }
 }

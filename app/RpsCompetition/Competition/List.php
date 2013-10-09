@@ -47,7 +47,7 @@ class ListCompetition extends \WP_List_Table
             $default_status = 'all';
         }
         $status = isset($_REQUEST['avhrps_competition_list_status']) ? $_REQUEST['avhrps_competition_list_status'] : $default_status;
-        if (! in_array($status, array('all', 'open', 'closed', 'search'))) {
+        if (!in_array($status, array('all', 'open', 'closed', 'search'))) {
             $status = 'all';
         }
         if ($status != $default_status && 'search' != $status) {
@@ -69,7 +69,7 @@ class ListCompetition extends \WP_List_Table
         global $post_id, $competition_status, $search, $comment_type;
 
         $competition_status = isset($_REQUEST['competition_status']) ? $_REQUEST['competition_status'] : 'open';
-        if (! in_array($competition_status, array('all', 'open', 'closed'))) {
+        if (!in_array($competition_status, array('all', 'open', 'closed'))) {
             $competition_status = 'open';
         }
 
@@ -121,6 +121,7 @@ class ListCompetition extends \WP_List_Table
     {
         $competitions_per_page = $this->get_items_per_page('competitions_per_page');
         $competitions_per_page = apply_filters('competitions_per_page', $competitions_per_page, $competition_status);
+
         return $competitions_per_page;
     }
 
@@ -161,7 +162,7 @@ class ListCompetition extends \WP_List_Table
         foreach ($stati as $status => $label) {
             $class = ($status == $competition_status) ? ' class="current"' : '';
 
-            if (! isset($num_competitions->$status)) {
+            if (!isset($num_competitions->$status)) {
                 $num_competitions->$status = 10;
             }
             $link = add_query_arg('competition_status', $status, $link);
@@ -205,8 +206,9 @@ class ListCompetition extends \WP_List_Table
 
     public function current_action()
     {
-        if (isset($_POST['clear-recent-list']))
+        if (isset($_POST['clear-recent-list'])) {
             return 'clear-recent-list';
+        }
 
         return parent::current_action();
     }
@@ -280,7 +282,7 @@ class ListCompetition extends \WP_List_Table
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         // We'll not add these for now, maybe later. There is no real need to open/close a single part of a competition anyway.
-        // if ( $competition->Closed == 'Y' ) {
+        // if ($competition->Closed == 'Y') {
         // $queryOpen = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'open','wp_http_referer' => $wp_http_referer);
         // $urlOpen = $url . http_build_query($queryOpen, '', '&');
         // $actions['open'] = '<a ' . Common::attributes(array('href' => $urlOpen,'title' => 'Open this competition')) . '>' . 'Open' . '</a>';

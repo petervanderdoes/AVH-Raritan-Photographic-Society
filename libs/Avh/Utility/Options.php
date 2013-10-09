@@ -28,7 +28,7 @@ final class Options
      * @param string $key
      *            Option name
      * @param string $file
-     * @param array $defaults
+     * @param array  $defaults
      *            An associative array of default values (optional)
      */
     public function load($option_name, $file, $defaults = array())
@@ -55,6 +55,7 @@ final class Options
         if (false === $_data) {
             $_data = array_merge($this->option_defaults, $_data);
         }
+
         return $this->get($field, $_data);
     }
 
@@ -128,7 +129,7 @@ final class Options
     /**
      * Keep only the keys defined in $this->defaults
      *
-     * @param array $data
+     * @param  array $data
      * @return array
      */
     private function clean($data)
@@ -139,8 +140,8 @@ final class Options
     /**
      * Get one, more or all fields from an array
      *
-     * @param string|array $field
-     * @param array $data
+     * @param  string|array $field
+     * @param  array        $data
      * @return mixed
      */
     private function get($field, $data)
@@ -158,6 +159,7 @@ final class Options
                 $_result[] = $data[$key];
             }
         }
+
         return $_result;
     }
 }

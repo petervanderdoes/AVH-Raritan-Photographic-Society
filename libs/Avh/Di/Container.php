@@ -3,7 +3,6 @@ namespace Avh\Di;
 
 use Closure;
 use ArrayAccess;
-use ReflectionMethod;
 use ReflectionClass;
 use Avh\Di\ContainerInterface;
 
@@ -52,7 +51,7 @@ class Container implements ContainerInterface, \ArrayAccess
     {
         self::$instance = $this;
 
-        if (! empty($config)) {
+        if (!empty($config)) {
             $this->setConfig($config);
         }
     }
@@ -76,7 +75,7 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Provide configuration for the container instance
      *
-     * @param array $config
+     * @param  array     $config
      * @return Container $this
      */
     public function setConfig(array $config = array())
@@ -108,10 +107,10 @@ class Container implements ContainerInterface, \ArrayAccess
      * Register a class name, closure or fully configured item with the container,
      * we will handle dependencies at the time it is requested
      *
-     * @param string $alias
-     * @param mixed $object
-     * @param boolean $shared
-     * @param boolean $auto
+     * @param  string  $alias
+     * @param  mixed   $object
+     * @param  boolean $shared
+     * @param  boolean $auto
      * @return void
      */
     public function register($alias, $object = null, $shared = false, $auto = false)
@@ -147,7 +146,7 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Check if an alias is registered with the container
      *
-     * @param string $key
+     * @param  string  $key
      * @return boolean
      */
     public function registered($key)
@@ -160,8 +159,8 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Resolve and return the requested item
      *
-     * @param string $alias
-     * @param array $args
+     * @param  string $alias
+     * @param  array  $args
      * @return mixed
      */
     public function resolve($alias, array $args = array())
@@ -172,7 +171,7 @@ class Container implements ContainerInterface, \ArrayAccess
 
         // if the requested item is not registered with the container already
         // then we register it for easier resolution
-        if (! array_key_exists($alias, $this->values)) {
+        if (!array_key_exists($alias, $this->values)) {
             $this->register($alias, $alias, false, true);
         }
 
@@ -206,7 +205,7 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Builds an object and injects constructor arguments
      *
-     * @param string $object
+     * @param  string $object
      * @return object
      */
     public function build($object)
@@ -235,8 +234,8 @@ class Container implements ContainerInterface, \ArrayAccess
      * Will first check if the parameters type hint is instantiable and resolve that, if
      * not it will attempt to resolve an implementation from the param annotation
      *
-     * @param string $object
-     * @param array $params
+     * @param  string $object
+     * @param  array  $params
      * @return array
      */
     public function dependencies($object, $params)
@@ -269,7 +268,7 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Proxy to resolve method
      *
-     * @param string $key
+     * @param  string $key
      * @return mixed
      */
     public function offsetGet($key)
@@ -282,8 +281,8 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Proxy to register method
      *
-     * @param string $key
-     * @param mixed $value
+     * @param  string $key
+     * @param  mixed  $value
      * @return void
      */
     public function offsetSet($key, $value)
@@ -296,7 +295,7 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Destroys an item in the container
      *
-     * @param string $key
+     * @param  string $key
      * @return void
      */
     public function offsetUnset($key)
@@ -309,7 +308,7 @@ class Container implements ContainerInterface, \ArrayAccess
      *
      * Proxy to registered method
      *
-     * @param string $key
+     * @param  string  $key
      * @return boolean
      */
     public function offsetExists($key)

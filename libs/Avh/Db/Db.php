@@ -16,30 +16,30 @@ final class Db
     {
         global $wpdb;
 
-        $_retval = wp_cache_get('field_names_' . $table, 'AvhDb');
-        if (false === $_retval) {
+        $return = wp_cache_get('field_names_' . $table, 'AvhDb');
+        if (false === $return) {
             $sql = $this->getQueryShowColumns($table);
 
             $_result = $wpdb->get_results($sql, ARRAY_A);
 
-            $_retval = array();
+            $return = array();
             foreach ($_result as $row) {
                 if (isset($row['Field'])) {
-                    $_retval[] = $row['Field'];
+                    $return[] = $row['Field'];
                 }
             }
-            wp_cache_set('field_names_' . $table, $_retval, 'AvhDb', 3600);
+            wp_cache_set('field_names_' . $table, $return, 'AvhDb', 3600);
         }
 
-        return $_retval;
+        return $return;
     }
 
     /**
      * Determine if a particular field exists
      *
      * @access public
-     * @param string $field_name
-     * @param string $table_name
+     * @param  string  $field_name
+     * @param  string  $table_name
      * @return boolean
      */
     public function checkFieldExists($field_name, $table_name)
@@ -60,6 +60,7 @@ final class Db
     private function getQueryShowColumns($table = '')
     {
         global $wpdb;
+
         return $wpdb->prepare('SHOW COLUMNS FROM ' . $table);
     }
 }
