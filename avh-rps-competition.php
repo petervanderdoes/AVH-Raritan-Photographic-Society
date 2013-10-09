@@ -49,8 +49,8 @@ class AVH_RPS_Client
         $this->container->register('\RpsCompetition\Settings', null, true);
         $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
         $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Competition\ListCompetition')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Entries\ListEntries')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Competition\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        $this->container->register('\RpsCompetition\Entries\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
         $this->container->register('\RpsCompetition\Frontend\Shortcodes')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
 
         $this->settings = $this->container->resolve('\RpsCompetition\Settings');

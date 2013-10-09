@@ -7,7 +7,7 @@ use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
 use RpsCompetition\Constants;
 
-class List extends \WP_List_Table
+class ListTable extends \WP_List_Table
 {
 
     /**

@@ -1,7 +1,8 @@
 <?php
 namespace RpsCompetition\Admin;
 
-use RpsCompetition\Competition\ListCompetition;
+use RpsCompetition\Competition\ListTable as CompetitionListTable;
+use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Settings;
 use RpsCompetition\Constants;
@@ -36,7 +37,7 @@ final class Admin
 
     /**
      *
-     * @var ListCompetition
+     * @var CompetitionListTable
      */
     private $competition_list;
 
@@ -48,7 +49,7 @@ final class Admin
 
     /**
      *
-     * @var AVH_RPS_EntriesList
+     * @var EntriesListTable
      */
     private $entries_list;
 
@@ -159,7 +160,7 @@ final class Admin
     {
         global $current_screen;
         $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListCompetition');
+        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListTable');
 
         $this->handleRequestCompetition();
 
@@ -645,7 +646,7 @@ final class Admin
     {
         global $current_screen;
         $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListCompetition');
+        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListTable');
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -862,7 +863,7 @@ final class Admin
         global $current_screen;
 
         $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->entries_list = $this->container->resolve('\RpsCompetition\Entries\ListEntries');
+        $this->entries_list = $this->container->resolve('\RpsCompetition\Entries\ListTable');
         $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
