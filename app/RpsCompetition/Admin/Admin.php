@@ -9,6 +9,7 @@ use RpsCompetition\Constants;
 use Avh\Html\FormBuilder;
 use Avh\Utility\Common;
 use Avh\Di\Container;
+use RpsCompetition\Db\RpsDb;
 
 final class Admin
 {
@@ -31,7 +32,7 @@ final class Admin
 
     /**
      *
-     * @var RPSDb
+     * @var RpsDb
      */
     private $rpsdb;
 
@@ -416,7 +417,7 @@ final class Admin
         $formBuilder->setOption_name('competition-edit');
 
         if (isset($_POST['update'])) {
-            $this->updateCompetition();
+            $updated = $this->updateCompetition();
         }
         $vars = (array('action', 'redirect', 'competition', 'wp_http_referer'));
         for ($i = 0; $i < count($vars); $i += 1) {
@@ -444,7 +445,11 @@ final class Admin
 
         if (isset($_POST['update'])) {
             echo '<div id="message" class="updated">';
-            echo '<p><strong>Competition updated.</strong></p>';
+            if ($updated) {
+                echo '<p><strong>Competition updated.</strong></p>';
+            } else {
+                echo '<p><strong>Competition not updated.</strong></p>';
+            }
             if ($wp_http_referer) {
                 echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Competitions</a></p>';
             }
@@ -1422,6 +1427,12 @@ final class Admin
         $data['Medium'] = $_medium[$formOptionsNew['medium']];
         $data['Classification'] = $_classification[$formOptionsNew['classification']];
         $competition_ID = $this->rpsdb->insertCompetition($data);
+
+        if (is_wp_error($competition_ID)) {
+            return false;
+        } else {
+            return true;
+        }
     }
     // ############ Admin WP Helper ##############
 
