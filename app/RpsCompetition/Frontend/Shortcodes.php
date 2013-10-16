@@ -40,7 +40,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      * @param string $content
      * @param string $tag
      */
-    private function displayCategoryWinners($atts, $content, $tag)
+    public function displayCategoryWinners($atts, $content, $tag)
     {
         global $wpdb;
 
