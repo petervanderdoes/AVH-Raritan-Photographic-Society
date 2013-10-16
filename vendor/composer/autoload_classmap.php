@@ -16,6 +16,8 @@ return array(
     'Avh\\Mail\\Mailer' => $baseDir . '/libs/Avh/Mail/Mailer.php',
     'Avh\\Network\\Security' => $baseDir . '/libs/Avh/Network/Security.php',
     'Avh\\Network\\Visitor' => $baseDir . '/libs/Avh/Network/Visitor.php',
+    'Avh\\Support\\Str' => $baseDir . '/libs/Avh/Support/Str.php',
+    'Avh\\Support\\Url' => $baseDir . '/libs/Avh/Support/Url.php',
     'Avh\\Utility\\Common' => $baseDir . '/libs/Avh/Utility/Common.php',
     'Avh\\Utility\\Loader' => $baseDir . '/libs/Avh/Utility/Loader.php',
     'Avh\\Utility\\Options' => $baseDir . '/libs/Avh/Utility/Options.php',
