@@ -50,8 +50,6 @@ class Frontend
     // Other commonly used globals
     private $digital_chair_email;
 
-    private $errmsg;
-
     private $url_params;
 
     /**
@@ -64,7 +62,7 @@ class Frontend
         $this->container = $container;
         $this->settings = $this->container->resolve('\RpsCompetition\Settings');
 
-        $this->errmsg = '';
+        $this->settings->errmsg = '';
         // Initialize the plugin
         $this->core = $container->resolve('\RpsCompetition\Common\Core');
         $this->rpsdb = $container->resolve('\RpsCompetition\Db\RpsDb');
@@ -199,7 +197,7 @@ class Frontend
             $this->settings->comp_date = "";
             $this->settings->classification = "";
             $this->settings->medium = "";
-            $this->errmsg = '';
+            $this->settings->errmsg = '';
 
             $page = explode('-', $post->post_name);
             $this->settings->medium_subset = $page[1];
@@ -274,7 +272,7 @@ class Frontend
                 $this->settings->comp_date = "";
                 $this->settings->classification = "";
                 $this->settings->medium = "";
-                $this->errmsg = 'There are no competitions available to enter';
+                $this->settings->errmsg = 'There are no competitions available to enter';
                 // Invalidate any existing cookie
                 $past = time() - (24 * 3600);
                 $url = parse_url(get_bloginfo('url'));
@@ -312,7 +310,7 @@ class Frontend
                 }
                 // makes sure they filled in the title field
                 if (!$_POST['new_title'] || trim($_POST['new_title']) == "") {
-                    $this->errmsg = 'You must provide an image title.<br><br>';
+                    $this->settings->errmsg = 'You must provide an image title.<br><br>';
                 } else {
                     $recs = $this->rpsdb->getCompetitionByID($this->_entry_id);
                     if ($recs == null) {
@@ -369,7 +367,7 @@ class Frontend
                 // Detect this situation by comparing the length of the http content received with post_max_size
                 if (isset($_SERVER['CONTENT_LENGTH'])) {
                     if ($_SERVER['CONTENT_LENGTH'] > $this->core->getShorthandToBytes(ini_get('post_max_size'))) {
-                        $this->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
+                        $this->settings->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                     } else {
                         if (!$this->checkUploadEntryTitle()) {
                             return;
@@ -379,7 +377,7 @@ class Frontend
                         $uploaded_file_name = $_FILES['file_name']['tmp_name'];
                         $size_info = getimagesize($uploaded_file_name);
                         if ($size_info[2] != IMAGETYPE_JPEG) {
-                            $this->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+                            $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
 
                             return;
                         }
@@ -388,7 +386,7 @@ class Frontend
                         if (isset($_COOKIE['RPS_MyEntries'])) {
                             list ($this->settings->comp_date, $this->settings->classification, $this->settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
                         } else {
-                            $this->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
+                            $this->settings->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
 
                             return;
                         }
@@ -401,7 +399,7 @@ class Frontend
                             $d = $this->comp_date;
                             $c = $this->classification;
                             $m = $this->medium;
-                            $this->errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
+                            $this->settings->errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
 
                             return;
                         }
@@ -419,7 +417,7 @@ class Frontend
                         // an entry already submitted to this competition. Dupliacte title result in duplicate
                         // file names on the server
                         if ($this->rpsdb->checkDuplicateTitle($comp_id, $title)) {
-                            $this->errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
+                            $this->settings->errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
 
                             return;
                         }
@@ -429,7 +427,7 @@ class Frontend
                         // maximum images per competition by having two upload windows open simultaneously.
                         $max_per_id = $this->rpsdb->checkMaxEntriesOnId($comp_id);
                         if ($max_per_id >= $max_entries) {
-                            $this->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
+                            $this->settings->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
 
                             return;
                         }
@@ -437,7 +435,7 @@ class Frontend
                         $max_per_date = $this->rpsdb->checkMaxEntriesOnDate();
                         if ($max_per_date >= $this->settings->club_max_entries_per_member_per_date) {
                             $x = $this->settings->club_max_entries_per_member_per_date;
-                            $this->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
+                            $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
 
                             return;
                         }
@@ -479,7 +477,7 @@ class Frontend
                             $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, '');
                             // if (! $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, ''));
                             // {
-                            // $this->errmsg = "There is a problem resizing the picture for the use of the projector.";
+                            // $this->settings->errmsg = "There is a problem resizing the picture for the use of the projector.";
                             // return;
                             // }
                             $resized = 1;
@@ -488,7 +486,7 @@ class Frontend
                         } else {
                             $resized = 0;
                             if (!move_uploaded_file($uploaded_file_name, $full_path . '.jpg')) {
-                                $this->errmsg = "Failed to move uploaded file to destination folder";
+                                $this->settings->errmsg = "Failed to move uploaded file to destination folder";
 
                                 return;
                             }
@@ -497,7 +495,7 @@ class Frontend
                         $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
                         $_result = $this->rpsdb->addEntry($data);
                         if ($_result === false) {
-                            $this->errmsg = "Failed to INSERT entry record into database";
+                            $this->settings->errmsg = "Failed to INSERT entry record into database";
 
                             return;
                         }
@@ -924,32 +922,32 @@ class Frontend
     {
         $_upload_ok = false;
         if (!isset($_POST['title']) || trim($_POST['title']) == "") {
-            $this->errmsg = 'Please enter your image title in the Title field.';
+            $this->settings->errmsg = 'Please enter your image title in the Title field.';
         } else {
             switch ($_FILES['file_name']['error']) {
                 case UPLOAD_ERR_OK:
                     $_upload_ok = true;
                     break;
                 case UPLOAD_ERR_INI_SIZE:
-                    $this->errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
+                    $this->settings->errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
                     break;
                 case UPLOAD_ERR_FORM_SIZE:
-                    $this->errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
+                    $this->settings->errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
                     break;
                 case UPLOAD_ERR_PARTIAL:
-                    $this->errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->settings->errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 case UPLOAD_ERR_NO_FILE:
-                    $this->errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+                    $this->settings->errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                     break;
                 case UPLOAD_ERR_NO_TMP_DIR:
-                    $this->errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->settings->errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 case UPLOAD_ERR_CANT_WRITE:
-                    $this->errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->settings->errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
                     break;
                 default:
-                    $this->errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
+                    $this->settings->errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
             }
         }
 
@@ -969,14 +967,14 @@ class Frontend
 
                 $recs = $this->rpsdb->getEntryInfo($id);
                 if ($recs == false) {
-                    $this->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
+                    $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {
 
                     $server_file_name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
                     // Delete the record from the database
                     $result = $this->rpsdb->deleteEntry($id);
                     if ($result === false) {
-                        $this->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
+                        $this->settings->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
                     } else {
 
                         // Delete the file from the server file system

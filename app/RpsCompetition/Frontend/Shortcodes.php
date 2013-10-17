@@ -664,9 +664,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         $relative_path = str_replace('/home/rarit0/public_html', '', $server_file_name);
 
-        if (isset($this->errmsg)) {
+        if (isset($this->settings->errmsg)) {
             echo '<div id="errmsg">';
-            echo $this->errmsg;
+            echo $this->settings->errmsg;
             echo '</div>';
         }
         $action = home_url('/' . get_page_uri($post->ID));
@@ -724,8 +724,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '}' . "\n";
         echo '</script>' . "\n";
 
-        if (!empty($this->errmsg)) {
-            echo '<div id="errmsg">' . $this->errmsg . '</div>';
+        if (!empty($this->settings->errmsg)) {
+            echo '<div id="errmsg">' . $this->settings->errmsg . '</div>';
         }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
@@ -960,9 +960,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
 
         // Error messages
-        if (isset($this->errmsg)) {
+        if (isset($this->settings->errmsg)) {
             echo '<div id="errmsg">';
-            echo $this->errmsg;
+            echo $this->settings->errmsg;
             echo '</div>';
         }
 
