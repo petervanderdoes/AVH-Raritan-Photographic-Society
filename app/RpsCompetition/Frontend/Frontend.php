@@ -1013,8 +1013,8 @@ class Frontend
     /**
      * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
      *
-     * @param  string  $date
-     * @param  unknown $med
+     * @param string $date
+     * @param unknown $med
      * @return boolean
      */
     private function validateSelectedComp($date, $med)
@@ -1070,6 +1070,10 @@ class Frontend
             $index = 0;
         }
         // Establish the (possibly adjusted) selected competition
+        $this->settings->open_comp_date = $this->_open_comp_date;
+        $this->settings->open_comp_medium = $this->_open_comp_medium;
+        $this->settings->open_comp_theme = $this->_open_comp_theme;
+        $this->settings->open_comp_class = $this->_open_comp_class;
         $this->settings->comp_date = $this->_open_comp_date[$index];
         $this->settings->classification = $this->_open_comp_class[$index];
         $this->settings->medium = $this->_open_comp_medium[$index];

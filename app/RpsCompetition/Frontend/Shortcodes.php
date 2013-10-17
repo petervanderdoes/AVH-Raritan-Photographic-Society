@@ -781,17 +781,17 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
         $prev_date = "";
-        for ($i = 0; $i < count($this->_open_comp_date); $i ++) {
-            if ($this->_open_comp_date[$i] != $prev_date) {
-                if ($this->settings->comp_date == $this->_open_comp_date[$i]) {
+        for ($i = 0; $i < count($this->settings->open_comp_date); $i ++) {
+            if ($this->settings->open_comp_date[$i] != $prev_date) {
+                if ($this->settings->comp_date == $this->settings->open_comp_date[$i]) {
                     $selected = " SELECTED";
-                    $theme = $this->_open_comp_theme[$i];
+                    $theme = $this->settings->open_comp_theme[$i];
                 } else {
                     $selected = "";
                 }
-                echo "<OPTION value=\"" . $this->_open_comp_date[$i] . "\"$selected>" . strftime('%d-%b-%Y', strtotime($this->_open_comp_date[$i])) . " " . $this->_open_comp_theme[$i] . "</OPTION>\n";
+                echo "<OPTION value=\"" . $this->settings->open_comp_date[$i] . "\"$selected>" . strftime('%d-%b-%Y', strtotime($this->settings->open_comp_date[$i])) . " " . $this->settings->open_comp_theme[$i] . "</OPTION>\n";
             }
-            $prev_date = $this->_open_comp_date[$i];
+            $prev_date = $this->settings->open_comp_date[$i];
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
@@ -801,14 +801,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<td width=\"64%\" align=\"left\">\n";
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
         // Load the values into the dropdown list
-        for ($i = 0; $i < count($this->_open_comp_date); $i ++) {
-            if ($this->_open_comp_date[$i] == $this->settings->comp_date) {
-                if ($this->settings->medium == $this->_open_comp_medium[$i]) {
+        for ($i = 0; $i < count($this->settings->open_comp_date); $i ++) {
+            if ($this->settings->open_comp_date[$i] == $this->settings->comp_date) {
+                if ($this->settings->medium == $this->settings->open_comp_medium[$i]) {
                     $selected = " SELECTED";
                 } else {
                     $selected = "";
                 }
-                echo "<OPTION value=\"" . $this->_open_comp_medium[$i] . "\"$selected>" . $this->_open_comp_medium[$i] . "</OPTION>\n";
+                echo "<OPTION value=\"" . $this->settings->open_comp_medium[$i] . "\"$selected>" . $this->settings->open_comp_medium[$i] . "</OPTION>\n";
             }
         }
         echo "</SELECT>\n";
