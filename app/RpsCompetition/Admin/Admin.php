@@ -414,7 +414,7 @@ final class Admin
 
         // @var $formBuilder FormBuilder
         $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
-        $formBuilder->setOption_name('competition-edit');
+        $formBuilder->setOptionName('competition-edit');
 
         if (isset($_POST['update'])) {
             $updated = $this->updateCompetition();
@@ -515,7 +515,7 @@ final class Admin
         echo $formBuilder->hidden('competition', $competition->ID);
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
-        $formBuilder->setNonce_action($competition->ID);
+        $formBuilder->setNonceAction($competition->ID);
         echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
@@ -672,7 +672,7 @@ final class Admin
         $option_name = 'competition_add';
         // @var $formBuilder AVH_Form
         $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
-        $formBuilder->setOption_name('competition_add');
+        $formBuilder->setOptionName('competition_add');
 
         // @formatter:off
         $formDefaultOptions = array(
@@ -694,7 +694,7 @@ final class Admin
         if (isset($_POST['action'])) {
             switch ($_POST['action']) {
                 case 'add':
-                    $formBuilder->setNonce_action(get_current_user_id());
+                    $formBuilder->setNonceAction(get_current_user_id());
                     check_admin_referer($formBuilder->getNonce_action());
                     $formNewOptions = $formDefaultOptions;
                     $formOptions = $_POST[$formBuilder->getOption_name()];
@@ -849,7 +849,7 @@ final class Admin
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
         echo $formBuilder->hidden('action', 'add');
-        $formBuilder->setNonce_action(get_current_user_id());
+        $formBuilder->setNonceAction(get_current_user_id());
         echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
@@ -1078,10 +1078,10 @@ final class Admin
         $updated = false;
         // @var $formBuilder AVH_Form
         $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
-        $formBuilder->setOption_name('entry-edit');
+        $formBuilder->setOptionName('entry-edit');
 
         if (isset($_POST['update'])) {
-            $formBuilder->setNonce_action($_POST['entry']);
+            $formBuilder->setNonceAction($_POST['entry']);
             check_admin_referer($formBuilder->getNonce_action());
             if (!current_user_can('rps_edit_entries')) {
                 wp_die(__('Cheatin&#8217; uh?'));
@@ -1137,7 +1137,7 @@ final class Admin
         echo $formBuilder->hidden('entry', $entry->ID);
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
-        $formBuilder->setNonce_action($entry->ID);
+        $formBuilder->setNonceAction($entry->ID);
         echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         $this->displayAdminFooter();
