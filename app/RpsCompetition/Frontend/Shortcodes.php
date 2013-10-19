@@ -31,6 +31,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
+        $this->rpsdb->setUserId(get_current_user_id());
     }
 
     /**
