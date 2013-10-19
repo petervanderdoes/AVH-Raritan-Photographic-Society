@@ -1,31 +1,32 @@
 <?php
-if ( !defined('AVH_FRAMEWORK') )
-    die('You are not allowed to call this page directly.');
+namespace RpsCompetition\Common;
 
-class AVH_RPS_Core
+use RpsCompetition\Settings;
+
+class Core
 {
 
     /**
-     * Version of AVH First Defense Against Spam
      *
      * @var string
      */
-    private $_version;
-    private $_db_version;
+    private $version;
+
+    private $db_version;
 
     /**
      * Comments used in HTML do identify the plugin
      *
      * @var string
      */
-    private $_comment;
+    private $comment;
 
     /**
      * Paths and URI's of the WordPress information, 'home', 'siteurl', 'install_url', 'install_dir'
      *
      * @var array
      */
-    var $info;
+    private $info;
 
     /**
      * Options set for the plugin
@@ -35,80 +36,85 @@ class AVH_RPS_Core
     /**
      * Properties used for the plugin options
      */
-    private $_db_options;
-    private $_default_options;
-    private $_default_options_general;
-    private $_options;
+    private $db_options;
+
+    private $default_options;
+
+    private $default_options_general;
+
+    private $options;
 
     /**
      * Properties used for the plugin data
      */
-    private $_db_data;
-    private $_default_data;
-    private $_data;
+    private $db_data;
+
+    private $default_data;
+
+    private $data;
 
     /**
      *
-     * @var AVH_RPS_Settings
+     * @var Settings
      */
-    private $_settings;
+    private $settings;
 
     /**
      * PHP5 constructor
      */
-    public function __construct()
+    public function __construct(Settings $settings)
     {
-        $this->_settings = AVH_RPS_Settings::getInstance();
-        $this->_db_options = 'avhrps_options';
-        $this->_db_version = 0;
+        $this->settings = $settings;
+        $this->db_options = 'avhrps_options';
+        $this->db_version = 0;
         /**
          * Default options - General Purpose
          */
-        $this->_default_options = array();
+        $this->default_options = array();
         // add_action('init', array($this,'handleInitializePlugin'),10);
         $this->handleInitializePlugin();
 
         return;
     }
 
-    function handleInitializePlugin()
+    public function handleInitializePlugin()
     {
         /**
          * Set the options for the program
          */
-        $this->_loadOptions();
-        // $this->_loadData();
+        $this->loadOptions();
+        // $this->loadData();
         // $this->_setTables();
         // Check if we have to do upgrades
         $old_db_version = get_option('avhrps_db_version', 0);
-        if ( $old_db_version < $this->_db_version ) {
-            $this->_doUpgrade($old_db_version);
-            update_option(avhrps_db_version, $this->_db_version);
+        if ($old_db_version < $this->db_version) {
+            $this->doUpgrade($old_db_version);
+            update_option('avhrps_db_version', $this->db_version);
         }
 
-        $this->_settings->storeSetting('club_name', "Raritan Photographic Society");
-        $this->_settings->storeSetting('club_short_name', "RPS");
-        $this->_settings->storeSetting('club_max_entries_per_member_per_date', 4);
-        $this->_settings->storeSetting('club_max_banquet_entries_per_member', 5);
-        $this->_settings->storeSetting('club_season_start_month_num', 9);
-        $this->_settings->storeSetting('club_season_end_month_num', 12);
+        $this->settings->club_name = "Raritan Photographic Society";
+        $this->settings->club_short_name = "RPS";
+        $this->settings->club_max_entries_per_member_per_date = 4;
+        $this->settings->club_max_banquet_entries_per_member = 5;
+        $this->settings->club_season_start_month_num = 9;
+        $this->settings->club_season_end_month_num = 12;
         // Database credentials
-        $this->_settings->storeSetting('host', 'localhost');
-        $this->_settings->storeSetting('dbname', 'avirtu2_raritdata');
-        $this->_settings->storeSetting('uname', 'avirtu2_rarit1');
-        $this->_settings->storeSetting('pw', '1Hallo@Done#');
-        $this->_settings->storeSetting('digital_chair_email', 'digitalchair@raritanphoto.com');
+        $this->settings->host = 'localhost';
+        $this->settings->dbname = 'avirtu2_raritdata';
+        $this->settings->uname = 'avirtu2_rarit1';
+        $this->settings->pw = '1Hallo@Done#';
+        $this->settings->digital_chair_email = 'digitalchair@raritanphoto.com';
 
-        $this->_settings->storeSetting('siteurl', get_option('siteurl'));
-        $this->_settings->storeSetting('graphics_url', plugins_url('images', $this->_settings->plugin_basename));
-        $this->_settings->storeSetting('js_url', plugins_url('js', $this->_settings->plugin_basename));
-        $this->_settings->storeSetting('css_url', plugins_url('css', $this->_settings->plugin_basename));
-        $this->_settings->storeSetting('validComp', '');
-        $this->_settings->storeSetting('comp_date', '');
-        $this->_settings->storeSetting('classification', '');
-        $this->_settings->storeSetting('medium', '');
-        $this->_settings->storeSetting('max_width_entry', 1024);
-        $this->_settings->storeSetting('max_height_entry', 768);
+        $this->settings->siteurl = get_option('siteurl');
+        $this->settings->graphics_url = plugins_url('images', $this->settings->plugin_basename);
+        $this->settings->js_url = plugins_url('js', $this->settings->plugin_basename);
+        $this->settings->css_url = plugins_url('css', $this->settings->plugin_basename);
+        $this->settings->validComp = '';
+        $this->settings->comp_date = '';
+        $this->settings->classification = '';
+        $this->settings->medium = '';
+        $this->settings->max_width_entry = 1024;
+        $this->settings->max_height_entry = 768;
     }
 
     /**
@@ -126,7 +132,7 @@ class AVH_RPS_Core
     /**
      * Checks if running version is newer and do upgrades if necessary
      */
-    private function _doUpgrade($old_db_version)
+    private function doUpgrade($old_db_version)
     {
         $options = $this->getOptions();
         // Introduced dbversion starting with v2.1
@@ -134,8 +140,8 @@ class AVH_RPS_Core
         // list ($options, $data) = $this->_doUpgrade21($options, $data);
         // }
         // Add none existing sections and/or elements to the options
-        foreach ( $this->_default_options as $option => $value ) {
-            if ( !array_key_exists($option, $options) ) {
+        foreach ($this->default_options as $option => $value) {
+            if (!array_key_exists($option, $options)) {
                 $options[$option] = $value;
                 continue;
             }
@@ -143,39 +149,40 @@ class AVH_RPS_Core
         $this->saveOptions($options);
     }
 
-    function rpsCreateThumbnail($row, $size, $show_maker = true)
+    public function rpsCreateThumbnail($row, $size, $show_maker = true)
     {
-        if ( $size >= 400 && $show_maker ) {
+        if ($size >= 400 && $show_maker) {
             $maker = $row['FirstName'] . " " . $row['LastName'];
         }
         $dateParts = explode(" ", $row['Competition_Date']);
         $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'];
         $file_name = $row['Title'] . '+' . $row['Username'];
 
-        if ( !is_dir("$path/thumbnails") )
+        if (!is_dir("$path/thumbnails")) {
             mkdir("$path/thumbnails", 0755);
+        }
 
-        if ( !file_exists("$path/thumbnails/$file_name" . "_$size.jpg") ) {
+        if (!file_exists("$path/thumbnails/$file_name" . "_$size.jpg")) {
             $name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']);
             $this->rpsResizeImage($name, "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
         }
     }
 
-    function rpsResizeImage($image_name, $thumb_name, $size, $quality, $maker)
+    public function rpsResizeImage($image_name, $thumb_name, $size, $quality, $maker)
     {
         $maker = trim($maker);
 
         // Open the original image
-        if ( !file_exists($image_name) ) {
+        if (!file_exists($image_name)) {
             return false;
         }
         $original_img = imagecreatefromjpeg($image_name);
         // Calculate the height and width of the resized image
         $dimensions = GetImageSize($image_name);
-        if ( !( false === $dimensions ) ) {
+        if (!(false === $dimensions)) {
             $w = $dimensions[0];
             $h = $dimensions[1];
-            if ( $w > $h ) { // Landscape image
+            if ($w > $h) { // Landscape image
                 $nw = $size;
                 $nh = $h * $size / $w;
             } else { // Portrait image
@@ -192,21 +199,21 @@ class AVH_RPS_Core
         imagecopyresampled($thumb_img, $original_img, 0, 0, 0, 0, $nw, $nh, $w, $h);
 
         // If this is the 400px image, write the copyright notice onto the image
-        if ( !( empty($maker) ) ) {
-            $dateParts = explode("-", $this->_settings->comp_date);
+        if (!(empty($maker))) {
+            $dateParts = explode("-", $this->settings->comp_date);
             $year = $dateParts[0];
             $black = imagecolorallocate($thumb_img, 0, 0, 0);
             $white = imagecolorallocate($thumb_img, 255, 255, 255);
             $font = 5;
-            $text = "Copyright " . substr($this->_settings->comp_date, 0, 4) . " $maker";
+            $text = "Copyright " . substr($this->settings->comp_date, 0, 4) . " $maker";
             $width = imagesx($thumb_img);
             $height = imagesy($thumb_img);
             $textLength = imagefontwidth($font) * strlen($text);
             $textHeight = imagefontwidth($font);
 
             // imagestring($img, $font, 5, $height/2, $text, $red);
-            imagestring($thumb_img, $font, 7, $height - ( $textHeight * 2 ), $text, $black);
-            imagestring($thumb_img, $font, 5, $height - ( $textHeight * 2 ) - 2, $text, $white);
+            imagestring($thumb_img, $font, 7, $height - ($textHeight * 2), $text, $black);
+            imagestring($thumb_img, $font, 5, $height - ($textHeight * 2) - 2, $text, $white);
         }
         // Write the downsized image back to disk
         imagejpeg($thumb_img, $thumb_name, $quality);
@@ -217,42 +224,44 @@ class AVH_RPS_Core
         return true;
     }
 
-    function rpsGetThumbnailUrl($row, $size)
+    public function rpsGetThumbnailUrl($row, $size)
     {
         $file_parts = pathinfo(str_replace('/home/rarit0/public_html/', '', $row['Server_File_Name']));
         $thumb_dir = $_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/thumbnails';
-        if ( !is_dir($thumb_dir) )
-            mkdir($thumb_dir, 0755);
 
-        if ( !file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg') ) {
+        if (!is_dir($thumb_dir)) {
+            mkdir($thumb_dir, 0755);
+        }
+
+        if (!file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg')) {
             $this->rpsResizeImage($_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
         }
 
         $p = explode('/', $file_parts['dirname']);
         $path = home_url() . '/';
-        foreach ( $p as $part ) {
+        foreach ($p as $part) {
             $path .= rawurlencode($part) . '/';
         }
         $path .= 'thumbnails/';
 
-        return ( $path . rawurlencode($file_parts['filename'] . '_' . $size . '.jpg') );
+        return ($path . rawurlencode($file_parts['filename'] . '_' . $size . '.jpg'));
     }
 
-    public function rps_rename_image_file($path, $old_name, $new_name, $ext)
+    public function renameImageFile($path, $old_name, $new_name, $ext)
     {
         $thumbnails = array();
         $path = $_SERVER['DOCUMENT_ROOT'] . $path;
         // Rename the main image file
         $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
-        if ( $status ) {
+        if ($status) {
             // Rename any and all thumbnails of this file
-            if ( is_dir($path . "/thumbnails") ) {
+            if (is_dir($path . "/thumbnails")) {
                 $thumb_base_name = $path . "/thumbnails/" . $old_name;
                 // Get all the matching thumbnail files
                 $thumbnails = glob("$thumb_base_name*");
                 // Iterate through the list of matching thumbnails and rename each one
-                if ( is_array($thumbnails) && count($thumbnails) > 0 ) {
-                    foreach ( $thumbnails as $thumb ) {
+                if (is_array($thumbnails) && count($thumbnails) > 0) {
+                    foreach ($thumbnails as $thumb) {
                         $start = strlen($thumb_base_name);
                         $length = strpos($thumb, $ext) - $start;
                         $suffix = substr($thumb, $start, $length);
@@ -261,22 +270,23 @@ class AVH_RPS_Core
                 }
             }
         }
+
         return $status;
     }
 
-    public function avh_array_msort($array, $cols)
+    public function arrayMsort($array, $cols)
     {
         $colarr = array();
-        foreach ( $cols as $col => $order ) {
+        foreach ($cols as $col => $order) {
             $colarr[$col] = array();
-            foreach ( $array as $k => $row ) {
+            foreach ($array as $k => $row) {
                 $colarr[$col]['_' . $k] = strtolower($row[$col]);
             }
         }
         $params = array();
-        foreach ( $cols as $col => $order ) {
+        foreach ($cols as $col => $order) {
             $params[] = & $colarr[$col];
-            foreach ( $order as $order_element ) {
+            foreach ($order as $order_element) {
                 // pass by reference, as required by php 5.3
                 $params[] = &$order_element;
                 unset($order_element);
@@ -286,25 +296,26 @@ class AVH_RPS_Core
         $ret = array();
         $keys = array();
         $first = true;
-        foreach ( $colarr as $col => $arr ) {
-            foreach ( $arr as $k => $v ) {
-                if ( $first ) {
+        foreach ($colarr as $col => $arr) {
+            foreach ($arr as $k => $v) {
+                if ($first) {
                     $keys[$k] = substr($k, 1);
                 }
                 $k = $keys[$k];
-                if ( !isset($ret[$k]) )
+                if (!isset($ret[$k])) {
                     $ret[$k] = $array[$k];
+                }
                 $ret[$k][$col] = $array[$k][$col];
             }
             $first = false;
         }
+
         return $ret;
     }
 
-    public function avh_ShortHandToBytes($size_str)
+    public function getShorthandToBytes($size_str)
     {
-        switch ( substr($size_str, -1) )
-        {
+        switch (substr($size_str, -1)) {
             case 'M':
             case 'm':
                 return (int) $size_str * 1048576;
@@ -323,18 +334,18 @@ class AVH_RPS_Core
      * Check if the user is a paid member
      *
      * @param int $user_id
-     *        UserID to check
+     *            UserID to check
      * @return boolean true if a paid member, false if non-existing user or non-paid member.`
      */
     public function isPaidMember($user_id = null)
     {
-        if ( is_numeric($user_id) ) {
+        if (is_numeric($user_id)) {
             $user = get_user_by('id', $user_id);
         } else {
             $user = wp_get_current_user();
         }
 
-        if ( empty($user) ) {
+        if (empty($user)) {
             return false;
         }
 
@@ -352,9 +363,9 @@ class AVH_RPS_Core
      *
      * @param array $data
      */
-    private function _setOptions($options)
+    private function setOptions($options)
     {
-        $this->_options = $options;
+        $this->options = $options;
     }
 
     /**
@@ -362,7 +373,7 @@ class AVH_RPS_Core
      */
     public function getOptions()
     {
-        return ( $this->_options );
+        return ($this->options);
     }
 
     /**
@@ -370,9 +381,9 @@ class AVH_RPS_Core
      */
     public function saveOptions($options)
     {
-        update_option($this->_db_options, $options);
+        update_option($this->db_options, $options);
         wp_cache_flush(); // Delete cache
-        $this->_setOptions($options);
+        $this->setOptions($options);
     }
 
     /**
@@ -381,41 +392,45 @@ class AVH_RPS_Core
      *
      * @return none
      */
-    private function _loadOptions()
+    private function loadOptions()
     {
-        $options = get_option($this->_db_options);
-        if ( false === $options ) { // New installation
-            add_option($this->_db_options, $this->_default_options, '', 'yes');
-            $options = $this->_default_options;
+        $options = get_option($this->db_options);
+        if (false === $options) { // New installation
+            add_option($this->db_options, $this->default_options, '', 'yes');
+            $options = $this->default_options;
         }
-        $this->_setOptions($options);
+        $this->setOptions($options);
     }
 
     /**
      * Get the value for an option element.
      *
-     * @param string $option
+     * @param  string $option
      * @return mixed
      */
     public function getOption($option)
     {
-        if ( !$option )
+        if (!$option) {
             return false;
+        }
 
-        if ( !isset($this->_options) )
-            $this->_loadOptions();
+        if (!isset($this->options)) {
+            $this->loadOptions();
+        }
 
-        if ( !is_array($this->_options) || empty($this->_options[$option]) )
+        if (!is_array($this->options) || empty($this->options[$option])) {
             return false;
+        }
 
-        return $this->_options[$option];
+        return $this->options[$option];
     }
 
     /**
      * Reset to default options and save in DB
      */
-    private function _resetToDefaultOptions()
-    {}
+    private function resetToDefaultOptions()
+    {
+    }
 
     /**
      * ****************************
@@ -428,9 +443,9 @@ class AVH_RPS_Core
      *
      * @param array $data
      */
-    private function _setData($data)
+    private function setData($data)
     {
-        $this->_data = $data;
+        $this->data = $data;
     }
 
     /**
@@ -439,7 +454,7 @@ class AVH_RPS_Core
      */
     public function getData()
     {
-        return ( $this->_data );
+        return ($this->data);
     }
 
     /**
@@ -450,9 +465,9 @@ class AVH_RPS_Core
      */
     public function saveData($data)
     {
-        update_option($this->_db_data, $data);
+        update_option($this->db_data, $data);
         wp_cache_flush(); // Delete cache
-        $this->_setData($data);
+        $this->setData($data);
     }
 
     /**
@@ -460,14 +475,15 @@ class AVH_RPS_Core
      *
      * @return array
      */
-    private function _loadData()
+    private function loadData()
     {
-        $data = get_option($this->_db_data);
-        if ( false === $data ) { // New installation
-            $this->_resetToDefaultData();
+        $data = get_option($this->db_data);
+        if (false === $data) { // New installation
+            $this->resetToDefaultData();
         } else {
-            $this->_setData($data);
+            $this->setData($data);
         }
+
         return;
     }
 
@@ -475,28 +491,29 @@ class AVH_RPS_Core
      * Get the value of a data element.
      * If there is no value return false
      *
-     * @param string $option
-     * @param string $key
+     * @param  string $option
+     * @param  string $key
      * @return mixed
      * @since 0.1
      */
     public function getDataElement($option, $key)
     {
-        if ( $this->_data[$option][$key] ) {
-            $return = $this->_data[$option][$key];
+        if ($this->data[$option][$key]) {
+            $return = $this->data[$option][$key];
         } else {
             $return = false;
         }
-        return ( $return );
+
+        return ($return);
     }
 
     /**
      * Reset to default data and save in DB
      */
-    private function _resetToDefaultData()
+    private function resetToDefaultData()
     {
-        $this->_data = $this->_default_data;
-        $this->saveData($this->_default_data);
+        $this->data = $this->default_data;
+        $this->saveData($this->default_data);
     }
 
     /**
@@ -505,7 +522,7 @@ class AVH_RPS_Core
      */
     public function getComment($str = '')
     {
-        return $this->_comment . ' ' . trim($str) . ' -->';
+        return $this->comment . ' ' . trim($str) . ' -->';
     }
 
     /**
@@ -525,4 +542,4 @@ class AVH_RPS_Core
     {
         return $this->_default_nonces;
     }
-} //End Class AVH_RPS_Core
+}
