@@ -1,10 +1,15 @@
 {
+	"name" : "RPS Competition",
+	"type" : "wordpress-plugin",
 	"authors" : [{
 			"name" : "Peter van der Does",
 			"email" : "peter@avirtualhome.com",
 			"homepage" : "blog.avirtualhome.com",
 			"role" : "Project Manager"
 		}
+	],
+	"keywords" : [
+		"RPS"
 	],
 	"license" : [
 		"BSD-3-Clause-Clear"
@@ -16,6 +21,6 @@
 		},
 		"files" : [
 			"libs/Avh/Support/helpers.php"
-			]
+		]
 	}
 }
