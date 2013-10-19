@@ -29,19 +29,7 @@ None
 == Changelog ==
 
 = Version 1.2.7-rc.1 =
-* Preparation for new development cycle.
-
-= Version 1.2.6 =
-* Preparation for new development cycle.
-
-= Version 1.2.5 =
-* Preparation for new development cycle.
-
-= Version 1.2.4 =
-* Preparation for new development cycle.
-
-= Version 1.2.3 =
-* Preparation for new development cycle.
+* Bugfix: Methods not found
 
 = Version 1.2.2 =
 * Enhancement: Close competitions when needed.
