@@ -28,7 +28,7 @@ None
 
 == Changelog ==
 
-= Version 1.3.0-dev.8 =
+= Version 1.3.0-rc.1 =
 * Remove AVH Framework from plugin.
   AVH Framework has been created as a seperate plugin.
 * Bugfix: New users don't see any competitions.
