@@ -90,11 +90,11 @@ class Frontend
         $shortcode->register('rps_my_entries', 'displayMyEntries');
         $shortcode->register('rps_edit_title', 'displayEditTitle');
         $shortcode->register('rps_upload_image', 'displayUploadEntry');
-        $userID=get_current_user_id();
+        $userID = get_current_user_id();
         $this->rpsdb->setUserId($userID);
         $this->rpsdb->setCompetitionClose();
 
-        $x=get_user_meta($userID,'rps_class_bw', true);
+        $x = get_user_meta($userID, 'rps_class_bw', true);
         if (empty($x)) {
             update_user_meta($userID, "rps_class_bw", 'beginner');
             update_user_meta($userID, "rps_class_color", 'beginner');
@@ -1008,8 +1008,8 @@ class Frontend
     /**
      * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
      *
-     * @param string $date
-     * @param unknown $med
+     * @param  string  $date
+     * @param  unknown $med
      * @return boolean
      */
     private function validateSelectedComp($date, $med)

@@ -1177,8 +1177,8 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param unknown $actions
-     * @param unknown $user
+     * @param  unknown $actions
+     * @param  unknown $user
      * @return string
      */
     public function filterRpsUserActionLinks($actions, $user)
@@ -1194,7 +1194,7 @@ final class Admin
      *
      * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
      *
-     * @param array $links
+     * @param  array $links
      * @return array
      *
      * @since 1.0

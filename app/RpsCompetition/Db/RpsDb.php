@@ -758,7 +758,8 @@ class RpsDb
             // Don't count post-trashed toward totals
             $total += $row['num_competitions'];
             if (in_array($row['Closed'], $known_types)) {
-                $stats[$status[$row['Closed']]] = (int) $row['num_competitions'];}
+                $stats[$status[$row['Closed']]] = (int) $row['num_competitions'];
+            }
         }
 
         $stats['all'] = $total;
