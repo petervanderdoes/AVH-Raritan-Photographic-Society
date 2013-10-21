@@ -28,7 +28,7 @@ None
 
 == Changelog ==
 
-= Version 1.3.0-dev.1 =
+= Version 1.3.0-dev.8 =
 * Remove AVH Framework from plugin.
   AVH Framework has been created as a seperate plugin.
 
