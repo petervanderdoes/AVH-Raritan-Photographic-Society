@@ -16,11 +16,7 @@
 	],
 	"autoload" : {
 		"psr-0" : {
-			"RpsCompetition\\" : "app/",
-			"Avh\\" : "libs/"
-		},
-		"files" : [
-			"libs/Avh/Support/helpers.php"
-		]
+			"RpsCompetition\\" : "app/"
+		}
 	}
 }
