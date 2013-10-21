@@ -31,6 +31,7 @@ None
 = Version 1.3.0-dev.8 =
 * Remove AVH Framework from plugin.
   AVH Framework has been created as a seperate plugin.
+* Bugfix: New users don't see any competitions.
 
 = Version 1.2.7 =
 * Bugfix: Methods not found
