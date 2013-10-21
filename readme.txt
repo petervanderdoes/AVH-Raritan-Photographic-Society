@@ -28,8 +28,9 @@ None
 
 == Changelog ==
 
-= Version 1.3.0-dev.1 =
-* Preparation for new development cycle.
+= Version 1.3.0-dev.8 =
+* Remove AVH Framework from plugin.
+  AVH Framework has been created as a seperate plugin.
 
 = Version 1.2.7 =
 * Bugfix: Methods not found
