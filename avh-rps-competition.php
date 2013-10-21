@@ -58,10 +58,10 @@ class AVH_RPS_Client
         $this->settings->plugin_basename = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
-        add_action('plugins_loaded', array($this, 'init'));
+        add_action('plugins_loaded', array($this, 'load'));
     }
 
-    public function init()
+    public function load()
     {
         if (is_admin()) {
             Initialize::load();

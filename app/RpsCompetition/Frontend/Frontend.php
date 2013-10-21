@@ -57,19 +57,30 @@ class Frontend
      */
     public function __construct(\Avh\Di\Container $container)
     {
-
-        // Get The Registry
         $this->container = $container;
         $this->settings = $this->container->resolve('\RpsCompetition\Settings');
-
-        $this->settings->errmsg = '';
-        // Initialize the plugin
         $this->core = $container->resolve('\RpsCompetition\Common\Core');
         $this->rpsdb = $container->resolve('\RpsCompetition\Db\RpsDb');
+
+        $this->settings->errmsg = '';
         $this->core_options = $this->core->getOptions();
 
-        $this->rpsdb->setCompetitionClose();
+        // The actions are in order as how WordPress executes them
+        add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
+        add_action('init', array($this, 'actionInit'));
+        add_action('wp', array($this, 'actionPreHeaderRpsMyEntries'));
+        add_action('wp', array($this, 'actionPreHeaderRpsEditTitle'));
+        add_action('wp', array($this, 'actionPreHeaderRpsUploadEntry'));
+        add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
+    }
 
+    public function actionAfterThemeSetup()
+    {
+        add_action('rps_showcase', array($this, 'actionShowcaseCompetitionThumbnails'));
+    }
+
+    public function actionInit()
+    {
         /* @var $shortcode \RpsCompetition\Frontend\Shortcodes */
         $shortcode = $this->container->resolve('\RpsCompetition\Frontend\Shortcodes');
         $shortcode->register('rps_category_winners', 'displayCategoryWinners');
@@ -79,31 +90,17 @@ class Frontend
         $shortcode->register('rps_my_entries', 'displayMyEntries');
         $shortcode->register('rps_edit_title', 'displayEditTitle');
         $shortcode->register('rps_upload_image', 'displayUploadEntry');
+        $userID=get_current_user_id();
+        $this->rpsdb->setUserId($userID);
+        $this->rpsdb->setCompetitionClose();
 
-        add_action('wp_loaded', array($this, 'actionWpLoaded'));
-        // Public actions and filters
-        add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
-
-        // add_action('pre-header-my-print-entries', array($this,'actionPreHeaderRpsMyEntries'));
-        // add_action('pre-header-my-digital-entries', array($this,'actionPreHeaderRpsMyEntries'));
-        // add_action('wp', array($this, 'actionPreHeaderRpsMyEntries'));
-        add_action('wp', array($this, 'actionPreHeaderRpsMyEntries'));
-
-        add_action('wp', array($this, 'actionPreHeaderRpsEditTitle'));
-
-        add_action('wp', array($this, 'actionPreHeaderRpsUploadEntry'));
-
-        add_action("after_setup_theme", array($this, 'actionAfterThemeSetup'), 14);
-    }
-
-    public function actionAfterThemeSetup()
-    {
-        add_action('rps_showcase', array($this, 'actionShowcaseCompetitionThumbnails'));
-    }
-
-    public function actionWpLoaded()
-    {
-        $this->rpsdb->setUserId(get_current_user_id());
+        $x=get_user_meta($userID,'rps_class_bw', true);
+        if (empty($x)) {
+            update_user_meta($userID, "rps_class_bw", 'beginner');
+            update_user_meta($userID, "rps_class_color", 'beginner');
+            update_user_meta($userID, "rps_class_print_bw", 'beginner');
+            update_user_meta($userID, "rps_class_print_color", 'beginner');
+        }
     }
 
     public function actionTemplateRedirectRpsWindowsClient()
