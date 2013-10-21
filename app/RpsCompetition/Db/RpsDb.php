@@ -234,8 +234,13 @@ class RpsDb
         }
         $user = get_userdata($this->user_id);
 
-        $_class1 = $user->rps_class_bw;
-        $_class2 = $user->rps_class_color;
+        if ($subset == 'digital') {
+            $_class1 = get_user_meta($this->user_id, 'rps_class_bw', true);
+            $_class2 = get_user_meta($this->user_id, 'rps_class_color', true);
+        } else {
+            $_class1 = get_user_meta($this->user_id, 'rps_class_print_bw', true);
+            $_class2 = get_user_meta($this->user_id, 'rps_class_print_color', true);
+        }
         // Select the list of open competitions that match this member's classification(s)
         $_sql = "SELECT c.Competition_Date, c.Classification, c.Medium, c.Theme, c.Closed
             FROM competitions c
@@ -753,7 +758,8 @@ class RpsDb
             // Don't count post-trashed toward totals
             $total += $row['num_competitions'];
             if (in_array($row['Closed'], $known_types)) {
-                $stats[$status[$row['Closed']]] = (int) $row['num_competitions'];}
+                $stats[$status[$row['Closed']]] = (int) $row['num_competitions'];
+            }
         }
 
         $stats['all'] = $total;

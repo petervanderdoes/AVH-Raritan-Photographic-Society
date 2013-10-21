@@ -31,6 +31,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
+        $this->rpsdb->setUserId(get_current_user_id());
     }
 
     /**
@@ -203,7 +204,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo "<table class=\"thumb_grid\">\n";
             // Output the column headings
             echo "<tr><th class='thumb_col_header' align='center'>Competition</th>\n";
-            for ($i = 0; $i < $max_num_awards; $i ++) {
+            for ($i = 0; $i < $max_num_awards; $i++) {
                 switch ($i) {
                     case 0:
                         $award_title = "1st";
@@ -244,7 +245,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 if ($prev_comp != $comp) {
                     // As necessary, pad the row out with empty cells
                     if ($row > 0 && $column < $max_num_awards) {
-                        for ($i = $column; $i < $max_num_awards; $i ++) {
+                        for ($i = $column; $i < $max_num_awards; $i++) {
                             echo "<td align=\"center\" class=\"thumb_cell\">";
                             echo "<div class=\"thumb_canvas\"></div></td>\n";
                         }
@@ -269,7 +270,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             }
             // As necessary, pad the last row out with empty cells
             if ($row > 0 && $column < $max_num_awards) {
-                for ($i = $column; $i < $max_num_awards; $i ++) {
+                for ($i = $column; $i < $max_num_awards; $i++) {
                     echo "<td align=\"center\" class=\"thumb_cell\">";
                     echo "<div class=\"thumb_canvas\"></div></td>\n";
                 }
@@ -406,11 +407,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                         // Iterate through all the accumulated scores for this member
                         foreach ($member_scores as $key => $score_array) {
                             // Print the scores for the submitted entries for this month
-                            for ($i = 0; $i < count($score_array); $i ++) {
+                            for ($i = 0; $i < count($score_array); $i++) {
                                 echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
                             }
                             // Pad the unused entries for this member for this month
-                            for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i ++) {
+                            for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
                                 echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
                             }
                         }
@@ -464,7 +465,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                         echo "<th class=\"form_frame_header\">Member</th>\n";
                         echo "<th class=\"form_frame_header\">Cl.</th>\n";
                         foreach ($comp_dates as $key => $d) {
-                            for ($i = 1; $i <= $comp_max_entries[$key]; $i ++) {
+                            for ($i = 1; $i <= $comp_max_entries[$key]; $i++) {
                                 echo "<th class=\"form_frame_header\">$i</th>\n";
                             }
                         }
@@ -512,11 +513,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             // Iterate through all the accumulated scores for this member
             foreach ($member_scores as $key => $score_array) {
                 // Print the scores for the submitted entries for this month
-                for ($i = 0; $i < count($score_array); $i ++) {
+                for ($i = 0; $i < count($score_array); $i++) {
                     echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
                 }
                 // Pad the unused entries for this member for this month
-                for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i ++) {
+                for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
                     echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
                 }
             }
@@ -781,7 +782,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
         $prev_date = "";
-        for ($i = 0; $i < count($this->settings->open_comp_date); $i ++) {
+        for ($i = 0; $i < count($this->settings->open_comp_date); $i++) {
             if ($this->settings->open_comp_date[$i] != $prev_date) {
                 if ($this->settings->comp_date == $this->settings->open_comp_date[$i]) {
                     $selected = " SELECTED";
@@ -801,7 +802,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<td width=\"64%\" align=\"left\">\n";
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
         // Load the values into the dropdown list
-        for ($i = 0; $i < count($this->settings->open_comp_date); $i ++) {
+        for ($i = 0; $i < count($this->settings->open_comp_date); $i++) {
             if ($this->settings->open_comp_date[$i] == $this->settings->comp_date) {
                 if ($this->settings->medium == $this->settings->open_comp_medium[$i]) {
                     $selected = " SELECTED";
