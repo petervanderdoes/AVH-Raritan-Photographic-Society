@@ -86,6 +86,8 @@ final class Admin
 
         add_action('wp_ajax_setscore', array($this, 'handleAjax'));
         add_filter('user_row_actions', array($this, 'filterRpsUserActionLinks'), 10, 2);
+
+        add_action('user_register', array($this, 'actionAddUserMeta'));
     }
 
     /**
@@ -117,6 +119,14 @@ final class Admin
             $role->add_cap('rps_edit_competitions');
             $role->add_cap('rps_edit_entries');
         }
+    }
+
+    public function actionAddUserMeta($userID)
+    {
+        update_user_meta($userID, "rps_class_bw", 'beginner');
+        update_user_meta($userID, "rps_class_color", 'beginner');
+        update_user_meta($userID, "rps_class_print_bw", 'beginner');
+        update_user_meta($userID, "rps_class_print_color", 'beginner');
     }
 
     /**
@@ -223,7 +233,7 @@ final class Admin
                 foreach ((array) $competitionIds as $id) {
                     $id = (int) $id;
                     $this->rpsdb->deleteCompetition($id);
-                    ++ $deleteCount;
+                    ++$deleteCount;
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
                 wp_redirect($redirect);
@@ -242,7 +252,7 @@ final class Admin
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'N';
                     $this->rpsdb->insertCompetition($data);
-                    ++ $count;
+                    ++$count;
                 }
                 $redirect = add_query_arg(array('count' => $count, 'update' => 'open_many'), $redirect);
                 wp_redirect($redirect);
@@ -261,7 +271,7 @@ final class Admin
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'Y';
                     $this->rpsdb->insertCompetition($data);
-                    ++ $count;
+                    ++$count;
                 }
                 $redirect = add_query_arg(array('count' => $count, 'update' => 'close_many'), $redirect);
                 wp_redirect($redirect);
@@ -392,7 +402,7 @@ final class Admin
                 echo "<li>" . sprintf(__('ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium, $entries) . "</li>\n";
             } else {
                 echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
-                $goDelete ++;
+                $goDelete++;
             }
         }
         if ($goDelete) {
@@ -463,7 +473,7 @@ final class Admin
         echo $formBuilder->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
         echo $formBuilder->text('Closing Date', '', 'close-date', $formOptions['close-date']);
 
-        for ($hour = 0; $hour <= 23; $hour ++) {
+        for ($hour = 0; $hour <= 23; $hour++) {
             $time_val = sprintf("%02d:00:00", $hour);
             $time_text = date("g:i a", strtotime($time_val));
             $time[$time_val] = $time_text;
@@ -926,7 +936,7 @@ final class Admin
                 foreach ((array) $entryIds as $id) {
                     $id = (int) $id;
                     $this->rpsdb->deleteEntry($id);
-                    ++ $deleteCount;
+                    ++$deleteCount;
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
                 wp_redirect($redirect);
@@ -1051,7 +1061,7 @@ final class Admin
                 echo $formBuilder->hidden('entries[]', $entryID);
                 printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'), $entryID, $entry->Title, $user->first_name, $user->last_name, $competition->Theme, mysql2date(get_option('date_format'), $competition->Competition_Date));
                 echo "</li>\n";
-                $goDelete ++;
+                $goDelete++;
             }
         }
         if ($goDelete) {
@@ -1167,8 +1177,8 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param  unknown $actions
-     * @param  unknown $user
+     * @param unknown $actions
+     * @param unknown $user
      * @return string
      */
     public function filterRpsUserActionLinks($actions, $user)
@@ -1184,7 +1194,7 @@ final class Admin
      *
      * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
      *
-     * @param  array $links
+     * @param array $links
      * @return array
      *
      * @since 1.0
