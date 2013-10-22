@@ -7,7 +7,7 @@ namespace RpsCompetition;
  * @author pdoes
  *
  */
-final class Settings extends \Avh\Utility\Settings
+final class Settings extends \Avh\Utility\SettingsAbstract
 {
 
     // prevent directly access.
