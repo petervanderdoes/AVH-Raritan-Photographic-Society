@@ -87,10 +87,6 @@ class Core
         // $this->_setTables();
         // Check if we have to do upgrades
         $old_db_version = get_option('avhrps_db_version', 0);
-        if ($old_db_version < $this->db_version) {
-            $this->doUpgrade($old_db_version);
-            update_option('avhrps_db_version', $this->db_version);
-        }
 
         $this->settings->club_name = "Raritan Photographic Society";
         $this->settings->club_short_name = "RPS";
@@ -128,27 +124,6 @@ class Core
     // // add DB pointer
     // $wpdb->avhfdasipcache = $wpdb->prefix . 'avhfdas_ipcache';
     // }
-
-    /**
-     * Checks if running version is newer and do upgrades if necessary
-     */
-    private function doUpgrade($old_db_version)
-    {
-        $options = $this->getOptions();
-        // Introduced dbversion starting with v2.1
-        // if (! isset($options['general']['dbversion']) || $options['general']['dbversion'] < 4) {
-        // list ($options, $data) = $this->_doUpgrade21($options, $data);
-        // }
-        // Add none existing sections and/or elements to the options
-        foreach ($this->default_options as $option => $value) {
-            if (!array_key_exists($option, $options)) {
-                $options[$option] = $value;
-                continue;
-            }
-        }
-        $this->saveOptions($options);
-    }
-
     public function rpsCreateThumbnail($row, $size, $show_maker = true)
     {
         if ($size >= 400 && $show_maker) {
@@ -350,170 +325,6 @@ class Core
         }
 
         return in_array('s2member_level1', (array) $user->roles);
-    }
-
-    /**
-     * *******************************
-     * *
-     * Methods for variable: options *
-     * *
-     * ******************************
-     */
-    /**
-     *
-     * @param array $data
-     */
-    private function setOptions($options)
-    {
-        $this->options = $options;
-    }
-
-    /**
-     * return array
-     */
-    public function getOptions()
-    {
-        return ($this->options);
-    }
-
-    /**
-     * Save all current options and set the options
-     */
-    public function saveOptions($options)
-    {
-        update_option($this->db_options, $options);
-        wp_cache_flush(); // Delete cache
-        $this->setOptions($options);
-    }
-
-    /**
-     * Retrieves the plugin options from the WordPress options table and assigns to class variable.
-     * If the options do not exists, like a new installation, the options are set to the default value.
-     *
-     * @return none
-     */
-    private function loadOptions()
-    {
-        $options = get_option($this->db_options);
-        if (false === $options) { // New installation
-            add_option($this->db_options, $this->default_options, '', 'yes');
-            $options = $this->default_options;
-        }
-        $this->setOptions($options);
-    }
-
-    /**
-     * Get the value for an option element.
-     *
-     * @param  string $option
-     * @return mixed
-     */
-    public function getOption($option)
-    {
-        if (!$option) {
-            return false;
-        }
-
-        if (!isset($this->options)) {
-            $this->loadOptions();
-        }
-
-        if (!is_array($this->options) || empty($this->options[$option])) {
-            return false;
-        }
-
-        return $this->options[$option];
-    }
-
-    /**
-     * Reset to default options and save in DB
-     */
-    private function resetToDefaultOptions()
-    {
-    }
-
-    /**
-     * ****************************
-     * *
-     * Methods for variable: data *
-     * *
-     * ***************************
-     */
-    /**
-     *
-     * @param array $data
-     */
-    private function setData($data)
-    {
-        $this->data = $data;
-    }
-
-    /**
-     *
-     * @return array
-     */
-    public function getData()
-    {
-        return ($this->data);
-    }
-
-    /**
-     * Save all current data to the DB
-     *
-     * @param array $data
-     *
-     */
-    public function saveData($data)
-    {
-        update_option($this->db_data, $data);
-        wp_cache_flush(); // Delete cache
-        $this->setData($data);
-    }
-
-    /**
-     * Retrieve the data from the DB
-     *
-     * @return array
-     */
-    private function loadData()
-    {
-        $data = get_option($this->db_data);
-        if (false === $data) { // New installation
-            $this->resetToDefaultData();
-        } else {
-            $this->setData($data);
-        }
-
-        return;
-    }
-
-    /**
-     * Get the value of a data element.
-     * If there is no value return false
-     *
-     * @param  string $option
-     * @param  string $key
-     * @return mixed
-     * @since 0.1
-     */
-    public function getDataElement($option, $key)
-    {
-        if ($this->data[$option][$key]) {
-            $return = $this->data[$option][$key];
-        } else {
-            $return = false;
-        }
-
-        return ($return);
-    }
-
-    /**
-     * Reset to default data and save in DB
-     */
-    private function resetToDefaultData()
-    {
-        $this->data = $this->default_data;
-        $this->saveData($this->default_data);
     }
 
     /**
