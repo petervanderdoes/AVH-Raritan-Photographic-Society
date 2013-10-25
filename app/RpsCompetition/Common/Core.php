@@ -79,13 +79,7 @@ class Core
 
     public function handleInitializePlugin()
     {
-        /**
-         * Set the options for the program
-         */
-        $this->loadOptions();
-        // $this->loadData();
-        // $this->_setTables();
-        // Check if we have to do upgrades
+
         $old_db_version = get_option('avhrps_db_version', 0);
 
         $this->settings->club_name = "Raritan Photographic Society";
