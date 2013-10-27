@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend;
 use RpsCompetition\Settings;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
+use Avh\Html\HtmlBuilder;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -26,18 +27,21 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $rpsdb;
 
+    private $html;
+
     public function __construct(Settings $settings, RpsDb $rpsdb, Core $core)
     {
         $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
         $this->rpsdb->setUserId(get_current_user_id());
+        $this->html = new \Avh\Html\HtmlBuilder();
     }
 
     /**
      * Display the given awards for the given classification.
      *
-     * @param array  $atts
+     * @param array $atts
      * @param string $content
      * @param string $tag
      */
@@ -1000,5 +1004,12 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo '</form>';
+    }
+
+    public function displayEmail($atts, $content, $tag)
+    {
+        $email = $atts['email'];
+        unset($atts['email']);
+        echo $this->html->mailto($email, $content, $atts);
     }
 }
