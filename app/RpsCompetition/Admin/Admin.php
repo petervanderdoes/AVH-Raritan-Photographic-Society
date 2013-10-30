@@ -384,7 +384,7 @@ final class Admin
         $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
 
         $this->displayAdminHeader('Delete Competitions');
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions'));
+        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
         wp_nonce_field('delete-competitions');
         echo $this->referer;
 
@@ -467,7 +467,7 @@ final class Admin
         }
 
         $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION);
-        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit'));
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
         echo $formBuilder->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
@@ -573,7 +573,7 @@ final class Admin
         $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
 
         $this->displayAdminHeader($title);
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions'));
+        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
         wp_nonce_field($action . '-competitions');
         echo $this->referer;
 
@@ -797,7 +797,7 @@ final class Admin
 
         $this->displayAdminHeader('Add Competition');
 
-        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd'));
+        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
         echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
@@ -1046,7 +1046,7 @@ final class Admin
         }
 
         $this->displayAdminHeader('Delete Entries');
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updateentries', 'name' => 'updateentries'));
+        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updateentries', 'name' => 'updateentries', 'accept-charset' => get_bloginfo('charset')));
 
         echo '<p>' . _n('You have specified this entry for deletion:', 'You have specified these entries for deletion:', count($entryIdsArray)) . '</p>';
 
@@ -1132,7 +1132,7 @@ final class Admin
         }
 
         $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES);
-        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-entryedit'));
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-entryedit', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
 
         $_user = get_user_by('id', $entry->Member_ID);
@@ -1177,8 +1177,8 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param  unknown $actions
-     * @param  unknown $user
+     * @param unknown $actions
+     * @param unknown $user
      * @return string
      */
     public function filterRpsUserActionLinks($actions, $user)
@@ -1194,7 +1194,7 @@ final class Admin
      *
      * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
      *
-     * @param  array $links
+     * @param array $links
      * @return array
      *
      * @since 1.0
