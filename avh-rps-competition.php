@@ -46,7 +46,7 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->register('\RpsCompetition\Settings', null, true);
+        $this->container->register('\RpsCompetition\Settings', '\RpsCompetition\Settings', true);
         $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
         $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
         $this->container->register('\RpsCompetition\Competition\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));

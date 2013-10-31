@@ -773,7 +773,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $img = '';
         }
 
-        echo '<img src="' . $this->settings->plugin_url . '/images' . $img . '">';
+        echo '<img src="' . plugins_url('/images' . $img, $this->settings->plugin_basename) . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
         echo "<table width=\"100%\">\n";

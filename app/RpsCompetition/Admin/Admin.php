@@ -70,10 +70,10 @@ final class Admin
         $this->container = $container;
 
         // The Settings Registery
-        $this->settings = $this->container->resolve('RpsCompetition\Settings');
+        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
 
         // Loads the CORE class
-        $this->core = $container->resolve('RpsCompetition\Common\Core');
+        $this->core = $container->resolve('\RpsCompetition\Common\Core');
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {
@@ -147,9 +147,9 @@ final class Admin
      */
     public function actionAdminMenu()
     {
-        wp_register_style('avhrps-admin-css', $this->settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
-        wp_register_style('avhrps-jquery-css', $this->settings->plugin_url . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', $this->settings->plugin_url . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
+        wp_register_style('avhrps-admin-css', plugins_url('/css/avh-rps.admin.css', $this->settings->plugin_basename), array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-jquery-css', plugins_url('/css/smoothness/jquery-ui-1.8.22.custom.css', $this->settings->plugin_basename), array('wp-admin'), '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', plugins_url('/js/avh-rps.admin.ajax.js', $this->settings->plugin_basename), array('jquery'), false, true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this, 'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
 
@@ -381,7 +381,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -423,7 +423,7 @@ final class Admin
         global $wpdb;
 
         // @var $formBuilder FormBuilder
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition-edit');
 
         if (isset($_POST['update'])) {
@@ -534,7 +534,7 @@ final class Admin
         echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
-        echo '   buttonImage: "' . $this->settings->plugin_url . '/images/calendar.png", ' . "\n";
+        echo '   buttonImage: "' . plugins_url("/images/calendar.png", $this->settings->plugin_basename) . '", ' . "\n";
         echo '   showOn: "both"' . "\n";
         echo ' });' . "\n";
         echo '	$( "#date" ).datepicker();' . "\n";
@@ -570,7 +570,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader($title);
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -681,7 +681,7 @@ final class Admin
     {
         $option_name = 'competition_add';
         // @var $formBuilder AVH_Form
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition_add');
 
         // @formatter:off
