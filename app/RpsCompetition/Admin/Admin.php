@@ -485,8 +485,8 @@ final class Admin
         $_medium = array(
                 'medium_bwd' => 'B&W Digital',
                 'medium_cd' => 'Color Digital',
-                'medium_bwp' => 'B&W Print',
-                'medium_cp' => 'Color Print'
+                'medium_bwp' => 'B&W Prints',
+                'medium_cp' => 'Color Prints'
             );
         // @formatter:on
         $selectedMedium = array_search($competition->Medium, $_medium);
@@ -760,8 +760,8 @@ final class Admin
                         $medium_convert = array(
                                 'medium_bwd' => 'B&W Digital',
                                 'medium_cd' => 'Color Digital',
-                                'medium_bwp' => 'B&W Print',
-                                'medium_cp' => 'Color Print'
+                                'medium_bwp' => 'B&W Prints',
+                                'medium_cp' => 'Color Prints'
                             );
 
                         $classification_convert = array(
@@ -992,7 +992,7 @@ final class Admin
                 case 'del':
                 case 'del_many':
                     $deleteCount = isset($_GET['deleteCount']) ? (int) $_GET['deleteCount'] : 0;
-                    $messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+                    $messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Entry deleted.', '%s entries deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
                     break;
             }
         }
@@ -1421,7 +1421,7 @@ final class Admin
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
-        $_medium = array('medium_bwd' => 'B&W Digital', 'medium_cd' => 'Color Digital', 'medium_bwp' => 'B&W Print', 'medium_cp' => 'Color Print');
+        $_medium = array('medium_bwd' => 'B&W Digital', 'medium_cd' => 'Color Digital', 'medium_bwp' => 'B&W Prints', 'medium_cp' => 'Color Prints');
         $selectedMedium = array_search($competition->Medium, $_medium);
 
         $_classification = array('class_b' => 'Beginner', 'class_a' => 'Advanced', 'class_s' => 'Salon');
