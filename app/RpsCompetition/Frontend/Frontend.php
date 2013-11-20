@@ -662,7 +662,7 @@ class Frontend
                         entries.Server_File_Name, entries.Score, entries.Award
                         FROM entries
                         WHERE entries.Competition_ID = :comp_id
-                        ORDER BY entries.Title";
+                        ORDER BY entries.Member_ID, entries.Title";
                 $sth_entries = $db->prepare($sql);
                 $sth_entries->bindParam(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
                 $sth_entries->execute();
