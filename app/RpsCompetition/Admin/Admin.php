@@ -13,7 +13,7 @@ use RpsCompetition\Db\RpsDb;
 
 final class Admin
 {
-    /* @var $formBuilder FormBuilder */
+
     private $message = '';
 
     private $status = '';
@@ -382,7 +382,9 @@ final class Admin
         }
 
         $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
-
+        /**
+         * @var $formBuilder FormBuilder
+         */
         $this->displayAdminHeader('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
         wp_nonce_field('delete-competitions');
@@ -422,7 +424,6 @@ final class Admin
     {
         global $wpdb;
 
-        // @var $formBuilder FormBuilder
         $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition-edit');
 
@@ -1115,6 +1116,7 @@ final class Admin
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
         $entry = $this->rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
+        $competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
 
         $this->displayAdminHeader('Edit Entry');
 
@@ -1139,6 +1141,28 @@ final class Admin
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
         echo $formBuilder->text('Title', '', 'title', $entry->Title);
+
+        // @formatter:off
+        $medium_array = array(
+                'medium_bwd' => 'B&W Digital',
+                'medium_cd' => 'Color Digital',
+                'medium_bwp' => 'B&W Prints',
+                'medium_cp' => 'Color Prints'
+            );
+        // @formatter:on
+        $selectedMedium = array_search($competition->Medium, $medium_array);
+        echo $formBuilder->select('Medium', '', 'medium', $medium_array, $selectedMedium, array('autocomplete' => 'off'));
+
+        // @formatter:off
+        $_classification = array(
+                'class_b' => 'Beginner',
+                'class_a' => 'Advanced',
+                'class_s' => 'Salon'
+            );
+        // @formatter:on
+        $selectedClassification = array_search($competition->Classification, $_classification);
+        echo $formBuilder->select('Classification', '', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
+
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
         if ($wp_http_referer) {
