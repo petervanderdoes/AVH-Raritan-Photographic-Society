@@ -11,6 +11,8 @@ use Avh\Utility\Common;
 use Avh\Di\Container;
 use RpsCompetition\Db\RpsDb;
 
+/* @var $formBuilder \Avh\Html\FormBuilder */
+
 final class Admin
 {
 
@@ -382,9 +384,7 @@ final class Admin
         }
 
         $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
-        /**
-         * @var $formBuilder FormBuilder
-         */
+
         $this->displayAdminHeader('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
         wp_nonce_field('delete-competitions');
@@ -681,7 +681,7 @@ final class Admin
     public function menuCompetitionAdd()
     {
         $option_name = 'competition_add';
-        // @var $formBuilder AVH_Form
+
         $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition_add');
 
@@ -1087,7 +1087,7 @@ final class Admin
         global $wpdb;
 
         $updated = false;
-        // @var $formBuilder AVH_Form
+
         $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('entry-edit');
 

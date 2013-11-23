@@ -593,6 +593,13 @@ class RpsDb
         return $_return;
     }
 
+    /**
+     * Get the Entry Record
+     *
+     * @param integer $id
+     * @param string $output
+     * @return Ambigous <mixed, NULL, multitype:>|multitype:
+     */
     public function getEntryInfo($id, $output = ARRAY_A)
     {
         $sql = $this->rpsdb->prepare("SELECT *
@@ -641,17 +648,33 @@ class RpsDb
         return $result;
     }
 
+    /**
+     * Get the whole competition record
+     *
+     * @param integer $id
+     * @param string $output default is OBJECT
+     * @return Ambigous <boolean, multitype:, NULL>
+     */
     public function getCompetitionByID2($id, $output = OBJECT)
     {
         $where = $this->rpsdb->prepare('ID=%d', $id);
         $result = $this->getCompetitions(array('where' => $where));
-        if (empty($result)) {
-            $return = false;
+
+        if ($output == OBJECT) {
+            return $result[0];
+        } elseif ($output == ARRAY_A) {
+            $resultArray = get_object_vars($result[0]);
+
+            return $resultArray;
+        } elseif ($output == ARRAY_N) {
+            $resultArray = array_values(get_object_vars($result[0]));
+
+            return $resultArray;
         } else {
-            $return = $result[0];
+            return $result[0];
         }
 
-        return $return;
+        return $result[0];
     }
 
     public function getIdmaxEntries()
