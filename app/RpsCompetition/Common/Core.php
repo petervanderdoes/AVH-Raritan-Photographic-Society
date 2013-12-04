@@ -318,7 +318,7 @@ class Core
             return false;
         }
 
-        return in_array('s2member_level1', (array) $user->roles);
+        return in_array('s2member_level4', (array) $user->roles);
     }
 
     /**
