@@ -88,6 +88,7 @@ class Frontend
         $shortcode->register('rps_edit_title', 'displayEditTitle');
         $shortcode->register('rps_upload_image', 'displayUploadEntry');
         $shortcode->register('rps_email', 'displayEmail');
+        $shortcode->register('rps_person_winners', 'displayPersonWinners');
         $userID = get_current_user_id();
         $this->rpsdb->setUserId($userID);
         $this->rpsdb->setCompetitionClose();

@@ -208,6 +208,22 @@ class RpsDb
         return $_x;
     }
 
+    public function getEightsAndHigherPerson($member_id)
+    {
+        $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Classification,
+                if(c.Classification = 'Beginner',1,
+                if(c.Classification = 'Advanced',2,
+                if(c.Classification = 'Salon',3,0))) as \"Class_Code\",
+                c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
+            FROM competitions c, entries e
+                WHERE c.ID = e.Competition_ID AND
+                    e.Member_ID = %s AND
+                    e.Score >= 8
+                ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score", $member_id);
+        $_x = $this->rpsdb->get_results($sql, ARRAY_A);
+
+        return $_x;
+    }
     public function getScoresCurrentUser()
     {
         $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
