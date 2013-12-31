@@ -208,6 +208,22 @@ class RpsDb
         return $_x;
     }
 
+    public function getEightsAndHigherPerson($member_id)
+    {
+        $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Classification,
+                if(c.Classification = 'Beginner',1,
+                if(c.Classification = 'Advanced',2,
+                if(c.Classification = 'Salon',3,0))) as \"Class_Code\",
+                c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
+            FROM competitions c, entries e
+                WHERE c.ID = e.Competition_ID AND
+                    e.Member_ID = %s AND
+                    e.Score >= 8
+                ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score", $member_id);
+        $_x = $this->rpsdb->get_results($sql, ARRAY_A);
+
+        return $_x;
+    }
     public function getScoresCurrentUser()
     {
         $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
@@ -593,6 +609,13 @@ class RpsDb
         return $_return;
     }
 
+    /**
+     * Get the Entry Record
+     *
+     * @param integer $id
+     * @param string $output
+     * @return Ambigous <mixed, NULL, multitype:>|multitype:
+     */
     public function getEntryInfo($id, $output = ARRAY_A)
     {
         $sql = $this->rpsdb->prepare("SELECT *
@@ -641,17 +664,33 @@ class RpsDb
         return $result;
     }
 
+    /**
+     * Get the whole competition record
+     *
+     * @param integer $id
+     * @param string $output default is OBJECT
+     * @return Ambigous <boolean, multitype:, NULL>
+     */
     public function getCompetitionByID2($id, $output = OBJECT)
     {
         $where = $this->rpsdb->prepare('ID=%d', $id);
         $result = $this->getCompetitions(array('where' => $where));
-        if (empty($result)) {
-            $return = false;
+
+        if ($output == OBJECT) {
+            return $result[0];
+        } elseif ($output == ARRAY_A) {
+            $resultArray = get_object_vars($result[0]);
+
+            return $resultArray;
+        } elseif ($output == ARRAY_N) {
+            $resultArray = array_values(get_object_vars($result[0]));
+
+            return $resultArray;
         } else {
-            $return = $result[0];
+            return $result[0];
         }
 
-        return $return;
+        return $result[0];
     }
 
     public function getIdmaxEntries()

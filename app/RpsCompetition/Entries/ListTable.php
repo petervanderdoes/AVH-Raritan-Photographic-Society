@@ -32,12 +32,14 @@ class ListTable extends \WP_List_Table
 
     public $screen;
 
+    private $html;
+
     public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core)
     {
         $this->settings = $settings;
-        // Initialize the plugin
         $this->core = $core;
         $this->rpsdb = $_rpsdb;
+        $this->html = new \Avh\Html\HtmlBuilder();
 
         $this->screen = 'avh_rps_page_avh_rps_entries_';
         $default_status = get_user_option('avhrps_entries_list_last_view');
@@ -283,7 +285,7 @@ class ListTable extends \WP_List_Table
         $_user = get_user_by('id', $entry->Member_ID);
         $queryUser = array('page' => Constants::MENU_SLUG_ENTRIES, 'user_id' => $_user->ID);
         $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
-        echo HtmlBuilder::anchor($urlUser, $_user->first_name . ' ' . $_user->last_name, array('title' => 'Entries for ' . $_user->first_name . ' ' . $_user->last_name));
+        echo $this->html->anchor($urlUser, $_user->first_name . ' ' . $_user->last_name, array('title' => 'Entries for ' . $_user->first_name . ' ' . $_user->last_name));
     }
 
     public function column_title($entry)
@@ -302,8 +304,8 @@ class ListTable extends \WP_List_Table
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         $actions = array();
-        $actions['delete'] = HtmlBuilder::anchor($urlDelete, 'Delete', array('class' => 'delete', 'title' => 'Delete this competition'));
-        $actions['edit'] = HtmlBuilder::anchor($urlEdit, 'Edit', array('title' => 'Edit this entry'));
+        $actions['delete'] = $this->html->anchor($urlDelete, 'Delete', array('class' => 'delete', 'title' => 'Delete this competition'));
+        $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', array('title' => 'Edit this entry'));
 
         echo '<div class="row-actions">';
         $sep = '';

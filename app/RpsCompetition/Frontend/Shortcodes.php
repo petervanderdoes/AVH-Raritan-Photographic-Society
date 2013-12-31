@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend;
 use RpsCompetition\Settings;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
+use Avh\Html\HtmlBuilder;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -26,18 +27,21 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $rpsdb;
 
+    private $html;
+
     public function __construct(Settings $settings, RpsDb $rpsdb, Core $core)
     {
         $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
         $this->rpsdb->setUserId(get_current_user_id());
+        $this->html = new \Avh\Html\HtmlBuilder();
     }
 
     /**
      * Display the given awards for the given classification.
      *
-     * @param array  $atts
+     * @param array $atts
      * @param string $content
      * @param string $tag
      */
@@ -769,7 +773,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $img = '';
         }
 
-        echo '<img src="' . $this->settings->plugin_url . '/images' . $img . '">';
+        echo '<img src="' . plugins_url('/images' . $img, $this->settings->plugin_basename) . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
         echo "<table width=\"100%\">\n";
@@ -1001,4 +1005,65 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</table>';
         echo '</form>';
     }
+
+    public function displayEmail($atts, $content, $tag)
+    {
+        $email = $atts['email'];
+        unset($atts['email']);
+        echo $this->html->mailto($email, $content, $atts);
+    }
+
+    /**
+     * Display the eights and higher for a given member ID.
+     *
+     * @param array $atts
+     * @param string $content
+     * @param string $tag
+     */
+    public function displayPersonWinners($atts, $content, $tag)
+    {
+        global $wpdb;
+
+        $id = 0;
+        extract($atts, EXTR_OVERWRITE);
+
+        echo '<section class="rps-showcases">';
+
+        echo '<div class="rps-sc-text entry-content">';
+        echo '<ul>';
+            $entries = $this->rpsdb->getEightsAndHigherPerson($id);
+            $images = array_rand($entries, 3);
+
+            foreach ($images as $key) {
+                $recs = $entries[$key];
+                $user_info = get_userdata($recs['Member_ID']);
+                $recs['FirstName'] = $user_info->user_firstname;
+                $recs['LastName'] = $user_info->user_lastname;
+                $recs['Username'] = $user_info->user_login;
+
+                // Grab a new record from the database
+                $dateParts = explode(" ", $recs['Competition_Date']);
+                $comp_date = $dateParts[0];
+                $medium = $recs['Medium'];
+                $classification = $recs['Classification'];
+                $comp = "$classification<br>$medium";
+                $title = $recs['Title'];
+                $last_name = $recs['LastName'];
+                $first_name = $recs['FirstName'];
+                $award = $recs['Award'];
+                // Display this thumbnail in the the next available column
+                echo '<li class="suf-widget">';
+                echo '<div class="dbx-box">';
+                echo '	<div class="image">';
+                echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+                echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                echo '	</div>';
+                echo "</div>\n";
+
+                echo '</li>';
+            }
+            echo '</ul>';
+        echo '</div>';
+        echo '</section>';
+        }
 }

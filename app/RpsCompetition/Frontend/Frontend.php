@@ -29,8 +29,6 @@ class Frontend
      */
     private $rpsdb;
 
-    private $core_options;
-
     // Properties of the logged in user
     private $member_id;
 
@@ -63,7 +61,6 @@ class Frontend
         $this->rpsdb = $container->resolve('\RpsCompetition\Db\RpsDb');
 
         $this->settings->errmsg = '';
-        $this->core_options = $this->core->getOptions();
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -90,6 +87,8 @@ class Frontend
         $shortcode->register('rps_my_entries', 'displayMyEntries');
         $shortcode->register('rps_edit_title', 'displayEditTitle');
         $shortcode->register('rps_upload_image', 'displayUploadEntry');
+        $shortcode->register('rps_email', 'displayEmail');
+        $shortcode->register('rps_person_winners', 'displayPersonWinners');
         $userID = get_current_user_id();
         $this->rpsdb->setUserId($userID);
         $this->rpsdb->setCompetitionClose();
@@ -664,7 +663,7 @@ class Frontend
                         entries.Server_File_Name, entries.Score, entries.Award
                         FROM entries
                         WHERE entries.Competition_ID = :comp_id
-                        ORDER BY entries.Title";
+                        ORDER BY entries.Member_ID, entries.Title";
                 $sth_entries = $db->prepare($sql);
                 $sth_entries->bindParam(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
                 $sth_entries->execute();
@@ -1008,8 +1007,8 @@ class Frontend
     /**
      * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
      *
-     * @param  string  $date
-     * @param  unknown $med
+     * @param string $date
+     * @param unknown $med
      * @return boolean
      */
     private function validateSelectedComp($date, $med)

@@ -11,9 +11,11 @@ use Avh\Utility\Common;
 use Avh\Di\Container;
 use RpsCompetition\Db\RpsDb;
 
+/* @var $formBuilder \Avh\Html\FormBuilder */
+
 final class Admin
 {
-    /* @var $formBuilder FormBuilder */
+
     private $message = '';
 
     private $status = '';
@@ -70,10 +72,10 @@ final class Admin
         $this->container = $container;
 
         // The Settings Registery
-        $this->settings = $this->container->resolve('RpsCompetition\Settings');
+        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
 
         // Loads the CORE class
-        $this->core = $container->resolve('RpsCompetition\Common\Core');
+        $this->core = $container->resolve('\RpsCompetition\Common\Core');
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {
@@ -147,9 +149,9 @@ final class Admin
      */
     public function actionAdminMenu()
     {
-        wp_register_style('avhrps-admin-css', $this->settings->plugin_url . '/css/avh-rps.admin.css', array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
-        wp_register_style('avhrps-jquery-css', $this->settings->plugin_url . '/css/smoothness/jquery-ui-1.8.22.custom.css', array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', $this->settings->plugin_url . '/js/avh-rps.admin.ajax.js', array('jquery'), false, true);
+        wp_register_style('avhrps-admin-css', plugins_url('/css/avh-rps.admin.css', $this->settings->plugin_basename), array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-jquery-css', plugins_url('/css/smoothness/jquery-ui-1.8.22.custom.css', $this->settings->plugin_basename), array('wp-admin'), '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', plugins_url('/js/avh-rps.admin.ajax.js', $this->settings->plugin_basename), array('jquery'), false, true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this, 'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
 
@@ -381,10 +383,10 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader('Delete Competitions');
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions'));
+        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
         wp_nonce_field('delete-competitions');
         echo $this->referer;
 
@@ -422,8 +424,7 @@ final class Admin
     {
         global $wpdb;
 
-        // @var $formBuilder FormBuilder
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition-edit');
 
         if (isset($_POST['update'])) {
@@ -467,7 +468,7 @@ final class Admin
         }
 
         $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION);
-        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit'));
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
         echo $formBuilder->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
@@ -485,8 +486,8 @@ final class Admin
         $_medium = array(
                 'medium_bwd' => 'B&W Digital',
                 'medium_cd' => 'Color Digital',
-                'medium_bwp' => 'B&W Print',
-                'medium_cp' => 'Color Print'
+                'medium_bwp' => 'B&W Prints',
+                'medium_cp' => 'Color Prints'
             );
         // @formatter:on
         $selectedMedium = array_search($competition->Medium, $_medium);
@@ -534,7 +535,7 @@ final class Admin
         echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
-        echo '   buttonImage: "' . $this->settings->plugin_url . '/images/calendar.png", ' . "\n";
+        echo '   buttonImage: "' . plugins_url("/images/calendar.png", $this->settings->plugin_basename) . '", ' . "\n";
         echo '   showOn: "both"' . "\n";
         echo ' });' . "\n";
         echo '	$( "#date" ).datepicker();' . "\n";
@@ -570,10 +571,10 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader($title);
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions'));
+        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
         wp_nonce_field($action . '-competitions');
         echo $this->referer;
 
@@ -680,8 +681,8 @@ final class Admin
     public function menuCompetitionAdd()
     {
         $option_name = 'competition_add';
-        // @var $formBuilder AVH_Form
-        $formBuilder = $this->container->resolve('\Avh\\Html\\FormBuilder');
+
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition_add');
 
         // @formatter:off
@@ -760,8 +761,8 @@ final class Admin
                         $medium_convert = array(
                                 'medium_bwd' => 'B&W Digital',
                                 'medium_cd' => 'Color Digital',
-                                'medium_bwp' => 'B&W Print',
-                                'medium_cp' => 'Color Print'
+                                'medium_bwp' => 'B&W Prints',
+                                'medium_cp' => 'Color Prints'
                             );
 
                         $classification_convert = array(
@@ -797,7 +798,7 @@ final class Admin
 
         $this->displayAdminHeader('Add Competition');
 
-        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd'));
+        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
         echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
         echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
@@ -992,7 +993,7 @@ final class Admin
                 case 'del':
                 case 'del_many':
                     $deleteCount = isset($_GET['deleteCount']) ? (int) $_GET['deleteCount'] : 0;
-                    $messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
+                    $messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Entry deleted.', '%s entries deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
                     break;
             }
         }
@@ -1046,7 +1047,7 @@ final class Admin
         }
 
         $this->displayAdminHeader('Delete Entries');
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updateentries', 'name' => 'updateentries'));
+        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updateentries', 'name' => 'updateentries', 'accept-charset' => get_bloginfo('charset')));
 
         echo '<p>' . _n('You have specified this entry for deletion:', 'You have specified these entries for deletion:', count($entryIdsArray)) . '</p>';
 
@@ -1086,7 +1087,7 @@ final class Admin
         global $wpdb;
 
         $updated = false;
-        // @var $formBuilder AVH_Form
+
         $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('entry-edit');
 
@@ -1115,6 +1116,7 @@ final class Admin
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
         $entry = $this->rpsdb->getEntryInfo($_REQUEST['entry'], OBJECT);
+        $competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
 
         $this->displayAdminHeader('Edit Entry');
 
@@ -1132,13 +1134,35 @@ final class Admin
         }
 
         $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES);
-        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-entryedit'));
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-entryedit', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
 
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
         echo $formBuilder->text('Title', '', 'title', $entry->Title);
+
+        // @formatter:off
+        $medium_array = array(
+                'medium_bwd' => 'B&W Digital',
+                'medium_cd' => 'Color Digital',
+                'medium_bwp' => 'B&W Prints',
+                'medium_cp' => 'Color Prints'
+            );
+        // @formatter:on
+        $selectedMedium = array_search($competition->Medium, $medium_array);
+        echo $formBuilder->select('Medium', '', 'medium', $medium_array, $selectedMedium, array('autocomplete' => 'off'));
+
+        // @formatter:off
+        $_classification = array(
+                'class_b' => 'Beginner',
+                'class_a' => 'Advanced',
+                'class_s' => 'Salon'
+            );
+        // @formatter:on
+        $selectedClassification = array_search($competition->Classification, $_classification);
+        echo $formBuilder->select('Classification', '', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
+
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
         if ($wp_http_referer) {
@@ -1177,8 +1201,8 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param  unknown $actions
-     * @param  unknown $user
+     * @param unknown $actions
+     * @param unknown $user
      * @return string
      */
     public function filterRpsUserActionLinks($actions, $user)
@@ -1194,7 +1218,7 @@ final class Admin
      *
      * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
      *
-     * @param  array $links
+     * @param array $links
      * @return array
      *
      * @since 1.0
@@ -1421,7 +1445,7 @@ final class Admin
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
-        $_medium = array('medium_bwd' => 'B&W Digital', 'medium_cd' => 'Color Digital', 'medium_bwp' => 'B&W Print', 'medium_cp' => 'Color Print');
+        $_medium = array('medium_bwd' => 'B&W Digital', 'medium_cd' => 'Color Digital', 'medium_bwp' => 'B&W Prints', 'medium_cp' => 'Color Prints');
         $selectedMedium = array_search($competition->Medium, $_medium);
 
         $_classification = array('class_b' => 'Beginner', 'class_a' => 'Advanced', 'class_s' => 'Salon');
