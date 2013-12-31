@@ -28,6 +28,9 @@ None
 
 == Changelog ==
 
+= Version 1.4.0-dev.1 =
+* Preparation for new development cycle.
+
 = Version 1.3.1 =
 * Preparation for new development cycle.
 
