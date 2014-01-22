@@ -28,7 +28,7 @@ None
 
 == Changelog ==
 
-= Version 1.4.0-dev.1 =
+= Version 1.3.2-rc.1 =
 * Show closing date at competition list.
 * Remove unnecessary CSS classes
 * Removes unnecessary redirect.
