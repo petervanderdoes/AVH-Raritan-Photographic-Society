@@ -974,7 +974,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $action = home_url('/' . get_page_uri($post->ID));
         echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
 
-        echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
+        if (isset($_GET['m'])) {
+            echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
+        }
         if (isset($_POST['wp_get_referer'])) {
             $_ref = $_POST['wp_get_referer'];
         } else {

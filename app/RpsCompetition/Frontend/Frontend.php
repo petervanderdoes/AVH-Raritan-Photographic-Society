@@ -168,8 +168,8 @@ class Frontend
                 $first_name = $recs['FirstName'];
                 $award = $recs['Award'];
                 // Display this thumbnail in the the next available column
-                echo '<li class="suf-widget">';
-                echo '<div class="dbx-box">';
+                echo '<li>';
+                echo '<div>';
                 echo '	<div class="image">';
                 echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
                 echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
@@ -227,19 +227,19 @@ class Frontend
                         if (!$this->rpsdb->getCompetionClosed()) {
                             $_query = array('m' => $this->settings->medium_subset);
                             $_query = build_query($_query);
-                            $loc = '/upload-image/?' . $_query;
+                            $loc = '/member/upload-image/?' . $_query;
                             wp_redirect($loc);
                         }
                         break;
 
                     case 'edit':
                         if (!$this->rpsdb->getCompetionClosed()) {
-                            if (is_array($entry_array)) {
+                            if (isset($entry_array) && is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
                                     $_query = array('id' => $id, 'm' => $this->settings->medium_subset);
                                     $_query = build_query($_query);
-                                    $loc = '/edit-title/?' . $_query;
+                                    $loc = '/member/edit-title/?' . $_query;
                                     wp_redirect($loc);
                                 }
                             }
@@ -365,25 +365,21 @@ class Frontend
                     if ($_SERVER['CONTENT_LENGTH'] > $this->core->getShorthandToBytes(ini_get('post_max_size'))) {
                         $this->settings->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                     } else {
-                        if (!$this->checkUploadEntryTitle()) {
-                            return;
-                        }
-
                         // Verify that the uploaded image is a JPEG
                         $uploaded_file_name = $_FILES['file_name']['tmp_name'];
                         $size_info = getimagesize($uploaded_file_name);
                         if ($size_info[2] != IMAGETYPE_JPEG) {
                             $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
-
                             return;
                         }
-
+                        if (!$this->checkUploadEntryTitle()) {
+                            return;
+                        }
                         // Retrieve and parse the selected competition cookie
                         if (isset($_COOKIE['RPS_MyEntries'])) {
                             list ($this->settings->comp_date, $this->settings->classification, $this->settings->medium) = explode("|", $_COOKIE['RPS_MyEntries']);
                         } else {
                             $this->settings->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
-
                             return;
                         }
 
@@ -396,7 +392,6 @@ class Frontend
                             $c = $this->classification;
                             $m = $this->medium;
                             $this->settings->errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
-
                             return;
                         }
 
@@ -414,7 +409,6 @@ class Frontend
                         // file names on the server
                         if ($this->rpsdb->checkDuplicateTitle($comp_id, $title)) {
                             $this->settings->errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
-
                             return;
                         }
 
@@ -424,7 +418,6 @@ class Frontend
                         $max_per_id = $this->rpsdb->checkMaxEntriesOnId($comp_id);
                         if ($max_per_id >= $max_entries) {
                             $this->settings->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
-
                             return;
                         }
 
@@ -432,7 +425,6 @@ class Frontend
                         if ($max_per_date >= $this->settings->club_max_entries_per_member_per_date) {
                             $x = $this->settings->club_max_entries_per_member_per_date;
                             $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
-
                             return;
                         }
 
@@ -483,7 +475,6 @@ class Frontend
                             $resized = 0;
                             if (!move_uploaded_file($uploaded_file_name, $full_path . '.jpg')) {
                                 $this->settings->errmsg = "Failed to move uploaded file to destination folder";
-
                                 return;
                             }
                         }
@@ -492,7 +483,6 @@ class Frontend
                         $_result = $this->rpsdb->addEntry($data);
                         if ($_result === false) {
                             $this->settings->errmsg = "Failed to INSERT entry record into database";
-
                             return;
                         }
                         $query = build_query(array('resized' => $resized));
