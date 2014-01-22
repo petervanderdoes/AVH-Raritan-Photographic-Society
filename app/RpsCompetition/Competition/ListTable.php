@@ -323,6 +323,9 @@ class ListTable extends \WP_List_Table
     public function column_status($competition)
     {
         echo $competition->Closed;
+        if ($competition->Closed == 'N') {
+            echo ' (Closing: '.mysql2date('Y-m-d', $competition->Close_Date).')';
+        }
     }
 
     public function column_scored($competition)
