@@ -29,7 +29,10 @@ None
 == Changelog ==
 
 = Version 1.4.0-dev.1 =
-* Preparation for new development cycle.
+* Show closing date at competition list.
+* Remove unnecessary CSS classes
+* Removes unnecessary redirect.
+* Clean up code to remove PHP notices.
 
 = Version 1.3.1 =
 * Preparation for new development cycle.
