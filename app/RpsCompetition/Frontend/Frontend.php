@@ -168,8 +168,8 @@ class Frontend
                 $first_name = $recs['FirstName'];
                 $award = $recs['Award'];
                 // Display this thumbnail in the the next available column
-                echo '<li class="suf-widget">';
-                echo '<div class="dbx-box">';
+                echo '<li>';
+                echo '<div>';
                 echo '	<div class="image">';
                 echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
                 echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
