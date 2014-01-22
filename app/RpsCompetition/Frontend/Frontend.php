@@ -227,7 +227,7 @@ class Frontend
                         if (!$this->rpsdb->getCompetionClosed()) {
                             $_query = array('m' => $this->settings->medium_subset);
                             $_query = build_query($_query);
-                            $loc = '/upload-image/?' . $_query;
+                            $loc = '/member/upload-image/?' . $_query;
                             wp_redirect($loc);
                         }
                         break;
@@ -239,7 +239,7 @@ class Frontend
                                     // @TODO Add Nonce
                                     $_query = array('id' => $id, 'm' => $this->settings->medium_subset);
                                     $_query = build_query($_query);
-                                    $loc = '/edit-title/?' . $_query;
+                                    $loc = '/member/edit-title/?' . $_query;
                                     wp_redirect($loc);
                                 }
                             }
