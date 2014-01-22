@@ -12,7 +12,6 @@ use Avh\Di\Container;
 use RpsCompetition\Db\RpsDb;
 
 /* @var $formBuilder \Avh\Html\FormBuilder */
-
 final class Admin
 {
 

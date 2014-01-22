@@ -224,6 +224,7 @@ class RpsDb
 
         return $_x;
     }
+
     public function getScoresCurrentUser()
     {
         $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Medium, c.Theme, e.Title, e.Server_File_Name,
@@ -442,7 +443,7 @@ class RpsDb
      * If the $data parameter has 'ID' set to a value, then competition will be updated.
      *
      * @param array $data
-     * @param bool  $wp_error
+     * @param bool $wp_error
      *            Optional. Allow return of WP_Error on failure.
      * @return object WP_Error on failure. The post ID on success.
      */
@@ -668,7 +669,8 @@ class RpsDb
      * Get the whole competition record
      *
      * @param integer $id
-     * @param string $output default is OBJECT
+     * @param string $output
+     *            default is OBJECT
      * @return Ambigous <boolean, multitype:, NULL>
      */
     public function getCompetitionByID2($id, $output = OBJECT)
@@ -737,7 +739,7 @@ class RpsDb
      * If the $data parameter has 'ID' set to a value, then entry will be updated.
      *
      * @param array $data
-     * @param bool  $wp_error
+     * @param bool $wp_error
      *            Optional. Allow return of WP_Error on failure.
      * @return object WP_Error on failure. The post ID on success.
      */

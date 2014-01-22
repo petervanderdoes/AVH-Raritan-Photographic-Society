@@ -1033,39 +1033,39 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         echo '<div class="rps-sc-text entry-content">';
         echo '<ul>';
-            $entries = $this->rpsdb->getEightsAndHigherPerson($id);
-            $images = array_rand($entries, 3);
+        $entries = $this->rpsdb->getEightsAndHigherPerson($id);
+        $images = array_rand($entries, 3);
 
-            foreach ($images as $key) {
-                $recs = $entries[$key];
-                $user_info = get_userdata($recs['Member_ID']);
-                $recs['FirstName'] = $user_info->user_firstname;
-                $recs['LastName'] = $user_info->user_lastname;
-                $recs['Username'] = $user_info->user_login;
+        foreach ($images as $key) {
+            $recs = $entries[$key];
+            $user_info = get_userdata($recs['Member_ID']);
+            $recs['FirstName'] = $user_info->user_firstname;
+            $recs['LastName'] = $user_info->user_lastname;
+            $recs['Username'] = $user_info->user_login;
 
-                // Grab a new record from the database
-                $dateParts = explode(" ", $recs['Competition_Date']);
-                $comp_date = $dateParts[0];
-                $medium = $recs['Medium'];
-                $classification = $recs['Classification'];
-                $comp = "$classification<br>$medium";
-                $title = $recs['Title'];
-                $last_name = $recs['LastName'];
-                $first_name = $recs['FirstName'];
-                $award = $recs['Award'];
-                // Display this thumbnail in the the next available column
-                echo '<li class="suf-widget">';
-                echo '<div class="dbx-box">';
-                echo '	<div class="image">';
-                echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
-                echo '	</div>';
-                echo "</div>\n";
+            // Grab a new record from the database
+            $dateParts = explode(" ", $recs['Competition_Date']);
+            $comp_date = $dateParts[0];
+            $medium = $recs['Medium'];
+            $classification = $recs['Classification'];
+            $comp = "$classification<br>$medium";
+            $title = $recs['Title'];
+            $last_name = $recs['LastName'];
+            $first_name = $recs['FirstName'];
+            $award = $recs['Award'];
+            // Display this thumbnail in the the next available column
+            echo '<li>';
+            echo '<div>';
+            echo '	<div class="image">';
+            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+            echo '	</div>';
+            echo "</div>\n";
 
-                echo '</li>';
-            }
-            echo '</ul>';
+            echo '</li>';
+        }
+        echo '</ul>';
         echo '</div>';
         echo '</section>';
-        }
+    }
 }
