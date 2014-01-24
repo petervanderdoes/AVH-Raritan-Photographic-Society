@@ -29,7 +29,8 @@ None
 == Changelog ==
 
 = Version 1.3.3-rc.1 =
-* Preparation for new development cycle.
+* Fix invalid method call
+* Update to PSR-2 coding standards
 
 = Version 1.3.2 =
 * Show closing date at competition list.
