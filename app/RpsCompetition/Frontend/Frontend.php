@@ -775,7 +775,7 @@ class Frontend
 
         // Return success to the client
         $warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
-        $this->_doRESTSuccess($warning);
+        $this->doRESTSuccess($warning);
         die();
     }
 
