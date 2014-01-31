@@ -66,8 +66,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<h3>' . $class . '</h3>';
         echo '</div>';
 
-        echo '<div class="rps-sc-text entry-content">';
-        echo '<ul>';
+        echo '<div class="gallery gallery-size-250">';
+        echo '<ul class="gallery-row gallery-row-equal">';
         foreach ($entries as $entry) {
             $dateParts = explode(" ", $entry['Competition_Date']);
             $comp_date = $dateParts[0];
@@ -79,13 +79,16 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $first_name = $entry['FirstName'];
             $award = $entry['Award'];
 
-            echo '<li class="suf-widget">';
-            echo '	<div class="image">';
+            echo '<li class="gallery-item">';
+            echo '	<div class="gallery-item-content">';
+            echo '<div class="gallery-item-content-image">';
             echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>';
-            echo '	</div>';
-            echo "<div class='winner-heading'>$title<br />$first_name $last_name</div>";
-            echo '</li>';
+            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>'."\n";
+
+           $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
+            echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
+            echo '	</div></div>';
+            echo '</li>'."\n";
         }
         echo '</ul>';
         echo '</div>';
