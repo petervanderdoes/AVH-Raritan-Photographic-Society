@@ -194,7 +194,7 @@ class Core
 
     public function rpsGetThumbnailUrl($row, $size)
     {
-        $file_parts = pathinfo(str_replace('/home/rarit0/public_html/', '', $row['Server_File_Name']));
+        $file_parts = pathinfo(str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']));
         $thumb_dir = $_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/thumbnails';
 
         if (!is_dir($thumb_dir)) {
@@ -206,7 +206,7 @@ class Core
         }
 
         $p = explode('/', $file_parts['dirname']);
-        $path = home_url() . '/';
+        $path = home_url();
         foreach ($p as $part) {
             $path .= rawurlencode($part) . '/';
         }
