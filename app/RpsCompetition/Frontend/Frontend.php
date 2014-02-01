@@ -145,8 +145,8 @@ class Frontend
             echo '<h3>Showcase</h3>';
             echo '</div>';
 
-            echo '<div class="rps-sc-text entry-content">';
-            echo '<ul>';
+            echo '<div class="gallery gallery-size-150">';
+            echo '<ul class="gallery-row">';
             $entries = $this->rpsdb->getEightsAndHigher('', $season);
             $images = array_rand($entries, 5);
 
@@ -168,16 +168,15 @@ class Frontend
                 $first_name = $recs['FirstName'];
                 $award = $recs['Award'];
                 // Display this thumbnail in the the next available column
-                echo '<li>';
-                echo '<div>';
-                echo '	<div class="image">';
+                echo '<li class="gallery-item">';
+                echo '<div class="gallery-item-content">';
+                echo '<div class="gallery-item-content-image">';
                 echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
-                echo '	</div>';
-                // echo " <div class='rps_showcase_title'>$title</div>";
-                echo "</div>\n";
+                echo '	<img src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                echo "</div>";
+                echo "</div>";
 
-                echo '</li>';
+                echo '</li>'."\n";
             }
             echo '</ul>';
             echo '</div>';
