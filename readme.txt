@@ -29,7 +29,9 @@ None
 == Changelog ==
 
 = Version 1.3.4-rc.1 =
-* Preparation for new development cycle.
+* Update Shortcodes that display photos.
+  They now show as gallery.
+* Fix double dash in thumbail URL at times.
 
 = Version 1.3.3 =
 * Fix invalid method call
