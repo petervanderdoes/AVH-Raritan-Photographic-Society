@@ -4,7 +4,7 @@ Donate link: http://blog.avirtualhome.com/wordpress-plugins/
 Tags:
 Requires at least: 3.4
 Tested up to: 3.4.1
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 
 The AVH RPS Competition plugin was written to manage the competitions of the Raritan Photographic Society.
 
@@ -28,7 +28,7 @@ None
 
 == Changelog ==
 
-= Version 1.3.4-rc.1 =
+= Version 1.3.4 =
 * Update Shortcodes that display photos.
   They now show as gallery.
 * Fix double dash in thumbail URL at times.
