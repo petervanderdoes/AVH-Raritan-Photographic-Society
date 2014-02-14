@@ -6,8 +6,9 @@
  * Version: 1.4.0-dev.1
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
- *
- * Copyright 2011 Peter van der Does (email : peter@avirtualhome.com)
+ * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
+ * GitHub Branch:     master
+ * Copyright 2011-2014 Peter van der Does (email : peter@avirtualhome.com)
  */
 use RpsCompetition\Constants;
 use RpsCompetition\Admin\Initialize;
