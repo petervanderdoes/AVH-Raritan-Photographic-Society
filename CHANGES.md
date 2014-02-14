@@ -1,6 +1,6 @@
 == Changelog ==
 
-= Version 1.3.5 =
+= Version 1.4.0-dev.1 =
 * Updated for usage of the github-updater plugin.
 * Fixed license
 
