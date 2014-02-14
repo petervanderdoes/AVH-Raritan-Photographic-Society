@@ -6,12 +6,6 @@ use RpsCompetition\Settings;
 class Core
 {
 
-    /**
-     *
-     * @var string
-     */
-    private $version;
-
     private $db_version;
 
     /**
@@ -20,13 +14,6 @@ class Core
      * @var string
      */
     private $comment;
-
-    /**
-     * Paths and URI's of the WordPress information, 'home', 'siteurl', 'install_url', 'install_dir'
-     *
-     * @var array
-     */
-    private $info;
 
     /**
      * Options set for the plugin
@@ -39,19 +26,6 @@ class Core
     private $db_options;
 
     private $default_options;
-
-    private $default_options_general;
-
-    private $options;
-
-    /**
-     * Properties used for the plugin data
-     */
-    private $db_data;
-
-    private $default_data;
-
-    private $data;
 
     /**
      *

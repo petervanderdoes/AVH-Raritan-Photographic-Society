@@ -55,8 +55,6 @@ final class Admin
      */
     private $entries_list;
 
-    private $add_disabled_notice = false;
-
     private $hooks = array();
 
     private $referer;
