@@ -692,7 +692,7 @@ class Frontend
         try {
             $db = new RPSPDO();
         } catch (\PDOException $e) {
-            $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
             die();
         }
         if ($db !== false) {
@@ -781,7 +781,7 @@ class Frontend
             $sth->bindParam(':award', $award, PDO::PARAM_STR);
             $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
         } catch (\PDOException $e) {
-            $this->_doRESTError("Error - " . $e->getMessage() . " - $sql");
+            $this->doRESTError("Error - " . $e->getMessage() . " - $sql");
             die();
         }
 
