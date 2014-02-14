@@ -29,27 +29,6 @@ class Frontend
      */
     private $rpsdb;
 
-    // Properties of the logged in user
-    private $member_id;
-
-    private $username;
-
-    private $first_name;
-
-    private $last_name;
-
-    private $email;
-
-    private $active_user;
-
-    private $digital_admin;
-
-    private $club_officer;
-    // Other commonly used globals
-    private $digital_chair_email;
-
-    private $url_params;
-
     /**
      * PHP5 Constructor
      */

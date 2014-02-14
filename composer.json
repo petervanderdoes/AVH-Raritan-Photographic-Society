@@ -11,9 +11,7 @@
 	"keywords" : [
 		"RPS"
 	],
-	"license" : [
-		"BSD-3-Clause-Clear"
-	],
+	"license" : "BSD-3-Clause",
 	"autoload" : {
 		"psr-0" : {
 			"RpsCompetition\\" : "app/"

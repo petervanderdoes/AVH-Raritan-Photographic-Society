@@ -469,17 +469,17 @@ final class Admin
         $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION);
         echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
-        echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
-        echo $formBuilder->text('Theme', '', 'theme', $competition->Theme, array('maxlength' => '32'));
-        echo $formBuilder->text('Closing Date', '', 'close-date', $formOptions['close-date']);
+        echo $formBuilder->text('Date', 'date', $formOptions['date']);
+        echo $formBuilder->text('Theme', 'theme', $competition->Theme, array('maxlength' => '32'));
+        echo $formBuilder->text('Closing Date', 'close-date', $formOptions['close-date']);
 
         for ($hour = 0; $hour <= 23; $hour++) {
             $time_val = sprintf("%02d:00:00", $hour);
             $time_text = date("g:i a", strtotime($time_val));
             $time[$time_val] = $time_text;
         }
-        // echo $formBuilder->select('Closing Time', '', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
-        echo $formBuilder->select('Closing Time', '', 'close-time', $time, $formOptions['close-time']);
+        // echo $formBuilder->select('Closing Time', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
+        echo $formBuilder->select('Closing Time', 'close-time', $time, $formOptions['close-time']);
 
         // @formatter:off
         $_medium = array(
@@ -490,7 +490,7 @@ final class Admin
             );
         // @formatter:on
         $selectedMedium = array_search($competition->Medium, $_medium);
-        echo $formBuilder->select('Medium', '', 'medium', $_medium, $selectedMedium, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Medium', 'medium', $_medium, $selectedMedium, array('autocomplete' => 'off'));
 
         // @formatter:off
         $_classification = array(
@@ -500,22 +500,22 @@ final class Admin
             );
         // @formatter:on
         $selectedClassification = array_search($competition->Classification, $_classification);
-        echo $formBuilder->select('Classification', '', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Classification', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
 
         $_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
-        echo $formBuilder->select('Max Entries', '', 'max_entries', $_max_entries, $competition->Max_Entries, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Max Entries', 'max_entries', $_max_entries, $competition->Max_Entries, array('autocomplete' => 'off'));
 
         $_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
-        echo $formBuilder->select('No. Judges', '', 'judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off'));
+        echo $formBuilder->select('No. Judges', 'judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off'));
 
         $_special_event = array('special_event' => array('text' => '', 'checked' => $competition->Special_Event));
-        echo $formBuilder->checkboxes('Special Event', '', key($_special_event), $_special_event);
+        echo $formBuilder->checkboxes('Special Event', key($_special_event), $_special_event);
 
         $_closed = array('closed' => array('text' => '', 'checked' => ($competition->Closed == 'Y' ? true : false)));
-        echo $formBuilder->checkboxes('Closed', '', key($_closed), $_closed);
+        echo $formBuilder->checkboxes('Closed', key($_closed), $_closed);
 
         $_scored = array('scored' => array('text' => '', 'checked' => ($competition->Scored == 'Y' ? true : false)));
-        echo $formBuilder->checkboxes('Scored', '', key($_scored), $_scored);
+        echo $formBuilder->checkboxes('Scored', key($_scored), $_scored);
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
@@ -822,7 +822,7 @@ final class Admin
             )
         );
         // @formatter:on
-        echo $formBuilder->checkboxes('Medium', '', key($_medium), $_medium);
+        echo $formBuilder->checkboxes('Medium', key($_medium), $_medium);
         unset($_medium);
 
         // @formatter:off
@@ -841,19 +841,19 @@ final class Admin
             )
         );
         // @formatter:on
-        echo $formBuilder->checkboxes('Classification', '', key($_classification), $_classification);
+        echo $formBuilder->checkboxes('Classification', key($_classification), $_classification);
         unset($_classification);
 
         $_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
-        echo $formBuilder->select('Max Entries', '', 'max_entries', $_max_entries, $formOptions['max_entries']);
+        echo $formBuilder->select('Max Entries', 'max_entries', $_max_entries, $formOptions['max_entries']);
         unset($_max_entries);
 
         $_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
-        echo $formBuilder->select('No. Judges', '', 'judges', $_judges, $formOptions['judges']);
+        echo $formBuilder->select('No. Judges', 'judges', $_judges, $formOptions['judges']);
         unset($_judges);
 
         $_special_event = array('special_event' => array('text' => '', 'checked' => $formOptions['special_event']));
-        echo $formBuilder->checkboxes('Special Event', '', key($_special_event), $_special_event);
+        echo $formBuilder->checkboxes('Special Event', key($_special_event), $_special_event);
         unset($_special_event);
 
         echo $formBuilder->closeTable();
@@ -1150,7 +1150,7 @@ final class Admin
             );
         // @formatter:on
         $selectedMedium = array_search($competition->Medium, $medium_array);
-        echo $formBuilder->select('Medium', '', 'medium', $medium_array, $selectedMedium, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Medium', 'medium', $medium_array, $selectedMedium, array('autocomplete' => 'off'));
 
         // @formatter:off
         $_classification = array(
@@ -1160,7 +1160,7 @@ final class Admin
             );
         // @formatter:on
         $selectedClassification = array_search($competition->Classification, $_classification);
-        echo $formBuilder->select('Classification', '', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
+        echo $formBuilder->select('Classification', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
