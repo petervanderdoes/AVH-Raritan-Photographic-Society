@@ -202,10 +202,12 @@ class ListTable extends \WP_List_Table
 
     public function current_action()
     {
-        if (isset($_POST['clear-recent-list']))
+        if (isset($_POST['clear-recent-list'])) {
             return 'clear-recent-list';
-        if (isset($_POST['filter-season']))
+        }
+        if (isset($_POST['filter-season'])) {
             return 'filter-season';
+        }
 
         return parent::current_action();
     }
