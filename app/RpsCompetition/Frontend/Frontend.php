@@ -579,8 +579,8 @@ class Frontend
         // Start building the XML response
         $dom = new \DOMDocument('1.0');
         // Create the root node
-        $rsp = $dom->CreateElement('rsp');
-        $rsp = $dom->AppendChild($rsp);
+        $node = $dom->CreateElement('rsp');
+        $rsp = $dom->AppendChild($node);
         $rsp->SetAttribute('stat', 'ok');
 
         $medium_clause = '';
