@@ -580,8 +580,8 @@ class Frontend
         $dom = new \DOMDocument('1.0');
         // Create the root node
         $node = $dom->CreateElement('rsp');
+        $node->SetAttribute('stat', 'ok');
         $rsp = $dom->AppendChild($node);
-        $rsp->SetAttribute('stat', 'ok');
 
         $medium_clause = '';
         if (!(empty($requested_medium))) {
