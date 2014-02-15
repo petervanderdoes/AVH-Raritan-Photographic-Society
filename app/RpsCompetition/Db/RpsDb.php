@@ -45,8 +45,8 @@ class RpsDb
             FROM competitions
             ORDER BY Season ' . $order, $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
 
-        $_result = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_result as $key => $value) {
+        $result = $this->rpsdb->get_results($sql, ARRAY_A);
+        foreach ($result as $key => $value) {
             $_seasons[$key] = $value['Season'];
         }
 
@@ -65,8 +65,8 @@ class RpsDb
             HAVING count(e.ID) > 0
             ORDER BY Season', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
 
-        $_result = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_result as $key => $value) {
+        $result = $this->rpsdb->get_results($sql, ARRAY_A);
+        foreach ($result as $key => $value) {
             $_seasons[$key] = $value['Season'];
         }
 
@@ -325,20 +325,9 @@ class RpsDb
             return $this->rpsdb->get_var($query);
         }
 
-        $_result = $this->rpsdb->get_results($query);
-        if ($output == OBJECT) {
-            return $_result;
-        } elseif ($output == ARRAY_A) {
-            $_result_array = get_object_vars($_result);
+        $result = $this->rpsdb->get_results($query);
 
-            return $_result_array;
-        } elseif ($output == ARRAY_N) {
-            $_result_array = array_values(get_object_vars($_result));
-
-            return $_result_array;
-        } else {
-            return $_result;
-        }
+        return $this->getReturn($result, $output);
     }
 
     public function getEntries($query_vars, $output = OBJECT)
@@ -373,20 +362,8 @@ class RpsDb
             return $this->rpsdb->get_var($query);
         }
 
-        $_result = $this->rpsdb->get_results($query);
-        if ($output == OBJECT) {
-            return $_result;
-        } elseif ($output == ARRAY_A) {
-            $_result_array = get_object_vars($_result);
-
-            return $_result_array;
-        } elseif ($output == ARRAY_N) {
-            $_result_array = array_values(get_object_vars($_result));
-
-            return $_result_array;
-        } else {
-            return $_result;
-        }
+        $result = $this->rpsdb->get_results($query);
+        return $this->getReturn($result, $output);
     }
 
     public function getCompetition($query_vars, $output = OBJECT)
@@ -421,20 +398,8 @@ class RpsDb
             return $this->rpsdb->get_var($query);
         }
 
-        $_result = $this->rpsdb->get_results($query);
-        if ($output == OBJECT) {
-            return $_result;
-        } elseif ($output == ARRAY_A) {
-            $_result_array = get_object_vars($_result);
-
-            return $_result_array;
-        } elseif ($output == ARRAY_N) {
-            $_result_array = array_values(get_object_vars($_result));
-
-            return $_result_array;
-        } else {
-            return $_result;
-        }
+        $result = $this->rpsdb->get_results($query);
+        return $this->getReturn($result, $output);
     }
 
     /**
@@ -623,21 +588,7 @@ class RpsDb
             FROM entries
             WHERE ID = %s", $id);
         $result = $this->rpsdb->get_row($sql);
-        if ($output == OBJECT) {
-            return $result;
-        } elseif ($output == ARRAY_A) {
-            $resultArray = get_object_vars($result);
-
-            return $resultArray;
-        } elseif ($output == ARRAY_N) {
-            $resultArray = array_values(get_object_vars($result));
-
-            return $resultArray;
-        } else {
-            return $result;
-        }
-
-        return $result;
+        return $this->getReturn($result, $output);
     }
 
     public function getCompetitionByID($id, $output = ARRAY_A)
@@ -648,21 +599,7 @@ class RpsDb
                 AND e.ID = %s", $id);
         $result = $this->rpsdb->get_row($sql);
 
-        if ($output == OBJECT) {
-            return $result;
-        } elseif ($output == ARRAY_A) {
-            $resultArray = get_object_vars($result);
-
-            return $resultArray;
-        } elseif ($output == ARRAY_N) {
-            $resultArray = array_values(get_object_vars($result));
-
-            return $resultArray;
-        } else {
-            return $result;
-        }
-
-        return $result;
+        return $this->getReturn($result, $output);
     }
 
     /**
@@ -677,22 +614,7 @@ class RpsDb
     {
         $where = $this->rpsdb->prepare('ID=%d', $id);
         $result = $this->getCompetitions(array('where' => $where));
-
-        if ($output == OBJECT) {
-            return $result[0];
-        } elseif ($output == ARRAY_A) {
-            $resultArray = get_object_vars($result[0]);
-
-            return $resultArray;
-        } elseif ($output == ARRAY_N) {
-            $resultArray = array_values(get_object_vars($result[0]));
-
-            return $resultArray;
-        } else {
-            return $result[0];
-        }
-
-        return $result[0];
+        return $this->getReturn($result[0], $output);
     }
 
     public function getIdmaxEntries()
@@ -774,9 +696,9 @@ class RpsDb
         $sql = $this->rpsdb->prepare("DELETE
             FROM entries
             WHERE ID = %s", $id);
-        $_result = $this->rpsdb->query($sql);
+        $result = $this->rpsdb->query($sql);
 
-        return $_result;
+        return $result;
     }
 
     public function deleteCompetition($id)
@@ -822,6 +744,32 @@ class RpsDb
     public function setUserId($_user_id)
     {
         $this->user_id = $_user_id;
+    }
+
+    /**
+     * Return the asked return value
+     *
+     * @param mixed $result
+     * @param integer $output
+     * @return mixed
+     */
+    private function getReturn($result, $output)
+    {
+        switch ($output) {
+            case ARRAY_A:
+                $resultArray = get_object_vars($result);
+                $return = $resultArray;
+                break;
+            case ARRAY_N:
+                $resultArray = array_values(get_object_vars($result));
+                $return = $resultArray;
+                break;
+            case OBJECT:
+            default:
+                $return = $result;
+                break;
+        }
+        return $result;
     }
 }
 
