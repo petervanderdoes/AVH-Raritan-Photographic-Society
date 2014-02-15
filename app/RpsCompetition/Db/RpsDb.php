@@ -47,10 +47,10 @@ class RpsDb
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
         foreach ($result as $key => $value) {
-            $_seasons[$key] = $value['Season'];
+            $seasons[$key] = $value['Season'];
         }
 
-        return $_seasons;
+        return $seasons;
     }
 
     public function getSeasonListOneEntry()
@@ -67,10 +67,10 @@ class RpsDb
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
         foreach ($result as $key => $value) {
-            $_seasons[$key] = $value['Season'];
+            $seasons[$key] = $value['Season'];
         }
 
-        return $_seasons;
+        return $seasons;
     }
 
     public function getClubCompetitionDates()
@@ -83,9 +83,9 @@ class RpsDb
                 Special_Event = "N"
             GROUP BY Competition_Date
             ORDER BY Competition_Date', $this->settings->season_start_date, $this->settings->season_end_date);
-        $_return = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
-        return $_return;
+        return $return;
     }
 
     public function getClubCompetitionResults()
@@ -101,16 +101,16 @@ class RpsDb
                 Special_Event = "N"
             ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $this->settings->season_start_date, $this->settings->season_end_date);
 
-        $_x = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_x as $key => $_rec) {
-            $user_info = get_userdata($_rec['Member_ID']);
-            $_rec['FirstName'] = $user_info->user_firstname;
-            $_rec['LastName'] = $user_info->user_lastname;
-            $_rec['Username'] = $user_info->user_login;
-            $_return[] = $_rec;
+        $x = $this->rpsdb->get_results($sql, ARRAY_A);
+        foreach ($x as $key => $rec) {
+            $user_info = get_userdata($rec['Member_ID']);
+            $rec['FirstName'] = $user_info->user_firstname;
+            $rec['LastName'] = $user_info->user_lastname;
+            $rec['Username'] = $user_info->user_login;
+            $return[] = $rec;
         }
 
-        return $_return;
+        return $return;
     }
 
     public function getMonthlyScores()
@@ -123,9 +123,9 @@ class RpsDb
             WHERE Competition_Date >= %s AND
                 Competition_Date < %s AND
                 Scored="Y" ORDER BY Competition_Date', $this->settings->season_start_date, $this->settings->season_end_date);
-        $_return = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
-        return $_return;
+        return $return;
     }
 
     public function getMaxAwards()
@@ -139,9 +139,9 @@ class RpsDb
                             Scored = 'Y' AND
                             e.Award <> ''
                         GROUP BY c.Competition_Date, c.Classification, c.Medium) z", $this->settings->min_date, $this->settings->max_date);
-        $_return = $this->rpsdb->get_var($sql);
+        $return = $this->rpsdb->get_var($sql);
 
-        return $_return;
+        return $return;
     }
 
     public function getWinner($date, $award, $class)
@@ -179,16 +179,16 @@ class RpsDb
                     c.Competition_Date < %s AND
                     e.Award <> ''
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->settings->min_date, $this->settings->max_date);
-        $_x = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($_x as $_rec) {
-            $user_info = get_userdata($_rec['Member_ID']);
-            $_rec['FirstName'] = $user_info->user_firstname;
-            $_rec['LastName'] = $user_info->user_lastname;
-            $_rec['Username'] = $user_info->user_login;
-            $_return[] = $_rec;
+        $x = $this->rpsdb->get_results($sql, ARRAY_A);
+        foreach ($x as $rec) {
+            $user_info = get_userdata($rec['Member_ID']);
+            $rec['FirstName'] = $user_info->user_firstname;
+            $rec['LastName'] = $user_info->user_lastname;
+            $rec['Username'] = $user_info->user_login;
+            $return[] = $rec;
         }
 
-        return $_return;
+        return $return;
     }
 
     public function getEightsAndHigher($classification, $season)
@@ -203,9 +203,9 @@ class RpsDb
                     c.Competition_Date >= %s AND
                     e.Score >= 8
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score", $season);
-        $_x = $this->rpsdb->get_results($sql, ARRAY_A);
+        $x = $this->rpsdb->get_results($sql, ARRAY_A);
 
-        return $_x;
+        return $x;
     }
 
     public function getEightsAndHigherPerson($member_id)
@@ -220,9 +220,9 @@ class RpsDb
                     e.Member_ID = %s AND
                     e.Score >= 8
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score", $member_id);
-        $_x = $this->rpsdb->get_results($sql, ARRAY_A);
+        $x = $this->rpsdb->get_results($sql, ARRAY_A);
 
-        return $_x;
+        return $x;
     }
 
     public function getScoresCurrentUser()
@@ -235,9 +235,9 @@ class RpsDb
         c.Competition_Date < %s AND
         e.Member_ID = %s
         ORDER BY c.Competition_Date, c.Medium", $this->settings->season_start_date, $this->settings->season_end_date, $this->user_id);
-        $_return = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
-        return $_return;
+        return $return;
     }
 
     public function getOpenCompetitions($subset)
@@ -252,30 +252,30 @@ class RpsDb
         $user = get_userdata($this->user_id);
 
         if ($subset == 'digital') {
-            $_class1 = get_user_meta($this->user_id, 'rps_class_bw', true);
-            $_class2 = get_user_meta($this->user_id, 'rps_class_color', true);
+            $class1 = get_user_meta($this->user_id, 'rps_class_bw', true);
+            $class2 = get_user_meta($this->user_id, 'rps_class_color', true);
         } else {
-            $_class1 = get_user_meta($this->user_id, 'rps_class_print_bw', true);
-            $_class2 = get_user_meta($this->user_id, 'rps_class_print_color', true);
+            $class1 = get_user_meta($this->user_id, 'rps_class_print_bw', true);
+            $class2 = get_user_meta($this->user_id, 'rps_class_print_color', true);
         }
         // Select the list of open competitions that match this member's classification(s)
-        $_sql = "SELECT c.Competition_Date, c.Classification, c.Medium, c.Theme, c.Closed
+        $sql_pre_prepare = "SELECT c.Competition_Date, c.Classification, c.Medium, c.Theme, c.Closed
             FROM competitions c
             WHERE c.Classification IN  (%s)
                 AND c.Closed = 'N'";
-        $_sql .= $and_medium_subset;
-        $_sql .= " GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium";
+        $sql_pre_prepare .= $and_medium_subset;
+        $sql_pre_prepare .= " GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium";
 
         $subset_detail = 'color ' . $subset;
-        $sql = $this->rpsdb->prepare($_sql, $_class2, '%' . $subset_detail . '%');
+        $sql = $this->rpsdb->prepare($sql_pre_prepare, $class2, '%' . $subset_detail . '%');
         $color_set = $this->rpsdb->get_results($sql, ARRAY_A);
         $subset_detail = 'b&w ' . $subset;
-        $sql = $this->rpsdb->prepare($_sql, $_class1, '%' . $subset_detail . '%');
+        $sql = $this->rpsdb->prepare($sql_pre_prepare, $class1, '%' . $subset_detail . '%');
         $bw_set = $this->rpsdb->get_results($sql, ARRAY_A);
-        $_return = array_merge($color_set, $bw_set);
-        sort($_return);
+        $return = array_merge($color_set, $bw_set);
+        sort($return);
 
-        return $_return;
+        return $return;
     }
 
     public function getCompetitions($query_vars, $output = OBJECT)
@@ -429,43 +429,30 @@ class RpsDb
             }
         } else {
             $competition_ID = 0;
-            if (!isset($data['Competition_Date'])) {
-                $data['Competition_Date'] = current_time('mysql');
-            }
-            if (!isset($data['Medium'])) {
-                $data['Medium'] = '';
-            }
-            if (!isset($data['Classification'])) {
-                $data['Classification'] = '';
-            }
-            if (!isset($data['Theme'])) {
-                $data['Theme'] = '';
-            }
-            if (!isset($data['Date_Created'])) {
-                $data['Date_Created'] = current_time('mysql');
-            }
-            if (!isset($data['Date_Modified'])) {
-                $data['Date_Modified'] = current_time('mysql');
-            }
-            if (!isset($data['Closed'])) {
-                $data['Closed'] = 'N';
-            }
-            if (!isset($data['Scored'])) {
-                $data['Scored'] = 'N';
+            $current_time = current_time('mysql');
+            //@formatter:off
+            $default_options = array('Competition_Date' => $current_time,
+                                     'Medium' => '',
+                                     'Classification' => '',
+                                     'Theme' => '',
+                                     'Date_Created' => $current_time,
+                                     'Date_Modified' => $current_time,
+                                     'Closed' => 'N',
+                                     'Scored' => 'N',
+                                     'Max_Entries' => 2,
+                                     'Num_Judges' => 1,
+                                     'Special_Event' => 'N'
+            );
+            // @formatter:on
+            foreach ($default_options as $key => $value) {
+                if (!isset($data[$key])) {
+                    $data[$key] = $value;
+                }
             }
             if (!isset($data['Close_Date'])) {
                 $data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
                 $date_array = getdate($data['Close_Date']);
                 $data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
-            }
-            if (!isset($data['Max_Entries'])) {
-                $data['Max_Entries'] = 2;
-            }
-            if (!isset($data['Num_Judges'])) {
-                $data['Num_Judges'] = 1;
-            }
-            if (!isset($data['Special_Event'])) {
-                $data['Special_Event'] = 'N';
             }
             $data = stripslashes_deep($data);
             if (false === $this->rpsdb->insert('competitions', $data)) {
@@ -484,9 +471,9 @@ class RpsDb
             WHERE Competition_Date = DATE(%s)
                 AND Classification = %s
                 AND Medium = %s", $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
-        $_return = $this->rpsdb->get_var($sql);
+        $return = $this->rpsdb->get_var($sql);
 
-        return $_return;
+        return $return;
     }
 
     public function getCompetionClosed()
@@ -496,23 +483,23 @@ class RpsDb
             WHERE Competition_Date = DATE(%s)
                 AND Classification = %s
                 AND Medium = %s", $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
-        $_closed = $this->rpsdb->get_var($sql);
-        if ($_closed == "Y") {
-            $_return = true;
+        $closed = $this->rpsdb->get_var($sql);
+        if ($closed == "Y") {
+            $return = true;
         } else {
-            $_return = false;
+            $return = false;
         }
 
-        return $_return;
+        return $return;
     }
 
     public function setCompetitionClose()
     {
-        $_current_time = current_time('mysql');
+        $current_time = current_time('mysql');
         $sql = $this->rpsdb->prepare("UPDATE competitions
             SET Closed='Y',  Date_Modified = %s
             WHERE Closed='N'
-                AND Close_Date < %s", $_current_time, $_current_time);
+                AND Close_Date < %s", $current_time, $current_time);
         $result = $this->rpsdb->query($sql);
     }
 
@@ -522,9 +509,9 @@ class RpsDb
                 WHERE Competition_Date = DATE %s AND
                 Classification = %s AND
                 Medium = %s", $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
-        $_return = $this->rpsdb->get_var($sql);
+        $return = $this->rpsdb->get_var($sql);
 
-        return $_return;
+        return $return;
     }
 
     public function checkMaxEntriesOnId($id)
@@ -532,9 +519,9 @@ class RpsDb
         $sql = $this->rpsdb->prepare("SELECT count(ID) FROM entries
             WHERE Competition_ID = %s
                 AND Member_ID = %s", $id, $this->user_id);
-        $_return = $this->rpsdb->get_var($sql);
+        $return = $this->rpsdb->get_var($sql);
 
-        return $_return;
+        return $return;
     }
 
     public function checkMaxEntriesOnDate()
@@ -544,9 +531,9 @@ class RpsDb
                     WHERE e.Competition_ID = c.ID AND
                     c.Competition_Date = DATE(%s) AND
                     e.Member_ID = %s", $this->settings->comp_date, $this->user_id);
-        $_return = $this->rpsdb->get_var($sql);
+        $return = $this->rpsdb->get_var($sql);
 
-        return $_return;
+        return $return;
     }
 
     public function getCompetitionEntriesUser()
@@ -556,9 +543,9 @@ class RpsDb
             WHERE competitions.ID = entries.Competition_ID
                 AND	entries.Member_ID=%s
                 AND competitions.Competition_Date = DATE %s ", $this->user_id, $this->settings->comp_date);
-        $_return = $this->rpsdb->get_var($sql);
+        $return = $this->rpsdb->get_var($sql);
 
-        return $_return;
+        return $return;
     }
 
     public function getCompetitionSubmittedEntriesUser()
@@ -570,9 +557,9 @@ class RpsDb
                 AND competitions.Competition_Date = DATE %s
                 AND competitions.Classification = %s
                 AND competitions.Medium = %s", $this->user_id, $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
-        $_return = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
-        return $_return;
+        return $return;
     }
 
     /**
@@ -624,9 +611,9 @@ class RpsDb
             WHERE Competition_Date = DATE %s
                 AND Classification = %s
                 AND Medium = %s", $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
-        $_return = $this->rpsdb->get_row($sql, ARRAY_A);
+        $return = $this->rpsdb->get_row($sql, ARRAY_A);
 
-        return $_return;
+        return $return;
     }
 
     public function checkDuplicateTitle($id, $title)
@@ -636,23 +623,23 @@ class RpsDb
             WHERE Competition_ID = %s
                 AND Member_ID = %s
                 AND Title = %s", $id, $this->user_id, $title);
-        $_return = $this->rpsdb->get_var($sql);
-        if ($_return > 0) {
-            $_return = true;
+        $return = $this->rpsdb->get_var($sql);
+        if ($return > 0) {
+            $return = true;
         } else {
-            $_return = false;
+            $return = false;
         }
 
-        return $_return;
+        return $return;
     }
 
     public function addEntry($data)
     {
         $data['Member_ID'] = $this->user_id;
         $data['Date_Created'] = current_time('mysql');
-        $_return = $this->rpsdb->insert('entries', $data);
+        $return = $this->rpsdb->insert('entries', $data);
 
-        return $_return;
+        return $return;
     }
 
     /**
@@ -685,10 +672,10 @@ class RpsDb
     public function updateEntriesTitle($new_title, $new_file_name, $id)
     {
         $data = array('Title' => $new_title, 'Server_File_Name' => $new_file_name, 'Date_Modified' => current_time('mysql'));
-        $_where = array('ID' => $id);
-        $_return = $this->rpsdb->update('entries', $data, $_where);
+        $where = array('ID' => $id);
+        $return = $this->rpsdb->update('entries', $data, $where);
 
-        return $_return;
+        return $return;
     }
 
     public function deleteEntry($id)
@@ -741,9 +728,9 @@ class RpsDb
      *
      * @param field_type $user_id
      */
-    public function setUserId($_user_id)
+    public function setUserId($user_id)
     {
-        $this->user_id = $_user_id;
+        $this->user_id = $user_id;
     }
 
     /**
