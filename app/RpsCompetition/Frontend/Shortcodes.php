@@ -5,6 +5,7 @@ use RpsCompetition\Settings;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
+use Avh\Html\FormBuilder;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -36,6 +37,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->rpsdb = $rpsdb;
         $this->rpsdb->setUserId(get_current_user_id());
         $this->html = new \Avh\Html\HtmlBuilder();
+        $this->formBuilder = new FormBuilder($this->html);
     }
 
     /**
@@ -789,17 +791,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
         $prev_date = "";
-        for ($i = 0; $i < count($this->settings->open_comp_date); $i++) {
-            if ($this->settings->open_comp_date[$i] != $prev_date) {
-                if ($this->settings->comp_date == $this->settings->open_comp_date[$i]) {
-                    $selected = " SELECTED";
-                    $theme = $this->settings->open_comp_theme[$i];
-                } else {
-                    $selected = "";
-                }
-                echo "<OPTION value=\"" . $this->settings->open_comp_date[$i] . "\"$selected>" . strftime('%d-%b-%Y', strtotime($this->settings->open_comp_date[$i])) . " " . $this->settings->open_comp_theme[$i] . "</OPTION>\n";
+        $compdates = array_unique($this->settings->open_comp_date);
+        foreach ($compdates as $key => $comp_date) {
+            $selected = '';
+            if ($this->settings->comp_date == $this->settings->open_comp_date[$key]) {
+                $selected = " SELECTED";
+                $theme = $this->settings->open_comp_theme[$key];
             }
-            $prev_date = $this->settings->open_comp_date[$i];
+            echo "<OPTION value=\"" . $comp_date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($comp_date)) . " " . $this->settings->open_comp_theme[$key] . "</OPTION>\n";
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
@@ -808,16 +807,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
         echo "<td width=\"64%\" align=\"left\">\n";
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
+
         // Load the values into the dropdown list
-        for ($i = 0; $i < count($this->settings->open_comp_date); $i++) {
-            if ($this->settings->open_comp_date[$i] == $this->settings->comp_date) {
-                if ($this->settings->medium == $this->settings->open_comp_medium[$i]) {
-                    $selected = " SELECTED";
-                } else {
-                    $selected = "";
-                }
-                echo "<OPTION value=\"" . $this->settings->open_comp_medium[$i] . "\"$selected>" . $this->settings->open_comp_medium[$i] . "</OPTION>\n";
+        $medium_array = array_keys($this->settings->open_comp_date,$this->settings->comp_date);
+        foreach ($medium_array as $comp_medium) {
+            $selected = '';
+            if ($this->settings->medium == $this->settings->open_comp_medium[$comp_medium]) {
+                   $selected = " SELECTED";
             }
+            echo "<OPTION value=\"" . $this->settings->open_comp_medium[$comp_medium] . "\"$selected>" . $this->settings->open_comp_medium[$comp_medium] . "</OPTION>\n";
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
