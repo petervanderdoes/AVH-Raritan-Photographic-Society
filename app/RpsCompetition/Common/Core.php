@@ -222,7 +222,7 @@ class Core
         foreach ($cols as $col => $order) {
             $colarr[$col] = array();
             foreach ($array as $k => $row) {
-                $colarr[$col]['_' . $k] = strtolower($row[$col]);
+                $colarr[$col][$k] = strtolower($row[$col]);
             }
         }
         $params = array();
@@ -234,25 +234,10 @@ class Core
                 unset($order_element);
             }
         }
+        $params[] = &$array;
         call_user_func_array('array_multisort', $params);
-        $ret = array();
-        $keys = array();
-        $first = true;
-        foreach ($colarr as $col => $arr) {
-            foreach ($arr as $k => $v) {
-                if ($first) {
-                    $keys[$k] = substr($k, 1);
-                }
-                $k = $keys[$k];
-                if (!isset($ret[$k])) {
-                    $ret[$k] = $array[$k];
-                }
-                $ret[$k][$col] = $array[$k][$col];
-            }
-            $first = false;
-        }
 
-        return $ret;
+        return $array;
     }
 
     public function getShorthandToBytes($size_str)
