@@ -83,12 +83,12 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo '	<div class="gallery-item-content">';
             echo '<div class="gallery-item-content-image">';
             echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>'."\n";
+            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
-           $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
+            $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
             echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
             echo '	</div></div>';
-            echo '</li>'."\n";
+            echo '</li>' . "\n";
         }
         echo '</ul>';
         echo '</div>';
