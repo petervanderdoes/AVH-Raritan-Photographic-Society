@@ -13,7 +13,7 @@
 	],
 	"license" : "BSD-3-Clause",
 	"autoload" : {
-		"psr-0" : {
+		"psr-4" : {
 			"RpsCompetition\\" : "app/"
 		}
 	}
