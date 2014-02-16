@@ -1294,98 +1294,33 @@ final class Admin
         $_rps_class_print_color = get_user_meta($userID, 'rps_class_print_color', true);
 
         $_classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
+
+        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+
         echo '<h3 id="rps">Competition Classification</h3>';
-        echo '<table class="form-table">';
+        echo $formBuilder->openTable();
 
-        echo '<tr>';
-        echo '<th>Classification Digital B&W</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_bw" id="rps_class_bw">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_bw) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
+        // @formatter:off
+        $all_classifications=array(
+            array('label'=>'Classification Digital B&W','name'=>'rps_class_bw','selected'=>$_rps_class_bw),
+            array('label'=>'Classification Digital Color','name'=>'rps_class_color','selected'=>$_rps_class_color),
+            array('label'=>'Classification Print B&W','name'=>'rps_class_print_bw','selected'=>$_rps_class_print_bw),
+            array('label'=>'Classification Print Color','name'=>'rps_class_print_color','selected'=>$_rps_class_print_color),
+        );
+        // @formatter:on
+        foreach ($all_classifications as $key => $data) {
+
+            if (current_user_can('rps_edit_competition_classification')) {
+                echo $formBuilder->select($data['label'], $data['name'], $_classification, $data['selected']);
+            } else {
+                echo '<tr>';
+                echo '<th>' . $data['label'] . '</th>';
+                echo '<td>' . $_classification[$data['selected']] . '</td>';
+                echo '</tr>';
             }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_bw];
         }
-        echo '</td>';
-        echo '</tr>';
 
-        echo '<tr>';
-        echo '<th>Classification Digital Color</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_color" id="rps_class_color">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_color) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_color];
-        }
-        echo '</td>';
-        echo '</tr>';
-
-        echo '<tr>';
-        echo '<th>Classification Print B&W</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_print_bw" id="rps_class_print_bw">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_print_bw) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_print_bw];
-        }
-        echo '</td>';
-        echo '</tr>';
-
-        echo '<tr>';
-        echo '<th>Classification Print Color</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_print_color" id="rps_class_print_color">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_print_color) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_print_color];
-        }
-        echo '</td>';
-        echo '</tr>';
-
-        echo '</table>';
+        echo $formBuilder->closeTable();
     }
 
     /**
