@@ -797,8 +797,8 @@ final class Admin
 
         echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
-        echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
-        echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
+        echo $formBuilder->text('Date', 'date', $formOptions['date']);
+        echo $formBuilder->text('Theme', 'theme', $formOptions['theme'], array('maxlength' => '32'));
 
         // @formatter:off
         $_medium = array(
@@ -1137,7 +1137,7 @@ final class Admin
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
-        echo $formBuilder->text('Title', '', 'title', $entry->Title);
+        echo $formBuilder->text('Title', 'title', $entry->Title);
 
         // @formatter:off
         $medium_array = array(
