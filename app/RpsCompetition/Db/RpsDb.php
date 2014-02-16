@@ -415,20 +415,16 @@ class RpsDb
     public function insertCompetition($data)
     {
         // Are we updating or creating?
-        $update = false;
         if (!empty($data['ID'])) {
-            $update = true;
             $competition_ID = (int) $data['ID'];
             $where = array('ID' => $competition_ID);
             if (!isset($data['Date_Modified'])) {
                 $data['Date_Modified'] = current_time('mysql');
             }
-            $data = stripslashes_deep($data);
-            if (false === $this->rpsdb->update('competitions', $data, $where)) {
+            if (false === $this->rpsdb->update('competitions', stripslashes_deep($data), $where)) {
                 return new \WP_Error('db_update_error', 'Could not update competition into the database', $this->rpsdb->last_error);
             }
         } else {
-            $competition_ID = 0;
             $current_time = current_time('mysql');
             //@formatter:off
             $default_options = array('Competition_Date' => $current_time,
@@ -444,18 +440,14 @@ class RpsDb
                                      'Special_Event' => 'N'
             );
             // @formatter:on
-            foreach ($default_options as $key => $value) {
-                if (!isset($data[$key])) {
-                    $data[$key] = $value;
-                }
-            }
+            $data = $data + $default_options;
+
             if (!isset($data['Close_Date'])) {
                 $data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
                 $date_array = getdate($data['Close_Date']);
                 $data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
             }
-            $data = stripslashes_deep($data);
-            if (false === $this->rpsdb->insert('competitions', $data)) {
+            if (false === $this->rpsdb->insert('competitions', stripslashes_deep($data))) {
                 return new \WP_Error('db_insert_error', __('Could not insert competition into the database'), $this->rpsdb->last_error);
             }
             $competition_ID = (int) $this->rpsdb->insert_id;
