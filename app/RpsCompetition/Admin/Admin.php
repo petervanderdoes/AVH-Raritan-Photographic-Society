@@ -507,13 +507,13 @@ final class Admin
         echo $formBuilder->select('No. Judges', 'judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off'));
 
         $_special_event = array('special_event' => array('text' => '', 'checked' => $competition->Special_Event));
-        echo $formBuilder->checkboxes('Special Event', key($_special_event), $_special_event);
+        echo $formBuilder->checkbox('Special Event', 'special_event', $_special_event);
 
         $_closed = array('closed' => array('text' => '', 'checked' => ($competition->Closed == 'Y' ? true : false)));
-        echo $formBuilder->checkboxes('Closed', key($_closed), $_closed);
+        echo $formBuilder->checkbox('Closed', 'closed', $_closed);
 
         $_scored = array('scored' => array('text' => '', 'checked' => ($competition->Scored == 'Y' ? true : false)));
-        echo $formBuilder->checkboxes('Scored', key($_scored), $_scored);
+        echo $formBuilder->checkbox('Scored', 'scored', $_scored);
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
@@ -686,13 +686,17 @@ final class Admin
         $formDefaultOptions = array(
                 'date' => '',
                 'theme' => '',
-                'medium_bwd' => true,
-                'medium_cd' => true,
-                'medium_bwp' => true,
-                'medium_cp' => true,
-                'class_b' => true,
-                'class_a' => true,
-                'class_s' => true,
+                'medium' => array(
+                    'medium_bwd' => true,
+                    'medium_cd' => true,
+                    'medium_bwp' => true,
+                    'medium_cp' => true
+                ),
+                'classification' => array (
+                    'class_b' => true,
+                    'class_a' => true,
+                    'class_s' => true
+                ),
                 'max_entries' => '2',
                 'judges' => '1',
                 'special_event' => false
@@ -703,50 +707,51 @@ final class Admin
             switch ($_POST['action']) {
                 case 'add':
                     $formBuilder->setNonceAction(get_current_user_id());
-                    check_admin_referer($formBuilder->getNonce_action());
+                    check_admin_referer($formBuilder->getNonceAction(get_current_user_id()));
                     $formNewOptions = $formDefaultOptions;
-                    $formOptions = $_POST[$formBuilder->getOption_name()];
+                    $formOptions = $_POST[$formBuilder->getOptionName()];
 
-                    $mediumArray = array();
-                    $classArray = array();
+                    // Set all checkboxes to false. HTML Post doesn't return anything if the checkbox is not checked.
+                    $array_medium_all_false = array_fill_keys(array_keys($formDefaultOptions['medium']), false);
+                    $array_classification_all_false = array_fill_keys(array_keys($formDefaultOptions['classification']), false);
+                    $formNewOptions['special_event'] = false;
+
                     $errorMsgArray = array();
-                    foreach ($formDefaultOptions as $optionKey => $optionValue) {
+                    foreach ($formOptions as $optionKey => $optionValue) {
 
                         // Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to false.
-                        $newval = (isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : false);
                         $current_value = $formDefaultOptions[$optionKey];
                         switch ($optionKey) {
                             case 'date':
                                 // Validate
                                 break;
 
+                            case 'medium':
+                                $formNewOptions['medium'] = $formOptions['medium'] + $array_medium_all_false;
+                                break;
+
+                            case 'classification':
+                                $formNewOptions['classification'] = $formOptions['classification'] + $array_classification_all_false;
+                                break;
+
                             case 'theme':
                                 // Validate
                                 break;
+
+                            case 'special_event':
+                                $formNewOptions[$optionKey] = true;
+                                break;
                         }
-                        if (substr($optionKey, 0, 7) == 'medium_') {
-                            $formNewOptions[$optionKey] = (bool) $newval;
-                            if ($formNewOptions[$optionKey]) {
-                                $mediumArray[] = $optionKey;
-                                continue;
-                            }
-                        }
-                        if (substr($optionKey, 0, 6) == 'class_') {
-                            $formNewOptions[$optionKey] = (bool) $newval;
-                            if ($formNewOptions[$optionKey]) {
-                                $classArray[] = $optionKey;
-                                continue;
-                            }
-                        }
-                        $formNewOptions[$optionKey] = $newval;
                     }
 
-                    if (empty($mediumArray)) {
+                    if (!isset($formOptions['medium'])) {
                         $errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
+                        $formNewOptions['medium'] = $array_medium_all_false;
                     }
 
-                    if (empty($classArray)) {
+                    if (!isset($formOptions['classification'])) {
                         $errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
+                        $formNewOptions['classification'] = $array_classification_all_false;
                     }
 
                     if (empty($errorMsgArray)) {
@@ -773,9 +778,9 @@ final class Admin
                         $data['Max_Entries'] = $formNewOptions['max_entries'];
                         $data['Num_Judges'] = $formNewOptions['judges'];
                         $data['Special_Event'] = ($formNewOptions['special_event'] ? 'Y' : 'N');
-                        foreach ($mediumArray as $medium) {
+                        foreach ($formNewOptions['medium'] as $medium) {
                             $data['Medium'] = $medium_convert[$medium];
-                            foreach ($classArray as $classification) {
+                            foreach ($formNewOptions['classification'] as $classification) {
                                 $data['Classification'] = $classification_convert[$classification];
                                 $competition_ID = $this->rpsdb->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
@@ -801,58 +806,58 @@ final class Admin
         echo $formBuilder->text('Theme', 'theme', $formOptions['theme'], array('maxlength' => '32'));
 
         // @formatter:off
-        $_medium = array(
+        $array_medium = array(
             'medium_bwd' => array(
                 'text' => 'B&W Digital',
-                'checked' => $formOptions['medium_bwd']
+                'checked' => $formOptions['medium']['medium_bwd']
             ),
             'medium_cd' => array(
                 'text' => 'Color Digital',
-                'checked' => $formOptions['medium_cd']
+                'checked' => $formOptions['medium']['medium_cd']
             ),
             'medium_bwp' => array(
                 'text' => 'B&W Print',
-                'checked' => $formOptions['medium_bwp']
+                'checked' => $formOptions['medium']['medium_bwp']
             ),
             'medium_cp' => array(
                 'text' => 'Color Digital',
-                'checked' => $formOptions['medium_cp']
+                'checked' => $formOptions['medium']['medium_cp']
             )
         );
         // @formatter:on
-        echo $formBuilder->checkboxes('Medium', key($_medium), $_medium);
-        unset($_medium);
+        echo $formBuilder->checkboxes('Medium', 'medium', $array_medium);
+        unset($array_medium);
 
         // @formatter:off
-        $_classification = array(
+        $array_classification = array(
             'class_b' => array(
                 'text' => 'Beginner',
-                'checked' => $formOptions['class_b']
+                'checked' => $formOptions['classification']['class_b']
             ),
             'class_a' => array(
                 'text' => 'Advanced',
-                'checked' => $formOptions['class_a']
+                'checked' => $formOptions['classification']['class_a']
             ),
             'class_s' => array(
                 'text' => 'Salon',
-                'checked' => $formOptions['class_s']
+                'checked' => $formOptions['classification']['class_s']
             )
         );
         // @formatter:on
-        echo $formBuilder->checkboxes('Classification', key($_classification), $_classification);
-        unset($_classification);
+        echo $formBuilder->checkboxes('Classification', 'classification', $array_classification);
+        unset($array_classification);
 
-        $_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
-        echo $formBuilder->select('Max Entries', 'max_entries', $_max_entries, $formOptions['max_entries']);
-        unset($_max_entries);
+        $array_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
+        echo $formBuilder->select('Max Entries', 'max_entries', $array_max_entries, $formOptions['max_entries']);
+        unset($array_max_entries);
 
-        $_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
-        echo $formBuilder->select('No. Judges', 'judges', $_judges, $formOptions['judges']);
-        unset($_judges);
+        $array_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
+        echo $formBuilder->select('No. Judges', 'judges', $array_judges, $formOptions['judges']);
+        unset($array_judges);
 
-        $_special_event = array('special_event' => array('text' => '', 'checked' => $formOptions['special_event']));
-        echo $formBuilder->checkboxes('Special Event', key($_special_event), $_special_event);
-        unset($_special_event);
+        $array_special_event = array('special_event' => array('text' => '', 'checked' => $formOptions['special_event']));
+        echo $formBuilder->checkbox('Special Event', 'special_event', 'special_event', $formOptions['special_event']);
+        unset($array_special_event);
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
