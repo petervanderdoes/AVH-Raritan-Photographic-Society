@@ -719,50 +719,43 @@ final class Admin
                 case 'add':
                     $formBuilder->setNonceAction(get_current_user_id());
                     check_admin_referer($formBuilder->getNonceAction(get_current_user_id()));
-                    $formNewOptions = $formDefaultOptions;
-                    $formOptions = $_POST[$formBuilder->getOptionName()];
+                    $formNewOptions = $_POST[$formBuilder->getOptionName()];
 
                     // Set all checkboxes to false. HTML Post doesn't return anything if the checkbox is not checked.
                     $array_medium_all_false = array_fill_keys(array_keys($formDefaultOptions['medium']), false);
                     $array_classification_all_false = array_fill_keys(array_keys($formDefaultOptions['classification']), false);
-                    $formNewOptions['special-event'] = false;
 
                     $errorMsgArray = array();
-                    foreach ($formOptions as $optionKey => $optionValue) {
-
-                        // Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to false.
-                        $current_value = $formDefaultOptions[$optionKey];
+                    foreach ($formNewOptions as $optionKey => $optionValue) {
                         switch ($optionKey) {
                             case 'date':
-                                // Validate
-                                break;
-
-                            case 'medium':
-                                $formNewOptions['medium'] = $formOptions['medium'] + $array_medium_all_false;
-                                break;
-
-                            case 'classification':
-                                $formNewOptions['classification'] = $formOptions['classification'] + $array_classification_all_false;
+                                //Validate
                                 break;
 
                             case 'theme':
-                                // Validate
-                                break;
-
-                            case 'special-event':
-                                $formNewOptions[$optionKey] = true;
+                                //Validate
                                 break;
                         }
                     }
 
-                    if (!isset($formOptions['medium'])) {
+                    if (!isset($formNewOptions['medium'])) {
                         $errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
                         $formNewOptions['medium'] = $array_medium_all_false;
+                    } else {
+                        $formNewOptions['medium'] = $formNewOptions['medium'] + $array_medium_all_false;
                     }
 
-                    if (!isset($formOptions['classification'])) {
+                    if (!isset($formNewOptions['classification'])) {
                         $errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
                         $formNewOptions['classification'] = $array_classification_all_false;
+                    } else {
+                        $formNewOptions['classification'] = $formNewOptions['classification'] + $array_classification_all_false;
+                    }
+
+                    if (!isset($formNewOptions['special-event'])) {
+                        $formNewOptions['special-event'] = false;
+                    } else {
+                        $formNewOptions['special-event'] = true;
                     }
 
                     if (empty($errorMsgArray)) {
@@ -822,18 +815,22 @@ final class Admin
         $array_medium = array(
             'medium_bwd' => array(
                 'text' => 'B&W Digital',
+                'value' => $formOptions['medium']['medium_bwd'],
                 'checked' => $formOptions['medium']['medium_bwd']
             ),
             'medium_cd' => array(
                 'text' => 'Color Digital',
+                'value' => $formOptions['medium']['medium_cd'],
                 'checked' => $formOptions['medium']['medium_cd']
             ),
             'medium_bwp' => array(
                 'text' => 'B&W Print',
+                'value' =>  $formOptions['medium']['medium_bwp'],
                 'checked' => $formOptions['medium']['medium_bwp']
             ),
             'medium_cp' => array(
                 'text' => 'Color Digital',
+                'value' => $formOptions['medium']['medium_cp'],
                 'checked' => $formOptions['medium']['medium_cp']
             )
         );
@@ -846,14 +843,17 @@ final class Admin
         $array_classification = array(
             'class_b' => array(
                 'text' => 'Beginner',
+                'value' => $formOptions['classification']['class_b'],
                 'checked' => $formOptions['classification']['class_b']
             ),
             'class_a' => array(
                 'text' => 'Advanced',
+                'value' =>  $formOptions['classification']['class_a'],
                 'checked' => $formOptions['classification']['class_a']
             ),
             'class_s' => array(
                 'text' => 'Salon',
+                'value' => $formOptions['classification']['class_s'],
                 'checked' => $formOptions['classification']['class_s']
             )
         );
@@ -874,7 +874,7 @@ final class Admin
 
         $array_special_event = array('special-event' => array('text' => '', 'checked' => $formOptions['special-event']));
         echo $formBuilder->outputLabel($formBuilder->label('special-event','Special Event'));
-        echo $formBuilder->outputField($formBuilder->checkbox('special-event', 'special-event', $formOptions['special-event']));
+        echo $formBuilder->outputField($formBuilder->checkbox('special-event', $formOptions['special-event'], $formOptions['special-event']));
         unset($array_special_event);
 
         echo $formBuilder->closeTable();
