@@ -43,7 +43,7 @@ before_script:
     - cd /tmp/avh-framework
     - git checkout develop
     - mkdir -p "/tmp/wordpress/src/wp-content/mu-plugins/"
-    - mv "/tmp/avh-framework "/tmp/wordpress/src/wp-content/mu-plugins/avh-framework"
+    - mv "/tmp/avh-framework" "/tmp/wordpress/src/wp-content/mu-plugins/avh-framework"
     - mv "/tmp/wordpress/src/wp-content/mu-plugins/avh-framework/avh-framework.php" "/tmp/wordpress/src/wp-content/mu-plugins"
     - mkdir -p "/tmp/wordpress/src/wp-content/plugins/"
     - mv $GIT_NAME /tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG
