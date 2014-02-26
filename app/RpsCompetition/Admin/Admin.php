@@ -8,7 +8,7 @@ use RpsCompetition\Settings;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
 use Avh\Utility\Common;
-use Avh\Di\Container;
+use Illuminate\Container\Container;
 
 /* @var $formBuilder \Avh\Html\FormBuilder */
 final class Admin
@@ -63,15 +63,15 @@ final class Admin
      *
      * @return unknown_type
      */
-    public function __construct(\Avh\Di\Container $container)
+    public function __construct(\Illuminate\Container\Container $container)
     {
         $this->container = $container;
 
         // The Settings Registery
-        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
+        $this->settings = $this->container->make('\RpsCompetition\Settings');
 
         // Loads the CORE class
-        $this->core = $container->resolve('\RpsCompetition\Common\Core');
+        $this->core = $container->make('\RpsCompetition\Common\Core');
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {
@@ -168,8 +168,8 @@ final class Admin
     public function actionLoadPagehookCompetition()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListTable');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
+        $this->competition_list = $this->container->make('\RpsCompetition\Competition\ListTable');
 
         $this->handleRequestCompetition();
 
@@ -314,7 +314,7 @@ final class Admin
      */
     public function handleAjax()
     {
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
         if (isset($_POST['scored'])) {
             if ($_POST['scored'] == 'Yes') {
                 $data['ID'] = (int) $_POST['id'];
@@ -379,7 +379,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -420,7 +420,7 @@ final class Admin
     {
         global $wpdb;
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition-edit');
 
         if (isset($_POST['update'])) {
@@ -578,7 +578,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader($title);
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -643,19 +643,19 @@ final class Admin
         echo '</h2>';
 
         $this->competition_list->views();
-        echo '<form id="rps-competition-form" action="" method="get">';
-        echo '<input type="hidden" name="page" value="' . Constants::MENU_SLUG_COMPETITION . '">';
-
-        echo '<input type="hidden" name="_total" value="' . esc_attr($this->competition_list->get_pagination_arg('total_items')) . '" />';
-        echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->competition_list->get_pagination_arg('per_page')) . '" />';
-        echo '<input type="hidden" name="_page" value="' . esc_attr($this->competition_list->get_pagination_arg('page')) . '" />';
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
+        echo $formBuilder->open(null,array('id'=> 'rps-competition-form', 'method'=>'get'));
+        echo $formBuilder->hidden('page',Constants::MENU_SLUG_COMPETITION);
+        echo $formBuilder->hidden('_total',$this->competition_list->get_pagination_arg('total_items'));
+        echo $formBuilder->hidden('_per_page', $this->competition_list->get_pagination_arg('per_page'));
+        echo $formBuilder->hidden('_page',$this->competition_list->get_pagination_arg('page'));
 
         if (isset($_REQUEST['paged'])) {
-            echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
+            echo $formBuilder->hidden('paged',absint($_REQUEST['paged']));
         }
         // $this->competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
         $this->competition_list->display();
-        echo '</form>';
+        echo $formBuilder->close();
 
         echo '<div id="ajax-response"></div>';
         $this->printAdminFooter();
@@ -668,8 +668,8 @@ final class Admin
     public function actionLoadPagehookCompetitionAdd()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListTable');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
+        $this->competition_list = $this->container->make('\RpsCompetition\Competition\ListTable');
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -689,7 +689,7 @@ final class Admin
     {
         $option_name = 'competition_add';
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition_add');
 
         // @formatter:off
@@ -882,8 +882,8 @@ final class Admin
     {
         global $current_screen;
 
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->entries_list = $this->container->resolve('\RpsCompetition\Entries\ListTable');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
+        $this->entries_list = $this->container->make('\RpsCompetition\Entries\ListTable');
         $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
@@ -1042,7 +1042,7 @@ final class Admin
     private function displayPageEntriesDelete()
     {
         global $wpdb;
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
 
         if (empty($_REQUEST['entries'])) {
             $entryIdsArray = array(intval($_REQUEST['entry']));
@@ -1092,7 +1092,7 @@ final class Admin
 
         $updated = false;
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('entry-edit');
 
         if (isset($_POST['update'])) {
@@ -1303,7 +1303,7 @@ final class Admin
 
         $_classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
 
         echo '<h3 id="rps">Competition Classification</h3>';
         echo $formBuilder->openTable();

@@ -32,12 +32,12 @@ class Frontend
     /**
      * PHP5 Constructor
      */
-    public function __construct(\Avh\Di\Container $container)
+    public function __construct(\Illuminate\Container\Container $container)
     {
         $this->container = $container;
-        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
-        $this->core = $container->resolve('\RpsCompetition\Common\Core');
-        $this->rpsdb = $container->resolve('\RpsCompetition\Db\RpsDb');
+        $this->settings = $this->container->make('\RpsCompetition\Settings');
+        $this->core = $container->make('\RpsCompetition\Common\Core');
+        $this->rpsdb = $container->make('\RpsCompetition\Db\RpsDb');
 
         $this->settings->errmsg = '';
 
@@ -58,7 +58,7 @@ class Frontend
     public function actionInit()
     {
         /* @var $shortcode \RpsCompetition\Frontend\Shortcodes */
-        $shortcode = $this->container->resolve('\RpsCompetition\Frontend\Shortcodes');
+        $shortcode = $this->container->make('\RpsCompetition\Frontend\Shortcodes');
         $shortcode->register('rps_category_winners', 'displayCategoryWinners');
         $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
         $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');

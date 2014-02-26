@@ -14,7 +14,8 @@ use RpsCompetition\Constants;
 use RpsCompetition\Admin\Initialize;
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Frontend\Frontend;
-use Avh\Di\Container;
+use Illuminate\Container\Container;
+use RpsCompetition\Settings;
 
 /**
  * |--------------------------------------------------------------------------
@@ -37,7 +38,7 @@ class AVH_RPS_Client
 
     /**
      *
-     * @var Avh\Di\Container
+     * @var Illuminate\Container\Container
      */
     private $container;
 
@@ -47,14 +48,18 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->register('\RpsCompetition\Settings', '\RpsCompetition\Settings', true);
-        $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
-        $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Competition\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Entries\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Frontend\Shortcodes')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        $this->container->singleton('\RpsCompetition\Settings', function ()
+        {
+            return new Settings();
+        });
+        // '\RpsCompetition\Settings', '\RpsCompetition\Settings', true);
+        // $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
+        // $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
+        // $this->container->register('\RpsCompetition\Competition\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        // $this->container->register('\RpsCompetition\Entries\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        // $this->container->register('\RpsCompetition\Frontend\Shortcodes')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
 
-        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
+        $this->settings = $this->container->make('\RpsCompetition\Settings');
         $this->settings->plugin_dir = $dir;
         $this->settings->plugin_basename = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
