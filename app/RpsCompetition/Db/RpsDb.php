@@ -330,76 +330,28 @@ class RpsDb
         return $this->getReturn($result, $output);
     }
 
+    /**
+     * Shortcut method to get entries through a general query
+     *
+     * @param var $query_vars
+     * @param string $output
+     * @return Ambigous <\RpsCompetition\Db\Ambigous, \RpsCompetition\Db\mixed, mixed, string, NULL>
+     */
     public function getEntries($query_vars, $output = OBJECT)
     {
-        $defaults = array('join' => '', 'where' => '1=1', 'fields' => '*', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
-        $this->_query_vars = wp_parse_args($query_vars, $defaults);
-        extract($this->_query_vars, EXTR_SKIP);
-
-        $order = ('ASC' == strtoupper($order)) ? 'ASC' : 'DESC';
-
-        $number = absint($number);
-        $offset = absint($offset);
-
-        if (!empty($number)) {
-            if ($offset) {
-                $limits = 'LIMIT ' . $offset . ',' . $number;
-            } else {
-                $limits = 'LIMIT ' . $number;
-            }
-        } else {
-            $limits = '';
-        }
-
-        if ($count) {
-            $fields = 'COUNT(*)';
-            $orderby = 'ID';
-        }
-
-        $query = "SELECT $fields FROM entries $join WHERE $where ORDER BY $orderby $order $limits";
-
-        if ($count) {
-            return $this->rpsdb->get_var($query);
-        }
-
-        $result = $this->rpsdb->get_results($query);
-        return $this->getReturn($result, $output);
+        return $this->query($query_vars, 'entries');
     }
 
-    public function getCompetition($query_vars, $output = OBJECT)
+    /**
+     * Shortcut method to get competition through a general query
+     *
+     * @param array $query_vars
+     * @param string $output
+     * @return Ambigous <\RpsCompetition\Db\Ambigous, \RpsCompetition\Db\mixed, mixed, string, NULL>
+     */
+    public function getCompetition(array $query_vars, $output = OBJECT)
     {
-        $defaults = array('join' => '', 'where' => '1=1', 'fields' => '*', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
-        $this->_query_vars = wp_parse_args($query_vars, $defaults);
-        extract($this->_query_vars, EXTR_SKIP);
-
-        $order = ('ASC' == strtoupper($order)) ? 'ASC' : 'DESC';
-
-        $number = absint($number);
-        $offset = absint($offset);
-
-        if (!empty($number)) {
-            if ($offset) {
-                $limits = 'LIMIT ' . $offset . ',' . $number;
-            } else {
-                $limits = 'LIMIT ' . $number;
-            }
-        } else {
-            $limits = '';
-        }
-
-        if ($count) {
-            $fields = 'COUNT(*)';
-            $orderby = 'ID';
-        }
-
-        $query = "SELECT $fields FROM competitions $join WHERE $where ORDER BY $orderby $order $limits";
-
-        if ($count) {
-            return $this->rpsdb->get_var($query);
-        }
-
-        $result = $this->rpsdb->get_results($query);
-        return $this->getReturn($result, $output);
+        return $this->query($query_vars, 'competitions');
     }
 
     /**
@@ -749,6 +701,49 @@ class RpsDb
                 break;
         }
         return $result;
+    }
+
+    /**
+     * General query method
+     *
+     * @param array $query_vars
+     * @param string $table
+     * @return Ambigous <string, NULL>|Ambigous <\RpsCompetition\Db\mixed, mixed>
+     */
+    private function query(array $query_vars, $table)
+    {
+        $defaults = array('join' => '', 'where' => '1=1', 'fields' => '*', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
+        $this->_query_vars = wp_parse_args($query_vars, $defaults);
+        extract($this->_query_vars, EXTR_SKIP);
+
+        $order = ('ASC' == strtoupper($order)) ? 'ASC' : 'DESC';
+
+        $number = absint($number);
+        $offset = absint($offset);
+
+        if (!empty($number)) {
+            if ($offset) {
+                $limits = 'LIMIT ' . $offset . ',' . $number;
+            } else {
+                $limits = 'LIMIT ' . $number;
+            }
+        } else {
+            $limits = '';
+        }
+
+        if ($count) {
+            $fields = 'COUNT(*)';
+            $orderby = 'ID';
+        }
+
+        $query = "SELECT $fields FROM $table $join WHERE $where ORDER BY $orderby $order $limits";
+
+        if ($count) {
+            return $this->rpsdb->get_var($query);
+        }
+
+        $result = $this->rpsdb->get_results($query);
+        return $this->getReturn($result, $output);
     }
 }
 
