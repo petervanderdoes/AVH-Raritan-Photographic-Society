@@ -333,7 +333,7 @@ class RpsDb
     /**
      * Shortcut method to get entries through a general query
      *
-     * @param var $query_vars
+     * @param array $query_vars
      * @param string $output
      * @return Ambigous <\RpsCompetition\Db\Ambigous, \RpsCompetition\Db\mixed, mixed, string, NULL>
      */
