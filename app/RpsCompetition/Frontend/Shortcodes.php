@@ -127,13 +127,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                     $this->settings->selected_month = substr(esc_attr($_POST['new_month']), 5, 2);
             }
         }
-        $seasons = $this->rpsdb->getSeasonList();
-        if (empty($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
-        }
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
+        $seasons = $this->getSeasons();
 
         $scores = $this->rpsdb->getMonthlyScores();
 
@@ -551,14 +545,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         if (isset($_POST['selected_season_list'])) {
             $this->settings->selected_season = $_POST['selected_season_list'];
         }
-        // Get the list of seasons
-        $seasons = $this->rpsdb->getSeasonList();
-        if (empty($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
-        }
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
+        $seasons = $this->getSeasons();
 
         // Start building the form
         $action = home_url('/' . get_page_uri($post->ID));
@@ -809,11 +796,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
 
         // Load the values into the dropdown list
-        $medium_array = array_keys($this->settings->open_comp_date,$this->settings->comp_date);
+        $medium_array = array_keys($this->settings->open_comp_date, $this->settings->comp_date);
         foreach ($medium_array as $comp_medium) {
             $selected = '';
             if ($this->settings->medium == $this->settings->open_comp_medium[$comp_medium]) {
-                   $selected = " SELECTED";
+                $selected = " SELECTED";
             }
             echo "<OPTION value=\"" . $this->settings->open_comp_medium[$comp_medium] . "\"$selected>" . $this->settings->open_comp_medium[$comp_medium] . "</OPTION>\n";
         }
@@ -1068,5 +1055,22 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</ul>';
         echo '</div>';
         echo '</section>';
+    }
+
+    /**
+     * Get the seasons list
+     *
+     * @return Ambigous <multitype:, NULL>
+     */
+    private function getSeasons()
+    {
+        $seasons = $this->rpsdb->getSeasonList();
+        if (empty($this->settings->selected_season)) {
+            $this->settings->selected_season = $seasons[count($seasons) - 1];
+        }
+        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
+        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
+        return $seasons;
     }
 }
