@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.4.0-dev.1
+#### Version 1.4.0-dev.38 =
 
 #### Version 1.3.5
 * Updated for usage of the github-updater plugin.
