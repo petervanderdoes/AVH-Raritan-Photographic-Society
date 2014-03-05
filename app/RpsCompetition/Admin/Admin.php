@@ -71,7 +71,7 @@ final class Admin
         $this->settings = $this->container->make('\RpsCompetition\Settings');
 
         // Loads the CORE class
-        $this->core = $container->make('\RpsCompetition\Common\Core');
+        $this->core = $this->container->make('\RpsCompetition\Common\Core');
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {
