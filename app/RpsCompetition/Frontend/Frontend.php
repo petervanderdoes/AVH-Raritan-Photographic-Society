@@ -34,10 +34,10 @@ class Frontend
      */
     public function __construct(\Illuminate\Container\Container $container)
     {
-        $this->container = $container;
-        $this->settings = $this->container->make('\RpsCompetition\Settings');
+        $this->settings = $container->make('\RpsCompetition\Settings');
         $this->core = $container->make('\RpsCompetition\Common\Core');
         $this->rpsdb = $container->make('\RpsCompetition\Db\RpsDb');
+        $this->container = $container;
 
         $this->settings->errmsg = '';
 

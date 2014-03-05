@@ -2,6 +2,7 @@
 namespace RpsCompetition\Common;
 
 use RpsCompetition\Settings;
+use \Illuminate\Http\Request;
 
 class Core
 {
@@ -34,11 +35,20 @@ class Core
     private $settings;
 
     /**
+     *
+     * @var \Illuminate\Http\Request;
+     */
+    private $request;
+
+    /**
      * PHP5 constructor
      */
-    public function __construct(Settings $settings)
+    public function __construct(\RpsCompetition\Settings $settings, Request $request)
     {
         $this->settings = $settings;
+        $this->request = $request;
+
+        //dd($request);
         $this->db_options = 'avhrps_options';
         $this->db_version = 0;
         /**
