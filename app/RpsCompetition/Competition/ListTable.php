@@ -53,7 +53,6 @@ class ListTable extends \WP_List_Table
         $this->request = $request;
         $this->html = new \Avh\Html\HtmlBuilder();
 
-
         $this->screen = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');
         if (empty($default_status)) {
