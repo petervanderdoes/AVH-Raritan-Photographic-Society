@@ -28,6 +28,10 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $rpsdb;
 
+    /**
+     *
+     * @var HtmlBuilder
+     */
     private $html;
 
     public function __construct(Settings $settings, RpsDb $rpsdb, Core $core)
