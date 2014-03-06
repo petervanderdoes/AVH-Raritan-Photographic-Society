@@ -1,2 +1,4 @@
-Capfile
-config/*
+phpunit.xml
+composer.json
+.travis.yml
+.gitignore
