@@ -533,7 +533,7 @@ final class Admin
         echo $formBuilder->hidden('competition', $competition->ID);
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
-        $formBuilder->setNonceAction($competition->ID);
+        $formBuilder->setNonce($competition->ID);
         echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
@@ -716,7 +716,7 @@ final class Admin
         if (isset($_POST['action'])) {
             switch ($_POST['action']) {
                 case 'add':
-                    $formBuilder->setNonceAction(get_current_user_id());
+                    $formBuilder->setNonce(get_current_user_id());
                     check_admin_referer($formBuilder->getNonceAction(get_current_user_id()));
                     $formNewOptions = $_POST[$formBuilder->getOptionName()];
 
@@ -864,7 +864,7 @@ final class Admin
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
         echo $formBuilder->hidden('action', 'add');
-        $formBuilder->setNonceAction(get_current_user_id());
+        $formBuilder->setNonce(get_current_user_id());
         echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
@@ -1096,7 +1096,7 @@ final class Admin
         $formBuilder->setOptionName('entry-edit');
 
         if (isset($_POST['update'])) {
-            $formBuilder->setNonceAction($_POST['entry']);
+            $formBuilder->setNonce($_POST['entry']);
             check_admin_referer($formBuilder->getNonce_action());
             if (!current_user_can('rps_edit_entries')) {
                 wp_die(__('Cheatin&#8217; uh?'));
@@ -1176,7 +1176,7 @@ final class Admin
         echo $formBuilder->hidden('entry', $entry->ID);
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
-        $formBuilder->setNonceAction($entry->ID);
+        $formBuilder->setNonce($entry->ID);
         echo $formBuilder->fieldNonce();
         echo $formBuilder->close();
         $this->displayAdminFooter();
