@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.3.6-rc.1
+#### Version 1.3.6 =
 * Reworked for update on AVH Framework
 
 #### Version 1.3.5
