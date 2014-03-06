@@ -52,17 +52,9 @@ class AVH_RPS_Client
         {
             return new Settings();
         });
-        // '\RpsCompetition\Settings', '\RpsCompetition\Settings', true);
-        // $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
-        // $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
-        // $this->container->register('\RpsCompetition\Competition\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        // $this->container->register('\RpsCompetition\Entries\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        // $this->container->register('\RpsCompetition\Frontend\Shortcodes')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
 
         $this->settings = $this->container->make('\RpsCompetition\Settings');
-        //$this->container->bind('Request', '\Illuminate\Http\Request');
-        $requestClass='Illuminate\Http\Request';
-        $this->container->instance('Illuminate\Http\Request', forward_static_call(array($requestClass, 'createFromGlobals')));
+        $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->plugin_dir = $dir;
         $this->settings->plugin_basename = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
