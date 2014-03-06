@@ -742,7 +742,8 @@ final class Admin
                     }
                     $formNewOptions['special-event'] = avh_array_get($formNewOptions, 'special-event', false);
 
-                    if (empty($v->errors())) {
+                    $x=$v->errors();
+                    if (empty($x)) {
                         $this->message = 'Competition Added';
                         $this->status = 'updated';
 
