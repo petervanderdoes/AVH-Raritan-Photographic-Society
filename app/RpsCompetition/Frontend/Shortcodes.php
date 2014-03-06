@@ -5,6 +5,7 @@ use RpsCompetition\Settings;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
+use Avh\Html\FormBuilder;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -36,6 +37,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->rpsdb = $rpsdb;
         $this->rpsdb->setUserId(get_current_user_id());
         $this->html = new \Avh\Html\HtmlBuilder();
+        $this->formBuilder = new FormBuilder($this->html);
     }
 
     /**
@@ -83,12 +85,12 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo '	<div class="gallery-item-content">';
             echo '<div class="gallery-item-content-image">';
             echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>'."\n";
+            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
-           $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
+            $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
             echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
             echo '	</div></div>';
-            echo '</li>'."\n";
+            echo '</li>' . "\n";
         }
         echo '</ul>';
         echo '</div>';
@@ -125,13 +127,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                     $this->settings->selected_month = substr(esc_attr($_POST['new_month']), 5, 2);
             }
         }
-        $seasons = $this->rpsdb->getSeasonList();
-        if (empty($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
-        }
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
+        $seasons = $this->getSeasons();
 
         $scores = $this->rpsdb->getMonthlyScores();
 
@@ -549,14 +545,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         if (isset($_POST['selected_season_list'])) {
             $this->settings->selected_season = $_POST['selected_season_list'];
         }
-        // Get the list of seasons
-        $seasons = $this->rpsdb->getSeasonList();
-        if (empty($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
-        }
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
+        $seasons = $this->getSeasons();
 
         // Start building the form
         $action = home_url('/' . get_page_uri($post->ID));
@@ -789,17 +778,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
         $prev_date = "";
-        for ($i = 0; $i < count($this->settings->open_comp_date); $i++) {
-            if ($this->settings->open_comp_date[$i] != $prev_date) {
-                if ($this->settings->comp_date == $this->settings->open_comp_date[$i]) {
-                    $selected = " SELECTED";
-                    $theme = $this->settings->open_comp_theme[$i];
-                } else {
-                    $selected = "";
-                }
-                echo "<OPTION value=\"" . $this->settings->open_comp_date[$i] . "\"$selected>" . strftime('%d-%b-%Y', strtotime($this->settings->open_comp_date[$i])) . " " . $this->settings->open_comp_theme[$i] . "</OPTION>\n";
+        $compdates = array_unique($this->settings->open_comp_date);
+        foreach ($compdates as $key => $comp_date) {
+            $selected = '';
+            if ($this->settings->comp_date == $this->settings->open_comp_date[$key]) {
+                $selected = " SELECTED";
+                $theme = $this->settings->open_comp_theme[$key];
             }
-            $prev_date = $this->settings->open_comp_date[$i];
+            echo "<OPTION value=\"" . $comp_date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($comp_date)) . " " . $this->settings->open_comp_theme[$key] . "</OPTION>\n";
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
@@ -808,16 +794,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
         echo "<td width=\"64%\" align=\"left\">\n";
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
+
         // Load the values into the dropdown list
-        for ($i = 0; $i < count($this->settings->open_comp_date); $i++) {
-            if ($this->settings->open_comp_date[$i] == $this->settings->comp_date) {
-                if ($this->settings->medium == $this->settings->open_comp_medium[$i]) {
-                    $selected = " SELECTED";
-                } else {
-                    $selected = "";
-                }
-                echo "<OPTION value=\"" . $this->settings->open_comp_medium[$i] . "\"$selected>" . $this->settings->open_comp_medium[$i] . "</OPTION>\n";
+        $medium_array = array_keys($this->settings->open_comp_date, $this->settings->comp_date);
+        foreach ($medium_array as $comp_medium) {
+            $selected = '';
+            if ($this->settings->medium == $this->settings->open_comp_medium[$comp_medium]) {
+                $selected = " SELECTED";
             }
+            echo "<OPTION value=\"" . $this->settings->open_comp_medium[$comp_medium] . "\"$selected>" . $this->settings->open_comp_medium[$comp_medium] . "</OPTION>\n";
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
@@ -1070,5 +1055,22 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</ul>';
         echo '</div>';
         echo '</section>';
+    }
+
+    /**
+     * Get the seasons list
+     *
+     * @return Ambigous <multitype:, NULL>
+     */
+    private function getSeasons()
+    {
+        $seasons = $this->rpsdb->getSeasonList();
+        if (empty($this->settings->selected_season)) {
+            $this->settings->selected_season = $seasons[count($seasons) - 1];
+        }
+        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
+        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
+        return $seasons;
     }
 }

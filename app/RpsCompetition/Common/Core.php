@@ -2,15 +2,10 @@
 namespace RpsCompetition\Common;
 
 use RpsCompetition\Settings;
+use \Illuminate\Http\Request;
 
 class Core
 {
-
-    /**
-     *
-     * @var string
-     */
-    private $version;
 
     private $db_version;
 
@@ -20,13 +15,6 @@ class Core
      * @var string
      */
     private $comment;
-
-    /**
-     * Paths and URI's of the WordPress information, 'home', 'siteurl', 'install_url', 'install_dir'
-     *
-     * @var array
-     */
-    private $info;
 
     /**
      * Options set for the plugin
@@ -40,19 +28,6 @@ class Core
 
     private $default_options;
 
-    private $default_options_general;
-
-    private $options;
-
-    /**
-     * Properties used for the plugin data
-     */
-    private $db_data;
-
-    private $default_data;
-
-    private $data;
-
     /**
      *
      * @var Settings
@@ -60,11 +35,20 @@ class Core
     private $settings;
 
     /**
+     *
+     * @var \Illuminate\Http\Request;
+     */
+    private $request;
+
+    /**
      * PHP5 constructor
      */
-    public function __construct(Settings $settings)
+    public function __construct(\RpsCompetition\Settings $settings, Request $request)
     {
         $this->settings = $settings;
+        $this->request = $request;
+
+        //dd($request);
         $this->db_options = 'avhrps_options';
         $this->db_version = 0;
         /**
@@ -248,7 +232,7 @@ class Core
         foreach ($cols as $col => $order) {
             $colarr[$col] = array();
             foreach ($array as $k => $row) {
-                $colarr[$col]['_' . $k] = strtolower($row[$col]);
+                $colarr[$col][$k] = strtolower($row[$col]);
             }
         }
         $params = array();
@@ -260,25 +244,10 @@ class Core
                 unset($order_element);
             }
         }
+        $params[] = &$array;
         call_user_func_array('array_multisort', $params);
-        $ret = array();
-        $keys = array();
-        $first = true;
-        foreach ($colarr as $col => $arr) {
-            foreach ($arr as $k => $v) {
-                if ($first) {
-                    $keys[$k] = substr($k, 1);
-                }
-                $k = $keys[$k];
-                if (!isset($ret[$k])) {
-                    $ret[$k] = $array[$k];
-                }
-                $ret[$k][$col] = $array[$k][$col];
-            }
-            $first = false;
-        }
 
-        return $ret;
+        return $array;
     }
 
     public function getShorthandToBytes($size_str)

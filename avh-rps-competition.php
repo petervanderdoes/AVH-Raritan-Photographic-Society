@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 1.3.5
+ * Version: 1.3.6
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -14,7 +14,8 @@ use RpsCompetition\Constants;
 use RpsCompetition\Admin\Initialize;
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Frontend\Frontend;
-use Avh\Di\Container;
+use Illuminate\Container\Container;
+use RpsCompetition\Settings;
 
 /**
  * |--------------------------------------------------------------------------
@@ -37,7 +38,7 @@ class AVH_RPS_Client
 
     /**
      *
-     * @var Avh\Di\Container
+     * @var Illuminate\Container\Container
      */
     private $container;
 
@@ -47,14 +48,13 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->register('\RpsCompetition\Settings', '\RpsCompetition\Settings', true);
-        $this->container->register('\RpsCompetition\Common\Core')->withArgument('\RpsCompetition\Settings');
-        $this->container->register('\RpsCompetition\Db\RpsDb')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Competition\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Entries\ListTable')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
-        $this->container->register('\RpsCompetition\Frontend\Shortcodes')->withArguments(array('\RpsCompetition\Settings', '\RpsCompetition\Db\RpsDb', '\RpsCompetition\Common\Core'));
+        $this->container->singleton('\RpsCompetition\Settings', function ()
+        {
+            return new Settings();
+        });
 
-        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
+        $this->settings = $this->container->make('\RpsCompetition\Settings');
+        $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->plugin_dir = $dir;
         $this->settings->plugin_basename = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);

@@ -6,10 +6,9 @@ use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Settings;
 use RpsCompetition\Constants;
-use Avh\Html\FormBuilder;
-use Avh\Utility\Common;
-use Avh\Di\Container;
 use RpsCompetition\Db\RpsDb;
+use Avh\Utility\Common;
+use Illuminate\Container\Container;
 
 /* @var $formBuilder \Avh\Html\FormBuilder */
 final class Admin
@@ -55,8 +54,6 @@ final class Admin
      */
     private $entries_list;
 
-    private $add_disabled_notice = false;
-
     private $hooks = array();
 
     private $referer;
@@ -66,15 +63,15 @@ final class Admin
      *
      * @return unknown_type
      */
-    public function __construct(\Avh\Di\Container $container)
+    public function __construct(\Illuminate\Container\Container $container)
     {
         $this->container = $container;
 
         // The Settings Registery
-        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
+        $this->settings = $this->container->make('\RpsCompetition\Settings');
 
         // Loads the CORE class
-        $this->core = $container->resolve('\RpsCompetition\Common\Core');
+        $this->core = $this->container->make('\RpsCompetition\Common\Core');
         // Admin URL and Pagination
         $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
         if (isset($_GET['pagination'])) {
@@ -171,8 +168,8 @@ final class Admin
     public function actionLoadPagehookCompetition()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListTable');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
+        $this->competition_list = $this->container->make('\RpsCompetition\Competition\ListTable');
 
         $this->handleRequestCompetition();
 
@@ -317,7 +314,7 @@ final class Admin
      */
     public function handleAjax()
     {
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
         if (isset($_POST['scored'])) {
             if ($_POST['scored'] == 'Yes') {
                 $data['ID'] = (int) $_POST['id'];
@@ -382,7 +379,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -423,7 +420,7 @@ final class Admin
     {
         global $wpdb;
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition-edit');
 
         if (isset($_POST['update'])) {
@@ -469,9 +466,12 @@ final class Admin
         $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION);
         echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
-        echo $formBuilder->text('Date', 'date', $formOptions['date']);
-        echo $formBuilder->text('Theme', 'theme', $competition->Theme, array('maxlength' => '32'));
-        echo $formBuilder->text('Closing Date', 'close-date', $formOptions['close-date']);
+        echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
+        echo $formBuilder->outputField($formBuilder->text('date', $formOptions['date']));
+        echo $formBuilder->outputLabel($formBuilder->label('theme', 'Theme'));
+        echo $formBuilder->outputField($formBuilder->text('theme', $competition->Theme, array('maxlength' => '32')));
+        echo $formBuilder->outputLabel($formBuilder->label('close-date', 'Closing Date'));
+        echo $formBuilder->outputField($formBuilder->text('close-date', $formOptions['close-date']));
 
         for ($hour = 0; $hour <= 23; $hour++) {
             $time_val = sprintf("%02d:00:00", $hour);
@@ -479,7 +479,8 @@ final class Admin
             $time[$time_val] = $time_text;
         }
         // echo $formBuilder->select('Closing Time', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
-        echo $formBuilder->select('Closing Time', 'close-time', $time, $formOptions['close-time']);
+        echo $formBuilder->outputLabel($formBuilder->label('close-time', 'Closing Time'));
+        echo $formBuilder->outputField($formBuilder->select('close-time', $time, $formOptions['close-time']));
 
         // @formatter:off
         $_medium = array(
@@ -490,7 +491,8 @@ final class Admin
             );
         // @formatter:on
         $selectedMedium = array_search($competition->Medium, $_medium);
-        echo $formBuilder->select('Medium', 'medium', $_medium, $selectedMedium, array('autocomplete' => 'off'));
+        echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
+        echo $formBuilder->outputField($formBuilder->select('medium', $_medium, $selectedMedium, array('autocomplete' => 'off')));
 
         // @formatter:off
         $_classification = array(
@@ -500,22 +502,28 @@ final class Admin
             );
         // @formatter:on
         $selectedClassification = array_search($competition->Classification, $_classification);
-        echo $formBuilder->select('Classification', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
+        echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
+        echo $formBuilder->outputField($formBuilder->select('classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
 
         $_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
-        echo $formBuilder->select('Max Entries', 'max_entries', $_max_entries, $competition->Max_Entries, array('autocomplete' => 'off'));
+        echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
+        echo $formBuilder->outputField($formBuilder->select('max-entries', $_max_entries, $competition->Max_Entries, array('autocomplete' => 'off')));
 
         $_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
-        echo $formBuilder->select('No. Judges', 'judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off'));
+        echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
+        echo $formBuilder->outputField($formBuilder->select('judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off')));
 
-        $_special_event = array('special_event' => array('text' => '', 'checked' => $competition->Special_Event));
-        echo $formBuilder->checkboxes('Special Event', key($_special_event), $_special_event);
+        $_special_event = array('special-event' => array('text' => '', 'checked' => $competition->Special_Event));
+        echo $formBuilder->outputLabel($formBuilder->label('special-event', 'Special Event'));
+        echo $formBuilder->outputField($formBuilder->checkbox('special-event', $_special_event));
 
         $_closed = array('closed' => array('text' => '', 'checked' => ($competition->Closed == 'Y' ? true : false)));
-        echo $formBuilder->checkboxes('Closed', key($_closed), $_closed);
+        echo $formBuilder->outputLabel($formBuilder->label('closed', 'Closed'));
+        echo $formBuilder->outputField($formBuilder->checkbox('closed', $_closed));
 
         $_scored = array('scored' => array('text' => '', 'checked' => ($competition->Scored == 'Y' ? true : false)));
-        echo $formBuilder->checkboxes('Scored', key($_scored), $_scored);
+        echo $formBuilder->outputLabel($formBuilder->label('scored', 'Scored'));
+        echo $formBuilder->outputField($formBuilder->checkbox('scored', $_scored));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
@@ -570,7 +578,7 @@ final class Admin
             $competitionIdsArray = (array) $_REQUEST['competitions'];
         }
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
 
         $this->displayAdminHeader($title);
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -635,19 +643,19 @@ final class Admin
         echo '</h2>';
 
         $this->competition_list->views();
-        echo '<form id="rps-competition-form" action="" method="get">';
-        echo '<input type="hidden" name="page" value="' . Constants::MENU_SLUG_COMPETITION . '">';
-
-        echo '<input type="hidden" name="_total" value="' . esc_attr($this->competition_list->get_pagination_arg('total_items')) . '" />';
-        echo '<input type="hidden" name="_per_page" value="' . esc_attr($this->competition_list->get_pagination_arg('per_page')) . '" />';
-        echo '<input type="hidden" name="_page" value="' . esc_attr($this->competition_list->get_pagination_arg('page')) . '" />';
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
+        echo $formBuilder->open(null,array('id'=> 'rps-competition-form', 'method'=>'get'));
+        echo $formBuilder->hidden('page',Constants::MENU_SLUG_COMPETITION);
+        echo $formBuilder->hidden('_total',$this->competition_list->get_pagination_arg('total_items'));
+        echo $formBuilder->hidden('_per_page', $this->competition_list->get_pagination_arg('per_page'));
+        echo $formBuilder->hidden('_page',$this->competition_list->get_pagination_arg('page'));
 
         if (isset($_REQUEST['paged'])) {
-            echo '<input type="hidden" name="paged"	value="' . esc_attr(absint($_REQUEST['paged'])) . '" />';
+            echo $formBuilder->hidden('paged',absint($_REQUEST['paged']));
         }
         // $this->competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
         $this->competition_list->display();
-        echo '</form>';
+        echo $formBuilder->close();
 
         echo '<div id="ajax-response"></div>';
         $this->printAdminFooter();
@@ -660,8 +668,8 @@ final class Admin
     public function actionLoadPagehookCompetitionAdd()
     {
         global $current_screen;
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->resolve('\RpsCompetition\Competition\ListTable');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
+        $this->competition_list = $this->container->make('\RpsCompetition\Competition\ListTable');
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -681,23 +689,27 @@ final class Admin
     {
         $option_name = 'competition_add';
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition_add');
 
         // @formatter:off
         $formDefaultOptions = array(
                 'date' => '',
                 'theme' => '',
-                'medium_bwd' => true,
-                'medium_cd' => true,
-                'medium_bwp' => true,
-                'medium_cp' => true,
-                'class_b' => true,
-                'class_a' => true,
-                'class_s' => true,
-                'max_entries' => '2',
+                'medium' => array(
+                    'medium_bwd' => true,
+                    'medium_cd' => true,
+                    'medium_bwp' => true,
+                    'medium_cp' => true
+                ),
+                'classification' => array (
+                    'class_b' => true,
+                    'class_a' => true,
+                    'class_s' => true
+                ),
+                'max-entries' => '2',
                 'judges' => '1',
-                'special_event' => false
+                'special-event' => false
             );
         // @formatter:on
         $formOptions = $formDefaultOptions;
@@ -705,53 +717,32 @@ final class Admin
             switch ($_POST['action']) {
                 case 'add':
                     $formBuilder->setNonceAction(get_current_user_id());
-                    check_admin_referer($formBuilder->getNonce_action());
-                    $formNewOptions = $formDefaultOptions;
-                    $formOptions = $_POST[$formBuilder->getOption_name()];
+                    check_admin_referer($formBuilder->getNonceAction(get_current_user_id()));
+                    $formNewOptions = $_POST[$formBuilder->getOptionName()];
 
-                    $mediumArray = array();
-                    $classArray = array();
-                    $errorMsgArray = array();
-                    foreach ($formDefaultOptions as $optionKey => $optionValue) {
+                    $v = new \Valitron\Validator($formNewOptions);
+                    $v->rule('required', 'date')
+                        ->message('{field} is required')
+                        ->label('Date');
+                    $v->rule('dateFormat', 'date', 'Y-m-d')
+                        ->message('{field} should be in Y-m-d format')
+                        ->label('Date');
+                    $v->rule('required', 'theme')
+                        ->message('{field} is required')
+                        ->label('Theme');
+                    $v->rule('required', 'medium')->message('No medium selected. At least one medium needs to be selected');
+                    $v->rule('required', 'classification')->message('No classification selected. At least one classification needs to be selected');
+                    $v->validate();
 
-                        // Every field in a form is set except unchecked checkboxes. Set an unchecked checkbox to false.
-                        $newval = (isset($formOptions[$optionKey]) ? stripslashes($formOptions[$optionKey]) : false);
-                        $current_value = $formDefaultOptions[$optionKey];
-                        switch ($optionKey) {
-                            case 'date':
-                                // Validate
-                                break;
-
-                            case 'theme':
-                                // Validate
-                                break;
-                        }
-                        if (substr($optionKey, 0, 7) == 'medium_') {
-                            $formNewOptions[$optionKey] = (bool) $newval;
-                            if ($formNewOptions[$optionKey]) {
-                                $mediumArray[] = $optionKey;
-                                continue;
-                            }
-                        }
-                        if (substr($optionKey, 0, 6) == 'class_') {
-                            $formNewOptions[$optionKey] = (bool) $newval;
-                            if ($formNewOptions[$optionKey]) {
-                                $classArray[] = $optionKey;
-                                continue;
-                            }
-                        }
-                        $formNewOptions[$optionKey] = $newval;
+                    foreach ($formDefaultOptions['medium'] as $key => $value) {
+                        $formNewOptions['medium'][$key] = avh_array_get($formNewOptions, 'medium.' . $key, false);
                     }
-
-                    if (empty($mediumArray)) {
-                        $errorMsgArray[] = 'No medium selected. At least one medium needs to be selected';
+                    foreach ($formDefaultOptions['classification'] as $key => $value) {
+                        $formNewOptions['classification'][$key] = avh_array_get($formNewOptions, 'classification.' . $key, false);
                     }
+                    $formNewOptions['special-event'] = avh_array_get($formNewOptions, 'special-event', false);
 
-                    if (empty($classArray)) {
-                        $errorMsgArray[] = 'No classification selected. At least one classification needs to be selected';
-                    }
-
-                    if (empty($errorMsgArray)) {
+                    if (empty($v->errors())) {
                         $this->message = 'Competition Added';
                         $this->status = 'updated';
 
@@ -772,12 +763,12 @@ final class Admin
                         // @formatter:on
                         $data['Competition_Date'] = $formNewOptions['date'];
                         $data['Theme'] = $formNewOptions['theme'];
-                        $data['Max_Entries'] = $formNewOptions['max_entries'];
+                        $data['Max_Entries'] = $formNewOptions['max-entries'];
                         $data['Num_Judges'] = $formNewOptions['judges'];
-                        $data['Special_Event'] = ($formNewOptions['special_event'] ? 'Y' : 'N');
-                        foreach ($mediumArray as $medium) {
+                        $data['Special_Event'] = ($formNewOptions['special-event'] ? 'Y' : 'N');
+                        foreach ($formNewOptions['medium'] as $medium) {
                             $data['Medium'] = $medium_convert[$medium];
-                            foreach ($classArray as $classification) {
+                            foreach ($formNewOptions['classification'] as $classification) {
                                 $data['Classification'] = $classification_convert[$classification];
                                 $competition_ID = $this->rpsdb->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
@@ -786,7 +777,7 @@ final class Admin
                             }
                         }
                     } else {
-                        $this->message = $errorMsgArray;
+                        $this->message = $v->errors();
                         $this->status = 'error';
                     }
                     $this->displayMessage();
@@ -799,62 +790,76 @@ final class Admin
 
         echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
-        echo $formBuilder->text('Date', '', 'date', $formOptions['date']);
-        echo $formBuilder->text('Theme', '', 'theme', $formOptions['theme'], array('maxlength' => '32'));
+        echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
+        echo $formBuilder->outputField($formBuilder->text('date', $formOptions['date']));
+        echo $formBuilder->outputLabel($formBuilder->label('theme', 'Theme'));
+        echo $formBuilder->outputField($formBuilder->text('theme', $formOptions['theme'], array('maxlength' => '32')));
 
         // @formatter:off
-        $_medium = array(
+        $array_medium = array(
             'medium_bwd' => array(
                 'text' => 'B&W Digital',
-                'checked' => $formOptions['medium_bwd']
+                'value' => $formOptions['medium']['medium_bwd'],
+                'checked' => $formOptions['medium']['medium_bwd']
             ),
             'medium_cd' => array(
                 'text' => 'Color Digital',
-                'checked' => $formOptions['medium_cd']
+                'value' => $formOptions['medium']['medium_cd'],
+                'checked' => $formOptions['medium']['medium_cd']
             ),
             'medium_bwp' => array(
                 'text' => 'B&W Print',
-                'checked' => $formOptions['medium_bwp']
+                'value' =>  $formOptions['medium']['medium_bwp'],
+                'checked' => $formOptions['medium']['medium_bwp']
             ),
             'medium_cp' => array(
                 'text' => 'Color Digital',
-                'checked' => $formOptions['medium_cp']
+                'value' => $formOptions['medium']['medium_cp'],
+                'checked' => $formOptions['medium']['medium_cp']
             )
         );
         // @formatter:on
-        echo $formBuilder->checkboxes('Medium', key($_medium), $_medium);
-        unset($_medium);
+        echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
+        echo $formBuilder->checkboxes('medium', $array_medium);
+        unset($array_medium);
 
         // @formatter:off
-        $_classification = array(
+        $array_classification = array(
             'class_b' => array(
                 'text' => 'Beginner',
-                'checked' => $formOptions['class_b']
+                'value' => $formOptions['classification']['class_b'],
+                'checked' => $formOptions['classification']['class_b']
             ),
             'class_a' => array(
                 'text' => 'Advanced',
-                'checked' => $formOptions['class_a']
+                'value' =>  $formOptions['classification']['class_a'],
+                'checked' => $formOptions['classification']['class_a']
             ),
             'class_s' => array(
                 'text' => 'Salon',
-                'checked' => $formOptions['class_s']
+                'value' => $formOptions['classification']['class_s'],
+                'checked' => $formOptions['classification']['class_s']
             )
         );
         // @formatter:on
-        echo $formBuilder->checkboxes('Classification', key($_classification), $_classification);
-        unset($_classification);
+        echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
+        echo $formBuilder->checkboxes('classification', $array_classification);
+        unset($array_classification);
 
-        $_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
-        echo $formBuilder->select('Max Entries', 'max_entries', $_max_entries, $formOptions['max_entries']);
-        unset($_max_entries);
+        $array_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
+        echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
+        echo $formBuilder->outputField($formBuilder->select('max-entries', $array_max_entries, $formOptions['max-entries']));
+        unset($array_max_entries);
 
-        $_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
-        echo $formBuilder->select('No. Judges', 'judges', $_judges, $formOptions['judges']);
-        unset($_judges);
+        $array_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
+        echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
+        echo $formBuilder->outputField($formBuilder->select('judges', $array_judges, $formOptions['judges']));
+        unset($array_judges);
 
-        $_special_event = array('special_event' => array('text' => '', 'checked' => $formOptions['special_event']));
-        echo $formBuilder->checkboxes('Special Event', key($_special_event), $_special_event);
-        unset($_special_event);
+        $array_special_event = array('special-event' => array('text' => '', 'checked' => $formOptions['special-event']));
+        echo $formBuilder->outputLabel($formBuilder->label('special-event', 'Special Event'));
+        echo $formBuilder->outputField($formBuilder->checkbox('special-event', $formOptions['special-event'], $formOptions['special-event']));
+        unset($array_special_event);
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
@@ -877,8 +882,8 @@ final class Admin
     {
         global $current_screen;
 
-        $this->rpsdb = $this->container->resolve('\RpsCompetition\Db\RpsDb');
-        $this->entries_list = $this->container->resolve('\RpsCompetition\Entries\ListTable');
+        $this->rpsdb = $this->container->make('\RpsCompetition\Db\RpsDb');
+        $this->entries_list = $this->container->make('\RpsCompetition\Entries\ListTable');
         $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
@@ -1037,7 +1042,7 @@ final class Admin
     private function displayPageEntriesDelete()
     {
         global $wpdb;
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
 
         if (empty($_REQUEST['entries'])) {
             $entryIdsArray = array(intval($_REQUEST['entry']));
@@ -1087,7 +1092,7 @@ final class Admin
 
         $updated = false;
 
-        $formBuilder = $this->container->resolve('\Avh\Html\FormBuilder');
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
         $formBuilder->setOptionName('entry-edit');
 
         if (isset($_POST['update'])) {
@@ -1139,7 +1144,8 @@ final class Admin
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
-        echo $formBuilder->text('Title', '', 'title', $entry->Title);
+
+        echo $formBuilder->outputField($formBuilder->text('Title', 'title', $entry->Title));
 
         // @formatter:off
         $medium_array = array(
@@ -1150,7 +1156,7 @@ final class Admin
             );
         // @formatter:on
         $selectedMedium = array_search($competition->Medium, $medium_array);
-        echo $formBuilder->select('Medium', 'medium', $medium_array, $selectedMedium, array('autocomplete' => 'off'));
+        echo $formBuilder->outputField($formBuilder->select('Medium', 'medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
 
         // @formatter:off
         $_classification = array(
@@ -1160,7 +1166,7 @@ final class Admin
             );
         // @formatter:on
         $selectedClassification = array_search($competition->Classification, $_classification);
-        echo $formBuilder->select('Classification', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off'));
+        echo $formBuilder->outputField($formBuilder->select('Classification', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
@@ -1296,98 +1302,34 @@ final class Admin
         $_rps_class_print_color = get_user_meta($userID, 'rps_class_print_color', true);
 
         $_classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
+
+        $formBuilder = $this->container->make('\Avh\Html\FormBuilder');
+
         echo '<h3 id="rps">Competition Classification</h3>';
-        echo '<table class="form-table">';
+        echo $formBuilder->openTable();
 
-        echo '<tr>';
-        echo '<th>Classification Digital B&W</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_bw" id="rps_class_bw">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_bw) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
+        // @formatter:off
+        $all_classifications=array(
+            array('label'=>'Classification Digital B&W','name'=>'rps_class_bw','selected'=>$_rps_class_bw),
+            array('label'=>'Classification Digital Color','name'=>'rps_class_color','selected'=>$_rps_class_color),
+            array('label'=>'Classification Print B&W','name'=>'rps_class_print_bw','selected'=>$_rps_class_print_bw),
+            array('label'=>'Classification Print Color','name'=>'rps_class_print_color','selected'=>$_rps_class_print_color),
+        );
+        // @formatter:on
+        foreach ($all_classifications as $key => $data) {
+
+            if (current_user_can('rps_edit_competition_classification')) {
+                echo $formBuilder->outputLabel($formBuilder->label($data['name'], $data['name']));
+                echo $formBuilder->outputField($formBuilder->select($data['name'], $_classification, $data['selected']));
+            } else {
+                echo '<tr>';
+                echo '<th>' . $data['label'] . '</th>';
+                echo '<td>' . $_classification[$data['selected']] . '</td>';
+                echo '</tr>';
             }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_bw];
         }
-        echo '</td>';
-        echo '</tr>';
 
-        echo '<tr>';
-        echo '<th>Classification Digital Color</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_color" id="rps_class_color">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_color) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_color];
-        }
-        echo '</td>';
-        echo '</tr>';
-
-        echo '<tr>';
-        echo '<th>Classification Print B&W</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_print_bw" id="rps_class_print_bw">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_print_bw) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_print_bw];
-        }
-        echo '</td>';
-        echo '</tr>';
-
-        echo '<tr>';
-        echo '<th>Classification Print Color</th>';
-        echo '<td>';
-        if (current_user_can('rps_edit_competition_classification')) {
-            $p = '';
-            $r = '';
-            echo '<select name="rps_class_print_color" id="rps_class_print_color">';
-            foreach ($_classification as $key => $value) {
-                if ($key === $_rps_class_print_color) {
-                    $p = "\n\t<option selected='selected' value='" . esc_attr($key) . "'>$value</option>";
-                } else {
-                    $r .= "\n\t<option value='" . esc_attr($key) . "'>$value</option>";
-                }
-            }
-            echo $p . $r;
-            echo '</select>';
-        } else {
-            echo $_classification[$_rps_class_print_color];
-        }
-        echo '</td>';
-        echo '</tr>';
-
-        echo '</table>';
+        echo $formBuilder->closeTable();
     }
 
     /**
@@ -1438,9 +1380,9 @@ final class Admin
         $formOptionsNew['theme'] = $formOptions['theme'];
         $formOptionsNew['medium'] = $formOptions['medium'];
         $formOptionsNew['classification'] = $formOptions['classification'];
-        $formOptionsNew['max_entries'] = $formOptions['max_entries'];
+        $formOptionsNew['max-entries'] = $formOptions['max-entries'];
         $formOptionsNew['judges'] = $formOptions['judges'];
-        $formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
+        $formOptionsNew['special-event'] = isset($formOptions['special-event']) ? $formOptions['special-event'] : '';
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
@@ -1452,9 +1394,9 @@ final class Admin
         $data['Competition_Date'] = $formOptionsNew['date'];
         $data['Close_Date'] = $formOptionsNew['close-date'] . ' ' . $formOptionsNew['close-time'];
         $data['Theme'] = $formOptionsNew['theme'];
-        $data['Max_Entries'] = $formOptionsNew['max_entries'];
+        $data['Max_Entries'] = $formOptionsNew['max-entries'];
         $data['Num_Judges'] = $formOptionsNew['judges'];
-        $data['Special_Event'] = ($formOptionsNew['special_event'] ? 'Y' : 'N');
+        $data['Special_Event'] = ($formOptionsNew['special-event'] ? 'Y' : 'N');
         $data['Closed'] = ($formOptionsNew['closed'] ? 'Y' : 'N');
         $data['Scored'] = ($formOptionsNew['scored'] ? 'Y' : 'N');
         $data['Medium'] = $_medium[$formOptionsNew['medium']];

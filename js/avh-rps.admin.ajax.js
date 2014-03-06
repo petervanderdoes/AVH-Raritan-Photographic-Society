@@ -18,7 +18,7 @@ var RPS;
                 datatype : 'json',
                 context : $("#competition-" + args.id),
                 success : function(data) {
-                var response = obj = JSON.parse(data);
+                var response = JSON.parse(data);
                 $(this).find(".text").text(response.text);
                 $(this).find(".adm-scored").attr("data-scored",
                     response.scored);

@@ -5,6 +5,7 @@ use RpsCompetition\Settings;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
+use Illuminate\Http\Request;
 use RpsCompetition\Constants;
 
 class ListTable extends \WP_List_Table
@@ -32,21 +33,33 @@ class ListTable extends \WP_List_Table
 
     public $screen;
 
+    /**
+     *
+     * @var HtmlBuilder
+     */
     private $html;
 
-    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core)
+    /**
+     *
+     * @var Request
+     */
+    private $request;
+
+    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core, Request $request)
     {
         $this->settings = $settings;
         $this->core = $core;
         $this->rpsdb = $_rpsdb;
+        $this->request = $request;
         $this->html = new \Avh\Html\HtmlBuilder();
+
 
         $this->screen = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');
         if (empty($default_status)) {
             $default_status = 'all';
         }
-        $status = isset($_REQUEST['avhrps_competition_list_status']) ? $_REQUEST['avhrps_competition_list_status'] : $default_status;
+        $status = $this->request->input('avhrps_competition_list_status',$default_status );
         if (!in_array($status, array('all', 'open', 'closed', 'search'))) {
             $status = 'all';
         }
@@ -68,40 +81,33 @@ class ListTable extends \WP_List_Table
     {
         global $post_id, $competition_status, $search, $comment_type;
 
-        $competition_status = isset($_REQUEST['competition_status']) ? $_REQUEST['competition_status'] : 'open';
+        $competition_status = $this->request->input('competition_status','open');
         if (!in_array($competition_status, array('all', 'open', 'closed'))) {
             $competition_status = 'open';
         }
 
-        $search = (isset($_REQUEST['s'])) ? $_REQUEST['s'] : '';
+        $search = $this->request->input('s','');
+        $s = $search;
 
         if ($competition_status == 'open') {
-            $orderby = (isset($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'Competition_Date ASC, Class_Code ASC, Medium ASC';
+            $orderby = $this->request->input('orderby','Competition_Date ASC, Class_Code ASC, Medium ASC');
         } else {
-            $orderby = (isset($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'Competition_Date DESC, Class_Code ASC, Medium ASC';
+            $orderby = $this->request->input('orderby','Competition_Date DESC, Class_Code ASC, Medium ASC');
         }
-        $order = (isset($_REQUEST['order'])) ? $_REQUEST['order'] : '';
+        $order = $this->request->input('order','');
 
         $competitions_per_page = $this->get_per_page($competition_status);
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        if (isset($_REQUEST['number'])) {
-            $number = (int) $_REQUEST['number'];
-        } else {
-            $number = $competitions_per_page + min(8, $competitions_per_page); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
-        }
+        $number = (int)  $this->request->input('number', $competitions_per_page + min(8, $competitions_per_page));
 
         $page = $this->get_pagenum();
 
-        if (isset($_REQUEST['start'])) {
-            $start = $_REQUEST['start'];
-        } else {
-            $start = ($page - 1) * $competitions_per_page;
-        }
+        $start = $this->request->input('start',($page - 1) * $competitions_per_page);
 
-        if ($doing_ajax && isset($_REQUEST['offset'])) {
-            $start += $_REQUEST['offset'];
+        if ($doing_ajax && $this->request->has('offset')) {
+            $start += $this->request->input('offset',0);
         }
 
         $args = array('status' => $competition_status, 'search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order);
@@ -114,7 +120,6 @@ class ListTable extends \WP_List_Table
 
         $this->set_pagination_args(array('total_items' => $total_competitions, 'per_page' => $competitions_per_page));
 
-        $s = isset($_REQUEST['s']) ? $_REQUEST['s'] : '';
     }
 
     public function get_per_page($competition_status = 'open')
@@ -206,7 +211,7 @@ class ListTable extends \WP_List_Table
 
     public function current_action()
     {
-        if (isset($_POST['clear-recent-list'])) {
+        if ($this->request->input('clear-recent-list')) {
             return 'clear-recent-list';
         }
 

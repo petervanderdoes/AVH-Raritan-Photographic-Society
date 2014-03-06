@@ -32,12 +32,12 @@ class Frontend
     /**
      * PHP5 Constructor
      */
-    public function __construct(\Avh\Di\Container $container)
+    public function __construct(\Illuminate\Container\Container $container)
     {
+        $this->settings = $container->make('\RpsCompetition\Settings');
+        $this->core = $container->make('\RpsCompetition\Common\Core');
+        $this->rpsdb = $container->make('\RpsCompetition\Db\RpsDb');
         $this->container = $container;
-        $this->settings = $this->container->resolve('\RpsCompetition\Settings');
-        $this->core = $container->resolve('\RpsCompetition\Common\Core');
-        $this->rpsdb = $container->resolve('\RpsCompetition\Db\RpsDb');
 
         $this->settings->errmsg = '';
 
@@ -58,7 +58,7 @@ class Frontend
     public function actionInit()
     {
         /* @var $shortcode \RpsCompetition\Frontend\Shortcodes */
-        $shortcode = $this->container->resolve('\RpsCompetition\Frontend\Shortcodes');
+        $shortcode = $this->container->make('\RpsCompetition\Frontend\Shortcodes');
         $shortcode->register('rps_category_winners', 'displayCategoryWinners');
         $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
         $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');
@@ -579,9 +579,9 @@ class Frontend
         // Start building the XML response
         $dom = new \DOMDocument('1.0');
         // Create the root node
-        $rsp = $dom->CreateElement('rsp');
-        $rsp = $dom->AppendChild($rsp);
-        $rsp->SetAttribute('stat', 'ok');
+        $node = $dom->CreateElement('rsp');
+        $node->SetAttribute('stat', 'ok');
+        $rsp = $dom->AppendChild($node);
 
         $medium_clause = '';
         if (!(empty($requested_medium))) {
@@ -692,7 +692,7 @@ class Frontend
         try {
             $db = new RPSPDO();
         } catch (\PDOException $e) {
-            $this->_doRESTError("Failed to obtain database handle " . $e->getMessage());
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
             die();
         }
         if ($db !== false) {
@@ -781,7 +781,7 @@ class Frontend
             $sth->bindParam(':award', $award, PDO::PARAM_STR);
             $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
         } catch (\PDOException $e) {
-            $this->_doRESTError("Error - " . $e->getMessage() . " - $sql");
+            $this->doRESTError("Error - " . $e->getMessage() . " - $sql");
             die();
         }
 

@@ -7,7 +7,7 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '1.3.5';
+    const PLUGIN_VERSION = '1.3.6';
 
     const PLUGIN_README_URL = '';
 
