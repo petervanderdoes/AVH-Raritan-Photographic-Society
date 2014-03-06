@@ -1,6 +1,7 @@
 ## Changelog
 
-#### Version 1.3.6-rc.1 =
+#### Version 1.3.6-rc.1
+* Reworked for update on AVH Framework
 
 #### Version 1.3.5
 * Updated for usage of the github-updater plugin.
