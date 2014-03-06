@@ -1,6 +1,7 @@
 ## Changelog
 
-#### Version 1.4.0-dev.40 =
+#### Version 1.3.6 =
+* Reworked for update on AVH Framework
 
 #### Version 1.3.5
 * Updated for usage of the github-updater plugin.
