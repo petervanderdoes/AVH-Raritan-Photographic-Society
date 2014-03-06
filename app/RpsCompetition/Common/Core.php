@@ -43,7 +43,7 @@ class Core
     /**
      * PHP5 constructor
      */
-    public function __construct(\RpsCompetition\Settings $settings, Request $request)
+    public function __construct(Settings $settings, Request $request)
     {
         $this->settings = $settings;
         $this->request = $request;
