@@ -4,8 +4,10 @@ namespace RpsCompetition\Entries;
 use RpsCompetition\Settings;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
-use Avh\Html\HtmlBuilder;
 use RpsCompetition\Constants;
+use Avh\Html\HtmlBuilder;
+use Illuminate\Http\Request;
+
 
 class ListTable extends \WP_List_Table
 {
@@ -28,25 +30,36 @@ class ListTable extends \WP_List_Table
      */
     private $rpsdb;
 
+    /**
+     *
+     * @var Request
+     */
+    private $request;
+
+    /**
+     *
+     * @var HtmlBuilder
+     */
+    private $html;
+
     public $messages;
 
     public $screen;
 
-    private $html;
-
-    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core)
+    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core, Request $request)
     {
         $this->settings = $settings;
         $this->core = $core;
         $this->rpsdb = $_rpsdb;
         $this->html = new \Avh\Html\HtmlBuilder();
+        $this->request = $request;
 
         $this->screen = 'avh_rps_page_avh_rps_entries_';
         $default_status = get_user_option('avhrps_entries_list_last_view');
         if (empty($default_status)) {
             $default_status = 'all';
         }
-        $status = isset($_REQUEST['avhrps_entries_list_status']) ? $_REQUEST['avhrps_entries_list_status'] : $default_status;
+        $status = $this->request->input('avhrps_entries_list_status', $default_status);
         if (!in_array($status, array('all', 'search'))) {
             $status = 'all';
         }
@@ -68,40 +81,34 @@ class ListTable extends \WP_List_Table
     {
         global $post_id, $entry_status, $search, $comment_type;
 
-        $entry_status = isset($_REQUEST['entry_status']) ? $_REQUEST['entry_status'] : 'all';
+        $entry_status = $this->request->input('entry_status','all');
         if (!in_array($entry_status, array('all'))) {
             $entry_status = 'all';
         }
 
-        $search = (isset($_REQUEST['s'])) ? $_REQUEST['s'] : '';
+        $search = $this->request->input('s', '');
+        $s = $search;
 
-        $orderby = (isset($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'Competition_ID';
-        $order = (isset($_REQUEST['order'])) ? $_REQUEST['order'] : '';
+        $orderby = $this->request->input('orderby','Competition_ID');
+        $order = $this->request->input('order','');
 
         $entries_per_page = $this->get_per_page($entry_status);
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        if (isset($_REQUEST['number'])) {
-            $number = (int) $_REQUEST['number'];
-        } else {
-            $number = $entries_per_page + min(8, $entries_per_page); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
-        }
+        $number = (int) $this->request->input('number', $entries_per_page + min(8, $entries_per_page)); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
+
 
         $where = '1=1';
-        if (isset($_REQUEST['user_id'])) {
-            $where = 'Member_ID=' . $_REQUEST['user_id'];
+        if ($this->request->has('user_id')) {
+            $where = 'Member_ID=' . $this->request->input('user_id');
         }
         $page = $this->get_pagenum();
 
-        if (isset($_REQUEST['start'])) {
-            $start = $_REQUEST['start'];
-        } else {
-            $start = ($page - 1) * $entries_per_page;
-        }
+            $start = $this->request->input('start', ($page - 1) * $entries_per_page);
 
-        if ($doing_ajax && isset($_REQUEST['offset'])) {
-            $start += $_REQUEST['offset'];
+        if ($doing_ajax && $this->request->has('offset')) {
+            $start += $this->request->input('offset');
         }
 
         $args = array('search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order, 'where' => $where);
@@ -114,7 +121,6 @@ class ListTable extends \WP_List_Table
 
         $this->set_pagination_args(array('total_items' => $total_entries, 'per_page' => $entries_per_page));
 
-        $s = isset($_REQUEST['s']) ? $_REQUEST['s'] : '';
     }
 
     public function get_per_page($entry_status = 'all')
@@ -189,7 +195,7 @@ class ListTable extends \WP_List_Table
         echo '<div class="alignleft actions">';
         if ('top' == $which) {
             $_seasons = $this->rpsdb->getSeasonList('DESC');
-            $season = isset($_GET['filter-season']) ? $_GET['filter-season'] : 0;
+            $season = $this->request->input('filter-season', 0);
             echo '<select name="filter-season">';
             echo '<option' . selected($season, 0, false) . ' value="0">' . __('Show all seasons') . '</option>';
             foreach ($_seasons as $_season) {
@@ -202,10 +208,10 @@ class ListTable extends \WP_List_Table
 
     public function current_action()
     {
-        if (isset($_POST['clear-recent-list'])) {
+        if ($this->request->has('clear-recent-list')) {
             return 'clear-recent-list';
         }
-        if (isset($_POST['filter-season'])) {
+        if ($this->request->input('filter-season')) {
             return 'filter-season';
         }
 

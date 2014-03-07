@@ -6,6 +6,7 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
 use Avh\Html\FormBuilder;
+use Illuminate\Http\Request;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -34,7 +35,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $html;
 
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core)
+    /**
+     *
+     * @var Request
+     */
+    private $request;
+
+    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
     {
         $this->core = $core;
         $this->settings = $settings;
@@ -42,6 +49,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->rpsdb->setUserId(get_current_user_id());
         $this->html = new \Avh\Html\HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
+        $this->request = $request;
     }
 
     /**
@@ -114,21 +122,21 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->selected_year = "";
         $this->settings->selected_month = "";
 
-        if (isset($_POST['submit_control'])) {
-            $this->settings->selected_season = esc_attr($_POST['selected_season']);
+        if ($this->request->has('submit_control')) {
+            $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
             $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-            $this->settings->selected_year = esc_attr($_POST['selected_year']);
-            $this->settings->selected_month = esc_attr($_POST['selected_month']);
+            $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
+            $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
 
-            switch ($_POST['submit_control']) {
+            switch ($this->request->input('submit_control')) {
                 case 'new_season':
-                    $this->settings->selected_season = esc_attr($_POST['new_season']);
+                    $this->settings->selected_season = esc_attr($this->request->input('new_season'));
                     $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
                     $this->settings->selected_month = "";
                     break;
                 case 'new_month':
-                    $this->settings->selected_year = substr(esc_attr($_POST['new_month']), 0, 4);
-                    $this->settings->selected_month = substr(esc_attr($_POST['new_month']), 5, 2);
+                    $this->settings->selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
+                    $this->settings->selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
             }
         }
         $seasons = $this->getSeasons();
@@ -293,8 +301,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayAllScores($atts, $content, $tag)
     {
         global $post;
-        if (isset($_POST['selected_season_list'])) {
-            $this->settings->selected_season = $_POST['selected_season_list'];
+        if ($this->request->has('selected_season_list')) {
+            $this->settings->selected_season = $this->request->input('selected_season_list');
         }
         $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
 
@@ -546,8 +554,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     {
         global $post;
 
-        if (isset($_POST['selected_season_list'])) {
-            $this->settings->selected_season = $_POST['selected_season_list'];
+        if ($this->request->has('selected_season_list')) {
+            $this->settings->selected_season = $this->request->input('selected_season_list');
         }
         $seasons = $this->getSeasons();
 
@@ -648,8 +656,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayEditTitle($atts, $content, $tag)
     {
         global $post;
-        if (isset($_GET['m'])) {
-            if ($_GET['m'] == "prints") {
+        if ($this->request->has('m')) {
+            if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
                 $medium_param = "?m=prints";
             } else {
@@ -657,7 +665,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $medium_param = "?m=digital";
             }
         }
-        $entry_id = $_GET['id'];
+        $entry_id = $this->request->input('id');
 
         $recs = $this->rpsdb->getEntryInfo($entry_id);
         $title = $recs['Title'];
@@ -878,8 +886,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
             // Image width and height columns. The height and width values are suppressed if the Client_File_Name is
             // empty i.e. no image uploaded for a print competition.
-            if (file_exists($_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']))) {
-                $size = getimagesize($_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+            if (file_exists($this->request->server('DOCUMENT_ROOT') . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']))) {
+                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
             } else {
                 $size[0] = 0;
                 $size[1] = 0;
@@ -920,7 +928,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
             echo "<li>Upload the resized image.</li></ul></ul>\n";
         }
-        if (isset($_GET['resized']) && ('1' == $_GET['resized'])) {
+        if ($this->request->has('resized') && ('1' == $this->request->input('resized'))) {
             echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
             echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
             echo "</li></ul>\n";
@@ -946,8 +954,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayUploadEntry($atts, $content, $tag)
     {
         global $post;
-        if (isset($_GET['m'])) {
-            if ($_GET['m'] == "prints") {
+        if ($this->request->has('m')) {
+            if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
                 $medium_param = "?m=prints";
             } else {
@@ -966,11 +974,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $action = home_url('/' . get_page_uri($post->ID));
         echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
 
-        if (isset($_GET['m'])) {
+        if ($this->request->has('m')) {
             echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
         }
-        if (isset($_POST['wp_get_referer'])) {
-            $_ref = $_POST['wp_get_referer'];
+        if ($this->request->has('wp_get_referer')) {
+            $_ref = $this->request->input('wp_get_referer');
         } else {
             $_ref = wp_get_referer();
         }
