@@ -1094,7 +1094,7 @@ final class Admin
         $formBuilder->setOptionName('entry-edit');
 
         if ($this->request->has('update')) {
-            $formBuilder->setNonce($_POST['entry']);
+            $formBuilder->setNonce($this->request->input('entry'));
             check_admin_referer($formBuilder->getNonce_action());
             if (!current_user_can('rps_edit_entries')) {
                 wp_die(__('Cheatin&#8217; uh?'));

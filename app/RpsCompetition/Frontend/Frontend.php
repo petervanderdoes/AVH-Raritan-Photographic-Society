@@ -311,7 +311,7 @@ class Frontend
                     $old_file_parts = pathinfo($server_file_name);
                     $old_file_name = $old_file_parts['filename'];
                     $current_user = wp_get_current_user();
-                    $new_file_name_noext = sanitize_file_name($_POST['new_title']) . '+' . $current_user->user_login;
+                    $new_file_name_noext = sanitize_file_name($this->request->input('new_title')) . '+' . $current_user->user_login;
                     $new_file_name = sanitize_file_name($new_title) . '+' . $current_user->user_login . $ext;
                     if (!$this->core->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
                         die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
@@ -323,7 +323,7 @@ class Frontend
                         wp_die("Failed to UPDATE entry record from database");
                     }
 
-                    $redirect_to = $_POST['wp_get_referer'];
+                    $redirect_to = $this->request->input('wp_get_referer');
                     wp_redirect($redirect_to);
                     exit();
                 }
@@ -347,7 +347,7 @@ class Frontend
 
                 // If we exceed the post_max_size the $_POST and $_FILES are empty
                 if ($this->request->isMethod('POST') && $this->request->request->count() == 0 && $this->request->files->count() == 0 && $this->request->server('CONTENT_LENGTH') > 0) {
-                    $this->settings->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
+                    $this->settings->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $this->request->server('CONTENT_LENGTH') / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                 } else {
                     $file = $this->request->file('file_name');
 
@@ -495,12 +495,12 @@ class Frontend
 
         try {
             $select = "SELECT DISTINCT(Competition_Date) FROM competitions ";
-            if ($_GET['closed'] || $_GET['scored']) {
+            if ($this->request->has('closed') || $this->request->has('scored')) {
                 $where = "WHERE";
-                if ($_GET['closed']) {
+                if ($this->request->has('closed')) {
                     $where .= " Closed=:closed";
                 }
-                if ($_GET['scored']) {
+                if ($this->request->has('scored')) {
                     $where .= " AND Scored=:scored";
                 }
             } else {
@@ -508,12 +508,12 @@ class Frontend
             }
 
             $sth = $db->prepare($select . $where);
-            if ($_GET['closed']) {
-                $_closed = $_GET['closed'];
+            if ($this->request->has('closed')) {
+                $_closed = $this->request->input('closed');
                 $sth->bindParam(':closed', $_closed, \PDO::PARAM_STR, 1);
             }
-            if ($_GET['scored']) {
-                $_scored = $_GET['scored'];
+            if ($this->request->has('scored')) {
+                $_scored = $this->request->input('scored');
                 $sth->bindParam(':scored', $_scored, \PDO::PARAM_STR, 1);
             }
             $sth->execute();
@@ -719,7 +719,7 @@ class Frontend
                 die();
                 break;
             case UPLOAD_ERR_FORM_SIZE:
-                $this->doRESTError("The uploaded file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB allowed by this form.");
+                $this->doRESTError("The uploaded file exceeds the maximum file size of " . $this->request->input('MAX_FILE_SIZE') / 1000 . "KB allowed by this form.");
                 die();
                 break;
             case UPLOAD_ERR_PARTIAL:
@@ -906,7 +906,7 @@ class Frontend
                     $this->settings->errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
                     break;
                 case UPLOAD_ERR_FORM_SIZE:
-                    $this->settings->errmsg = "The submitted file exceeds the maximum file size of " . $_POST[MAX_FILE_SIZE] / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
+                    $this->settings->errmsg = "The submitted file exceeds the maximum file size of " . $this->request->input('MAX_FILE_SIZE') / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
                     break;
                 case UPLOAD_ERR_PARTIAL:
                     $this->settings->errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
