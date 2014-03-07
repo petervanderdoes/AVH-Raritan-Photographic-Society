@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.4.0-dev.1
+#### Version 1.4.0-dev.12
 * Use Request class
 
 #### Version 1.3.6
