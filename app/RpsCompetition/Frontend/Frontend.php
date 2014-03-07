@@ -292,7 +292,7 @@ class Frontend
                     }
                 }
                 // makes sure they filled in the title field
-                if (!$this->request->has('new_title') || trim($this->request->input('new_title') == '')) {
+                if (!$this->request->has('new_title') || trim($this->request->input('new_title')) === '') {
                     $this->settings->errmsg = 'You must provide an image title.<br><br>';
                 } else {
                     $recs = $this->rpsdb->getCompetitionByID($this->_entry_id);
