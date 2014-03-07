@@ -8,6 +8,7 @@ use RpsCompetition\Common\Core;
 use Illuminate\Http\Request;
 use PDO;
 use DOMDocument;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class Frontend
 {
@@ -546,8 +547,8 @@ class Frontend
      */
     private function sendCompetitions()
     {
-        $username = $_REQUEST['username'];
-        $password = $_REQUEST['password'];
+        $username = $this->request->input('username');
+        $password = $this->request->input('password');
         try {
             $db = new RPSPDO();
         } catch (\PDOException $e) {
@@ -562,7 +563,7 @@ class Frontend
                 die();
             }
             // @todo Check if the user has the role needed.
-            $this->sendXmlCompetitions($db, $_REQUEST['medium'], $_REQUEST['comp_date']);
+            $this->sendXmlCompetitions($db, $this->request->input('medium'), $this->request->input('comp_date'));
         }
         die();
     }
@@ -691,9 +692,9 @@ class Frontend
      */
     private function doUploadScore()
     {
-        $username = $_REQUEST['username'];
-        $password = $_REQUEST['password'];
-        $comp_date = $_REQUEST['date'];
+        $username = $this->request->input('username');
+        $password = $this->request->input('password');
+        $comp_date = $this->request->input('date');
         try {
             $db = new RPSPDO();
         } catch (\PDOException $e) {
@@ -709,7 +710,8 @@ class Frontend
             }
         }
         // Check to see if there were any file upload errors
-        switch ($_FILES['file']['error']) {
+        $file = $this->request->file('file');
+        switch ($file->getError()) {
             case UPLOAD_ERR_OK:
                 break;
             case UPLOAD_ERR_INI_SIZE:
@@ -743,11 +745,13 @@ class Frontend
         }
 
         // Move the file to its final location
-        $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions';
+        $path = $this->request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
         $dest_name = "scores_" . $comp_date . ".xml";
         $file_name = $path . '/' . $dest_name;
-        if (!move_uploaded_file($_FILES['file']['tmp_name'], $file_name)) {
-            $this->doRESTError("Failed to store scores XML file in destination folder.");
+        try {
+            $file->move($path, $dest_name);
+        } catch (FileException $e) {
+            $this->doRESTError($e->getMessage());
             die();
         }
 
@@ -890,10 +894,11 @@ class Frontend
     private function checkUploadEntryTitle()
     {
         $_upload_ok = false;
-        if (!isset($_POST['title']) || trim($_POST['title']) == "") {
+        $file=$this->request->file('file_name');
+        if (!$this->request->has('title') || empty($this->request->input('title'))) {
             $this->settings->errmsg = 'Please enter your image title in the Title field.';
         } else {
-            switch ($_FILES['file_name']['error']) {
+            switch ($file->getError()) {
                 case UPLOAD_ERR_OK:
                     $_upload_ok = true;
                     break;
@@ -939,7 +944,7 @@ class Frontend
                     $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {
 
-                    $server_file_name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
+                    $server_file_name = $this->request->server('DOCUMENT_ROOT') . str_replace('/home/rarit0/public_html/', '', $recs['Server_File_Name']);
                     // Delete the record from the database
                     $result = $this->rpsdb->deleteEntry($id);
                     if ($result === false) {
@@ -955,7 +960,7 @@ class Frontend
                         $comp_date = $this->settings->comp_date;
                         $classification = $this->settings->classification;
                         $medium = $this->settings->medium;
-                        $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                        $path = $this->request->server('DOCUMENT_ROOT') . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
 
                         $old_file_parts = pathinfo($server_file_name);
                         $old_file_name = $old_file_parts['filename'];
