@@ -210,14 +210,14 @@ final class Admin
             case 'open':
             case 'close':
                 check_admin_referer('bulk-competitions');
-                if (empty($this->request->input('competitions')) && empty($this->request->input('competition'))) {
+                if ($this->request->input('competitions') === '' && $this->request->input('competition') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
                 break;
 
             case 'edit':
-                if (empty($this->request->input('competition'))) {
+                if ($this->request->input('competition') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -225,7 +225,7 @@ final class Admin
 
             case 'dodelete':
                 check_admin_referer('delete-competitions');
-                if (empty($this->request->input('competitions'))) {
+                if ($this->request->input('competitions') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -244,7 +244,7 @@ final class Admin
 
             case 'doopen':
                 check_admin_referer('open-competitions');
-                if (empty($this->request->input('competitions'))) {
+                if ($this->request->input('competitions') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -263,7 +263,7 @@ final class Admin
 
             case 'doclose':
                 check_admin_referer('close-competitions');
-                if (empty($this->request->input('competitions'))) {
+                if ($this->request->input('competitions') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -281,7 +281,7 @@ final class Admin
                 break;
 
             case 'setscore':
-                if (!empty($this->request->input('competition'))) {
+                if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'Y';
@@ -290,7 +290,7 @@ final class Admin
                 wp_redirect($redirect);
                 break;
             case 'Unsetscore':
-                if (!empty($this->request->input('competition'))) {
+                if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'N';
@@ -299,7 +299,7 @@ final class Admin
                 wp_redirect($redirect);
                 break;
             default:
-                if (!empty($this->request->input('_wp_http_referer'))) {
+                if ($this->request->input('_wp_http_referer') !== '') {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
@@ -378,7 +378,7 @@ final class Admin
     {
         global $wpdb;
 
-        if (empty($this->request->input('competitions'))) {
+        if ($this->request->input('competitions') === '') {
             $competitionIdsArray = array(intval($this->request->input('competition')));
         } else {
             $competitionIdsArray = (array) $this->request->input('competitions');
@@ -434,7 +434,7 @@ final class Admin
         $vars = (array('action', 'redirect', 'competition', 'wp_http_referer'));
         for ($i = 0; $i < count($vars); $i += 1) {
             $var = $vars[$i];
-            $$var = $this->request->input($var, '' );
+            $$var = $this->request->input($var, '');
         }
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
@@ -569,7 +569,7 @@ final class Admin
             $action_verb = 'closed';
         }
 
-        if (empty($this->request->input('competitions'))) {
+        if ($this->request->input('competitions') === '') {
             $competitionIdsArray = array(intval($this->request->input('competition')));
         } else {
             $competitionIdsArray = (array) $this->request->input('competitions');
@@ -610,11 +610,11 @@ final class Admin
             switch ($this->request->input('update')) {
                 case 'del':
                 case 'del_many':
-                    $deleteCount = (int) $this->request->input('deleteCount',0);
+                    $deleteCount = (int) $this->request->input('deleteCount', 0);
                     $messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
                     break;
                 case 'open_many':
-                    $openCount = (int) $this->request->input('count',0);
+                    $openCount = (int) $this->request->input('count', 0);
                     $messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Competition opened.', '%s competitions opened.', $openCount), number_format_i18n($openCount)) . '</p></div>';
                     break;
                 case 'close_many':
@@ -641,14 +641,14 @@ final class Admin
 
         $this->competition_list->views();
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
-        echo $formBuilder->open(null,array('id'=> 'rps-competition-form', 'method'=>'get'));
-        echo $formBuilder->hidden('page',Constants::MENU_SLUG_COMPETITION);
-        echo $formBuilder->hidden('_total',$this->competition_list->get_pagination_arg('total_items'));
+        echo $formBuilder->open(null, array('id' => 'rps-competition-form', 'method' => 'get'));
+        echo $formBuilder->hidden('page', Constants::MENU_SLUG_COMPETITION);
+        echo $formBuilder->hidden('_total', $this->competition_list->get_pagination_arg('total_items'));
         echo $formBuilder->hidden('_per_page', $this->competition_list->get_pagination_arg('per_page'));
-        echo $formBuilder->hidden('_page',$this->competition_list->get_pagination_arg('page'));
+        echo $formBuilder->hidden('_page', $this->competition_list->get_pagination_arg('page'));
 
         if ($this->request->has('paged')) {
-            echo $formBuilder->hidden('paged',absint($this->request->input('paged')));
+            echo $formBuilder->hidden('paged', absint($this->request->input('paged')));
         }
         // $this->competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
         $this->competition_list->display();
@@ -739,7 +739,7 @@ final class Admin
                     }
                     $formNewOptions['special-event'] = avh_array_get($formNewOptions, 'special-event', false);
 
-                    $x=$v->errors();
+                    $x = $v->errors();
                     if (empty($x)) {
                         $this->message = 'Competition Added';
                         $this->status = 'updated';
@@ -914,21 +914,21 @@ final class Admin
         switch ($doAction) {
             case 'delete':
                 check_admin_referer('bulk-entries');
-                if (empty($this->request->input('entries')) && empty($this->request->input('entry'))) {
+                if ($this->request->input('entries') === '' && $this->request->input('entry') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
                 break;
 
             case 'edit':
-                if (empty($this->request->input('entry'))) {
+                if ($this->request->input('entry') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
                 break;
             case 'dodelete':
                 check_admin_referer('delete-entries');
-                if (empty($this->request->input('entries'))) {
+                if ($this->request->input('entries') === '') {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -946,7 +946,7 @@ final class Admin
                 break;
 
             default:
-                if (!empty($this->request->input('_wp_http_referer'))) {
+                if ($this->request->input('_wp_http_referer') !== '') {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
@@ -994,7 +994,7 @@ final class Admin
             switch ($this->request->input('update')) {
                 case 'del':
                 case 'del_many':
-                    $deleteCount = (int) $this->request->input('deleteCount',0);
+                    $deleteCount = (int) $this->request->input('deleteCount', 0);
                     $messages[] = '<div id="message" class="updated"><p>' . sprintf(_n('Entry deleted.', '%s entries deleted.', $deleteCount), number_format_i18n($deleteCount)) . '</p></div>';
                     break;
             }
@@ -1042,7 +1042,7 @@ final class Admin
         global $wpdb;
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
 
-        if (empty($this->request->input('entries'))) {
+        if ($this->request->input('entries') === '') {
             $entryIdsArray = array(intval($this->request->input('entry')));
         } else {
             $entryIdsArray = (array) $this->request->input('entries');
@@ -1105,7 +1105,7 @@ final class Admin
         $vars = (array('action', 'redirect', 'entry', 'wp_http_referer'));
         for ($i = 0; $i < count($vars); $i += 1) {
             $var = $vars[$i];
-            $$var = $this->request->input($var, '' );
+            $$var = $this->request->input($var, '');
         }
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
@@ -1179,7 +1179,7 @@ final class Admin
      */
     private function updateEntry()
     {
-        $formOptions =$this->request->input('entry-edit');
+        $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
         $entry = $this->rpsdb->getEntryInfo($id);
 

@@ -292,7 +292,7 @@ class Frontend
                     }
                 }
                 // makes sure they filled in the title field
-                if (!$this->request->has('new_title') || empty(trim($this->request->input('new_title')))) {
+                if (!$this->request->has('new_title') || trim($this->request->input('new_title') == '')) {
                     $this->settings->errmsg = 'You must provide an image title.<br><br>';
                 } else {
                     $recs = $this->rpsdb->getCompetitionByID($this->_entry_id);
@@ -346,7 +346,7 @@ class Frontend
                 }
 
                 // If we exceed the post_max_size the $_POST and $_FILES are empty
-                if ($this->request->isMethod('POST') && empty($this->request->request->all()) && empty($this->request->files->all()) && $this->request->server('CONTENT_LENGTH') > 0) {
+                if ($this->request->isMethod('POST') && $this->request->request->count() == 0 && $this->request->files->count() == 0 && $this->request->server('CONTENT_LENGTH') > 0) {
                     $this->settings->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $_SERVER['CONTENT_LENGTH'] / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                 } else {
                     $file = $this->request->file('file_name');
@@ -894,8 +894,8 @@ class Frontend
     private function checkUploadEntryTitle()
     {
         $_upload_ok = false;
-        $file=$this->request->file('file_name');
-        if (!$this->request->has('title') || empty($this->request->input('title'))) {
+        $file = $this->request->file('file_name');
+        if (!$this->request->has('title') || $this->request->input('title') === '') {
             $this->settings->errmsg = 'Please enter your image title in the Title field.';
         } else {
             switch ($file->getError()) {
