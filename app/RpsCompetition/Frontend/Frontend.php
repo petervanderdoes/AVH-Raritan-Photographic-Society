@@ -263,7 +263,6 @@ class Frontend
     }
 
     /**
-     *
      * Handle $_POST Edit Title
      */
     public function actionPreHeaderRpsEditTitle()
@@ -294,7 +293,7 @@ class Frontend
                     }
                 }
                 // makes sure they filled in the title field
-                if (!$this->request->has('new_title') || trim($this->request->input('new_title')) === '') {
+                if (!$this->request->has('new_title')) {
                     $this->settings->errmsg = 'You must provide an image title.<br><br>';
                 } else {
                     $recs = $this->rpsdb->getCompetitionByID($this->_entry_id);
@@ -903,7 +902,7 @@ class Frontend
     {
         $_upload_ok = false;
         $file = $this->request->file('file_name');
-        if (!$this->request->has('title') || $this->request->input('title') === '') {
+        if (!$this->request->has('title')) {
             $this->settings->errmsg = 'Please enter your image title in the Title field.';
         } else {
             switch ($file->getError()) {
@@ -947,7 +946,7 @@ class Frontend
         if (is_array($entries)) {
             foreach ($entries as $id) {
 
-                $recs = $this->rpsdb->getEntryInfo($id);
+                $recs = $this->rpsdb->getEntryInfo($id, OBJECT);
                 if ($recs == false) {
                     $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {

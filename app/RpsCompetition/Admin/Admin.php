@@ -210,14 +210,14 @@ final class Admin
             case 'open':
             case 'close':
                 check_admin_referer('bulk-competitions');
-                if ($this->request->input('competitions') === '' && $this->request->input('competition') === '') {
+                if (!($this->request->has('competitions') && $this->request->has('competition'))) {
                     wp_redirect($redirect);
                     exit();
                 }
                 break;
 
             case 'edit':
-                if ($this->request->input('competition') === '') {
+                if (!$this->request->has('competition')) {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -225,7 +225,7 @@ final class Admin
 
             case 'dodelete':
                 check_admin_referer('delete-competitions');
-                if ($this->request->input('competitions') === '') {
+                if (!$this->request->has('competitions')) {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -244,7 +244,7 @@ final class Admin
 
             case 'doopen':
                 check_admin_referer('open-competitions');
-                if ($this->request->input('competitions') === '') {
+                if (!$this->request->has('competitions')) {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -263,7 +263,7 @@ final class Admin
 
             case 'doclose':
                 check_admin_referer('close-competitions');
-                if ($this->request->input('competitions') === '') {
+                if (!$this->request->has('competitions')) {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -299,7 +299,7 @@ final class Admin
                 wp_redirect($redirect);
                 break;
             default:
-                if ($this->request->input('_wp_http_referer') !== '') {
+                if (!$this->request->has('_wp_http_referer') ) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
@@ -378,7 +378,7 @@ final class Admin
     {
         global $wpdb;
 
-        if ($this->request->input('competitions') === '') {
+        if (!$this->request->has('competitions')) {
             $competitionIdsArray = array(intval($this->request->input('competition')));
         } else {
             $competitionIdsArray = (array) $this->request->input('competitions');
@@ -569,7 +569,7 @@ final class Admin
             $action_verb = 'closed';
         }
 
-        if ($this->request->input('competitions') === '') {
+        if (!$this->request->has('competitions')) {
             $competitionIdsArray = array(intval($this->request->input('competition')));
         } else {
             $competitionIdsArray = (array) $this->request->input('competitions');
@@ -586,7 +586,7 @@ final class Admin
 
         foreach ($competitionIdsArray as $competitionID) {
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $this->rpsdb->getCompetitions(array('where' => $sqlWhere));
+            $competition = $this->rpsdb->getCompetitions(array('where' => $sqlWhere), ARRAY_A);
             $competition = $competition[0];
             echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
         }
@@ -914,21 +914,21 @@ final class Admin
         switch ($doAction) {
             case 'delete':
                 check_admin_referer('bulk-entries');
-                if ($this->request->input('entries') === '' && $this->request->input('entry') === '') {
+                if (!($this->request->has('entries') && $this->request->has('entry'))) {
                     wp_redirect($redirect);
                     exit();
                 }
                 break;
 
             case 'edit':
-                if ($this->request->input('entry') === '') {
+                if (!$this->request->has('entry')) {
                     wp_redirect($redirect);
                     exit();
                 }
                 break;
             case 'dodelete':
                 check_admin_referer('delete-entries');
-                if ($this->request->input('entries') === '') {
+                if (!$this->request->has('entries')) {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -946,7 +946,7 @@ final class Admin
                 break;
 
             default:
-                if ($this->request->input('_wp_http_referer') !== '') {
+                if (!$this->request->has('_wp_http_referer') ) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
@@ -1042,7 +1042,7 @@ final class Admin
         global $wpdb;
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
 
-        if ($this->request->input('entries') === '') {
+        if (!$this->request->has('entries')) {
             $entryIdsArray = array(intval($this->request->input('entry')));
         } else {
             $entryIdsArray = (array) $this->request->input('entries');
@@ -1059,7 +1059,7 @@ final class Admin
             $entry = $this->rpsdb->getEntryInfo($entryID, OBJECT);
             if ($entry !== null) {
                 $user = get_user_by('id', $entry->Member_ID);
-                $competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID, OBJECT);
+                $competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
                 echo "<li>";
                 echo $formBuilder->hidden('entries[]', $entryID);
                 printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'), $entryID, $entry->Title, $user->first_name, $user->last_name, $competition->Theme, mysql2date(get_option('date_format'), $competition->Competition_Date));
