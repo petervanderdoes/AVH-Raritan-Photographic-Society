@@ -203,7 +203,7 @@ class RpsDb
                     c.Competition_Date >= %s AND
                     e.Score >= 8
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score", $season);
-        $x = $this->rpsdb->get_results($sql, ARRAY_A);
+        $x = $this->rpsdb->get_results($sql);
 
         return $x;
     }
@@ -499,7 +499,7 @@ class RpsDb
                 AND competitions.Competition_Date = DATE %s
                 AND competitions.Classification = %s
                 AND competitions.Medium = %s", $this->user_id, $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
-        $return = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->rpsdb->get_results($sql);
 
         return $return;
     }

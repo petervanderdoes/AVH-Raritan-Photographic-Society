@@ -140,21 +140,21 @@ class Frontend
 
             foreach ($images as $key) {
                 $recs = $entries[$key];
-                $user_info = get_userdata($recs['Member_ID']);
-                $recs['FirstName'] = $user_info->user_firstname;
-                $recs['LastName'] = $user_info->user_lastname;
-                $recs['Username'] = $user_info->user_login;
+                $user_info = get_userdata($recs->Member_ID);
+                $recs->FirstName = $user_info->user_firstname;
+                $recs->LastName = $user_info->user_lastname;
+                $recs->Username = $user_info->user_login;
 
                 // Grab a new record from the database
-                $dateParts = explode(" ", $recs['Competition_Date']);
+                $dateParts = explode(" ", $recs->Competition_Date);
                 $comp_date = $dateParts[0];
-                $medium = $recs['Medium'];
-                $classification = $recs['Classification'];
+                $medium = $recs->Medium;
+                $classification = $recs->Classification;
                 $comp = "$classification<br>$medium";
-                $title = $recs['Title'];
-                $last_name = $recs['LastName'];
-                $first_name = $recs['FirstName'];
-                $award = $recs['Award'];
+                $title = $recs->Title;
+                $last_name = $recs->LastName;
+                $first_name = $recs->FirstName;
+                $award = $recs->Award;
                 // Display this thumbnail in the the next available column
                 echo '<li class="gallery-item">';
                 echo '<div class="gallery-item-content">';
@@ -241,7 +241,6 @@ class Frontend
                 }
             }
 
-            // Get the currently selected competition
             if (!$this->request->isMethod('POST')) {
                 if ($this->request->hasCookie('RPS_MyEntries')) {
                     list ($comp_date, $classification, $medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
@@ -301,10 +300,10 @@ class Frontend
                         wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);
                     }
 
-                    $dateParts = explode(" ", $recs['Competition_Date']);
+                    $dateParts = explode(" ", $recs->Competition_Date);
                     $comp_date = $dateParts[0];
-                    $classification = $recs['Classification'];
-                    $medium = $recs['Medium'];
+                    $classification = $recs->Classification;
+                    $medium = $recs->Medium;
 
                     // Rename the image file on the server file system
                     $ext = ".jpg";
@@ -312,8 +311,8 @@ class Frontend
                     $old_file_parts = pathinfo($server_file_name);
                     $old_file_name = $old_file_parts['filename'];
                     $current_user = wp_get_current_user();
-                    $new_file_name_noext = sanitize_file_name($this->request->input('new_title')) . '+' . $current_user->user_login;
-                    $new_file_name = sanitize_file_name($new_title) . '+' . $current_user->user_login . $ext;
+                    $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT').$server_file_name);
+                    $new_file_name = $new_file_name_noext . $ext;
                     if (!$this->core->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
                         die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
                     }
@@ -427,7 +426,7 @@ class Frontend
                 $path = $this->request->server('DOCUMENT_ROOT') . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
 
                 $user = wp_get_current_user();
-                $dest_name = sanitize_file_name($title) . '+' . $user->user_login;
+                $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
                 $full_path = $path . '/' . $dest_name;
                 // Need to create the destination folder?
                 if (!is_dir($path)) {

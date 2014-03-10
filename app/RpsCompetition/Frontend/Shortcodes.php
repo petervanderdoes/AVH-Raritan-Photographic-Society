@@ -83,15 +83,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<div class="gallery gallery-size-250">';
         echo '<ul class="gallery-row gallery-row-equal">';
         foreach ($entries as $entry) {
-            $dateParts = explode(" ", $entry['Competition_Date']);
+            $dateParts = explode(" ", $entry->Competition_Date);
             $comp_date = $dateParts[0];
-            $medium = $entry['Medium'];
-            $classification = $entry['Classification'];
+            $medium = $entry->Medium;
+            $classification = $entry->Classification;
             $comp = "$classification<br>$medium";
-            $title = $entry['Title'];
-            $last_name = $entry['LastName'];
-            $first_name = $entry['FirstName'];
-            $award = $entry['Award'];
+            $title = $entry->Title;
+            $last_name = $entry->LastName;
+            $first_name = $entry->FirstName;
+            $award = $entry->Award;
 
             echo '<li class="gallery-item">';
             echo '	<div class="gallery-item-content">';
@@ -246,15 +246,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $prev_comp = $comp;
 
                 // Grab a new record from the database
-                $dateParts = explode(" ", $recs['Competition_Date']);
+                $dateParts = explode(" ", $recs->Competition_Date);
                 $comp_date = $dateParts[0];
-                $medium = $recs['Medium'];
-                $classification = $recs['Classification'];
+                $medium = $recs->Medium;
+                $classification = $recs->Classification;
                 $comp = "$classification<br>$medium";
-                $title = $recs['Title'];
-                $last_name = $recs['LastName'];
-                $first_name = $recs['FirstName'];
-                $award = $recs['Award'];
+                $title = $recs->Title;
+                $last_name = $recs->LastName;
+                $first_name = $recs->FirstName;
+                $award = $recs->Award;
 
                 // If we're at the end of a row, finish off the row and get ready for the next one
                 if ($prev_comp != $comp) {
@@ -668,8 +668,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $entry_id = $this->request->input('id');
 
         $recs = $this->rpsdb->getEntryInfo($entry_id);
-        $title = $recs['Title'];
-        $server_file_name = $recs['Server_File_Name'];
+        $title = $recs->Title;
+        $server_file_name = $recs->Server_File_Name;
 
         $relative_path = $server_file_name;
 
@@ -865,34 +865,34 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $rowStyle = $numRows % 2 == 1 ? "odd_row" : "even_row";
 
             // Checkbox column
-            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs['ID'] . '">' . "\n";
+            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
 
             // Thumbnail column
             $user = wp_get_current_user();
-            $a = realpath($recs['Server_File_Name']);
-            $image_url = home_url($recs['Server_File_Name']);
+            $a = realpath($recs->Server_File_Name);
+            $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs['Title'] . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
+            echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs->Title . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
             echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
             echo '<td align="left" width="40%">';
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo htmlentities($recs['Title']) . "</td>\n";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
+            echo htmlentities($recs->Title) . "</td>\n";
             // File Name
-            echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
+            echo '<td align="left" width="25%">' . $recs->Client_File_Name . "</td>\n";
 
             // Image width and height columns. The height and width values are suppressed if the Client_File_Name is
             // empty i.e. no image uploaded for a print competition.
-            if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs['Server_File_Name'])) {
-                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs['Server_File_Name']);
+            if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name)) {
+                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
             } else {
                 $size[0] = 0;
                 $size[1] = 0;
             }
-            if ($recs['Client_File_Name'] > "") {
+            if ($recs->Client_File_Name > "") {
                 if ($size[0] > 1024) {
                     echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[0] . "</td>\n";
                 } else {
@@ -1038,21 +1038,21 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         foreach ($images as $key) {
             $recs = $entries[$key];
-            $user_info = get_userdata($recs['Member_ID']);
-            $recs['FirstName'] = $user_info->user_firstname;
-            $recs['LastName'] = $user_info->user_lastname;
-            $recs['Username'] = $user_info->user_login;
+            $user_info = get_userdata($recs->Member_ID);
+            $recs->FirstName = $user_info->user_firstname;
+            $recs->LastName = $user_info->user_lastname;
+            $recs->Username = $user_info->user_login;
 
             // Grab a new record from the database
-            $dateParts = explode(" ", $recs['Competition_Date']);
+            $dateParts = explode(" ", $recs->Competition_Date);
             $comp_date = $dateParts[0];
-            $medium = $recs['Medium'];
-            $classification = $recs['Classification'];
+            $medium = $recs->Medium;
+            $classification = $recs->Classification;
             $comp = "$classification<br>$medium";
-            $title = $recs['Title'];
-            $last_name = $recs['LastName'];
-            $first_name = $recs['FirstName'];
-            $award = $recs['Award'];
+            $title = $recs->Title;
+            $last_name = $recs->LastName;
+            $first_name = $recs->FirstName;
+            $award = $recs->Award;
             // Display this thumbnail in the the next available column
             echo '<li>';
             echo '<div>';

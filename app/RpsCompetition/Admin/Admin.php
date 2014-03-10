@@ -1133,7 +1133,7 @@ final class Admin
 
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
-        echo "<img src=\"" . $this->core->rpsGetThumbnailUrl(get_object_vars($entry), 200) . "\" />\n";
+        echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($entry, 200) . "\" />\n";
 
         echo $formBuilder->outputField($formBuilder->text('Title', 'title', $entry->Title));
 
