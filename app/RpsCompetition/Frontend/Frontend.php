@@ -683,7 +683,7 @@ class Frontend
                     $award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
                     $award_node->AppendChild($dom->CreateTextNode($award));
                     // Convert the absolute server file name into a URL
-                    $image_url = home_url(str_replace('/home/rarit0/public_html', '', $record_entries['Server_File_Name']));
+                    $image_url = home_url($record_entries['Server_File_Name']);
                     $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
                     $url_node->AppendChild($dom->CreateTextNode($image_url));
                 }
@@ -952,8 +952,7 @@ class Frontend
                     $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {
 
-                    $server_file_name = $this->request->server('DOCUMENT_ROOT');
-                    $server_file_name .= str_replace('/home/rarit0/public_html/', '', $recs->Server_File_Name);
+                    $server_file_name = $this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name;
                     // Delete the record from the database
                     $result = $this->rpsdb->deleteEntry($id);
                     if ($result === false) {

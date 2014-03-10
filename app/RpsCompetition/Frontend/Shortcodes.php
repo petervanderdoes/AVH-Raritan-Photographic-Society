@@ -618,7 +618,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 }
 
                 $a = realpath($recs['Server_File_Name']);
-                $image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+                $image_url = home_url($recs['Server_File_Name']);
 
                 if ($prev_date == $dateParts[0]) {
                     $dateParts[0] = "";
@@ -671,7 +671,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $title = $recs['Title'];
         $server_file_name = $recs['Server_File_Name'];
 
-        $relative_path = str_replace('/home/rarit0/public_html', '', $server_file_name);
+        $relative_path = $server_file_name;
 
         if (isset($this->settings->errmsg)) {
             echo '<div id="errmsg">';
@@ -870,7 +870,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             // Thumbnail column
             $user = wp_get_current_user();
             $a = realpath($recs['Server_File_Name']);
-            $image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+            $image_url = home_url($recs['Server_File_Name']);
             echo "<td align=\"center\" width=\"10%\">\n";
             // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
             echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs['Title'] . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
@@ -886,8 +886,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
             // Image width and height columns. The height and width values are suppressed if the Client_File_Name is
             // empty i.e. no image uploaded for a print competition.
-            if (file_exists($this->request->server('DOCUMENT_ROOT') . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']))) {
-                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+            if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs['Server_File_Name'])) {
+                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs['Server_File_Name']);
             } else {
                 $size[0] = 0;
                 $size[1] = 0;

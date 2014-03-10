@@ -109,7 +109,7 @@ class Core
         }
 
         if (!file_exists("$path/thumbnails/$file_name" . "_$size.jpg")) {
-            $name = $this->request->server('DOCUMENT_ROOT') . str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']);
+            $name = $this->request->server('DOCUMENT_ROOT') . $row['Server_File_Name'];
             $this->rpsResizeImage($name, "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
         }
     }
@@ -172,7 +172,7 @@ class Core
 
     public function rpsGetThumbnailUrl($row, $size)
     {
-        $file_parts = pathinfo(str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']));
+        $file_parts = pathinfo($row['Server_File_Name']);
         $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
 
         if (!is_dir($thumb_dir)) {
