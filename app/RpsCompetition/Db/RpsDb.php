@@ -325,9 +325,7 @@ class RpsDb
             return $this->rpsdb->get_var($query);
         }
 
-        $result = $this->rpsdb->get_results($query);
-
-        return $this->getReturn($result, $output);
+        return $this->rpsdb->get_results($query, $output);
     }
 
     /**
@@ -339,7 +337,7 @@ class RpsDb
      */
     public function getEntries($query_vars, $output = OBJECT)
     {
-        return $this->query($query_vars, 'entries');
+        return $this->query($query_vars, 'entries', $output);
     }
 
     /**
@@ -351,7 +349,7 @@ class RpsDb
      */
     public function getCompetition(array $query_vars, $output = OBJECT)
     {
-        return $this->query($query_vars, 'competitions');
+        return $this->query($query_vars, 'competitions', $output);
     }
 
     /**
@@ -710,7 +708,7 @@ class RpsDb
      * @param string $table
      * @return Ambigous <string, NULL>|Ambigous <\RpsCompetition\Db\mixed, mixed>
      */
-    private function query(array $query_vars, $table)
+    private function query(array $query_vars, $table, $output)
     {
         $defaults = array('join' => '', 'where' => '1=1', 'fields' => '*', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
         $this->_query_vars = wp_parse_args($query_vars, $defaults);
@@ -742,8 +740,7 @@ class RpsDb
             return $this->rpsdb->get_var($query);
         }
 
-        $result = $this->rpsdb->get_results($query);
-        return $this->getReturn($result, $output);
+        return $this->rpsdb->get_results($query, $output);
     }
 }
 
