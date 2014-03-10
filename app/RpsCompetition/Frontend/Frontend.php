@@ -467,7 +467,7 @@ class Frontend
                     try {
                         $file->move($path, $dest_name . '.jpg');
                     } catch (FileException $e) {
-                        $this->settings->errmsg = "Failed to move uploaded file to destination folder";
+                        $this->settings->errmsg = $e->getMessage();
                         return;
                     }
                 }
