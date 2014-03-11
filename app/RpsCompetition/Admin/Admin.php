@@ -299,7 +299,7 @@ final class Admin
                 wp_redirect($redirect);
                 break;
             default:
-                if (!$this->request->has('_wp_http_referer') ) {
+                if ($this->request->has('_wp_http_referer') ) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
@@ -946,7 +946,7 @@ final class Admin
                 break;
 
             default:
-                if (!$this->request->has('_wp_http_referer') ) {
+                if ($this->request->has('_wp_http_referer') ) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
