@@ -516,8 +516,7 @@ class RpsDb
         $sql = $this->rpsdb->prepare("SELECT *
             FROM entries
             WHERE ID = %s", $id);
-        $result = $this->rpsdb->get_row($sql);
-        return $this->getReturn($result, $output);
+        return $this->rpsdb->get_row($sql, $output);
     }
 
     public function getCompetitionByID($id, $output = ARRAY_A)
