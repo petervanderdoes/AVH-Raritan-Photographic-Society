@@ -2,7 +2,7 @@
 namespace RpsCompetition\Common;
 
 use RpsCompetition\Settings;
-use \Illuminate\Http\Request;
+use Illuminate\Http\Request;
 
 class Core
 {
@@ -36,7 +36,7 @@ class Core
 
     /**
      *
-     * @var \Illuminate\Http\Request;
+     * @var Request
      */
     private $request;
 
@@ -48,7 +48,6 @@ class Core
         $this->settings = $settings;
         $this->request = $request;
 
-        //dd($request);
         $this->db_options = 'avhrps_options';
         $this->db_version = 0;
         /**
@@ -71,11 +70,6 @@ class Core
         $this->settings->club_max_banquet_entries_per_member = 5;
         $this->settings->club_season_start_month_num = 9;
         $this->settings->club_season_end_month_num = 12;
-        // Database credentials
-        $this->settings->host = 'localhost';
-        $this->settings->dbname = 'avirtu2_raritdata';
-        $this->settings->uname = 'avirtu2_rarit1';
-        $this->settings->pw = '1Hallo@Done#';
         $this->settings->digital_chair_email = 'digitalchair@raritanphoto.com';
 
         $this->settings->siteurl = get_option('siteurl');
@@ -88,36 +82,6 @@ class Core
         $this->settings->medium = '';
         $this->settings->max_width_entry = 1024;
         $this->settings->max_height_entry = 768;
-    }
-
-    /**
-     * Setup DB Tables
-     *
-     * @return unknown_type
-     */
-    // private function _setTables()
-    // {
-    // global $wpdb;
-    // // add DB pointer
-    // $wpdb->avhfdasipcache = $wpdb->prefix . 'avhfdas_ipcache';
-    // }
-    public function rpsCreateThumbnail($row, $size, $show_maker = true)
-    {
-        if ($size >= 400 && $show_maker) {
-            $maker = $row['FirstName'] . " " . $row['LastName'];
-        }
-        $dateParts = explode(" ", $row['Competition_Date']);
-        $path = $_SERVER['DOCUMENT_ROOT'] . '/Digital_Competitions/' . $dateParts[0] . '_' . $row['Classification'] . '_' . $row['Medium'];
-        $file_name = $row['Title'] . '+' . $row['Username'];
-
-        if (!is_dir("$path/thumbnails")) {
-            mkdir("$path/thumbnails", 0755);
-        }
-
-        if (!file_exists("$path/thumbnails/$file_name" . "_$size.jpg")) {
-            $name = $_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']);
-            $this->rpsResizeImage($name, "$path/thumbnails/$file_name" . "_$size.jpg", $size, 75, $maker);
-        }
     }
 
     public function rpsResizeImage($image_name, $thumb_name, $size, $quality, $maker)
@@ -178,15 +142,15 @@ class Core
 
     public function rpsGetThumbnailUrl($row, $size)
     {
-        $file_parts = pathinfo(str_replace('/home/rarit0/public_html', '', $row['Server_File_Name']));
-        $thumb_dir = $_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/thumbnails';
+        $file_parts = pathinfo($row->Server_File_Name);
+        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
 
         if (!is_dir($thumb_dir)) {
             mkdir($thumb_dir, 0755);
         }
 
         if (!file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg')) {
-            $this->rpsResizeImage($_SERVER['DOCUMENT_ROOT'] . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
+            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
         }
 
         $p = explode('/', $file_parts['dirname']);
@@ -202,7 +166,7 @@ class Core
     public function renameImageFile($path, $old_name, $new_name, $ext)
     {
         $thumbnails = array();
-        $path = $_SERVER['DOCUMENT_ROOT'] . $path;
+        $path = $this->request->server('DOCUMENT_ROOT') . $path;
         // Rename the main image file
         $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
         if ($status) {

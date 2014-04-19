@@ -6,6 +6,7 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
 use Avh\Html\FormBuilder;
+use Illuminate\Http\Request;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -34,7 +35,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $html;
 
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core)
+    /**
+     *
+     * @var Request
+     */
+    private $request;
+
+    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
     {
         $this->core = $core;
         $this->settings = $settings;
@@ -42,6 +49,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->rpsdb->setUserId(get_current_user_id());
         $this->html = new \Avh\Html\HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
+        $this->request = $request;
     }
 
     /**
@@ -75,15 +83,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<div class="gallery gallery-size-250">';
         echo '<ul class="gallery-row gallery-row-equal">';
         foreach ($entries as $entry) {
-            $dateParts = explode(" ", $entry['Competition_Date']);
+            $dateParts = explode(" ", $entry->Competition_Date);
             $comp_date = $dateParts[0];
-            $medium = $entry['Medium'];
-            $classification = $entry['Classification'];
+            $medium = $entry->Medium;
+            $classification = $entry->Classification;
             $comp = "$classification<br>$medium";
-            $title = $entry['Title'];
-            $last_name = $entry['LastName'];
-            $first_name = $entry['FirstName'];
-            $award = $entry['Award'];
+            $title = $entry->Title;
+            $last_name = $entry->LastName;
+            $first_name = $entry->FirstName;
+            $award = $entry->Award;
 
             echo '<li class="gallery-item">';
             echo '	<div class="gallery-item-content">';
@@ -114,21 +122,21 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->selected_year = "";
         $this->settings->selected_month = "";
 
-        if (isset($_POST['submit_control'])) {
-            $this->settings->selected_season = esc_attr($_POST['selected_season']);
+        if ($this->request->has('submit_control')) {
+            $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
             $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-            $this->settings->selected_year = esc_attr($_POST['selected_year']);
-            $this->settings->selected_month = esc_attr($_POST['selected_month']);
+            $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
+            $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
 
-            switch ($_POST['submit_control']) {
+            switch ($this->request->input('submit_control')) {
                 case 'new_season':
-                    $this->settings->selected_season = esc_attr($_POST['new_season']);
+                    $this->settings->selected_season = esc_attr($this->request->input('new_season'));
                     $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
                     $this->settings->selected_month = "";
                     break;
                 case 'new_month':
-                    $this->settings->selected_year = substr(esc_attr($_POST['new_month']), 0, 4);
-                    $this->settings->selected_month = substr(esc_attr($_POST['new_month']), 5, 2);
+                    $this->settings->selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
+                    $this->settings->selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
             }
         }
         $seasons = $this->getSeasons();
@@ -238,15 +246,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $prev_comp = $comp;
 
                 // Grab a new record from the database
-                $dateParts = explode(" ", $recs['Competition_Date']);
+                $dateParts = explode(" ", $recs->Competition_Date);
                 $comp_date = $dateParts[0];
-                $medium = $recs['Medium'];
-                $classification = $recs['Classification'];
+                $medium = $recs->Medium;
+                $classification = $recs->Classification;
                 $comp = "$classification<br>$medium";
-                $title = $recs['Title'];
-                $last_name = $recs['LastName'];
-                $first_name = $recs['FirstName'];
-                $award = $recs['Award'];
+                $title = $recs->Title;
+                $last_name = $recs->LastName;
+                $first_name = $recs->FirstName;
+                $award = $recs->Award;
 
                 // If we're at the end of a row, finish off the row and get ready for the next one
                 if ($prev_comp != $comp) {
@@ -293,8 +301,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayAllScores($atts, $content, $tag)
     {
         global $post;
-        if (isset($_POST['selected_season_list'])) {
-            $this->settings->selected_season = $_POST['selected_season_list'];
+        if ($this->request->has('selected_season_list')) {
+            $this->settings->selected_season = $this->request->input('selected_season_list');
         }
         $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
 
@@ -546,8 +554,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     {
         global $post;
 
-        if (isset($_POST['selected_season_list'])) {
-            $this->settings->selected_season = $_POST['selected_season_list'];
+        if ($this->request->has('selected_season_list')) {
+            $this->settings->selected_season = $this->request->input('selected_season_list');
         }
         $seasons = $this->getSeasons();
 
@@ -610,7 +618,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 }
 
                 $a = realpath($recs['Server_File_Name']);
-                $image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+                $image_url = home_url($recs['Server_File_Name']);
 
                 if ($prev_date == $dateParts[0]) {
                     $dateParts[0] = "";
@@ -648,8 +656,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayEditTitle($atts, $content, $tag)
     {
         global $post;
-        if (isset($_GET['m'])) {
-            if ($_GET['m'] == "prints") {
+        if ($this->request->has('m')) {
+            if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
                 $medium_param = "?m=prints";
             } else {
@@ -657,13 +665,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $medium_param = "?m=digital";
             }
         }
-        $entry_id = $_GET['id'];
+        $entry_id = $this->request->input('id');
 
         $recs = $this->rpsdb->getEntryInfo($entry_id);
-        $title = $recs['Title'];
-        $server_file_name = $recs['Server_File_Name'];
+        // Legacy need. Previously titles would be stores with added slashes.
+        $title = stripslashes($recs->Title);
+        $server_file_name = $recs->Server_File_Name;
 
-        $relative_path = str_replace('/home/rarit0/public_html', '', $server_file_name);
+        $relative_path = $server_file_name;
 
         if (isset($this->settings->errmsg)) {
             echo '<div id="errmsg">';
@@ -682,15 +691,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
-        echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . htmlentities($title) . '">';
+        echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
         echo '</td></tr>';
         echo '<tr><td style="padding-top:20px" align="center" colspan="2">';
         echo '<input type="submit" name="submit" value="Update">';
         echo '<input type="submit" name="cancel" value="Cancel">';
-        echo '<input type="hidden" name="id" value="' . $entry_id . '" />';
-        echo '<input type="hidden" name="title" value="' . $title . '" />';
-        echo '<input type="hidden" name="server_file_name" value="' . $server_file_name . '" />';
-        echo '<input type="hidden" name="m" value="' . strtolower($medium_subset) . '" />';
+        echo '<input type="hidden" name="id" value="' . esc_attr($entry_id) . '" />';
+        echo '<input type="hidden" name="title" value="' . esc_attr($title) . '" />';
+        echo '<input type="hidden" name="server_file_name" value="' . esc_attr($server_file_name) . '" />';
+        echo '<input type="hidden" name="m" value="' . esc_attr(strtolower($medium_subset)) . '" />';
         echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
         echo '</td></tr>';
         echo '</table>';
@@ -726,7 +735,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</script>' . "\n";
 
         if (!empty($this->settings->errmsg)) {
-            echo '<div id="errmsg">' . $this->settings->errmsg . '</div>';
+            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
         }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
@@ -857,34 +866,34 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $rowStyle = $numRows % 2 == 1 ? "odd_row" : "even_row";
 
             // Checkbox column
-            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs['ID'] . '">' . "\n";
+            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
 
             // Thumbnail column
             $user = wp_get_current_user();
-            $a = realpath($recs['Server_File_Name']);
-            $image_url = home_url(str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+            $a = realpath($recs->Server_File_Name);
+            $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs['Title'] . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
+            echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs->Title . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
             echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
             echo '<td align="left" width="40%">';
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs['Title']) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo htmlentities($recs['Title']) . "</td>\n";
+            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
+            echo htmlentities($recs->Title) . "</td>\n";
             // File Name
-            echo '<td align="left" width="25%">' . $recs['Client_File_Name'] . "</td>\n";
+            echo '<td align="left" width="25%">' . $recs->Client_File_Name . "</td>\n";
 
             // Image width and height columns. The height and width values are suppressed if the Client_File_Name is
             // empty i.e. no image uploaded for a print competition.
-            if (file_exists($_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']))) {
-                $size = getimagesize($_SERVER['DOCUMENT_ROOT'] . str_replace('/home/rarit0/public_html', '', $recs['Server_File_Name']));
+            if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name)) {
+                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
             } else {
                 $size[0] = 0;
                 $size[1] = 0;
             }
-            if ($recs['Client_File_Name'] > "") {
+            if ($recs->Client_File_Name > "") {
                 if ($size[0] > 1024) {
                     echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[0] . "</td>\n";
                 } else {
@@ -920,7 +929,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
             echo "<li>Upload the resized image.</li></ul></ul>\n";
         }
-        if (isset($_GET['resized']) && ('1' == $_GET['resized'])) {
+        if ($this->request->has('resized') && ('1' == $this->request->input('resized'))) {
             echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
             echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
             echo "</li></ul>\n";
@@ -946,8 +955,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayUploadEntry($atts, $content, $tag)
     {
         global $post;
-        if (isset($_GET['m'])) {
-            if ($_GET['m'] == "prints") {
+        if ($this->request->has('m')) {
+            if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
                 $medium_param = "?m=prints";
             } else {
@@ -966,11 +975,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $action = home_url('/' . get_page_uri($post->ID));
         echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
 
-        if (isset($_GET['m'])) {
+        if ($this->request->has('m')) {
             echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
         }
-        if (isset($_POST['wp_get_referer'])) {
-            $_ref = $_POST['wp_get_referer'];
+        if ($this->request->has('wp_get_referer')) {
+            $_ref = $this->request->input('wp_get_referer');
         } else {
             $_ref = wp_get_referer();
         }
@@ -1030,21 +1039,21 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         foreach ($images as $key) {
             $recs = $entries[$key];
-            $user_info = get_userdata($recs['Member_ID']);
-            $recs['FirstName'] = $user_info->user_firstname;
-            $recs['LastName'] = $user_info->user_lastname;
-            $recs['Username'] = $user_info->user_login;
+            $user_info = get_userdata($recs->Member_ID);
+            $recs->FirstName = $user_info->user_firstname;
+            $recs->LastName = $user_info->user_lastname;
+            $recs->Username = $user_info->user_login;
 
             // Grab a new record from the database
-            $dateParts = explode(" ", $recs['Competition_Date']);
+            $dateParts = explode(" ", $recs->Competition_Date);
             $comp_date = $dateParts[0];
-            $medium = $recs['Medium'];
-            $classification = $recs['Classification'];
+            $medium = $recs->Medium;
+            $classification = $recs->Classification;
             $comp = "$classification<br>$medium";
-            $title = $recs['Title'];
-            $last_name = $recs['LastName'];
-            $first_name = $recs['FirstName'];
-            $award = $recs['Award'];
+            $title = $recs->Title;
+            $last_name = $recs->LastName;
+            $first_name = $recs->FirstName;
+            $award = $recs->Award;
             // Display this thumbnail in the the next available column
             echo '<li>';
             echo '<div>';
