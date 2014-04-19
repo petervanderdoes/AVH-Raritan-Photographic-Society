@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.3.10-rc.1
+#### Version 1.3.10
 * Use Request class
 
 #### Version 1.3.6
