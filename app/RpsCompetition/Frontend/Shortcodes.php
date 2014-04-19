@@ -668,7 +668,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $entry_id = $this->request->input('id');
 
         $recs = $this->rpsdb->getEntryInfo($entry_id);
-        $title = $recs->Title;
+        // Legacy need. Previously titles would be stores with added slashes.
+        $title = stripslashes($recs->Title);
         $server_file_name = $recs->Server_File_Name;
 
         $relative_path = $server_file_name;
@@ -690,15 +691,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
-        echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . htmlentities($title) . '">';
+        echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
         echo '</td></tr>';
         echo '<tr><td style="padding-top:20px" align="center" colspan="2">';
         echo '<input type="submit" name="submit" value="Update">';
         echo '<input type="submit" name="cancel" value="Cancel">';
-        echo '<input type="hidden" name="id" value="' . $entry_id . '" />';
-        echo '<input type="hidden" name="title" value="' . $title . '" />';
-        echo '<input type="hidden" name="server_file_name" value="' . $server_file_name . '" />';
-        echo '<input type="hidden" name="m" value="' . strtolower($medium_subset) . '" />';
+        echo '<input type="hidden" name="id" value="' . esc_attr($entry_id) . '" />';
+        echo '<input type="hidden" name="title" value="' . esc_attr($title) . '" />';
+        echo '<input type="hidden" name="server_file_name" value="' . esc_attr($server_file_name) . '" />';
+        echo '<input type="hidden" name="m" value="' . esc_attr(strtolower($medium_subset)) . '" />';
         echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
         echo '</td></tr>';
         echo '</table>';
@@ -734,7 +735,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</script>' . "\n";
 
         if (!empty($this->settings->errmsg)) {
-            echo '<div id="errmsg">' . $this->settings->errmsg . '</div>';
+            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
         }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));

@@ -364,7 +364,7 @@ class Frontend
                     $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                     return;
                 }
-                if (!$this->checkUploadEntryTitle()) {
+                if (!$this->checkUploadEntry()) {
                     return;
                 }
                 // Retrieve and parse the selected competition cookie
@@ -390,16 +390,12 @@ class Frontend
                 // Prepare the title and client file name for storing in the database
                 $title = trim($this->request->input('title'));
                 $client_file_name = $file->getClientOriginalName();
-                if (!get_magic_quotes_gpc()) {
-                    $title = addslashes($title);
-                    $client_file_name = addslashes($client_file_name);
-                }
 
                 // Before we go any further, make sure the title is not a duplicate of
                 // an entry already submitted to this competition. Dupliacte title result in duplicate
                 // file names on the server
                 if ($this->rpsdb->checkDuplicateTitle($comp_id, $title)) {
-                    $this->settings->errmsg = "You have already submitted an entry with a title of \"" . stripslashes($title) . "\" in this competition<br>Please submit your entry again with a different title.";
+                    $this->settings->errmsg = "You have already submitted an entry with a title of \"" . esc_html($title) . "\" in this competition<br>Please submit your entry again with a different title.";
                     return;
                 }
 
@@ -897,7 +893,7 @@ class Frontend
     /**
      * Check the upload entry for errors.
      */
-    private function checkUploadEntryTitle()
+    private function checkUploadEntry()
     {
         $_upload_ok = false;
         $file = $this->request->file('file_name');
