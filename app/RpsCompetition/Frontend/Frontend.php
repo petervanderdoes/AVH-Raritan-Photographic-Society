@@ -395,7 +395,7 @@ class Frontend
                 // an entry already submitted to this competition. Dupliacte title result in duplicate
                 // file names on the server
                 if ($this->rpsdb->checkDuplicateTitle($comp_id, $title)) {
-                    $this->settings->errmsg = "You have already submitted an entry with a title of \"" . esc_html($title) . "\" in this competition<br>Please submit your entry again with a different title.";
+                    $this->settings->errmsg = "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.";
                     return;
                 }
 
