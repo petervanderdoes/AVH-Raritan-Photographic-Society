@@ -134,7 +134,7 @@ class Frontend
             echo '</div>';
 
             echo '<div class="gallery gallery-size-150">';
-            echo '<ul class="gallery-row">';
+            echo '<ul class="gallery-row gallery-row-equal">';
             $entries = $this->rpsdb->getEightsAndHigher('', $season);
             $images = array_rand($entries, 5);
 
@@ -161,6 +161,8 @@ class Frontend
                 echo '<div class="gallery-item-content-image">';
                 echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
                 echo '	<img src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
+                echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
                 echo "</div>";
                 echo "</div>";
 
