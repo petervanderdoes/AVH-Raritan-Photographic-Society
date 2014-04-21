@@ -154,12 +154,12 @@ class RpsDb
                     e.Award =%s AND
                     c.Classification = %s
                 ORDER BY c.Medium", $date, $award, $class);
-        $results = $this->rpsdb->get_results($sql, ARRAY_A);
+        $results = $this->rpsdb->get_results($sql);
         foreach ($results as $record) {
-            $user_info = get_userdata($record['Member_ID']);
-            $record['FirstName'] = $user_info->user_firstname;
-            $record['LastName'] = $user_info->user_lastname;
-            $record['Username'] = $user_info->user_login;
+            $user_info = get_userdata($record->Member_ID);
+            $record->FirstName = $user_info->user_firstname;
+            $record->LastName = $user_info->user_lastname;
+            $record->Username = $user_info->user_login;
             $return[] = $record;
         }
 
