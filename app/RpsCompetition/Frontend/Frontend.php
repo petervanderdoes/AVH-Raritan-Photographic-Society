@@ -134,7 +134,7 @@ class Frontend
             echo '</div>';
 
             echo '<div class="gallery gallery-size-150">';
-            echo '<ul class="gallery-row">';
+            echo '<ul class="gallery-row gallery-row-equal">';
             $entries = $this->rpsdb->getEightsAndHigher('', $season);
             $images = array_rand($entries, 5);
 
@@ -161,6 +161,8 @@ class Frontend
                 echo '<div class="gallery-item-content-image">';
                 echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
                 echo '	<img src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
+                echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
                 echo "</div>";
                 echo "</div>";
 
@@ -585,7 +587,7 @@ class Frontend
 
         /* @var $db RPSPDO */
         // Start building the XML response
-        $dom = new \DOMDocument('1.0');
+        $dom = new \DOMDocument('1.0', 'utf-8');
         // Create the root node
         $node = $dom->CreateElement('rsp');
         $node->SetAttribute('stat', 'ok');
@@ -622,16 +624,16 @@ class Frontend
             $competition_element = $xml_competions->AppendChild($dom->CreateElement('Competition'));
 
             $date_element = $competition_element->AppendChild($dom->CreateElement('Date'));
-            $date_element->AppendChild($dom->CreateTextNode($date));
+            $date_element->AppendChild($dom->CreateTextNode(utf8_encode($date)));
 
             $theme_element = $competition_element->AppendChild($dom->CreateElement('Theme'));
-            $theme_element->AppendChild($dom->CreateTextNode($theme));
+            $theme_element->AppendChild($dom->CreateTextNode(utf8_encode($theme)));
 
             $medium_element = $competition_element->AppendChild($dom->CreateElement('Medium'));
-            $medium_element->AppendChild($dom->CreateTextNode($medium));
+            $medium_element->AppendChild($dom->CreateTextNode(utf8_encode($medium)));
 
             $xml_classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
-            $xml_classification_node->AppendChild($dom->CreateTextNode($classification));
+            $xml_classification_node->AppendChild($dom->CreateTextNode(utf8_encode($classification)));
 
             // Get all the entries for this competition
             try {
@@ -658,34 +660,35 @@ class Frontend
                     $entry_id = $record_entries['ID'];
                     $first_name = $user->first_name;
                     $last_name = $user->last_name;
-                    $title = $record_entries['Title'];
+                    $title =$record_entries['Title'];
                     $score = $record_entries['Score'];
                     $award = $record_entries['Award'];
                     $server_file_name = $record_entries['Server_File_Name'];
                     // Create an Entry node
                     $entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
                     $id = $entry_element->AppendChild($dom->CreateElement('ID'));
-                    $id->AppendChild($dom->CreateTextNode($entry_id));
+                    $id->AppendChild($dom->CreateTextNode(utf8_encode($entry_id)));
                     $fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-                    $fname->AppendChild($dom->CreateTextNode($first_name));
+                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($first_name)));
                     $lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-                    $lname->AppendChild($dom->CreateTextNode($last_name));
+                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($last_name)));
                     $title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
-                    $title_node->AppendChild($dom->CreateTextNode($title));
+                    $title_node->AppendChild($dom->CreateTextNode(utf8_encode($title)));
                     $score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
-                    $score_node->AppendChild($dom->CreateTextNode($score));
+                    $score_node->AppendChild($dom->CreateTextNode(utf8_encode($score)));
                     $award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
-                    $award_node->AppendChild($dom->CreateTextNode($award));
+                    $award_node->AppendChild($dom->CreateTextNode(utf8_encode($award)));
                     // Convert the absolute server file name into a URL
                     $image_url = home_url($record_entries['Server_File_Name']);
                     $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
-                    $url_node->AppendChild($dom->CreateTextNode($image_url));
+                    $url_node->AppendChild($dom->CreateTextNode(utf8_encode($image_url)));
                 }
             }
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         }
         // Send the completed XML response back to the client
         // header('Content-Type: text/xml');
+        $dom->save('peter.xml');
         echo $dom->saveXML();
     }
 

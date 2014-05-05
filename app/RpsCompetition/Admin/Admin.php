@@ -530,8 +530,7 @@ final class Admin
         echo $formBuilder->hidden('competition', $competition->ID);
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
-        $formBuilder->setNonce($competition->ID);
-        echo $formBuilder->fieldNonce();
+        echo $formBuilder->fieldNonce($competition->ID);
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
@@ -713,8 +712,7 @@ final class Admin
         if ($this->request->has('action')) {
             switch ($this->request->input('action')) {
                 case 'add':
-                    $formBuilder->setNonce(get_current_user_id());
-                    check_admin_referer($formBuilder->getNonceAction(get_current_user_id()));
+                    check_admin_referer(get_current_user_id());
                     $formNewOptions = $this->request->input($formBuilder->getOptionName());
 
                     $v = new \Valitron\Validator($formNewOptions);
@@ -862,8 +860,7 @@ final class Admin
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
         echo $formBuilder->hidden('action', 'add');
-        $formBuilder->setNonce(get_current_user_id());
-        echo $formBuilder->fieldNonce();
+        echo $formBuilder->fieldNonce(get_current_user_id());
         echo $formBuilder->close();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
@@ -1094,8 +1091,7 @@ final class Admin
         $formBuilder->setOptionName('entry-edit');
 
         if ($this->request->has('update')) {
-            $formBuilder->setNonce($this->request->input('entry'));
-            check_admin_referer($formBuilder->getNonce_action());
+            check_admin_referer($this->request->input('entry'));
             if (!current_user_can('rps_edit_entries')) {
                 wp_die(__('Cheatin&#8217; uh?'));
             }
@@ -1135,7 +1131,8 @@ final class Admin
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
         echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($entry, 200) . "\" />\n";
 
-        echo $formBuilder->outputField($formBuilder->text('Title', 'title', $entry->Title));
+        echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));
+        echo $formBuilder->outputField($formBuilder->text('title', $entry->Title));
 
         // @formatter:off
         $medium_array = array(
@@ -1146,7 +1143,8 @@ final class Admin
             );
         // @formatter:on
         $selectedMedium = array_search($competition->Medium, $medium_array);
-        echo $formBuilder->outputField($formBuilder->select('Medium', 'medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
+        echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
+        echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
 
         // @formatter:off
         $_classification = array(
@@ -1156,7 +1154,8 @@ final class Admin
             );
         // @formatter:on
         $selectedClassification = array_search($competition->Classification, $_classification);
-        echo $formBuilder->outputField($formBuilder->select('Classification', 'classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
+        echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
+        echo $formBuilder->outputField($formBuilder->select('classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
@@ -1166,8 +1165,7 @@ final class Admin
         echo $formBuilder->hidden('entry', $entry->ID);
         echo $formBuilder->hidden('update', true);
         echo $formBuilder->hidden('action', 'edit');
-        $formBuilder->setNonce($entry->ID);
-        echo $formBuilder->fieldNonce();
+        echo $formBuilder->fieldNonce($entry->ID);
         echo $formBuilder->close();
         $this->displayAdminFooter();
     }

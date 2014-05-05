@@ -1,6 +1,11 @@
 ## Changelog
 
-#### Version 1.3.10
+### Version 1.3.11-rc1
+* The stripslashes function is no longer needed
+* Fix XML file. Make sure UTF-8 encoding is done.
+* Use object for data retrieval instead of objects.
+
+#### Version 1.3.11
 * Use Request class
 
 #### Version 1.3.6

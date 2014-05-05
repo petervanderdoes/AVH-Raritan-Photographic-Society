@@ -154,12 +154,12 @@ class RpsDb
                     e.Award =%s AND
                     c.Classification = %s
                 ORDER BY c.Medium", $date, $award, $class);
-        $results = $this->rpsdb->get_results($sql, ARRAY_A);
+        $results = $this->rpsdb->get_results($sql);
         foreach ($results as $record) {
-            $user_info = get_userdata($record['Member_ID']);
-            $record['FirstName'] = $user_info->user_firstname;
-            $record['LastName'] = $user_info->user_lastname;
-            $record['Username'] = $user_info->user_login;
+            $user_info = get_userdata($record->Member_ID);
+            $record->FirstName = $user_info->user_firstname;
+            $record->LastName = $user_info->user_lastname;
+            $record->Username = $user_info->user_login;
             $return[] = $record;
         }
 
@@ -179,12 +179,12 @@ class RpsDb
                     c.Competition_Date < %s AND
                     e.Award <> ''
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->settings->min_date, $this->settings->max_date);
-        $x = $this->rpsdb->get_results($sql, ARRAY_A);
+        $x = $this->rpsdb->get_results($sql);
         foreach ($x as $rec) {
-            $user_info = get_userdata($rec['Member_ID']);
-            $rec['FirstName'] = $user_info->user_firstname;
-            $rec['LastName'] = $user_info->user_lastname;
-            $rec['Username'] = $user_info->user_login;
+            $user_info = get_userdata($rec->Member_ID);
+            $rec->FirstName = $user_info->user_firstname;
+            $rec->LastName = $user_info->user_lastname;
+            $rec->Username = $user_info->user_login;
             $return[] = $rec;
         }
 
