@@ -660,7 +660,7 @@ class Frontend
                     $entry_id = $record_entries['ID'];
                     $first_name = $user->first_name;
                     $last_name = $user->last_name;
-                    $title = stripslashes($record_entries['Title']);
+                    $title =$record_entries['Title'];
                     $score = $record_entries['Score'];
                     $award = $record_entries['Award'];
                     $server_file_name = $record_entries['Server_File_Name'];

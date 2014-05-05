@@ -251,7 +251,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $medium = $recs->Medium;
                 $classification = $recs->Classification;
                 $comp = "$classification<br>$medium";
-                $title = stripslashes($recs->Title);
+                $title = $recs->Title;
                 $last_name = $recs->LastName;
                 $first_name = $recs->FirstName;
                 $award = $recs->Award;
@@ -669,7 +669,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         $recs = $this->rpsdb->getEntryInfo($entry_id);
         // Legacy need. Previously titles would be stores with added slashes.
-        $title = stripslashes($recs->Title);
+        $title = $recs->Title;
         $server_file_name = $recs->Server_File_Name;
 
         $relative_path = $server_file_name;
