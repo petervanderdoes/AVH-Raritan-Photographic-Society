@@ -251,7 +251,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $medium = $recs->Medium;
                 $classification = $recs->Classification;
                 $comp = "$classification<br>$medium";
-                $title = $recs->Title;
+                $title = stripslashes($recs->Title);
                 $last_name = $recs->LastName;
                 $first_name = $recs->FirstName;
                 $award = $recs->Award;
