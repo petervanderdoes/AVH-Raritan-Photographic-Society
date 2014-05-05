@@ -179,12 +179,12 @@ class RpsDb
                     c.Competition_Date < %s AND
                     e.Award <> ''
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $this->settings->min_date, $this->settings->max_date);
-        $x = $this->rpsdb->get_results($sql, ARRAY_A);
+        $x = $this->rpsdb->get_results($sql);
         foreach ($x as $rec) {
-            $user_info = get_userdata($rec['Member_ID']);
-            $rec['FirstName'] = $user_info->user_firstname;
-            $rec['LastName'] = $user_info->user_lastname;
-            $rec['Username'] = $user_info->user_login;
+            $user_info = get_userdata($rec->Member_ID);
+            $rec->FirstName = $user_info->user_firstname;
+            $rec->LastName = $user_info->user_lastname;
+            $rec->Username = $user_info->user_login;
             $return[] = $rec;
         }
 
