@@ -313,7 +313,7 @@ class Frontend
                     $old_file_parts = pathinfo($server_file_name);
                     $old_file_name = $old_file_parts['filename'];
                     $current_user = wp_get_current_user();
-                    $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT').$server_file_name);
+                    $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT') . $server_file_name);
                     $new_file_name = $new_file_name_noext . $ext;
                     if (!$this->core->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
                         die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
@@ -660,7 +660,7 @@ class Frontend
                     $entry_id = $record_entries['ID'];
                     $first_name = $user->first_name;
                     $last_name = $user->last_name;
-                    $title =$record_entries['Title'];
+                    $title = $record_entries['Title'];
                     $score = $record_entries['Score'];
                     $award = $record_entries['Award'];
                     $server_file_name = $record_entries['Server_File_Name'];
@@ -898,35 +898,27 @@ class Frontend
      */
     private function checkUploadEntry()
     {
-        $_upload_ok = false;
+        // @formatter:off
+        $errors = array (
+            UPLOAD_ERR_INI_SIZE   => "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.",
+            UPLOAD_ERR_FORM_SIZE  => "The submitted file exceeds the maximum file size of " . $this->request->input('MAX_FILE_SIZE') / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>",
+            UPLOAD_ERR_PARTIAL    => "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.",
+            UPLOAD_ERR_NO_FILE    => "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit",
+            UPLOAD_ERR_NO_TMP_DIR => "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.",
+            UPLOAD_ERR_CANT_WRITE => "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair."
+        );
+        // @formatter:on
+
+        $_upload_ok = true;
         $file = $this->request->file('file_name');
         if (!$this->request->has('title')) {
             $this->settings->errmsg = 'Please enter your image title in the Title field.';
+            $_upload_ok = false;
         } else {
-            switch ($file->getError()) {
-                case UPLOAD_ERR_OK:
-                    $_upload_ok = true;
-                    break;
-                case UPLOAD_ERR_INI_SIZE:
-                    $this->settings->errmsg = "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.";
-                    break;
-                case UPLOAD_ERR_FORM_SIZE:
-                    $this->settings->errmsg = "The submitted file exceeds the maximum file size of " . $this->request->input('MAX_FILE_SIZE') / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>";
-                    break;
-                case UPLOAD_ERR_PARTIAL:
-                    $this->settings->errmsg = "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.";
-                    break;
-                case UPLOAD_ERR_NO_FILE:
-                    $this->settings->errmsg = "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
-                    break;
-                case UPLOAD_ERR_NO_TMP_DIR:
-                    $this->settings->errmsg = "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.";
-                    break;
-                case UPLOAD_ERR_CANT_WRITE:
-                    $this->settings->errmsg = "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair.";
-                    break;
-                default:
-                    $this->settings->errmsg = "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
+            $error_code = $file->getError();
+            if ($error_code !== UPLOAD_ERR_OK) {
+                $_upload_ok = false;
+                $this->settings->errmsg = isset($errors[$error_code]) ? $errors[$error_code] : "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
             }
         }
 
