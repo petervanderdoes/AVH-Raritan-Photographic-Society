@@ -1,7 +1,7 @@
 ## Changelog
 
 #### Version 1.4.0
-* Preparation for new development cycle.
+* Improved check for uploaded files to the competitions.
 
 #### Version 1.3.11
 * The stripslashes function is no longer needed
