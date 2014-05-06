@@ -359,12 +359,6 @@ class Frontend
                     return;
                 }
 
-                // If we exceed the post_max_size the $_POST and $_FILES are empty
-                if ($this->request->isMethod('POST') && $this->request->request->count() == 0 && $this->request->files->count() == 0 && $this->request->server('CONTENT_LENGTH') > 0) {
-                    $this->settings->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $this->request->server('CONTENT_LENGTH') / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
-                    return;
-                }
-
                 // Verify that the uploaded image is a JPEG
                 $uploaded_file_name = $file->getRealPath();
                 $size_info = getimagesize($uploaded_file_name);
