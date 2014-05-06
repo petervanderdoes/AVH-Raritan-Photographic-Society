@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use PDO;
 use DOMDocument;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Frontend
 {
@@ -347,17 +348,22 @@ class Frontend
                     exit();
                 }
 
+                $file = $this->request->file('file_name');
+                if ($file === null) {
+                    $this->settings->errmsg = 'You did not select a file to upload';
+                    return;
+                }
+
+                if (!$file->isValid()) {
+                    $this->settings->errmsg = $file->getErrorMessage();
+                    return;
+                }
+
                 // If we exceed the post_max_size the $_POST and $_FILES are empty
                 if ($this->request->isMethod('POST') && $this->request->request->count() == 0 && $this->request->files->count() == 0 && $this->request->server('CONTENT_LENGTH') > 0) {
                     $this->settings->errmsg = "Your submitted file failed to transfer successfully.<br>The submitted file is " . sprintf("%dMB", $this->request->server('CONTENT_LENGTH') / 1024 / 1024) . " which exceeds the maximum file size of " . ini_get('post_max_size') . "B<br>" . "Click <a href=\"/competitions/resize_digital_images.html#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.";
                     return;
                 }
-
-                if (!$this->request->hasFile('file_name')) {
-                    $this->settings->errmsg = 'You did not select a file to upload';
-                    return;
-                }
-                $file = $this->request->file('file_name');
 
                 // Verify that the uploaded image is a JPEG
                 $uploaded_file_name = $file->getRealPath();
@@ -366,9 +372,11 @@ class Frontend
                     $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                     return;
                 }
-                if (!$this->checkUploadEntry()) {
+                if (!$this->request->has('title')) {
+                    $this->settings->errmsg = 'Please enter your image title in the Title field.';
                     return;
                 }
+
                 // Retrieve and parse the selected competition cookie
                 if ($this->request->hasCookie('RPS_MyEntries')) {
                     list ($this->settings->comp_date, $this->settings->classification, $this->settings->medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
@@ -891,38 +899,6 @@ class Frontend
         echo '<rsp stat="' . $status . '">' . "\n";
         echo '	' . $message . "\n";
         echo "</rsp>\n";
-    }
-
-    /**
-     * Check the upload entry for errors.
-     */
-    private function checkUploadEntry()
-    {
-        // @formatter:off
-        $errors = array (
-            UPLOAD_ERR_INI_SIZE   => "The submitted file exceeds the upload_max_filesize directive (" . ini_get("upload_max_filesize") . "B) in php.ini.<br>Please report the exact text of this error message to the Digital Chair.<br>Try downsizing your image to 1024x788 pixels and submit again.",
-            UPLOAD_ERR_FORM_SIZE  => "The submitted file exceeds the maximum file size of " . $this->request->input('MAX_FILE_SIZE') / 1000 . "KB.<br />Click <a href=\"/digital/Resize Digital Images.shtml#Set_File_Size\">here</a> for instructions on setting the overall size of your file on disk.<br>Please report the exact text of this error message to the Digital Chair.</p>",
-            UPLOAD_ERR_PARTIAL    => "The submitted file was only partially uploaded.<br>Please report the exact text of this error message to the Digital Chair.",
-            UPLOAD_ERR_NO_FILE    => "No file was submitted.&nbsp; Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit",
-            UPLOAD_ERR_NO_TMP_DIR => "Missing a temporary folder.<br>Please report the exact text of this error message to the Digital Chair.",
-            UPLOAD_ERR_CANT_WRITE => "Failed to write file to disk on server.<br>Please report the exact text of this error message to the Digital Chair."
-        );
-        // @formatter:on
-
-        $_upload_ok = true;
-        $file = $this->request->file('file_name');
-        if (!$this->request->has('title')) {
-            $this->settings->errmsg = 'Please enter your image title in the Title field.';
-            $_upload_ok = false;
-        } else {
-            $error_code = $file->getError();
-            if ($error_code !== UPLOAD_ERR_OK) {
-                $_upload_ok = false;
-                $this->settings->errmsg = isset($errors[$error_code]) ? $errors[$error_code] : "Unknown File Upload Error<br>Please report the exact text of this error message to the Digital Chair.";
-            }
-        }
-
-        return $_upload_ok;
     }
 
     /**
