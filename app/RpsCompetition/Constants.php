@@ -7,7 +7,7 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '1.4.0-dev.1';
+    const PLUGIN_VERSION = '1.4.0-dev.15';
 
     const PLUGIN_README_URL = '';
 
@@ -35,4 +35,28 @@ final class Constants
     const MENU_POSITION_COMPETITION = '25.avh-rps-plugin.1';
 
     const MENU_POSITION_ENTRIES = '25.avh-rps-plugin.2';
+
+    const IMAGE_QUALITY = 90;
+
+    const IMAGE_MAX_WIDTH_ENTRY = 1024;
+
+    const IMAGE_MAX_HEIGHT_ENTRY = 768;
+
+    // @formatter:off
+    private static $image_sizes = array (
+        'FULL' => array('width'=>1024,'height'=>768),
+        '800' => array('width'=>800,'height'=>800),
+        '250' => array('width'=>250,'height'=>250),
+        '200' => array('width'=>200,'height'=>200),
+        '150' => array('width'=>150,'height'=>150),
+        '75' => array('width'=>75,'height'=>75),
+    );
+    // @formatter:on
+    public static function get_image_size($size)
+    {
+        if (key_exists($size, self::$image_sizes)) {
+            return self::$image_sizes[(string) $size];
+        }
+        return null;
+    }
 }

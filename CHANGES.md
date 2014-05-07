@@ -1,7 +1,8 @@
 ## Changelog
 
-#### Version 1.4.0
+#### Version 1.4.0-dev.15
 * Improved check for uploaded files to the competitions.
+* Use image library.
 
 #### Version 1.3.11
 * The stripslashes function is no longer needed

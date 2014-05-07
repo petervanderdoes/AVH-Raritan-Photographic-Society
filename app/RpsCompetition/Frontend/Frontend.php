@@ -10,6 +10,7 @@ use PDO;
 use DOMDocument;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use RpsCompetition\Constants;
 
 class Frontend
 {
@@ -434,34 +435,15 @@ class Frontend
                 }
 
                 // If the .jpg file is too big resize it
-                if ($size_info[0] > $this->settings->max_width_entry || $size_info[1] > $this->settings->max_height_entry) {
-                    // If this is a landscape image and the aspect ratio is less than the aspect ratio of the projector
-                    if ($size_info[0] > $size_info[1] && $size_info[0] / $size_info[1] < $this->settings->max_width_entry / $this->settings->max_height_entry) {
-                        // Set the maximum width to ensure the height does not exceed the maximum height
-                        $size = $this->settings->max_height_entry * $size_info[0] / $size_info[1];
-                    } else {
-                        // if its landscape and the aspect ratio is greater than the projector
-                        if ($size_info[0] > $size_info[1]) {
-                            // Set the maximum width to the width of the projector
-                            $size = $this->settings->max_width_entry;
+                if ($size_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $size_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
 
-                            // If its a portrait image
-                        } else {
-                            // Set the maximum height to the height of the projector
-                            $size = $this->settings->max_height_entry;
-                        }
-                    }
                     // Resize the image and deposit it in the destination directory
-                    $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, '');
-                    // if (! $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', $size, 95, ''));
-                    // {
-                    // $this->settings->errmsg = "There is a problem resizing the picture for the use of the projector.";
-                    // return;
-                    // }
+                    $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
                     $resized = 1;
 
-                    // The uploaded image does not need to be resized so just move it to the destination directory
+
                 } else {
+                    // The uploaded image does not need to be resized so just move it to the destination directory
                     $resized = 0;
                     try {
                         $file->move($path, $dest_name . '.jpg');
