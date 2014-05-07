@@ -1,9 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend;
 
-use DOMDocument;
 use Illuminate\Http\Request;
-use PDO;
 use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
