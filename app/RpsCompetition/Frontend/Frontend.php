@@ -10,6 +10,7 @@ use PDO;
 use DOMDocument;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use RpsCompetition\Constants;
 
 class Frontend
 {
@@ -434,14 +435,15 @@ class Frontend
                 }
 
                 // If the .jpg file is too big resize it
-                if ($size_info[0] > $this->settings->max_width_entry || $size_info[1] > $this->settings->max_height_entry) {
+                if ($size_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $size_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
 
                     // Resize the image and deposit it in the destination directory
                     $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
                     $resized = 1;
 
-                    // The uploaded image does not need to be resized so just move it to the destination directory
+
                 } else {
+                    // The uploaded image does not need to be resized so just move it to the destination directory
                     $resized = 0;
                     try {
                         $file->move($path, $dest_name . '.jpg');

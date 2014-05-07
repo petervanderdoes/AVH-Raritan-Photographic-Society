@@ -82,8 +82,6 @@ class Core
         $this->settings->comp_date = '';
         $this->settings->classification = '';
         $this->settings->medium = '';
-        $this->settings->max_width_entry = 1024;
-        $this->settings->max_height_entry = 768;
     }
 
     public function rpsResizeImage($image_name, $thumb_name, $size)
