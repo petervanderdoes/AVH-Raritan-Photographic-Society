@@ -437,7 +437,7 @@ class Frontend
                 if ($size_info[0] > $this->settings->max_width_entry || $size_info[1] > $this->settings->max_height_entry) {
 
                     // Resize the image and deposit it in the destination directory
-                    $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL', 95, '');
+                    $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
                     $resized = 1;
 
                     // The uploaded image does not need to be resized so just move it to the destination directory

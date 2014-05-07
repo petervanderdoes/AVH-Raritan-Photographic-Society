@@ -86,7 +86,7 @@ class Core
         $this->settings->max_height_entry = 768;
     }
 
-    public function rpsResizeImage($image_name, $thumb_name, $size, $quality, $maker)
+    public function rpsResizeImage($image_name, $thumb_name, $size)
     {
         $maker = trim($maker);
 
@@ -100,7 +100,7 @@ class Core
         $image=Image::make($image_name);
         $new_size= Constants::get_image_size($size);
         $image->resize($new_size['width'], $new_size['height'], true, false);
-        $image->save($thumb_name,$quality);
+        $image->save($thumb_name,Constants::IMAGE_QUALITY);
         return true;
     }
 
@@ -115,7 +115,7 @@ class Core
         }
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $thumb_name, $size, 80, "");
+            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $thumb_name, $size);
         }
 
         $p = explode('/', $file_parts['dirname']);

@@ -36,6 +36,8 @@ final class Constants
 
     const MENU_POSITION_ENTRIES = '25.avh-rps-plugin.2';
 
+    const IMAGE_QUALITY = 90;
+
     private static $image_sizes = array (
         'FULL' => array('width'=>1024,'height'=>768),
         '800' => array('width'=>800,'height'=>800),
