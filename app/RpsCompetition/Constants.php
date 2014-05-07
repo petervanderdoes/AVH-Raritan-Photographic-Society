@@ -39,9 +39,10 @@ final class Constants
     const IMAGE_QUALITY = 90;
 
     const IMAGE_MAX_WIDTH_ENTRY = 1024;
+
     const IMAGE_MAX_HEIGHT_ENTRY = 768;
 
-    // formatter:off
+    // @formatter:off
     private static $image_sizes = array (
         'FULL' => array('width'=>1024,'height'=>768),
         '800' => array('width'=>800,'height'=>800),
@@ -50,9 +51,9 @@ final class Constants
         '150' => array('width'=>150,'height'=>150),
         '75' => array('width'=>75,'height'=>75),
     );
-    // formatter:on
-
-    public static function get_image_size($size) {
+    // @formatter:on
+    public static function get_image_size($size)
+    {
         if (key_exists($size, self::$image_sizes)) {
             return self::$image_sizes[(string) $size];
         }

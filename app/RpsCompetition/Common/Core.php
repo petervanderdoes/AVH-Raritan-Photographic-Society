@@ -95,10 +95,10 @@ class Core
         if (file_exists($thumb_name)) {
             return true;
         }
-        $image=Image::make($image_name);
-        $new_size= Constants::get_image_size($size);
+        $image = Image::make($image_name);
+        $new_size = Constants::get_image_size($size);
         $image->resize($new_size['width'], $new_size['height'], true, false);
-        $image->save($thumb_name,Constants::IMAGE_QUALITY);
+        $image->save($thumb_name, Constants::IMAGE_QUALITY);
         return true;
     }
 
