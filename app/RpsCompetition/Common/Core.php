@@ -3,6 +3,8 @@ namespace RpsCompetition\Common;
 
 use RpsCompetition\Settings;
 use Illuminate\Http\Request;
+use Intervention\Image\Image;
+use RpsCompetition\Constants;
 
 class Core
 {
@@ -92,65 +94,28 @@ class Core
         if (!file_exists($image_name)) {
             return false;
         }
-        $original_img = imagecreatefromjpeg($image_name);
-        // Calculate the height and width of the resized image
-        $dimensions = GetImageSize($image_name);
-        if (!(false === $dimensions)) {
-            $w = $dimensions[0];
-            $h = $dimensions[1];
-            if ($w > $h) { // Landscape image
-                $nw = $size;
-                $nh = $h * $size / $w;
-            } else { // Portrait image
-                $nh = $size;
-                $nw = $w * $size / $h;
-            }
-        } else {
-            // set new size
-            $nw = "0";
-            $nh = "0";
+        if (file_exists($thumb_name)) {
+            return true;
         }
-        // Downsize the original image
-        $thumb_img = imagecreatetruecolor($nw, $nh);
-        imagecopyresampled($thumb_img, $original_img, 0, 0, 0, 0, $nw, $nh, $w, $h);
-
-        // If this is the 400px image, write the copyright notice onto the image
-        if (!(empty($maker))) {
-            $dateParts = explode("-", $this->settings->comp_date);
-            $year = $dateParts[0];
-            $black = imagecolorallocate($thumb_img, 0, 0, 0);
-            $white = imagecolorallocate($thumb_img, 255, 255, 255);
-            $font = 5;
-            $text = "Copyright " . substr($this->settings->comp_date, 0, 4) . " $maker";
-            $width = imagesx($thumb_img);
-            $height = imagesy($thumb_img);
-            $textLength = imagefontwidth($font) * strlen($text);
-            $textHeight = imagefontwidth($font);
-
-            // imagestring($img, $font, 5, $height/2, $text, $red);
-            imagestring($thumb_img, $font, 7, $height - ($textHeight * 2), $text, $black);
-            imagestring($thumb_img, $font, 5, $height - ($textHeight * 2) - 2, $text, $white);
-        }
-        // Write the downsized image back to disk
-        imagejpeg($thumb_img, $thumb_name, $quality);
-
-        // Free up memory
-        imagedestroy($thumb_img);
-
+        $image=Image::make($image_name);
+        $new_size= Constants::get_image_size($size);
+        $image->resize($new_size['width'], $new_size['height'], true, false);
+        $image->save($thumb_name,$quality);
         return true;
     }
 
-    public function rpsGetThumbnailUrl($row, $size)
+    public function rpsGetThumbnailUrl($record, $size)
     {
-        $file_parts = pathinfo($row->Server_File_Name);
+        $file_parts = pathinfo($record->Server_File_Name);
         $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_name = $file_parts['filename'] . '_' . $size . '.jpg';
 
         if (!is_dir($thumb_dir)) {
             mkdir($thumb_dir, 0755);
         }
 
-        if (!file_exists($thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg')) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $file_parts['filename'] . '_' . $size . '.jpg', $size, 80, "");
+        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $thumb_name, $size, 80, "");
         }
 
         $p = explode('/', $file_parts['dirname']);
