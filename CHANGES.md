@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.4.0-dev.15
+#### Version 1.4.0-dev.21
 * Improved check for uploaded files to the competitions.
 * Use image library.
 
