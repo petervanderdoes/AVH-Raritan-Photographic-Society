@@ -1,12 +1,12 @@
 <?php
 namespace RpsCompetition\Competition;
 
-use RpsCompetition\Settings;
-use RpsCompetition\Common\Core;
-use RpsCompetition\Db\RpsDb;
 use Avh\Html\HtmlBuilder;
 use Illuminate\Http\Request;
+use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Settings;
 
 class ListTable extends \WP_List_Table
 {

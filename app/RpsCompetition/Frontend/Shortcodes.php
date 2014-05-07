@@ -1,12 +1,12 @@
 <?php
 namespace RpsCompetition\Frontend;
 
-use RpsCompetition\Settings;
+use Avh\Html\FormBuilder;
+use Avh\Html\HtmlBuilder;
+use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
-use Avh\Html\HtmlBuilder;
-use Avh\Html\FormBuilder;
-use Illuminate\Http\Request;
+use RpsCompetition\Settings;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {

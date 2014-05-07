@@ -1,15 +1,15 @@
 <?php
 namespace RpsCompetition\Admin;
 
-use RpsCompetition\Competition\ListTable as CompetitionListTable;
-use RpsCompetition\Entries\ListTable as EntriesListTable;
-use RpsCompetition\Common\Core;
-use RpsCompetition\Settings;
-use RpsCompetition\Constants;
-use RpsCompetition\Db\RpsDb;
 use Avh\Utility\Common;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
+use RpsCompetition\Common\Core;
+use RpsCompetition\Competition\ListTable as CompetitionListTable;
+use RpsCompetition\Constants;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entries\ListTable as EntriesListTable;
+use RpsCompetition\Settings;
 
 /* @var $formBuilder \Avh\Html\FormBuilder */
 final class Admin

@@ -1,10 +1,10 @@
 <?php
 namespace RpsCompetition\Common;
 
-use RpsCompetition\Settings;
 use Illuminate\Http\Request;
 use Intervention\Image\Image;
 use RpsCompetition\Constants;
+use RpsCompetition\Settings;
 
 class Core
 {

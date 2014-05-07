@@ -1,16 +1,15 @@
 <?php
 namespace RpsCompetition\Frontend;
 
-use RpsCompetition\Settings;
-use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Db\RPSPDO;
-use RpsCompetition\Common\Core;
+use DOMDocument;
 use Illuminate\Http\Request;
 use PDO;
-use DOMDocument;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\RPSPDO;
+use RpsCompetition\Settings;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class Frontend
 {
