@@ -276,7 +276,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 // Display this thumbnail in the the next available column
                 echo "<td align=\"center\" class=\"thumb_cell\">\n";
                 echo "  <div class=\"thumb_canvas\">\n";
-                echo "    <a href=\"" . $this->core->rpsGetThumbnailUrl($recs, 400) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                echo "    <a href=\"" . $this->core->rpsGetThumbnailUrl($recs, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
                 echo "    <img class=\"thumb_img\" src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
                 echo "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
                 echo "  </div>\n</td>\n";

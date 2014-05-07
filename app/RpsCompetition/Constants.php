@@ -41,7 +41,6 @@ final class Constants
     private static $image_sizes = array (
         'FULL' => array('width'=>1024,'height'=>768),
         '800' => array('width'=>800,'height'=>800),
-        '400' => array('width'=>400,'height'=>400),
         '250' => array('width'=>250,'height'=>250),
         '200' => array('width'=>200,'height'=>200),
         '150' => array('width'=>150,'height'=>150),
