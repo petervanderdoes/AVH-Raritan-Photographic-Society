@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 1.4.0-dev.23
+ * Version: 1.4.0-dev.41
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -13,6 +13,7 @@
 use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Admin\Initialize;
+use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Settings;
@@ -24,7 +25,6 @@ use RpsCompetition\Settings;
  * for our application. We just need to utilize it! We'll require it
  * into the script here so that we do not have to worry about the
  * loading of any our classes "manually". Feels great to relax.
- *
  */
 require __DIR__ . '/vendor/autoload.php';
 
@@ -51,7 +51,13 @@ class AVH_RPS_Client
             return new Settings();
         });
 
+        $this->container->singleton('RpsCompetition\Db\RpsDb', function ()
+        {
+            return new RpsDb();
+        });
+
         $this->settings = $this->container->make('RpsCompetition\Settings');
+        $db = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->plugin_dir = $dir;
         $this->settings->plugin_basename = $basename;

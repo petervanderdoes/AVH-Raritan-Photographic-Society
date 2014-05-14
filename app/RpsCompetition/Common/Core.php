@@ -86,8 +86,6 @@ class Core
 
     public function rpsResizeImage($image_name, $thumb_name, $size)
     {
-        $maker = trim($maker);
-
         // Open the original image
         if (!file_exists($image_name)) {
             return false;

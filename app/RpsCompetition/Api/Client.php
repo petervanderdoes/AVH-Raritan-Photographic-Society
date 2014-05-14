@@ -11,6 +11,7 @@ class Client
 
     /**
      * Create a XML File with the competition dates
+     *
      * @param \Illuminate\Http\Request $request
      */
     public static function sendXmlCompetitionDates(\Illuminate\Http\Request $request)
@@ -74,6 +75,7 @@ class Client
 
     /**
      * Handles request by client to download images for a particular date,
+     *
      * @param \Illuminate\Http\Request $request
      */
     public static function sendCompetitions(\Illuminate\Http\Request $request)
@@ -101,6 +103,7 @@ class Client
 
     /**
      * Handles the uploading of the score file
+     *
      * @param \Illuminate\Http\Request $request
      */
     public static function doUploadScore(\Illuminate\Http\Request $request)

@@ -6,7 +6,10 @@ use Avh\Html\HtmlBuilder;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Settings;
+use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryMiscellaneous;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -46,7 +49,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
-        $this->rpsdb->setUserId(get_current_user_id());
+        $current_user_id = get_current_user_id();
         $this->html = new \Avh\Html\HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
         $this->request = $request;
@@ -62,6 +65,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayCategoryWinners($atts, $content, $tag)
     {
         global $wpdb;
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $class = 'Beginner';
         $award = '1';
@@ -71,7 +75,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $competiton_date = date('Y-m-d H:i:s', strtotime($date));
         $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
 
-        $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $class);
+        $entries = $query_miscellaneous->getWinner($competiton_date, $award_map[$award], $class);
 
         echo '<section class="rps-showcase-category-winner">';
         echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
@@ -89,17 +93,16 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $classification = $entry->Classification;
             $comp = "$classification<br>$medium";
             $title = $entry->Title;
-            $last_name = $entry->LastName;
-            $first_name = $entry->FirstName;
             $award = $entry->Award;
+            $user_info = get_userdata($entry->Member_ID);
 
             echo '<li class="gallery-item">';
             echo '	<div class="gallery-item-content">';
             echo '<div class="gallery-item-content-image">';
-            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
             echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
-            $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
+            $caption = "$title<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
             echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
             echo '	</div></div>';
             echo '</li>' . "\n";
@@ -107,11 +110,17 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</ul>';
         echo '</div>';
         echo '</section>';
+        unset($query_miscellaneous);
     }
 
     public function displayMonthlyWinners($atts, $content, $tag)
     {
         global $post;
+        global $wpdb;
+
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+
         $months = array();
         $themes = array();
 
@@ -121,6 +130,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->season_start_year = "";
         $this->settings->selected_year = "";
         $this->settings->selected_month = "";
+
+        $seasons = $this->getSeasons();
+        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+        $this->settings->selected_year = substr($last_scored->Competition_Date, 0, 4);
+        $this->settings->selected_month = substr($last_scored->Competition_Date, 5, 2);
 
         if ($this->request->has('submit_control')) {
             $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
@@ -132,16 +146,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 case 'new_season':
                     $this->settings->selected_season = esc_attr($this->request->input('new_season'));
                     $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-                    $this->settings->selected_month = "";
+                    $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
                     break;
                 case 'new_month':
                     $this->settings->selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
                     $this->settings->selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
             }
         }
-        $seasons = $this->getSeasons();
 
-        $scores = $this->rpsdb->getMonthlyScores();
+        $scores = $query_miscellaneous->getMonthlyScores($this->settings->season_start_date, $this->settings->season_end_date);
 
         if (is_array($scores) && (!empty($scores))) {
             $scored_competitions = true;
@@ -171,7 +184,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month + 1, 1);
         }
 
-        $max_num_awards = $this->rpsdb->getMaxAwards();
+        $max_num_awards = $query_miscellaneous->getMaxAwards($this->settings->min_date, $this->settings->max_date);
 
         // Start displaying the form
         echo '<script type="text/javascript">';
@@ -235,7 +248,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 }
                 echo "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
             }
-            $award_winners = $this->rpsdb->getWinners();
+            $date_object = new \DateTime($this_month);
+            $award_winners = $query_miscellaneous->getWinners($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
             // Iterate through all the award winners and display each thumbnail in a grid
             $row = 0;
             $column = 0;
@@ -296,17 +310,23 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo 'There are no scored competitions for the selected season.';
         }
         echo "<br />\n";
+
+        unset($query_competitions, $query_miscellaneous);
     }
 
     public function displayAllScores($atts, $content, $tag)
     {
         global $post;
+
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+
         if ($this->request->has('selected_season_list')) {
             $this->settings->selected_season = $this->request->input('selected_season_list');
         }
         $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
 
-        $seasons = $this->rpsdb->getSeasonListOneEntry();
+        $seasons = $query_miscellaneous->getSeasonListWithEntries($this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
         arsort($seasons);
         if (!isset($this->settings->selected_season)) {
             $this->settings->selected_season = $seasons[count($seasons) - 1];
@@ -316,7 +336,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, 9, 1);
         $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, 9, 1);
 
-        $competition_dates = $this->rpsdb->getClubCompetitionDates();
+        $competition_dates = $query_competitions->getCompetitionDates($this->settings->season_start_date, $this->settings->season_end_date);
         // Build an array of competition dates in "MM/DD" format for column titles.
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
@@ -331,7 +351,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
         }
 
-        $club_competition_results_unsorted = $this->rpsdb->getClubCompetitionResults();
+        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($this->settings->season_start_date, $this->settings->season_end_date);
         $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
         // Bail out if no entries found
         if (empty($club_competition_results)) {
@@ -548,11 +568,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             // We're all done
             echo "</table>";
         }
+        unset($query_competitions, $query_miscellaneous);
     }
 
     public function displayScoresCurrentUser($atts, $content, $tag)
     {
         global $post;
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         if ($this->request->has('selected_season_list')) {
             $this->settings->selected_season = $this->request->input('selected_season_list');
@@ -590,7 +612,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<th class="form_frame_header">Title</th>';
         echo '<th class="form_frame_header" width="8%">Score</th>';
         echo '<th class="form_frame_header" width="8%">Award</th></tr>';
-        $scores = $this->rpsdb->getScoresCurrentUser();
+        $scores = $query_miscellaneous->getScoresUser($this->current_user_id, $this->settings->season_start, $this->settings->season_end);
 
         // Bail out if not entries found
         if (empty($scores)) {
@@ -651,11 +673,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             }
             echo "</table>";
         }
+        unset($query_miscellaneous);
     }
 
     public function displayEditTitle($atts, $content, $tag)
     {
         global $post;
+        $query_entries = new QueryEntries($this->rpsdb);
+
         if ($this->request->has('m')) {
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
@@ -667,7 +692,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
         $entry_id = $this->request->input('id');
 
-        $recs = $this->rpsdb->getEntryInfo($entry_id);
+        $recs = $query_entries->getEntryById($entry_id);
         // Legacy need. Previously titles would be stores with added slashes.
         $title = $recs->Title;
         $server_file_name = $recs->Server_File_Name;
@@ -706,11 +731,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo '</form>';
+        unset($query_entries);
     }
 
     public function displayMyEntries($atts, $content, $tag)
     {
         global $post;
+
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         // Default values
         $medium = 'digital';
@@ -831,7 +860,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
         if ($this->settings->comp_date != "") {
-            $close_date = $this->rpsdb->getCompetitionCloseDate();
+            $close_date = $query_competitions->getCompetitionCloseDate($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
             if (!empty($close_date)) {
                 $close_epoch = strtotime($close_date);
                 $time_to_close = $close_epoch - current_time('timestamp');
@@ -852,12 +881,12 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</tr>';
 
         // Retrieve the maximum number of entries per member for this competition
-        $max_entries_per_member_per_comp = $this->rpsdb->getCompetitionMaxEntries();
+        $max_entries_per_member_per_comp = $query_competitions->getCompetitionMaxEntries($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
 
         // Retrive the total number of entries submitted by this member for this competition date
-        $total_entries_submitted = $this->rpsdb->getCompetitionEntriesUser();
+        $total_entries_submitted = $query_entries->countEntriesSubmittedByMember($this->current_user_id);
 
-        $entries = $this->rpsdb->getCompetitionSubmittedEntriesUser();
+        $entries = $query_entries->getEntriesSubmittedByMember($this->current_user_id, $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
         // Build the rows of submitted images
         $numRows = 0;
         $numOversize = 0;
@@ -950,6 +979,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         // All done, close out the table and the form
         echo "</table>\n</form>\n<br />\n";
+
+        unset($query_entries, $query_competitions);
     }
 
     public function displayUploadEntry($atts, $content, $tag)
@@ -1026,6 +1057,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayPersonWinners($atts, $content, $tag)
     {
         global $wpdb;
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $id = 0;
         extract($atts, EXTR_OVERWRITE);
@@ -1034,7 +1066,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         echo '<div class="rps-sc-text entry-content">';
         echo '<ul>';
-        $entries = $this->rpsdb->getEightsAndHigherPerson($id);
+        $entries = $query_miscellaneous->getEightsAndHigherPerson($id);
         $images = array_rand($entries, 3);
 
         foreach ($images as $key) {
@@ -1068,6 +1100,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</ul>';
         echo '</div>';
         echo '</section>';
+
+        unset($query_miscellaneous);
     }
 
     /**
@@ -1077,13 +1111,23 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private function getSeasons()
     {
-        $seasons = $this->rpsdb->getSeasonList();
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $seasons = $query_miscellaneous->getSeasonList('ASC', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
         if (empty($this->settings->selected_season)) {
             $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
+
+        // @TODO: Serious to do: Take this construction and make it better.
         $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
+
+        $date = new \DateTime($this->settings->season_start_year . '-' . $this->settings->club_season_start_month_num);
+        $this->settings->season_start_date = $date->format('Y-m-d');
+
+        // @TODO: The 6 is the end of the season.
+        $date = new \DateTime(substr($this->settings->selected_season, 5, 2) . '-6-1');
+        $this->settings->season_end_date = $date->format('Y-m-t');
+
+        unset($query_miscellaneous);
         return $seasons;
     }
 }

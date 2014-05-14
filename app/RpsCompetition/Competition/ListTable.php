@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Settings;
 
 class ListTable extends \WP_List_Table
@@ -58,7 +60,7 @@ class ListTable extends \WP_List_Table
         if (empty($default_status)) {
             $default_status = 'all';
         }
-        $status = $this->request->input('avhrps_competition_list_status',$default_status );
+        $status = $this->request->input('avhrps_competition_list_status', $default_status);
         if (!in_array($status, array('all', 'open', 'closed', 'search'))) {
             $status = 'all';
         }
@@ -80,45 +82,48 @@ class ListTable extends \WP_List_Table
     {
         global $post_id, $competition_status, $search, $comment_type;
 
-        $competition_status = $this->request->input('competition_status','open');
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
+        $competition_status = $this->request->input('competition_status', 'open');
         if (!in_array($competition_status, array('all', 'open', 'closed'))) {
             $competition_status = 'open';
         }
 
-        $search = $this->request->input('s','');
+        $search = $this->request->input('s', '');
         $s = $search;
 
         if ($competition_status == 'open') {
-            $orderby = $this->request->input('orderby','Competition_Date ASC, Class_Code ASC, Medium ASC');
+            $orderby = $this->request->input('orderby', 'Competition_Date ASC, Class_Code ASC, Medium');
         } else {
-            $orderby = $this->request->input('orderby','Competition_Date DESC, Class_Code ASC, Medium ASC');
+            $orderby = $this->request->input('orderby', 'Competition_Date DESC, Class_Code ASC, Medium');
         }
-        $order = $this->request->input('order','');
+        $order = $this->request->input('order', '');
 
         $competitions_per_page = $this->get_per_page($competition_status);
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        $number = (int)  $this->request->input('number', $competitions_per_page + min(8, $competitions_per_page));
+        $number = (int) $this->request->input('number', $competitions_per_page + min(8, $competitions_per_page));
 
         $page = $this->get_pagenum();
 
-        $start = $this->request->input('start',($page - 1) * $competitions_per_page);
+        $start = $this->request->input('start', ($page - 1) * $competitions_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
-            $start += $this->request->input('offset',0);
+            $start += $this->request->input('offset', 0);
         }
 
         $args = array('status' => $competition_status, 'search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order);
 
-        $_competitions = $this->rpsdb->getCompetitions($args);
+        $_competitions = $query_competitions->query($args);
         $this->items = array_slice($_competitions, 0, $competitions_per_page);
         $this->extra_items = array_slice($_competitions, $competitions_per_page);
 
-        $total_competitions = $this->rpsdb->getCompetitions(array_merge($args, array('count' => true, 'offset' => 0, 'number' => 0)));
+        $total_competitions = $query_competitions->query(array_merge($args, array('count' => true, 'offset' => 0, 'number' => 0)));
 
         $this->set_pagination_args(array('total_items' => $total_competitions, 'per_page' => $competitions_per_page));
 
+        unset($query_competitions);
     }
 
     public function get_per_page($competition_status = 'open')
@@ -157,7 +162,9 @@ class ListTable extends \WP_List_Table
     {
         global $totals, $competition_status;
 
-        $num_competitions = $this->rpsdb->countCompetitions();
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
+        $num_competitions = $query_competitions->countCompetitions();
         $status_links = array();
         $stati = array('all' => _nx_noop('All', 'All', 'competitions'), 'open' => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>', 'Open <span class="count">(<span class="open-count">%s</span>)</span>'), 'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>', 'Closed <span class="count">(<span class="closed-count">%s</span>)</span>'));
 
@@ -174,6 +181,7 @@ class ListTable extends \WP_List_Table
             $status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_competitions->$status), number_format_i18n($num_competitions->$status)) . '</a>';
         }
 
+        unset($query_competitions);
         return $status_links;
     }
 
@@ -272,7 +280,6 @@ class ListTable extends \WP_List_Table
         $date_text = mysql2date(get_option('date_format'), $competition->Competition_Date);
         echo $date_text;
 
-        $user_ID = get_current_user_id();
         $url = admin_url('admin.php') . '?';
 
         $queryReferer = array('page' => Constants::MENU_SLUG_COMPETITION);
@@ -368,9 +375,12 @@ class ListTable extends \WP_List_Table
     public function column_entries($competition)
     {
         global $wpdb;
+        $query_entries = new QueryEntries($this->rpsdb);
 
         $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competition->ID);
-        $entries = $this->rpsdb->getEntries(array('where' => $sqlWhere, 'count' => true));
+        $entries = $query_entries->query(array('where' => $sqlWhere, 'count' => true));
         echo $entries;
+
+        unset($query_entries);
     }
 }

@@ -8,6 +8,8 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Competition\ListTable as CompetitionListTable;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Settings;
 
@@ -198,6 +200,7 @@ final class Admin
      */
     private function handleRequestCompetition()
     {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         if ($this->request->has('wp_http_referer')) {
             $redirect = remove_query_arg(array('wp_http_referer', 'updated', 'delete_count'), stripslashes($this->request->input('wp_http_referer')));
         } else {
@@ -254,7 +257,7 @@ final class Admin
                 foreach ((array) $competitionIds as $id) {
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'N';
-                    $this->rpsdb->insertCompetition($data);
+                    $query_competitions->insertCompetition($data);
                     ++$count;
                 }
                 $redirect = add_query_arg(array('count' => $count, 'update' => 'open_many'), $redirect);
@@ -273,7 +276,7 @@ final class Admin
                 foreach ((array) $competitionIds as $id) {
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'Y';
-                    $this->rpsdb->insertCompetition($data);
+                    $query_competitions->insertCompetition($data);
                     ++$count;
                 }
                 $redirect = add_query_arg(array('count' => $count, 'update' => 'close_many'), $redirect);
@@ -285,7 +288,7 @@ final class Admin
                     check_admin_referer('score_' . $this->request->input('competition'));
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'Y';
-                    $this->rpsdb->insertCompetition($data);
+                    $query_competitions->insertCompetition($data);
                 }
                 wp_redirect($redirect);
                 break;
@@ -294,12 +297,12 @@ final class Admin
                     check_admin_referer('score_' . $this->request->input('competition'));
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'N';
-                    $this->rpsdb->insertCompetition($data);
+                    $query_competitions->insertCompetition($data);
                 }
                 wp_redirect($redirect);
                 break;
             default:
-                if ($this->request->has('_wp_http_referer') ) {
+                if ($this->request->has('_wp_http_referer')) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
@@ -312,6 +315,7 @@ final class Admin
                 }
                 break;
         }
+        unset($query_competitions);
     }
 
     /**
@@ -319,18 +323,19 @@ final class Admin
      */
     public function handleAjax()
     {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         if ($this->request->has('scored')) {
             if ($this->request->input('scored') == 'Yes') {
                 $data['ID'] = (int) $this->request->input('id');
                 $data['Scored'] = 'N';
-                $result = $this->rpsdb->insertCompetition($data);
+                $result = $query_competitions->insertCompetition($data);
                 $response = json_encode(array('text' => 'N', 'scored' => 'No', 'scoredtext' => 'Yes'));
             }
             if ($this->request->input('scored') == 'No') {
                 $data['ID'] = (int) $this->request->input('id');
                 $data['Scored'] = 'Y';
-                $result = $this->rpsdb->insertCompetition($data);
+                $result = $query_competitions->insertCompetition($data);
                 $response = json_encode(array('text' => 'Y', 'scored' => 'Yes', 'scoredtext' => 'No'));
             }
             if (is_wp_error($result)) {
@@ -339,6 +344,7 @@ final class Admin
                 echo $response;
             }
         }
+        unset($query_competitions);
         die();
     }
 
@@ -378,6 +384,9 @@ final class Admin
     {
         global $wpdb;
 
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
         if (!$this->request->has('competitions')) {
             $competitionIdsArray = array(intval($this->request->input('competition')));
         } else {
@@ -397,9 +406,9 @@ final class Admin
         foreach ($competitionIdsArray as $competitionID) {
 
             $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competitionID);
-            $entries = $this->rpsdb->getEntries(array('where' => $sqlWhere, 'count' => true));
+            $entries = $query_entries->query(array('where' => $sqlWhere, 'count' => true));
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $this->rpsdb->getCompetitions(array('where' => $sqlWhere));
+            $competition = $query_competitions->query(array('where' => $sqlWhere));
             $competition = $competition[0];
             if ($entries !== "0") {
                 echo "<li>" . sprintf(__('ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium, $entries) . "</li>\n";
@@ -416,6 +425,7 @@ final class Admin
         }
         echo $formBuilder->close();
         $this->displayAdminFooter();
+        unset($query_entries, $query_competitions);
     }
 
     /**
@@ -424,6 +434,8 @@ final class Admin
     private function displayPageCompetitionEdit()
     {
         global $wpdb;
+
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition-edit');
@@ -439,7 +451,7 @@ final class Admin
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
 
-        $competition = $this->rpsdb->getCompetitionByID2($this->request->input('competition'));
+        $competition = $query_competitions->getCompetitionById($this->request->input('competition'));
 
         $formOptions['date'] = mysql2date('Y-m-d', $competition->Competition_Date);
         $formOptions['close-date'] = mysql2date('Y-m-d', $competition->Close_Date);
@@ -546,6 +558,8 @@ final class Admin
         echo '});', "\n";
         echo "</script>";
         $this->displayAdminFooter();
+
+        unset($query_competitions);
     }
 
     /**
@@ -558,6 +572,8 @@ final class Admin
     private function displayPageCompetitionOpenClose($action)
     {
         global $wpdb;
+
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         if ($action == 'open') {
             $title = 'Open Competitions';
@@ -585,7 +601,7 @@ final class Admin
 
         foreach ($competitionIdsArray as $competitionID) {
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $this->rpsdb->getCompetitions(array('where' => $sqlWhere), ARRAY_A);
+            $competition = $query_competitions->query(array('where' => $sqlWhere), ARRAY_A);
             $competition = $competition[0];
             echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'), $competitionID, mysql2date(get_option('date_format'), $competition->Competition_Date), $competition->Theme, $competition->Classification, $competition->Medium) . "</li>\n";
         }
@@ -595,6 +611,7 @@ final class Admin
 
         echo $formBuilder->close();
         $this->displayAdminFooter();
+        unset($query_competitions);
     }
 
     /**
@@ -683,6 +700,8 @@ final class Admin
      */
     public function menuCompetitionAdd()
     {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
         $option_name = 'competition_add';
 
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
@@ -766,7 +785,7 @@ final class Admin
                             $data['Medium'] = $medium_convert[$medium];
                             foreach ($formNewOptions['classification'] as $classification) {
                                 $data['Classification'] = $classification_convert[$classification];
-                                $competition_ID = $this->rpsdb->insertCompetition($data);
+                                $competition_ID = $query_competitions->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
                                     wp_die($competition_ID);
                                 }
@@ -780,6 +799,7 @@ final class Admin
                     $formOptions = $formNewOptions;
                     break;
             }
+            unset($query_competitions);
         }
 
         $this->displayAdminHeader('Add Competition');
@@ -901,6 +921,8 @@ final class Admin
      */
     private function handleRequestEntries()
     {
+        $query_entries = new QueryEntries($this->rpsdb);
+
         if ($this->request->has('wp_http_referer')) {
             $redirect = remove_query_arg(array('wp_http_referer', 'updated', 'delete_count'), stripslashes($this->request->input('wp_http_referer')));
         } else {
@@ -935,7 +957,7 @@ final class Admin
 
                 foreach ((array) $entryIds as $id) {
                     $id = (int) $id;
-                    $this->rpsdb->deleteEntry($id);
+                    $query_entries->deleteEntry($id);
                     ++$deleteCount;
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
@@ -943,7 +965,7 @@ final class Admin
                 break;
 
             default:
-                if ($this->request->has('_wp_http_referer') ) {
+                if ($this->request->has('_wp_http_referer')) {
                     wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
@@ -956,6 +978,7 @@ final class Admin
                 }
                 break;
         }
+        unset($query_entries);
     }
 
     /**
@@ -1037,6 +1060,9 @@ final class Admin
     private function displayPageEntriesDelete()
     {
         global $wpdb;
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
 
         if (!$this->request->has('entries')) {
@@ -1053,10 +1079,10 @@ final class Admin
         $goDelete = 0;
         foreach ($entryIdsArray as $entryID) {
 
-            $entry = $this->rpsdb->getEntryInfo($entryID, OBJECT);
+            $entry = $query_entries->getEntryById($entryID, OBJECT);
             if ($entry !== null) {
                 $user = get_user_by('id', $entry->Member_ID);
-                $competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
+                $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
                 echo "<li>";
                 echo $formBuilder->hidden('entries[]', $entryID);
                 printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'), $entryID, $entry->Title, $user->first_name, $user->last_name, $competition->Theme, mysql2date(get_option('date_format'), $competition->Competition_Date));
@@ -1076,6 +1102,7 @@ final class Admin
 
         echo $formBuilder->close();
         $this->displayAdminFooter();
+        unset($query_entries, $query_competitions);
     }
 
     /**
@@ -1084,6 +1111,8 @@ final class Admin
     private function displayPageEntriesEdit()
     {
         global $wpdb;
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $updated = false;
 
@@ -1105,8 +1134,8 @@ final class Admin
         }
 
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
-        $entry = $this->rpsdb->getEntryInfo($this->request->input('entry'), OBJECT);
-        $competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
+        $entry = $query_entries->getEntryById($this->request->input('entry'), OBJECT);
+        $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
 
         $this->displayAdminHeader('Edit Entry');
 
@@ -1168,6 +1197,8 @@ final class Admin
         echo $formBuilder->fieldNonce($entry->ID);
         echo $formBuilder->close();
         $this->displayAdminFooter();
+
+        unset($query_entries, $query_competitions);
     }
 
     /**
@@ -1177,17 +1208,19 @@ final class Admin
      */
     private function updateEntry()
     {
+        $query_entries = new QueryEntries($this->rpsdb);
         $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
-        $entry = $this->rpsdb->getEntryInfo($id);
+        $entry = $query_entries->getEntryById($id);
 
         $return = false;
         $formOptionsNew['title'] = empty($formOptions['title']) ? $entry['Title'] : $formOptions['title'];
         if ($entry['Title'] != $formOptionsNew['title']) {
             $data = array('ID' => $id, 'Title' => $formOptionsNew['title']);
-            $return = $this->rpsdb->updateEntry($data);
+            $return = $query_entries->updateEntry($data);
         }
 
+        unset($query_entries);
         return $return;
     }
 
@@ -1344,6 +1377,8 @@ final class Admin
      */
     private function updateCompetition()
     {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
         $formOptions = $this->request->input('competition-edit');
 
         $formOptionsNew['date'] = $formOptions['date'];
@@ -1373,8 +1408,9 @@ final class Admin
         $data['Scored'] = ($formOptionsNew['scored'] ? 'Y' : 'N');
         $data['Medium'] = $_medium[$formOptionsNew['medium']];
         $data['Classification'] = $_classification[$formOptionsNew['classification']];
-        $competition_ID = $this->rpsdb->insertCompetition($data);
+        $competition_ID = $query_competitions->insertCompetition($data);
 
+        unset($query_competitions);
         if (is_wp_error($competition_ID)) {
             return false;
         } else {

@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Settings;
-
 
 class ListTable extends \WP_List_Table
 {
@@ -81,7 +83,9 @@ class ListTable extends \WP_List_Table
     {
         global $post_id, $entry_status, $search, $comment_type;
 
-        $entry_status = $this->request->input('entry_status','all');
+        $query_entries = new QueryEntries($this->rpsdb);
+
+        $entry_status = $this->request->input('entry_status', 'all');
         if (!in_array($entry_status, array('all'))) {
             $entry_status = 'all';
         }
@@ -89,8 +93,8 @@ class ListTable extends \WP_List_Table
         $search = $this->request->input('s', '');
         $s = $search;
 
-        $orderby = $this->request->input('orderby','Competition_ID');
-        $order = $this->request->input('order','');
+        $orderby = $this->request->input('orderby', 'Competition_ID DESC, Member_ID');
+        $order = $this->request->input('order', '');
 
         $entries_per_page = $this->get_per_page($entry_status);
 
@@ -98,14 +102,13 @@ class ListTable extends \WP_List_Table
 
         $number = (int) $this->request->input('number', $entries_per_page + min(8, $entries_per_page)); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
 
-
         $where = '1=1';
         if ($this->request->has('user_id')) {
-            $where = 'Member_ID=' . $this->request->input('user_id');
+            $where = 'Member_ID=' . esc_sql($this->request->input('user_id'));
         }
         $page = $this->get_pagenum();
 
-            $start = $this->request->input('start', ($page - 1) * $entries_per_page);
+        $start = $this->request->input('start', ($page - 1) * $entries_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
             $start += $this->request->input('offset');
@@ -113,14 +116,13 @@ class ListTable extends \WP_List_Table
 
         $args = array('search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order, 'where' => $where);
 
-        $_entries = $this->rpsdb->getEntries($args);
+        $_entries = $query_entries->query($args);
         $this->items = array_slice($_entries, 0, $entries_per_page);
         $this->extra_items = array_slice($_entries, $entries_per_page);
 
-        $total_entries = $this->rpsdb->getEntries(array_merge($args, array('count' => true, 'offset' => 0, 'number' => 0)));
+        $total_entries = $query_entries->query(array_merge($args, array('count' => true, 'offset' => 0, 'number' => 0)));
 
         $this->set_pagination_args(array('total_items' => $total_entries, 'per_page' => $entries_per_page));
-
     }
 
     public function get_per_page($entry_status = 'all')
@@ -192,9 +194,10 @@ class ListTable extends \WP_List_Table
     {
         global $status;
 
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         echo '<div class="alignleft actions">';
         if ('top' == $which) {
-            $_seasons = $this->rpsdb->getSeasonList('DESC');
+            $_seasons = $query_miscellaneous->getSeasonList('DESC', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
             $season = $this->request->input('filter-season', 0);
             echo '<select name="filter-season">';
             echo '<option' . selected($season, 0, false) . ' value="0">' . __('Show all seasons') . '</option>';
@@ -204,6 +207,7 @@ class ListTable extends \WP_List_Table
             submit_button(__('Filter'), 'button', false, false, array('id' => 'entries-query-submit'));
         }
         echo '</div>';
+        unset($query_miscellaneous);
     }
 
     public function current_action()
@@ -265,7 +269,9 @@ class ListTable extends \WP_List_Table
 
     public function column_season($entry)
     {
-        $_competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
+        $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
         if ($_competition != false) {
             $unix_date = mysql2date('U', $_competition->Competition_Date);
             $_competition_month = date('n', $unix_date);
@@ -278,14 +284,19 @@ class ListTable extends \WP_List_Table
         } else {
             echo "Unknown Season";
         }
+        unset($query_competitions);
     }
 
     public function column_competition($entry)
     {
         global $competition_status;
-        $_competition = $this->rpsdb->getCompetitionByID2($entry->Competition_ID);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
+        $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
         $competition_text = $_competition->Theme . ' - ' . $_competition->Medium . ' - ' . $_competition->Classification;
         echo $competition_text;
+
+        unset($query_competitions);
     }
 
     public function column_name($entry)

@@ -6,8 +6,11 @@ use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use RpsCompetition\Db\QueryMiscellaneous;
 
 class Frontend
 {
@@ -65,6 +68,7 @@ class Frontend
 
     public function actionInit()
     {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         /* @var $shortcode \RpsCompetition\Frontend\Shortcodes */
         $shortcode = $this->container->make('RpsCompetition\Frontend\Shortcodes');
         $shortcode->register('rps_category_winners', 'displayCategoryWinners');
@@ -76,17 +80,17 @@ class Frontend
         $shortcode->register('rps_upload_image', 'displayUploadEntry');
         $shortcode->register('rps_email', 'displayEmail');
         $shortcode->register('rps_person_winners', 'displayPersonWinners');
-        $userID = get_current_user_id();
-        $this->rpsdb->setUserId($userID);
-        $this->rpsdb->setCompetitionClose();
+        $user_id = get_current_user_id();
+        $query_competitions->setAllPastCompetitionsClose();
 
-        $x = get_user_meta($userID, 'rps_class_bw', true);
+        $x = get_user_meta($user_id, 'rps_class_bw', true);
         if (empty($x)) {
-            update_user_meta($userID, "rps_class_bw", 'beginner');
-            update_user_meta($userID, "rps_class_color", 'beginner');
-            update_user_meta($userID, "rps_class_print_bw", 'beginner');
-            update_user_meta($userID, "rps_class_print_color", 'beginner');
+            update_user_meta($user_id, "rps_class_bw", 'beginner');
+            update_user_meta($user_id, "rps_class_color", 'beginner');
+            update_user_meta($user_id, "rps_class_print_bw", 'beginner');
+            update_user_meta($user_id, "rps_class_print_color", 'beginner');
         }
+        unset($query_competitions);
     }
 
     public function actionTemplateRedirectRpsWindowsClient()
@@ -102,7 +106,7 @@ class Frontend
             status_header(200);
             switch ($this->request->input('rpswinclient')) {
                 case 'getcompdate':
-                   Client::sendXmlCompetitionDates($this->request);
+                    Client::sendXmlCompetitionDates($this->request);
                     break;
                 case 'download':
                     Client::sendCompetitions($this->request);
@@ -119,8 +123,9 @@ class Frontend
     public function actionShowcaseCompetitionThumbnails($ctr)
     {
         if (is_front_page()) {
+            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
             $image = array();
-            $seasons = $this->rpsdb->getSeasonList();
+            $seasons = $query_miscellaneous->getSeasonList('ASC', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
             $from_season = $seasons[count($seasons) - 3];
 
             $season_start_year = substr($from_season, 0, 4);
@@ -170,12 +175,15 @@ class Frontend
             echo '</ul>';
             echo '</div>';
             echo '</div>';
+
+            unset($query_miscellaneous);
         }
     }
 
     public function actionPreHeaderRpsMyEntries()
     {
         global $post;
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
             $this->settings->comp_date = "";
@@ -212,7 +220,7 @@ class Frontend
                         break;
 
                     case 'add':
-                        if (!$this->rpsdb->getCompetionClosed()) {
+                        if (!$query_competitions->checkCompetitionClosed($this->settings->comp_date, $this->settings->classification, $this->settings->medium)) {
                             $_query = array('m' => $this->settings->medium_subset);
                             $_query = build_query($_query);
                             $loc = '/member/upload-image/?' . $_query;
@@ -221,7 +229,7 @@ class Frontend
                         break;
 
                     case 'edit':
-                        if (!$this->rpsdb->getCompetionClosed()) {
+                        if (!$query_competitions->checkCompetitionClosed($this->settings->comp_date, $this->settings->classification, $this->settings->medium)) {
                             if (isset($entry_array) && is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
@@ -235,7 +243,7 @@ class Frontend
                         break;
 
                     case 'delete':
-                        if (!$this->rpsdb->getCompetionClosed()) {
+                        if (!$query_competitions->checkCompetitionClosed($this->settings->comp_date, $this->settings->classification, $this->settings->medium)) {
                             $this->deleteCompetitionEntries($entry_array);
                         }
                         break;
@@ -260,6 +268,7 @@ class Frontend
                 setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, time() - (24 * 3600), '/', $url['host']);
             }
         }
+        unset($query_competitions);
     }
 
     /**
@@ -269,6 +278,8 @@ class Frontend
     {
         global $post;
 
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         if (is_object($post) && $post->ID == 75) {
             if ($this->request->isMethod('POST')) {
                 $redirect_to = $this->request->input('wp_get_referer');
@@ -296,7 +307,7 @@ class Frontend
                 if (!$this->request->has('new_title')) {
                     $this->settings->errmsg = 'You must provide an image title.<br><br>';
                 } else {
-                    $recs = $this->rpsdb->getCompetitionByID($this->_entry_id);
+                    $recs = $query_competitions->getCompetitionByEntryId($this->_entry_id);
                     if ($recs == null) {
                         wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);
                     }
@@ -319,7 +330,8 @@ class Frontend
                     }
 
                     // Update the Title and File Name in the database
-                    $_result = $this->rpsdb->updateEntriesTitle($new_title, $path . '/' . $new_file_name, $this->_entry_id);
+                    $updated_data = array('ID' => $this->_entry_id, 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
+                    $_result = $query_entries->updateEntry($updated_data);
                     if ($_result === false) {
                         wp_die("Failed to UPDATE entry record from database");
                     }
@@ -330,11 +342,14 @@ class Frontend
                 }
             }
         }
+        unset($query_entries);
     }
 
     public function actionPreHeaderRpsUploadEntry()
     {
         global $post;
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         if (is_object($post) && $post->ID == 89) {
             if ($this->request->has('post')) {
@@ -349,11 +364,13 @@ class Frontend
                 $file = $this->request->file('file_name');
                 if ($file === null) {
                     $this->settings->errmsg = 'You did not select a file to upload';
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
                 if (!$file->isValid()) {
                     $this->settings->errmsg = $file->getErrorMessage();
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
@@ -362,10 +379,12 @@ class Frontend
                 $size_info = getimagesize($uploaded_file_name);
                 if ($file->getClientMimeType() != 'image/jpeg') {
                     $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+                    unset($query_entries, $query_competitions);
                     return;
                 }
                 if (!$this->request->has('title')) {
                     $this->settings->errmsg = 'Please enter your image title in the Title field.';
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
@@ -374,10 +393,11 @@ class Frontend
                     list ($this->settings->comp_date, $this->settings->classification, $this->settings->medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
                 } else {
                     $this->settings->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
-                $recs = $this->rpsdb->getIdmaxEntries();
+                $recs = $this->rpsdb->getCompetitionByDateClassMedium($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
                 if ($recs) {
                     $comp_id = $recs['ID'];
                     $max_entries = $recs['Max_Entries'];
@@ -386,6 +406,7 @@ class Frontend
                     $c = $this->classification;
                     $m = $this->medium;
                     $this->settings->errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
@@ -396,24 +417,27 @@ class Frontend
                 // Before we go any further, make sure the title is not a duplicate of
                 // an entry already submitted to this competition. Dupliacte title result in duplicate
                 // file names on the server
-                if ($this->rpsdb->checkDuplicateTitle($comp_id, $title)) {
+                if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
                     $this->settings->errmsg = "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.";
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
                 // Do a final check that the user hasn't exceeded the maximum images per competition.
                 // If we don't check this at the last minute it may be possible to exceed the
                 // maximum images per competition by having two upload windows open simultaneously.
-                $max_per_id = $this->rpsdb->checkMaxEntriesOnId($comp_id);
+                $max_per_id = $query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
                 if ($max_per_id >= $max_entries) {
                     $this->settings->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
-                $max_per_date = $this->rpsdb->checkMaxEntriesOnDate();
+                $max_per_date = $this->rpsdb->countEntriesByCompetitionDate($this->settings->comp_date, get_current_user_id());
                 if ($max_per_date >= $this->settings->club_max_entries_per_member_per_date) {
                     $x = $this->settings->club_max_entries_per_member_per_date;
                     $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
+                    unset($query_entries, $query_competitions);
                     return;
                 }
 
@@ -444,14 +468,16 @@ class Frontend
                         $file->move($path, $dest_name . '.jpg');
                     } catch (FileException $e) {
                         $this->settings->errmsg = $e->getMessage();
+                        unset($query_entries, $query_competitions);
                         return;
                     }
                 }
                 $server_file_name = str_replace($this->request->server('DOCUMENT_ROOT'), '', $full_path . '.jpg');
                 $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
-                $_result = $this->rpsdb->addEntry($data);
+                $_result = $query_entries->addEntry($data, get_current_user_id());
                 if ($_result === false) {
                     $this->settings->errmsg = "Failed to INSERT entry record into database";
+                    unset($query_entries, $query_competitions);
                     return;
                 }
                 $query = build_query(array('resized' => $resized));
@@ -459,10 +485,10 @@ class Frontend
                 exit();
             }
         }
+        unset($query_entries, $query_competitions);
     }
 
     // ----- Private Functions --------
-
 
     /**
      * Delete competition entries
@@ -472,17 +498,19 @@ class Frontend
      */
     private function deleteCompetitionEntries($entries)
     {
+        $query_entries = new QueryEntries($this->rpsdb);
+
         if (is_array($entries)) {
             foreach ($entries as $id) {
 
-                $recs = $this->rpsdb->getEntryInfo($id, OBJECT);
+                $recs = $query_entries->getEntryById($id, OBJECT);
                 if ($recs == false) {
                     $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {
 
                     $server_file_name = $this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name;
                     // Delete the record from the database
-                    $result = $this->rpsdb->deleteEntry($id);
+                    $result = $query_entries->deleteEntry($id);
                     if ($result === false) {
                         $this->settings->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
                     } else {
@@ -516,6 +544,7 @@ class Frontend
                 }
             }
         }
+        unset($query_entries);
     }
 
     /**
@@ -527,9 +556,11 @@ class Frontend
      */
     private function validateSelectedComp($date, $med)
     {
-        $open_competitions = $this->rpsdb->getOpenCompetitions($this->settings->medium_subset);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $this->settings->medium_subset);
 
         if (empty($open_competitions)) {
+            unset($query_competitions);
             return false;
         }
 
@@ -590,6 +621,7 @@ class Frontend
         $url = parse_url(get_bloginfo('url'));
         setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $hour, '/', $url['host']);
 
+        unset($query_competitions);
         return true;
     }
 }
