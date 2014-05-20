@@ -209,6 +209,23 @@ class QueryMiscellaneous
         return $return;
     }
 
+    public function getEightsAndHigher($limit)
+    {
+        $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Classification,
+                if(c.Classification = 'Beginner',1,
+                if(c.Classification = 'Advanced',2,
+                if(c.Classification = 'Salon',3,0))) as \"Class_Code\",
+                c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
+            FROM competitions c, entries e
+                WHERE c.ID = e.Competition_ID AND
+                    e.Score >= 8
+                ORDER BY RAND()
+                LIMIT %d", $limit);
+        $return = $this->rpsdb->get_results($sql);
+
+        return $return;
+    }
+
     /**
      * Get all photos of the given member_id with a score that is 8 or higher.
      *

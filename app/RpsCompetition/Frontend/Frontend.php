@@ -137,13 +137,11 @@ class Frontend
             echo '<h3>Showcase</h3>';
             echo '</div>';
 
-            echo '<div class="gallery gallery-size-150">';
-            echo '<ul class="gallery-row gallery-row-equal">';
-            $entries = $this->rpsdb->getEightsAndHigher('', $season);
-            $images = array_rand($entries, 5);
+            echo '<div class="gallery gallery-columns-5 gallery-size-150">';
+            echo '<div class="gallery-row gallery-row-equal">';
+            $records = $query_miscellaneous->getEightsAndHigher(5);
 
-            foreach ($images as $key) {
-                $recs = $entries[$key];
+            foreach ($records as $recs) {
                 $user_info = get_userdata($recs->Member_ID);
                 $recs->FirstName = $user_info->user_firstname;
                 $recs->LastName = $user_info->user_lastname;
@@ -160,19 +158,20 @@ class Frontend
                 $first_name = $recs->FirstName;
                 $award = $recs->Award;
                 // Display this thumbnail in the the next available column
-                echo '<li class="gallery-item">';
+
+                echo '<figure class="gallery-item">';
                 echo '<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
-                echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '	<img src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
-                $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
-                echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
-                echo "</div>";
-                echo "</div>";
+                echo '<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+                echo '<img src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                echo '</div>';
+                $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
+                echo "<figcaption class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</figcaption>\n";
+                echo '</div>';
 
-                echo '</li>' . "\n";
+                echo '</figure>' . "\n";
             }
-            echo '</ul>';
+            echo '</dic>';
             echo '</div>';
             echo '</div>';
 
