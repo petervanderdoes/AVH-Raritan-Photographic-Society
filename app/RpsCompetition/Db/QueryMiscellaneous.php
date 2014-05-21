@@ -209,6 +209,31 @@ class QueryMiscellaneous
         return $return;
     }
 
+    /**
+     * Get all photos for competitions between the given dates.
+     *
+     * @param string $competition_date_start
+     * @param string $competition_date_end
+     * @return unknown
+     */
+    public function getAllEntries($competition_date_start, $competition_date_end = NULL)
+    {
+        $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
+
+        $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Classification,
+                if(c.Classification = 'Beginner',1,
+                if(c.Classification = 'Advanced',2,
+                if(c.Classification = 'Salon',3,0))) as \"Class_Code\",
+                c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
+            FROM competitions c, entries e
+                WHERE c.ID = e.Competition_ID and
+                    c.Competition_Date >= %s AND
+                    c.Competition_Date <= %s
+                ORDER BY RAND()", $competition_date_start, $competition_date_end);
+        $return = $this->rpsdb->get_results($sql);
+
+        return $return;
+    }
     public function getEightsAndHigher($limit)
     {
         $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Classification,

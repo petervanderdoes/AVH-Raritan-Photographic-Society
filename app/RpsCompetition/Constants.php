@@ -49,6 +49,7 @@ final class Constants
         '250' => array('width'=>250,'height'=>250),
         '200' => array('width'=>200,'height'=>200),
         '150' => array('width'=>150,'height'=>150),
+        '150w' => array('width'=>150,'height'=>null),
         '75' => array('width'=>75,'height'=>75),
     );
     // @formatter:on

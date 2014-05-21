@@ -95,7 +95,15 @@ class Core
         }
         $image = Image::make($image_name);
         $new_size = Constants::get_image_size($size);
-        $image->resize($new_size['width'], $new_size['height'], true, false);
+        if ($new_size['height'] == null) {
+            if ($image->height <= $image->width) {
+                $image->resize($new_size['width'], $new_size['width'], true, false);
+            } else {
+                $image->resize($new_size['width'], null, true, false);
+            }
+        } else {
+            $image->resize($new_size['width'], $new_size['height'], true, false);
+        }
         $image->save($thumb_name, Constants::IMAGE_QUALITY);
         return true;
     }

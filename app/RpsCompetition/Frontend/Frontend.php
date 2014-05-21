@@ -80,6 +80,7 @@ class Frontend
         $shortcode->register('rps_upload_image', 'displayUploadEntry');
         $shortcode->register('rps_email', 'displayEmail');
         $shortcode->register('rps_person_winners', 'displayPersonWinners');
+        $shortcode->register('rps_monthly_entries', 'displayMonthlyEntries');
         $user_id = get_current_user_id();
         $query_competitions->setAllPastCompetitionsClose();
 
@@ -171,7 +172,7 @@ class Frontend
 
                 echo '</figure>' . "\n";
             }
-            echo '</dic>';
+            echo '</div>';
             echo '</div>';
             echo '</div>';
 

@@ -314,6 +314,175 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         unset($query_competitions, $query_miscellaneous);
     }
 
+    /**
+     * Show all entries for the given competition
+     *
+     * @param array $atts
+     * @param string $content
+     * @param string $tag
+     */
+    public function displayMonthlyEntries($atts, $content, $tag)
+    {
+        global $post;
+        global $wpdb;
+
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
+
+        $months = array();
+        $themes = array();
+
+        $this->settings->selected_season = '';
+        $this->settings->season_start_date = "";
+        $this->settings->season_end_date = "";
+        $this->settings->season_start_year = "";
+        $this->settings->selected_year = "";
+        $this->settings->selected_month = "";
+
+        $seasons = $this->getSeasons();
+        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+        $this->settings->selected_year = substr($last_scored->Competition_Date, 0, 4);
+        $this->settings->selected_month = substr($last_scored->Competition_Date, 5, 2);
+
+        if ($this->request->has('submit_control')) {
+            $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
+            $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+            $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
+            $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
+
+            switch ($this->request->input('submit_control')) {
+                case 'new_season':
+                    $this->settings->selected_season = esc_attr($this->request->input('new_season'));
+                    $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+                    $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
+                    break;
+                case 'new_month':
+                    $this->settings->selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
+                    $this->settings->selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
+            }
+        }
+
+        $scores = $query_miscellaneous->getMonthlyScores($this->settings->season_start_date, $this->settings->season_end_date);
+
+        if (is_array($scores) && (!empty($scores))) {
+            $scored_competitions = true;
+        } else {
+            $scored_competitions = false;
+        }
+
+        if ($scored_competitions) {
+            foreach ($scores as $recs) {
+                $key = sprintf("%d-%02s", $recs['Year'], $recs['Month_Num']);
+                $months[$key] = $recs['Month'];
+                $themes[$key] = $recs['Theme'];
+            }
+
+            if (empty($this->settings->selected_month)) {
+                end($months);
+                $this->settings->selected_year = substr(key($months), 0, 4);
+                $this->settings->selected_month = substr(key($months), 5, 2);
+            }
+        }
+
+        // Count the maximum number of awards in the selected competitions
+        $this->settings->min_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month, 1);
+        if ($this->settings->selected_month == 12) {
+            $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year + 1, 1, 1);
+        } else {
+            $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month + 1, 1);
+        }
+
+        $max_num_awards = $query_miscellaneous->getMaxAwards($this->settings->min_date, $this->settings->max_date);
+
+        // Start displaying the form
+        echo '<script type="text/javascript">';
+        echo 'function submit_form(control_name) {' . "\n";
+        echo '	document.winners_form.submit_control.value = control_name;' . "\n";
+        echo '	document.winners_form.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>';
+
+        echo '<span class="competion-monthly-winners-form"> Monthly Entries for ';
+        $action = home_url('/' . get_page_uri($post->ID));
+        $form = '';
+        $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
+        $form .= '<input name="submit_control" type="hidden">' . "\n";
+        $form .= '<input name="selected_season" type="hidden" value="' . $this->settings->selected_season . '">' . "\n";
+        $form .= '<input name="selected_year" type="hidden" value="' . $this->settings->selected_year . '">' . "\n";
+        $form .= '<input name="selected_month" type="hidden" value="' . $this->settings->selected_month . '">' . "\n";
+
+        if ($scored_competitions) {
+            // Drop down list for months
+            $form .= '<select name="new_month" onchange="submit_form(\'new_month\')">' . "\n";
+            foreach ($months as $key => $month) {
+                $selected = (substr($key, 5, 2) == $this->settings->selected_month) ? " selected" : "";
+                $form .= '<option value="' . $key . '"' . $selected . '>' . $month . '</option>' . "\n";
+            }
+            $form .= "</select>\n";
+        }
+
+        // Drop down list for season
+        $form .= '<select name="new_season" onChange="submit_form(\'new_season\')">' . "\n";
+        foreach ($seasons as $season) {
+            $selected = ($season == $this->settings->selected_season) ? " selected" : "";
+            $form .= '<option value="' . $season . '"' . $selected . '>' . $season . '</option>' . "\n";
+        }
+        $form .= '</select>' . "\n";
+        $form .= '</form>';
+        echo $form;
+        unset($form);
+        echo '</span>';
+
+        if ($scored_competitions) {
+            $this_month = sprintf("%d-%02s", $this->settings->selected_year, $this->settings->selected_month);
+            $output = '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
+
+            // We display these in masonry style
+            $output .= $this->html->element('div', false, array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
+            $output .= $this->html->element('div', true, array('class' => 'grid-sizer', 'style' => 'width: 194px'));
+            $date_object = new \DateTime($this_month);
+            $entries = $query_miscellaneous->getAllEntries($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
+            // Iterate through all the award winners and display each thumbnail in a grid
+            foreach ($entries as $recs) {
+                $user_info = get_userdata($recs->Member_ID);
+                $recs->FirstName = $user_info->user_firstname;
+                $recs->LastName = $user_info->user_lastname;
+                $recs->Username = $user_info->user_login;
+
+                // Grab a new record from the database
+                $dateParts = explode(" ", $recs->Competition_Date);
+                $comp_date = $dateParts[0];
+                $medium = $recs->Medium;
+                $classification = $recs->Classification;
+                $comp = "$classification<br>$medium";
+                $title = $recs->Title;
+                $last_name = $recs->LastName;
+                $first_name = $recs->FirstName;
+                $award = $recs->Award;
+                // Display this thumbnail in the the next available column
+
+                $output .= $this->html->element('figure', false, array('class'=>'gallery-item-masonry masonry-150'));
+                $output .= $this->html->element('div',false,array('class'=>'gallery-item-content'));
+                $output .= $this->html->element('div',false,array('class'=>'gallery-item-content-images'));
+                $output .= $this->html->element('a', false, array('href'=>$this->core->rpsGetThumbnailUrl($recs, 800),'title'=> $title . ' by ' . $first_name . ' ' . $last_name, 'rel'=>'rps-entries'));
+                $output .= $this->html->image($this->core->rpsGetThumbnailUrl($recs, '150w', true));
+                $output .= '</a>';
+                $output .= '</div>';
+                $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
+                $output .= $this->html->element('figcaption', false, array('class'=>'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
+                $output .= '</div>';
+
+                $output .= '</figure>' . "\n";
+            }
+            $output .= '</div>';
+        }
+        echo $output;
+        echo "<br />\n";
+
+        unset($query_competitions, $query_miscellaneous, $query_entries);
+    }
+
     public function displayAllScores($atts, $content, $tag)
     {
         global $post;
