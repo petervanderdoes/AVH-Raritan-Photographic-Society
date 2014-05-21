@@ -397,7 +397,7 @@ class Frontend
                     return;
                 }
 
-                $recs = $this->rpsdb->getCompetitionByDateClassMedium($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
+                $recs = $query_competitions->getCompetitionByDateClassMedium($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
                 if ($recs) {
                     $comp_id = $recs['ID'];
                     $max_entries = $recs['Max_Entries'];
@@ -433,7 +433,7 @@ class Frontend
                     return;
                 }
 
-                $max_per_date = $this->rpsdb->countEntriesByCompetitionDate($this->settings->comp_date, get_current_user_id());
+                $max_per_date = $query_entries->countEntriesByCompetitionDate($this->settings->comp_date, get_current_user_id());
                 if ($max_per_date >= $this->settings->club_max_entries_per_member_per_date) {
                     $x = $this->settings->club_max_entries_per_member_per_date;
                     $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";

@@ -21,13 +21,13 @@ class QueryEntries
      *
      * @return Ambigous <string, NULL>
      */
-    public function countEntriesSubmittedByMember($user_id)
+    public function countEntriesSubmittedByMember($user_id, $competition_date)
     {
         $sql = $this->rpsdb->prepare("SELECT COUNT(entries.ID) as Total_Submitted
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND	entries.Member_ID=%s
-                AND competitions.Competition_Date = DATE %s ", $user_id, $this->settings->comp_date);
+                AND competitions.Competition_Date = DATE %s ", $user_id, $competition_date);
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -50,7 +50,7 @@ class QueryEntries
                 AND entries.Member_ID = %s
                 AND competitions.Competition_Date = DATE %s
                 AND competitions.Classification = %s
-                AND competitions.Medium = %s", $user_id, $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
+                AND competitions.Medium = %s", $user_id, $competition_date, $classification, $medium);
         $return = $this->rpsdb->get_results($sql);
 
         return $return;

@@ -462,15 +462,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $award = $recs->Award;
                 // Display this thumbnail in the the next available column
 
-                $output .= $this->html->element('figure', false, array('class'=>'gallery-item-masonry masonry-150'));
-                $output .= $this->html->element('div',false,array('class'=>'gallery-item-content'));
-                $output .= $this->html->element('div',false,array('class'=>'gallery-item-content-images'));
-                $output .= $this->html->element('a', false, array('href'=>$this->core->rpsGetThumbnailUrl($recs, 800),'title'=> $title . ' by ' . $first_name . ' ' . $last_name, 'rel'=>'rps-entries'));
+                $output .= $this->html->element('figure', false, array('class' => 'gallery-item-masonry masonry-150'));
+                $output .= $this->html->element('div', false, array('class' => 'gallery-item-content'));
+                $output .= $this->html->element('div', false, array('class' => 'gallery-item-content-images'));
+                $output .= $this->html->element('a', false, array('href' => $this->core->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
                 $output .= $this->html->image($this->core->rpsGetThumbnailUrl($recs, '150w', true));
                 $output .= '</a>';
                 $output .= '</div>';
                 $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-                $output .= $this->html->element('figcaption', false, array('class'=>'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
+                $output .= $this->html->element('figcaption', false, array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
                 $output .= '</div>';
 
                 $output .= '</figure>' . "\n";
@@ -935,6 +935,10 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         if (!empty($this->settings->errmsg)) {
             echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
         }
+
+        if (!is_array($this->settings->open_comp_date)) {
+            return;
+        }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
         $form = '';
@@ -1053,9 +1057,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $max_entries_per_member_per_comp = $query_competitions->getCompetitionMaxEntries($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
 
         // Retrive the total number of entries submitted by this member for this competition date
-        $total_entries_submitted = $query_entries->countEntriesSubmittedByMember($this->current_user_id);
+        $total_entries_submitted = $query_entries->countEntriesSubmittedByMember(get_current_user_id(), $this->settings->comp_date);
 
-        $entries = $query_entries->getEntriesSubmittedByMember($this->current_user_id, $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
+        $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
         // Build the rows of submitted images
         $numRows = 0;
         $numOversize = 0;

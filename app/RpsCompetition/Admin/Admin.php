@@ -238,7 +238,7 @@ final class Admin
 
                 foreach ((array) $competitionIds as $id) {
                     $id = (int) $id;
-                    $this->rpsdb->deleteCompetition($id);
+                    $query_competitions->deleteCompetition($id);
                     ++$deleteCount;
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
