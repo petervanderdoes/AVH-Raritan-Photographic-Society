@@ -439,8 +439,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $output = '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
 
             // We display these in masonry style
-            $output .= $this->html->element('div', false, array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
-            $output .= $this->html->element('div', true, array('class' => 'grid-sizer', 'style' => 'width: 194px'));
+            $output .= $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
+            $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 194px'), true);
             $date_object = new \DateTime($this_month);
             $entries = $query_miscellaneous->getAllEntries($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
             // Iterate through all the award winners and display each thumbnail in a grid
@@ -462,15 +462,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $award = $recs->Award;
                 // Display this thumbnail in the the next available column
 
-                $output .= $this->html->element('figure', false, array('class' => 'gallery-item-masonry masonry-150'));
-                $output .= $this->html->element('div', false, array('class' => 'gallery-item-content'));
-                $output .= $this->html->element('div', false, array('class' => 'gallery-item-content-images'));
-                $output .= $this->html->element('a', false, array('href' => $this->core->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+                $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
+                $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
+                $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
+                $output .= $this->html->element('a', array('href' => $this->core->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
                 $output .= $this->html->image($this->core->rpsGetThumbnailUrl($recs, '150w', true));
                 $output .= '</a>';
                 $output .= '</div>';
                 $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-                $output .= $this->html->element('figcaption', false, array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
+                $output .= $this->html->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
                 $output .= '</div>';
 
                 $output .= '</figure>' . "\n";
