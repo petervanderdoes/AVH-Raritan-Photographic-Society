@@ -181,6 +181,17 @@ class QueryCompetitions
         return $result;
     }
 
+    public function getCompetitionByDates($start, $end, $output = OBJECT)
+    {
+        $sql = $this->rpsdb->prepare("SELECT *
+            FROM competitions
+            WHERE Competition_Date >= %s AND
+                Competition_Date <= %s", $start, $end);
+        $result = $this->rpsdb->get_results($sql, $output);
+
+        return $result;
+    }
+
     /**
      * Delete a competition
      *

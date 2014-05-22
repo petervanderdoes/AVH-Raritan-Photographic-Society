@@ -84,6 +84,7 @@ class ListTable extends \WP_List_Table
         global $post_id, $entry_status, $search, $comment_type;
 
         $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $entry_status = $this->request->input('entry_status', 'all');
         if (!in_array($entry_status, array('all'))) {
@@ -105,6 +106,14 @@ class ListTable extends \WP_List_Table
         $where = '1=1';
         if ($this->request->has('user_id')) {
             $where = 'Member_ID=' . esc_sql($this->request->input('user_id'));
+        }
+        if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
+            $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
+            $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
+            foreach ($competitions as $competition) {
+                $competition_ids[] = $competition->ID;
+            }
+            $where = 'Competition_ID IN (' . implode(',', $competition_ids) . ')';
         }
         $page = $this->get_pagenum();
 
@@ -215,10 +224,6 @@ class ListTable extends \WP_List_Table
         if ($this->request->has('clear-recent-list')) {
             return 'clear-recent-list';
         }
-        if ($this->request->input('filter-season')) {
-            return 'filter-season';
-        }
-
         return parent::current_action();
     }
 

@@ -200,6 +200,19 @@ class Core
         }
     }
 
+    public function getSeasonDates($season) {
+        // @TODO: Serious to do: Take this construction and make it better.
+        $season_start_year = substr($season, 0, 4);
+
+        $date = new \DateTime($season_start_year . '-' . $this->settings->club_season_start_month_num);
+        $season_dates['start'] = $date->format('Y-m-d');
+
+        // @TODO: The 6 is the end of the season.
+        $date = new \DateTime(substr($season, 5, 2) . '-6-1');
+        $season_dates['end'] = $date->format('Y-m-t');
+
+        return $season_dates;
+    }
     /**
      * Check if the user is a paid member
      *
