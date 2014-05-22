@@ -109,8 +109,19 @@ class ListTable extends \WP_List_Table
         }
         if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
             $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
-            $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
+            $where = $this->rpsdb->prepare('Competition_Date >= %s AND Competition_Date <= %s', $season_dates['start'], $season_dates['end']);
+
+            $filter_theme = $this->request->input('filter-theme', 0);
+            if ($filter_theme != 0) {
+                $x = $query_competitions->getCompetitionById($filter_theme);
+                $where .= $this->rpsdb->prepare(' AND Theme = %s', $x->Theme);
+            }
+            $sql_query=array('where' => $where);
+
+            $competitions = $query_competitions->query($sql_query);
+
             foreach ($competitions as $competition) {
+
                 $competition_ids[] = $competition->ID;
             }
             $where = 'Competition_ID IN (' . implode(',', $competition_ids) . ')';
@@ -204,19 +215,40 @@ class ListTable extends \WP_List_Table
         global $status;
 
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         echo '<div class="alignleft actions">';
         if ('top' == $which) {
             $_seasons = $query_miscellaneous->getSeasonList('DESC', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
             $season = $this->request->input('filter-season', 0);
             echo '<select name="filter-season">';
-            echo '<option' . selected($season, 0, false) . ' value="0">' . __('Show all seasons') . '</option>';
+            echo '<option' . selected($season, 0, false) . ' value="0">' . __('All seasons') . '</option>';
             foreach ($_seasons as $_season) {
                 echo '<option' . selected($season, $_season, false) . ' value="' . esc_attr($_season) . '">' . $_season . '</option>';
+            }
+            echo '</select>';
+
+            if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
+                $theme_request = $this->request->input('filter-theme',0);
+                $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
+                 $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
+                foreach ($competitions as $competition) {
+                 $themes[$competition->ID] = $competition->Theme;
+                }
+                ksort($themes);
+                $themes = array_unique($themes);
+                asort($themes);
+
+                echo $this->html->element('select',array('name'=>'filter-theme'));
+                echo '<option' . selected($theme_request, 0, false) . ' value="0">' . __('All Competition Themes') . '</option>';
+                foreach ($themes as $theme_key => $theme_value) {
+                    echo '<option' . selected($theme_request, $theme_key, false) . ' value="' . esc_attr($theme_key) . '">' . $theme_value . '</option>';
+                }
+                echo '</select>';
             }
             submit_button(__('Filter'), 'button', false, false, array('id' => 'entries-query-submit'));
         }
         echo '</div>';
-        unset($query_miscellaneous);
+        unset($query_miscellaneous, $query_competitions);
     }
 
     public function current_action()
