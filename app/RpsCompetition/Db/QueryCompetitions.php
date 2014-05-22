@@ -346,6 +346,21 @@ class QueryCompetitions
             $limits = '';
         }
 
+        if (isset($status)) {
+            switch ($status) {
+                case 'open':
+                    $where = 'Closed="N"';
+                    break;
+                case 'closed':
+                    $where = 'Closed="Y"';
+                    break;
+                case 'all':
+                default:
+                    $where = '1=1';
+                    break;
+            }
+        }
+
         if ($count) {
             $fields = 'COUNT(*)';
             $orderby = 'ID';
