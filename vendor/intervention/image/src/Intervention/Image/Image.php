@@ -1799,6 +1799,7 @@ class Image
      */
     private function isBinary($input)
     {
+        return false;
         $mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), (string) $input);
         return substr($mime, 0, 4) != 'text';
     }
@@ -1870,7 +1871,7 @@ class Image
         $clone = imagecreatetruecolor($this->width, $this->height);
         imagealphablending($clone, false);
         imagesavealpha($clone, true);
-        
+
         imagecopy($clone, $resource, 0, 0, 0, 0, $this->width, $this->height);
 
         return $clone;
