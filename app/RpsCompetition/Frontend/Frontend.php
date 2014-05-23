@@ -376,8 +376,8 @@ class Frontend
 
                 // Verify that the uploaded image is a JPEG
                 $uploaded_file_name = $file->getRealPath();
-                $size_info = getimagesize($uploaded_file_name);
-                if ($file->getClientMimeType() != 'image/jpeg') {
+                $uploaded_file_info = getimagesize($uploaded_file_name);
+                if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
                     $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
                     unset($query_entries, $query_competitions);
                     return;
@@ -456,7 +456,7 @@ class Frontend
                 }
 
                 // If the .jpg file is too big resize it
-                if ($size_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $size_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
+                if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
 
                     // Resize the image and deposit it in the destination directory
                     $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
