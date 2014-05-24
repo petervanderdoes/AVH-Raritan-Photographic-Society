@@ -1249,9 +1249,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $recs->LastName = $user_info->user_lastname;
             $recs->Username = $user_info->user_login;
 
-            // Grab a new record from the database
-            $dateParts = explode(" ", $recs->Competition_Date);
-            $comp_date = $dateParts[0];
             $medium = $recs->Medium;
             $classification = $recs->Classification;
             $comp = "$classification<br>$medium";
