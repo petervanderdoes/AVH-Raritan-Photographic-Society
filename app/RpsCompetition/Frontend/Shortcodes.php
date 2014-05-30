@@ -782,7 +782,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<th class="form_frame_header">Title</th>';
         echo '<th class="form_frame_header" width="8%">Score</th>';
         echo '<th class="form_frame_header" width="8%">Award</th></tr>';
-        $scores = $query_miscellaneous->getScoresUser($this->current_user_id, $this->settings->season_start, $this->settings->season_end);
+        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $this->settings->season_start_date, $this->settings->season_end_date);
 
         // Bail out if not entries found
         if (empty($scores)) {
@@ -824,13 +824,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 } else {
                     $prev_medium = $medium;
                 }
-                                $score_award = "";
-                                if ($score > "") {
-                                    $score_award = " / {$score}pts";
-                                }
-                                if ($award > "") {
-                                    $score_award .= " / $award";
-                                }
+                $score_award = "";
+                if ($score > "") {
+                    $score_award = " / {$score}pts";
+                }
+                if ($award > "") {
+                    $score_award .= " / $award";
+                }
 
                 echo "<tr>";
                 echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
@@ -899,24 +899,24 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $this->settings->season_start_date, $this->settings->season_end_date);
         $banquet_id = $query_banquet->getBanquets($this->settings->season_start_date, $this->settings->season_end_date);
         $banquet_id_string = '0';
-        $banquet_id_array=array();
+        $banquet_id_array = array();
         $disabled = '';
         if (is_array($banquet_id)) {
             $banquet_id_array[] = '0';
             foreach ($banquet_id as $record) {
                 $banquet_id_array[] = $record['ID'];
                 if ($record['Closed'] == 'Y') {
-                    $disabled='disabled="1"';
+                    $disabled = 'disabled="1"';
                 }
             }
 
             $banquet_id_string = implode(',', $banquet_id_array);
         }
-        $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "'.get_current_user_id().'"';
+        $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
         $banquet_entries = $query_entries->query(array('where' => $where));
         $all_entries = array();
         foreach ($banquet_entries as $banquet_entry) {
-            $all_entries[]=$banquet_entry->ID;
+            $all_entries[] = $banquet_entry->ID;
         }
         // Bail out if not entries found
         if (empty($scores)) {
@@ -972,16 +972,16 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
                 echo "<tr>";
                 echo "<td align=\"center\" valign=\"middle\" class=\"$rowStyle\" width=\"3%\">";
-                $checked ='';
+                $checked = '';
                 foreach ($banquet_entries as $banquet_entry) {
 
-                if (!empty($banquet_entry) && $banquet_entry->Title == $title){
-                $checked = 'checked="checked"';
-                break;
-                }
+                    if (!empty($banquet_entry) && $banquet_entry->Title == $title) {
+                        $checked = 'checked="checked"';
+                        break;
+                    }
                 }
 
-                $entry_id=$recs['Entry_ID'];
+                $entry_id = $recs['Entry_ID'];
                 echo "<input type=\"checkbox\" name=\"entry_id[]\" value=\"$entry_id\" $checked $disabled/>";
                 echo '</td>';
                 echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
@@ -999,24 +999,23 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo "</table>";
             if (empty($disabled)) {
                 echo '<input type="submit" name="submit" value="Update">';
-                    echo '<input type="submit" name="cancel" value="Cancel">';
+                echo '<input type="submit" name="cancel" value="Cancel">';
             }
             echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
             echo '<input type="hidden" name="allentries" value="', implode(',', $all_entries) . '" />';
-                echo '<input type="hidden" name="banquetids" value="'.$banquet_id_string.'" />';
-                echo '</form>';
-                echo '<script type="text/javascript">' . "\n";
-                    echo "jQuery('.banquet :checkbox').change(function () {\n";
+            echo '<input type="hidden" name="banquetids" value="' . $banquet_id_string . '" />';
+            echo '</form>';
+            echo '<script type="text/javascript">' . "\n";
+            echo "jQuery('.banquet :checkbox').change(function () {\n";
             echo "    var cs=jQuery(this).closest('.banquet').find(':checkbox:checked');\n";
             echo "    if (cs.length > 5) {\n";
             echo "        this.checked=false;\n";
             echo "    }\n";
-                echo "});\n";
-                    echo '</script>';
+            echo "});\n";
+            echo '</script>';
         }
         unset($query_miscellaneous, $query_banquet);
     }
-
 
     public function displayEditTitle($atts, $content, $tag)
     {
