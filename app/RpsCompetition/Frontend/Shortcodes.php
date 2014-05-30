@@ -50,7 +50,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
-        $current_user_id = get_current_user_id();
         $this->html = new \Avh\Html\HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
         $this->request = $request;
@@ -65,7 +64,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     public function displayCategoryWinners($atts, $content, $tag)
     {
-        global $wpdb;
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $class = 'Beginner';
@@ -88,11 +86,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<div class="gallery gallery-size-250">';
         echo '<ul class="gallery-row gallery-row-equal">';
         foreach ($entries as $entry) {
-            $dateParts = explode(" ", $entry->Competition_Date);
-            $comp_date = $dateParts[0];
-            $medium = $entry->Medium;
             $classification = $entry->Classification;
-            $comp = "$classification<br>$medium";
             $title = $entry->Title;
             $award = $entry->Award;
             $user_info = get_userdata($entry->Member_ID);
@@ -117,7 +111,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayMonthlyWinners($atts, $content, $tag)
     {
         global $post;
-        global $wpdb;
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -128,7 +121,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->selected_season = '';
         $this->settings->season_start_date = "";
         $this->settings->season_end_date = "";
-        $season_start_year = "";
         $this->settings->selected_year = "";
         $this->settings->selected_month = "";
 
@@ -139,14 +131,12 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         if ($this->request->has('submit_control')) {
             $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
-            $season_start_year = substr($this->settings->selected_season, 0, 4);
             $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
             $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
 
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
                     $this->settings->selected_season = esc_attr($this->request->input('new_season'));
-                    $season_start_year = substr($this->settings->selected_season, 0, 4);
                     $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
                     break;
                 case 'new_month':
@@ -261,8 +251,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $prev_comp = $comp;
 
                 // Grab a new record from the database
-                $dateParts = explode(" ", $recs->Competition_Date);
-                $comp_date = $dateParts[0];
                 $medium = $recs->Medium;
                 $classification = $recs->Classification;
                 $comp = "$classification<br>$medium";
@@ -325,7 +313,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayMonthlyEntries($atts, $content, $tag)
     {
         global $post;
-        global $wpdb;
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -337,7 +324,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->selected_season = '';
         $this->settings->season_start_date = "";
         $this->settings->season_end_date = "";
-        $season_start_year = "";
         $this->settings->selected_year = "";
         $this->settings->selected_month = "";
 
@@ -348,14 +334,12 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         if ($this->request->has('submit_control')) {
             $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
-            $season_start_year = substr($this->settings->selected_season, 0, 4);
             $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
             $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
 
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
                     $this->settings->selected_season = esc_attr($this->request->input('new_season'));
-                    $season_start_year = substr($this->settings->selected_season, 0, 4);
                     $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
                     break;
                 case 'new_month':
@@ -393,8 +377,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         } else {
             $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month + 1, 1);
         }
-
-        $max_num_awards = $query_miscellaneous->getMaxAwards($this->settings->min_date, $this->settings->max_date);
 
         // Start displaying the form
         echo '<script type="text/javascript">';
@@ -452,15 +434,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $recs->Username = $user_info->user_login;
 
                 // Grab a new record from the database
-                $dateParts = explode(" ", $recs->Competition_Date);
-                $comp_date = $dateParts[0];
-                $medium = $recs->Medium;
-                $classification = $recs->Classification;
-                $comp = "$classification<br>$medium";
                 $title = $recs->Title;
                 $last_name = $recs->LastName;
                 $first_name = $recs->FirstName;
-                $award = $recs->Award;
                 // Display this thumbnail in the the next available column
 
                 $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
@@ -511,6 +487,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
         $total_max_entries = 0;
+        $comp_dates=array();
+        $comp_max_entries=array();
+        $comp_num_judges=array();
         foreach ($competition_dates as $key => $recs) {
             $comp_date = $recs['Competition_Date'];
             $date_parts = explode(" ", $comp_date);
@@ -809,7 +788,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                     $prev_medium = "";
                 }
 
-                $a = realpath($recs['Server_File_Name']);
                 $image_url = home_url($recs['Server_File_Name']);
 
                 if ($prev_date == $dateParts[0]) {
@@ -1038,8 +1016,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $title = $recs->Title;
         $server_file_name = $recs->Server_File_Name;
 
-        $relative_path = $server_file_name;
-
         if (isset($this->settings->errmsg)) {
             echo '<div id="errmsg">';
             echo $this->settings->errmsg;
@@ -1113,7 +1089,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
-        $form = '';
         echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
         echo '<input type="hidden" name="submit_control">' . "\n";
         echo '<input type="hidden" name="comp_date" value="' . $this->settings->comp_date . '">' . "\n";
@@ -1131,7 +1106,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
         echo "<tr><td align=\"center\" colspan=\"6\">\n";
         echo "<table width=\"100%\">\n";
-        $theme_uri_images = get_stylesheet_directory_uri() . '/images';
         echo '<tr>';
         echo '<td width="25%">';
         // echo '<span class="rps-comp-medium">' . $this->settings->medium . '</span>';
@@ -1164,7 +1138,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
-        $prev_date = "";
         $compdates = array_unique($this->settings->open_comp_date);
         foreach ($compdates as $key => $comp_date) {
             $selected = '';
@@ -1243,8 +1216,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
 
             // Thumbnail column
-            $user = wp_get_current_user();
-            $a = realpath($recs->Server_File_Name);
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
             // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
@@ -1334,10 +1305,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         if ($this->request->has('m')) {
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
-                $medium_param = "?m=prints";
             } else {
                 $medium_subset = "Digital";
-                $medium_param = "?m=digital";
             }
         }
 
@@ -1401,7 +1370,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     public function displayPersonWinners($atts, $content, $tag)
     {
-        global $wpdb;
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $id = 0;
@@ -1421,13 +1389,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $recs->LastName = $user_info->user_lastname;
             $recs->Username = $user_info->user_login;
 
-            $medium = $recs->Medium;
-            $classification = $recs->Classification;
-            $comp = "$classification<br>$medium";
             $title = $recs->Title;
             $last_name = $recs->LastName;
             $first_name = $recs->FirstName;
-            $award = $recs->Award;
             // Display this thumbnail in the the next available column
             echo '<li>';
             echo '<div>';
