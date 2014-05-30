@@ -1,18 +1,18 @@
 [
     {
         "name": "illuminate/support",
-        "version": "v4.1.28",
-        "version_normalized": "4.1.28.0",
+        "version": "v4.1.29",
+        "version_normalized": "4.1.29.0",
         "target-dir": "Illuminate/Support",
         "source": {
             "type": "git",
             "url": "https://github.com/illuminate/support.git",
-            "reference": "69b248f240719e8d764ee6ec0384819fa57d60bb"
+            "reference": "7716337401e573ba69923d335c0ee01fd5448df7"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/illuminate/support/zipball/69b248f240719e8d764ee6ec0384819fa57d60bb",
-            "reference": "69b248f240719e8d764ee6ec0384819fa57d60bb",
+            "url": "https://api.github.com/repos/illuminate/support/zipball/7716337401e573ba69923d335c0ee01fd5448df7",
+            "reference": "7716337401e573ba69923d335c0ee01fd5448df7",
             "shasum": ""
         },
         "require": {
@@ -24,7 +24,7 @@
             "patchwork/utf8": "1.1.*",
             "phpunit/phpunit": "4.0.*"
         },
-        "time": "2014-03-22 20:29:54",
+        "time": "2014-05-02 18:11:11",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -55,17 +55,17 @@
     },
     {
         "name": "intervention/image",
-        "version": "1.6.3",
-        "version_normalized": "1.6.3.0",
+        "version": "1.6.4",
+        "version_normalized": "1.6.4.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Intervention/image.git",
-            "reference": "83402d5e4f06e2237144ead92e65407b119b60e2"
+            "reference": "606228bc7614105125d0e65b4187d5e436facf76"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Intervention/image/zipball/83402d5e4f06e2237144ead92e65407b119b60e2",
-            "reference": "83402d5e4f06e2237144ead92e65407b119b60e2",
+            "url": "https://api.github.com/repos/Intervention/image/zipball/606228bc7614105125d0e65b4187d5e436facf76",
+            "reference": "606228bc7614105125d0e65b4187d5e436facf76",
             "shasum": ""
         },
         "require": {
@@ -79,7 +79,7 @@
         "suggest": {
             "intervention/imagecache": "Caching extension for the Intervention Image library"
         },
-        "time": "2014-04-18 15:54:35",
+        "time": "2014-04-29 14:50:43",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

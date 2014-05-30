@@ -82,6 +82,7 @@ return array(
     'RpsCompetition\\Common\\Core' => $baseDir . '/app/RpsCompetition/Common/Core.php',
     'RpsCompetition\\Competition\\ListTable' => $baseDir . '/app/RpsCompetition/Competition/ListTable.php',
     'RpsCompetition\\Constants' => $baseDir . '/app/RpsCompetition/Constants.php',
+    'RpsCompetition\\Db\\QueryBanquet' => $baseDir . '/app/RpsCompetition/Db/QueryBanquet.php',
     'RpsCompetition\\Db\\QueryCompetitions' => $baseDir . '/app/RpsCompetition/Db/QueryCompetitions.php',
     'RpsCompetition\\Db\\QueryEntries' => $baseDir . '/app/RpsCompetition/Db/QueryEntries.php',
     'RpsCompetition\\Db\\QueryMiscellaneous' => $baseDir . '/app/RpsCompetition/Db/QueryMiscellaneous.php',

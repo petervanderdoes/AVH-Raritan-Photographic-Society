@@ -11,6 +11,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\QueryBanquet;
 
 class Frontend
 {
@@ -58,6 +59,7 @@ class Frontend
         add_action('wp', array($this, 'actionPreHeaderRpsMyEntries'));
         add_action('wp', array($this, 'actionPreHeaderRpsEditTitle'));
         add_action('wp', array($this, 'actionPreHeaderRpsUploadEntry'));
+        add_action('wp', array($this, 'actionPreHeaderRpsBanquetEntries'));
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
     }
 
@@ -74,6 +76,7 @@ class Frontend
         $shortcode->register('rps_category_winners', 'displayCategoryWinners');
         $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
         $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');
+        $shortcode->register('rps_banquet_current_user', 'displayBanquetCurrentUser');
         $shortcode->register('rps_all_scores', 'displayAllScores');
         $shortcode->register('rps_my_entries', 'displayMyEntries');
         $shortcode->register('rps_edit_title', 'displayEditTitle');
@@ -488,6 +491,62 @@ class Frontend
         unset($query_entries, $query_competitions);
     }
 
+    public function actionPreHeaderRpsBanquetEntries()
+    {
+        global $post;
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
+        if (is_object($post) && $post->post_title == 'Banquet Entries') {
+            if ($this->request->isMethod('POST')) {
+                $redirect_to = $this->request->input('wp_get_referer');
+
+                // Just return if user clicked Cancel
+                if ($this->request->has('cancel')) {
+                    wp_redirect($redirect_to);
+                    exit();
+                }
+
+                if ($this->request->has('submit')) {
+                    if ($this->request->has('allentries')) {
+                        $all_entries = explode(',', $this->request->input('allentries'));
+                        foreach ($all_entries as $entry) {
+                            $query_entries->deleteEntry($entry);
+                        }
+                    }
+                    $entries = $this->request->input('entry_id', array());
+                    foreach ($entries as $entry_id) {
+                        $entry = $query_entries->getEntryById($entry_id, OBJECT);
+                        $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
+                        $banquet_ids = explode(',', $this->request->input('banquetids'));
+                        foreach ($banquet_ids as $banquet_id) {
+                            $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
+                            if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
+                                // Move the file to its final location
+                                $comp_date = strtok($banquet_record->Competition_Date, ' ');
+                                $classification = $banquet_record->Classification;
+                                $medium = $banquet_record->Medium;
+                                $path = $this->request->server('DOCUMENT_ROOT') . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                                if (!is_dir($path)) {
+                                    mkdir($path, 0755);
+                                }
+
+                                $file_name = pathinfo($entry->Server_File_Name);
+                                $server_file_name = $path . '/' . $file_name['basename'];
+                                $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name, ENT_QUOTES, get_bloginfo('charset'));
+                                // Need to create the destination folder?
+                                copy($original_filename, $server_file_name);
+                                $data = array('Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $server_file_name);
+                                $this->rpsdb->addEntry($data);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        unset($query_entries, $query_competitions);
+    }
+
     // ----- Private Functions --------
 
     /**
@@ -569,6 +628,9 @@ class Frontend
         $date_index = -1;
         $medium_index = -1;
         foreach ($open_competitions as $recs) {
+            if ($recs['Theme'] == 'Annual Banquet') {
+                continue;
+            }
             // Append this competition to the arrays
             $dateParts = explode(" ", $recs['Competition_Date']);
             $this->_open_comp_date[$index] = $dateParts[0];

@@ -10,6 +10,7 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\QueryBanquet;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -823,19 +824,19 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 } else {
                     $prev_medium = $medium;
                 }
+                                $score_award = "";
+                                if ($score > "") {
+                                    $score_award = " / {$score}pts";
+                                }
+                                if ($award > "") {
+                                    $score_award .= " / $award";
+                                }
 
                 echo "<tr>";
                 echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
                 echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$theme</td>\n";
                 echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$medium</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                $score_award = "";
-                if ($score > "") {
-                    $score_award = " / {$score}pts";
-                }
-                if ($award > "") {
-                    $score_award .= " / $award";
-                }
                 echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
                 echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
                 echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
@@ -844,6 +845,178 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
         unset($query_miscellaneous);
     }
+
+    public function displayBanquetCurrentUser($atts, $content, $tag)
+    {
+        global $post;
+
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_banquet = new QueryBanquet($this->rpsdb);
+
+        if ($this->request->has('selected_season_list')) {
+            $this->settings->selected_season = $this->request->input('selected_season_list');
+        }
+        $seasons = $this->getSeasons();
+
+        // Start building the form
+        $action = home_url('/' . get_page_uri($post->ID));
+        $form = '';
+        $form .= '<form name="banquet_form" method="post" action="' . $action . '">';
+        $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '" />';
+        $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
+        foreach ($seasons as $this_season) {
+            if ($this_season == $this->settings->selected_season) {
+                $selected = " SELECTED";
+            } else {
+                $selected = "";
+            }
+            $form .= "<option value=\"$this_season\"$selected>$this_season</option>\n";
+        }
+        $form .= "</select>&nbsp;season\n";
+        $form .= "</form>";
+        echo '<script type="text/javascript">' . "\n";
+        echo 'function submit_form() {' . "\n";
+        echo '	document.banquet_form.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>' . "\n";
+        echo "My banquet entries for ";
+        echo $form;
+
+        echo '<p>Select up to 5 entries</p>';
+        echo '<form name="BanquetEntries" action=' . $action . ' method="post">' . "\n";
+        echo '<table class="banquet form_frame" width="99%">';
+        echo '<tr>';
+        echo '<th>Banquet Entry</th>';
+        echo '<th width="12%">Date</th>';
+        echo '<th>Theme</th>';
+        echo '<th>Competition</th>';
+        echo '<th>Title</th>';
+        echo '<th width="8%">Score</th>';
+        echo '<th width="8%">Award</th>';
+        echo '<th width="3%"></th>';
+        echo '</tr>';
+        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $this->settings->season_start_date, $this->settings->season_end_date);
+        $banquet_id = $query_banquet->getBanquets($this->settings->season_start_date, $this->settings->season_end_date);
+        $banquet_id_string = '0';
+        $banquet_id_array=array();
+        $disabled = '';
+        if (is_array($banquet_id)) {
+            $banquet_id_array[] = '0';
+            foreach ($banquet_id as $record) {
+                $banquet_id_array[] = $record['ID'];
+                if ($record['Closed'] == 'Y') {
+                    $disabled='disabled="1"';
+                }
+            }
+
+            $banquet_id_string = implode(',', $banquet_id_array);
+        }
+        $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "'.get_current_user_id().'"';
+        $banquet_entries = $query_entries->query(array('where' => $where));
+        $all_entries = array();
+        foreach ($banquet_entries as $banquet_entry) {
+            $all_entries[]=$banquet_entry->ID;
+        }
+        // Bail out if not entries found
+        if (empty($scores)) {
+            echo "<tr><td colspan=\"6\">No eligible banquet entries</td></tr>\n";
+            echo "</table>\n";
+            echo '</form>';
+        } else {
+
+            // Build the list of submitted images
+            $compCount = 0;
+            $prev_date = "";
+            $prev_medium = "";
+            foreach ($scores as $recs) {
+                if (empty($recs['Award'])) {
+                    continue;
+                }
+
+                $dateParts = explode(" ", $recs['Competition_Date']);
+                $dateParts[0] = strftime('%d-%b-%Y', strtotime($dateParts[0]));
+                $comp_date = $dateParts[0];
+                $medium = $recs['Medium'];
+                $theme = $recs['Theme'];
+                $title = $recs['Title'];
+                $score = $recs['Score'];
+                $award = $recs['Award'];
+                if ($dateParts[0] != $prev_date) {
+                    $compCount += 1;
+                    $rowStyle = $compCount % 2 == 1 ? "odd_row" : "even_row";
+                    $prev_medium = "";
+                }
+
+                $image_url = home_url($recs['Server_File_Name']);
+
+                if ($prev_date == $dateParts[0]) {
+                    $dateParts[0] = "";
+                    $theme = "";
+                } else {
+                    $prev_date = $dateParts[0];
+                }
+                if ($prev_medium == $medium) {
+                    // $medium = "";
+                    $theme = "";
+                } else {
+                    $prev_medium = $medium;
+                }
+                $score_award = "";
+                if ($score > "") {
+                    $score_award = " / {$score}pts";
+                }
+                if ($award > "") {
+                    $score_award .= " / $award";
+                }
+
+                echo "<tr>";
+                echo "<td align=\"center\" valign=\"middle\" class=\"$rowStyle\" width=\"3%\">";
+                $checked ='';
+                foreach ($banquet_entries as $banquet_entry) {
+
+                if (!empty($banquet_entry) && $banquet_entry->Title == $title){
+                $checked = 'checked="checked"';
+                break;
+                }
+                }
+
+                $entry_id=$recs['Entry_ID'];
+                echo "<input type=\"checkbox\" name=\"entry_id[]\" value=\"$entry_id\" $checked $disabled/>";
+                echo '</td>';
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$theme</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$medium</td>\n";
+                // echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
+
+                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
+                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td>";
+                echo "<td align=\"center\" valign=\"middle\" class=\"$rowStyle\" width=\"3%\">";
+
+                echo "</tr>\n";
+            }
+            echo "</table>";
+            if (empty($disabled)) {
+                echo '<input type="submit" name="submit" value="Update">';
+                    echo '<input type="submit" name="cancel" value="Cancel">';
+            }
+            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
+            echo '<input type="hidden" name="allentries" value="', implode(',', $all_entries) . '" />';
+                echo '<input type="hidden" name="banquetids" value="'.$banquet_id_string.'" />';
+                echo '</form>';
+                echo '<script type="text/javascript">' . "\n";
+                    echo "jQuery('.banquet :checkbox').change(function () {\n";
+            echo "    var cs=jQuery(this).closest('.banquet').find(':checkbox:checked');\n";
+            echo "    if (cs.length > 5) {\n";
+            echo "        this.checked=false;\n";
+            echo "    }\n";
+                echo "});\n";
+                    echo '</script>';
+        }
+        unset($query_miscellaneous, $query_banquet);
+    }
+
 
     public function displayEditTitle($atts, $content, $tag)
     {
