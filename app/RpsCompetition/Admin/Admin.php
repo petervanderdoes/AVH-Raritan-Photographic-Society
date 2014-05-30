@@ -781,10 +781,10 @@ final class Admin
                         $data['Max_Entries'] = $formNewOptions['max-entries'];
                         $data['Num_Judges'] = $formNewOptions['judges'];
                         $data['Special_Event'] = ($formNewOptions['special-event'] ? 'Y' : 'N');
-                        foreach ($formNewOptions['medium'] as $medium) {
-                            $data['Medium'] = $medium_convert[$medium];
-                            foreach ($formNewOptions['classification'] as $classification) {
-                                $data['Classification'] = $classification_convert[$classification];
+                        foreach ($formNewOptions['medium'] as $medium_key => $medium_value) {
+                            $data['Medium'] = $medium_convert[$medium_key];
+                            foreach ($formNewOptions['classification'] as $classification_key => $classification_value) {
+                                $data['Classification'] = $classification_convert[$classification_key];
                                 $competition_ID = $query_competitions->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
                                     wp_die($competition_ID);
