@@ -128,7 +128,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->selected_season = '';
         $this->settings->season_start_date = "";
         $this->settings->season_end_date = "";
-        $this->settings->season_start_year = "";
+        $season_start_year = "";
         $this->settings->selected_year = "";
         $this->settings->selected_month = "";
 
@@ -139,14 +139,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         if ($this->request->has('submit_control')) {
             $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
-            $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+            $season_start_year = substr($this->settings->selected_season, 0, 4);
             $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
             $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
 
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
                     $this->settings->selected_season = esc_attr($this->request->input('new_season'));
-                    $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+                    $season_start_year = substr($this->settings->selected_season, 0, 4);
                     $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
                     break;
                 case 'new_month':
@@ -337,7 +337,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->settings->selected_season = '';
         $this->settings->season_start_date = "";
         $this->settings->season_end_date = "";
-        $this->settings->season_start_year = "";
+        $season_start_year = "";
         $this->settings->selected_year = "";
         $this->settings->selected_month = "";
 
@@ -348,14 +348,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         if ($this->request->has('submit_control')) {
             $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
-            $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+            $season_start_year = substr($this->settings->selected_season, 0, 4);
             $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
             $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
 
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
                     $this->settings->selected_season = esc_attr($this->request->input('new_season'));
-                    $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+                    $season_start_year = substr($this->settings->selected_season, 0, 4);
                     $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
                     break;
                 case 'new_month':
@@ -502,9 +502,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
 
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, 9, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, 9, 1);
+        $season_start_year = substr($this->settings->selected_season, 0, 4);
+        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $season_start_year, 9, 1);
+        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $season_start_year + 1, 9, 1);
 
         $competition_dates = $query_competitions->getCompetitionDates($this->settings->season_start_date, $this->settings->season_end_date);
         // Build an array of competition dates in "MM/DD" format for column titles.
@@ -1460,9 +1460,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
 
         // @TODO: Serious to do: Take this construction and make it better.
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
+        $season_start_year = substr($this->settings->selected_season, 0, 4);
 
-        $date = new \DateTime($this->settings->season_start_year . '-' . $this->settings->club_season_start_month_num);
+        $date = new \DateTime($season_start_year . '-' . $this->settings->club_season_start_month_num);
         $this->settings->season_start_date = $date->format('Y-m-d');
 
         // @TODO: The 6 is the end of the season.
