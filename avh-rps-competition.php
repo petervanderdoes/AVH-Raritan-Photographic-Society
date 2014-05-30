@@ -34,9 +34,10 @@ $rps_basename = plugin_basename($plugin);
 class AVH_RPS_Client
 {
 
+
     /**
      *
-     * @var Illuminate\Container\Container
+     * @var Container
      */
     private $container;
 
@@ -69,7 +70,7 @@ class AVH_RPS_Client
     public function load()
     {
         if (is_admin()) {
-            Initialize::load();
+            //Initialize::load();
             add_action('wp_loaded', array($this->admin()));
         } else {
             new Frontend($this->container);

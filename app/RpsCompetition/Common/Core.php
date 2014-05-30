@@ -134,7 +134,7 @@ class Core
 
     public function renameImageFile($path, $old_name, $new_name, $ext)
     {
-        $thumbnails = array();
+
         $path = $this->request->server('DOCUMENT_ROOT') . $path;
         // Rename the main image file
         $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);

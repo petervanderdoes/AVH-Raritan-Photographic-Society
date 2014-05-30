@@ -487,9 +487,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
         $total_max_entries = 0;
-        $comp_dates=array();
-        $comp_max_entries=array();
-        $comp_num_judges=array();
+        $comp_dates = array();
+        $comp_max_entries = array();
+        $comp_num_judges = array();
         foreach ($competition_dates as $key => $recs) {
             $comp_date = $recs['Competition_Date'];
             $date_parts = explode(" ", $comp_date);
@@ -773,6 +773,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $compCount = 0;
             $prev_date = "";
             $prev_medium = "";
+            $rowStyle = 'odd_row';
             foreach ($scores as $recs) {
                 $dateParts = explode(" ", $recs['Competition_Date']);
                 $dateParts[0] = strftime('%d-%b-%Y', strtotime($dateParts[0]));
@@ -1000,14 +1001,11 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
 
-        if ($this->request->has('m')) {
-            if ($this->request->input('m') == "prints") {
-                $medium_subset = "Prints";
-                $medium_param = "?m=prints";
-            } else {
-                $medium_subset = "Digital";
-                $medium_param = "?m=digital";
-            }
+        $medium_subset = "Digital";
+        $medium_param = "?m=digital";
+        if ($this->request->input('m') == "prints") {
+            $medium_subset = "Prints";
+            $medium_param = "?m=prints";
         }
         $entry_id = $this->request->input('id');
 
@@ -1141,6 +1139,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $compdates = array_unique($this->settings->open_comp_date);
         foreach ($compdates as $key => $comp_date) {
             $selected = '';
+            $theme = '';
             if ($this->settings->comp_date == $this->settings->open_comp_date[$key]) {
                 $selected = " SELECTED";
                 $theme = $this->settings->open_comp_theme[$key];
@@ -1235,8 +1234,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name)) {
                 $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
             } else {
-                $size[0] = 0;
-                $size[1] = 0;
+                $size = array(0, 0);
             }
             if ($recs->Client_File_Name > "") {
                 if ($size[0] > 1024) {
@@ -1302,13 +1300,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     public function displayUploadEntry($atts, $content, $tag)
     {
         global $post;
-        if ($this->request->has('m')) {
-            if ($this->request->input('m') == "prints") {
-                $medium_subset = "Prints";
-            } else {
-                $medium_subset = "Digital";
-            }
-        }
 
         // Error messages
         if (isset($this->settings->errmsg)) {
@@ -1321,6 +1312,10 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
 
         if ($this->request->has('m')) {
+            $medium_subset = "Digital";
+            if ($this->request->input('m') == "prints") {
+                $medium_subset = "Prints";
+            }
             echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
         }
         if ($this->request->has('wp_get_referer')) {

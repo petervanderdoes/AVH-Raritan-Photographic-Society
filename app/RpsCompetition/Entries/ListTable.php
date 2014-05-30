@@ -113,10 +113,11 @@ class ListTable extends \WP_List_Table
                 $x = $query_competitions->getCompetitionById($filter_theme);
                 $where .= $this->rpsdb->prepare(' AND Theme = %s', $x->Theme);
             }
-            $sql_query=array('where' => $where);
+            $sql_query = array('where' => $where);
 
             $competitions = $query_competitions->query($sql_query);
 
+            $competition_ids = array(0);
             foreach ($competitions as $competition) {
 
                 $competition_ids[] = $competition->ID;
@@ -165,12 +166,6 @@ class ListTable extends \WP_List_Table
         return array('');
     }
 
-    public function display_tablenav($which)
-    {
-        parent::display_tablenav($which);
-    }
-
-
     public function get_bulk_actions()
     {
         $actions = array();
@@ -195,17 +190,19 @@ class ListTable extends \WP_List_Table
             echo '</select>';
 
             if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
-                $theme_request = $this->request->input('filter-theme',0);
+                $theme_request = $this->request->input('filter-theme', 0);
                 $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
-                 $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
+                $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
+
+                $themes = array();
                 foreach ($competitions as $competition) {
-                 $themes[$competition->ID] = $competition->Theme;
+                    $themes[$competition->ID] = $competition->Theme;
                 }
                 ksort($themes);
                 $themes = array_unique($themes);
                 asort($themes);
 
-                echo $this->html->element('select',array('name'=>'filter-theme'));
+                echo $this->html->element('select', array('name' => 'filter-theme'));
                 echo '<option' . selected($theme_request, 0, false) . ' value="0">' . __('All Competition Themes') . '</option>';
                 foreach ($themes as $theme_key => $theme_value) {
                     echo '<option' . selected($theme_request, $theme_key, false) . ' value="' . esc_attr($theme_key) . '">' . $theme_value . '</option>';

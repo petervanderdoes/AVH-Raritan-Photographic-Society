@@ -254,6 +254,7 @@ final class Admin
                 $count = 0;
 
                 foreach ((array) $competitionIds as $id) {
+                    $data = array();
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'N';
                     $query_competitions->insertCompetition($data);
@@ -273,6 +274,7 @@ final class Admin
                 $count = 0;
 
                 foreach ((array) $competitionIds as $id) {
+                    $data = array();
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'Y';
                     $query_competitions->insertCompetition($data);
@@ -285,6 +287,7 @@ final class Admin
             case 'setscore':
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
+                    $data = array();
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'Y';
                     $query_competitions->insertCompetition($data);
@@ -294,6 +297,7 @@ final class Admin
             case 'Unsetscore':
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
+                    $data = array();
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'N';
                     $query_competitions->insertCompetition($data);
@@ -325,6 +329,9 @@ final class Admin
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         if ($this->request->has('scored')) {
+            $data=array();
+            $response='';
+            $result = null;
             if ($this->request->input('scored') == 'Yes') {
                 $data['ID'] = (int) $this->request->input('id');
                 $data['Scored'] = 'N';
@@ -437,6 +444,8 @@ final class Admin
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition-edit');
 
+        $updated = false;
+        $formOptions=array();
         if ($this->request->has('update')) {
             $updated = $this->updateCompetition();
         }
@@ -479,6 +488,7 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('close-date', 'Closing Date'));
         echo $formBuilder->outputField($formBuilder->text('close-date', $formOptions['close-date']));
 
+        $time=array();
         for ($hour = 0; $hour <= 23; $hour++) {
             $time_val = sprintf("%02d:00:00", $hour);
             $time_text = date("g:i a", strtotime($time_val));
@@ -572,6 +582,8 @@ final class Admin
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
+        $title = '';
+        $action_verb = '';
         if ($action == 'open') {
             $title = 'Open Competitions';
             $action_verb = 'openend';
@@ -1202,6 +1214,7 @@ final class Admin
         $entry = $query_entries->getEntryById($id);
 
         $return = false;
+        $formOptionsNew = array();
         $formOptionsNew['title'] = empty($formOptions['title']) ? $entry['Title'] : $formOptions['title'];
         if ($entry['Title'] != $formOptionsNew['title']) {
             $data = array('ID' => $id, 'Title' => $formOptionsNew['title']);
@@ -1257,7 +1270,6 @@ final class Admin
      */
     public function filterSetScreenOption($error_value, $option, $value)
     {
-        $return = $error_value;
         switch ($option) {
             case 'competitions_per_page':
                 $value = (int) $value;
@@ -1285,14 +1297,15 @@ final class Admin
      */
     public function filterScreenLayoutColumns($columns, $screen)
     {
-        switch ($screen) {
+        //switch ($screen) {
+            // We can define columns here
             // case $this->hooks['avhrps_menu_competition']:
             // $columns[$this->hooks['avhfdas_menu_overview']] = 1;
             // break;
             // case $this->hooks['avhrps_menu_competition_add']:
             // $columns[$this->hooks['avhfdas_menu_general']] = 1;
             // break;
-        }
+        //}
 
         return $columns;
     }
@@ -1349,15 +1362,15 @@ final class Admin
     public function actionProfileUpdateSave($user_id)
     {
         $userID = $user_id;
-        $_rps_class_bw = $this->request->input('rps_class_bw', get_user_meta($userID, 'rps_class_bw', true));
-        $_rps_class_color = $this->request->input('rps_class_color', get_user_meta($userID, 'rps_class_color', true));
-        $_rps_class_print_bw = $this->request->input('rps_class_print_bw', get_user_meta($userID, 'rps_class_print_bw', true));
-        $_rps_class_print_color = $this->request->input('rps_class_print_color', get_user_meta($userID, 'rps_class_print_color', true));
+        $rps_class_bw = $this->request->input('rps_class_bw', get_user_meta($userID, 'rps_class_bw', true));
+        $rps_class_color = $this->request->input('rps_class_color', get_user_meta($userID, 'rps_class_color', true));
+        $rps_class_print_bw = $this->request->input('rps_class_print_bw', get_user_meta($userID, 'rps_class_print_bw', true));
+        $rps_class_print_color = $this->request->input('rps_class_print_color', get_user_meta($userID, 'rps_class_print_color', true));
 
-        update_user_meta($userID, "rps_class_bw", $_rps_class_bw);
-        update_user_meta($userID, "rps_class_color", $_rps_class_color);
-        update_user_meta($userID, "rps_class_print_bw", $_rps_class_print_bw);
-        update_user_meta($userID, "rps_class_print_color", $_rps_class_print_color);
+        update_user_meta($userID, "rps_class_bw", $rps_class_bw);
+        update_user_meta($userID, "rps_class_color", $rps_class_color);
+        update_user_meta($userID, "rps_class_print_bw", $rps_class_print_bw);
+        update_user_meta($userID, "rps_class_print_color", $rps_class_print_color);
     }
 
     /**

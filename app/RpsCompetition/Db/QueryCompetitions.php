@@ -239,6 +239,7 @@ class QueryCompetitions
         $total = 0;
         $status = array('N' => 'open', 'Y' => 'closed');
         $known_types = array_keys($status);
+        $stats=array();
         foreach ((array) $count as $row) {
             // Don't count post-trashed toward totals
             $total += $row['num_competitions'];

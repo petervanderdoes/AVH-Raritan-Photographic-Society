@@ -196,9 +196,7 @@ class Frontend
                 $url = parse_url(get_bloginfo('url'));
                 setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $t, '/', $url['host']);
 
-                if ($this->request->has('EntryID')) {
-                    $entry_array = $this->request->input('EntryID');
-                }
+                $entry_array = $this->request->input('EntryID', null);
 
                 switch ($this->request->input('submit_control')) {
 
@@ -221,7 +219,7 @@ class Frontend
 
                     case 'edit':
                         if (!$query_competitions->checkCompetitionClosed($this->settings->comp_date, $this->settings->classification, $this->settings->medium)) {
-                            if (isset($entry_array) && is_array($entry_array)) {
+                            if (is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
                                     $_query = array('id' => $id, 'm' => $this->settings->medium_subset);
@@ -235,7 +233,9 @@ class Frontend
 
                     case 'delete':
                         if (!$query_competitions->checkCompetitionClosed($this->settings->comp_date, $this->settings->classification, $this->settings->medium)) {
-                            $this->deleteCompetitionEntries($entry_array);
+                            if ($entry_array !== null) {
+                                $this->deleteCompetitionEntries($entry_array);
+                            }
                         }
                         break;
                 }
@@ -284,20 +284,17 @@ class Frontend
                     exit();
                 }
 
-                if ($this->request->has('m')) {
-
-                    if (get_magic_quotes_gpc()) {
-                        $server_file_name = stripslashes($this->request->input('server_file_name'));
-                        $new_title = stripslashes(trim($this->request->input('new_title')));
-                    } else {
-                        $server_file_name = $this->request->input('server_file_name');
-                        $new_title = trim($this->request->input('new_title'));
-                    }
-                }
                 // makes sure they filled in the title field
                 if (!$this->request->has('new_title')) {
                     $this->settings->errmsg = 'You must provide an image title.<br><br>';
                 } else {
+                    $server_file_name = $this->request->input('server_file_name');
+                    $new_title = trim($this->request->input('new_title'));
+                    if (get_magic_quotes_gpc()) {
+                        $server_file_name = stripslashes($this->request->input('server_file_name'));
+                        $new_title = stripslashes(trim($this->request->input('new_title')));
+                    }
+
                     $recs = $query_competitions->getCompetitionByEntryId($this->_entry_id);
                     if ($recs == null) {
                         wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);

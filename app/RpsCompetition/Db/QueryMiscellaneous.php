@@ -34,6 +34,7 @@ class QueryMiscellaneous
             ORDER BY Season ' . $order, $season_start_month_num, $season_end_month_num);
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
+        $seasons = array();
         foreach ($result as $key => $value) {
             $seasons[$key] = $value['Season'];
         }
@@ -61,6 +62,7 @@ class QueryMiscellaneous
             ORDER BY Season', $season_start_month_num, $season_end_month_num);
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
+        $seasons = array();
         foreach ($result as $key => $value) {
             $seasons[$key] = $value['Season'];
         }
@@ -198,8 +200,9 @@ class QueryMiscellaneous
                     c.Competition_Date <= %s AND
                     e.Award <> ''
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award", $competition_date_start, $competition_date_end);
-        $x = $this->rpsdb->get_results($sql);
-        foreach ($x as $rec) {
+        $results = $this->rpsdb->get_results($sql);
+        $return = array();
+        foreach ($results as $rec) {
             $user_info = get_userdata($rec->Member_ID);
             $rec->FirstName = $user_info->user_firstname;
             $rec->LastName = $user_info->user_lastname;

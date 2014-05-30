@@ -29,12 +29,7 @@ class Client
     public function sendXmlCompetitionDates(\Illuminate\Http\Request $request)
     {
         // Connect to the Database
-        try {
-            $db = new RpsPdo();
-        } catch (\PDOException $e) {
-            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
-            die($e->getMessage());
-        }
+        $db = $this->getDatabaseHandle();
 
         try {
             $select = "SELECT DISTINCT(Competition_Date) FROM competitions ";
@@ -47,7 +42,7 @@ class Client
                     $where .= " AND Scored=:scored";
                 }
             } else {
-                $where .= " Competition_Date >= CURDATE()";
+                $where = "WHERE Competition_Date >= CURDATE()";
             }
 
             $sth = $db->prepare($select . $where);
@@ -81,7 +76,7 @@ class Client
             $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         }
         echo $dom->saveXML();
-        $db = null;
+        unset($db);
         die();
     }
 
@@ -211,8 +206,8 @@ class Client
             $medium_element = $competition_element->AppendChild($dom->CreateElement('Medium'));
             $medium_element->AppendChild($dom->CreateTextNode(utf8_encode($medium)));
 
-            $xml_classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
-            $xml_classification_node->AppendChild($dom->CreateTextNode(utf8_encode($classification)));
+            $classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
+            $classification_node->AppendChild($dom->CreateTextNode(utf8_encode($classification)));
 
             // Get all the entries for this competition
             try {
