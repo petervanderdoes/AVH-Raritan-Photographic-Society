@@ -68,8 +68,6 @@ class ListTable extends \WP_List_Table
             update_user_meta(get_current_user_id(), 'avhrps_competition_list_last_view', $status);
         }
 
-        $page = $this->get_pagenum();
-
         parent::__construct(array('plural' => 'competitions', 'singular' => 'competition', 'ajax' => false));
     }
 
@@ -80,7 +78,7 @@ class ListTable extends \WP_List_Table
 
     public function prepare_items()
     {
-        global $post_id, $competition_status, $search, $comment_type;
+        global $competition_status, $search;
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
@@ -90,7 +88,6 @@ class ListTable extends \WP_List_Table
         }
 
         $search = $this->request->input('s', '');
-        $s = $search;
 
         if ($competition_status == 'open') {
             $orderby = $this->request->input('orderby', 'Competition_Date ASC, Class_Code ASC, Medium');
@@ -141,8 +138,6 @@ class ListTable extends \WP_List_Table
 
     public function get_columns()
     {
-        global $status;
-
         return array('cb' => '<input type="checkbox" />', 'date' => 'Date', 'theme' => 'Theme', 'classification' => 'Classification', 'medium' => 'Medium', 'status' => 'Closed', 'scored' => 'Scored', 'entries' => 'Entries');
     }
 
@@ -153,14 +148,12 @@ class ListTable extends \WP_List_Table
 
     public function display_tablenav($which)
     {
-        global $status;
-
         parent::display_tablenav($which);
     }
 
     public function get_views()
     {
-        global $totals, $competition_status;
+        global $competition_status;
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
@@ -205,14 +198,12 @@ class ListTable extends \WP_List_Table
     {
         global $status;
 
-        if ('recently_activated' == $status) {
-            ?>
-<div class="alignleft actions">
-                <?php
-            submit_button(__('Clear List'), 'secondary', 'clear-recent-list', false);
-            ?>
-            </div>
-<?php
+        if ('top' === $which) {
+            if ('recently_activated' == $status) {
+                echo '<div class="alignleft actions">';
+                submit_button(__('Clear List'), 'secondary', 'clear-recent-list', false);
+                echo '</div>';
+            }
         }
     }
 
@@ -275,8 +266,6 @@ class ListTable extends \WP_List_Table
 
     public function column_date($competition)
     {
-        global $competition_status;
-
         $date_text = mysql2date(get_option('date_format'), $competition->Competition_Date);
         echo $date_text;
 
@@ -343,18 +332,19 @@ class ListTable extends \WP_List_Table
     {
         echo '<span class="text">' . $competition->Scored . '</span>';
 
-        $url = admin_url('admin.php') . '?';
+        // The commented code below is to be used when we decided to not use AJAX for toggle the score setting. This is mot implemented yet, only AJAX way is implemented.
+        // $url = admin_url('admin.php') . '?';
 
-        $queryReferer = array('page' => Constants::MENU_SLUG_COMPETITION);
-        $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
+        // $queryReferer = array('page' => Constants::MENU_SLUG_COMPETITION);
+        // $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
-        $nonceScore = wp_create_nonce('score_' . $competition->ID);
-        $querySetScore = array('page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'setscore', '_wpnonce' => $nonceScore);
-        $urlSetScore = $url . http_build_query($querySetScore, '', '&');
+        // $nonceScore = wp_create_nonce('score_' . $competition->ID);
+        // $querySetScore = array('page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'setscore', '_wpnonce' => $nonceScore);
+        // $urlSetScore = $url . http_build_query($querySetScore, '', '&');
 
-        $nonceUnsetScore = wp_create_nonce('score_' . $competition->ID);
-        $queryUnsetScore = array('page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'unsetscore', '_wpnonce' => $nonceScore);
-        $urlUnsetScore = $url . http_build_query($queryUnsetScore, '', '&');
+        // $nonceUnsetScore = wp_create_nonce('score_' . $competition->ID);
+        // $queryUnsetScore = array('page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'unsetscore', '_wpnonce' => $nonceScore);
+        // $urlUnsetScore = $url . http_build_query($queryUnsetScore, '', '&');
 
         $actions = array();
         if ($competition->Scored == 'Y') {

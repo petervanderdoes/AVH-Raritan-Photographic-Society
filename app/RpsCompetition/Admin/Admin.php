@@ -174,7 +174,6 @@ final class Admin
      */
     public function actionLoadPagehookCompetition()
     {
-        global $current_screen;
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->competition_list = $this->container->make('RpsCompetition\Competition\ListTable');
 
@@ -433,8 +432,6 @@ final class Admin
      */
     private function displayPageCompetitionEdit()
     {
-        global $wpdb;
-
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
@@ -619,8 +616,6 @@ final class Admin
      */
     private function displayPageCompetitionList()
     {
-        global $screen_layout_columns;
-
         $messages = array();
         if ($this->request->has('update')) {
             switch ($this->request->input('update')) {
@@ -680,7 +675,6 @@ final class Admin
      */
     public function actionLoadPagehookCompetitionAdd()
     {
-        global $current_screen;
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->competition_list = $this->container->make('RpsCompetition\Competition\ListTable');
 
@@ -702,7 +696,7 @@ final class Admin
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
-        $option_name = 'competition_add';
+        $data = array();
 
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition_add');
@@ -781,9 +775,9 @@ final class Admin
                         $data['Max_Entries'] = $formNewOptions['max-entries'];
                         $data['Num_Judges'] = $formNewOptions['judges'];
                         $data['Special_Event'] = ($formNewOptions['special-event'] ? 'Y' : 'N');
-                        foreach ($formNewOptions['medium'] as $medium_key => $medium_value) {
+                        foreach ($formNewOptions['medium'] as $medium_key => $value) {
                             $data['Medium'] = $medium_convert[$medium_key];
-                            foreach ($formNewOptions['classification'] as $classification_key => $classification_value) {
+                            foreach ($formNewOptions['classification'] as $classification_key => $value) {
                                 $data['Classification'] = $classification_convert[$classification_key];
                                 $competition_ID = $query_competitions->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
@@ -895,8 +889,6 @@ final class Admin
      */
     public function actionLoadPagehookEntries()
     {
-        global $current_screen;
-
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->entries_list = $this->container->make('RpsCompetition\Entries\ListTable');
         $this->handleRequestEntries();
@@ -1007,8 +999,6 @@ final class Admin
      */
     private function displayPageEntriesList()
     {
-        global $screen_layout_columns;
-
         $messages = array();
         if ($this->request->has('update')) {
             switch ($this->request->input('update')) {
@@ -1059,7 +1049,6 @@ final class Admin
      */
     private function displayPageEntriesDelete()
     {
-        global $wpdb;
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
@@ -1110,7 +1099,6 @@ final class Admin
      */
     private function displayPageEntriesEdit()
     {
-        global $wpdb;
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
@@ -1337,7 +1325,7 @@ final class Admin
             array('label'=>'Classification Print Color','name'=>'rps_class_print_color','selected'=>$_rps_class_print_color),
         );
         // @formatter:on
-        foreach ($all_classifications as $key => $data) {
+        foreach ($all_classifications as $data) {
 
             if (current_user_can('rps_edit_competition_classification')) {
                 echo $formBuilder->outputLabel($formBuilder->label($data['name'], $data['name']));
@@ -1378,7 +1366,8 @@ final class Admin
     private function updateCompetition()
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
-
+        $formOptionsNew = array();
+        $data = array();
         $formOptions = $this->request->input('competition-edit');
 
         $formOptionsNew['date'] = $formOptions['date'];
@@ -1394,7 +1383,6 @@ final class Admin
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
         $_medium = array('medium_bwd' => 'B&W Digital', 'medium_cd' => 'Color Digital', 'medium_bwp' => 'B&W Prints', 'medium_cp' => 'Color Prints');
-        $selectedMedium = array_search($competition->Medium, $_medium);
 
         $_classification = array('class_b' => 'Beginner', 'class_a' => 'Advanced', 'class_s' => 'Salon');
         $data['ID'] = $this->request->input('competition');
@@ -1437,7 +1425,7 @@ final class Admin
     {
         $message = '';
         if (is_array($this->message)) {
-            foreach ($this->message as $key => $_msg) {
+            foreach ($this->message as $_msg) {
                 $message .= $_msg . "<br>";
             }
         } else {
@@ -1463,18 +1451,6 @@ final class Admin
     private function displayIcon($icon)
     {
         return ('<div class="icon32" id="icon-' . $icon . '"><br/></div>');
-    }
-
-    /**
-     * Display error message at bottom of comments.
-     *
-     * @param string $msg
-     *            Error Message. Assumed to contain HTML and be sanitized.
-     */
-    private function displayCommentFooterDie($msg)
-    {
-        echo "<div class='wrap'><p>$msg</p></div>";
-        die();
     }
 
     /**

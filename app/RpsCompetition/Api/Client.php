@@ -4,17 +4,29 @@ namespace RpsCompetition\Api;
 use DOMDocument;
 use PDO;
 use RpsCompetition\Db\RpsPdo;
+use RpsCompetition\Common\Core;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class Client
 {
 
     /**
+     *
+     * @var Core
+     */
+    private $core;
+
+    public function __construct($core)
+    {
+        $this->core = $core;
+    }
+
+    /**
      * Create a XML File with the competition dates
      *
      * @param \Illuminate\Http\Request $request
      */
-    public static function sendXmlCompetitionDates(\Illuminate\Http\Request $request)
+    public function sendXmlCompetitionDates(\Illuminate\Http\Request $request)
     {
         // Connect to the Database
         try {
@@ -78,23 +90,13 @@ class Client
      *
      * @param \Illuminate\Http\Request $request
      */
-    public static function sendCompetitions(\Illuminate\Http\Request $request)
+    public function sendCompetitions(\Illuminate\Http\Request $request)
     {
         $username = $request->input('username');
         $password = $request->input('password');
-        try {
-            $db = new RpsPdo();
-        } catch (\PDOException $e) {
-            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
-            die($e->getMessage());
-        }
+        $db = $this->getDatabaseHandle();
         if ($db !== false) {
-            $user = wp_authenticate($username, $password);
-            if (is_wp_error($user)) {
-                $a = strip_tags($user->get_error_message());
-                $this->doRESTError($a);
-                die();
-            }
+            $this->checkUserAuthentication($username, $password);
             // @todo Check if the user has the role needed.
             $this->sendXmlCompetitions($db, $request->input('medium'), $request->input('comp_date'));
         }
@@ -106,24 +108,15 @@ class Client
      *
      * @param \Illuminate\Http\Request $request
      */
-    public static function doUploadScore(\Illuminate\Http\Request $request)
+    public function doUploadScore(\Illuminate\Http\Request $request)
     {
         $username = $request->input('username');
         $password = $request->input('password');
         $comp_date = $request->input('date');
-        try {
-            $db = new RpsPdo();
-        } catch (\PDOException $e) {
-            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
-            die();
-        }
+        $db = $this->getDatabaseHandle();
+
         if ($db !== false) {
-            $user = wp_authenticate($username, $password);
-            if (is_wp_error($user)) {
-                $a = strip_tags($user->get_error_message());
-                $this->doRESTError("Unable to authenticate: $a");
-                die();
-            }
+            $this->checkUserAuthentication($username, $password);
         }
         // Check to see if there were any file upload errors
         $file = $request->file('file');
@@ -243,31 +236,30 @@ class Client
             foreach ($all_records_entries as $record_entries) {
                 $user = get_user_by('id', $record_entries['Member_ID']);
                 if ($this->core->isPaidMember($user->ID)) {
-                    $entry_id = $record_entries['ID'];
-                    $first_name = $user->first_name;
-                    $last_name = $user->last_name;
-                    $title = $record_entries['Title'];
-                    $score = $record_entries['Score'];
-                    $award = $record_entries['Award'];
-                    $server_file_name = $record_entries['Server_File_Name'];
+
                     // Create an Entry node
                     $entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
+
                     $id = $entry_element->AppendChild($dom->CreateElement('ID'));
-                    $id->AppendChild($dom->CreateTextNode(utf8_encode($entry_id)));
+                    $id->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['ID'])));
+
                     $fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($first_name)));
+                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($user->first_name)));
+
                     $lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($last_name)));
+                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($user->last_name)));
+
                     $title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
-                    $title_node->AppendChild($dom->CreateTextNode(utf8_encode($title)));
+                    $title_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Title'])));
+
                     $score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
-                    $score_node->AppendChild($dom->CreateTextNode(utf8_encode($score)));
+                    $score_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Score'])));
+
                     $award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
-                    $award_node->AppendChild($dom->CreateTextNode(utf8_encode($award)));
-                    // Convert the absolute server file name into a URL
-                    $image_url = home_url($record_entries['Server_File_Name']);
+                    $award_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Award'])));
+
                     $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
-                    $url_node->AppendChild($dom->CreateTextNode(utf8_encode($image_url)));
+                    $url_node->AppendChild($dom->CreateTextNode(utf8_encode(home_url($record_entries['Server_File_Name']))));
                 }
             }
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
@@ -402,5 +394,36 @@ class Client
         echo '<rsp stat="' . $status . '">' . "\n";
         echo '	' . $message . "\n";
         echo "</rsp>\n";
+    }
+
+    /**
+     * Open database
+     *
+     * @return \RpsCompetition\Db\RpsPdo
+     */
+    private function getDatabaseHandle()
+    {
+        try {
+            $db = new RpsPdo();
+        } catch (\PDOException $e) {
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
+            die($e->getMessage());
+        }
+        return $db;
+    }
+
+    /**
+     * Check if user/password combination is valid
+     */
+    private function checkUserAuthentication($username, $password)
+    {
+        $user = wp_authenticate($username, $password);
+        if (is_wp_error($user)) {
+            $a = strip_tags($user->get_error_message());
+            $this->doRESTError($a);
+            die();
+        }
+
+        return;
     }
 }

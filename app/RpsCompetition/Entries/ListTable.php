@@ -69,8 +69,6 @@ class ListTable extends \WP_List_Table
             update_user_meta(get_current_user_id(), 'avhrps_entries_list_last_view', $status);
         }
 
-        $page = $this->get_pagenum();
-
         parent::__construct(array('plural' => 'entries', 'singular' => 'entry', 'ajax' => false));
     }
 
@@ -81,7 +79,7 @@ class ListTable extends \WP_List_Table
 
     public function prepare_items()
     {
-        global $post_id, $entry_status, $search, $comment_type;
+        global $entry_status, $search;
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
@@ -92,7 +90,6 @@ class ListTable extends \WP_List_Table
         }
 
         $search = $this->request->input('s', '');
-        $s = $search;
 
         $orderby = $this->request->input('orderby', 'Competition_ID DESC, Member_ID');
         $order = $this->request->input('order', '');
@@ -160,8 +157,6 @@ class ListTable extends \WP_List_Table
 
     public function get_columns()
     {
-        global $status;
-
         return array('cb' => '<input type="checkbox" />', 'season' => 'Season', 'competition' => 'Competition', 'name' => 'Photographer', 'title' => 'Title', 'score' => 'Score', 'award' => 'Award');
     }
 
@@ -172,38 +167,12 @@ class ListTable extends \WP_List_Table
 
     public function display_tablenav($which)
     {
-        global $status;
-
         parent::display_tablenav($which);
     }
 
-    public function get_views()
-    {
-        global $totals, $entry_status;
-
-        // $num_competitions = $this->rpsdb->countEntries();
-        $status_links = array();
-        $stati = array('all' => _nx_noop('All', 'All', 'entries'));
-
-        $link = 'admin.php?page=' . Constants::MENU_SLUG_ENTRIES;
-
-        foreach ($stati as $status => $label) {
-            $class = ($status == $entry_status) ? ' class="current"' : '';
-
-            if ($status != 'all') {
-                $link = add_query_arg('entry_status', $status, $link);
-            }
-            // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
-            // $status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_entries->$status)) . '</a>';
-        }
-
-        return $status_links;
-    }
 
     public function get_bulk_actions()
     {
-        global $competition_status;
-
         $actions = array();
         $actions['delete'] = __('Delete');
 
@@ -212,8 +181,6 @@ class ListTable extends \WP_List_Table
 
     public function extra_tablenav($which)
     {
-        global $status;
-
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
         echo '<div class="alignleft actions">';
@@ -326,7 +293,6 @@ class ListTable extends \WP_List_Table
 
     public function column_competition($entry)
     {
-        global $competition_status;
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);

@@ -101,6 +101,8 @@ class Frontend
     {
         if ($this->request->has('rpswinclient')) {
 
+            $api_client = new Client($this->core);
+
             define('DONOTCACHEPAGE', true);
             global $hyper_cache_stop;
             $hyper_cache_stop = true;
@@ -110,13 +112,13 @@ class Frontend
             status_header(200);
             switch ($this->request->input('rpswinclient')) {
                 case 'getcompdate':
-                    Client::sendXmlCompetitionDates($this->request);
+                    $api_client->sendXmlCompetitionDates($this->request);
                     break;
                 case 'download':
-                    Client::sendCompetitions($this->request);
+                    $api_client->sendCompetitions($this->request);
                     break;
                 case 'uploadscore':
-                    Client::doUploadScore($this->request);
+                    $api_client->doUploadScore($this->request);
                     break;
                 default:
                     break;
@@ -124,16 +126,10 @@ class Frontend
         }
     }
 
-    public function actionShowcaseCompetitionThumbnails($ctr)
+    public function actionShowcaseCompetitionThumbnails($foo)
     {
         if (is_front_page()) {
             $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-            $image = array();
-            $seasons = $query_miscellaneous->getSeasonList('ASC', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
-            $from_season = $seasons[count($seasons) - 3];
-
-            $season_start_year = substr($from_season, 0, 4);
-            $season = sprintf("%d-%02s-%02s", $season_start_year, $this->settings->club_season_start_month_num, 1);
 
             echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
@@ -152,17 +148,11 @@ class Frontend
                 $recs->Username = $user_info->user_login;
 
                 // Grab a new record from the database
-                $dateParts = explode(" ", $recs->Competition_Date);
-                $comp_date = $dateParts[0];
-                $medium = $recs->Medium;
-                $classification = $recs->Classification;
-                $comp = "$classification<br>$medium";
                 $title = $recs->Title;
                 $last_name = $recs->LastName;
                 $first_name = $recs->FirstName;
-                $award = $recs->Award;
-                // Display this thumbnail in the the next available column
 
+                // Display this thumbnail in the the next available column
                 echo '<figure class="gallery-item">';
                 echo '<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
@@ -209,8 +199,6 @@ class Frontend
                 if ($this->request->has('EntryID')) {
                     $entry_array = $this->request->input('EntryID');
                 }
-                $medium_subset = $this->request->input('medium_subset');
-                $medium_param = "?medium=" . strtolower($medium_subset);
 
                 switch ($this->request->input('submit_control')) {
 
@@ -584,7 +572,6 @@ class Frontend
                             unlink($server_file_name);
                         }
                         // Delete any thumbnails of this image
-                        $ext = ".jpg";
                         $comp_date = $this->settings->comp_date;
                         $classification = $this->settings->classification;
                         $medium = $this->settings->medium;

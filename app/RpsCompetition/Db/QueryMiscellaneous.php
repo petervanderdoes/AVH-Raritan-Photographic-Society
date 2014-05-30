@@ -93,7 +93,8 @@ class QueryMiscellaneous
             ORDER BY c.Medium DESC, Class_Code, c.Competition_Date', $competition_date_start, $competition_date_end);
 
         $x = $this->rpsdb->get_results($sql, ARRAY_A);
-        foreach ($x as $key => $rec) {
+        $return = array();
+        foreach ($x as $rec) {
             $user_info = get_userdata($rec['Member_ID']);
             $rec['FirstName'] = $user_info->user_firstname;
             $rec['LastName'] = $user_info->user_lastname;

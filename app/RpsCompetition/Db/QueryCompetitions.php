@@ -31,7 +31,6 @@ class QueryCompetitions
         } else {
             $and_medium_subset = '';
         }
-        $user = get_userdata($user_id);
 
         if ($subset == 'digital') {
             $class1 = get_user_meta($user_id, 'rps_class_bw', true);
@@ -131,6 +130,8 @@ class QueryCompetitions
             WHERE Closed='N'
                 AND Close_Date < %s", $current_time, $current_time);
         $result = $this->rpsdb->query($sql);
+
+        return $result;
     }
 
     /**
@@ -233,8 +234,6 @@ class QueryCompetitions
      */
     public function countCompetitions()
     {
-        $where = '';
-
         $count = $this->rpsdb->get_results("SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed", ARRAY_A);
 
         $total = 0;
@@ -314,7 +313,7 @@ class QueryCompetitions
         return $competition_ID;
     }
 
-    public function getScoredCompetitions($start_date, $end_date, $output = OBJECT)
+    public function getScoredCompetitions($date_start, $date_end, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare('SELECT *
             FROM competitions

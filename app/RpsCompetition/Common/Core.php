@@ -64,7 +64,7 @@ class Core
 
     public function handleInitializePlugin()
     {
-        $old_db_version = get_option('avhrps_db_version', 0);
+        //$old_db_version = get_option('avhrps_db_version', 0);
 
         $this->settings->club_name = "Raritan Photographic Society";
         $this->settings->club_short_name = "RPS";
