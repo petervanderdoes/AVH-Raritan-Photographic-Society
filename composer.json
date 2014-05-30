@@ -18,6 +18,7 @@
 		}
 	},
 	"require" : {
-		"intervention/image" : "~1.6"
+		"intervention/image" : "~1.6",
+		"phpmd/phpmd" : "2.0.0"
 	}
 }
