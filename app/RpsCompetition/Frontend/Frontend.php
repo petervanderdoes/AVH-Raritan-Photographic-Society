@@ -414,8 +414,13 @@ class Frontend
                 }
 
                 // Prepare the title and client file name for storing in the database
-                $title = trim($this->request->input('title'));
+                if (get_magic_quotes_gpc()) {
+                    $title = stripslashes(trim($this->request->input('title')));
+                } else {
+                    $title = trim($this->request->input('title'));
+                }
                 $client_file_name = $file->getClientOriginalName();
+
 
                 // Before we go any further, make sure the title is not a duplicate of
                 // an entry already submitted to this competition. Dupliacte title result in duplicate
