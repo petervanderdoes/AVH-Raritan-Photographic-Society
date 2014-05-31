@@ -300,8 +300,8 @@ class Frontend
                         wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);
                     }
 
-                    $dateParts = explode(" ", $recs->Competition_Date);
-                    $comp_date = $dateParts[0];
+                    $date_parts = explode(" ", $recs->Competition_Date);
+                    $comp_date = $date_parts[0];
                     $classification = $recs->Classification;
                     $medium = $recs->Medium;
 
@@ -467,8 +467,8 @@ class Frontend
                 }
                 $server_file_name = str_replace($this->request->server('DOCUMENT_ROOT'), '', $full_path . '.jpg');
                 $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
-                $_result = $query_entries->addEntry($data, get_current_user_id());
-                if ($_result === false) {
+                $result = $query_entries->addEntry($data, get_current_user_id());
+                if ($result === false) {
                     $this->settings->errmsg = "Failed to INSERT entry record into database";
                     unset($query_entries, $query_competitions);
                     return;
@@ -621,8 +621,8 @@ class Frontend
                 continue;
             }
             // Append this competition to the arrays
-            $dateParts = explode(" ", $recs['Competition_Date']);
-            $this->_open_comp_date[$index] = $dateParts[0];
+            $date_parts = explode(" ", $recs['Competition_Date']);
+            $this->_open_comp_date[$index] = $date_parts[0];
             $this->_open_comp_medium[$index] = $recs['Medium'];
             $this->_open_comp_class[$index] = $recs['Classification'];
             $this->_open_comp_theme[$index] = $recs['Theme'];

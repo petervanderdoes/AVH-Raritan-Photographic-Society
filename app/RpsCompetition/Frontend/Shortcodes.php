@@ -417,6 +417,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         unset($form);
         echo '</span>';
 
+        $output = '';
         if ($scored_competitions) {
             $this_month = sprintf("%d-%02s", $this->settings->selected_year, $this->settings->selected_month);
             $output = '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
@@ -537,7 +538,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $prev_member = "";
             $prev_medium = "";
             $prev_class = "";
-            $rowCount = 0;
+            $row_count = 0;
             // Initialize the 2D array to hold the members scores for each month
             // Each row represents a competition month and each column holds the scores
             // of the submitted images for that month
@@ -577,34 +578,34 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
                 // Is this the beginning of the next member's scores?
                 if ($member != $prev_member || $classification != $prev_class || $medium != $prev_medium) {
-                    $rowCount += 1;
-                    $rowStyle = $rowCount % 2 == 1 ? "odd_row" : "even_row";
+                    $row_count += 1;
+                    $row_style = $row_count % 2 == 1 ? "odd_row" : "even_row";
 
                     // Don't do anything yet if this is the very first member, otherwise, output all
                     // the accumulated scored for the member we just passed.
                     if ($prev_member != "") {
                         // Display the members name and classification
                         echo "<tr>";
-                        echo "<td align=\"left\" class=\"$rowStyle\">" . $prev_fname . " " . $prev_lname . "</td>\n";
-                        echo "<td align=\"center\" class=\"$rowStyle\">" . substr($prev_class, 0, 1) . "</td>\n";
+                        echo "<td align=\"left\" class=\"$row_style\">" . $prev_fname . " " . $prev_lname . "</td>\n";
+                        echo "<td align=\"center\" class=\"$row_style\">" . substr($prev_class, 0, 1) . "</td>\n";
 
                         // Iterate through all the accumulated scores for this member
                         foreach ($member_scores as $key => $score_array) {
                             // Print the scores for the submitted entries for this month
                             for ($i = 0; $i < count($score_array); $i++) {
-                                echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
+                                echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                             }
                             // Pad the unused entries for this member for this month
                             for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
-                                echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                                echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                             }
                         }
 
                         // Display the members annual average score
                         if ($total_score > 0 && $num_scores > 0) {
-                            echo "<td align=\"center\" class=\"$rowStyle\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                            echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
                         } else {
-                            echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                            echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                         }
                         echo "</tr>";
                     }
@@ -688,29 +689,29 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             }
 
             // Output the last remaining row of the table that hasn't been displayed yet
-            $rowCount += 1;
-            $rowStyle = $rowCount % 2 == 1 ? "odd_row" : "even_row";
+            $row_count += 1;
+            $row_style = $row_count % 2 == 1 ? "odd_row" : "even_row";
             // Display the members name and classification
             echo "<tr>";
-            echo "<td align=\"left\" class=\"$rowStyle\">" . $first_name . " " . $last_name . "</td>\n";
-            echo "<td align=\"center\" class=\"$rowStyle\">" . substr($classification, 0, 1) . "</td>\n";
+            echo "<td align=\"left\" class=\"$row_style\">" . $first_name . " " . $last_name . "</td>\n";
+            echo "<td align=\"center\" class=\"$row_style\">" . substr($classification, 0, 1) . "</td>\n";
             // Iterate through all the accumulated scores for this member
             foreach ($member_scores as $key => $score_array) {
                 // Print the scores for the submitted entries for this month
                 for ($i = 0; $i < count($score_array); $i++) {
-                    echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
+                    echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                 }
                 // Pad the unused entries for this member for this month
                 for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
-                    echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                    echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                 }
             }
 
             // Display the members annual average score
             if ($total_score > 0 && $num_scores > 0) {
-                echo "<td align=\"center\" class=\"$rowStyle\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
             } else {
-                echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
             }
             echo "</tr>";
 
@@ -770,32 +771,32 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         } else {
 
             // Build the list of submitted images
-            $compCount = 0;
+            $comp_count = 0;
             $prev_date = "";
             $prev_medium = "";
-            $rowStyle = 'odd_row';
+            $row_style = 'odd_row';
             foreach ($scores as $recs) {
-                $dateParts = explode(" ", $recs['Competition_Date']);
-                $dateParts[0] = strftime('%d-%b-%Y', strtotime($dateParts[0]));
-                $comp_date = $dateParts[0];
+                $date_parts = explode(" ", $recs['Competition_Date']);
+                $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
+                $comp_date = $date_parts[0];
                 $medium = $recs['Medium'];
                 $theme = $recs['Theme'];
                 $title = $recs['Title'];
                 $score = $recs['Score'];
                 $award = $recs['Award'];
-                if ($dateParts[0] != $prev_date) {
-                    $compCount += 1;
-                    $rowStyle = $compCount % 2 == 1 ? "odd_row" : "even_row";
+                if ($date_parts[0] != $prev_date) {
+                    $comp_count += 1;
+                    $row_style = $comp_count % 2 == 1 ? "odd_row" : "even_row";
                     $prev_medium = "";
                 }
 
                 $image_url = home_url($recs['Server_File_Name']);
 
-                if ($prev_date == $dateParts[0]) {
-                    $dateParts[0] = "";
+                if ($prev_date == $date_parts[0]) {
+                    $date_parts[0] = "";
                     $theme = "";
                 } else {
-                    $prev_date = $dateParts[0];
+                    $prev_date = $date_parts[0];
                 }
                 if ($prev_medium == $medium) {
                     // $medium = "";
@@ -812,13 +813,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 }
 
                 echo "<tr>";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$theme</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$medium</td>\n";
-                // echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
-                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
-                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\" width=\"12%\">" . $date_parts[0] . "</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
+                // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
             }
             echo "</table>";
         }
@@ -905,35 +906,36 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         } else {
 
             // Build the list of submitted images
-            $compCount = 0;
+            $comp_count = 0;
             $prev_date = "";
             $prev_medium = "";
+            $row_style = 'odd_row';
             foreach ($scores as $recs) {
                 if (empty($recs['Award'])) {
                     continue;
                 }
 
-                $dateParts = explode(" ", $recs['Competition_Date']);
-                $dateParts[0] = strftime('%d-%b-%Y', strtotime($dateParts[0]));
-                $comp_date = $dateParts[0];
+                $date_parts = explode(" ", $recs['Competition_Date']);
+                $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
+                $comp_date = $date_parts[0];
                 $medium = $recs['Medium'];
                 $theme = $recs['Theme'];
                 $title = $recs['Title'];
                 $score = $recs['Score'];
                 $award = $recs['Award'];
-                if ($dateParts[0] != $prev_date) {
-                    $compCount += 1;
-                    $rowStyle = $compCount % 2 == 1 ? "odd_row" : "even_row";
+                if ($date_parts[0] != $prev_date) {
+                    $comp_count += 1;
+                    $row_style = $comp_count % 2 == 1 ? "odd_row" : "even_row";
                     $prev_medium = "";
                 }
 
                 $image_url = home_url($recs['Server_File_Name']);
 
-                if ($prev_date == $dateParts[0]) {
-                    $dateParts[0] = "";
+                if ($prev_date == $date_parts[0]) {
+                    $date_parts[0] = "";
                     $theme = "";
                 } else {
-                    $prev_date = $dateParts[0];
+                    $prev_date = $date_parts[0];
                 }
                 if ($prev_medium == $medium) {
                     // $medium = "";
@@ -950,7 +952,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 }
 
                 echo "<tr>";
-                echo "<td align=\"center\" valign=\"middle\" class=\"$rowStyle\" width=\"3%\">";
+                echo "<td align=\"center\" valign=\"middle\" class=\"$row_style\" width=\"3%\">";
                 $checked = '';
                 foreach ($banquet_entries as $banquet_entry) {
 
@@ -963,15 +965,15 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $entry_id = $recs['Entry_ID'];
                 echo "<input type=\"checkbox\" name=\"entry_id[]\" value=\"$entry_id\" $checked $disabled/>";
                 echo '</td>';
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$theme</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$medium</td>\n";
-                // echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\" width=\"12%\">" . $date_parts[0] . "</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
+                // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
 
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
-                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
-                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td>";
-                echo "<td align=\"center\" valign=\"middle\" class=\"$rowStyle\" width=\"3%\">";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td>";
+                echo "<td align=\"center\" valign=\"middle\" class=\"$row_style\" width=\"3%\">";
 
                 echo "</tr>\n";
             }
@@ -1137,9 +1139,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
         $compdates = array_unique($this->settings->open_comp_date);
+        $theme = '';
         foreach ($compdates as $key => $comp_date) {
             $selected = '';
-            $theme = '';
             if ($this->settings->comp_date == $this->settings->open_comp_date[$key]) {
                 $selected = " SELECTED";
                 $theme = $this->settings->open_comp_theme[$key];
@@ -1205,14 +1207,14 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
         // Build the rows of submitted images
-        $numRows = 0;
-        $numOversize = 0;
+        $num_rows = 0;
+        $num_oversize = 0;
         foreach ($entries as $recs) {
-            $numRows += 1;
-            $rowStyle = $numRows % 2 == 1 ? "odd_row" : "even_row";
+            $num_rows += 1;
+            $row_style = $num_rows % 2 == 1 ? "odd_row" : "even_row";
 
             // Checkbox column
-            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
+            echo '<tr class="' . $row_style . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
 
             // Thumbnail column
             $image_url = home_url($recs->Server_File_Name);
@@ -1252,20 +1254,20 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
             }
             if ($size[0] > 1024 || $size[1] > 768) {
-                $numOversize += 1;
+                $num_oversize += 1;
             }
         }
 
         // Add some instructional bullet points above the buttons
         echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\">";
         echo "<ul style=\"margin:0;margin-left:15px;padding:0\">\n";
-        if ($numRows > 0) {
+        if ($num_rows > 0) {
             echo "<li>Click the thumbnail or title to view the full size image</li>\n";
         }
         echo "<ul></td></tr>\n";
 
         // Warn the user about oversized images.
-        if ($numOversize > 0) {
+        if ($num_oversize > 0) {
             echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\" class=\"warning_cell\">";
             echo "<ul style=\"margin:0;margin-left:15px;padding:0;color:red\"><li>When the Width or Height value is red, the image is too large to display on the projector. &nbsp;Here's what you need to do:\n";
             echo "<ul style=\"margin:0;margin-left:15px;padding:0\"><li>Remove the image from the competition. (check the corresponding checkbox and click Remove)</li>\n";
@@ -1281,13 +1283,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         // Buttons at the bottom of the list of submitted images
         echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
         // Don't show the Add button if the max number of images per member reached
-        if ($numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->club_max_entries_per_member_per_date) {
+        if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->club_max_entries_per_member_per_date) {
             echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
         }
-        if ($numRows > 0 && $max_entries_per_member_per_comp > 0) {
+        if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
             echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
         }
-        if ($numRows > 0) {
+        if ($num_rows > 0) {
             echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
         }
 

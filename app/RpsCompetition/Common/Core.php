@@ -201,6 +201,8 @@ class Core
     }
 
     public function getSeasonDates($season) {
+        $season_dates = array();
+
         // @TODO: Serious to do: Take this construction and make it better.
         $season_start_year = substr($season, 0, 4);
 

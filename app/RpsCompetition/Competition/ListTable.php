@@ -146,11 +146,6 @@ class ListTable extends \WP_List_Table
         return array('');
     }
 
-    public function display_tablenav($which)
-    {
-        parent::display_tablenav($which);
-    }
-
     public function get_views()
     {
         global $competition_status;

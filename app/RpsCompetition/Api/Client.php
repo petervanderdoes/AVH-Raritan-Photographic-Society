@@ -70,9 +70,9 @@ class Client
         $stat->appendChild($value);
         $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         while ($recs != false) {
-            $dateParts = explode(" ", $recs['Competition_Date']);
+            $date_parts = explode(" ", $recs['Competition_Date']);
             $comp_date = $root->appendChild($dom->createElement('Competition_Date'));
-            $comp_date->appendChild($dom->createTextNode($dateParts[0]));
+            $comp_date->appendChild($dom->createTextNode($date_parts[0]));
             $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         }
         echo $dom->saveXML();
@@ -189,8 +189,8 @@ class Client
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ($record_competitions !== false) {
             $comp_id = $record_competitions['ID'];
-            $dateParts = explode(" ", $record_competitions['Competition_Date']);
-            $date = $dateParts[0];
+            $date_parts = explode(" ", $record_competitions['Competition_Date']);
+            $date = $date_parts[0];
             $theme = $record_competitions['Theme'];
             $medium = $record_competitions['Medium'];
             $classification = $record_competitions['Classification'];

@@ -1318,12 +1318,8 @@ final class Admin
     public function actionUserProfile($user_id)
     {
         $userID = $user_id->ID;
-        $_rps_class_bw = get_user_meta($userID, 'rps_class_bw', true);
-        $_rps_class_color = get_user_meta($userID, 'rps_class_color', true);
-        $_rps_class_print_bw = get_user_meta($userID, 'rps_class_print_bw', true);
-        $_rps_class_print_color = get_user_meta($userID, 'rps_class_print_color', true);
 
-        $_classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
+        $classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
 
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
 
@@ -1332,21 +1328,21 @@ final class Admin
 
         // @formatter:off
         $all_classifications=array(
-            array('label'=>'Classification Digital B&W','name'=>'rps_class_bw','selected'=>$_rps_class_bw),
-            array('label'=>'Classification Digital Color','name'=>'rps_class_color','selected'=>$_rps_class_color),
-            array('label'=>'Classification Print B&W','name'=>'rps_class_print_bw','selected'=>$_rps_class_print_bw),
-            array('label'=>'Classification Print Color','name'=>'rps_class_print_color','selected'=>$_rps_class_print_color),
+            array('label'=>'Classification Digital B&W','name'=>'rps_class_bw','selected'=>get_user_meta($userID, 'rps_class_bw', true)),
+            array('label'=>'Classification Digital Color','name'=>'rps_class_color','selected'=>get_user_meta($userID, 'rps_class_color', true)),
+            array('label'=>'Classification Print B&W','name'=>'rps_class_print_bw','selected'=>get_user_meta($userID, 'rps_class_print_bw', true)),
+            array('label'=>'Classification Print Color','name'=>'rps_class_print_color','selected'=>get_user_meta($userID, 'rps_class_print_color', true)),
         );
         // @formatter:on
         foreach ($all_classifications as $data) {
 
             if (current_user_can('rps_edit_competition_classification')) {
                 echo $formBuilder->outputLabel($formBuilder->label($data['name'], $data['name']));
-                echo $formBuilder->outputField($formBuilder->select($data['name'], $_classification, $data['selected']));
+                echo $formBuilder->outputField($formBuilder->select($data['name'], $classification, $data['selected']));
             } else {
                 echo '<tr>';
                 echo '<th>' . $data['label'] . '</th>';
-                echo '<td>' . $_classification[$data['selected']] . '</td>';
+                echo '<td>' . $classification[$data['selected']] . '</td>';
                 echo '</tr>';
             }
         }
