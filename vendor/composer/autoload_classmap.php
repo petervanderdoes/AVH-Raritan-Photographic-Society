@@ -379,6 +379,7 @@ return array(
     'RpsCompetition\\Entries\\ListTable' => $baseDir . '/app/RpsCompetition/Entries/ListTable.php',
     'RpsCompetition\\Frontend\\Frontend' => $baseDir . '/app/RpsCompetition/Frontend/Frontend.php',
     'RpsCompetition\\Frontend\\Shortcodes' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes.php',
+    'RpsCompetition\\Season\\Helper' => $baseDir . '/app/RpsCompetition/Season/Helper.php',
     'RpsCompetition\\Settings' => $baseDir . '/app/RpsCompetition/Settings.php',
     'Symfony\\Component\\Config\\ConfigCache' => $vendorDir . '/symfony/config/Symfony/Component/Config/ConfigCache.php',
     'Symfony\\Component\\Config\\Definition\\ArrayNode' => $vendorDir . '/symfony/config/Symfony/Component/Config/Definition/ArrayNode.php',
