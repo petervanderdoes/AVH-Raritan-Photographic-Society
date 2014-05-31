@@ -114,7 +114,7 @@ class QueryMiscellaneous
      * @param string $competition_date_end
      * @return array
      */
-    public function getMonthlyScores($competition_date_start, $competition_date_end = NULL)
+    public function getScoredCompetions($competition_date_start, $competition_date_end = NULL)
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
