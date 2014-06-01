@@ -12,6 +12,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Options\General as OptionsGeneral;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -46,7 +47,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $request;
 
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request, OptionsGeneral $options)
     {
         $this->core = $core;
         $this->settings = $settings;
@@ -1073,7 +1074,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<table class="form_frame" width="90%">' . "\n";
 
         // Form Heading
-        if ($this->settings->validComp) {
+        if ($this->settings->valid_comp) {
             echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->settings->comp_date)) . "</th></tr>\n";
         } else {
             echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";

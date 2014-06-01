@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Intervention\Image\Image;
 use RpsCompetition\Constants;
 use RpsCompetition\Settings;
+use RpsCompetition\Options\General as OptionsGeneral;
 
 class Core
 {
@@ -45,7 +46,7 @@ class Core
     /**
      * PHP5 constructor
      */
-    public function __construct(Settings $settings, Request $request)
+    public function __construct(Settings $settings, Request $request, OptionsGeneral $options)
     {
         $this->settings = $settings;
         $this->request = $request;
@@ -78,7 +79,7 @@ class Core
         $this->settings->graphics_url = plugins_url('images', $this->settings->plugin_basename);
         $this->settings->js_url = plugins_url('js', $this->settings->plugin_basename);
         $this->settings->css_url = plugins_url('css', $this->settings->plugin_basename);
-        $this->settings->validComp = '';
+        $this->settings->valid_comp = '';
         $this->settings->comp_date = '';
         $this->settings->classification = '';
         $this->settings->medium = '';

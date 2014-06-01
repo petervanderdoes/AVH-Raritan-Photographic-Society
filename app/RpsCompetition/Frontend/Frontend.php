@@ -12,6 +12,7 @@ use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\QueryBanquet;
+use RpsCompetition\Options\General;
 
 class Frontend
 {
@@ -50,6 +51,8 @@ class Frontend
         $this->rpsdb = $container->make('RpsCompetition\Db\RpsDb');
         $this->request = $container->make('Illuminate\Http\Request');
         $this->container = $container;
+        $this->options = $container->make('RpsCompetition\Options\General');
+        $this->options->load('rps');
 
         $this->settings->errmsg = '';
 
@@ -249,8 +252,8 @@ class Frontend
                     $this->settings->medium = $medium;
                 }
             }
-            $this->settings->validComp = $this->validateSelectedComp($this->settings->comp_date, $this->settings->medium);
-            if ($this->settings->validComp === false) {
+            $this->settings->valid_comp = $this->validateSelectedComp($this->settings->comp_date, $this->settings->medium);
+            if ($this->settings->valid_comp === false) {
                 $this->settings->comp_date = '';
                 $this->settings->classification = '';
                 $this->settings->medium = '';

@@ -17,6 +17,7 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Settings;
+use RpsCompetition\Options\General as OptionsGeneral;
 
 /**
  * Register The Composer Auto Loader
@@ -57,13 +58,20 @@ class AVH_RPS_Client
             return new RpsDb();
         });
 
+
+
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $db = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->plugin_dir = $dir;
         $this->settings->plugin_basename = $basename;
+        $this->settings->plugin_file = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
+        $this->container->singleton('RpsCompetition\Options\General', function ()
+        {
+            return new OptionsGeneral($this->settings);
+        });
         add_action('plugins_loaded', array($this, 'load'));
     }
 
