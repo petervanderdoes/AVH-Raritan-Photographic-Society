@@ -148,7 +148,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $selected_month = substr($last_scored->Competition_Date, 5, 2);
         }
 
-
         $selected_season = $season_helper->getSeasonId($selected_year, $selected_month);
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_miscellaneous->getScoredCompetions($season_start_date, $season_end_date);
@@ -816,22 +815,47 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $query_banquet = new QueryBanquet($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $selected_season = end($season_helper->getSeasons());
 
-        if ($this->request->has('selected_season_list')) {
-            $this->settings->selected_season = $this->request->input('selected_season_list');
+        if ($this->request->isMethod('POST')) {
+           $selected_season = esc_attr($this->request->input('new_season', $selected_season));
         }
-        $seasons = $this->getSeasons();
+
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
+        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $season_start_date, $season_end_date);
+        $banquet_id = $query_banquet->getBanquets($season_start_date, $season_end_date);
+        $banquet_id_string = '0';
+        $banquet_id_array = array();
+        $disabled = '';
+        if (is_array($banquet_id)) {
+            foreach ($banquet_id as $record) {
+                $banquet_id_array[] = $record['ID'];
+                if ($record['Closed'] == 'Y') {
+                    $disabled = 'disabled="1"';
+                }
+            }
+
+            $banquet_id_string = implode(',', $banquet_id_array);
+        }
+        $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
+        $banquet_entries = $query_entries->query(array('where' => $where));
+        $all_entries = array();
+        foreach ($banquet_entries as $banquet_entry) {
+            $all_entries[] = $banquet_entry->ID;
+        }
 
         // Start building the form
         $action = home_url('/' . get_page_uri($post->ID));
         $form = '';
         $form .= '<form name="banquet_form" method="post" action="' . $action . '">';
-        $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '" />';
         // Drop down list for season
-        $form .= $this->getSeasonDropdown($this->settings->selected_season);
+        $form .= $season_helper->getSeasonDropdown($selected_season);
+        $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '" />';
+        $form .= '<input name="submit_control" type="hidden">' . "\n";
         $form .= "</form>";
         echo '<script type="text/javascript">' . "\n";
-        echo 'function submit_form() {' . "\n";
+        echo 'function submit_form(control_name) {' . "\n";
         echo '	document.banquet_form.submit();' . "\n";
         echo '}' . "\n";
         echo '</script>' . "\n";
@@ -851,28 +875,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<th width="8%">Award</th>';
         echo '<th width="3%"></th>';
         echo '</tr>';
-        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $this->settings->season_start_date, $this->settings->season_end_date);
-        $banquet_id = $query_banquet->getBanquets($this->settings->season_start_date, $this->settings->season_end_date);
-        $banquet_id_string = '0';
-        $banquet_id_array = array();
-        $disabled = '';
-        if (is_array($banquet_id)) {
-            $banquet_id_array[] = '0';
-            foreach ($banquet_id as $record) {
-                $banquet_id_array[] = $record['ID'];
-                if ($record['Closed'] == 'Y') {
-                    $disabled = 'disabled="1"';
-                }
-            }
 
-            $banquet_id_string = implode(',', $banquet_id_array);
-        }
-        $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
-        $banquet_entries = $query_entries->query(array('where' => $where));
-        $all_entries = array();
-        foreach ($banquet_entries as $banquet_entry) {
-            $all_entries[] = $banquet_entry->ID;
-        }
         // Bail out if not entries found
         if (empty($scores)) {
             echo "<tr><td colspan=\"6\">No eligible banquet entries</td></tr>\n";
@@ -970,7 +973,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo "});\n";
             echo '</script>';
         }
-        unset($query_miscellaneous, $query_banquet);
+        unset($query_miscellaneous, $query_banquet, $query_entries, $season_helper);
     }
 
     public function displayEditTitle($atts, $content, $tag)
