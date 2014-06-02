@@ -52,7 +52,6 @@ class Frontend
         $this->request = $container->make('Illuminate\Http\Request');
         $this->container = $container;
         $this->options = $container->make('RpsCompetition\Options\General');
-        $this->options->load('rps');
 
         $this->settings->errmsg = '';
 
