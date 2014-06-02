@@ -518,17 +518,17 @@ class Frontend
                                 $comp_date = strtok($banquet_record->Competition_Date, ' ');
                                 $classification = $banquet_record->Classification;
                                 $medium = $banquet_record->Medium;
-                                $path = $this->request->server('DOCUMENT_ROOT') . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
-                                if (!is_dir($path)) {
-                                    mkdir($path, 0755);
+                                $path = '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                                if (!is_dir($this->request->server('DOCUMENT_ROOT') . $path)) {
+                                    mkdir($this->request->server('DOCUMENT_ROOT') . $path, 0755);
                                 }
 
-                                $file_name = pathinfo($entry->Server_File_Name);
-                                $server_file_name = $path . '/' . $file_name['basename'];
+                                $file_info = pathinfo($entry->Server_File_Name);
+                                $new_file_name = $path . '/' . $file_info['basename'];
                                 $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name, ENT_QUOTES, get_bloginfo('charset'));
                                 // Need to create the destination folder?
-                                copy($original_filename, $server_file_name);
-                                $data = array('Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $server_file_name);
+                                copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
+                                $data = array('Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $new_file_name);
                                 $this->rpsdb->addEntry($data);
                             }
                         }
