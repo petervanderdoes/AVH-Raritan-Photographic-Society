@@ -23,11 +23,13 @@ class QueryEntries
      */
     public function countEntriesSubmittedByMember($user_id, $competition_date)
     {
+        $competition_date = $this->rpsdb->getMysqldate($competition_date);
+
         $sql = $this->rpsdb->prepare("SELECT COUNT(entries.ID) as Total_Submitted
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND	entries.Member_ID=%s
-                AND competitions.Competition_Date = DATE %s ", $user_id, $competition_date);
+                AND competitions.Competition_Date = %s ", $user_id, $competition_date);
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -44,11 +46,13 @@ class QueryEntries
      */
     public function getEntriesSubmittedByMember($user_id, $competition_date, $classification, $medium)
     {
+        $competition_date = $this->rpsdb->getMysqldate($competition_date);
+
         $sql = $this->rpsdb->prepare("SELECT entries.ID, entries.Title, entries.Client_File_Name, entries.Server_File_Name, competitions.Max_Entries
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND entries.Member_ID = %s
-                AND competitions.Competition_Date = DATE %s
+                AND competitions.Competition_Date = %s
                 AND competitions.Classification = %s
                 AND competitions.Medium = %s", $user_id, $competition_date, $classification, $medium);
         $return = $this->rpsdb->get_results($sql);

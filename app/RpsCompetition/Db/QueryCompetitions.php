@@ -22,7 +22,7 @@ class QueryCompetitions
      * @param string $subset
      * @return multitype:
      */
-    public function getOpenCompetitions($user_id, $subset = '')
+    public function getOpenCompetitions($user_id, $subset = '', $output = OBJECT)
     {
 
         // Select the list of open competitions that match this member's classification(s)
@@ -32,7 +32,7 @@ class QueryCompetitions
             $and_medium_subset = '';
         }
 
-        if ($subset == 'digital') {
+        if (strtolower($subset) == 'digital') {
             $class1 = get_user_meta($user_id, 'rps_class_bw', true);
             $class2 = get_user_meta($user_id, 'rps_class_color', true);
         } else {
@@ -40,7 +40,7 @@ class QueryCompetitions
             $class2 = get_user_meta($user_id, 'rps_class_print_color', true);
         }
         // Select the list of open competitions that match this member's classification(s)
-        $sql_pre_prepare = "SELECT c.Competition_Date, c.Classification, c.Medium, c.Theme, c.Closed
+        $sql_pre_prepare = "SELECT *
             FROM competitions c
             WHERE c.Classification IN  (%s)
                 AND c.Closed = 'N'";
@@ -49,12 +49,11 @@ class QueryCompetitions
 
         $subset_detail = 'color ' . $subset;
         $sql = $this->rpsdb->prepare($sql_pre_prepare, $class2, '%' . $subset_detail . '%');
-        $color_set = $this->rpsdb->get_results($sql, ARRAY_A);
+        $color_set = $this->rpsdb->get_results($sql, $output);
         $subset_detail = 'b&w ' . $subset;
         $sql = $this->rpsdb->prepare($sql_pre_prepare, $class1, '%' . $subset_detail . '%');
-        $bw_set = $this->rpsdb->get_results($sql, ARRAY_A);
+        $bw_set = $this->rpsdb->get_results($sql, $output);
         $return = array_merge($color_set, $bw_set);
-        sort($return);
 
         return $return;
     }
@@ -139,12 +138,14 @@ class QueryCompetitions
      *
      * @return Ambigous <string, NULL>
      */
-    public function getCompetitionMaxEntries($competiton_date, $classification, $medium)
+    public function getCompetitionMaxEntries($competition_date, $classification, $medium)
     {
+        $competition_date = $this->rpsdb->getMysqldate($competition_date);
+
         $sql = $this->rpsdb->prepare("SELECT Max_Entries FROM competitions
-                WHERE Competition_Date = DATE %s AND
+                WHERE Competition_Date = %s AND
                 Classification = %s AND
-                Medium = %s", $competiton_date, $classification, $medium);
+                Medium = %s", $competition_date, $classification, $medium);
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -214,14 +215,14 @@ class QueryCompetitions
      * @param unknown $medium
      * @return Ambigous <mixed, NULL, multitype:>
      */
-    public function getCompetitionByDateClassMedium($competition_date, $classification, $medium)
+    public function getCompetitionByDateClassMedium($competition_date, $classification, $medium, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare("SELECT *
             FROM competitions
             WHERE Competition_Date = DATE %s
                 AND Classification = %s
                 AND Medium = %s", $competition_date, $classification, $medium);
-        $return = $this->rpsdb->get_row($sql, ARRAY_A);
+        $return = $this->rpsdb->get_row($sql, $output);
 
         return $return;
     }

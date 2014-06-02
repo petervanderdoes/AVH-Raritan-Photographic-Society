@@ -13,6 +13,7 @@ use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Options\General as OptionsGeneral;
+use RpsCompetition\Competition\Helper as CompetitionHelper;
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -819,7 +820,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $selected_season = end($season_helper->getSeasons());
 
         if ($this->request->isMethod('POST')) {
-           $selected_season = esc_attr($this->request->input('new_season', $selected_season));
+            $selected_season = esc_attr($this->request->input('new_season', $selected_season));
         }
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
@@ -1035,12 +1036,38 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $competition_helper = new CompetitionHelper($this->rpsdb);
 
-        // Default values
-        $medium = 'digital';
+        $medium_subset_medium = $atts['medium'];
 
-        extract($atts, EXTR_OVERWRITE);
-        $this->settings->medium_subset = $medium;
+        $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
+        $open_competitions = $this->core->arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
+
+        if (!empty($open_competitions)) {
+            if ($this->request->isMethod('POST')) {
+                switch ($this->request->input('submit_control')) {
+
+                    case 'select_comp':
+                        $competition_date = $this->request->input('select_comp');
+                        $medium = $this->request->input('medium');
+                        break;
+
+                    case 'select_medium':
+                        $competition_date = $this->request->input('comp_date');
+                        $medium = $this->request->input('select_medium');
+                        break;
+                }
+                $classification = $this->request->input('classification');
+                $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+            } else {
+                $current_competition = reset($open_competitions);
+                $competition_date = mysql2date('Y-m-d', $current_competition->Competition_Date);
+                $medium = $current_competition->Medium;
+                $classification = $current_competition->Classification;
+            }
+        } else {
+            $this->settings->errmsg = 'There are no competitions available to enter';
+        }
 
         echo '<script language="javascript">' . "\n";
         echo '	function confirmSubmit() {' . "\n";
@@ -1062,32 +1089,27 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
         }
 
-        if (!is_array($this->settings->open_comp_date)) {
+        if (empty($open_competitions)) {
             return;
         }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
         echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
         echo '<input type="hidden" name="submit_control">' . "\n";
-        echo '<input type="hidden" name="comp_date" value="' . $this->settings->comp_date . '">' . "\n";
-        echo '<input type="hidden" name="classification" value="' . $this->settings->classification . '">' . "\n";
-        echo '<input type="hidden" name="medium" value="' . $this->settings->medium . '">' . "\n";
-        echo '<input type="hidden" name="medium_subset" value="' . $this->settings->medium_subset . '">' . "\n";
+        echo '<input type="hidden" name="comp_date" value="' . $current_competition->Competition_Date . '">' . "\n";
+        echo '<input type="hidden" name="classification" value="' . $current_competition->Classification . '">' . "\n";
+        echo '<input type="hidden" name="medium" value="' . $current_competition->Medium . '">' . "\n";
         echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce('avh-rps-myentries') . '" />' . "\n";
         echo '<table class="form_frame" width="90%">' . "\n";
 
         // Form Heading
-        if ($this->settings->valid_comp) {
-            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->settings->comp_date)) . "</th></tr>\n";
-        } else {
-            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
-        }
+        echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $current_competition->Medium . " on " . mysql2date('Y-m-d', $current_competition->Competition_Date) . "</th></tr>\n";
         echo "<tr><td align=\"center\" colspan=\"6\">\n";
         echo "<table width=\"100%\">\n";
         echo '<tr>';
         echo '<td width="25%">';
         // echo '<span class="rps-comp-medium">' . $this->settings->medium . '</span>';
-        switch ($this->settings->medium) {
+        switch ($current_competition->Medium) {
             case "Color Digital":
                 $img = '/thumb-comp-digital-color.jpg';
                 break;
@@ -1116,15 +1138,17 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
-        $compdates = array_unique($this->settings->open_comp_date);
-        $theme = '';
-        foreach ($compdates as $key => $comp_date) {
-            $selected = '';
-            if ($this->settings->comp_date == $this->settings->open_comp_date[$key]) {
-                $selected = " SELECTED";
-                $theme = $this->settings->open_comp_theme[$key];
+        $previous_date = '';
+        foreach ($open_competitions as $open_competition) {
+            if ($previous_date == $open_competition->Competition_Date) {
+                continue;
             }
-            echo "<OPTION value=\"" . $comp_date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($comp_date)) . " " . $this->settings->open_comp_theme[$key] . "</OPTION>\n";
+            $previous_date = $open_competition->Competition_Date;
+            $selected = '';
+            if ($current_competition->Competition_Date == $open_competition->Competition_Date) {
+                $selected = " SELECTED";
+            }
+            echo "<OPTION value=\"" . $competition_date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($competition_date)) . " " . $open_competition->Theme . "</OPTION>\n";
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
@@ -1135,35 +1159,33 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
 
         // Load the values into the dropdown list
-        $medium_array = array_keys($this->settings->open_comp_date, $this->settings->comp_date);
+        $medium_array = $competition_helper->getMedium($open_competitions);
         foreach ($medium_array as $comp_medium) {
             $selected = '';
-            if ($this->settings->medium == $this->settings->open_comp_medium[$comp_medium]) {
+            if ($current_competition->Medium == $comp_medium) {
                 $selected = " SELECTED";
             }
-            echo "<OPTION value=\"" . $this->settings->open_comp_medium[$comp_medium] . "\"$selected>" . $this->settings->open_comp_medium[$comp_medium] . "</OPTION>\n";
+            echo "<OPTION value=\"" . $comp_medium . "\"$selected>" . $comp_medium . "</OPTION>\n";
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
 
         // Display the Classification and Theme for the selected competition
         echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">" . $this->settings->classification . "</td></tr>\n";
+        echo "<td width=\"64%\" align=\"left\">" . $current_competition->Classification . "</td></tr>\n";
         echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">$theme</td></tr>\n";
+        echo "<td width=\"64%\" align=\"left\">$current_competition->Theme</td></tr>\n";
 
         echo "</table>\n";
         echo "</td></tr></table>\n";
 
         // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
-        if ($this->settings->comp_date != "") {
-            $close_date = $query_competitions->getCompetitionCloseDate($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
-            if (!empty($close_date)) {
-                $close_epoch = strtotime($close_date);
-                $time_to_close = $close_epoch - current_time('timestamp');
-                if ($time_to_close >= 0 && $time_to_close <= 604800) {
-                    echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . mysql2date("F j, Y", $close_date) . " at " . mysql2date('h:i a', $close_date) . "</td></tr>\n";
-                }
+        $close_date = $query_competitions->getCompetitionCloseDate($current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
+        if ($close_date !== null) {
+            $close_epoch = strtotime($close_date);
+            $time_to_close = $close_epoch - current_time('timestamp');
+            if ($time_to_close >= 0 && $time_to_close <= 604800) {
+                echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . mysql2date("F j, Y", $close_date) . " at " . mysql2date('h:i a', $close_date) . "</td></tr>\n";
             }
         }
 
@@ -1178,12 +1200,12 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</tr>';
 
         // Retrieve the maximum number of entries per member for this competition
-        $max_entries_per_member_per_comp = $query_competitions->getCompetitionMaxEntries($this->settings->comp_date, $this->settings->classification, $this->settings->medium);
+        $max_entries_per_member_per_comp = $query_competitions->getCompetitionMaxEntries($current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
 
         // Retrive the total number of entries submitted by this member for this competition date
         $total_entries_submitted = $query_entries->countEntriesSubmittedByMember(get_current_user_id(), $this->settings->comp_date);
 
-        $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $this->settings->comp_date, $this->settings->classification, $this->settings->medium);
+        $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
         // Build the rows of submitted images
         $num_rows = 0;
         $num_oversize = 0;
@@ -1198,7 +1220,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
             // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs->Title . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
+            echo '<a href="' . $image_url . '" rel="' . $recs->Competition_Date . '" title="' . $recs->Title . ' ' . $recs->classification . ' ' . $recs->medium . '">' . "\n";
             echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 

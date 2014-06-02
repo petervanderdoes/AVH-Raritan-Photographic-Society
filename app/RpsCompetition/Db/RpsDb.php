@@ -13,4 +13,9 @@ class RpsDb extends \wpdb
         $this->show_errors(true);
         $this->user_id = get_current_user_id();
     }
+
+    public function getMysqldate($date){
+        $date = new \DateTime($date);
+        return $date->format('Y-m-d H:i:s');
+    }
 }

@@ -368,6 +368,7 @@ return array(
     'RpsCompetition\\Admin\\Initialize' => $baseDir . '/app/RpsCompetition/Admin/Initialize.php',
     'RpsCompetition\\Api\\Client' => $baseDir . '/app/RpsCompetition/Api/Client.php',
     'RpsCompetition\\Common\\Core' => $baseDir . '/app/RpsCompetition/Common/Core.php',
+    'RpsCompetition\\Competition\\Helper' => $baseDir . '/app/RpsCompetition/Competition/Helper.php',
     'RpsCompetition\\Competition\\ListTable' => $baseDir . '/app/RpsCompetition/Competition/ListTable.php',
     'RpsCompetition\\Constants' => $baseDir . '/app/RpsCompetition/Constants.php',
     'RpsCompetition\\Db\\QueryBanquet' => $baseDir . '/app/RpsCompetition/Db/QueryBanquet.php',

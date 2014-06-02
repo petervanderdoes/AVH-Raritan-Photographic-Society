@@ -65,8 +65,7 @@ class Core
 
     public function handleInitializePlugin()
     {
-        //$old_db_version = get_option('avhrps_db_version', 0);
-
+        // $old_db_version = get_option('avhrps_db_version', 0);
         $this->settings->club_name = "Raritan Photographic Society";
         $this->settings->club_short_name = "RPS";
         $this->settings->club_max_entries_per_member_per_date = 4;
@@ -135,7 +134,6 @@ class Core
 
     public function renameImageFile($path, $old_name, $new_name, $ext)
     {
-
         $path = $this->request->server('DOCUMENT_ROOT') . $path;
         // Rename the main image file
         $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
@@ -162,10 +160,15 @@ class Core
 
     public function arrayMsort($array, $cols)
     {
+        $object = false;
         $colarr = array();
         foreach ($cols as $col => $order) {
             $colarr[$col] = array();
             foreach ($array as $k => $row) {
+                if (is_object($row)) {
+                    $row = (array) $row;
+                    $object = true;
+                }
                 $colarr[$col][$k] = strtolower($row[$col]);
             }
         }
@@ -178,9 +181,13 @@ class Core
                 unset($order_element);
             }
         }
+
         $params[] = &$array;
         call_user_func_array('array_multisort', $params);
-
+        if ($object)
+            foreach ($array as $key => $row) {
+                $array[$key] = (object) $row;
+            }
         return $array;
     }
 
@@ -201,7 +208,8 @@ class Core
         }
     }
 
-    public function getSeasonDates($season) {
+    public function getSeasonDates($season)
+    {
         $season_dates = array();
 
         // @TODO: Serious to do: Take this construction and make it better.
@@ -216,6 +224,7 @@ class Core
 
         return $season_dates;
     }
+
     /**
      * Check if the user is a paid member
      *
