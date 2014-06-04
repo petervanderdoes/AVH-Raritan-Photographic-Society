@@ -59,10 +59,10 @@ class Frontend
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
         if ($this->request->isMethod('POST')) {
-            add_action('wp', array($this, 'actionHandlePostRpsMyEntries'));
-            add_action('wp', array($this, 'actionHandlePostRpsEditTitle'));
-            add_action('wp', array($this, 'actionHandlePostRpsUploadEntry'));
-            add_action('wp', array($this, 'actionHandlePostRpsBanquetEntries'));
+            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsMyEntries'));
+            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsEditTitle'));
+            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsUploadEntry'));
+            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
         }
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
     }
@@ -177,7 +177,7 @@ class Frontend
         }
     }
 
-    public function actionHandlePostRpsMyEntries()
+    public function actionHandleHttpPostRpsMyEntries()
     {
         global $post;
         $query_competitions = new QueryCompetitions($this->rpsdb);
@@ -239,7 +239,7 @@ class Frontend
     /**
      * Handle $_POST Edit Title
      */
-    public function actionHandlePostRpsEditTitle()
+    public function actionHandleHttpPostRpsEditTitle()
     {
         global $post;
 
@@ -305,7 +305,7 @@ class Frontend
         unset($query_entries);
     }
 
-    public function actionHandlePostRpsUploadEntry()
+    public function actionHandleHttpPostRpsUploadEntry()
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
@@ -453,7 +453,7 @@ class Frontend
         unset($query_entries, $query_competitions);
     }
 
-    public function actionHandlePostRpsBanquetEntries()
+    public function actionHandleHttpPostRpsBanquetEntries()
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
