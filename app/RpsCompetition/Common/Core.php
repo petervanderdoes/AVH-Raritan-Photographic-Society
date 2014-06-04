@@ -119,7 +119,7 @@ class Core
         }
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['filename'] . '.jpg', $thumb_dir . '/' . $thumb_name, $size);
+            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir . '/' . $thumb_name, $size);
         }
 
         $p = explode('/', $file_parts['dirname']);
