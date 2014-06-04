@@ -14,6 +14,8 @@ use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
+use Avh\Network\Session;
+
 
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
@@ -1038,6 +1040,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $competition_helper = new CompetitionHelper($this->rpsdb);
 
+        $session= new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path'=>get_page_uri( $post->ID)));
+        $session->start();
+
         $medium_subset_medium = $atts['medium'];
 
         $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
@@ -1058,16 +1063,24 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                         break;
                 }
                 $classification = $this->request->input('classification');
-                $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
             } else {
                 $current_competition = reset($open_competitions);
-                $competition_date = mysql2date('Y-m-d', $current_competition->Competition_Date);
-                $medium = $current_competition->Medium;
-                $classification = $current_competition->Classification;
+                $competition_date = $session->get('myentries/competition_date',mysql2date('Y-m-d', $current_competition->Competition_Date));
+                $medium = $session->get('myentries/medium',$current_competition->Medium);
+                $classification = $session->get('myentries/classification',$current_competition->Classification);
             }
         } else {
             $this->settings->errmsg = 'There are no competitions available to enter';
         }
+
+        $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+        $session->set('myentries/competition_date', $current_competition->Competition_Date);
+        $session->set('myentries/medium', $current_competition->Medium);
+        $session->set('myentries/classification', $current_competition->Classification);
+        $session->save();
+       // $cookie = $cookie_jar->queued('rps_'.COOKIEHASH);
+        //setcookie($cookie->getName(),$cookie->getValue(),$cookie->getExpiresTime(),$cookie->getPath(),$cookie->getDomain(),$cookie->isSecure(),$cookie->isHttpOnly());
+
 
         echo '<script language="javascript">' . "\n";
         echo '	function confirmSubmit() {' . "\n";
@@ -1220,7 +1233,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
             // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $recs->Competition_Date . '" title="' . $recs->Title . ' ' . $recs->classification . ' ' . $recs->medium . '">' . "\n";
+            echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $recs->Classification . ' ' . $recs->Medium . '">' . "\n";
             echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
