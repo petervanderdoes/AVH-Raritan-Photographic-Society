@@ -185,6 +185,9 @@ class QueryCompetitions
 
     public function getCompetitionByDates($start, $end, $output = OBJECT)
     {
+        $start = $this->rpsdb->getMysqldate($start);
+        $end = $this->rpsdb->getMysqldate($end);
+
         $sql = $this->rpsdb->prepare("SELECT *
             FROM competitions
             WHERE Competition_Date >= %s AND
@@ -217,9 +220,11 @@ class QueryCompetitions
      */
     public function getCompetitionByDateClassMedium($competition_date, $classification, $medium, $output = OBJECT)
     {
+        $competition_date = $this->rpsdb->getMysqldate($competition_date);
+
         $sql = $this->rpsdb->prepare("SELECT *
             FROM competitions
-            WHERE Competition_Date = DATE %s
+            WHERE Competition_Date = %s
                 AND Classification = %s
                 AND Medium = %s", $competition_date, $classification, $medium);
         $return = $this->rpsdb->get_row($sql, $output);
