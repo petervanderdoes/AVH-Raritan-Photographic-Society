@@ -65,23 +65,16 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $seasons = $season_helper->getSeasons();
+        $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
 
-        if ($this->request->has('selected_season_list')) {
-            $this->settings->selected_season = $this->request->input('selected_season_list');
-        }
         $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
 
-        $seasons = $query_miscellaneous->getSeasonListWithEntries($this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
-        arsort($seasons);
-        if (!isset($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
-        }
 
-        $season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $season_start_year, 9, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $season_start_year + 1, 9, 1);
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
 
-        $competition_dates = $query_competitions->getCompetitionDates($this->settings->season_start_date, $this->settings->season_end_date);
+        $competition_dates = $query_competitions->getCompetitionDates($season_start_date, $season_end_date);
         // Build an array of competition dates in "MM/DD" format for column titles.
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
@@ -90,8 +83,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $comp_max_entries = array();
         $comp_num_judges = array();
         foreach ($competition_dates as $key => $recs) {
-            $comp_date = $recs['Competition_Date'];
-            $date_parts = explode(" ", $comp_date);
+            $date_parts = explode(" ", $recs['Competition_Date']);
             list ($comp_year, $comp_month, $comp_day) = explode("-", $date_parts[0]);
             $comp_dates[$date_parts[0]] = sprintf("%d/%d", $comp_month, $comp_day);
             $comp_max_entries[$date_parts[0]] = $recs['Max_Entries'];
@@ -99,7 +91,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
         }
 
-        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($this->settings->season_start_date, $this->settings->season_end_date);
+        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
         $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
         // Bail out if no entries found
         if (empty($club_competition_results)) {
@@ -111,9 +103,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $action = home_url('/' . get_page_uri($post->ID));
             $form = '';
             $form .= '<form name="all_scores_form" method="post" action="' . $action . '">';
-            $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '"/>';
+            $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '"/>';
             // Drop down list for season
-            $form .= $this->getSeasonDropdown($this->settings->selected_season);
+            $form .=  $season_helper->getSeasonDropdown($selected_season);
             $form .= '</form>';
             echo 'Select the season: ';
             echo $form;
@@ -308,7 +300,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             // We're all done
             echo "</table>";
         }
-        unset($query_competitions, $query_miscellaneous);
+        unset($query_competitions, $query_miscellaneous, $season_helper);
     }
 
     public function displayBanquetCurrentUser($atts, $content, $tag)
