@@ -487,10 +487,10 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $date = '';
         extract($atts, EXTR_OVERWRITE);
 
-        $competiton_date = date('Y-m-d H:i:s', strtotime($date));
+        $competition_date = date('Y-m-d H:i:s', strtotime($date));
         $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
 
-        $entries = $query_miscellaneous->getWinner($competiton_date, $award_map[$award], $class);
+        $entries = $query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
 
         echo '<section class="rps-showcase-category-winner">';
         echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
