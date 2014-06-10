@@ -1237,7 +1237,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo '<li>';
             echo '<div>';
             echo '	<div class="image">';
-            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<a href="'. $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
             echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
             echo '	</div>';
             echo "</div>\n";
@@ -1255,19 +1255,19 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     {
         global $post;
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
 
-        if ($this->request->has('selected_season_list')) {
-            $this->settings->selected_season = $this->request->input('selected_season_list');
-        }
-        $seasons = $this->getSeasons();
+        $seasons = $season_helper->getSeasons();
+        $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
 
         // Start building the form
         $action = home_url('/' . get_page_uri($post->ID));
         $form = '';
         $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
-        $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '" />';
+        $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '" />';
         // Drop down list for season
-        $form .= $this->getSeasonDropdown($this->settings->selected_season);
+        $form .= $season_helper->getSeasonDropdown($selected_season);
         $form .= "</form>";
         echo '<script type="text/javascript">' . "\n";
         echo 'function submit_form() {' . "\n";
@@ -1284,7 +1284,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<th class="form_frame_header">Title</th>';
         echo '<th class="form_frame_header" width="8%">Score</th>';
         echo '<th class="form_frame_header" width="8%">Award</th></tr>';
-        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $this->settings->season_start_date, $this->settings->season_end_date);
+        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $season_start_date, $season_end_date);
 
         // Bail out if not entries found
         if (empty($scores)) {
@@ -1345,7 +1345,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             }
             echo "</table>";
         }
-        unset($query_miscellaneous);
+        unset($query_miscellaneous, $season_helper);
     }
 
     public function displayUploadEntry($atts, $content, $tag)
