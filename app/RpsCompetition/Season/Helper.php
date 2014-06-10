@@ -13,13 +13,17 @@ use RpsCompetition\Db\QueryMiscellaneous;
  */
 class Helper
 {
+
     private $settings;
+
     private $rpsdb;
 
-    public function __construct(Settings $settings, $rpsdb) {
+    public function __construct(Settings $settings, $rpsdb)
+    {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
     }
+
     /**
      * Get the seasons list
      *
@@ -44,7 +48,7 @@ class Helper
      */
     public function getSeasonStartEnd($selected_season)
     {
-        $season_date=array();
+        $season_date = array();
         // @TODO: Serious to do: Take this construction and make it better.
         $season_start_year = substr($selected_season, 0, 4);
 
@@ -81,7 +85,11 @@ class Helper
         return $form;
     }
 
-    public function getSeasonId($selected_year,$selected_month) {
-         return $selected_year.'-'.substr($selected_year+1, 2,2);
+    public function getSeasonId($selected_year, $selected_month)
+    {
+        if ($selected_month < $this->settings->club_season_start_month_num) {
+            $selected_year--;
+        }
+        return $selected_year . '-' . substr($selected_year + 1, 2, 2);
     }
 }
