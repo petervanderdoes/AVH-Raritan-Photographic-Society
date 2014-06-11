@@ -31,8 +31,9 @@ class Helper
      */
     public function getSeasons()
     {
+        $options = get_option('avh-rps');
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $seasons = $query_miscellaneous->getSeasonList('ASC', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
+        $seasons = $query_miscellaneous->getSeasonList('ASC', $options['season_start_month_num'], $options['season_end_month_num']);
         if (empty($this->settings->selected_season)) {
             $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
@@ -48,11 +49,12 @@ class Helper
      */
     public function getSeasonStartEnd($selected_season)
     {
+        $options = get_option('avh-rps');
         $season_date = array();
         // @TODO: Serious to do: Take this construction and make it better.
         $season_start_year = substr($selected_season, 0, 4);
 
-        $date = new \DateTime($season_start_year . '-' . $this->settings->club_season_start_month_num);
+        $date = new \DateTime($season_start_year . '-' . $options['season_start_month_num']);
         $season_date[] = $date->format('Y-m-d');
 
         // @TODO: The 6 is the end of the season.
@@ -87,7 +89,8 @@ class Helper
 
     public function getSeasonId($selected_year, $selected_month)
     {
-        if ($selected_month < $this->settings->club_season_start_month_num) {
+        $options = get_option('avh-rps');
+        if ($selected_month < $options['season_start_month_num']) {
             $selected_year--;
         }
         return $selected_year . '-' . substr($selected_year + 1, 2, 2);

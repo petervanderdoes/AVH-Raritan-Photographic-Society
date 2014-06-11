@@ -176,11 +176,14 @@ class ListTable extends \WP_List_Table
 
     public function extra_tablenav($which)
     {
+
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $options = get_option('avh-rps');
+
         echo '<div class="alignleft actions">';
         if ('top' == $which) {
-            $_seasons = $query_miscellaneous->getSeasonList('DESC', $this->settings->club_season_start_month_num, $this->settings->club_season_end_month_num);
+            $_seasons = $query_miscellaneous->getSeasonList('DESC', $options['season_start_month_num'], $options['season_end_month_num']);
             $season = $this->request->input('filter-season', 0);
             echo '<select name="filter-season">';
             echo '<option' . selected($season, 0, false) . ' value="0">' . __('All seasons') . '</option>';
@@ -271,12 +274,13 @@ class ListTable extends \WP_List_Table
     public function column_season($entry)
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $options = get_option('avh-rps');
 
         $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
         if ($_competition != false) {
             $unix_date = mysql2date('U', $_competition->Competition_Date);
             $_competition_month = date('n', $unix_date);
-            if ($_competition_month >= $this->settings->club_season_start_month_num && $_competition_month <= $this->settings->club_season_end_month_num) {
+            if ($_competition_month >= $options['season_start_month_num'] && $_competition_month <= $options['season_end_month_num']) {
                 $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
             } else {
                 $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);

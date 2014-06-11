@@ -51,7 +51,7 @@ class Frontend
         $this->rpsdb = $container->make('RpsCompetition\Db\RpsDb');
         $this->request = $container->make('Illuminate\Http\Request');
         $this->container = $container;
-        $this->options = $container->make('RpsCompetition\Options\General');
+        $this->options = $container->make('RpsCompetition\Options\General', array($this->settings));
 
         $this->settings->errmsg = '';
 

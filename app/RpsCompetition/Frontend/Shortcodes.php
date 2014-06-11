@@ -49,7 +49,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $settings;
 
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request, OptionsGeneral $options)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
     {
         $this->core = $core;
         $this->settings = $settings;
@@ -598,6 +598,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $options=get_option('avh-rps');
 
         $months = array();
         $themes = array();
@@ -607,7 +608,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 case 'new_season':
                     $selected_year = substr(esc_attr($this->request->input('new_season')), 0, 4);
                     $selected_month = esc_attr($this->request->input('selected_month'));
-                    if ($selected_month < $this->settings->club_season_start_month_num) {
+                    if ($selected_month < $options['season_start_month_num']) {
                         $selected_year++;
                     }
                     break;
@@ -737,6 +738,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $options=get_option('avh-rps');
 
         $months = array();
         $themes = array();
@@ -749,7 +751,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 case 'new_season':
                     $selected_year = substr(esc_attr($this->request->input('new_season')), 0, 4);
                     $selected_month = esc_attr($this->request->input('selected_month'));
-                    if ($selected_month < $this->settings->club_season_start_month_num) {
+                    if ($selected_month < $options['season_start_month_num']) {
                         $selected_year++;
                     }
                     break;

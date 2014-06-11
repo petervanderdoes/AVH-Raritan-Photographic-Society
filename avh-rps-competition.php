@@ -68,10 +68,12 @@ class AVH_RPS_Client
         $this->settings->plugin_file = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
-        $this->container->singleton('RpsCompetition\Options\General', function ()
+        $this->container->singleton('RpsCompetition\Options\General', function ($app, $settings)
         {
-            return new OptionsGeneral($this->settings);
+            return new OptionsGeneral($settings);
         });
+        $this->container->make('RpsCompetition\Options\General');
+
         add_action('plugins_loaded', array($this, 'load'));
     }
 

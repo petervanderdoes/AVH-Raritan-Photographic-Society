@@ -8,9 +8,6 @@ class QueryMiscellaneous
 
     private $rpsdb;
 
-    /**
-     * PHP5 constructor
-     */
     public function __construct(RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;

@@ -24,12 +24,11 @@ class Core
      *
      * @var array
      */
+
     /**
      * Properties used for the plugin options
      */
-    private $db_options;
-
-    private $default_options;
+    private $options;
 
     /**
      *
@@ -46,18 +45,12 @@ class Core
     /**
      * PHP5 constructor
      */
-    public function __construct(Settings $settings, Request $request, OptionsGeneral $options)
+    public function __construct(Settings $settings, Request $request)
     {
         $this->settings = $settings;
         $this->request = $request;
+        $this->options = get_option('avh-rps');
 
-        $this->db_options = 'avhrps_options';
-        $this->db_version = 0;
-        /**
-         * Default options - General Purpose
-         */
-        $this->default_options = array();
-        // add_action('init', array($this,'handleInitializePlugin'),10);
         $this->handleInitializePlugin();
 
         return;
@@ -70,8 +63,6 @@ class Core
         $this->settings->club_short_name = "RPS";
         $this->settings->club_max_entries_per_member_per_date = 4;
         $this->settings->club_max_banquet_entries_per_member = 5;
-        $this->settings->club_season_start_month_num = 9;
-        $this->settings->club_season_end_month_num = 12;
         $this->settings->digital_chair_email = 'digitalchair@raritanphoto.com';
 
         $this->settings->siteurl = get_option('siteurl');
@@ -215,7 +206,7 @@ class Core
         // @TODO: Serious to do: Take this construction and make it better.
         $season_start_year = substr($season, 0, 4);
 
-        $date = new \DateTime($season_start_year . '-' . $this->settings->club_season_start_month_num);
+        $date = new \DateTime($season_start_year . '-' . $this->options['season_start_month_num']);
         $season_dates['start'] = $date->format('Y-m-d');
 
         // @TODO: The 6 is the end of the season.
