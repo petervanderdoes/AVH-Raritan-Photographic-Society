@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Admin;
 
+// ---------- Private methods ----------
 class Initialize
 {
 
@@ -8,6 +9,7 @@ class Initialize
     {
     }
 
+// ---------- Public methods ----------
     public static function load()
     {
         // Room to initialize widgets.

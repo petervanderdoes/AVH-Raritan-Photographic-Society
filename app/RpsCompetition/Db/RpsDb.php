@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Db;
 
+// ---------- Private methods ----------
 class RpsDb extends \wpdb
 {
 
@@ -14,8 +15,11 @@ class RpsDb extends \wpdb
         $this->user_id = get_current_user_id();
     }
 
-    public function getMysqldate($date){
+// ---------- Public methods ----------
+    public function getMysqldate($date)
+    {
         $date = new \DateTime($date);
+
         return $date->format('Y-m-d H:i:s');
     }
 }

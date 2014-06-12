@@ -12,12 +12,11 @@
  */
 use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
-use RpsCompetition\Admin\Initialize;
-use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Constants;
+use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Frontend;
-use RpsCompetition\Settings;
 use RpsCompetition\Options\General as OptionsGeneral;
+use RpsCompetition\Settings;
 
 /**
  * Register The Composer Auto Loader
@@ -32,6 +31,7 @@ require __DIR__ . '/vendor/autoload.php';
 $rps_dir = pathinfo($plugin, PATHINFO_DIRNAME);
 $rps_basename = plugin_basename($plugin);
 
+// ---------- Private methods ----------
 class AVH_RPS_Client
 {
 
@@ -48,16 +48,15 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->singleton('RpsCompetition\Settings', function ()
-        {
-            return new Settings();
-        });
+        $this->container->singleton('RpsCompetition\Settings',
+            function () {
+                return new Settings();
+            });
 
-        $this->container->singleton('RpsCompetition\Db\RpsDb', function ()
-        {
-            return new RpsDb();
-        });
-
+        $this->container->singleton('RpsCompetition\Db\RpsDb',
+            function () {
+                return new RpsDb();
+            });
 
 
         $this->settings = $this->container->make('RpsCompetition\Settings');
@@ -68,13 +67,19 @@ class AVH_RPS_Client
         $this->settings->plugin_file = $basename;
         $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
 
-        $this->container->singleton('RpsCompetition\Options\General', function ($app, $settings)
-        {
-            return new OptionsGeneral($settings);
-        });
+        $this->container->singleton('RpsCompetition\Options\General',
+            function ($app, $settings) {
+                return new OptionsGeneral($settings);
+            });
         $this->container->make('RpsCompetition\Options\General');
 
         add_action('plugins_loaded', array($this, 'load'));
+    }
+
+// ---------- Public methods ----------
+    public function admin()
+    {
+        new Admin($this->container);
     }
 
     public function load()
@@ -85,11 +90,6 @@ class AVH_RPS_Client
         } else {
             new Frontend($this->container);
         }
-    }
-
-    public function admin()
-    {
-        new Admin($this->container);
     }
 }
 

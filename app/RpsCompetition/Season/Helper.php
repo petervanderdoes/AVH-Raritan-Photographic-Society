@@ -1,11 +1,12 @@
 <?php
 namespace RpsCompetition\Season;
 
-use RpsCompetition\Settings;
-use Avh\Html\HtmlBuilder;
 use Avh\Html\FormBuilder;
+use Avh\Html\HtmlBuilder;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Settings;
 
+// ---------- Private methods ----------
 /**
  *
  * @author pdoes
@@ -14,9 +15,8 @@ use RpsCompetition\Db\QueryMiscellaneous;
 class Helper
 {
 
-    private $settings;
-
     private $rpsdb;
+    private $settings;
 
     public function __construct(Settings $settings, $rpsdb)
     {
@@ -24,22 +24,40 @@ class Helper
         $this->rpsdb = $rpsdb;
     }
 
+// ---------- Public methods ----------
     /**
-     * Get the seasons list
+     * Get the season in a dropdown menu
      *
-     * @return Ambigous <multitype:, NULL>
+     * @param string  $selected_season
+     * @param boolean $echo
+     *
+     * @return void string
      */
-    public function getSeasons()
+    public function getSeasonDropdown($selected_season, $echo = false)
     {
-        $options = get_option('avh-rps');
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $seasons = $query_miscellaneous->getSeasonList('ASC', $options['season_start_month_num'], $options['season_end_month_num']);
-        if (empty($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
+        $seasons = $this->getSeasons();
+        $html_builder = new HtmlBuilder();
+        $form_builder = new FormBuilder($html_builder);
+
+        $form = $form_builder->select('new_season', array_combine($seasons, $seasons), $selected_season, array('onChange' => 'submit_form("new_season")'));
+
+        if ($echo) {
+            echo $form;
+
+            return;
         }
 
-        unset($query_miscellaneous);
-        return $seasons;
+        return $form;
+    }
+
+    public function getSeasonId($selected_year, $selected_month)
+    {
+        $options = get_option('avh-rps');
+        if ($selected_month < $options['season_start_month_num']) {
+            $selected_year--;
+        }
+
+        return $selected_year . '-' . substr($selected_year + 1, 2, 2);
     }
 
     /**
@@ -65,34 +83,21 @@ class Helper
     }
 
     /**
-     * Get the season in a dropdown menu
+     * Get the seasons list
      *
-     * @param string $selected_season
-     * @param boolean $echo
-     * @return void string
+     * @return Ambigous <multitype:, NULL>
      */
-    public function getSeasonDropdown($selected_season, $echo = false)
-    {
-        $seasons = $this->getSeasons();
-        $html_builder = new HtmlBuilder();
-        $form_builder = new FormBuilder($html_builder);
-
-        $form = $form_builder->select('new_season', array_combine($seasons, $seasons), $selected_season, array('onChange' => 'submit_form("new_season")'));
-
-        if ($echo) {
-            echo $form;
-            return;
-        }
-
-        return $form;
-    }
-
-    public function getSeasonId($selected_year, $selected_month)
+    public function getSeasons()
     {
         $options = get_option('avh-rps');
-        if ($selected_month < $options['season_start_month_num']) {
-            $selected_year--;
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $seasons = $query_miscellaneous->getSeasonList('ASC', $options['season_start_month_num'], $options['season_end_month_num']);
+        if (empty($this->settings->selected_season)) {
+            $this->settings->selected_season = $seasons[count($seasons) - 1];
         }
-        return $selected_year . '-' . substr($selected_year + 1, 2, 2);
+
+        unset($query_miscellaneous);
+
+        return $seasons;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition;
 
+// ---------- Private methods ----------
 /**
  * Create separate Settings Registry for the plugin.
  *
@@ -16,6 +17,7 @@ final class Settings extends \Avh\Utility\SettingsAbstract
     }
 
     // prevent clone.
+// ---------- Public methods ----------
     public function __clone()
     {
     }

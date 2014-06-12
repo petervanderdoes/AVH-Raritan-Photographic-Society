@@ -3,19 +3,19 @@ namespace RpsCompetition\Frontend;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
+use Avh\Network\Session;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
-use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Settings;
-use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Db\QueryBanquet;
-use RpsCompetition\Season\Helper as SeasonHelper;
-use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
-use Avh\Network\Session;
+use RpsCompetition\Db\QueryBanquet;
+use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Settings;
 
+// ---------- Private methods ----------
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
 
@@ -59,6 +59,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->request = $request;
     }
 
+// ---------- Public methods ----------
     public function displayAllScores($atts, $content, $tag)
     {
         global $post;
@@ -91,7 +92,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         }
 
         $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
-        $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
+        $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted,
+                                                            array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -473,7 +475,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     /**
      * Display the given awards for the given classification.
      *
-     * @param array $atts
+     * @param array  $atts
      * @param string $content
      * @param string $tag
      */
@@ -586,7 +588,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     /**
      * Show all entries for the given competition
      *
-     * @param array $atts
+     * @param array  $atts
      * @param string $content
      * @param string $tag
      */
@@ -598,7 +600,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $options=get_option('avh-rps');
+        $options = get_option('avh-rps');
 
         $months = array();
         $themes = array();
@@ -738,7 +740,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $options=get_option('avh-rps');
+        $options = get_option('avh-rps');
 
         $months = array();
         $themes = array();
@@ -1207,7 +1209,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
     /**
      * Display the eights and higher for a given member ID.
      *
-     * @param array $atts
+     * @param array  $atts
      * @param string $content
      * @param string $tag
      */
@@ -1239,7 +1241,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo '<li>';
             echo '<div>';
             echo '	<div class="image">';
-            echo '	<a href="'. $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
             echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
             echo '	</div>';
             echo "</div>\n";

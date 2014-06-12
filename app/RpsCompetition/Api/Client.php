@@ -3,10 +3,11 @@ namespace RpsCompetition\Api;
 
 use DOMDocument;
 use PDO;
-use RpsCompetition\Db\RpsPdo;
 use RpsCompetition\Common\Core;
+use RpsCompetition\Db\RpsPdo;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
+// ---------- Private methods ----------
 class Client
 {
 
@@ -19,6 +20,74 @@ class Client
     public function __construct($core)
     {
         $this->core = $core;
+    }
+
+// ---------- Public methods ----------
+    /**
+     * Handles the uploading of the score file
+     *
+     * @param \Illuminate\Http\Request $request
+     */
+    public function doUploadScore(\Illuminate\Http\Request $request)
+    {
+        $username = $request->input('username');
+        $password = $request->input('password');
+        $comp_date = $request->input('date');
+        $db = $this->getDatabaseHandle();
+
+        if ($db !== false) {
+            $this->checkUserAuthentication($username, $password);
+        }
+        // Check to see if there were any file upload errors
+        $file = $request->file('file');
+        if ($file === null) {
+            $this->doRESTError('No file was given to upload!');
+            die();
+        }
+
+        if (!$file->isValid()) {
+            $this->doRESTError($file->getErrorMessage());
+            die();
+        }
+
+        // Move the file to its final location
+        $path = $request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
+        $dest_name = "scores_" . $comp_date . ".xml";
+        $file_name = $path . '/' . $dest_name;
+        try {
+            $file->move($path, $dest_name);
+        } catch (FileException $e) {
+            $this->doRESTError($e->getMessage());
+            die();
+        }
+
+        $warning = $this->handleUploadScoresFile($db, $file_name);
+
+        // Remove the uploaded .xml file
+        unlink($file_name);
+
+        // Return success to the client
+        $warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
+        $this->doRESTSuccess($warning);
+        die();
+    }
+
+    /**
+     * Handles request by client to download images for a particular date,
+     *
+     * @param \Illuminate\Http\Request $request
+     */
+    public function sendCompetitions(\Illuminate\Http\Request $request)
+    {
+        $username = $request->input('username');
+        $password = $request->input('password');
+        $db = $this->getDatabaseHandle();
+        if ($db !== false) {
+            $this->checkUserAuthentication($username, $password);
+            // @todo Check if the user has the role needed.
+            $this->sendXmlCompetitions($db, $request->input('medium'), $request->input('comp_date'));
+        }
+        die();
     }
 
     /**
@@ -80,71 +149,163 @@ class Client
         die();
     }
 
+// ---------- Private methods ----------
     /**
-     * Handles request by client to download images for a particular date,
-     *
-     * @param \Illuminate\Http\Request $request
+     * Check if user/password combination is valid
      */
-    public function sendCompetitions(\Illuminate\Http\Request $request)
+    private function checkUserAuthentication($username, $password)
     {
-        $username = $request->input('username');
-        $password = $request->input('password');
-        $db = $this->getDatabaseHandle();
-        if ($db !== false) {
-            $this->checkUserAuthentication($username, $password);
-            // @todo Check if the user has the role needed.
-            $this->sendXmlCompetitions($db, $request->input('medium'), $request->input('comp_date'));
+        $user = wp_authenticate($username, $password);
+        if (is_wp_error($user)) {
+            $a = strip_tags($user->get_error_message());
+            $this->doRESTError($a);
+            die();
         }
-        die();
+
+        return;
     }
 
     /**
-     * Handles the uploading of the score file
-     *
-     * @param \Illuminate\Http\Request $request
+     * Handle the uploaded score from the RPS Client.
      */
-    public function doUploadScore(\Illuminate\Http\Request $request)
+
+    /**
+     * Create a REST error
+     *
+     * @param string $errMsg
+     *            The actual error message
+     */
+    private function doRESTError($errMsg)
     {
-        $username = $request->input('username');
-        $password = $request->input('password');
-        $comp_date = $request->input('date');
-        $db = $this->getDatabaseHandle();
+        $this->doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
+    }
 
-        if ($db !== false) {
-            $this->checkUserAuthentication($username, $password);
-        }
-        // Check to see if there were any file upload errors
-        $file = $request->file('file');
-        if ($file === null) {
-            $this->doRESTError('No file was given to upload!');
-            die();
-        }
+    /**
+     * Create the REST respone
+     *
+     * @param string $status
+     * @param string $message
+     */
+    private function doRESTResponse($status, $message)
+    {
+        echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
+        echo '<rsp stat="' . $status . '">' . "\n";
+        echo '	' . $message . "\n";
+        echo "</rsp>\n";
+    }
 
-        if (!$file->isValid()) {
-            $this->doRESTError($file->getErrorMessage());
-            die();
-        }
+    /**
+     * Create a REST success message
+     *
+     * @param string $message
+     *            The actual messsage
+     */
+    private function doRESTSuccess($message)
+    {
+        $this->doRESTResponse("ok", $message);
+    }
 
-        // Move the file to its final location
-        $path = $request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
-        $dest_name = "scores_" . $comp_date . ".xml";
-        $file_name = $path . '/' . $dest_name;
+    /**
+     * Open database
+     *
+     * @return \RpsCompetition\Db\RpsPdo
+     */
+    private function getDatabaseHandle()
+    {
         try {
-            $file->move($path, $dest_name);
-        } catch (FileException $e) {
-            $this->doRESTError($e->getMessage());
+            $db = new RpsPdo();
+        } catch (\PDOException $e) {
+            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
+            die($e->getMessage());
+        }
+
+        return $db;
+    }
+
+    /**
+     * Handle the XML file containing the scores and add them to the database
+     *
+     * @param object $db
+     *            Database handle.
+     */
+    private function handleUploadScoresFile($db, $file_name)
+    {
+        $warning = '';
+        $score = '';
+        $award = '';
+        $entry_id = '';
+
+        if (!$xml = simplexml_load_file($file_name)) {
+            $this->doRESTError("Failed to open scores XML file");
+            die();
+        }
+        try {
+            $sql = "UPDATE `entries` SET `Score` = :score, `Date_Modified` = NOW(), `Award` = :award WHERE `ID` = :entryid";
+            $sth = $db->prepare($sql);
+            $sth->bindParam(':score', $score, PDO::PARAM_STR);
+            $sth->bindParam(':award', $award, PDO::PARAM_STR);
+            $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
+        } catch (\PDOException $e) {
+            $this->doRESTError("Error - " . $e->getMessage() . " - $sql");
             die();
         }
 
-        $warning = $this->handleUploadScoresFile($db, $file_name);
+        foreach ($xml->Competition as $comp) {
+            $comp_date = $comp->Date;
+            $classification = $comp->Classification;
+            $medium = $comp->Medium;
 
-        // Remove the uploaded .xml file
-        unlink($file_name);
+            foreach ($comp->Entries as $entries) {
+                foreach ($entries->Entry as $entry) {
+                    $entry_id = $entry->ID;
+                    $first_name = html_entity_decode($entry->First_Name);
+                    $last_name = html_entity_decode($entry->Last_Name);
+                    $title = html_entity_decode($entry->Title);
+                    $score = html_entity_decode($entry->Score);
+                    if (empty($entry->Award)) {
+                        $award = null;
+                    } else {
+                        $award = html_entity_decode($entry->Award);
+                    }
 
-        // Return success to the client
-        $warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
-        $this->doRESTSuccess($warning);
-        die();
+                    if ($entry_id != "") {
+                        if ($score != "") {
+                            try {
+                                $sth->execute();
+                            } catch (\PDOException $e) {
+                                $this->doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
+                                die();
+                            }
+                            if ($sth->rowCount() < 1) {
+                                $warning .= "  <info>$comp_date, $first_name $last_name, $title -- Row failed to update</info>\n";
+                            }
+                        }
+                    } else {
+                        $warning .= "  <info>$comp_date, $first_name $last_name, $title -- ID is Null -- skipped</info>\n";
+                    }
+                }
+            }
+
+            // Mark this competition as scored
+            try {
+                $sql = "UPDATE competitions SET Scored='Y', Date_Modified=NOW()
+                        WHERE Competition_Date='$comp_date' AND
+                        Classification='$classification' AND
+                        Medium = '$medium'";
+                if (!$rs = mysql_query($sql)) {
+                    throw new \Exception(mysql_error());
+                }
+            } catch (\Exception $e) {
+                $this->doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
+                die();
+            }
+            if (mysql_affected_rows() < 1) {
+                $this->doRESTError("No rows updated when setting Scored flag to Y in database for $comp_date / $classification");
+                die();
+            }
+        }
+
+        return $warning;
     }
 
     /**
@@ -263,162 +424,5 @@ class Client
         // header('Content-Type: text/xml');
         $dom->save('peter.xml');
         echo $dom->saveXML();
-    }
-
-    /**
-     * Handle the uploaded score from the RPS Client.
-     */
-
-    /**
-     * Handle the XML file containing the scores and add them to the database
-     *
-     * @param object $db
-     *            Database handle.
-     */
-    private function handleUploadScoresFile($db, $file_name)
-    {
-        $warning = '';
-        $score = '';
-        $award = '';
-        $entry_id = '';
-
-        if (!$xml = simplexml_load_file($file_name)) {
-            $this->doRESTError("Failed to open scores XML file");
-            die();
-        }
-        try {
-            $sql = "UPDATE `entries` SET `Score` = :score, `Date_Modified` = NOW(), `Award` = :award WHERE `ID` = :entryid";
-            $sth = $db->prepare($sql);
-            $sth->bindParam(':score', $score, PDO::PARAM_STR);
-            $sth->bindParam(':award', $award, PDO::PARAM_STR);
-            $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
-        } catch (\PDOException $e) {
-            $this->doRESTError("Error - " . $e->getMessage() . " - $sql");
-            die();
-        }
-
-        foreach ($xml->Competition as $comp) {
-            $comp_date = $comp->Date;
-            $classification = $comp->Classification;
-            $medium = $comp->Medium;
-
-            foreach ($comp->Entries as $entries) {
-                foreach ($entries->Entry as $entry) {
-                    $entry_id = $entry->ID;
-                    $first_name = html_entity_decode($entry->First_Name);
-                    $last_name = html_entity_decode($entry->Last_Name);
-                    $title = html_entity_decode($entry->Title);
-                    $score = html_entity_decode($entry->Score);
-                    if (empty($entry->Award)) {
-                        $award = null;
-                    } else {
-                        $award = html_entity_decode($entry->Award);
-                    }
-
-                    if ($entry_id != "") {
-                        if ($score != "") {
-                            try {
-                                $sth->execute();
-                            } catch (\PDOException $e) {
-                                $this->doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
-                                die();
-                            }
-                            if ($sth->rowCount() < 1) {
-                                $warning .= "  <info>$comp_date, $first_name $last_name, $title -- Row failed to update</info>\n";
-                            }
-                        }
-                    } else {
-                        $warning .= "  <info>$comp_date, $first_name $last_name, $title -- ID is Null -- skipped</info>\n";
-                    }
-                }
-            }
-
-            // Mark this competition as scored
-            try {
-                $sql = "UPDATE competitions SET Scored='Y', Date_Modified=NOW()
-                        WHERE Competition_Date='$comp_date' AND
-                        Classification='$classification' AND
-                        Medium = '$medium'";
-                if (!$rs = mysql_query($sql)) {
-                    throw new \Exception(mysql_error());
-                }
-            } catch (\Exception $e) {
-                $this->doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
-                die();
-            }
-            if (mysql_affected_rows() < 1) {
-                $this->doRESTError("No rows updated when setting Scored flag to Y in database for $comp_date / $classification");
-                die();
-            }
-        }
-
-        return $warning;
-    }
-
-    /**
-     * Create a REST error
-     *
-     * @param string $errMsg
-     *            The actual error message
-     */
-    private function doRESTError($errMsg)
-    {
-        $this->doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
-    }
-
-    /**
-     * Create a REST success message
-     *
-     * @param string $message
-     *            The actual messsage
-     */
-    private function doRESTSuccess($message)
-    {
-        $this->doRESTResponse("ok", $message);
-    }
-
-    /**
-     * Create the REST respone
-     *
-     * @param string $status
-     * @param string $message
-     */
-    private function doRESTResponse($status, $message)
-    {
-        echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
-        echo '<rsp stat="' . $status . '">' . "\n";
-        echo '	' . $message . "\n";
-        echo "</rsp>\n";
-    }
-
-    /**
-     * Open database
-     *
-     * @return \RpsCompetition\Db\RpsPdo
-     */
-    private function getDatabaseHandle()
-    {
-        try {
-            $db = new RpsPdo();
-        } catch (\PDOException $e) {
-            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
-            die($e->getMessage());
-        }
-        return $db;
-    }
-
-    /**
-     * Check if user/password combination is valid
-     */
-    private function checkUserAuthentication($username, $password)
-    {
-        $user = wp_authenticate($username, $password);
-        if (is_wp_error($user)) {
-            $a = strip_tags($user->get_error_message());
-            $this->doRESTError($a);
-            die();
-        }
-
-        return;
     }
 }

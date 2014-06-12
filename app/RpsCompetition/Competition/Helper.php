@@ -3,8 +3,8 @@ namespace RpsCompetition\Competition;
 
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Settings;
 
+// ---------- Private methods ----------
 class Helper
 {
 
@@ -16,9 +16,11 @@ class Helper
     }
 
 
-    public function getMedium($competitions) {
+// ---------- Public methods ----------
+    public function getMedium($competitions)
+    {
 
-        $medium=array();
+        $medium = array();
 
         foreach ($competitions as $competition) {
             if (in_array($competition->Medium, $medium)) {
@@ -26,14 +28,16 @@ class Helper
             }
             $medium[] = $competition->Medium;
         }
+
         return $medium;
     }
 
     /**
      * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
      *
-     * @param string $date
+     * @param string  $date
      * @param unknown $med
+     *
      * @return boolean
      */
     public function validateSelectedComp($date, $medium_subset)
@@ -43,6 +47,7 @@ class Helper
 
         if (empty($open_competitions)) {
             unset($query_competitions);
+
             return false;
         }
 
@@ -107,6 +112,7 @@ class Helper
         setcookie("RPS_MyEntries", $this->settings->comp_date . "|" . $this->settings->classification . "|" . $this->settings->medium, $hour, '/', $url['host']);
 
         unset($query_competitions);
+
         return true;
     }
 }

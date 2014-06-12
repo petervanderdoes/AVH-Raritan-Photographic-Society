@@ -2,8 +2,8 @@
 namespace RpsCompetition\Options;
 
 use Avh\Utility\OptionsAbstract;
-use RpsCompetition\Settings;
 
+// ---------- Private methods ----------
 final class General extends OptionsAbstract
 
 {
@@ -14,19 +14,20 @@ final class General extends OptionsAbstract
     public $option_name = 'avh-rps';
 
     protected $defaults = array(
-            'season_start_month_num' => 9,
-            'season_end_month_num' => 12
-        );
+        'season_start_month_num' => 9,
+        'season_end_month_num'   => 12
+    );
 
     public function __construct()
     {
         parent::__construct();
 
         /* Clear the cache on update/add */
-        add_action( 'add_option_' . $this->option_name, array( 'Avh\Utility\Common', 'clear_cache' ) );
-        add_action( 'update_option_' . $this->option_name, array( 'Avh\Utility\Common', 'clear_cache' ) );
+        add_action('add_option_' . $this->option_name, array('Avh\Utility\Common', 'clear_cache'));
+        add_action('update_option_' . $this->option_name, array('Avh\Utility\Common', 'clear_cache'));
     }
 
+// ---------- Public methods ----------
     /**
      * Concrete classes *may* contain a enrich_defaults method to add additional defaults once
      * all post_types and taxonomies have been registered
@@ -44,6 +45,7 @@ final class General extends OptionsAbstract
         // TODO: Implement translate_defaults() method.
     }
 
+// ---------- Protected methods ----------
     /**
      * All concrete classes must contain a validate_option() method which validates all
      * values within the option

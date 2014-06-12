@@ -5,48 +5,43 @@ use Avh\Html\HtmlBuilder;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+// ---------- Private methods ----------
 class ListTable extends \WP_List_Table
 {
 
+    public $messages;
+    public $screen;
     /**
      *
      * @var Core
      */
     private $core;
-
-    /**
-     *
-     * @var Settings
-     */
-    private $settings;
-
-    /**
-     *
-     * @var RpsDb
-     */
-    private $rpsdb;
-
-    /**
-     *
-     * @var Request
-     */
-    private $request;
-
     /**
      *
      * @var HtmlBuilder
      */
     private $html;
-
-    public $messages;
-
-    public $screen;
+    /**
+     *
+     * @var Request
+     */
+    private $request;
+    /**
+     *
+     * @var RpsDb
+     */
+    private $rpsdb;
+    /**
+     *
+     * @var Settings
+     */
+    private $settings;
 
     public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core, Request $request)
     {
@@ -72,9 +67,209 @@ class ListTable extends \WP_List_Table
         parent::__construct(array('plural' => 'entries', 'singular' => 'entry', 'ajax' => false));
     }
 
+// ---------- Public methods ----------
     public function ajax_user_can()
     {
         return true;
+    }
+
+    public function column_award($entry)
+    {
+        echo $entry->Award;
+    }
+
+    public function column_cb($entry)
+    {
+        echo "<input type='checkbox' name='entries[]' value='$entry->ID' />";
+    }
+
+    public function column_competition($entry)
+    {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
+        $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
+        $competition_text = $_competition->Theme . ' - ' . $_competition->Medium . ' - ' . $_competition->Classification;
+        echo $competition_text;
+
+        unset($query_competitions);
+    }
+
+    public function column_name($entry)
+    {
+        $_user = get_user_by('id', $entry->Member_ID);
+        $queryUser = array('page' => Constants::MENU_SLUG_ENTRIES, 'user_id' => $_user->ID);
+        $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
+        echo $this->html->anchor($urlUser, $_user->first_name . ' ' . $_user->last_name, array('title' => 'Entries for ' . $_user->first_name . ' ' . $_user->last_name));
+    }
+
+    public function column_score($entry)
+    {
+        echo $entry->Score;
+    }
+
+    public function column_season($entry)
+    {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $options = get_option('avh-rps');
+
+        $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
+        if ($_competition != false) {
+            $unix_date = mysql2date('U', $_competition->Competition_Date);
+            $_competition_month = date('n', $unix_date);
+            if ($_competition_month >= $options['season_start_month_num'] && $_competition_month <= $options['season_end_month_num']) {
+                $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
+            } else {
+                $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
+            }
+            echo $_season_text;
+        } else {
+            echo "Unknown Season";
+        }
+        unset($query_competitions);
+    }
+
+    public function column_title($entry)
+    {
+        echo $entry->Title;
+        $url = admin_url('admin.php') . '?';
+
+        $queryReferer = array('page' => Constants::MENU_SLUG_ENTRIES);
+        $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
+
+        $nonceDelete = wp_create_nonce('bulk-entries');
+        $queryDelete = array('page' => Constants::MENU_SLUG_ENTRIES, 'entry' => $entry->ID, 'action' => 'delete', '_wpnonce' => $nonceDelete);
+        $urlDelete = $url . http_build_query($queryDelete, '', '&');
+
+        $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES, 'entry' => $entry->ID, 'action' => 'edit', 'wp_http_referer' => $wp_http_referer);
+        $urlEdit = $url . http_build_query($queryEdit, '', '&');
+
+        $actions = array();
+        $actions['delete'] = $this->html->anchor($urlDelete, 'Delete', array('class' => 'delete', 'title' => 'Delete this competition'));
+        $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', array('title' => 'Edit this entry'));
+
+        echo '<div class="row-actions">';
+        $sep = '';
+        foreach ($actions as $action => $link) {
+            echo "<span class='set_$action'>$sep$link</span>";
+            $sep = ' | ';
+        }
+        echo '</div>';
+    }
+
+    public function current_action()
+    {
+        if ($this->request->has('clear-recent-list')) {
+            return 'clear-recent-list';
+        }
+
+        return parent::current_action();
+    }
+
+    public function display()
+    {
+        extract($this->_args);
+
+        $this->display_tablenav('top');
+
+        echo '<table class="' . implode(' ', $this->get_table_classes()) . '" cellspacing="0">';
+        echo '<thead>';
+        echo '<tr>';
+        $this->print_column_headers();
+        echo '</tr>';
+        echo '</thead>';
+
+        echo '<tfoot>';
+        echo '<tr>';
+        $this->print_column_headers(false);
+        echo '</tr>';
+        echo '</tfoot>';
+
+        echo '<tbody id="the-entries-list" class="list:entry">';
+        $this->display_rows_or_placeholder();
+        echo '</tbody>';
+
+        echo '<tbody id="the-extra-entries-list" class="list:entry" style="display: none;">';
+        $this->items = $this->extra_items;
+        $this->display_rows();
+        echo '</tbody>';
+        echo '</table>';
+
+        $this->display_tablenav('bottom');
+    }
+
+    public function extra_tablenav($which)
+    {
+
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $options = get_option('avh-rps');
+
+        echo '<div class="alignleft actions">';
+        if ('top' == $which) {
+            $_seasons = $query_miscellaneous->getSeasonList('DESC', $options['season_start_month_num'], $options['season_end_month_num']);
+            $season = $this->request->input('filter-season', 0);
+            echo '<select name="filter-season">';
+            echo '<option' . selected($season, 0, false) . ' value="0">' . __('All seasons') . '</option>';
+            foreach ($_seasons as $_season) {
+                echo '<option' . selected($season, $_season, false) . ' value="' . esc_attr($_season) . '">' . $_season . '</option>';
+            }
+            echo '</select>';
+
+            if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
+                $theme_request = $this->request->input('filter-theme', 0);
+                $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
+                $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
+
+                $themes = array();
+                foreach ($competitions as $competition) {
+                    $themes[$competition->ID] = $competition->Theme;
+                }
+                ksort($themes);
+                $themes = array_unique($themes);
+                asort($themes);
+
+                echo $this->html->element('select', array('name' => 'filter-theme'));
+                echo '<option' . selected($theme_request, 0, false) . ' value="0">' . __('All Competition Themes') . '</option>';
+                foreach ($themes as $theme_key => $theme_value) {
+                    echo '<option' . selected($theme_request, $theme_key, false) . ' value="' . esc_attr($theme_key) . '">' . $theme_value . '</option>';
+                }
+                echo '</select>';
+            }
+            submit_button(__('Filter'), 'button', false, false, array('id' => 'entries-query-submit'));
+        }
+        echo '</div>';
+        unset($query_miscellaneous, $query_competitions);
+    }
+
+    public function get_bulk_actions()
+    {
+        $actions = array();
+        $actions['delete'] = __('Delete');
+
+        return $actions;
+    }
+
+    public function get_columns()
+    {
+        return array('cb' => '<input type="checkbox" />', 'season' => 'Season', 'competition' => 'Competition', 'name' => 'Photographer', 'title' => 'Title', 'score' => 'Score', 'award' => 'Award');
+    }
+
+    public function get_per_page($entry_status = 'all')
+    {
+        $entries_per_page = $this->get_items_per_page('entries_per_page');
+        $entries_per_page = apply_filters('entries_per_page', $entries_per_page, $entry_status);
+
+        return $entries_per_page;
+    }
+
+    public function get_sortable_columns()
+    {
+        return array('');
+    }
+
+    public function no_items()
+    {
+        _e('No entries.');
     }
 
     public function prepare_items()
@@ -143,209 +338,11 @@ class ListTable extends \WP_List_Table
         $this->set_pagination_args(array('total_items' => $total_entries, 'per_page' => $entries_per_page));
     }
 
-    public function get_per_page($entry_status = 'all')
-    {
-        $entries_per_page = $this->get_items_per_page('entries_per_page');
-        $entries_per_page = apply_filters('entries_per_page', $entries_per_page, $entry_status);
-
-        return $entries_per_page;
-    }
-
-    public function no_items()
-    {
-        _e('No entries.');
-    }
-
-    public function get_columns()
-    {
-        return array('cb' => '<input type="checkbox" />', 'season' => 'Season', 'competition' => 'Competition', 'name' => 'Photographer', 'title' => 'Title', 'score' => 'Score', 'award' => 'Award');
-    }
-
-    public function get_sortable_columns()
-    {
-        return array('');
-    }
-
-    public function get_bulk_actions()
-    {
-        $actions = array();
-        $actions['delete'] = __('Delete');
-
-        return $actions;
-    }
-
-    public function extra_tablenav($which)
-    {
-
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
-        $options = get_option('avh-rps');
-
-        echo '<div class="alignleft actions">';
-        if ('top' == $which) {
-            $_seasons = $query_miscellaneous->getSeasonList('DESC', $options['season_start_month_num'], $options['season_end_month_num']);
-            $season = $this->request->input('filter-season', 0);
-            echo '<select name="filter-season">';
-            echo '<option' . selected($season, 0, false) . ' value="0">' . __('All seasons') . '</option>';
-            foreach ($_seasons as $_season) {
-                echo '<option' . selected($season, $_season, false) . ' value="' . esc_attr($_season) . '">' . $_season . '</option>';
-            }
-            echo '</select>';
-
-            if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
-                $theme_request = $this->request->input('filter-theme', 0);
-                $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
-                $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
-
-                $themes = array();
-                foreach ($competitions as $competition) {
-                    $themes[$competition->ID] = $competition->Theme;
-                }
-                ksort($themes);
-                $themes = array_unique($themes);
-                asort($themes);
-
-                echo $this->html->element('select', array('name' => 'filter-theme'));
-                echo '<option' . selected($theme_request, 0, false) . ' value="0">' . __('All Competition Themes') . '</option>';
-                foreach ($themes as $theme_key => $theme_value) {
-                    echo '<option' . selected($theme_request, $theme_key, false) . ' value="' . esc_attr($theme_key) . '">' . $theme_value . '</option>';
-                }
-                echo '</select>';
-            }
-            submit_button(__('Filter'), 'button', false, false, array('id' => 'entries-query-submit'));
-        }
-        echo '</div>';
-        unset($query_miscellaneous, $query_competitions);
-    }
-
-    public function current_action()
-    {
-        if ($this->request->has('clear-recent-list')) {
-            return 'clear-recent-list';
-        }
-        return parent::current_action();
-    }
-
-    public function display()
-    {
-        extract($this->_args);
-
-        $this->display_tablenav('top');
-
-        echo '<table class="' . implode(' ', $this->get_table_classes()) . '" cellspacing="0">';
-        echo '<thead>';
-        echo '<tr>';
-        $this->print_column_headers();
-        echo '</tr>';
-        echo '</thead>';
-
-        echo '<tfoot>';
-        echo '<tr>';
-        $this->print_column_headers(false);
-        echo '</tr>';
-        echo '</tfoot>';
-
-        echo '<tbody id="the-entries-list" class="list:entry">';
-        $this->display_rows_or_placeholder();
-        echo '</tbody>';
-
-        echo '<tbody id="the-extra-entries-list" class="list:entry" style="display: none;">';
-        $this->items = $this->extra_items;
-        $this->display_rows();
-        echo '</tbody>';
-        echo '</table>';
-
-        $this->display_tablenav('bottom');
-    }
-
     public function single_row($a_entry)
     {
         $entry = $a_entry;
         echo '<tr id="entry-' . $entry->ID . '">';
         echo $this->single_row_columns($entry);
         echo "</tr>";
-    }
-
-    public function column_cb($entry)
-    {
-        echo "<input type='checkbox' name='entries[]' value='$entry->ID' />";
-    }
-
-    public function column_season($entry)
-    {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
-        $options = get_option('avh-rps');
-
-        $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
-        if ($_competition != false) {
-            $unix_date = mysql2date('U', $_competition->Competition_Date);
-            $_competition_month = date('n', $unix_date);
-            if ($_competition_month >= $options['season_start_month_num'] && $_competition_month <= $options['season_end_month_num']) {
-                $_season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
-            } else {
-                $_season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
-            }
-            echo $_season_text;
-        } else {
-            echo "Unknown Season";
-        }
-        unset($query_competitions);
-    }
-
-    public function column_competition($entry)
-    {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
-
-        $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
-        $competition_text = $_competition->Theme . ' - ' . $_competition->Medium . ' - ' . $_competition->Classification;
-        echo $competition_text;
-
-        unset($query_competitions);
-    }
-
-    public function column_name($entry)
-    {
-        $_user = get_user_by('id', $entry->Member_ID);
-        $queryUser = array('page' => Constants::MENU_SLUG_ENTRIES, 'user_id' => $_user->ID);
-        $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
-        echo $this->html->anchor($urlUser, $_user->first_name . ' ' . $_user->last_name, array('title' => 'Entries for ' . $_user->first_name . ' ' . $_user->last_name));
-    }
-
-    public function column_title($entry)
-    {
-        echo $entry->Title;
-        $url = admin_url('admin.php') . '?';
-
-        $queryReferer = array('page' => Constants::MENU_SLUG_ENTRIES);
-        $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
-
-        $nonceDelete = wp_create_nonce('bulk-entries');
-        $queryDelete = array('page' => Constants::MENU_SLUG_ENTRIES, 'entry' => $entry->ID, 'action' => 'delete', '_wpnonce' => $nonceDelete);
-        $urlDelete = $url . http_build_query($queryDelete, '', '&');
-
-        $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES, 'entry' => $entry->ID, 'action' => 'edit', 'wp_http_referer' => $wp_http_referer);
-        $urlEdit = $url . http_build_query($queryEdit, '', '&');
-
-        $actions = array();
-        $actions['delete'] = $this->html->anchor($urlDelete, 'Delete', array('class' => 'delete', 'title' => 'Delete this competition'));
-        $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', array('title' => 'Edit this entry'));
-
-        echo '<div class="row-actions">';
-        $sep = '';
-        foreach ($actions as $action => $link) {
-            echo "<span class='set_$action'>$sep$link</span>";
-            $sep = ' | ';
-        }
-        echo '</div>';
-    }
-
-    public function column_score($entry)
-    {
-        echo $entry->Score;
-    }
-
-    public function column_award($entry)
-    {
-        echo $entry->Award;
     }
 }
