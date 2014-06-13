@@ -1,10 +1,8 @@
 <?php
 namespace RpsCompetition\Db;
 
-// ---------- Private methods ----------
 class QueryEntries
 {
-
     private $rpsdb;
 
     /**
@@ -15,7 +13,6 @@ class QueryEntries
         $this->rpsdb = $rpsdb;
     }
 
-// ---------- Public methods ----------
     /**
      * Add an entry
      *

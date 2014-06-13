@@ -3,10 +3,8 @@ namespace RpsCompetition\Db;
 
 use PDO;
 
-// ---------- Private methods ----------
 class RpsPdo extends \PDO
 {
-
     private $database;
     private $engine;
     private $host;

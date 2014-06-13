@@ -3,16 +3,12 @@ namespace RpsCompetition\Options;
 
 use Avh\Utility\OptionsAbstract;
 
-// ---------- Private methods ----------
 final class General extends OptionsAbstract
-
 {
-
     /**
      * @var  string  option name
      */
     public $option_name = 'avh-rps';
-
     protected $defaults = array(
         'season_start_month_num' => 9,
         'season_end_month_num'   => 12
@@ -23,35 +19,45 @@ final class General extends OptionsAbstract
         parent::__construct();
 
         /* Clear the cache on update/add */
-        add_action('add_option_' . $this->option_name, array('Avh\Utility\Common', 'clear_cache'));
-        add_action('update_option_' . $this->option_name, array('Avh\Utility\Common', 'clear_cache'));
-    }
-
-// ---------- Public methods ----------
-    /**
-     * Concrete classes *may* contain a enrich_defaults method to add additional defaults once
-     * all post_types and taxonomies have been registered
-     */
-    public function enrich_defaults()
-    {
-        // TODO: Implement enrich_defaults() method.
+        add_action('add_option_' . $this->option_name, array('Avh\Utility\Common', 'clearCache'));
+        add_action('update_option_' . $this->option_name, array('Avh\Utility\Common', 'clearCache'));
     }
 
     /**
-     * Concrete classes *may* contain a translate_defaults method
+     * Clean out old/renamed values within the option
+     *
+     * @param mixed $option_value
+     * @param mixed $current_version
+     * @param mixed $all_old_option_values
+     *
+     * @return mixed|void
      */
-    public function translate_defaults()
+    public function cleanOption($option_value, $current_version = null, $all_old_option_values = null)
     {
-        // TODO: Implement translate_defaults() method.
+        // TODO: Implement cleanOption() method.
     }
 
-// ---------- Protected methods ----------
     /**
-     * All concrete classes must contain a validate_option() method which validates all
-     * values within the option
+     * Add additional defaults once all post_types and taxonomies have been registered
      */
-    protected function validate_option($dirty, $clean, $old)
+    public function handleEnrichDefaults()
     {
-        // TODO: Implement validate_option() method.
+        // TODO: Implement handleEnrichDefaults() method.
+    }
+
+    /**
+     * Translate default values if needed.
+     */
+    public function handleTranslateDefaults()
+    {
+        // TODO: Implement handleTranslateDefaults() method.
+    }
+
+    /**
+     * Validate all values within the option
+     */
+    protected function validateOption($dirty, $clean, $old)
+    {
+        // TODO: Implement validateOption() method.
     }
 }

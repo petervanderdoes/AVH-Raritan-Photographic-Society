@@ -1,10 +1,8 @@
 <?php
 namespace RpsCompetition\Db;
 
-// ---------- Private methods ----------
 class RpsDb extends \wpdb
 {
-
     /**
      * PHP5 constructor
      */
@@ -15,7 +13,6 @@ class RpsDb extends \wpdb
         $this->user_id = get_current_user_id();
     }
 
-// ---------- Public methods ----------
     public function getMysqldate($date)
     {
         $date = new \DateTime($date);

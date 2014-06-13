@@ -15,34 +15,28 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
-// ---------- Private methods ----------
 final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 {
-
     /**
      *
      * @var Core
      */
     private $core;
-
     /**
      *
      * @var HtmlBuilder
      */
     private $html;
-
     /**
      *
      * @var Request
      */
     private $request;
-
     /**
      *
      * @var RpsDb
      */
     private $rpsdb;
-
     /**
      *
      * @var Settings
@@ -59,7 +53,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         $this->request = $request;
     }
 
-// ---------- Public methods ----------
     public function displayAllScores($atts, $content, $tag)
     {
         global $post;

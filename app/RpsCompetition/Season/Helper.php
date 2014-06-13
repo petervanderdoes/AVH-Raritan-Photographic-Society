@@ -6,7 +6,6 @@ use Avh\Html\HtmlBuilder;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Settings;
 
-// ---------- Private methods ----------
 /**
  *
  * @author pdoes
@@ -14,7 +13,6 @@ use RpsCompetition\Settings;
  */
 class Helper
 {
-
     private $rpsdb;
     private $settings;
 
@@ -24,7 +22,6 @@ class Helper
         $this->rpsdb = $rpsdb;
     }
 
-// ---------- Public methods ----------
     /**
      * Get the season in a dropdown menu
      *

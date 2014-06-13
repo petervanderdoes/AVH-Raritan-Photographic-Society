@@ -1,10 +1,8 @@
 <?php
 namespace RpsCompetition\Db;
 
-// ---------- Private methods ----------
 class QueryMiscellaneous
 {
-
     private $rpsdb;
 
     public function __construct(RpsDb $rpsdb)
@@ -12,7 +10,6 @@ class QueryMiscellaneous
         $this->rpsdb = $rpsdb;
     }
 
-// ---------- Public methods ----------
     /**
      * Get all photos for competitions between the given dates.
      *

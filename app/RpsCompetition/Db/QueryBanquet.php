@@ -1,10 +1,8 @@
 <?php
 namespace RpsCompetition\Db;
 
-// ---------- Private methods ----------
 class QueryBanquet
 {
-
     private $rpsdb;
 
     /**
@@ -15,7 +13,6 @@ class QueryBanquet
         $this->rpsdb = $rpsdb;
     }
 
-// ---------- Public methods ----------
     /**
      * Get the banquets between the given dates
      *

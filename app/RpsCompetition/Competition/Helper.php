@@ -4,10 +4,9 @@ namespace RpsCompetition\Competition;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
 
-// ---------- Private methods ----------
+
 class Helper
 {
-
     private $rpsdb;
 
     function __construct(RpsDb $rpsdb)
@@ -15,8 +14,6 @@ class Helper
         $this->rpsdb = $rpsdb;
     }
 
-
-// ---------- Public methods ----------
     public function getMedium($competitions)
     {
 

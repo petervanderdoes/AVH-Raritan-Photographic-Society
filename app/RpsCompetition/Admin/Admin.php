@@ -13,11 +13,9 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Settings;
 
-// ---------- Private methods ----------
 /* @var $formBuilder \Avh\Html\FormBuilder */
 final class Admin
 {
-
     /**
      *
      * @var CompetitionListTable
@@ -86,7 +84,6 @@ final class Admin
         add_action('user_register', array($this, 'actionAddUserMeta'));
     }
 
-// ---------- Public methods ----------
     public function actionAddUserMeta($userID)
     {
         update_user_meta($userID, "rps_class_bw", 'beginner');
@@ -697,7 +694,6 @@ final class Admin
         }
     }
 
-// ---------- Private methods ----------
     /**
      * Displays the icon needed.
      * Using this instead of core in case we ever want to show our own icons

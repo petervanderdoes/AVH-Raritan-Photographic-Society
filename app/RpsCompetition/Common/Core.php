@@ -6,10 +6,8 @@ use Intervention\Image\Image;
 use RpsCompetition\Constants;
 use RpsCompetition\Settings;
 
-// ---------- Private methods ----------
 class Core
 {
-
     /**
      * Comments used in HTML do identify the plugin
      *
@@ -17,7 +15,6 @@ class Core
      */
     private $comment;
     private $db_version;
-
     /**
      * Options set for the plugin
      *
@@ -52,7 +49,6 @@ class Core
         return;
     }
 
-// ---------- Public methods ----------
     public function arrayMsort($array, $cols)
     {
         $object = false;

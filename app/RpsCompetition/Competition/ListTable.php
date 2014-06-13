@@ -10,10 +10,8 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
-// ---------- Private methods ----------
 class ListTable extends \WP_List_Table
 {
-
     public $messages;
     public $screen;
     /**
@@ -66,7 +64,6 @@ class ListTable extends \WP_List_Table
         parent::__construct(array('plural' => 'competitions', 'singular' => 'competition', 'ajax' => false));
     }
 
-// ---------- Public methods ----------
     public function ajax_user_can()
     {
         return true;

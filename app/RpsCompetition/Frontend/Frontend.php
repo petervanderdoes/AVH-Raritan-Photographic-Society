@@ -12,28 +12,23 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
-// ---------- Private methods ----------
 class Frontend
 {
-
     /**
      *
      * @var Core
      */
     private $core;
-
     /**
      *
      * @var Request
      */
     private $request;
-
     /**
      *
      * @var RpsDb
      */
     private $rpsdb;
-
     /**
      *
      * @var Settings
@@ -66,8 +61,6 @@ class Frontend
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
     }
 
-
-// ---------- Public methods ----------
     public function actionAfterThemeSetup()
     {
         add_action('rps_showcase', array($this, 'actionShowcaseCompetitionThumbnails'));
@@ -518,7 +511,6 @@ class Frontend
         }
     }
 
-// ---------- Private methods ----------
     /**
      * Delete competition entries
      *

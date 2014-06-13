@@ -1,10 +1,9 @@
 <?php
 namespace RpsCompetition\Db;
 
-// ---------- Private methods ----------
+
 class QueryCompetitions
 {
-
     private $rpsdb;
 
     /**
@@ -15,7 +14,6 @@ class QueryCompetitions
         $this->rpsdb = $rpsdb;
     }
 
-// ---------- Public methods ----------
     /**
      * Check if competition is closed
      *

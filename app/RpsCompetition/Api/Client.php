@@ -7,10 +7,8 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsPdo;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
-// ---------- Private methods ----------
 class Client
 {
-
     /**
      *
      * @var Core
@@ -22,7 +20,6 @@ class Client
         $this->core = $core;
     }
 
-// ---------- Public methods ----------
     /**
      * Handles the uploading of the score file
      *
@@ -149,7 +146,6 @@ class Client
         die();
     }
 
-// ---------- Private methods ----------
     /**
      * Check if user/password combination is valid
      */

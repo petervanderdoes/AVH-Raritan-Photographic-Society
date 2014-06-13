@@ -31,7 +31,7 @@ require __DIR__ . '/vendor/autoload.php';
 $rps_dir = pathinfo($plugin, PATHINFO_DIRNAME);
 $rps_basename = plugin_basename($plugin);
 
-// ---------- Private methods ----------
+
 class AVH_RPS_Client
 {
 
@@ -76,7 +76,7 @@ class AVH_RPS_Client
         add_action('plugins_loaded', array($this, 'load'));
     }
 
-// ---------- Public methods ----------
+
     public function admin()
     {
         new Admin($this->container);
