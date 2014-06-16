@@ -1,13 +1,32 @@
 <?php
 namespace RpsCompetition\Db;
 
-
+/**
+ * Class QueryCompetitions
+ *
+ * @package RpsCompetition\Db
+ * @property  int     ID
+ * @property  string  Competition_Date
+ * @property  string  Medium
+ * @property  string  Classification
+ * @property  string  Theme
+ * @property  string  Date_Created
+ * @property  string  Date_Modified
+ * @property  string  Closed
+ * @property  string  Scored
+ * @property  string  Close_Date
+ * @property  int     Max_Entries
+ * @property  int     Num_Judges
+ * @property  string  Special_Event
+ */
 class QueryCompetitions
 {
     private $rpsdb;
 
     /**
      * PHP5 constructor
+     *
+     * @param RpsDb $rpsdb
      */
     public function __construct(RpsDb $rpsdb)
     {
@@ -15,9 +34,14 @@ class QueryCompetitions
     }
 
     /**
-     * Check if competition is closed
+     * Check if a competition is closed.
+     * Check if the competition for the given date, classification and medium is closed.
      *
-     * @return boolean
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
+     *
+     * @return bool
      */
     public function checkCompetitionClosed($competition_date, $classification, $medium)
     {
@@ -41,10 +65,13 @@ class QueryCompetitions
     }
 
     /**
-     * Count competitions
-     * Returns a class with the count of open, closed and total.
+     * Count competitions.
+     * Return an object with the count of open, closed and total competitions.
      *
-     * @return StdClass
+     * @property int open
+     * @property int closed
+     * @property int all
+     * @return object
      */
     public function countCompetitions()
     {
@@ -75,7 +102,7 @@ class QueryCompetitions
     }
 
     /**
-     * Delete a competition
+     * Delete a competition.
      *
      * @param unknown $id
      *
@@ -89,13 +116,14 @@ class QueryCompetitions
     }
 
     /**
-     * Get competition by date, classification, medium
+     * Get competition by date, classification, medium.
      *
-     * @param unknown $competition_date
-     * @param unknown $classification
-     * @param unknown $medium
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
+     * @param string $output
      *
-     * @return Ambigous <mixed, NULL, multitype:>
+     * @return QueryCompetitions
      */
     public function getCompetitionByDateClassMedium($competition_date, $classification, $medium, $output = OBJECT)
     {
@@ -114,17 +142,26 @@ class QueryCompetitions
         return $return;
     }
 
-    public function getCompetitionByDates($start, $end, $output = OBJECT)
+    /**
+     * Get all competitions by date.
+     *
+     * @param string $date_start
+     * @param string $date_end
+     * @param string $output
+     *
+     * @return QueryCompetitions
+     */
+    public function getCompetitionByDates($date_start, $date_end, $output = OBJECT)
     {
-        $start = $this->rpsdb->getMysqldate($start);
-        $end = $this->rpsdb->getMysqldate($end);
+        $date_start = $this->rpsdb->getMysqldate($date_start);
+        $date_end = $this->rpsdb->getMysqldate($date_end);
 
         $sql = $this->rpsdb->prepare("SELECT *
             FROM competitions
             WHERE Competition_Date >= %s AND
                 Competition_Date <= %s",
-                                     $start,
-                                     $end);
+                                     $date_start,
+                                     $date_end);
         $result = $this->rpsdb->get_results($sql, $output);
 
         return $result;
@@ -133,8 +170,10 @@ class QueryCompetitions
     /**
      * Get competition by entry ID
      *
-     * @param unknown $id
-     * @param string  $output
+     * @param int    $entry_id
+     * @param string $output
+     *
+     * @return array
      */
     public function getCompetitionByEntryId($entry_id, $output = ARRAY_A)
     {
@@ -155,7 +194,7 @@ class QueryCompetitions
      * @param string  $output
      *            default is OBJECT
      *
-     * @return Ambigous <boolean, multitype:, NULL>
+     * @return QueryCompetitions
      */
     public function getCompetitionById($id, $output = OBJECT)
     {
@@ -168,7 +207,11 @@ class QueryCompetitions
     /**
      * Get closing date for specific competition
      *
-     * @return Ambigous <string, NULL>
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
+     *
+     * @return QueryCompetitions
      */
     public function getCompetitionCloseDate($competition_date, $classification, $medium)
     {
@@ -188,7 +231,10 @@ class QueryCompetitions
     /**
      * Get competitions between given dates
      *
-     * @return Ambigous <mixed, NULL, multitype:multitype: , multitype:unknown >
+     * @param string $date_start
+     * @param string $date_end
+     *
+     * @return array
      */
     public function getCompetitionDates($date_start, $date_end)
     {
@@ -210,7 +256,11 @@ class QueryCompetitions
     /**
      * Get max entries for given competition.
      *
-     * @return Ambigous <string, NULL>
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
+     *
+     * @return int
      */
     public function getCompetitionMaxEntries($competition_date, $classification, $medium)
     {
@@ -231,9 +281,11 @@ class QueryCompetitions
     /**
      * Get open competitions
      *
+     * @param int    $user_id
      * @param string $subset
+     * @param string $output
      *
-     * @return multitype:
+     * @return QueryCompetitions
      */
     public function getOpenCompetitions($user_id, $subset = '', $output = OBJECT)
     {
@@ -271,6 +323,15 @@ class QueryCompetitions
         return $return;
     }
 
+    /**
+     * Get all regular (non-special-event) scored competitions.
+     *
+     * @param string $date_start
+     * @param string $date_end
+     * @param string $output
+     *
+     * @return QueryCompetitions
+     */
     public function getScoredCompetitions($date_start, $date_end, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare('SELECT *
@@ -294,12 +355,10 @@ class QueryCompetitions
      * If the $data parameter has 'ID' set to a value, then competition will be updated.
      *
      * @param array $data
-     * @param bool  $wp_error
-     *            Optional. Allow return of WP_Error on failure.
      *
      * @return object WP_Error on failure. The post ID on success.
      */
-    public function insertCompetition($data)
+    public function insertCompetition(array $data)
     {
         // Are we updating or creating?
         if (!empty($data['ID'])) {
@@ -344,18 +403,31 @@ class QueryCompetitions
     }
 
     /**
-     * General query method
+     * General query method.
      *
      * @param array  $query_vars
-     * @param string $table
+     * @param string $output
      *
-     * @return Ambigous <string, NULL>|Ambigous <\RpsCompetition\Db\mixed, mixed>
+     * @return QueryCompetitions
      */
     public function query(array $query_vars, $output = OBJECT)
     {
+        /**
+         * Define used variables after the extract function.
+         *
+         * @var string  $order
+         * @var string  $join
+         * @var string  $where
+         * @var string  $offset
+         * @var int     $number
+         * @var string  $orderby
+         * @var string  $order
+         * @var boolean $count
+         */
         $defaults = array('join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
-        $this->_query_vars = wp_parse_args($query_vars, $defaults);
-        extract($this->_query_vars, EXTR_SKIP);
+        $query_vars = array_merge($defaults, $query_vars);
+
+        extract($query_vars, EXTR_SKIP);
 
         $order = ('ASC' == strtoupper($order)) ? 'ASC' : 'DESC';
 
@@ -408,7 +480,9 @@ class QueryCompetitions
     }
 
     /**
-     * Close all past competition
+     * Close all competitions with a closing date in the past.
+     *
+     * @return boolean
      */
     public function setAllPastCompetitionsClose()
     {
@@ -424,5 +498,3 @@ class QueryCompetitions
         return $result;
     }
 }
-
-?>

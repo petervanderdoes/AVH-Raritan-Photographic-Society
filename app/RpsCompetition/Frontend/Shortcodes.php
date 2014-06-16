@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend;
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
 use Avh\Network\Session;
+use Avh\Utility\ShortcodesAbstract;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
@@ -15,7 +16,7 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
-final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
+final class Shortcodes extends ShortcodesAbstract
 {
     /**
      *
@@ -43,16 +44,27 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
      */
     private $settings;
 
+    /**
+     * @param Settings $settings
+     * @param RpsDb    $rpsdb
+     * @param Core     $core
+     * @param Request  $request
+     */
     public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
     {
         $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
-        $this->html = new \Avh\Html\HtmlBuilder();
+        $this->html = new HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
         $this->request = $request;
     }
 
+    /**
+     * @param $atts
+     * @param $content
+     * @param $tag
+     */
     public function displayAllScores($atts, $content, $tag)
     {
         global $post;

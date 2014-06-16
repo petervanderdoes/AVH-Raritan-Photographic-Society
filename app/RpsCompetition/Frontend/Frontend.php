@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend;
 
+use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
@@ -15,30 +16,28 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 class Frontend
 {
     /**
-     *
      * @var Core
      */
     private $core;
     /**
-     *
      * @var Request
      */
     private $request;
     /**
-     *
      * @var RpsDb
      */
     private $rpsdb;
     /**
-     *
      * @var Settings
      */
     private $settings;
 
     /**
      * PHP5 Constructor
+     *
+     * @param Container $container
      */
-    public function __construct(\Illuminate\Container\Container $container)
+    public function __construct(Container $container)
     {
         $this->settings = $container->make('RpsCompetition\Settings');
         $this->core = $container->make('RpsCompetition\Common\Core');
@@ -61,11 +60,30 @@ class Frontend
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
     }
 
+    /**
+     * Implement actions.
+     * This method is called by the action after_setup_theme and is used to setup:
+     *  - New actions
+     *
+     * @since    1.0.0
+     * @internal Hook: after_setup_theme
+     */
     public function actionAfterThemeSetup()
     {
         add_action('rps_showcase', array($this, 'actionShowcaseCompetitionThumbnails'));
     }
 
+    /**
+     * Handle POST request for the Banquet Entries.
+     * This method handles the POST request generated on the page for Banquet Entries
+     * The action is called from the theme!
+     *
+     * @since    1.0.0
+     * @uses     \RpsCompetition\Db\QueryEntries
+     * @uses     \RpsCompetition\Db\QueryCompetitions
+     * @see      Shortcodes::displayBanquetCurrentUser
+     * @internal Hook: suffusion_before_post
+     */
     public function actionHandleHttpPostRpsBanquetEntries()
     {
         global $post;
@@ -88,7 +106,7 @@ class Frontend
                         $query_entries->deleteEntry($entry);
                     }
                 }
-                $entries = $this->request->input('entry_id', array());
+                $entries = (array) $this->request->input('entry_id', array());
                 foreach ($entries as $entry_id) {
                     $entry = $query_entries->getEntryById($entry_id, OBJECT);
                     $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
@@ -121,7 +139,15 @@ class Frontend
     }
 
     /**
-     * Handle $_POST Edit Title
+     * Handle POST request for the editing the title of a photo.
+     * This method handles the POST request generated on the page Edit Title
+     * The action is called from the theme!
+     *
+     * @since    1.0.0
+     * @uses     \RpsCompetition\Db\QueryEntries
+     * @uses     \RpsCompetition\Db\QueryCompetitions
+     * @see      Shortcodes::displayEditTitle
+     * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsEditTitle()
     {
@@ -189,6 +215,16 @@ class Frontend
         unset($query_entries);
     }
 
+    /**
+     * Handle POST request for editing the entries of a user.
+     * This method handles the POST request generated on the page for editing entries
+     * The action is called from the theme!
+     *
+     * @since    1.0.0
+     * @uses     \RpsCompetition\Db\QueryCompetitions
+     * @see      Shortcodes::displayMyEntries
+     * @internal Hook: suffusion_before_post
+     */
     public function actionHandleHttpPostRpsMyEntries()
     {
         global $post;
@@ -248,6 +284,17 @@ class Frontend
         unset($query_competitions);
     }
 
+    /**
+     * Handle POST request for uploading a photo.
+     * This method handles the POST request generated when uploading a photo
+     * The action is called from the theme!
+     *
+     * @since    1.0.0
+     * @uses     \RpsCompetition\Db\QueryEntries
+     * @uses     \RpsCompetition\Db\QueryCompetitions
+     * @see      Shortcodes::displayUploadEntry
+     * @internal Hook: suffusion_before_post
+     */
     public function actionHandleHttpPostRpsUploadEntry()
     {
         global $post;
@@ -406,35 +453,41 @@ class Frontend
         unset($query_entries, $query_competitions);
     }
 
+    /**
+     * Setup all that is needed to run the plugin.
+     * This method runs during the init hook and you can basically add everything that needs
+     * to be setup for plugin.
+     * - Shortcodes
+     * - User meta information concerning their classification
+     *
+     * @since    1.0.0
+     * @uses     \RpsCompetition\Db\QueryCompetitions
+     * @internal Hook: init
+     */
     public function actionInit()
     {
+
+        $this->setupShortcodes();
+
         $query_competitions = new QueryCompetitions($this->rpsdb);
-        /* @var $shortcode \RpsCompetition\Frontend\Shortcodes */
-        $shortcode = $this->container->make('RpsCompetition\Frontend\Shortcodes');
-        $shortcode->register('rps_category_winners', 'displayCategoryWinners');
-        $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
-        $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');
-        $shortcode->register('rps_banquet_current_user', 'displayBanquetCurrentUser');
-        $shortcode->register('rps_all_scores', 'displayAllScores');
-        $shortcode->register('rps_my_entries', 'displayMyEntries');
-        $shortcode->register('rps_edit_title', 'displayEditTitle');
-        $shortcode->register('rps_upload_image', 'displayUploadEntry');
-        $shortcode->register('rps_email', 'displayEmail');
-        $shortcode->register('rps_person_winners', 'displayPersonWinners');
-        $shortcode->register('rps_monthly_entries', 'displayMonthlyEntries');
-        $user_id = get_current_user_id();
         $query_competitions->setAllPastCompetitionsClose();
 
-        $x = get_user_meta($user_id, 'rps_class_bw', true);
-        if (empty($x)) {
-            update_user_meta($user_id, "rps_class_bw", 'beginner');
-            update_user_meta($user_id, "rps_class_color", 'beginner');
-            update_user_meta($user_id, "rps_class_print_bw", 'beginner');
-            update_user_meta($user_id, "rps_class_print_color", 'beginner');
-        }
+        $this->setupUserMeta();
+
         unset($query_competitions);
     }
 
+    /**
+     * Display the showcase on the front page.
+     * This will display the showcase as used on the front page.
+     *
+     * @since    1.0.0
+     * @uses     \RpsCompetition\Db\QueryMiscellaneous
+     * @see      actionAfterThemeSetup
+     * @internal Hook: rps_showcase
+     *
+     * @param null $foo
+     */
     public function actionShowcaseCompetitionThumbnails($foo)
     {
         if (is_front_page()) {
@@ -482,6 +535,13 @@ class Frontend
         }
     }
 
+    /**
+     * Handles the requests by the RPS Windows Client
+     *
+     * @since    1.0.0
+     * @uses     \RpsCompetition\Api\Client
+     * @internal Hook: template_redirect
+     */
     public function actionTemplateRedirectRpsWindowsClient()
     {
         if ($this->request->has('rpswinclient')) {
@@ -514,8 +574,10 @@ class Frontend
     /**
      * Delete competition entries
      *
-     * @param array $entries
-     *            Array of entries ID to delete.
+     * @since 1.0.0
+     * @uses  \RpsCompetition\Db\QueryEntries
+     *
+     * @param array $entries Array of entries ID to delete.
      */
     private function deleteCompetitionEntries($entries)
     {
@@ -565,5 +627,46 @@ class Frontend
             }
         }
         unset($query_entries);
+    }
+
+    /**
+     * Setup shortcodes.
+     * Setup all the need shortcodes.
+     *
+     * @since 1.0.0
+     * @uses  \RpsCompetition\Frontend\Shortcodes
+     */
+    private function setupShortcodes()
+    {
+        /** @var \RpsCompetition\Frontend\Shortcodes $shortcode */
+        $shortcode = $this->container->make('RpsCompetition\Frontend\Shortcodes');
+        $shortcode->register('rps_category_winners', 'displayCategoryWinners');
+        $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
+        $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');
+        $shortcode->register('rps_banquet_current_user', 'displayBanquetCurrentUser');
+        $shortcode->register('rps_all_scores', 'displayAllScores');
+        $shortcode->register('rps_my_entries', 'displayMyEntries');
+        $shortcode->register('rps_edit_title', 'displayEditTitle');
+        $shortcode->register('rps_upload_image', 'displayUploadEntry');
+        $shortcode->register('rps_email', 'displayEmail');
+        $shortcode->register('rps_person_winners', 'displayPersonWinners');
+        $shortcode->register('rps_monthly_entries', 'displayMonthlyEntries');
+    }
+
+    /**
+     * Setup the needed user meta information.
+     *
+     * @since 1.0.0
+     */
+    private function setupUserMeta()
+    {
+        $user_id = get_current_user_id();
+        $x = get_user_meta($user_id, 'rps_class_bw', true);
+        if (empty($x)) {
+            update_user_meta($user_id, "rps_class_bw", 'beginner');
+            update_user_meta($user_id, "rps_class_color", 'beginner');
+            update_user_meta($user_id, "rps_class_print_bw", 'beginner');
+            update_user_meta($user_id, "rps_class_print_color", 'beginner');
+        }
     }
 }
