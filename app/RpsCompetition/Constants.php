@@ -11,7 +11,8 @@ final class Constants
      */
     // Message Numbers
 
-    // Menu Slugs for Admin menu    const MENU_POSITION_COMPETITION = '25.avh-rps-plugin.1';
+    // Menu Slugs for Admin menu
+    const MENU_POSITION_COMPETITION = '25.avh-rps-plugin.1';
     const MENU_POSITION_ENTRIES = '25.avh-rps-plugin.2';
     const MENU_SLUG = 'avh-rps-plugin';
     const MENU_SLUG_COMPETITION = 'avh-rps-competition';
