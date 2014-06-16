@@ -1,25 +1,26 @@
 {
-	"name" : "RPS Competition",
-	"type" : "wordpress-plugin",
-	"authors" : [{
-			"name" : "Peter van der Does",
-			"email" : "peter@avirtualhome.com",
-			"homepage" : "http://blog.avirtualhome.com",
-			"role" : "Project Manager"
-		}
-	],
-	"keywords" : [
-		"RPS"
-	],
-	"license" : "BSD-3-Clause",
-	"autoload" : {
-		"psr-4" : {
-			"RpsCompetition\\" : "app/"
-		}
-	},
-	"require" : {
-		"intervention/image" : "~2.0",
-		"phpmd/phpmd" : "2.0.0",
-		"phpunit/phpunit" : "~4.1"
-	}
+    "name": "RPS Competition",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Peter van der Does",
+            "email": "peter@avirtualhome.com",
+            "homepage": "http://blog.avirtualhome.com",
+            "role": "Project Manager"
+        }
+    ],
+    "keywords": [
+        "RPS"
+    ],
+    "license": "BSD-3-Clause",
+    "autoload": {
+        "psr-4": {
+            "RpsCompetition\\": "app/"
+        }
+    },
+    "require": {
+        "intervention/image": "~2.0",
+        "phpmd/phpmd": "2.0.0",
+        "phpunit/phpunit": "~4.1"
+    }
 }

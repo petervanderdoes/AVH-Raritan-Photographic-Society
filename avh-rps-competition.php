@@ -20,7 +20,6 @@ use RpsCompetition\Settings;
 
 /**
  * Register The Composer Auto Loader
- *
  * Composer provides a convenient, automatically generated class loader
  * for our application. We just need to utilize it! We'll require it
  * into the script here so that we do not have to worry about the
@@ -31,17 +30,12 @@ require __DIR__ . '/vendor/autoload.php';
 $rps_dir = pathinfo($plugin, PATHINFO_DIRNAME);
 $rps_basename = plugin_basename($plugin);
 
-
 class AVH_RPS_Client
 {
-
-
     /**
-     *
      * @var Container
      */
     private $container;
-
     private $settings;
 
     public function __construct($dir, $basename)
@@ -57,7 +51,6 @@ class AVH_RPS_Client
             function () {
                 return new RpsDb();
             });
-
 
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $db = $this->container->make('RpsCompetition\Db\RpsDb');
@@ -75,7 +68,6 @@ class AVH_RPS_Client
 
         add_action('plugins_loaded', array($this, 'load'));
     }
-
 
     public function admin()
     {
