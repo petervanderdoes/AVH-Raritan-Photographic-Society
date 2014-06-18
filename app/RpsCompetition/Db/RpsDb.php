@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Db;
 
-
 class RpsDb extends \wpdb
 {
     /**

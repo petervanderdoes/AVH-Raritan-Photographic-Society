@@ -71,7 +71,7 @@ class QueryCompetitions
      * @property int open
      * @property int closed
      * @property int all
-     * @return object
+     * @return QueryCompetitions|array
      */
     public function countCompetitions()
     {
@@ -104,7 +104,7 @@ class QueryCompetitions
     /**
      * Delete a competition.
      *
-     * @param unknown $id
+     * @param integer $id
      *
      * @return boolean
      */
@@ -123,7 +123,7 @@ class QueryCompetitions
      * @param string $medium
      * @param string $output
      *
-     * @return QueryCompetitions
+     * @return QueryCompetitions|array
      */
     public function getCompetitionByDateClassMedium($competition_date, $classification, $medium, $output = OBJECT)
     {
@@ -149,7 +149,7 @@ class QueryCompetitions
      * @param string $date_end
      * @param string $output
      *
-     * @return QueryCompetitions
+     * @return QueryCompetitions|array
      */
     public function getCompetitionByDates($date_start, $date_end, $output = OBJECT)
     {
@@ -173,7 +173,7 @@ class QueryCompetitions
      * @param int    $entry_id
      * @param string $output
      *
-     * @return array
+     * @return QueryCompetitions|array
      */
     public function getCompetitionByEntryId($entry_id, $output = ARRAY_A)
     {
@@ -194,7 +194,7 @@ class QueryCompetitions
      * @param string  $output
      *            default is OBJECT
      *
-     * @return QueryCompetitions
+     * @return QueryCompetitions|array
      */
     public function getCompetitionById($id, $output = OBJECT)
     {
@@ -285,7 +285,7 @@ class QueryCompetitions
      * @param string $subset
      * @param string $output
      *
-     * @return QueryCompetitions
+     * @return QueryCompetitions|array
      */
     public function getOpenCompetitions($user_id, $subset = '', $output = OBJECT)
     {
@@ -330,7 +330,7 @@ class QueryCompetitions
      * @param string $date_end
      * @param string $output
      *
-     * @return QueryCompetitions
+     * @return QueryCompetitions|array
      */
     public function getScoredCompetitions($date_start, $date_end, $output = OBJECT)
     {
@@ -351,7 +351,6 @@ class QueryCompetitions
 
     /**
      * Insert a competition.
-     *
      * If the $data parameter has 'ID' set to a value, then competition will be updated.
      *
      * @param array $data
@@ -408,7 +407,7 @@ class QueryCompetitions
      * @param array  $query_vars
      * @param string $output
      *
-     * @return QueryCompetitions
+     * @return object|array
      */
     public function query(array $query_vars, $output = OBJECT)
     {

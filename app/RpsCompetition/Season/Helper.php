@@ -4,19 +4,24 @@ namespace RpsCompetition\Season;
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
 /**
+ * Class Helper
  *
- * @author pdoes
- *
+ * @package RpsCompetition\Season
  */
 class Helper
 {
     private $rpsdb;
     private $settings;
 
-    public function __construct(Settings $settings, $rpsdb)
+    /**
+     * @param Settings $settings
+     * @param RpsDb    $rpsdb
+     */
+    public function __construct(Settings $settings, RpsDb $rpsdb)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
@@ -28,7 +33,7 @@ class Helper
      * @param string  $selected_season
      * @param boolean $echo
      *
-     * @return void string
+     * @return string|null
      */
     public function getSeasonDropdown($selected_season, $echo = false)
     {
@@ -41,12 +46,20 @@ class Helper
         if ($echo) {
             echo $form;
 
-            return;
+            return null;
         }
 
         return $form;
     }
 
+    /**
+     * Returns the season of the given year and month as YYYY-YY
+     *
+     * @param $selected_year
+     * @param $selected_month
+     *
+     * @return string
+     */
     public function getSeasonId($selected_year, $selected_month)
     {
         $options = get_option('avh-rps');
@@ -61,6 +74,8 @@ class Helper
      * Set the Season Start date and Season End date
      *
      * @param string $selected_season
+     *
+     * @return array
      */
     public function getSeasonStartEnd($selected_season)
     {
@@ -82,16 +97,13 @@ class Helper
     /**
      * Get the seasons list
      *
-     * @return Ambigous <multitype:, NULL>
+     * @return array
      */
     public function getSeasons()
     {
         $options = get_option('avh-rps');
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $seasons = $query_miscellaneous->getSeasonList('ASC', $options['season_start_month_num'], $options['season_end_month_num']);
-        if (empty($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
-        }
 
         unset($query_miscellaneous);
 

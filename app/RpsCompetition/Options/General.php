@@ -55,6 +55,10 @@ final class General extends OptionsAbstract
 
     /**
      * Validate all values within the option
+     *
+     * @param mixed $dirty
+     * @param mixed $clean
+     * @param mixed $old
      */
     protected function validateOption($dirty, $clean, $old)
     {

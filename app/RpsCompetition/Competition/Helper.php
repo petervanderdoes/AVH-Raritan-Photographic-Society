@@ -32,8 +32,8 @@ class Helper
     /**
      * Select the list of open competitions for this member's classification and validate the currently selected competition against that list.
      *
-     * @param string  $date
-     * @param unknown $med
+     * @param string $date
+     * @param string $medium_subset
      *
      * @return boolean
      */

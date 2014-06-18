@@ -1,12 +1,29 @@
 <?php
 namespace RpsCompetition\Db;
 
+/**
+ * Class QueryEntries
+ *
+ * @package RpsCompetition\Db
+ * @property integer ID
+ * @property integer Competition_ID
+ * @property integer Member_ID
+ * @property string  Title
+ * @property string  Client_File_Name
+ * @property string  Server_File_Name
+ * @property string  Date_Created
+ * @property string  Date_Modified
+ * @property float   Score
+ * @property string  Award
+ */
 class QueryEntries
 {
     private $rpsdb;
 
     /**
      * PHP5 constructor
+     *
+     * @param RpsDb $rpsdb
      */
     public function __construct(RpsDb $rpsdb)
     {
@@ -19,7 +36,7 @@ class QueryEntries
      * @param array   $data
      * @param integer $user_id
      *
-     * @return Ambigous <number, false>
+     * @return boolean
      */
     public function addEntry($data, $user_id)
     {
@@ -37,7 +54,7 @@ class QueryEntries
      * @param string  $title
      * @param integer $user_id
      *
-     * @return Ambigous <boolean, string, NULL>
+     * @return boolean
      */
     public function checkDuplicateTitle($id, $title, $user_id)
     {
@@ -62,10 +79,10 @@ class QueryEntries
     /**
      * Count the entries for a member on a given competition date
      *
-     * @param unknown $date
-     * @param unknown $user_id
+     * @param string  $date
+     * @param integer $user_id
      *
-     * @return Ambigous <string, NULL>
+     * @return integer
      */
     public function countEntriesByCompetitionDate($date, $user_id)
     {
@@ -85,8 +102,9 @@ class QueryEntries
      * Get the amount of entries for the given competition.
      *
      * @param integer $id
+     * @param integer $user_id
      *
-     * @return Ambigous <string, NULL>
+     * @return integer
      */
     public function countEntriesByCompetitionId($id, $user_id)
     {
@@ -103,7 +121,10 @@ class QueryEntries
     /**
      * Count entries submitted by this member for this competition date.
      *
-     * @return Ambigous <string, NULL>
+     * @param integer $user_id
+     * @param string  $competition_date
+     *
+     * @return integer
      */
     public function countEntriesSubmittedByMember($user_id, $competition_date)
     {
@@ -126,7 +147,7 @@ class QueryEntries
      *
      * @param integer $id
      *
-     * @return unknown
+     * @return boolean
      */
     public function deleteEntry($id)
     {
@@ -138,12 +159,12 @@ class QueryEntries
     /**
      * Get entries submitted for the member on the given competition date in the given classification and medium
      *
-     * @param unknown $user_id
-     * @param unknown $competition_date
-     * @param unknown $classification
-     * @param unknown $medium
+     * @param int    $user_id
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
      *
-     * @return Ambigous <mixed, NULL, multitype:multitype: , multitype:unknown >
+     * @return QueryEntries
      */
     public function getEntriesSubmittedByMember($user_id, $competition_date, $classification, $medium)
     {
@@ -171,7 +192,7 @@ class QueryEntries
      * @param integer $id
      * @param string  $output
      *
-     * @return Ambigous <mixed, NULL, multitype:>|multitype:
+     * @return QueryEntries|array
      */
     public function getEntryById($id, $output = ARRAY_A)
     {
@@ -187,15 +208,24 @@ class QueryEntries
      * General query method
      *
      * @param array  $query_vars
-     * @param string $table
+     * @param string $output
      *
-     * @return Ambigous <string, NULL>|Ambigous <\RpsCompetition\Db\mixed, mixed>
+     * @return QueryEntries|array|int
      */
     public function query(array $query_vars, $output = OBJECT)
     {
+        /**
+         * @var string  $join
+         * @var string  $where
+         * @var integer $offset
+         * @var integer $number
+         * @var string  $orderby
+         * @var string  $order
+         * @var boolean $count
+         */
         $defaults = array('join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
-        $this->_query_vars = wp_parse_args($query_vars, $defaults);
-        extract($this->_query_vars, EXTR_SKIP);
+        $query_vars = wp_parse_args($query_vars, $defaults);
+        extract($query_vars, EXTR_SKIP);
 
         $order = ('ASC' == strtoupper($order)) ? 'ASC' : 'DESC';
 
@@ -234,12 +264,9 @@ class QueryEntries
 
     /**
      * Update an entry.
-     *
      * If the $data parameter has 'ID' set to a value, then entry will be updated.
      *
      * @param array $data
-     * @param bool  $wp_error
-     *            Optional. Allow return of WP_Error on failure.
      *
      * @return object WP_Error on failure. The post ID on success.
      */

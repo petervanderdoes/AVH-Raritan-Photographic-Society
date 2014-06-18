@@ -16,7 +16,7 @@ class QueryMiscellaneous
      * @param string $competition_date_start
      * @param string $competition_date_end
      *
-     * @return unknown
+     * @return QueryMiscellaneous
      */
     public function getAllEntries($competition_date_start, $competition_date_end = null)
     {
@@ -41,7 +41,6 @@ class QueryMiscellaneous
 
     /**
      * Get result by given date.
-     *
      * This will return the results, scores & awards, including member info for competitions given between the dates
      *
      * @param string $competition_date_start
@@ -102,7 +101,7 @@ class QueryMiscellaneous
      *
      * @param integer $member_id
      *
-     * @return unknown
+     * @return array
      */
     public function getEightsAndHigherPerson($member_id)
     {
@@ -128,7 +127,7 @@ class QueryMiscellaneous
      * @param string $competition_date_start
      * @param string $competition_date_end
      *
-     * @return unknown
+     * @return int
      */
     public function getMaxAwards($competition_date_start, $competition_date_end = null)
     {
@@ -158,7 +157,7 @@ class QueryMiscellaneous
      *
      * @return array
      */
-    public function getScoredCompetions($competition_date_start, $competition_date_end = null)
+    public function getScoredCompetitions($competition_date_start, $competition_date_end = null)
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
@@ -180,11 +179,11 @@ class QueryMiscellaneous
     /**
      * Get the scores for the given user for competitions between the given dates.
      *
-     * @param unknown $user_id
-     * @param unknown $competition_date_start
+     * @param integer $user_id
+     * @param string  $competition_date_start
      * @param string  $competition_date_end
      *
-     * @return unknown
+     * @return array
      */
     public function getScoresUser($user_id, $competition_date_start, $competition_date_end = null)
     {
@@ -276,7 +275,7 @@ class QueryMiscellaneous
      * @param string $award
      * @param string $class
      *
-     * @return unknown
+     * @return QueryMiscellaneous
      */
     public function getWinner($date, $award, $class)
     {
@@ -302,7 +301,7 @@ class QueryMiscellaneous
      * @param string $competition_date_start
      * @param string $competition_date_end
      *
-     * @return unknown
+     * @return array
      */
     public function getWinners($competition_date_start, $competition_date_end = null)
     {

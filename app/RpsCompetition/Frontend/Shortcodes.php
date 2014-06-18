@@ -19,27 +19,22 @@ use RpsCompetition\Settings;
 final class Shortcodes extends ShortcodesAbstract
 {
     /**
-     *
      * @var Core
      */
     private $core;
     /**
-     *
      * @var HtmlBuilder
      */
     private $html;
     /**
-     *
      * @var Request
      */
     private $request;
     /**
-     *
      * @var RpsDb
      */
     private $rpsdb;
     /**
-     *
      * @var Settings
      */
     private $settings;
@@ -61,11 +56,13 @@ final class Shortcodes extends ShortcodesAbstract
     }
 
     /**
-     * @param $atts
-     * @param $content
-     * @param $tag
+     * Display all scores.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
      */
-    public function displayAllScores($atts, $content, $tag)
+    public function displayAllScores($attr, $content, $tag)
     {
         global $post;
 
@@ -123,9 +120,6 @@ final class Shortcodes extends ShortcodesAbstract
             echo "<table class=\"form_frame\" width=\"99%\">\n";
 
             // Build the list of submitted images
-            $prev_member = "";
-            $prev_medium = "";
-            $prev_class = "";
             $row_count = 0;
             // Initialize the 2D array to hold the members scores for each month
             // Each row represents a competition month and each column holds the scores
@@ -178,13 +172,13 @@ final class Shortcodes extends ShortcodesAbstract
                         echo "<td align=\"center\" class=\"$row_style\">" . substr($prev_class, 0, 1) . "</td>\n";
 
                         // Iterate through all the accumulated scores for this member
-                        foreach ($member_scores as $key => $score_array) {
+                        foreach ($member_scores as $score_key => $score_array) {
                             // Print the scores for the submitted entries for this month
                             for ($i = 0; $i < count($score_array); $i++) {
                                 echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                             }
                             // Pad the unused entries for this member for this month
-                            for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
+                            for ($i = 0; $i < $comp_max_entries[$score_key] - count($score_array); $i++) {
                                 echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                             }
                         }
@@ -223,13 +217,13 @@ final class Shortcodes extends ShortcodesAbstract
 
                         // Display the category title
                         echo '<tr><td align="left" class="form_title" colspan="' . ($total_max_entries + 3) . '">';
-                        echo $medium . ' scores for ' . $this->settings->selected_season . ' season';
+                        echo $medium . ' scores for ' . $selected_season . ' season';
                         echo '</td></tr>' . "\n";
 
                         // Display the first row column headers
                         echo "<tr>\n<th class=\"form_frame_header\" colspan=\"2\">&nbsp;</th>\n";
-                        foreach ($comp_dates as $key => $d) {
-                            echo "<th class=\"form_frame_header\" colspan=\"" . $comp_max_entries[$key] . "\">$d</th>\n";
+                        foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
+                            echo "<th class=\"form_frame_header\" colspan=\"" . $comp_max_entries[$comp_dates_key] . "\">$comp_dates_date</th>\n";
                         }
                         echo "<th class=\"form_frame_header\">&nbsp;</th>\n";
                         echo "</tr>\n";
@@ -237,8 +231,8 @@ final class Shortcodes extends ShortcodesAbstract
                         echo "<tr>\n";
                         echo "<th class=\"form_frame_header\">Member</th>\n";
                         echo "<th class=\"form_frame_header\">Cl.</th>\n";
-                        foreach ($comp_dates as $key => $d) {
-                            for ($i = 1; $i <= $comp_max_entries[$key]; $i++) {
+                        foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
+                            for ($i = 1; $i <= $comp_max_entries[$comp_dates_key]; $i++) {
                                 echo "<th class=\"form_frame_header\">$i</th>\n";
                             }
                         }
@@ -249,8 +243,8 @@ final class Shortcodes extends ShortcodesAbstract
                     // Reset the score array to be ready to start accumulating the scores for this
                     // new member we just started.
                     $member_scores = array();
-                    foreach ($comp_dates as $key => $d) {
-                        $member_scores[$key] = array();
+                    foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
+                        $member_scores[$comp_dates_key] = array();
                     }
                     $total_score = 0;
                     $num_scores = 0;
@@ -309,7 +303,16 @@ final class Shortcodes extends ShortcodesAbstract
         unset($query_competitions, $query_miscellaneous, $season_helper);
     }
 
-    public function displayBanquetCurrentUser($atts, $content, $tag)
+    /**
+     * Display the possible Banquet entries for the current user.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsBanquetEntries
+     */
+    public function displayBanquetCurrentUser($attr, $content, $tag)
     {
         global $post;
 
@@ -442,14 +445,14 @@ final class Shortcodes extends ShortcodesAbstract
                 }
 
                 $entry_id = $recs['Entry_ID'];
-                echo "<input type=\"checkbox\" name=\"entry_id[]\" value=\"$entry_id\" $checked $disabled/>";
+                echo "<input type=\"checkbox\" name=\"entry_id[]\" value=\"$entry_id\" {$checked} {$disabled}/>";
                 echo '</td>';
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\" width=\"12%\">" . $date_parts[0] . "</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\" width=\"12%\">" . $date_parts[0] . "</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\">{$theme}</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\">{$medium}</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
 
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities($title) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td>";
                 echo "<td align=\"center\" valign=\"middle\" class=\"$row_style\" width=\"3%\">";
@@ -478,20 +481,23 @@ final class Shortcodes extends ShortcodesAbstract
     }
 
     /**
-     * Display the given awards for the given classification.
+     * Display the given awards for the given classification on a given date.
      *
-     * @param array  $atts
-     * @param string $content
-     * @param string $tag
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - class
+     *                        - award
+     *                        - date
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
      */
-    public function displayCategoryWinners($atts, $content, $tag)
+    public function displayCategoryWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $class = 'Beginner';
         $award = '1';
         $date = '';
-        extract($atts, EXTR_OVERWRITE);
+        extract($attr, EXTR_OVERWRITE);
 
         $competition_date = date('Y-m-d H:i:s', strtotime($date));
         $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
@@ -530,7 +536,16 @@ final class Shortcodes extends ShortcodesAbstract
         unset($query_miscellaneous);
     }
 
-    public function displayEditTitle($atts, $content, $tag)
+    /**
+     * Display the form to edit the title of the selected entry
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsEditTitle
+     */
+    public function displayEditTitle($attr, $content, $tag)
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
@@ -583,21 +598,32 @@ final class Shortcodes extends ShortcodesAbstract
         unset($query_entries);
     }
 
-    public function displayEmail($atts, $content, $tag)
+    /**
+     * Display an obfuscated email link.
+     *
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - email
+     *                        - HTML Attributes
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayEmail($attr, $content, $tag)
     {
-        $email = $atts['email'];
-        unset($atts['email']);
-        echo $this->html->mailto($email, $content, $atts);
+        $email = $attr['email'];
+        unset($attr['email']);
+        echo $this->html->mailto($email, $content, $attr);
     }
 
     /**
-     * Show all entries for the given competition
+     * Show all entries for a month.
+     * The default is to show the entries for the latest closed competition.
+     * A dropdown selection to choose different months and/or season is also displayed.
      *
-     * @param array  $atts
-     * @param string $content
-     * @param string $tag
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
      */
-    public function displayMonthlyEntries($atts, $content, $tag)
+    public function displayMonthlyEntries($attr, $content, $tag)
     {
         global $post;
 
@@ -636,7 +662,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         $selected_season = $season_helper->getSeasonId($selected_year, $selected_month);
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_miscellaneous->getScoredCompetions($season_start_date, $season_end_date);
+        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
 
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
@@ -738,7 +764,16 @@ final class Shortcodes extends ShortcodesAbstract
         unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper);
     }
 
-    public function displayMonthlyWinners($atts, $content, $tag)
+    /**
+     * Display all winners for the month.
+     * All winners of the month are shown, which defaults to the latest month.
+     * A dropdown selection to choose different months and/or season is also displayed.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayMonthlyWinners($attr, $content, $tag)
     {
         global $post;
 
@@ -746,9 +781,6 @@ final class Shortcodes extends ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $options = get_option('avh-rps');
-
-        $months = array();
-        $themes = array();
 
         $months = array();
         $themes = array();
@@ -779,7 +811,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         $selected_season = $season_helper->getSeasonId($selected_year, $selected_month);
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_miscellaneous->getScoredCompetions($season_start_date, $season_end_date);
+        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
 
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
@@ -932,23 +964,35 @@ final class Shortcodes extends ShortcodesAbstract
         unset($query_competitions, $query_miscellaneous);
     }
 
-    public function displayMyEntries($atts, $content, $tag)
+    /**
+     * Display the entries of the current user.
+     * This page shows the current entries for a competition of the current user.
+     *
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - medium
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsMyEntries
+     */
+    public function displayMyEntries($attr, $content, $tag)
     {
         global $post;
+
+        $attr = shortcode_atts(array('medium' => 'digital'), $attr);
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $competition_helper = new CompetitionHelper($this->rpsdb);
 
-        $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
-        $session->start();
-
-        $medium_subset_medium = $atts['medium'];
+        $medium_subset_medium = $attr['medium'];
 
         $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
         $open_competitions = $this->core->arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
 
         if (!empty($open_competitions)) {
+            $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
+            $session->start();
             if ($this->request->isMethod('POST')) {
                 switch ($this->request->input('submit_control')) {
 
@@ -969,17 +1013,23 @@ final class Shortcodes extends ShortcodesAbstract
                 $medium = $session->get('myentries/medium', $current_competition->Medium);
                 $classification = $session->get('myentries/classification', $current_competition->Classification);
             }
+            $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+
+            $session->set('myentries/competition_date', $current_competition->Competition_Date);
+            $session->set('myentries/medium', $current_competition->Medium);
+            $session->set('myentries/classification', $current_competition->Classification);
+            $session->save();
         } else {
             $this->settings->errmsg = 'There are no competitions available to enter';
         }
 
-        $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
-        $session->set('myentries/competition_date', $current_competition->Competition_Date);
-        $session->set('myentries/medium', $current_competition->Medium);
-        $session->set('myentries/classification', $current_competition->Classification);
-        $session->save();
-        // $cookie = $cookie_jar->queued('rps_'.COOKIEHASH);
-        // setcookie($cookie->getName(),$cookie->getValue(),$cookie->getExpiresTime(),$cookie->getPath(),$cookie->getDomain(),$cookie->isSecure(),$cookie->isHttpOnly());
+        if (!empty($this->settings->errmsg)) {
+            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
+        }
+
+        if (empty($open_competitions)) {
+            return;
+        }
 
         echo '<script language="javascript">' . "\n";
         echo '	function confirmSubmit() {' . "\n";
@@ -997,13 +1047,6 @@ final class Shortcodes extends ShortcodesAbstract
         echo '}' . "\n";
         echo '</script>' . "\n";
 
-        if (!empty($this->settings->errmsg)) {
-            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
-        }
-
-        if (empty($open_competitions)) {
-            return;
-        }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
         echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
@@ -1171,21 +1214,13 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         // Add some instructional bullet points above the buttons
-        echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\">";
-        echo "<ul style=\"margin:0;margin-left:15px;padding:0\">\n";
+        echo '<tr><td align="left" style="padding-top: 5px;" colspan="6">';
+        echo '<ul style="margin: 0 0 0 15px;padding:0">';
         if ($num_rows > 0) {
             echo "<li>Click the thumbnail or title to view the full size image</li>\n";
         }
         echo "<ul></td></tr>\n";
 
-        // Warn the user about oversized images.
-        if ($num_oversize > 0) {
-            echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\" class=\"warning_cell\">";
-            echo "<ul style=\"margin:0;margin-left:15px;padding:0;color:red\"><li>When the Width or Height value is red, the image is too large to display on the projector. &nbsp;Here's what you need to do:\n";
-            echo "<ul style=\"margin:0;margin-left:15px;padding:0\"><li>Remove the image from the competition. (check the corresponding checkbox and click Remove)</li>\n";
-            echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
-            echo "<li>Upload the resized image.</li></ul></ul>\n";
-        }
         if ($this->request->has('resized') && ('1' == $this->request->input('resized'))) {
             echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
             echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
@@ -1214,22 +1249,22 @@ final class Shortcodes extends ShortcodesAbstract
     /**
      * Display the eights and higher for a given member ID.
      *
-     * @param array  $atts
-     * @param string $content
-     * @param string $tag
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - id => The member ID
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
      */
-    public function displayPersonWinners($atts, $content, $tag)
+    public function displayPersonWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
-        $id = 0;
-        extract($atts, EXTR_OVERWRITE);
+        $attr = shortcode_atts(array('id' => 0), $attr);
 
         echo '<section class="rps-showcases">';
 
         echo '<div class="rps-sc-text entry-content">';
         echo '<ul>';
-        $entries = $query_miscellaneous->getEightsAndHigherPerson($id);
+        $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
         $images = array_rand($entries, 3);
 
         foreach ($images as $key) {
@@ -1260,7 +1295,16 @@ final class Shortcodes extends ShortcodesAbstract
         unset($query_miscellaneous);
     }
 
-    public function displayScoresCurrentUser($atts, $content, $tag)
+    /**
+     * Displays the scores of the current user.
+     * By default the scores of the latest season is shown.
+     * A drop down with a season list is shown for the user to select.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayScoresCurrentUser($attr, $content, $tag)
     {
         global $post;
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -1348,7 +1392,7 @@ final class Shortcodes extends ShortcodesAbstract
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
             }
@@ -1357,7 +1401,16 @@ final class Shortcodes extends ShortcodesAbstract
         unset($query_miscellaneous, $season_helper);
     }
 
-    public function displayUploadEntry($atts, $content, $tag)
+    /**
+     * Displays the form to upload a new entry.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsUploadEntry
+     */
+    public function displayUploadEntry($attr, $content, $tag)
     {
         global $post;
 

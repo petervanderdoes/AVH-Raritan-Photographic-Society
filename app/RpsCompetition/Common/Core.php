@@ -37,6 +37,9 @@ class Core
 
     /**
      * PHP5 constructor
+     *
+     * @param Settings $settings
+     * @param Request  $request
      */
     public function __construct(Settings $settings, Request $request)
     {
@@ -85,6 +88,7 @@ class Core
     }
 
     /**
+     * @param string $str
      *
      * @return string
      */

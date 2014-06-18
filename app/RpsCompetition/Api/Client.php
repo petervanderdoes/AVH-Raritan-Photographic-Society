@@ -2,6 +2,7 @@
 namespace RpsCompetition\Api;
 
 use DOMDocument;
+use Illuminate\Http\Request;
 use PDO;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Db\RpsPdo;
@@ -10,12 +11,14 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 class Client
 {
     /**
-     *
      * @var Core
      */
     private $core;
 
-    public function __construct($core)
+    /**
+     * @param Core $core
+     */
+    public function __construct(Core $core)
     {
         $this->core = $core;
     }
@@ -23,9 +26,9 @@ class Client
     /**
      * Handles the uploading of the score file
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      */
-    public function doUploadScore(\Illuminate\Http\Request $request)
+    public function doUploadScore(Request $request)
     {
         $username = $request->input('username');
         $password = $request->input('password');
@@ -72,9 +75,9 @@ class Client
     /**
      * Handles request by client to download images for a particular date,
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      */
-    public function sendCompetitions(\Illuminate\Http\Request $request)
+    public function sendCompetitions(Request $request)
     {
         $username = $request->input('username');
         $password = $request->input('password');
@@ -90,9 +93,9 @@ class Client
     /**
      * Create a XML File with the competition dates
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      */
-    public function sendXmlCompetitionDates(\Illuminate\Http\Request $request)
+    public function sendXmlCompetitionDates(Request $request)
     {
         // Connect to the Database
         $db = $this->getDatabaseHandle();
@@ -148,6 +151,9 @@ class Client
 
     /**
      * Check if user/password combination is valid
+     *
+     * @param string $username
+     * @param string $password
      */
     private function checkUserAuthentication($username, $password)
     {
@@ -162,14 +168,9 @@ class Client
     }
 
     /**
-     * Handle the uploaded score from the RPS Client.
-     */
-
-    /**
      * Create a REST error
      *
-     * @param string $errMsg
-     *            The actual error message
+     * @param string $errMsg The actual error message
      */
     private function doRESTError($errMsg)
     {
@@ -177,7 +178,7 @@ class Client
     }
 
     /**
-     * Create the REST respone
+     * Create the REST response
      *
      * @param string $status
      * @param string $message
@@ -193,8 +194,7 @@ class Client
     /**
      * Create a REST success message
      *
-     * @param string $message
-     *            The actual messsage
+     * @param string $message The actual message
      */
     private function doRESTSuccess($message)
     {
@@ -204,7 +204,7 @@ class Client
     /**
      * Open database
      *
-     * @return \RpsCompetition\Db\RpsPdo
+     * @return RpsPdo
      */
     private function getDatabaseHandle()
     {
@@ -221,8 +221,10 @@ class Client
     /**
      * Handle the XML file containing the scores and add them to the database
      *
-     * @param object $db
-     *            Database handle.
+     * @param RpsPdo $db Database handle.
+     * @param string $file_name
+     *
+     * @return string
      */
     private function handleUploadScoresFile($db, $file_name)
     {
@@ -231,7 +233,8 @@ class Client
         $award = '';
         $entry_id = '';
 
-        if (!$xml = simplexml_load_file($file_name)) {
+        $xml = simplexml_load_file($file_name);
+        if (!$xml) {
             $this->doRESTError("Failed to open scores XML file");
             die();
         }
@@ -246,23 +249,19 @@ class Client
             die();
         }
 
-        foreach ($xml->Competition as $comp) {
-            $comp_date = $comp->Date;
-            $classification = $comp->Classification;
-            $medium = $comp->Medium;
+        foreach ($xml->{'Competition'} as $comp) {
+            $comp_date = $comp->{'Date'};
+            $classification = $comp->{'Classification'};
+            $medium = $comp->{'Medium'};
 
-            foreach ($comp->Entries as $entries) {
-                foreach ($entries->Entry as $entry) {
-                    $entry_id = $entry->ID;
-                    $first_name = html_entity_decode($entry->First_Name);
-                    $last_name = html_entity_decode($entry->Last_Name);
-                    $title = html_entity_decode($entry->Title);
-                    $score = html_entity_decode($entry->Score);
-                    if (empty($entry->Award)) {
-                        $award = null;
-                    } else {
-                        $award = html_entity_decode($entry->Award);
-                    }
+            foreach ($comp->{'Entries'} as $entries) {
+                foreach ($entries->{'Entry'} as $entry) {
+                    $entry_id = $entry->{'ID'};
+                    $first_name = html_entity_decode($entry->{'First_Name'});
+                    $last_name = html_entity_decode($entry->{'Last_Name'});
+                    $title = html_entity_decode($entry->{'Title'});
+                    $score = html_entity_decode($entry->{'Score'});
+                    $award = empty($entry->{'Award'}) ? null : html_entity_decode($entry->{'Award'});
 
                     if ($entry_id != "") {
                         if ($score != "") {
@@ -341,7 +340,7 @@ class Client
             die();
         }
         // Create a Competitions node
-        $xml_competions = $rsp->AppendChild($dom->CreateElement('Competitions'));
+        $xml_competitions = $rsp->AppendChild($dom->CreateElement('Competitions'));
         // Iterate through all the matching Competitions and create corresponding Competition nodes
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ($record_competitions !== false) {
@@ -352,7 +351,7 @@ class Client
             $medium = $record_competitions['Medium'];
             $classification = $record_competitions['Classification'];
             // Create the competition node in the XML response
-            $competition_element = $xml_competions->AppendChild($dom->CreateElement('Competition'));
+            $competition_element = $xml_competitions->AppendChild($dom->CreateElement('Competition'));
 
             $date_element = $competition_element->AppendChild($dom->CreateElement('Date'));
             $date_element->AppendChild($dom->CreateTextNode(utf8_encode($date)));

@@ -42,7 +42,7 @@ final class Constants
 
     public static function get_image_size($size)
     {
-        if (key_exists($size, self::$image_sizes)) {
+        if (array_key_exists($size, self::$image_sizes)) {
             return self::$image_sizes[(string) $size];
         }
 

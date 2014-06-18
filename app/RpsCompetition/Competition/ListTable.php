@@ -40,13 +40,13 @@ class ListTable extends \WP_List_Table
      */
     private $settings;
 
-    public function __construct(Settings $settings, RpsDb $_rpsdb, Core $core, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
     {
         $this->settings = $settings;
         $this->core = $core;
-        $this->rpsdb = $_rpsdb;
+        $this->rpsdb = $rpsdb;
         $this->request = $request;
-        $this->html = new \Avh\Html\HtmlBuilder();
+        $this->html = new HtmlBuilder();
 
         $this->screen = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');

@@ -65,7 +65,7 @@ class Frontend
      * This method is called by the action after_setup_theme and is used to setup:
      *  - New actions
      *
-     * @since    1.0.0
+     * @version  GIT: $Id$
      * @internal Hook: after_setup_theme
      */
     public function actionAfterThemeSetup()
@@ -78,7 +78,6 @@ class Frontend
      * This method handles the POST request generated on the page for Banquet Entries
      * The action is called from the theme!
      *
-     * @since    1.0.0
      * @uses     \RpsCompetition\Db\QueryEntries
      * @uses     \RpsCompetition\Db\QueryCompetitions
      * @see      Shortcodes::displayBanquetCurrentUser
@@ -143,7 +142,6 @@ class Frontend
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
      *
-     * @since    1.0.0
      * @uses     \RpsCompetition\Db\QueryEntries
      * @uses     \RpsCompetition\Db\QueryCompetitions
      * @see      Shortcodes::displayEditTitle
@@ -220,7 +218,6 @@ class Frontend
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
      *
-     * @since    1.0.0
      * @uses     \RpsCompetition\Db\QueryCompetitions
      * @see      Shortcodes::displayMyEntries
      * @internal Hook: suffusion_before_post
@@ -289,7 +286,6 @@ class Frontend
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
      *
-     * @since    1.0.0
      * @uses     \RpsCompetition\Db\QueryEntries
      * @uses     \RpsCompetition\Db\QueryCompetitions
      * @see      Shortcodes::displayUploadEntry
@@ -460,7 +456,6 @@ class Frontend
      * - Shortcodes
      * - User meta information concerning their classification
      *
-     * @since    1.0.0
      * @uses     \RpsCompetition\Db\QueryCompetitions
      * @internal Hook: init
      */
@@ -481,7 +476,6 @@ class Frontend
      * Display the showcase on the front page.
      * This will display the showcase as used on the front page.
      *
-     * @since    1.0.0
      * @uses     \RpsCompetition\Db\QueryMiscellaneous
      * @see      actionAfterThemeSetup
      * @internal Hook: rps_showcase
@@ -538,7 +532,6 @@ class Frontend
     /**
      * Handles the requests by the RPS Windows Client
      *
-     * @since    1.0.0
      * @uses     \RpsCompetition\Api\Client
      * @internal Hook: template_redirect
      */
@@ -574,7 +567,6 @@ class Frontend
     /**
      * Delete competition entries
      *
-     * @since 1.0.0
      * @uses  \RpsCompetition\Db\QueryEntries
      *
      * @param array $entries Array of entries ID to delete.
@@ -633,7 +625,6 @@ class Frontend
      * Setup shortcodes.
      * Setup all the need shortcodes.
      *
-     * @since 1.0.0
      * @uses  \RpsCompetition\Frontend\Shortcodes
      */
     private function setupShortcodes()
@@ -655,8 +646,7 @@ class Frontend
 
     /**
      * Setup the needed user meta information.
-     *
-     * @since 1.0.0
+
      */
     private function setupUserMeta()
     {

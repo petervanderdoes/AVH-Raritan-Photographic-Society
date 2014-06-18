@@ -1,13 +1,12 @@
 <?php
 namespace RpsCompetition;
 
+use Avh\Utility\SettingsAbstract;
+
 /**
  * Create separate Settings Registry for the plugin.
- *
- * @author pdoes
- *
  */
-final class Settings extends \Avh\Utility\SettingsAbstract
+final class Settings extends SettingsAbstract
 {
     // prevent directly access.
     public function __construct()

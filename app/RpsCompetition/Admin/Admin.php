@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Admin;
 
-use Avh\Utility\Common;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
@@ -12,27 +11,24 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Settings;
+use Valitron\Validator;
 
 /* @var $formBuilder \Avh\Html\FormBuilder */
 final class Admin
 {
     /**
-     *
      * @var CompetitionListTable
      */
     private $competition_list;
     /**
-     *
      * @var Container
      */
     private $container;
     /**
-     *
      * @var Core
      */
     private $core;
     /**
-     *
      * @var EntriesListTable
      */
     private $entries_list;
@@ -40,28 +36,23 @@ final class Admin
     private $message = '';
     private $referer;
     /**
-     *
      * @var Request
      */
     private $request;
     /**
-     *
      * @var RpsDb
      */
     private $rpsdb;
     /**
-     *
      * @var Settings
      */
     private $settings;
     private $status = '';
 
     /**
-     * PHP5 Constructor
-     *
-     * @return unknown_type
+     * @param Container $container
      */
-    public function __construct(\Illuminate\Container\Container $container)
+    public function __construct(Container $container)
     {
         $this->container = $container;
 
@@ -84,6 +75,13 @@ final class Admin
         add_action('user_register', array($this, 'actionAddUserMeta'));
     }
 
+    /**
+     * Setup User metadata
+     *
+     * @param integer $userID
+     *
+     * @internal Hook: user_register
+     */
     public function actionAddUserMeta($userID)
     {
         update_user_meta($userID, "rps_class_bw", 'beginner');
@@ -93,9 +91,10 @@ final class Admin
     }
 
     /**
-     * Add the Tools and Options to the Management and Options page respectively
+     * Add the Tools and Options to the Management and Options page respectively.
+     * Setup the Admin Menu pages
      *
-     * @WordPress Action admin_menu
+     * @internal Hook: admin_menu
      */
     public function actionAdminMenu()
     {
@@ -122,27 +121,9 @@ final class Admin
     }
 
     /**
-     * Setup Roles
-     *
-     * @WordPress Action init
-     */
-    public function actionInitRoles()
-    {
-        // Get the administrator role.
-        $role = get_role('administrator');
-
-        // If the administrator role exists, add required capabilities for the plugin.
-        if (!empty($role)) {
-
-            // Role management capabilities.
-            $role->add_cap('rps_edit_competition_classification');
-            $role->add_cap('rps_edit_competitions');
-            $role->add_cap('rps_edit_entries');
-        }
-    }
-
-    /**
      * Add the actions needed for to extended the user profile
+     *
+     * @see handleActionInit
      */
     public function actionInitUserFields()
     {
@@ -154,6 +135,8 @@ final class Admin
 
     /**
      * Setup all that is needed for the page Competition
+     *
+     * @internal Hook: load-{page}
      */
     public function actionLoadPagehookCompetition()
     {
@@ -178,6 +161,8 @@ final class Admin
 
     /**
      * Setup all that is needed for the page "Add competition"
+     *
+     * @internal Hook: load-{page}
      */
     public function actionLoadPagehookCompetitionAdd()
     {
@@ -197,6 +182,8 @@ final class Admin
 
     /**
      * Setup all that is needed for the page "Entries"
+     *
+     * @internal Hook: load-{page}
      */
     public function actionLoadPagehookEntries()
     {
@@ -221,7 +208,10 @@ final class Admin
     /**
      * Update the user meta concerning Classification when a user is updated.
      *
-     * @param int $user_id
+     * @param integer $user_id
+     *
+     * @internal Hook: personal_options_update
+     * @internal Hook: edit_user_profile_update
      */
     public function actionProfileUpdateSave($user_id)
     {
@@ -240,7 +230,10 @@ final class Admin
     /**
      * Show the Classification meta on the user profile page.
      *
-     * @param int $user_id
+     * @param integer $user_id
+     *
+     * @internal Hook: edit_user_profile
+     * @internal Hook: show_user_profile
      */
     public function actionUserProfile($user_id)
     {
@@ -253,14 +246,13 @@ final class Admin
         echo '<h3 id="rps">Competition Classification</h3>';
         echo $formBuilder->openTable();
 
-        // @formatter:off
-        $all_classifications=array(
-            array('label'=>'Classification Digital B&W','name'=>'rps_class_bw','selected'=>get_user_meta($userID, 'rps_class_bw', true)),
-            array('label'=>'Classification Digital Color','name'=>'rps_class_color','selected'=>get_user_meta($userID, 'rps_class_color', true)),
-            array('label'=>'Classification Print B&W','name'=>'rps_class_print_bw','selected'=>get_user_meta($userID, 'rps_class_print_bw', true)),
-            array('label'=>'Classification Print Color','name'=>'rps_class_print_color','selected'=>get_user_meta($userID, 'rps_class_print_color', true)),
+        $all_classifications = array(
+            array('label' => 'Classification Digital B&W', 'name' => 'rps_class_bw', 'selected' => get_user_meta($userID, 'rps_class_bw', true)),
+            array('label' => 'Classification Digital Color', 'name' => 'rps_class_color', 'selected' => get_user_meta($userID, 'rps_class_color', true)),
+            array('label' => 'Classification Print B&W', 'name' => 'rps_class_print_bw', 'selected' => get_user_meta($userID, 'rps_class_print_bw', true)),
+            array('label' => 'Classification Print Color', 'name' => 'rps_class_print_color', 'selected' => get_user_meta($userID, 'rps_class_print_color', true)),
         );
-        // @formatter:on
+
         foreach ($all_classifications as $data) {
 
             if (current_user_can('rps_edit_competition_classification')) {
@@ -278,12 +270,7 @@ final class Admin
     }
 
     /**
-     * Generates the footer for admin pages
-     *
-     * @param bool $submit
-     *            Whether or not a submit button should be shown.
-     * @param text $text
-     *            The text to be shown in the submit button.
+     * Generates the footer for admin pages.
      */
     public function displayAdminFooter()
     {
@@ -296,16 +283,7 @@ final class Admin
     /**
      * Generates the header for admin pages
      *
-     * @param string $title
-     *            The title to show in the main heading.
-     * @param bool   $form
-     *            Whether or not the form should be included.
-     * @param string $option
-     *            The long name of the option to use for the current page.
-     * @param string $optionshort
-     *            The short name of the option to use for the current page.
-     * @param bool   $contains_files
-     *            Whether the form should allow for file uploads.
+     * @param string $title The title to show in the main heading.
      */
     public function displayAdminHeader($title)
     {
@@ -318,31 +296,12 @@ final class Admin
     }
 
     /**
-     * Adds Settings next to the plugin actions
-     *
-     * @WordPress Filter plugin_action_links_avh-first-defense-against-spam/avh-fdas.php
-     *
-     * @param array $links
-     *
-     * @return array
-     *
-     * @since     1.0
-     */
-    public function filterPluginActions($links)
-    {
-        $folder = Common::getBaseDirectory($this->settings->plugin_basename);
-        $settings_link = '<a href="admin.php?page=' . $folder . '">' . __('Settings', 'avh-fdas') . '</a>';
-        array_unshift($links, $settings_link); // before other links
-
-        return $links;
-    }
-
-    /**
      * Add row action link to users list to display all their entries.
      *
      * @param unknown $actions
      * @param unknown $user
      *
+     * @internal Hook: user_row_actions
      * @return string
      */
     public function filterRpsUserActionLinks($actions, $user)
@@ -356,12 +315,13 @@ final class Admin
     /**
      * Sets the amount of columns wanted for a particuler screen
      *
-     * @WordPress filter screen_meta_screen
+     * @see      filter screen_meta_screen
      *
-     * @param
-     *            $screen
+     * @param int $columns
+     * @param int $screen
      *
-     * @return strings
+     * @internal Hook: screen_layout_columns
+     * @return string
      */
     public function filterScreenLayoutColumns($columns, $screen)
     {
@@ -380,12 +340,14 @@ final class Admin
 
     /**
      * Used when we set our own screen options.
+     * The filter needs to be set during construct otherwise it's not recognized.
      *
-     * The filter needs to be set during construct otherwise it's not regonized.
+     * @param int    $error_value
+     * @param string $option
+     * @param int    $value
      *
-     * @param unknown_type $default
-     * @param unknown_type $option
-     * @param unknown_type $value
+     * @internal Hook:
+     * @return int
      */
     public function filterSetScreenOption($error_value, $option, $value)
     {
@@ -407,10 +369,12 @@ final class Admin
 
     /**
      * Runs during the action init.
+     *
+     * @internal Hook: admin_init
      */
     public function handleActionInit()
     {
-        $this->actionInitRoles();
+        $this->initRoles();
         $this->actionInitUserFields();
 
         return;
@@ -418,6 +382,8 @@ final class Admin
 
     /**
      * Handle the Ajax callback
+     *
+     * @internal Hook: wp_ajax_setscore
      */
     public function handleAjax()
     {
@@ -447,6 +413,26 @@ final class Admin
         }
         unset($query_competitions);
         die();
+    }
+
+    /**
+     * Setup Roles
+     *
+     * @see handleActionInit
+     */
+    public function initRoles()
+    {
+        // Get the administrator role.
+        $role = get_role('administrator');
+
+        // If the administrator role exists, add required capabilities for the plugin.
+        if (!empty($role)) {
+
+            // Role management capabilities.
+            $role->add_cap('rps_edit_competition_classification');
+            $role->add_cap('rps_edit_competitions');
+            $role->add_cap('rps_edit_entries');
+        }
     }
 
     /**
@@ -490,26 +476,25 @@ final class Admin
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
         $formBuilder->setOptionName('competition_add');
 
-        // @formatter:off
         $formDefaultOptions = array(
-                'date' => '',
-                'theme' => '',
-                'medium' => array(
-                    'medium_bwd' => true,
-                    'medium_cd' => true,
-                    'medium_bwp' => true,
-                    'medium_cp' => true
-                ),
-                'classification' => array (
-                    'class_b' => true,
-                    'class_a' => true,
-                    'class_s' => true
-                ),
-                'max-entries' => '2',
-                'judges' => '1',
-                'special-event' => false
-            );
-        // @formatter:on
+            'date'           => '',
+            'theme'          => '',
+            'medium'         => array(
+                'medium_bwd' => true,
+                'medium_cd'  => true,
+                'medium_bwp' => true,
+                'medium_cp'  => true
+            ),
+            'classification' => array(
+                'class_b' => true,
+                'class_a' => true,
+                'class_s' => true
+            ),
+            'max-entries'    => '2',
+            'judges'         => '1',
+            'special-event'  => false
+        );
+
         $formOptions = $formDefaultOptions;
         if ($this->request->has('action')) {
             switch ($this->request->input('action')) {
@@ -517,7 +502,7 @@ final class Admin
                     check_admin_referer(get_current_user_id());
                     $formNewOptions = $this->request->input($formBuilder->getOptionName());
 
-                    $v = new \Valitron\Validator($formNewOptions);
+                    $v = new Validator($formNewOptions);
                     $v->rule('required', 'date')
                         ->message('{field} is required')
                         ->label('Date');
@@ -544,21 +529,20 @@ final class Admin
                         $this->message = 'Competition Added';
                         $this->status = 'updated';
 
-                        // @formatter:off
                         // @TODO: This is needed because of the old program, someday it needs to be cleaned up.
                         $medium_convert = array(
-                                'medium_bwd' => 'B&W Digital',
-                                'medium_cd' => 'Color Digital',
-                                'medium_bwp' => 'B&W Prints',
-                                'medium_cp' => 'Color Prints'
-                            );
+                            'medium_bwd' => 'B&W Digital',
+                            'medium_cd'  => 'Color Digital',
+                            'medium_bwp' => 'B&W Prints',
+                            'medium_cp'  => 'Color Prints'
+                        );
 
                         $classification_convert = array(
-                                'class_b' => 'Beginner',
-                                'class_a' => 'Advanced',
-                                'class_s' => 'Salon'
-                            );
-                        // @formatter:on
+                            'class_b' => 'Beginner',
+                            'class_a' => 'Advanced',
+                            'class_s' => 'Salon'
+                        );
+
                         $data['Competition_Date'] = $formNewOptions['date'];
                         $data['Theme'] = $formNewOptions['theme'];
                         $data['Max_Entries'] = $formNewOptions['max-entries'];
@@ -594,53 +578,51 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('theme', 'Theme'));
         echo $formBuilder->outputField($formBuilder->text('theme', $formOptions['theme'], array('maxlength' => '32')));
 
-        // @formatter:off
         $array_medium = array(
             'medium_bwd' => array(
-                'text' => 'B&W Digital',
-                'value' => $formOptions['medium']['medium_bwd'],
+                'text'    => 'B&W Digital',
+                'value'   => $formOptions['medium']['medium_bwd'],
                 'checked' => $formOptions['medium']['medium_bwd']
             ),
-            'medium_cd' => array(
-                'text' => 'Color Digital',
-                'value' => $formOptions['medium']['medium_cd'],
+            'medium_cd'  => array(
+                'text'    => 'Color Digital',
+                'value'   => $formOptions['medium']['medium_cd'],
                 'checked' => $formOptions['medium']['medium_cd']
             ),
             'medium_bwp' => array(
-                'text' => 'B&W Print',
-                'value' =>  $formOptions['medium']['medium_bwp'],
+                'text'    => 'B&W Print',
+                'value'   => $formOptions['medium']['medium_bwp'],
                 'checked' => $formOptions['medium']['medium_bwp']
             ),
-            'medium_cp' => array(
-                'text' => 'Color Digital',
-                'value' => $formOptions['medium']['medium_cp'],
+            'medium_cp'  => array(
+                'text'    => 'Color Digital',
+                'value'   => $formOptions['medium']['medium_cp'],
                 'checked' => $formOptions['medium']['medium_cp']
             )
         );
-        // @formatter:on
+
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->checkboxes('medium', $array_medium);
         unset($array_medium);
 
-        // @formatter:off
         $array_classification = array(
             'class_b' => array(
-                'text' => 'Beginner',
-                'value' => $formOptions['classification']['class_b'],
+                'text'    => 'Beginner',
+                'value'   => $formOptions['classification']['class_b'],
                 'checked' => $formOptions['classification']['class_b']
             ),
             'class_a' => array(
-                'text' => 'Advanced',
-                'value' =>  $formOptions['classification']['class_a'],
+                'text'    => 'Advanced',
+                'value'   => $formOptions['classification']['class_a'],
                 'checked' => $formOptions['classification']['class_a']
             ),
             'class_s' => array(
-                'text' => 'Salon',
-                'value' => $formOptions['classification']['class_s'],
+                'text'    => 'Salon',
+                'value'   => $formOptions['classification']['class_s'],
                 'checked' => $formOptions['classification']['class_s']
             )
         );
-        // @formatter:on
+
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
         echo $formBuilder->checkboxes('classification', $array_classification);
         unset($array_classification);
@@ -698,7 +680,7 @@ final class Admin
      * Displays the icon needed.
      * Using this instead of core in case we ever want to show our own icons
      *
-     * @param $icon strings
+     * @param string $icon
      *
      * @return string
      */
@@ -794,9 +776,13 @@ final class Admin
 
     /**
      * Display the page to edit a competition.
+
      */
     private function displayPageCompetitionEdit()
     {
+        /**
+         * @var string $wp_http_referer
+         */
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $formBuilder = $this->container->make('Avh\Html\FormBuilder');
@@ -856,25 +842,23 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('close-time', 'Closing Time'));
         echo $formBuilder->outputField($formBuilder->select('close-time', $time, $formOptions['close-time']));
 
-        // @formatter:off
         $_medium = array(
-                'medium_bwd' => 'B&W Digital',
-                'medium_cd' => 'Color Digital',
-                'medium_bwp' => 'B&W Prints',
-                'medium_cp' => 'Color Prints'
-            );
-        // @formatter:on
+            'medium_bwd' => 'B&W Digital',
+            'medium_cd'  => 'Color Digital',
+            'medium_bwp' => 'B&W Prints',
+            'medium_cp'  => 'Color Prints'
+        );
+
         $selectedMedium = array_search($competition->Medium, $_medium);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField($formBuilder->select('medium', $_medium, $selectedMedium, array('autocomplete' => 'off')));
 
-        // @formatter:off
         $_classification = array(
-                'class_b' => 'Beginner',
-                'class_a' => 'Advanced',
-                'class_s' => 'Salon'
-            );
-        // @formatter:on
+            'class_b' => 'Beginner',
+            'class_a' => 'Advanced',
+            'class_s' => 'Salon'
+        );
+
         $selectedClassification = array_search($competition->Classification, $_classification);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
         echo $formBuilder->outputField($formBuilder->select('classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
@@ -928,7 +912,7 @@ final class Admin
     }
 
     /**
-     * Display the competion in a list
+     * Display the competition in a list
      */
     private function displayPageCompetitionList()
     {
@@ -989,9 +973,7 @@ final class Admin
     /**
      * Display the page to open or close competitions
      *
-     * @param string $redirect
-     * @param string $referer
-     *
+     * @param string $action
      */
     private function displayPageCompetitionOpenClose($action)
     {
@@ -1106,6 +1088,9 @@ final class Admin
      */
     private function displayPageEntriesEdit()
     {
+        /**
+         * @var string $wp_http_referer
+         */
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
@@ -1158,25 +1143,21 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));
         echo $formBuilder->outputField($formBuilder->text('title', $entry->Title));
 
-        // @formatter:off
         $medium_array = array(
-                'medium_bwd' => 'B&W Digital',
-                'medium_cd' => 'Color Digital',
-                'medium_bwp' => 'B&W Prints',
-                'medium_cp' => 'Color Prints'
-            );
-        // @formatter:on
+            'medium_bwd' => 'B&W Digital',
+            'medium_cd'  => 'Color Digital',
+            'medium_bwp' => 'B&W Prints',
+            'medium_cp'  => 'Color Prints'
+        );
         $selectedMedium = array_search($competition->Medium, $medium_array);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
 
-        // @formatter:off
         $_classification = array(
-                'class_b' => 'Beginner',
-                'class_a' => 'Advanced',
-                'class_s' => 'Salon'
-            );
-        // @formatter:on
+            'class_b' => 'Beginner',
+            'class_a' => 'Advanced',
+            'class_s' => 'Salon'
+        );
         $selectedClassification = array_search($competition->Classification, $_classification);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
         echo $formBuilder->outputField($formBuilder->select('classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
@@ -1245,7 +1226,6 @@ final class Admin
         $this->printAdminFooter();
         echo '</div>';
     }
-    // ############ Admin WP Helper ##############
 
     /**
      * Handle the HTTP Request before the page of the menu Competition is displayed.
@@ -1448,12 +1428,12 @@ final class Admin
     {
         echo '<div class="clear"></div>';
         echo '<p class="footer_avhfdas">';
-        printf('&copy; Copyright 2012 <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s', Constants::PLUGIN_VERSION);
+        printf('&copy; Copyright 2012-%s <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s', date("Y"), Constants::PLUGIN_VERSION);
         echo '</p>';
     }
 
     /**
-     * Update a comeptition after a POST
+     * Update a competition after a POST
      */
     private function updateCompetition()
     {

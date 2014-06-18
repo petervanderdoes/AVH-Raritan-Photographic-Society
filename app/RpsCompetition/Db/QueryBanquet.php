@@ -7,6 +7,8 @@ class QueryBanquet
 
     /**
      * PHP5 constructor
+     *
+     * @param RpsDb $rpsdb
      */
     public function __construct(RpsDb $rpsdb)
     {
