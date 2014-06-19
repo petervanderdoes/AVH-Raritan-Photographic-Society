@@ -117,7 +117,7 @@ class Frontend
                             $comp_date = strtok($banquet_record->Competition_Date, ' ');
                             $classification = $banquet_record->Classification;
                             $medium = $banquet_record->Medium;
-                            $path = '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                            $path = $this->core->getCompetitionPath($comp_date, $classification , $medium);
                             if (!is_dir($this->request->server('DOCUMENT_ROOT') . $path)) {
                                 mkdir($this->request->server('DOCUMENT_ROOT') . $path, 0755);
                             }
@@ -187,10 +187,10 @@ class Frontend
                 $medium = $recs->Medium;
 
                 // Rename the image file on the server file system
-                $ext = ".jpg";
-                $path = '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                $path = $this->core->getCompetitionPath($comp_date, $classification , $medium);
                 $old_file_parts = pathinfo($server_file_name);
                 $old_file_name = $old_file_parts['filename'];
+                $ext = $old_file_parts['extension'];
                 $current_user = wp_get_current_user();
                 $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT') . $server_file_name);
                 $new_file_name = $new_file_name_noext . $ext;
@@ -404,7 +404,7 @@ class Frontend
                 $comp_date = $this->settings->comp_date;
                 $classification = $this->settings->classification;
                 $medium = $this->settings->medium;
-                $path = $this->request->server('DOCUMENT_ROOT') . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($comp_date, $classification , $medium);
 
                 $user = wp_get_current_user();
                 $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
@@ -598,7 +598,7 @@ class Frontend
                         $comp_date = $this->settings->comp_date;
                         $classification = $this->settings->classification;
                         $medium = $this->settings->medium;
-                        $path = $this->request->server('DOCUMENT_ROOT') . '/Digital_Competitions/' . $comp_date . '_' . $classification . '_' . $medium;
+                        $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($comp_date, $classification , $medium);
 
                         $old_file_parts = pathinfo($server_file_name);
                         $old_file_name = $old_file_parts['filename'];

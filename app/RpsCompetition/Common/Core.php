@@ -15,24 +15,8 @@ class Core
      */
     private $comment;
     private $db_version;
-    /**
-     * Options set for the plugin
-     *
-     * @var array
-     */
-    /**
-     * Properties used for the plugin options
-     */
     private $options;
-    /**
-     *
-     * @var Request
-     */
     private $request;
-    /**
-     *
-     * @var Settings
-     */
     private $settings;
 
     /**
@@ -52,23 +36,34 @@ class Core
         return;
     }
 
+    /**
+     * Sort an array on multiple columns
+     *
+     * @param array $array
+     * @param array $cols
+     *
+     * @return array
+     */
     public function arrayMsort($array, $cols)
     {
-        $object = false;
-        $colarr = array();
+        $row_is_object = false;
+        $sort_column_array = array();
+
+        // Create multiple arrays using the array $cols. These arrays hold the values of each field that we want to sort on.
         foreach ($cols as $col => $order) {
-            $colarr[$col] = array();
-            foreach ($array as $k => $row) {
+            $sort_column_array[$col] = array();
+            foreach ($array as $key => $row) {
                 if (is_object($row)) {
                     $row = (array) $row;
-                    $object = true;
+                    $row_is_object = true;
                 }
-                $colarr[$col][$k] = strtolower($row[$col]);
+                $sort_column_array[$col][$key] = strtolower($row[$col]);
             }
         }
+
         $params = array();
         foreach ($cols as $col => $order) {
-            $params[] = & $colarr[$col];
+            $params[] = & $sort_column_array[$col];
             foreach ($order as $order_element) {
                 // pass by reference, as required by php 5.3
                 $params[] = & $order_element;
@@ -78,7 +73,7 @@ class Core
 
         $params[] = & $array;
         call_user_func_array('array_multisort', $params);
-        if ($object) {
+        if ($row_is_object) {
             foreach ($array as $key => $row) {
                 $array[$key] = (object) $row;
             }
@@ -171,8 +166,7 @@ class Core
     /**
      * Check if the user is a paid member
      *
-     * @param int $user_id
-     *            UserID to check
+     * @param int $user_id UserID to check
      *
      * @return boolean true if a paid member, false if non-existing user or non-paid member.`
      */
@@ -191,6 +185,18 @@ class Core
         return in_array('s2member_level4', (array) $user->roles);
     }
 
+    /**
+     * Rename an already uploaded entry.
+     *
+     * Besides renaming the original upload, we also rename all the thumbnails.
+     *
+     * @param string $path
+     * @param string $old_name
+     * @param string $new_name
+     * @param string $ext
+     *
+     * @return bool
+     */
     public function renameImageFile($path, $old_name, $new_name, $ext)
     {
         $path = $this->request->server('DOCUMENT_ROOT') . $path;
@@ -264,5 +270,20 @@ class Core
         $image->save($thumb_name, Constants::IMAGE_QUALITY);
 
         return true;
+    }
+
+    /**
+     * Get the path to the competition
+     *
+     * Returns the path to the competition where we store the photo entries.
+     *
+     * @param string $date
+     * @param string $classification
+     * @param string $medium
+     *
+     * @return string
+     */
+    public function getCompetitionPath($date, $classification, $medium) {
+        return '/Digital_Competitions/' . $date . '_' . $classification . '_' . $medium;
     }
 }
