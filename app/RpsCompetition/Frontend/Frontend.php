@@ -15,21 +15,13 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class Frontend
 {
-    /**
-     * @var Core
-     */
+    /** @var Core */
     private $core;
-    /**
-     * @var Request
-     */
+    /** @var Request */
     private $request;
-    /**
-     * @var RpsDb
-     */
+    /** @var RpsDb */
     private $rpsdb;
-    /**
-     * @var Settings
-     */
+    /** @var Settings */
     private $settings;
 
     /**
@@ -114,10 +106,7 @@ class Frontend
                         $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
                         if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
                             // Move the file to its final location
-                            $comp_date = strtok($banquet_record->Competition_Date, ' ');
-                            $classification = $banquet_record->Classification;
-                            $medium = $banquet_record->Medium;
-                            $path = $this->core->getCompetitionPath($comp_date, $classification , $medium);
+                            $path = $this->core->getCompetitionPath($banquet_record->Competition_Date, $banquet_record->Classification, $banquet_record->Medium);
                             if (!is_dir($this->request->server('DOCUMENT_ROOT') . $path)) {
                                 mkdir($this->request->server('DOCUMENT_ROOT') . $path, 0755);
                             }
@@ -156,7 +145,7 @@ class Frontend
         if (is_object($post) && $post->ID == 75) {
             $redirect_to = $this->request->input('wp_get_referer');
             $this->_medium_subset = $this->request->input('m');
-            $this->_entry_id = $this->request->input('id');
+            $entry_id = $this->request->input('id');
 
             // Just return to the My Images page is the user clicked Cancel
             if ($this->request->has('cancel')) {
@@ -176,18 +165,13 @@ class Frontend
                     $new_title = stripslashes(trim($this->request->input('new_title')));
                 }
 
-                $recs = $query_competitions->getCompetitionByEntryId($this->_entry_id);
-                if ($recs == null) {
-                    wp_die("Failed to SELECT competition for entry ID: " . $this->_entry_id);
+                $competition = $query_competitions->getCompetitionByEntryId($entry_id);
+                if ($competition == null) {
+                    wp_die("Failed to SELECT competition for entry ID: " . $entry_id);
                 }
 
-                $date_parts = explode(" ", $recs->Competition_Date);
-                $comp_date = $date_parts[0];
-                $classification = $recs->Classification;
-                $medium = $recs->Medium;
-
                 // Rename the image file on the server file system
-                $path = $this->core->getCompetitionPath($comp_date, $classification , $medium);
+                $path = $this->core->getCompetitionPath($competition->Competition_Date, $competition->Classification, $competition->Medium);
                 $old_file_parts = pathinfo($server_file_name);
                 $old_file_name = $old_file_parts['filename'];
                 $ext = $old_file_parts['extension'];
@@ -199,7 +183,7 @@ class Frontend
                 }
 
                 // Update the Title and File Name in the database
-                $updated_data = array('ID' => $this->_entry_id, 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
+                $updated_data = array('ID' => $entry_id, 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
                 $_result = $query_entries->updateEntry($updated_data);
                 if ($_result === false) {
                     wp_die("Failed to UPDATE entry record from database");
@@ -340,7 +324,7 @@ class Frontend
 
                 // Retrieve and parse the selected competition cookie
                 if ($this->request->hasCookie('RPS_MyEntries')) {
-                    list ($this->settings->comp_date, $this->settings->classification, $this->settings->medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
+                    list ($comp_date, $classification, $medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
                 } else {
                     $this->settings->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
                     unset($query_entries, $query_competitions);
@@ -348,15 +332,12 @@ class Frontend
                     return;
                 }
 
-                $recs = $query_competitions->getCompetitionByDateClassMedium($this->settings->comp_date, $this->settings->classification, $this->settings->medium, ARRAY_A);
+                $recs = $query_competitions->getCompetitionByDateClassMedium($comp_date, $classification, $medium, ARRAY_A);
                 if ($recs) {
                     $comp_id = $recs['ID'];
                     $max_entries = $recs['Max_Entries'];
                 } else {
-                    $d = $this->comp_date;
-                    $c = $this->classification;
-                    $m = $this->medium;
-                    $this->settings->errmsg = "Upload Form Error<br>Competition $d/$c/$m not found in database<br>";
+                    $this->settings->errmsg = "Upload Form Error<br>Competition $comp_date/$classification/$medium not found in database<br>";
                     unset($query_entries, $query_competitions);
 
                     return;
@@ -371,7 +352,7 @@ class Frontend
                 $client_file_name = $file->getClientOriginalName();
 
                 // Before we go any further, make sure the title is not a duplicate of
-                // an entry already submitted to this competition. Dupliacte title result in duplicate
+                // an entry already submitted to this competition. Duplicate title result in duplicate
                 // file names on the server
                 if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
                     $this->settings->errmsg = "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.";
@@ -391,9 +372,9 @@ class Frontend
                     return;
                 }
 
-                $max_per_date = $query_entries->countEntriesByCompetitionDate($this->settings->comp_date, get_current_user_id());
-                if ($max_per_date >= $this->settings->club_max_entries_per_member_per_date) {
-                    $x = $this->settings->club_max_entries_per_member_per_date;
+                $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
+                if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
+                    $x = $this->settings->get('club_max_entries_per_member_per_date');
                     $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
                     unset($query_entries, $query_competitions);
 
@@ -401,10 +382,7 @@ class Frontend
                 }
 
                 // Move the file to its final location
-                $comp_date = $this->settings->comp_date;
-                $classification = $this->settings->classification;
-                $medium = $this->settings->medium;
-                $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($comp_date, $classification , $medium);
+                $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($comp_date, $classification, $medium);
 
                 $user = wp_get_current_user();
                 $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
@@ -568,37 +546,35 @@ class Frontend
      * Delete competition entries
      *
      * @uses  \RpsCompetition\Db\QueryEntries
+     * @uses  \RpsCompetition\Db\QueryCompetitions
      *
      * @param array $entries Array of entries ID to delete.
      */
     private function deleteCompetitionEntries($entries)
     {
         $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         if (is_array($entries)) {
             foreach ($entries as $id) {
 
-                $recs = $query_entries->getEntryById($id, OBJECT);
-                if ($recs == false) {
+                $entry_record = $query_entries->getEntryById($id, OBJECT);
+                if ($entry_record == false) {
                     $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {
-
-                    $server_file_name = $this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name;
+                    $server_file_name = $this->request->server('DOCUMENT_ROOT') . $entry_record->Server_File_Name;
                     // Delete the record from the database
                     $result = $query_entries->deleteEntry($id);
                     if ($result === false) {
                         $this->settings->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
                     } else {
-
+                        $competition_record = $query_competitions->getCompetitionById($entry_record->Competition_ID);
                         // Delete the file from the server file system
                         if (file_exists($server_file_name)) {
                             unlink($server_file_name);
                         }
                         // Delete any thumbnails of this image
-                        $comp_date = $this->settings->comp_date;
-                        $classification = $this->settings->classification;
-                        $medium = $this->settings->medium;
-                        $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($comp_date, $classification , $medium);
+                        $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($competition_record->Competition_Date, $competition_record->Classification, $competition_record->Medium);
 
                         $old_file_parts = pathinfo($server_file_name);
                         $old_file_name = $old_file_parts['filename'];

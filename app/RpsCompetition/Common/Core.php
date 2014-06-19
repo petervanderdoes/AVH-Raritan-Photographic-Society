@@ -147,20 +147,16 @@ class Core
     public function handleInitializePlugin()
     {
         // $old_db_version = get_option('avhrps_db_version', 0);
-        $this->settings->club_name = "Raritan Photographic Society";
-        $this->settings->club_short_name = "RPS";
-        $this->settings->club_max_entries_per_member_per_date = 4;
-        $this->settings->club_max_banquet_entries_per_member = 5;
-        $this->settings->digital_chair_email = 'digitalchair@raritanphoto.com';
+        //$this->settings->club_name = "Raritan Photographic Society";
+        //$this->settings->club_short_name = "RPS";
+        $this->settings->set('club_max_entries_per_member_per_date', 4);
+        $this->settings->set('club_max_banquet_entries_per_member', 5);
+        $this->settings->set('digital_chair_email', 'digitalchair@raritanphoto.com');
 
-        $this->settings->siteurl = get_option('siteurl');
-        $this->settings->graphics_url = plugins_url('images', $this->settings->plugin_basename);
-        $this->settings->js_url = plugins_url('js', $this->settings->plugin_basename);
-        $this->settings->css_url = plugins_url('css', $this->settings->plugin_basename);
-        $this->settings->valid_comp = '';
-        $this->settings->comp_date = '';
-        $this->settings->classification = '';
-        $this->settings->medium = '';
+        $this->settings->set('siteurl', get_option('siteurl'));
+        $this->settings->set('graphics_url', plugins_url('images', $this->settings->get('plugin_basename')));
+        $this->settings->set('js_url',  plugins_url('js', $this->settings->get('plugin_basename')));
+        $this->settings->set('css_url',  plugins_url('css', $this->settings->get('plugin_basename')));
     }
 
     /**
@@ -274,16 +270,16 @@ class Core
 
     /**
      * Get the path to the competition
-     *
      * Returns the path to the competition where we store the photo entries.
      *
-     * @param string $date
+     * @param string $competition_date
      * @param string $classification
      * @param string $medium
      *
      * @return string
      */
-    public function getCompetitionPath($date, $classification, $medium) {
-        return '/Digital_Competitions/' . $date . '_' . $classification . '_' . $medium;
+    public function getCompetitionPath($competition_date, $classification, $medium) {
+        $date = new \DateTime($competition_date);
+        return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
     }
 }

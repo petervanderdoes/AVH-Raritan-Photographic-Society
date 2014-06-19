@@ -43,9 +43,7 @@ final class Admin
      * @var RpsDb
      */
     private $rpsdb;
-    /**
-     * @var Settings
-     */
+    /** @var  \Avh\DataHandler\DataHandler */
     private $settings;
     private $status = '';
 
@@ -63,7 +61,7 @@ final class Admin
         // Loads the CORE class
         $this->core = $this->container->make('RpsCompetition\Common\Core');
         // Admin URL and Pagination
-        $this->core->admin_base_url = $this->settings->siteurl . '/wp-admin/admin.php?page=';
+        $this->core->admin_base_url = $this->settings->get('siteurl') . '/wp-admin/admin.php?page=';
 
         // Admin menu
         add_action('admin_menu', array($this, 'actionAdminMenu'));
@@ -98,9 +96,9 @@ final class Admin
      */
     public function actionAdminMenu()
     {
-        wp_register_style('avhrps-admin-css', plugins_url('/css/avh-rps.admin.css', $this->settings->plugin_basename), array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
-        wp_register_style('avhrps-jquery-css', plugins_url('/css/smoothness/jquery-ui-1.8.22.custom.css', $this->settings->plugin_basename), array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', plugins_url('/js/avh-rps.admin.ajax.js', $this->settings->plugin_basename), array('jquery'), false, true);
+        wp_register_style('avhrps-admin-css', plugins_url('/css/avh-rps.admin.css', $this->settings->get('plugin_basename')), array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-jquery-css', plugins_url('/css/smoothness/jquery-ui-1.8.22.custom.css', $this->settings->get('plugin_basename')), array('wp-admin'), '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', plugins_url('/js/avh-rps.admin.ajax.js', $this->settings->get('plugin_basename')), array('jquery'), false, true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this, 'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
 
@@ -899,7 +897,7 @@ final class Admin
         echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
-        echo '   buttonImage: "' . plugins_url("/images/calendar.png", $this->settings->plugin_basename) . '", ' . "\n";
+        echo '   buttonImage: "' . plugins_url("/images/calendar.png", $this->settings->get('plugin_basename')) . '", ' . "\n";
         echo '   showOn: "both"' . "\n";
         echo ' });' . "\n";
         echo '	$( "#date" ).datepicker();' . "\n";

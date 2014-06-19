@@ -679,11 +679,11 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         // Count the maximum number of awards in the selected competitions
-        $this->settings->min_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month, 1);
+        $min_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month, 1);
         if ($selected_month == 12) {
-            $this->settings->max_date = sprintf("%d-%02s-%02s", $selected_year + 1, 1, 1);
+            $max_date = sprintf("%d-%02s-%02s", $selected_year + 1, 1, 1);
         } else {
-            $this->settings->max_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month + 1, 1);
+            $max_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month + 1, 1);
         }
 
         // Start displaying the form
@@ -1081,7 +1081,7 @@ final class Shortcodes extends ShortcodesAbstract
                 $img = '';
         }
 
-        echo '<img src="' . plugins_url('/images' . $img, $this->settings->plugin_basename) . '">';
+        echo '<img src="' . plugins_url('/images' . $img, $this->settings->get('plugin_basename')) . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
         echo "<table width=\"100%\">\n";
@@ -1157,8 +1157,8 @@ final class Shortcodes extends ShortcodesAbstract
         // Retrieve the maximum number of entries per member for this competition
         $max_entries_per_member_per_comp = $query_competitions->getCompetitionMaxEntries($current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
 
-        // Retrive the total number of entries submitted by this member for this competition date
-        $total_entries_submitted = $query_entries->countEntriesSubmittedByMember(get_current_user_id(), $this->settings->comp_date);
+        // Retrieve the total number of entries submitted by this member for this competition date
+        $total_entries_submitted = $query_entries->countEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date);
 
         $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
         // Build the rows of submitted images
@@ -1230,7 +1230,7 @@ final class Shortcodes extends ShortcodesAbstract
         // Buttons at the bottom of the list of submitted images
         echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
         // Don't show the Add button if the max number of images per member reached
-        if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->club_max_entries_per_member_per_date) {
+        if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
             echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
         }
         if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {

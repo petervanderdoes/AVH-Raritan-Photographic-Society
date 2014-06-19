@@ -177,7 +177,7 @@ class QueryCompetitions
      */
     public function getCompetitionByEntryId($entry_id, $output = ARRAY_A)
     {
-        $sql = $this->rpsdb->prepare("SELECT *
+        $sql = $this->rpsdb->prepare("SELECT c.*
             FROM competitions c, entries e
             WHERE c.ID =  e.Competition_ID
                 AND e.ID = %s",

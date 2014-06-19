@@ -36,6 +36,7 @@ class AVH_RPS_Client
      * @var Container
      */
     private $container;
+    /** @var  Settings */
     private $settings;
 
     public function __construct($dir, $basename)
@@ -43,8 +44,11 @@ class AVH_RPS_Client
         $this->container = new Container();
 
         $this->container->singleton('RpsCompetition\Settings',
+            /**
+             * @return Settings
+             */
             function () {
-                return new Settings();
+                return new Settings(new Avh\DataHandler\NamespacedAttributeBag());
             });
 
         $this->container->singleton('RpsCompetition\Db\RpsDb',
@@ -53,12 +57,12 @@ class AVH_RPS_Client
             });
 
         $this->settings = $this->container->make('RpsCompetition\Settings');
-        $db = $this->container->make('RpsCompetition\Db\RpsDb');
+        $this->container->make('RpsCompetition\Db\RpsDb');
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
-        $this->settings->plugin_dir = $dir;
-        $this->settings->plugin_basename = $basename;
-        $this->settings->plugin_file = $basename;
-        $this->settings->plugin_url = plugins_url('', Constants::PLUGIN_FILE);
+        $this->settings->set('plugin_dir',$dir);
+        $this->settings->set('plugin_basename',$basename);
+        $this->settings->set('plugin_file', $basename);
+        $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
 
         $this->container->singleton('RpsCompetition\Options\General',
             function ($app, $settings) {
