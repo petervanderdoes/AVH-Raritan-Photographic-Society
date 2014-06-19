@@ -2,7 +2,7 @@
 namespace RpsCompetition\Common;
 
 use Illuminate\Http\Request;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManagerStatic as Image;
 use RpsCompetition\Constants;
 use RpsCompetition\Settings;
 
@@ -93,7 +93,23 @@ class Core
     }
 
     /**
+     * Get the path to the competition
+     * Returns the path to the competition where we store the photo entries.
      *
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
+     *
+     * @return string
+     */
+    public function getCompetitionPath($competition_date, $classification, $medium)
+    {
+        $date = new \DateTime($competition_date);
+
+        return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
+    }
+
+    /**
      * @return the $_db_nonces
      */
     public function getDbNonces()
@@ -102,7 +118,6 @@ class Core
     }
 
     /**
-     *
      * @return the $_default_nonces
      */
     public function getDefaultNonces()
@@ -155,8 +170,8 @@ class Core
 
         $this->settings->set('siteurl', get_option('siteurl'));
         $this->settings->set('graphics_url', plugins_url('images', $this->settings->get('plugin_basename')));
-        $this->settings->set('js_url',  plugins_url('js', $this->settings->get('plugin_basename')));
-        $this->settings->set('css_url',  plugins_url('css', $this->settings->get('plugin_basename')));
+        $this->settings->set('js_url', plugins_url('js', $this->settings->get('plugin_basename')));
+        $this->settings->set('css_url', plugins_url('css', $this->settings->get('plugin_basename')));
     }
 
     /**
@@ -183,7 +198,6 @@ class Core
 
     /**
      * Rename an already uploaded entry.
-     *
      * Besides renaming the original upload, we also rename all the thumbnails.
      *
      * @param string $path
@@ -252,34 +266,32 @@ class Core
         if (file_exists($thumb_name)) {
             return true;
         }
+        /** @var Image $image */
         $image = Image::make($image_name);
         $new_size = Constants::get_image_size($size);
         if ($new_size['height'] == null) {
             if ($image->height <= $image->width) {
-                $image->resize($new_size['width'], $new_size['width'], true, false);
+                $image->resize($new_size['width'],
+                               $new_size['width'],
+                function ($constraint) {
+                    $constraint->aspectRatio();
+                });
             } else {
-                $image->resize($new_size['width'], null, true, false);
+                $image->resize($new_size['width'],
+                               null,
+                function ($constraint) {
+                    $constraint->aspectRatio();
+                });
             }
         } else {
-            $image->resize($new_size['width'], $new_size['height'], true, false);
+            $image->resize($new_size['width'],
+                           $new_size['height'],
+            function ($constraint) {
+                $constraint->aspectRatio();
+            });
         }
         $image->save($thumb_name, Constants::IMAGE_QUALITY);
 
         return true;
-    }
-
-    /**
-     * Get the path to the competition
-     * Returns the path to the competition where we store the photo entries.
-     *
-     * @param string $competition_date
-     * @param string $classification
-     * @param string $medium
-     *
-     * @return string
-     */
-    public function getCompetitionPath($competition_date, $classification, $medium) {
-        $date = new \DateTime($competition_date);
-        return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
     }
 }
