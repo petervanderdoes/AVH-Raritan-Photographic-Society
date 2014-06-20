@@ -16,11 +16,6 @@ class ListTable extends \WP_List_Table
     public $screen;
     /**
      *
-     * @var Core
-     */
-    private $core;
-    /**
-     *
      * @var HtmlBuilder
      */
     private $html;
@@ -40,10 +35,9 @@ class ListTable extends \WP_List_Table
      */
     private $settings;
 
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
     {
         $this->settings = $settings;
-        $this->core = $core;
         $this->rpsdb = $rpsdb;
         $this->request = $request;
         $this->html = new HtmlBuilder();
