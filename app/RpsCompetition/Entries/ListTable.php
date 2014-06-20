@@ -3,12 +3,12 @@ namespace RpsCompetition\Entries;
 
 use Avh\Html\HtmlBuilder;
 use Illuminate\Http\Request;
-use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
 class ListTable extends \WP_List_Table
@@ -16,27 +16,18 @@ class ListTable extends \WP_List_Table
     public $messages;
     public $screen;
     /**
-     *
-     * @var Core
-     */
-    private $core;
-    /**
-     *
      * @var HtmlBuilder
      */
     private $html;
     /**
-     *
      * @var Request
      */
     private $request;
     /**
-     *
      * @var RpsDb
      */
     private $rpsdb;
     /**
-     *
      * @var Settings
      */
     private $settings;
@@ -44,13 +35,11 @@ class ListTable extends \WP_List_Table
     /**
      * @param Settings $settings
      * @param RpsDb    $rpsdb
-     * @param Core     $core
      * @param Request  $request
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
     {
         $this->settings = $settings;
-        $this->core = $core;
         $this->rpsdb = $rpsdb;
         $this->html = new HtmlBuilder();
         $this->request = $request;
@@ -205,6 +194,7 @@ class ListTable extends \WP_List_Table
 
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $options = get_option('avh-rps');
 
         echo '<div class="alignleft actions">';
@@ -220,8 +210,8 @@ class ListTable extends \WP_List_Table
 
             if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
                 $theme_request = $this->request->input('filter-theme', 0);
-                $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
-                $competitions = $query_competitions->getCompetitionByDates($season_dates['start'], $season_dates['end']);
+                list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($this->request->input('filter-season'));
+                $competitions = $query_competitions->getCompetitionByDates($season_start_date,$season_end_date);
 
                 $themes = array();
                 foreach ($competitions as $competition) {
@@ -241,7 +231,7 @@ class ListTable extends \WP_List_Table
             submit_button(__('Filter'), 'button', false, false, array('id' => 'entries-query-submit'));
         }
         echo '</div>';
-        unset($query_miscellaneous, $query_competitions);
+        unset($query_miscellaneous, $query_competitions, $season_helper);
     }
 
     public function get_bulk_actions()
@@ -281,6 +271,7 @@ class ListTable extends \WP_List_Table
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
 
         $entry_status = $this->request->input('entry_status', 'all');
         if (!in_array($entry_status, array('all'))) {
@@ -303,8 +294,8 @@ class ListTable extends \WP_List_Table
             $where = 'Member_ID=' . esc_sql($this->request->input('user_id'));
         }
         if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
-            $season_dates = $this->core->getSeasonDates($this->request->input('filter-season'));
-            $where = $this->rpsdb->prepare('Competition_Date >= %s AND Competition_Date <= %s', $season_dates['start'], $season_dates['end']);
+            list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($this->request->input('filter-season'));
+            $where = $this->rpsdb->prepare('Competition_Date >= %s AND Competition_Date <= %s', $season_start_date, $season_end_date);
 
             $filter_theme = $this->request->input('filter-theme', 0);
             if ($filter_theme != 0) {
@@ -339,6 +330,8 @@ class ListTable extends \WP_List_Table
         $total_entries = $query_entries->query(array_merge($args, array('count' => true, 'offset' => 0, 'number' => 0)));
 
         $this->set_pagination_args(array('total_items' => $total_entries, 'per_page' => $entries_per_page));
+
+        unset($query_competitions, $query_entries, $season_helper);
     }
 
     public function single_row($a_entry)
