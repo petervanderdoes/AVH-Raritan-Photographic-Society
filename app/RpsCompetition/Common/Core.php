@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Common;
 
-use Illuminate\Http\Request;
 use RpsCompetition\Settings;
 
 class Core
