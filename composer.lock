@@ -1,23 +1,24 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
-    "hash": "7aaec7ff117cf2aca9386bb654da905f",
+    "hash": "644b03d5be64d3fa4d26239fe8c43fa0",
     "packages": [
         {
             "name": "illuminate/config",
-            "version": "v4.2.3",
+            "version": "v4.2.4",
             "target-dir": "Illuminate/Config",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/config.git",
-                "reference": "cd99d3dc2ca192b7b4003b5f6b31a4b1dd3c8167"
+                "reference": "33396894a35428074e8c41583bf308a7c019610a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/config/zipball/cd99d3dc2ca192b7b4003b5f6b31a4b1dd3c8167",
-                "reference": "cd99d3dc2ca192b7b4003b5f6b31a4b1dd3c8167",
+                "url": "https://api.github.com/repos/illuminate/config/zipball/33396894a35428074e8c41583bf308a7c019610a",
+                "reference": "33396894a35428074e8c41583bf308a7c019610a",
                 "shasum": ""
             },
             "require": {
@@ -48,11 +49,11 @@
                     "role": "Creator of Laravel"
                 }
             ],
-            "time": "2014-05-23 16:40:19"
+            "time": "2014-06-08 19:09:40"
         },
         {
             "name": "illuminate/filesystem",
-            "version": "v4.2.3",
+            "version": "v4.2.4",
             "target-dir": "Illuminate/Filesystem",
             "source": {
                 "type": "git",
@@ -97,17 +98,17 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v4.2.3",
+            "version": "v4.2.4",
             "target-dir": "Illuminate/Support",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "71975fd0c0f73033e108a7058be9dae2d32545a7"
+                "reference": "976bdc0f42e9efd3dfa2e0eba11aba48a97113ac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/71975fd0c0f73033e108a7058be9dae2d32545a7",
-                "reference": "71975fd0c0f73033e108a7058be9dae2d32545a7",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/976bdc0f42e9efd3dfa2e0eba11aba48a97113ac",
+                "reference": "976bdc0f42e9efd3dfa2e0eba11aba48a97113ac",
                 "shasum": ""
             },
             "require": {
@@ -143,20 +144,20 @@
                     "role": "Creator of Laravel"
                 }
             ],
-            "time": "2014-06-03 16:57:35"
+            "time": "2014-06-13 20:42:27"
         },
         {
             "name": "intervention/image",
-            "version": "2.0.3",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Intervention/image.git",
-                "reference": "bbdb310dfaa76c9756509d90f6badaf157117c28"
+                "reference": "edd507dacfacab7fcfcee6c5fcfad3335d0ec85f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Intervention/image/zipball/bbdb310dfaa76c9756509d90f6badaf157117c28",
-                "reference": "bbdb310dfaa76c9756509d90f6badaf157117c28",
+                "url": "https://api.github.com/repos/Intervention/image/zipball/edd507dacfacab7fcfcee6c5fcfad3335d0ec85f",
+                "reference": "edd507dacfacab7fcfcee6c5fcfad3335d0ec85f",
                 "shasum": ""
             },
             "require": {
@@ -201,7 +202,7 @@
                 "thumbnail",
                 "watermark"
             ],
-            "time": "2014-06-08 21:56:29"
+            "time": "2014-06-16 09:52:34"
         },
         {
             "name": "pdepend/pdepend",
