@@ -332,10 +332,10 @@ class ListTable extends \WP_List_Table
 
         $page = $this->get_pagenum();
 
-        $start = $this->request->input('start', ($page - 1) * $competitions_per_page);
+        $start = (int) $this->request->input('start', ($page - 1) * $competitions_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
-            $start += $this->request->input('offset', 0);
+            $start += (int) $this->request->input('offset', 0);
         }
 
         $args = array('status' => $competition_status, 'search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order);
@@ -356,7 +356,7 @@ class ListTable extends \WP_List_Table
         $competition = $a_competition;
         $status = ($competition->Closed == "Y" ? '' : 'closed');
         echo '<tr id="competition-' . $competition->ID . '" class="' . $status . '">';
-        echo $this->single_row_columns($competition);
+        $this->single_row_columns($competition);
         echo "</tr>";
     }
 }

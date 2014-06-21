@@ -315,10 +315,10 @@ class ListTable extends \WP_List_Table
         }
         $page = $this->get_pagenum();
 
-        $start = $this->request->input('start', ($page - 1) * $entries_per_page);
+        $start = (int) $this->request->input('start', ($page - 1) * $entries_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
-            $start += $this->request->input('offset');
+            $start += (int) $this->request->input('offset');
         }
 
         $args = array('search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order, 'where' => $where);
@@ -338,7 +338,7 @@ class ListTable extends \WP_List_Table
     {
         $entry = $a_entry;
         echo '<tr id="entry-' . $entry->ID . '">';
-        echo $this->single_row_columns($entry);
+        $this->single_row_columns($entry);
         echo "</tr>";
     }
 }
