@@ -4,23 +4,17 @@ namespace RpsCompetition\Api;
 use DOMDocument;
 use Illuminate\Http\Request;
 use PDO;
-use RpsCompetition\Common\Core;
+use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsPdo;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class Client
 {
     /**
-     * @var Core
+     * @internal param Core $core
      */
-    private $core;
-
-    /**
-     * @param Core $core
-     */
-    public function __construct(Core $core)
+    public function __construct()
     {
-        $this->core = $core;
     }
 
     /**
@@ -386,7 +380,7 @@ class Client
             // Iterate through all the entries for this competition
             foreach ($all_records_entries as $record_entries) {
                 $user = get_user_by('id', $record_entries['Member_ID']);
-                if ($this->core->isPaidMember($user->ID)) {
+                if (CommonHelper::isPaidMember($user->ID)) {
 
                     // Create an Entry node
                     $entry_element = $entries->AppendChild($dom->CreateElement('Entry'));

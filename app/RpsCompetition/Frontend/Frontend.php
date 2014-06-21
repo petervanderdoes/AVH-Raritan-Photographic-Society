@@ -10,6 +10,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -31,12 +32,13 @@ class Frontend
      */
     public function __construct(Container $container)
     {
+        $this->container = $container;
+
         $this->settings = $container->make('RpsCompetition\Settings');
-        $this->core = $container->make('RpsCompetition\Common\Core');
         $this->rpsdb = $container->make('RpsCompetition\Db\RpsDb');
         $this->request = $container->make('Illuminate\Http\Request');
-        $this->container = $container;
-        $this->options = $container->make('RpsCompetition\Options\General', array($this->settings));
+        $this->options = $container->make('RpsCompetition\Options\General');
+        $this->core = new Core($this->settings);
 
         $this->settings->errmsg = '';
 
@@ -80,6 +82,7 @@ class Frontend
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         if (is_object($post) && $post->post_title == 'Banquet Entries') {
             $redirect_to = $this->request->input('wp_get_referer');
@@ -106,7 +109,7 @@ class Frontend
                         $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
                         if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
                             // Move the file to its final location
-                            $path = $this->core->getCompetitionPath($banquet_record->Competition_Date, $banquet_record->Classification, $banquet_record->Medium);
+                            $path = $photo_helper->getCompetitionPath($banquet_record->Competition_Date, $banquet_record->Classification, $banquet_record->Medium);
                             if (!is_dir($this->request->server('DOCUMENT_ROOT') . $path)) {
                                 mkdir($this->request->server('DOCUMENT_ROOT') . $path, 0755);
                             }
@@ -123,7 +126,7 @@ class Frontend
                 }
             }
         }
-        unset($query_entries, $query_competitions);
+        unset($query_entries, $query_competitions, $photo_helper);
     }
 
     /**
@@ -142,6 +145,8 @@ class Frontend
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
+
         if (is_object($post) && $post->ID == 75) {
             $redirect_to = $this->request->input('wp_get_referer');
             $this->_medium_subset = $this->request->input('m');
@@ -171,14 +176,14 @@ class Frontend
                 }
 
                 // Rename the image file on the server file system
-                $path = $this->core->getCompetitionPath($competition->Competition_Date, $competition->Classification, $competition->Medium);
+                $path = $photo_helper->getCompetitionPath($competition->Competition_Date, $competition->Classification, $competition->Medium);
                 $old_file_parts = pathinfo($server_file_name);
                 $old_file_name = $old_file_parts['filename'];
                 $ext = $old_file_parts['extension'];
                 $current_user = wp_get_current_user();
                 $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT') . $server_file_name);
                 $new_file_name = $new_file_name_noext . $ext;
-                if (!$this->core->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
+                if (!$photo_helper->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
                     die("<b>Failed to rename image file</b><br>" . "Path: $path<br>Old Name: $old_file_name<br>" . "New Name: $new_file_name_noext");
                 }
 
@@ -194,7 +199,7 @@ class Frontend
                 exit();
             }
         }
-        unset($query_entries);
+        unset($query_entries, $query_competitions, $photo_helper);
     }
 
     /**
@@ -280,6 +285,7 @@ class Frontend
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         if (is_object($post) && $post->ID == 89) {
             if ($this->request->has('post')) {
@@ -382,7 +388,7 @@ class Frontend
                 }
 
                 // Move the file to its final location
-                $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($comp_date, $classification, $medium);
+                $path = $this->request->server('DOCUMENT_ROOT') . $photo_helper->getCompetitionPath($comp_date, $classification, $medium);
 
                 $user = wp_get_current_user();
                 $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
@@ -396,7 +402,7 @@ class Frontend
                 if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
 
                     // Resize the image and deposit it in the destination directory
-                    $this->core->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
+                    $photo_helper->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
                     $resized = 1;
                 } else {
                     // The uploaded image does not need to be resized so just move it to the destination directory
@@ -424,7 +430,7 @@ class Frontend
                 exit();
             }
         }
-        unset($query_entries, $query_competitions);
+        unset($query_entries, $query_competitions, $photo_helper);
     }
 
     /**
@@ -464,6 +470,7 @@ class Frontend
     {
         if (is_front_page()) {
             $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+            $photo_helper = new PhotoHelper($this->settings, $this->request);
 
             echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
@@ -490,8 +497,8 @@ class Frontend
                 echo '<figure class="gallery-item">';
                 echo '<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
-                echo '<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '<img src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                echo '<a href="' . $photo_helper->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+                echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
                 echo '</div>';
                 $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
                 echo "<figcaption class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</figcaption>\n";
@@ -503,7 +510,7 @@ class Frontend
             echo '</div>';
             echo '</div>';
 
-            unset($query_miscellaneous);
+            unset($query_miscellaneous, $photo_helper);
         }
     }
 
@@ -517,7 +524,7 @@ class Frontend
     {
         if ($this->request->has('rpswinclient')) {
 
-            $api_client = new Client($this->core);
+            $api_client = new Client();
 
             define('DONOTCACHEPAGE', true);
             global $hyper_cache_stop;
@@ -554,6 +561,7 @@ class Frontend
     {
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         if (is_array($entries)) {
             foreach ($entries as $id) {
@@ -574,7 +582,7 @@ class Frontend
                             unlink($server_file_name);
                         }
                         // Delete any thumbnails of this image
-                        $path = $this->request->server('DOCUMENT_ROOT') . $this->core->getCompetitionPath($competition_record->Competition_Date, $competition_record->Classification, $competition_record->Medium);
+                        $path = $this->request->server('DOCUMENT_ROOT') . $photo_helper->getCompetitionPath($competition_record->Competition_Date, $competition_record->Classification, $competition_record->Medium);
 
                         $old_file_parts = pathinfo($server_file_name);
                         $old_file_name = $old_file_parts['filename'];
@@ -594,7 +602,7 @@ class Frontend
                 }
             }
         }
-        unset($query_entries);
+        unset($query_entries, $photo_helper);
     }
 
     /**

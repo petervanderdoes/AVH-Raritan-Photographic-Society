@@ -3,7 +3,6 @@ namespace RpsCompetition\Competition;
 
 use Avh\Html\HtmlBuilder;
 use Illuminate\Http\Request;
-use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;

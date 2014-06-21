@@ -44,31 +44,26 @@ class AVH_RPS_Client
         $this->container = new Container();
 
         $this->container->singleton('RpsCompetition\Settings',
-            /**
-             * @return Settings
-             */
             function () {
                 return new Settings(new Avh\DataHandler\NamespacedAttributeBag());
             });
-
         $this->container->singleton('RpsCompetition\Db\RpsDb',
             function () {
                 return new RpsDb();
             });
+        $this->container->singleton('RpsCompetition\Options\General',
+            function () {
+                return new OptionsGeneral();
+            });
 
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $this->container->make('RpsCompetition\Db\RpsDb');
+        $this->container->make('RpsCompetition\Options\General');
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->set('plugin_dir',$dir);
         $this->settings->set('plugin_basename',$basename);
         $this->settings->set('plugin_file', $basename);
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
-
-        $this->container->singleton('RpsCompetition\Options\General',
-            function ($app, $settings) {
-                return new OptionsGeneral($settings);
-            });
-        $this->container->make('RpsCompetition\Options\General');
 
         add_action('plugins_loaded', array($this, 'load'));
     }

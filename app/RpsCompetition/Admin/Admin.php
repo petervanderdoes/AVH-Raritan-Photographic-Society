@@ -1,6 +1,8 @@
 <?php
 namespace RpsCompetition\Admin;
 
+use Avh\Html\FormBuilder;
+use Avh\Html\HtmlBuilder;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
@@ -13,37 +15,21 @@ use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Settings;
 use Valitron\Validator;
 
-/* @var $formBuilder \Avh\Html\FormBuilder */
+/* @var $formBuilder FormBuilder */
 final class Admin
 {
-    /**
-     * @var CompetitionListTable
-     */
     private $competition_list;
-    /**
-     * @var Container
-     */
     private $container;
-    /**
-     * @var Core
-     */
     private $core;
-    /**
-     * @var EntriesListTable
-     */
     private $entries_list;
     private $hooks = array();
     private $message = '';
     private $referer;
-    /**
-     * @var Request
-     */
+    /** @var Request */
     private $request;
-    /**
-     * @var RpsDb
-     */
+    /** @var RpsDb */
     private $rpsdb;
-    /** @var  \Avh\DataHandler\DataHandler */
+    /** @var  Settings */
     private $settings;
     private $status = '';
 
@@ -54,14 +40,9 @@ final class Admin
     {
         $this->container = $container;
 
-        // The Settings Registery
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $this->request = $this->container->make('Illuminate\Http\Request');
-
-        // Loads the CORE class
-        $this->core = $this->container->make('RpsCompetition\Common\Core');
-        // Admin URL and Pagination
-        $this->core->admin_base_url = $this->settings->get('siteurl') . '/wp-admin/admin.php?page=';
+        $this->core = new Core($this->settings);
 
         // Admin menu
         add_action('admin_menu', array($this, 'actionAdminMenu'));
@@ -139,7 +120,7 @@ final class Admin
     public function actionLoadPagehookCompetition()
     {
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->make('RpsCompetition\Competition\ListTable');
+        $this->competition_list = new CompetitionListTable($this->settings, $this->rpsdb, $this->request);
 
         $this->handleRequestCompetition();
 
@@ -165,7 +146,7 @@ final class Admin
     public function actionLoadPagehookCompetitionAdd()
     {
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
-        $this->competition_list = $this->container->make('RpsCompetition\Competition\ListTable');
+        $this->competition_list = new CompetitionListTable($this->settings, $this->rpsdb, $this->request);
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
         // WordPress core Styles and Scripts
@@ -186,7 +167,7 @@ final class Admin
     public function actionLoadPagehookEntries()
     {
         $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
-        $this->entries_list = $this->container->make('RpsCompetition\Entries\ListTable');
+        $this->entries_list = $this->competition_list = new EntriesListTable($this->settings, $this->rpsdb, $this->request);
         $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
@@ -239,7 +220,7 @@ final class Admin
 
         $classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
 
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
 
         echo '<h3 id="rps">Competition Classification</h3>';
         echo $formBuilder->openTable();
@@ -471,7 +452,7 @@ final class Admin
 
         $data = array();
 
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition_add');
 
         $formDefaultOptions = array(
@@ -726,7 +707,7 @@ final class Admin
             $competitionIdsArray = (array) $this->request->input('competitions');
         }
 
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
 
         $this->displayAdminHeader('Delete Competitions');
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -783,7 +764,7 @@ final class Admin
          */
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition-edit');
 
         $updated = false;
@@ -949,7 +930,7 @@ final class Admin
         echo '</h2>';
 
         $this->competition_list->views();
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
         echo $formBuilder->open(null, array('id' => 'rps-competition-form', 'method' => 'get'));
         echo $formBuilder->hidden('page', Constants::MENU_SLUG_COMPETITION);
         echo $formBuilder->hidden('_total', $this->competition_list->get_pagination_arg('total_items'));
@@ -996,7 +977,7 @@ final class Admin
             $competitionIdsArray = (array) $this->request->input('competitions');
         }
 
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
 
         $this->displayAdminHeader($title);
         echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
@@ -1033,7 +1014,7 @@ final class Admin
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
 
         if (!$this->request->has('entries')) {
             $entryIdsArray = array(intval($this->request->input('entry')));
@@ -1094,7 +1075,7 @@ final class Admin
 
         $updated = false;
 
-        $formBuilder = $this->container->make('Avh\Html\FormBuilder');
+        $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('entry-edit');
 
         if ($this->request->has('update')) {

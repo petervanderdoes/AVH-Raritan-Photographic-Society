@@ -6,48 +6,31 @@ use Avh\Html\HtmlBuilder;
 use Avh\Network\Session;
 use Avh\Utility\ShortcodesAbstract;
 use Illuminate\Http\Request;
-use RpsCompetition\Common\Core;
+use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
 final class Shortcodes extends ShortcodesAbstract
 {
-    /**
-     * @var Core
-     */
-    private $core;
-    /**
-     * @var HtmlBuilder
-     */
     private $html;
-    /**
-     * @var Request
-     */
     private $request;
-    /**
-     * @var RpsDb
-     */
     private $rpsdb;
-    /**
-     * @var Settings
-     */
     private $settings;
 
     /**
      * @param Settings $settings
      * @param RpsDb    $rpsdb
-     * @param Core     $core
      * @param Request  $request
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
     {
-        $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
         $this->html = new HtmlBuilder();
@@ -94,8 +77,8 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
-        $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted,
-                                                            array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
+        $club_competition_results = CommonHelper::arrayMsort($club_competition_results_unsorted,
+                                                             array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -493,6 +476,7 @@ final class Shortcodes extends ShortcodesAbstract
     public function displayCategoryWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         $class = 'Beginner';
         $award = '1';
@@ -522,7 +506,7 @@ final class Shortcodes extends ShortcodesAbstract
             echo '<li class="gallery-item">';
             echo '	<div class="gallery-item-content">';
             echo '<div class="gallery-item-content-image">';
-            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
+            echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
             echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
             $caption = "$title<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
@@ -533,7 +517,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</ul>';
         echo '</div>';
         echo '</section>';
-        unset($query_miscellaneous);
+        unset($query_miscellaneous, $photo_helper);
     }
 
     /**
@@ -549,6 +533,7 @@ final class Shortcodes extends ShortcodesAbstract
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         $medium_subset = "Digital";
         $medium_param = "?m=digital";
@@ -577,7 +562,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<table>';
         echo '<tr><td align="center" colspan="2">';
 
-        echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
+        echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
         echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
@@ -595,7 +580,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo '</form>';
-        unset($query_entries);
+        unset($query_entries, $photo_helper);
     }
 
     /**
@@ -631,6 +616,8 @@ final class Shortcodes extends ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
+
         $options = get_option('avh-rps');
 
         $months = array();
@@ -746,8 +733,8 @@ final class Shortcodes extends ShortcodesAbstract
                 $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
                 $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
                 $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
-                $output .= $this->html->element('a', array('href' => $this->core->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-                $output .= $this->html->image($this->core->rpsGetThumbnailUrl($recs, '150w', true));
+                $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+                $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w', true));
                 $output .= '</a>';
                 $output .= '</div>';
                 $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
@@ -761,7 +748,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo $output;
         echo "<br />\n";
 
-        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper);
+        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $photo_helper);
     }
 
     /**
@@ -780,6 +767,8 @@ final class Shortcodes extends ShortcodesAbstract
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
+
         $options = get_option('avh-rps');
 
         $months = array();
@@ -940,8 +929,8 @@ final class Shortcodes extends ShortcodesAbstract
                 // Display this thumbnail in the the next available column
                 echo "<td align=\"center\" class=\"thumb_cell\">\n";
                 echo "  <div class=\"thumb_canvas\">\n";
-                echo "    <a href=\"" . $this->core->rpsGetThumbnailUrl($recs, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                echo "    <img class=\"thumb_img\" src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
+                echo "    <a href=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                echo "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
                 echo "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
                 echo "  </div>\n</td>\n";
                 $prev_comp = $comp;
@@ -961,7 +950,7 @@ final class Shortcodes extends ShortcodesAbstract
         }
         echo "<br />\n";
 
-        unset($query_competitions, $query_miscellaneous);
+        unset($query_competitions, $query_miscellaneous, $season_helper, $photo_helper);
     }
 
     /**
@@ -984,11 +973,12 @@ final class Shortcodes extends ShortcodesAbstract
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $competition_helper = new CompetitionHelper($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         $medium_subset_medium = $attr['medium'];
 
         $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
-        $open_competitions = $this->core->arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
+        $open_competitions = CommonHelper::arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
 
         if (!empty($open_competitions)) {
             $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
@@ -1176,7 +1166,7 @@ final class Shortcodes extends ShortcodesAbstract
             echo "<td align=\"center\" width=\"10%\">\n";
             // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
             echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $recs->Classification . ' ' . $recs->Medium . '">' . "\n";
-            echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
+            echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
@@ -1243,7 +1233,7 @@ final class Shortcodes extends ShortcodesAbstract
         // All done, close out the table and the form
         echo "</table>\n</form>\n<br />\n";
 
-        unset($query_entries, $query_competitions);
+        unset($query_entries, $query_competitions, $competition_helper, $photo_helper);
     }
 
     /**
@@ -1257,6 +1247,7 @@ final class Shortcodes extends ShortcodesAbstract
     public function displayPersonWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         $attr = shortcode_atts(array('id' => 0), $attr);
 
@@ -1281,8 +1272,8 @@ final class Shortcodes extends ShortcodesAbstract
             echo '<li>';
             echo '<div>';
             echo '	<div class="image">';
-            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+            echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
             echo '	</div>';
             echo "</div>\n";
 
@@ -1292,7 +1283,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</div>';
         echo '</section>';
 
-        unset($query_miscellaneous);
+        unset($query_miscellaneous, $photo_helper);
     }
 
     /**
