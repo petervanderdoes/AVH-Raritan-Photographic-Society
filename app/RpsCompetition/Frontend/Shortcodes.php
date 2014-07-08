@@ -302,7 +302,8 @@ final class Shortcodes extends ShortcodesAbstract
         $query_entries = new QueryEntries($this->rpsdb);
         $query_banquet = new QueryBanquet($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $selected_season = end($season_helper->getSeasons());
+        $seasons = $season_helper->getSeasons();
+        $selected_season = end($seasons);
 
         if ($this->request->isMethod('POST')) {
             $selected_season = esc_attr($this->request->input('new_season', $selected_season));
