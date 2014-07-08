@@ -211,7 +211,7 @@ class QueryCompetitions
      * @param string $classification
      * @param string $medium
      *
-     * @return QueryCompetitions
+     * @return string
      */
     public function getCompetitionCloseDate($competition_date, $classification, $medium)
     {
