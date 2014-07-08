@@ -13,11 +13,5 @@ use Avh\DataHandler\DataHandler;
 
 class Settings extends DataHandler
 {
-    /**
-     * @param AttributeBagInterface $registry
-     */
-    public function __construct(AttributeBagInterface $registry)
-    {
-        parent::__construct($registry);
-    }
+
 }
