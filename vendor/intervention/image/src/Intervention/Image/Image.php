@@ -2,6 +2,12 @@
 
 namespace Intervention\Image;
 
+/**
+ * Class Image
+ *
+ * @package Intervention\Image
+ * @method boolean resize()
+ */
 class Image extends File
 {
     /**
