@@ -979,49 +979,48 @@ final class Shortcodes extends ShortcodesAbstract
         $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
         $open_competitions = CommonHelper::arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
 
-        if (!empty($open_competitions)) {
-            $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
-            $session->start();
-            if ($this->request->isMethod('POST')) {
-                switch ($this->request->input('submit_control')) {
-
-                    case 'select_comp':
-                        $competition_date = $this->request->input('select_comp');
-                        $medium = $this->request->input('medium');
-                        break;
-
-                    case 'select_medium':
-                        $competition_date = $this->request->input('comp_date');
-                        $medium = $this->request->input('select_medium');
-                        break;
-                    default:
-                        $competition_date = $this->request->input('comp_date');
-                        $medium = $this->request->input('medium');
-                        break;
-                }
-                $classification = $this->request->input('classification');
-            } else {
-                $current_competition = reset($open_competitions);
-                $competition_date = $session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-                $medium = $session->get('myentries/medium', $current_competition->Medium);
-                $classification = $session->get('myentries/classification', $current_competition->Classification);
-            }
-            $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
-
-            $session->set('myentries/competition_date', $current_competition->Competition_Date);
-            $session->set('myentries/medium', $current_competition->Medium);
-            $session->set('myentries/classification', $current_competition->Classification);
-            $session->save();
-        } else {
+        if (empty($open_competitions)) {
             $this->settings->errmsg = 'There are no competitions available to enter';
+            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
+
+            return;
         }
+
+        $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
+        $session->start();
+        if ($this->request->isMethod('POST')) {
+            switch ($this->request->input('submit_control')) {
+
+                case 'select_comp':
+                    $competition_date = $this->request->input('select_comp');
+                    $medium = $this->request->input('medium');
+                    break;
+
+                case 'select_medium':
+                    $competition_date = $this->request->input('comp_date');
+                    $medium = $this->request->input('select_medium');
+                    break;
+                default:
+                    $competition_date = $this->request->input('comp_date');
+                    $medium = $this->request->input('medium');
+                    break;
+            }
+            $classification = $this->request->input('classification');
+        } else {
+            $current_competition = reset($open_competitions);
+            $competition_date = $session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+            $medium = $session->get('myentries/medium', $current_competition->Medium);
+            $classification = $session->get('myentries/classification', $current_competition->Classification);
+        }
+        $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+
+        $session->set('myentries/competition_date', $current_competition->Competition_Date);
+        $session->set('myentries/medium', $current_competition->Medium);
+        $session->set('myentries/classification', $current_competition->Classification);
+        $session->save();
 
         if (!empty($this->settings->errmsg)) {
             echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
-        }
-
-        if (empty($open_competitions)) {
-            return;
         }
 
         echo '<script language="javascript">' . "\n";
