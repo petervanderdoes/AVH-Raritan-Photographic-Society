@@ -157,11 +157,12 @@ final class Shortcodes extends ShortcodesAbstract
                         // Iterate through all the accumulated scores for this member
                         foreach ($member_scores as $score_key => $score_array) {
                             // Print the scores for the submitted entries for this month
-                            for ($i = 0; $i < count($score_array); $i++) {
+                            $total_score_array =  count($score_array);
+                            for ($i = 0; $i < $total_score_array; $i++) {
                                 echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                             }
                             // Pad the unused entries for this member for this month
-                            for ($i = 0; $i < $comp_max_entries[$score_key] - count($score_array); $i++) {
+                            for ($i = 0; $i < $comp_max_entries[$score_key] - $total_score_array; $i++) {
                                 echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                             }
                         }
@@ -262,11 +263,12 @@ final class Shortcodes extends ShortcodesAbstract
             // Iterate through all the accumulated scores for this member
             foreach ($member_scores as $key => $score_array) {
                 // Print the scores for the submitted entries for this month
-                for ($i = 0; $i < count($score_array); $i++) {
+                $total_score_array = count($score_array);
+                for ($i = 0; $i < $total_score_array; $i++) {
                     echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                 }
                 // Pad the unused entries for this member for this month
-                for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
+                for ($i = 0; $i < $comp_max_entries[$key] - $total_score_array; $i++) {
                     echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                 }
             }
