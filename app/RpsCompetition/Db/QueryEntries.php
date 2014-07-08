@@ -164,7 +164,7 @@ class QueryEntries
      * @param string $classification
      * @param string $medium
      *
-     * @return QueryEntries
+     * @return array
      */
     public function getEntriesSubmittedByMember($user_id, $competition_date, $classification, $medium)
     {

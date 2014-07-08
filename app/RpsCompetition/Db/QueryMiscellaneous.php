@@ -16,7 +16,7 @@ class QueryMiscellaneous
      * @param string $competition_date_start
      * @param string $competition_date_end
      *
-     * @return QueryMiscellaneous
+     * @return array
      */
     public function getAllEntries($competition_date_start, $competition_date_end = null)
     {
