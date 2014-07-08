@@ -10,14 +10,19 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Options;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class Frontend
 {
+    /** @var Container */
+    private $container;
     /** @var Core */
     private $core;
+    /** @var Options */
+    private $options;
     /** @var Request */
     private $request;
     /** @var RpsDb */
@@ -149,7 +154,6 @@ class Frontend
 
         if (is_object($post) && $post->ID == 75) {
             $redirect_to = $this->request->input('wp_get_referer');
-            $this->_medium_subset = $this->request->input('m');
             $entry_id = $this->request->input('id');
 
             // Just return to the My Images page is the user clicked Cancel
