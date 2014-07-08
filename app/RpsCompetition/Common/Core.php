@@ -42,22 +42,6 @@ class Core
         return $this->comment . ' ' . trim($str) . ' -->';
     }
 
-    /**
-     * @return string
-     */
-    public function getDbNonces()
-    {
-        return $this->_db_nonces;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultNonces()
-    {
-        return $this->_default_nonces;
-    }
-
     public function getShorthandToBytes($size_str)
     {
         switch (substr($size_str, -1)) {
