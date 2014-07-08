@@ -95,7 +95,7 @@ class Helper
         $image = Image::make($image_name);
         $new_size = Constants::get_image_size($size);
         if ($new_size['height'] == null) {
-            if ($image->height <= $image->width) {
+            if ($image->getHeight() <= $image->getWidth()) {
                 $image->resize($new_size['width'],
                                $new_size['width'],
                     function ($constraint) {
