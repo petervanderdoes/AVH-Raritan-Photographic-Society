@@ -527,9 +527,11 @@ final class Admin
                         $data['Max_Entries'] = $formNewOptions['max-entries'];
                         $data['Num_Judges'] = $formNewOptions['judges'];
                         $data['Special_Event'] = ($formNewOptions['special-event'] ? 'Y' : 'N');
-                        foreach ($formNewOptions['medium'] as $medium_key => $value) {
+                        $medium_keys = array_keys($formNewOptions['Medium']);
+                        foreach ($medium_keys as $medium_key) {
                             $data['Medium'] = $medium_convert[$medium_key];
-                            foreach ($formNewOptions['classification'] as $classification_key => $value) {
+                            $classification_keys = array_keys($formNewOptions['classification']);
+                            foreach ($classification_keys as $classification_key) {
                                 $data['Classification'] = $classification_convert[$classification_key];
                                 $competition_ID = $query_competitions->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
@@ -537,6 +539,7 @@ final class Admin
                                 }
                             }
                         }
+                        unset ($medium_keys, $classification_keys);
                     } else {
                         $this->message = $v->errors();
                         $this->status = 'error';
