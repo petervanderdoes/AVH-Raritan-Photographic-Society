@@ -255,7 +255,6 @@ class Client
                     $last_name = html_entity_decode($entry->{'Last_Name'});
                     $title = html_entity_decode($entry->{'Title'});
                     $score = html_entity_decode($entry->{'Score'});
-                    $award = empty($entry->{'Award'}) ? null : html_entity_decode($entry->{'Award'});
 
                     if ($entry_id != "") {
                         if ($score != "") {

@@ -183,7 +183,6 @@ final class Shortcodes extends ShortcodesAbstract
                         echo "<tr>";
                         echo "<td colspan=\"" . ($total_max_entries + 3) . "\" class=\"horizontal_separator\"></td>";
                         echo "</tr>\n";
-                        $prev_class = $classification;
                     }
 
                     // Are we at the beginning of a new medium?
@@ -498,18 +497,15 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<div class="gallery gallery-size-250">';
         echo '<ul class="gallery-row gallery-row-equal">';
         foreach ($entries as $entry) {
-            $classification = $entry->Classification;
-            $title = $entry->Title;
-            $award = $entry->Award;
             $user_info = get_userdata($entry->Member_ID);
 
             echo '<li class="gallery-item">';
             echo '	<div class="gallery-item-content">';
             echo '<div class="gallery-item-content-image">';
-            echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
+            echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
             echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
-            $caption = "$title<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
+            $caption = $entry->Title."<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
             echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
             echo '	</div></div>';
             echo '</li>' . "\n";
@@ -663,14 +659,6 @@ final class Shortcodes extends ShortcodesAbstract
                 $months[$key] = $recs['Month'];
                 $themes[$key] = $recs['Theme'];
             }
-        }
-
-        // Count the maximum number of awards in the selected competitions
-        $min_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month, 1);
-        if ($selected_month == 12) {
-            $max_date = sprintf("%d-%02s-%02s", $selected_year + 1, 1, 1);
-        } else {
-            $max_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month + 1, 1);
         }
 
         // Start displaying the form
@@ -933,7 +921,6 @@ final class Shortcodes extends ShortcodesAbstract
                 echo "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
                 echo "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
                 echo "  </div>\n</td>\n";
-                $prev_comp = $comp;
                 $column += 1;
             }
             // As necessary, pad the last row out with empty cells
