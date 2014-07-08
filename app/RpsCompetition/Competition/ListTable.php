@@ -111,6 +111,9 @@ class ListTable extends \WP_List_Table
 
     public function column_entries($competition)
     {
+        /**
+         * @var \wpdb $wpdb
+         */
         global $wpdb;
         $query_entries = new QueryEntries($this->rpsdb);
 

@@ -210,14 +210,14 @@ final class Admin
     /**
      * Show the Classification meta on the user profile page.
      *
-     * @param integer $user_id
+     * @param object $user
      *
      * @internal Hook: edit_user_profile
      * @internal Hook: show_user_profile
      */
-    public function actionUserProfile($user_id)
+    public function actionUserProfile($user)
     {
-        $userID = $user_id->ID;
+        $userID = $user->ID;
 
         $classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
 
@@ -700,6 +700,9 @@ final class Admin
      */
     private function displayPageCompetitionDelete()
     {
+        /**
+         * @var \wpdb $wpdb
+         */
         global $wpdb;
 
         $query_entries = new QueryEntries($this->rpsdb);
@@ -961,6 +964,9 @@ final class Admin
      */
     private function displayPageCompetitionOpenClose($action)
     {
+        /**
+         * @var \wpdb $wpdb
+         */
         global $wpdb;
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
