@@ -1087,6 +1087,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
         // Load the values into the dropdown list
         $previous_date = '';
+        /** @var QueryCompetitions $open_competition */
         foreach ($open_competitions as $open_competition) {
             if ($previous_date == $open_competition->Competition_Date) {
                 continue;
@@ -1096,7 +1097,7 @@ final class Shortcodes extends ShortcodesAbstract
             if ($current_competition->Competition_Date == $open_competition->Competition_Date) {
                 $selected = " SELECTED";
             }
-            echo "<OPTION value=\"" . $competition_date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($competition_date)) . " " . $open_competition->Theme . "</OPTION>\n";
+            echo "<OPTION value=\"" . $open_competition->Competition_Date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($open_competition->Competition_Date)) . " " . $open_competition->Theme . "</OPTION>\n";
         }
         echo "</SELECT>\n";
         echo "</td></tr>\n";
