@@ -722,7 +722,7 @@ final class Shortcodes extends ShortcodesAbstract
                 $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
                 $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
                 $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-                $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w', true));
+                $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w'));
                 $output .= '</a>';
                 $output .= '</div>';
                 $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
