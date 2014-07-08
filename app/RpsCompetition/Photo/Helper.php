@@ -91,7 +91,7 @@ class Helper
         if (file_exists($thumb_name)) {
             return true;
         }
-        /** @var Image $image */
+        /** @var \Intervention\Image\Image $image */
         $image = Image::make($image_name);
         $new_size = Constants::get_image_size($size);
         if ($new_size['height'] == null) {
