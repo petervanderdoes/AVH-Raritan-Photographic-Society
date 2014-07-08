@@ -12,9 +12,9 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
+use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Valitron\Validator;
-use RpsCompetition\Photo\Helper as PhotoHelper;
 
 /* @var $formBuilder FormBuilder */
 final class Admin
@@ -278,7 +278,7 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param array $actions
+     * @param array  $actions
      * @param object $user
      *
      * @internal Hook: user_row_actions
@@ -1457,7 +1457,9 @@ final class Admin
         $competition_ID = $query_competitions->insertCompetition($data);
 
         unset($query_competitions);
-        return !is_wp_error($competition_ID);    }
+
+        return !is_wp_error($competition_ID);
+    }
 
     /**
      * Update an entry after a POST
