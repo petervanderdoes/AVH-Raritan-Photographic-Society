@@ -22,6 +22,23 @@ class Helper
     }
 
     /**
+     * Get the path to the competition
+     * Returns the path to the competition where we store the photo entries.
+     *
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
+     *
+     * @return string
+     */
+    public function getCompetitionPath($competition_date, $classification, $medium)
+    {
+        $date = new \DateTime($competition_date);
+
+        return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
+    }
+
+    /**
      * Rename an already uploaded entry.
      * Besides renaming the original upload, we also rename all the thumbnails.
      *
@@ -91,7 +108,8 @@ class Helper
      * @param string $size
      *
      * @return bool
-     */public function rpsResizeImage($image_name, $thumb_name, $size)
+     */
+    public function rpsResizeImage($image_name, $thumb_name, $size)
     {
         // Open the original image
         if (!file_exists($image_name)) {
@@ -127,22 +145,5 @@ class Helper
         $image->save($thumb_name, Constants::IMAGE_QUALITY);
 
         return true;
-    }
-
-    /**
-     * Get the path to the competition
-     * Returns the path to the competition where we store the photo entries.
-     *
-     * @param string $competition_date
-     * @param string $classification
-     * @param string $medium
-     *
-     * @return string
-     */
-    public function getCompetitionPath($competition_date, $classification, $medium)
-    {
-        $date = new \DateTime($competition_date);
-
-        return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
     }
 }

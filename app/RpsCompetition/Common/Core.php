@@ -73,6 +73,4 @@ class Core
         $this->settings->set('js_url', plugins_url('js', $this->settings->get('plugin_basename')));
         $this->settings->set('css_url', plugins_url('css', $this->settings->get('plugin_basename')));
     }
-
-
 }

@@ -157,7 +157,7 @@ final class Shortcodes extends ShortcodesAbstract
                         // Iterate through all the accumulated scores for this member
                         foreach ($member_scores as $score_key => $score_array) {
                             // Print the scores for the submitted entries for this month
-                            $total_score_array =  count($score_array);
+                            $total_score_array = count($score_array);
                             for ($i = 0; $i < $total_score_array; $i++) {
                                 echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                             }

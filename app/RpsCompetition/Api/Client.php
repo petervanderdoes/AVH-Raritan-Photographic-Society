@@ -265,11 +265,11 @@ class Client
                                 die();
                             }
                             if ($sth->rowCount() < 1) {
-                                $warning .= "  <info>". (string) $comp_date.", $first_name $last_name, $title -- Row failed to update</info>\n";
+                                $warning .= "  <info>" . (string) $comp_date . ", $first_name $last_name, $title -- Row failed to update</info>\n";
                             }
                         }
                     } else {
-                        $warning .= "  <info>". (string) $comp_date.", $first_name $last_name, $title -- ID is Null -- skipped</info>\n";
+                        $warning .= "  <info>" . (string) $comp_date . ", $first_name $last_name, $title -- ID is Null -- skipped</info>\n";
                     }
                 }
             }

@@ -211,7 +211,7 @@ class ListTable extends \WP_List_Table
             if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
                 $theme_request = $this->request->input('filter-theme', 0);
                 list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($this->request->input('filter-season'));
-                $competitions = $query_competitions->getCompetitionByDates($season_start_date,$season_end_date);
+                $competitions = $query_competitions->getCompetitionByDates($season_start_date, $season_end_date);
 
                 $themes = array();
                 /** @var QueryCompetitions $competition */
