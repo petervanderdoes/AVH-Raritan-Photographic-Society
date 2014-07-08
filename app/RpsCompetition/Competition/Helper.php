@@ -7,7 +7,7 @@ class Helper
 {
     private $rpsdb;
 
-    function __construct(RpsDb $rpsdb)
+    public function __construct(RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;
     }
