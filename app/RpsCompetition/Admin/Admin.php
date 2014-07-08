@@ -777,7 +777,8 @@ final class Admin
             $updated = $this->updateCompetition();
         }
         $vars = (array('action', 'redirect', 'competition', 'wp_http_referer'));
-        for ($i = 0; $i < count($vars); $i += 1) {
+        $total_vars = count($vars);
+        for ($i = 0; $i < $total_vars; $i += 1) {
             $var = $vars[$i];
             $$var = $this->request->input($var, '');
         }
@@ -1092,7 +1093,8 @@ final class Admin
         }
 
         $vars = (array('action', 'redirect', 'entry', 'wp_http_referer'));
-        for ($i = 0; $i < count($vars); $i += 1) {
+        $total_vars = count($vars);
+        for ($i = 0; $i < $total_vars; $i += 1) {
             $var = $vars[$i];
             $$var = $this->request->input($var, '');
         }
