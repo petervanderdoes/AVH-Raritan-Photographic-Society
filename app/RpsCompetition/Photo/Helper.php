@@ -82,7 +82,16 @@ class Helper
         return ($path . rawurlencode($file_parts['filename'] . '_' . $size . '.jpg'));
     }
 
-    public function rpsResizeImage($image_name, $thumb_name, $size)
+    /**
+     * Resize an image.
+     * Resize a given image to the given size
+     *
+     * @param string $image_name
+     * @param string $thumb_name
+     * @param string $size
+     *
+     * @return bool
+     */public function rpsResizeImage($image_name, $thumb_name, $size)
     {
         // Open the original image
         if (!file_exists($image_name)) {

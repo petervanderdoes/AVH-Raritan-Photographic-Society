@@ -13,6 +13,13 @@ class RpsDb extends \wpdb
         $this->user_id = get_current_user_id();
     }
 
+    /**
+     * Return a given date in the mysql format.
+     *
+     * @param string $date
+     *
+     * @return string
+     */
     public function getMysqldate($date)
     {
         $date = new \DateTime($date);

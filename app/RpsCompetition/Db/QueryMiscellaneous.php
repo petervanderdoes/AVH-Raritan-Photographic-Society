@@ -78,7 +78,15 @@ class QueryMiscellaneous
         return $return;
     }
 
-    public function getEightsAndHigher($limit)
+    /**
+     * Get random entries that scored 8 or higher.
+     * The amount of records returned can be set by the $limit argument.
+     *
+     * @param int $limit Amount of records to return. Default is 5.
+     *
+     * @return mixed
+     */
+    public function getEightsAndHigher($limit = 5)
     {
         $sql = $this->rpsdb->prepare("SELECT c.Competition_Date, c.Classification,
                 if(c.Classification = 'Beginner',1,

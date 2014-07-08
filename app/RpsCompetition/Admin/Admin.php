@@ -301,7 +301,7 @@ final class Admin
      * @param int $screen
      *
      * @internal Hook: screen_layout_columns
-     * @return string
+     * @return int
      */
     public function filterScreenLayoutColumns($columns, $screen)
     {
