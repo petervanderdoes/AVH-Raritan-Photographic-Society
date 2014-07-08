@@ -992,6 +992,10 @@ final class Shortcodes extends ShortcodesAbstract
                         $competition_date = $this->request->input('comp_date');
                         $medium = $this->request->input('select_medium');
                         break;
+                    default:
+                        $competition_date = $this->request->input('comp_date');
+                        $medium = $this->request->input('medium');
+                        break;
                 }
                 $classification = $this->request->input('classification');
             } else {
