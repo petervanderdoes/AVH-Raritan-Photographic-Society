@@ -326,6 +326,9 @@ final class Shortcodes extends ShortcodesAbstract
         }
         $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
         $banquet_entries = $query_entries->query(array('where' => $where));
+        if (!is_array($banquet_entries)) {
+            $banquet_entries = array();
+        }
         $all_entries = array();
         foreach ($banquet_entries as $banquet_entry) {
             $all_entries[] = $banquet_entry->ID;
@@ -487,32 +490,35 @@ final class Shortcodes extends ShortcodesAbstract
 
         $entries = $query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
 
-        echo '<section class="rps-showcase-category-winner">';
-        echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
+        if (is_array($entries)) {
+            echo '<section class="rps-showcase-category-winner">';
+            echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
-        echo '<div class="suf-gradient suf-tile-topmost">';
-        echo '<h3>' . $class . '</h3>';
-        echo '</div>';
+            echo '<div class="suf-gradient suf-tile-topmost">';
+            echo '<h3>' . $class . '</h3>';
+            echo '</div>';
 
-        echo '<div class="gallery gallery-size-250">';
-        echo '<ul class="gallery-row gallery-row-equal">';
-        foreach ($entries as $entry) {
-            $user_info = get_userdata($entry->Member_ID);
+            echo '<div class="gallery gallery-size-250">';
+            echo '<ul class="gallery-row gallery-row-equal">';
+            foreach ($entries as $entry) {
+                $user_info = get_userdata($entry->Member_ID);
 
-            echo '<li class="gallery-item">';
-            echo '	<div class="gallery-item-content">';
-            echo '<div class="gallery-item-content-image">';
-            echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
-            echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
+                echo '<li class="gallery-item">';
+                echo '	<div class="gallery-item-content">';
+                echo '<div class="gallery-item-content-image">';
+                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry,
+                                                                         800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
+                echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
-            $caption = $entry->Title."<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
-            echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
-            echo '	</div></div>';
-            echo '</li>' . "\n";
+                $caption = $entry->Title . "<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
+                echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
+                echo '	</div></div>';
+                echo '</li>' . "\n";
+            }
+            echo '</ul>';
+            echo '</div>';
+            echo '</section>';
         }
-        echo '</ul>';
-        echo '</div>';
-        echo '</section>';
         unset($query_miscellaneous, $photo_helper);
     }
 
@@ -705,31 +711,34 @@ final class Shortcodes extends ShortcodesAbstract
             $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 194px'), true);
             $date_object = new \DateTime($this_month);
             $entries = $query_miscellaneous->getAllEntries($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
-            // Iterate through all the award winners and display each thumbnail in a grid
-            foreach ($entries as $recs) {
-                $user_info = get_userdata($recs->Member_ID);
-                $recs->FirstName = $user_info->user_firstname;
-                $recs->LastName = $user_info->user_lastname;
-                $recs->Username = $user_info->user_login;
+            if (is_array($entries)) {
+                // Iterate through all the award winners and display each thumbnail in a grid
+                /** @var QueryEntries $recs */
+                foreach ($entries as $recs) {
+                    $user_info = get_userdata($recs->Member_ID);
+                    $recs->FirstName = $user_info->user_firstname;
+                    $recs->LastName = $user_info->user_lastname;
+                    $recs->Username = $user_info->user_login;
 
-                // Grab a new record from the database
-                $title = $recs->Title;
-                $last_name = $recs->LastName;
-                $first_name = $recs->FirstName;
-                // Display this thumbnail in the the next available column
+                    // Grab a new record from the database
+                    $title = $recs->Title;
+                    $last_name = $recs->LastName;
+                    $first_name = $recs->FirstName;
+                    // Display this thumbnail in the the next available column
 
-                $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
-                $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
-                $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
-                $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-                $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w'));
-                $output .= '</a>';
-                $output .= '</div>';
-                $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-                $output .= $this->html->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
-                $output .= '</div>';
+                    $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
+                    $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
+                    $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
+                    $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+                    $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w'));
+                    $output .= '</a>';
+                    $output .= '</div>';
+                    $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
+                    $output .= $this->html->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
+                    $output .= '</div>';
 
-                $output .= '</figure>' . "\n";
+                    $output .= '</figure>' . "\n";
+                }
             }
             $output .= '</div>';
         }
@@ -1141,7 +1150,9 @@ final class Shortcodes extends ShortcodesAbstract
         // Build the rows of submitted images
         $num_rows = 0;
         $num_oversize = 0;
+        /** @var QueryEntries $recs */
         foreach ($entries as $recs) {
+            $competition = $query_competitions->getCompetitionById($recs->Competition_ID);
             $num_rows += 1;
             $row_style = $num_rows % 2 == 1 ? "odd_row" : "even_row";
 
@@ -1151,15 +1162,14 @@ final class Shortcodes extends ShortcodesAbstract
             // Thumbnail column
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $recs->Classification . ' ' . $recs->Medium . '">' . "\n";
+            echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium . '">' . "\n";
             echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
             echo '<td align="left" width="40%">';
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
             echo htmlentities($recs->Title) . "</td>\n";
+
             // File Name
             echo '<td align="left" width="25%">' . $recs->Client_File_Name . "</td>\n";
 
