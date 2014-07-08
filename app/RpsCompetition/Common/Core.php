@@ -43,7 +43,7 @@ class Core
     }
 
     /**
-     * @return the $_db_nonces
+     * @return string
      */
     public function getDbNonces()
     {
@@ -51,7 +51,7 @@ class Core
     }
 
     /**
-     * @return the $_default_nonces
+     * @return string
      */
     public function getDefaultNonces()
     {
