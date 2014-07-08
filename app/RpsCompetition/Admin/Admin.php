@@ -14,6 +14,7 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Settings;
 use Valitron\Validator;
+use RpsCompetition\Photo\Helper as PhotoHelper;
 
 /* @var $formBuilder FormBuilder */
 final class Admin
@@ -277,11 +278,11 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param unknown $actions
-     * @param unknown $user
+     * @param array $actions
+     * @param object $user
      *
      * @internal Hook: user_row_actions
-     * @return string
+     * @return array
      */
     public function filterRpsUserActionLinks($actions, $user)
     {
@@ -1075,6 +1076,7 @@ final class Admin
          */
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         $updated = false;
 
@@ -1120,7 +1122,7 @@ final class Admin
 
         $_user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
-        echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($entry, 200) . "\" />\n";
+        echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($entry, 200) . "\" />\n";
 
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));
         echo $formBuilder->outputField($formBuilder->text('title', $entry->Title));

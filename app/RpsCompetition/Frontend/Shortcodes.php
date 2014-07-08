@@ -503,7 +503,7 @@ final class Shortcodes extends ShortcodesAbstract
             echo '	<div class="gallery-item-content">';
             echo '<div class="gallery-item-content-image">';
             echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
+            echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
             $caption = $entry->Title."<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
             echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
