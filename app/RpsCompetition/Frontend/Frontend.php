@@ -10,10 +10,12 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Options;
+use RpsCompetition\Options\General as Options;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+
+;
 
 class Frontend
 {
@@ -125,7 +127,7 @@ class Frontend
                             // Need to create the destination folder?
                             copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
                             $data = array('Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $new_file_name);
-                            $this->rpsdb->addEntry($data);
+                            $query_entries->addEntry($data, get_current_user_id());
                         }
                     }
                 }
