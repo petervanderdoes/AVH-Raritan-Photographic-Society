@@ -11,7 +11,6 @@ class Core
      * @var string
      */
     private $comment;
-    private $db_version;
     private $options;
     private $settings;
 
