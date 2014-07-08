@@ -1457,12 +1457,7 @@ final class Admin
         $competition_ID = $query_competitions->insertCompetition($data);
 
         unset($query_competitions);
-        if (is_wp_error($competition_ID)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+        return !is_wp_error($competition_ID);    }
 
     /**
      * Update an entry after a POST
