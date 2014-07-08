@@ -149,7 +149,7 @@ class QueryCompetitions
      * @param string $date_end
      * @param string $output
      *
-     * @return QueryCompetitions|array
+     * @return array
      */
     public function getCompetitionByDates($date_start, $date_end, $output = OBJECT)
     {

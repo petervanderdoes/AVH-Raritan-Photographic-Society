@@ -214,6 +214,7 @@ class ListTable extends \WP_List_Table
                 $competitions = $query_competitions->getCompetitionByDates($season_start_date,$season_end_date);
 
                 $themes = array();
+                /** @var QueryCompetitions $competition */
                 foreach ($competitions as $competition) {
                     $themes[$competition->ID] = $competition->Theme;
                 }
