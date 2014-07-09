@@ -86,7 +86,7 @@ class ImageServiceProvider extends ServiceProvider
                     }
 
                     // define mime type
-                    $mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $content);
+                    //$mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $content);
 
                     // return http response
                     return new IlluminateResponse($content, 200, array(

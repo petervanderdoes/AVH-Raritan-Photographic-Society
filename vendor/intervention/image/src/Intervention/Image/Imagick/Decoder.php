@@ -88,7 +88,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
 
         // build image
         $image = $this->initFromImagick($core);
-        $image->mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $binary);
+        //$image->mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $binary);
 
         return $image;
     }
