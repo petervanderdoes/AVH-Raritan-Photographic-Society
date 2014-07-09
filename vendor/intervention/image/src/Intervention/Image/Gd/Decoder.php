@@ -43,9 +43,8 @@ class Decoder extends \Intervention\Image\AbstractDecoder
 
             default:
                 throw new \Intervention\Image\Exception\NotReadableException(
-                    "Unable to read image type ({$this->type}) only use JPG, PNG or GIF images with GD driver."
+                    "Unable to read image type. Only use JPG, PNG or GIF images with GD driver."
                 );
-                break;
         }
 
         // build image
@@ -120,6 +119,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
         imagealphablending($canvas, false);
         $transparent = imagecolorallocatealpha($canvas, 255, 255, 255, 127);
         imagefilledrectangle($canvas, 0, 0, $width, $height, $transparent);
+        imagecolortransparent($canvas, $transparent);
         imagealphablending($canvas, true);
 
         // copy original

@@ -1,5 +1,6 @@
 {
-	"name" : "RPS Competition",
+	"name" : "avh/rps-competition",
+    "description" : "Package written for the Raritan Photographic Society",
 	"type" : "wordpress-plugin",
 	"authors" : [{
 			"name" : "Peter van der Does",

@@ -1,24 +1,24 @@
 [
     {
         "name": "symfony/filesystem",
-        "version": "v2.5.0",
-        "version_normalized": "2.5.0.0",
+        "version": "v2.5.1",
+        "version_normalized": "2.5.1.0",
         "target-dir": "Symfony/Component/Filesystem",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/Filesystem.git",
-            "reference": "98e831eac836a0a5911626ce82684155f21d0e4d"
+            "reference": "92d5e2f4ebc89fa7573688caffa2363ed995843d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/Filesystem/zipball/98e831eac836a0a5911626ce82684155f21d0e4d",
-            "reference": "98e831eac836a0a5911626ce82684155f21d0e4d",
+            "url": "https://api.github.com/repos/symfony/Filesystem/zipball/92d5e2f4ebc89fa7573688caffa2363ed995843d",
+            "reference": "92d5e2f4ebc89fa7573688caffa2363ed995843d",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.3"
         },
-        "time": "2014-04-16 10:36:21",
+        "time": "2014-07-08 12:21:33",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -52,25 +52,25 @@
     },
     {
         "name": "symfony/config",
-        "version": "v2.5.0",
-        "version_normalized": "2.5.0.0",
+        "version": "v2.5.1",
+        "version_normalized": "2.5.1.0",
         "target-dir": "Symfony/Component/Config",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/Config.git",
-            "reference": "9c8caadb38ecc69ac35ab31af4d1996944b5a09f"
+            "reference": "94f0c86c76a74ec9d09ef361e1476d5a66be9ff2"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/Config/zipball/9c8caadb38ecc69ac35ab31af4d1996944b5a09f",
-            "reference": "9c8caadb38ecc69ac35ab31af4d1996944b5a09f",
+            "url": "https://api.github.com/repos/symfony/Config/zipball/94f0c86c76a74ec9d09ef361e1476d5a66be9ff2",
+            "reference": "94f0c86c76a74ec9d09ef361e1476d5a66be9ff2",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.3",
             "symfony/filesystem": "~2.3"
         },
-        "time": "2014-04-22 08:11:23",
+        "time": "2014-07-08 12:21:33",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -104,18 +104,18 @@
     },
     {
         "name": "symfony/dependency-injection",
-        "version": "v2.5.0",
-        "version_normalized": "2.5.0.0",
+        "version": "v2.5.1",
+        "version_normalized": "2.5.1.0",
         "target-dir": "Symfony/Component/DependencyInjection",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/DependencyInjection.git",
-            "reference": "5dfb4c2b74c4976efe1efa783370da656a2dd742"
+            "reference": "7bc387ce1fe800ac4f52275f2bf06f0beb927b27"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/DependencyInjection/zipball/5dfb4c2b74c4976efe1efa783370da656a2dd742",
-            "reference": "5dfb4c2b74c4976efe1efa783370da656a2dd742",
+            "url": "https://api.github.com/repos/symfony/DependencyInjection/zipball/7bc387ce1fe800ac4f52275f2bf06f0beb927b27",
+            "reference": "7bc387ce1fe800ac4f52275f2bf06f0beb927b27",
             "shasum": ""
         },
         "require": {
@@ -131,7 +131,7 @@
             "symfony/proxy-manager-bridge": "Generate service proxies to lazy load them",
             "symfony/yaml": ""
         },
-        "time": "2014-05-12 09:28:39",
+        "time": "2014-07-08 12:21:33",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -250,18 +250,18 @@
     },
     {
         "name": "illuminate/support",
-        "version": "v4.2.4",
-        "version_normalized": "4.2.4.0",
+        "version": "v4.2.6",
+        "version_normalized": "4.2.6.0",
         "target-dir": "Illuminate/Support",
         "source": {
             "type": "git",
             "url": "https://github.com/illuminate/support.git",
-            "reference": "976bdc0f42e9efd3dfa2e0eba11aba48a97113ac"
+            "reference": "d59811c8d3e0b7c2b9ffd2c480e698b3352472d0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/illuminate/support/zipball/976bdc0f42e9efd3dfa2e0eba11aba48a97113ac",
-            "reference": "976bdc0f42e9efd3dfa2e0eba11aba48a97113ac",
+            "url": "https://api.github.com/repos/illuminate/support/zipball/d59811c8d3e0b7c2b9ffd2c480e698b3352472d0",
+            "reference": "d59811c8d3e0b7c2b9ffd2c480e698b3352472d0",
             "shasum": ""
         },
         "require": {
@@ -271,7 +271,7 @@
             "jeremeamia/superclosure": "~1.0",
             "patchwork/utf8": "1.1.*"
         },
-        "time": "2014-06-13 20:42:27",
+        "time": "2014-06-29 00:06:59",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -302,24 +302,24 @@
     },
     {
         "name": "symfony/finder",
-        "version": "v2.5.0",
-        "version_normalized": "2.5.0.0",
+        "version": "v2.5.1",
+        "version_normalized": "2.5.1.0",
         "target-dir": "Symfony/Component/Finder",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/Finder.git",
-            "reference": "307aad2c541bbdf43183043645e186ef2cd6b973"
+            "reference": "614f0f46f81873d952684e355af7acceb85409b9"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/Finder/zipball/307aad2c541bbdf43183043645e186ef2cd6b973",
-            "reference": "307aad2c541bbdf43183043645e186ef2cd6b973",
+            "url": "https://api.github.com/repos/symfony/Finder/zipball/614f0f46f81873d952684e355af7acceb85409b9",
+            "reference": "614f0f46f81873d952684e355af7acceb85409b9",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.3"
         },
-        "time": "2014-05-22 13:47:45",
+        "time": "2014-07-08 12:21:33",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -353,8 +353,8 @@
     },
     {
         "name": "illuminate/filesystem",
-        "version": "v4.2.4",
-        "version_normalized": "4.2.4.0",
+        "version": "v4.2.6",
+        "version_normalized": "4.2.6.0",
         "target-dir": "Illuminate/Filesystem",
         "source": {
             "type": "git",
@@ -400,8 +400,8 @@
     },
     {
         "name": "illuminate/config",
-        "version": "v4.2.4",
-        "version_normalized": "4.2.4.0",
+        "version": "v4.2.6",
+        "version_normalized": "4.2.6.0",
         "target-dir": "Illuminate/Config",
         "source": {
             "type": "git",
@@ -447,17 +447,17 @@
     },
     {
         "name": "intervention/image",
-        "version": "2.0.4",
-        "version_normalized": "2.0.4.0",
+        "version": "2.0.5",
+        "version_normalized": "2.0.5.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Intervention/image.git",
-            "reference": "edd507dacfacab7fcfcee6c5fcfad3335d0ec85f"
+            "reference": "fc0c20277260f09aa0bd172d66d8b39957c50078"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Intervention/image/zipball/edd507dacfacab7fcfcee6c5fcfad3335d0ec85f",
-            "reference": "edd507dacfacab7fcfcee6c5fcfad3335d0ec85f",
+            "url": "https://api.github.com/repos/Intervention/image/zipball/fc0c20277260f09aa0bd172d66d8b39957c50078",
+            "reference": "fc0c20277260f09aa0bd172d66d8b39957c50078",
             "shasum": ""
         },
         "require": {
@@ -475,7 +475,7 @@
             "ext-imagick": "to use Imagick based image processing.",
             "intervention/imagecache": "Caching extension for the Intervention Image library"
         },
-        "time": "2014-06-16 09:52:34",
+        "time": "2014-06-30 15:30:03",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -785,24 +785,24 @@
     },
     {
         "name": "symfony/yaml",
-        "version": "v2.5.0",
-        "version_normalized": "2.5.0.0",
+        "version": "v2.5.1",
+        "version_normalized": "2.5.1.0",
         "target-dir": "Symfony/Component/Yaml",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/Yaml.git",
-            "reference": "b4b09c68ec2f2727574544ef0173684281a5033c"
+            "reference": "1057e87364c0b38b50f5695fc9df9dd189036bec"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/Yaml/zipball/b4b09c68ec2f2727574544ef0173684281a5033c",
-            "reference": "b4b09c68ec2f2727574544ef0173684281a5033c",
+            "url": "https://api.github.com/repos/symfony/Yaml/zipball/1057e87364c0b38b50f5695fc9df9dd189036bec",
+            "reference": "1057e87364c0b38b50f5695fc9df9dd189036bec",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.3"
         },
-        "time": "2014-05-16 14:25:18",
+        "time": "2014-07-08 12:21:33",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -882,17 +882,17 @@
     },
     {
         "name": "phpunit/phpunit-mock-objects",
-        "version": "2.1.4",
-        "version_normalized": "2.1.4.0",
+        "version": "2.1.5",
+        "version_normalized": "2.1.5.0",
         "source": {
             "type": "git",
             "url": "https://github.com/sebastianbergmann/phpunit-mock-objects.git",
-            "reference": "1a894a16b6c15fcdc5ef2b110f0e6233952c9b0f"
+            "reference": "7878b9c41edb3afab92b85edf5f0981014a2713a"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/1a894a16b6c15fcdc5ef2b110f0e6233952c9b0f",
-            "reference": "1a894a16b6c15fcdc5ef2b110f0e6233952c9b0f",
+            "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/7878b9c41edb3afab92b85edf5f0981014a2713a",
+            "reference": "7878b9c41edb3afab92b85edf5f0981014a2713a",
             "shasum": ""
         },
         "require": {
@@ -905,7 +905,7 @@
         "suggest": {
             "ext-soap": "*"
         },
-        "time": "2014-06-07 16:22:57",
+        "time": "2014-06-12 07:22:15",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -1086,17 +1086,17 @@
     },
     {
         "name": "phpunit/php-code-coverage",
-        "version": "2.0.8",
-        "version_normalized": "2.0.8.0",
+        "version": "2.0.9",
+        "version_normalized": "2.0.9.0",
         "source": {
             "type": "git",
             "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-            "reference": "58401826c8cfc8fd689b60026e91c337df374bca"
+            "reference": "ed8ac99ce38c3fd134128c898f7ca74665abef7f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/58401826c8cfc8fd689b60026e91c337df374bca",
-            "reference": "58401826c8cfc8fd689b60026e91c337df374bca",
+            "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/ed8ac99ce38c3fd134128c898f7ca74665abef7f",
+            "reference": "ed8ac99ce38c3fd134128c898f7ca74665abef7f",
             "shasum": ""
         },
         "require": {
@@ -1116,7 +1116,7 @@
             "ext-xdebug": ">=2.2.1",
             "ext-xmlwriter": "*"
         },
-        "time": "2014-05-26 14:55:24",
+        "time": "2014-06-29 08:14:40",
         "type": "library",
         "extra": {
             "branch-alias": {
