@@ -1084,6 +1084,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo "<td width=\"64%\" align=\"left\">\n";
 
         $previous_date = '';
+        $open_competitions_options = array();
         foreach ($open_competitions as $open_competition) {
             if ($previous_date == $open_competition->Competition_Date) {
                 continue;
@@ -1138,7 +1139,6 @@ final class Shortcodes extends ShortcodesAbstract
         $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
         // Build the rows of submitted images
         $num_rows = 0;
-        $num_oversize = 0;
         /** @var QueryEntries $recs */
         foreach ($entries as $recs) {
             $competition = $query_competitions->getCompetitionById($recs->Competition_ID);
