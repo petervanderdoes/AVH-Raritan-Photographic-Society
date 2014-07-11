@@ -149,7 +149,7 @@ class ListTable extends \WP_List_Table
 
         $actions = array();
         if ($competition->Scored == 'Y') {
-            $actions['score'] = '<a class="adm-scored" data-scored="Yes" data-id="' . $competition->ID . '">' . 'No' . '</a>';
+            $actions['score'] = '<a class="adm-scored" data-scored="Yes" data-id="' . $competition->ID . '">No</a>';
         } else {
             $actions['score'] = '<a class="adm-scored" data-scored="No" data-id="' . $competition->ID . '">' . 'Yes' . '</a>';
         }
