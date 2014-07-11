@@ -398,7 +398,6 @@ class Frontend
 
             $user = wp_get_current_user();
             $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
-            $full_path = $path . '/' . $dest_name;
             // Need to create the destination folder?
             if (!is_dir($path)) {
                 mkdir($path, 0755);
@@ -408,7 +407,7 @@ class Frontend
             if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
 
                 // Resize the image and deposit it in the destination directory
-                $photo_helper->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
+                $photo_helper->rpsResizeImage($uploaded_file_name, $path, $dest_name . '.jpg', 'FULL');
                 $resized = 1;
             } else {
                 // The uploaded image does not need to be resized so just move it to the destination directory
@@ -422,7 +421,7 @@ class Frontend
                     return;
                 }
             }
-            $server_file_name = str_replace($this->request->server('DOCUMENT_ROOT'), '', $full_path . '.jpg');
+            $server_file_name = str_replace($this->request->server('DOCUMENT_ROOT'), '', $path . '/' . $dest_name . '.jpg');
             $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
             $result = $query_entries->addEntry($data, get_current_user_id());
             if ($result === false) {

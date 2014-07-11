@@ -86,7 +86,7 @@ class Helper
         }
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir . '/' . $thumb_name, $size);
+            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
         }
 
         $p = explode('/', $file_parts['dirname']);
@@ -109,13 +109,13 @@ class Helper
      *
      * @return bool
      */
-    public function rpsResizeImage($image_name, $thumb_name, $size)
+    public function rpsResizeImage($image_name, $thumb_path, $thumb_name, $size)
     {
         // Open the original image
         if (!file_exists($image_name)) {
             return false;
         }
-        if (file_exists($thumb_name)) {
+        if (file_exists($thumb_path . '/' . $thumb_name)) {
             return true;
         }
         /** @var \Intervention\Image\Image $image */
@@ -142,7 +142,7 @@ class Helper
                     $constraint->aspectRatio();
                 });
         }
-        $image->save($thumb_name, Constants::IMAGE_QUALITY);
+        $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
 
         return true;
     }
