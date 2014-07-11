@@ -44,4 +44,4 @@ checks:
         no_short_open_tag: true
         one_class_per_file: true
 tools:
-    external_code_coverage: true
+    external_code_coverage: false
