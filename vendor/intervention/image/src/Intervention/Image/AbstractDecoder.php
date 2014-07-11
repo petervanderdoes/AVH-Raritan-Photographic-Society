@@ -128,7 +128,7 @@ abstract class AbstractDecoder
      */
     public function isBinary()
     {
-        return true;
+        return false;
         if (is_string($this->data)) {
             $mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $this->data);
             return (substr($mime, 0, 4) != 'text' && $mime != 'application/x-empty');
