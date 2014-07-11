@@ -998,7 +998,7 @@ final class Shortcodes extends ShortcodesAbstract
 
                 case 'select_medium':
                     $competition_date = $this->request->input('comp_date');
-                    $medium = $this->request->input('select_medium');
+                    $medium = $this->request->input('selected_medium');
                     break;
                 default:
                     $competition_date = $this->request->input('comp_date');
@@ -1083,39 +1083,21 @@ final class Shortcodes extends ShortcodesAbstract
         echo "<td width=\"33%\" align=\"right\"><b>Competition Date:&nbsp;&nbsp;</b></td>\n";
         echo "<td width=\"64%\" align=\"left\">\n";
 
-        echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
-        // Load the values into the dropdown list
         $previous_date = '';
-        /** @var QueryCompetitions $open_competition */
         foreach ($open_competitions as $open_competition) {
             if ($previous_date == $open_competition->Competition_Date) {
                 continue;
             }
             $previous_date = $open_competition->Competition_Date;
-            $selected = '';
-            if ($current_competition->Competition_Date == $open_competition->Competition_Date) {
-                $selected = " SELECTED";
-            }
-            echo "<OPTION value=\"" . $open_competition->Competition_Date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($open_competition->Competition_Date)) . " " . $open_competition->Theme . "</OPTION>\n";
+            $open_competitions_options[$open_competition->Competition_Date] = strftime('%d-%b-%Y', strtotime($open_competition->Competition_Date)) . " " . $open_competition->Theme;
         }
-        echo "</SELECT>\n";
+        echo $this->formBuilder->select('select_comp', $open_competitions_options, $current_competition->Competition_Date, array('onchange' => 'submit_form(\'select_comp\')'));
         echo "</td></tr>\n";
 
         // Competition medium dropdown list
         echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
         echo "<td width=\"64%\" align=\"left\">\n";
-        echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
-
-        // Load the values into the dropdown list
-        $medium_array = $competition_helper->getMedium($open_competitions);
-        foreach ($medium_array as $comp_medium) {
-            $selected = '';
-            if ($current_competition->Medium == $comp_medium) {
-                $selected = " SELECTED";
-            }
-            echo "<OPTION value=\"" . $comp_medium . "\"$selected>" . $comp_medium . "</OPTION>\n";
-        }
-        echo "</SELECT>\n";
+        echo $this->formBuilder->select('selected_medium', $competition_helper->getMedium($open_competitions), $current_competition->Medium, array('onchange' => 'submit_form(\'select_medium\')'));
         echo "</td></tr>\n";
 
         // Display the Classification and Theme for the selected competition
@@ -1188,22 +1170,11 @@ final class Shortcodes extends ShortcodesAbstract
                 $size = array(0, 0);
             }
             if ($recs->Client_File_Name > "") {
-                if ($size[0] > 1024) {
-                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[0] . "</td>\n";
-                } else {
-                    echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
-                }
-                if ($size[1] > 768) {
-                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[1] . "</td>\n";
-                } else {
-                    echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
-                }
+                echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
+                echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
             } else {
                 echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
                 echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
-            }
-            if ($size[0] > 1024 || $size[1] > 768) {
-                $num_oversize += 1;
             }
         }
 
@@ -1223,17 +1194,20 @@ final class Shortcodes extends ShortcodesAbstract
 
         // Buttons at the bottom of the list of submitted images
         echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
+        echo '<span>';
         // Don't show the Add button if the max number of images per member reached
         if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
-            echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
+            echo $this->formBuilder->input('submit[add]','Add',array('type'=>'submit','onclick'=>'submit_form(\'add\')')). "&nbsp;";
         }
         if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
-            echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
+            echo $this->formBuilder->input('submit[edit_title]','Change Title',array('type'=>'submit','onclick'=>'submit_form(\'add\')')). "&nbsp;";
+            //echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
         }
         if ($num_rows > 0) {
-            echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
+            echo $this->formBuilder->input('submit[delete]','Remove',array('type'=>'submit','onclick'=>'return  confirmSubmit()'));
+            //echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
         }
-
+        echo '</span></td></tr>';
         // All done, close out the table and the form
         echo "</table>\n</form>\n<br />\n";
 

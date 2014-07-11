@@ -21,7 +21,7 @@ class Helper
             if (in_array($competition->Medium, $medium)) {
                 continue;
             }
-            $medium[] = $competition->Medium;
+            $medium[$competition->Medium] = $competition->Medium;
         }
 
         return $medium;
