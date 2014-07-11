@@ -445,18 +445,17 @@ final class Admin
     }
 
     /**
-     * Show the page to add a competition
+     * Handle the menu Competition Add
      */
     public function menuCompetitionAdd()
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
-
-        $data = array();
-
         $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition_add');
 
-        $formDefaultOptions = array(
+        $data = array();
+
+        $form_default_options = array(
             'date'           => '',
             'theme'          => '',
             'medium'         => array(
@@ -475,14 +474,14 @@ final class Admin
             'special-event'  => false
         );
 
-        $formOptions = $formDefaultOptions;
+        $form_options = $form_default_options;
         if ($this->request->has('action')) {
             switch ($this->request->input('action')) {
                 case 'add':
                     check_admin_referer(get_current_user_id());
-                    $formNewOptions = $this->request->input($formBuilder->getOptionName());
+                    $form_new_options = $this->request->input($formBuilder->getOptionName());
 
-                    $v = new Validator($formNewOptions);
+                    $v = new Validator($form_new_options);
                     $v->rule('required', 'date')
                         ->message('{field} is required')
                         ->label('Date');
@@ -496,13 +495,13 @@ final class Admin
                     $v->rule('required', 'classification')->message('No classification selected. At least one classification needs to be selected');
                     $v->validate();
 
-                    foreach ($formDefaultOptions['medium'] as $key => $value) {
-                        $formNewOptions['medium'][$key] = avh_array_get($formNewOptions, 'medium.' . $key, false);
+                    foreach ($form_default_options['medium'] as $key => $value) {
+                        $form_new_options['medium'][$key] = avh_array_get($form_new_options, 'medium.' . $key, false);
                     }
-                    foreach ($formDefaultOptions['classification'] as $key => $value) {
-                        $formNewOptions['classification'][$key] = avh_array_get($formNewOptions, 'classification.' . $key, false);
+                    foreach ($form_default_options['classification'] as $key => $value) {
+                        $form_new_options['classification'][$key] = avh_array_get($form_new_options, 'classification.' . $key, false);
                     }
-                    $formNewOptions['special-event'] = avh_array_get($formNewOptions, 'special-event', false);
+                    $form_new_options['special-event'] = avh_array_get($form_new_options, 'special-event', false);
 
                     $x = $v->errors();
                     if (empty($x)) {
@@ -523,15 +522,15 @@ final class Admin
                             'class_s' => 'Salon'
                         );
 
-                        $data['Competition_Date'] = $formNewOptions['date'];
-                        $data['Theme'] = $formNewOptions['theme'];
-                        $data['Max_Entries'] = $formNewOptions['max-entries'];
-                        $data['Num_Judges'] = $formNewOptions['judges'];
-                        $data['Special_Event'] = ($formNewOptions['special-event'] ? 'Y' : 'N');
-                        $medium_keys = array_keys($formNewOptions['Medium']);
+                        $data['Competition_Date'] = $form_new_options['date'];
+                        $data['Theme'] = $form_new_options['theme'];
+                        $data['Max_Entries'] = $form_new_options['max-entries'];
+                        $data['Num_Judges'] = $form_new_options['judges'];
+                        $data['Special_Event'] = ($form_new_options['special-event'] ? 'Y' : 'N');
+                        $medium_keys = array_keys($form_new_options['Medium']);
                         foreach ($medium_keys as $medium_key) {
                             $data['Medium'] = $medium_convert[$medium_key];
-                            $classification_keys = array_keys($formNewOptions['classification']);
+                            $classification_keys = array_keys($form_new_options['classification']);
                             foreach ($classification_keys as $classification_key) {
                                 $data['Classification'] = $classification_convert[$classification_key];
                                 $competition_ID = $query_competitions->insertCompetition($data);
@@ -546,96 +545,13 @@ final class Admin
                         $this->status = 'error';
                     }
                     $this->displayMessage();
-                    $formOptions = $formNewOptions;
+                    $form_options = $form_new_options;
                     break;
             }
             unset($query_competitions);
         }
 
-        $this->displayAdminHeader('Add Competition');
-
-        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')));
-        echo $formBuilder->openTable();
-        echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
-        echo $formBuilder->outputField($formBuilder->text('date', $formOptions['date']));
-        echo $formBuilder->outputLabel($formBuilder->label('theme', 'Theme'));
-        echo $formBuilder->outputField($formBuilder->text('theme', $formOptions['theme'], array('maxlength' => '32')));
-
-        $array_medium = array(
-            'medium_bwd' => array(
-                'text'    => 'B&W Digital',
-                'value'   => $formOptions['medium']['medium_bwd'],
-                'checked' => $formOptions['medium']['medium_bwd']
-            ),
-            'medium_cd'  => array(
-                'text'    => 'Color Digital',
-                'value'   => $formOptions['medium']['medium_cd'],
-                'checked' => $formOptions['medium']['medium_cd']
-            ),
-            'medium_bwp' => array(
-                'text'    => 'B&W Print',
-                'value'   => $formOptions['medium']['medium_bwp'],
-                'checked' => $formOptions['medium']['medium_bwp']
-            ),
-            'medium_cp'  => array(
-                'text'    => 'Color Digital',
-                'value'   => $formOptions['medium']['medium_cp'],
-                'checked' => $formOptions['medium']['medium_cp']
-            )
-        );
-
-        echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
-        echo $formBuilder->checkboxes('medium', $array_medium);
-        unset($array_medium);
-
-        $array_classification = array(
-            'class_b' => array(
-                'text'    => 'Beginner',
-                'value'   => $formOptions['classification']['class_b'],
-                'checked' => $formOptions['classification']['class_b']
-            ),
-            'class_a' => array(
-                'text'    => 'Advanced',
-                'value'   => $formOptions['classification']['class_a'],
-                'checked' => $formOptions['classification']['class_a']
-            ),
-            'class_s' => array(
-                'text'    => 'Salon',
-                'value'   => $formOptions['classification']['class_s'],
-                'checked' => $formOptions['classification']['class_s']
-            )
-        );
-
-        echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
-        echo $formBuilder->checkboxes('classification', $array_classification);
-        unset($array_classification);
-
-        $array_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
-        echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
-        echo $formBuilder->outputField($formBuilder->select('max-entries', $array_max_entries, $formOptions['max-entries']));
-        unset($array_max_entries);
-
-        $array_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
-        echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
-        echo $formBuilder->outputField($formBuilder->select('judges', $array_judges, $formOptions['judges']));
-        unset($array_judges);
-
-        $array_special_event = array('special-event' => array('text' => '', 'checked' => $formOptions['special-event']));
-        echo $formBuilder->outputLabel($formBuilder->label('special-event', 'Special Event'));
-        echo $formBuilder->outputField($formBuilder->checkbox('special-event', $formOptions['special-event'], $formOptions['special-event']));
-        unset($array_special_event);
-
-        echo $formBuilder->closeTable();
-        echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
-        echo $formBuilder->hidden('action', 'add');
-        echo $formBuilder->fieldNonce(get_current_user_id());
-        echo $formBuilder->close();
-        echo '<script type="text/javascript">' . "\n";
-        echo 'jQuery(function($) {' . "\n";
-        echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
-        echo '});', "\n";
-        echo "</script>";
-        $this->displayAdminFooter();
+        $this->displayPageCompetitionAdd($formBuilder, $form_options);
     }
 
     /**
@@ -693,6 +609,100 @@ final class Admin
             echo '<div id="message"	class="' . $status . '">';
             echo '<p><strong>' . $message . '</strong></p></div>';
         }
+    }
+
+    /**
+     * Display the page for adding a competition.
+     *
+     * @param FormBuilder $formBuilder
+     * @param array       $form_options
+     */
+    private function displayPageCompetitionAdd($formBuilder, $form_options)
+    {
+        $this->displayAdminHeader('Add Competition');
+
+        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')));
+        echo $formBuilder->openTable();
+        echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
+        echo $formBuilder->outputField($formBuilder->text('date', $form_options['date']));
+        echo $formBuilder->outputLabel($formBuilder->label('theme', 'Theme'));
+        echo $formBuilder->outputField($formBuilder->text('theme', $form_options['theme'], array('maxlength' => '32')));
+
+        $array_medium = array(
+            'medium_bwd' => array(
+                'text'    => 'B&W Digital',
+                'value'   => $form_options['medium']['medium_bwd'],
+                'checked' => $form_options['medium']['medium_bwd']
+            ),
+            'medium_cd'  => array(
+                'text'    => 'Color Digital',
+                'value'   => $form_options['medium']['medium_cd'],
+                'checked' => $form_options['medium']['medium_cd']
+            ),
+            'medium_bwp' => array(
+                'text'    => 'B&W Print',
+                'value'   => $form_options['medium']['medium_bwp'],
+                'checked' => $form_options['medium']['medium_bwp']
+            ),
+            'medium_cp'  => array(
+                'text'    => 'Color Digital',
+                'value'   => $form_options['medium']['medium_cp'],
+                'checked' => $form_options['medium']['medium_cp']
+            )
+        );
+
+        echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
+        echo $formBuilder->checkboxes('medium', $array_medium);
+        unset($array_medium);
+
+        $array_classification = array(
+            'class_b' => array(
+                'text'    => 'Beginner',
+                'value'   => $form_options['classification']['class_b'],
+                'checked' => $form_options['classification']['class_b']
+            ),
+            'class_a' => array(
+                'text'    => 'Advanced',
+                'value'   => $form_options['classification']['class_a'],
+                'checked' => $form_options['classification']['class_a']
+            ),
+            'class_s' => array(
+                'text'    => 'Salon',
+                'value'   => $form_options['classification']['class_s'],
+                'checked' => $form_options['classification']['class_s']
+            )
+        );
+
+        echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
+        echo $formBuilder->checkboxes('classification', $array_classification);
+        unset($array_classification);
+
+        $array_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
+        echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
+        echo $formBuilder->outputField($formBuilder->select('max-entries', $array_max_entries, $form_options['max-entries']));
+        unset($array_max_entries);
+
+        $array_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
+        echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
+        echo $formBuilder->outputField($formBuilder->select('judges', $array_judges, $form_options['judges']));
+        unset($array_judges);
+
+        $array_special_event = array('special-event' => array('text' => '', 'checked' => $form_options['special-event']));
+        echo $formBuilder->outputLabel($formBuilder->label('special-event', 'Special Event'));
+        echo $formBuilder->outputField($formBuilder->checkbox('special-event', $form_options['special-event'], $form_options['special-event']));
+        unset($array_special_event);
+
+        echo $formBuilder->closeTable();
+        echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
+        echo $formBuilder->hidden('action', 'add');
+        echo $formBuilder->fieldNonce(get_current_user_id());
+        echo $formBuilder->close();
+        echo '<script type="text/javascript">' . "\n";
+        echo 'jQuery(function($) {' . "\n";
+        echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
+        echo '});', "\n";
+        echo "</script>";
+        $this->displayAdminFooter();
     }
 
     /**
