@@ -104,6 +104,7 @@ class Helper
      * Resize a given image to the given size
      *
      * @param string $image_name
+     * @param string $thumb_path
      * @param string $thumb_name
      * @param string $size
      *
