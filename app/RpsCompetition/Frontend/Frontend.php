@@ -293,148 +293,147 @@ class Frontend
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request);
 
-        if (is_object($post) && $post->ID == 89) {
-            if ($this->request->has('post')) {
-                $redirect_to = $this->request->input('wp_get_referer');
+        if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-                // Just return if user clicked Cancel
-                if ($this->request->has('cancel')) {
-                    wp_redirect($redirect_to);
-                    exit();
-                }
+            $redirect_to = $this->request->input('wp_get_referer');
 
-                $file = $this->request->file('file_name');
-                if ($file === null) {
-                    $this->settings->errmsg = 'You did not select a file to upload';
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                if (!$file->isValid()) {
-                    $this->settings->errmsg = $file->getErrorMessage();
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                // Verify that the uploaded image is a JPEG
-                $uploaded_file_name = $file->getRealPath();
-                $uploaded_file_info = getimagesize($uploaded_file_name);
-                if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
-                    $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-                if (!$this->request->has('title')) {
-                    $this->settings->errmsg = 'Please enter your image title in the Title field.';
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                // Retrieve and parse the selected competition cookie
-                if ($this->request->hasCookie('RPS_MyEntries')) {
-                    list ($comp_date, $classification, $medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
-                } else {
-                    $this->settings->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                $recs = $query_competitions->getCompetitionByDateClassMedium($comp_date, $classification, $medium, ARRAY_A);
-                if ($recs) {
-                    $comp_id = $recs['ID'];
-                    $max_entries = $recs['Max_Entries'];
-                } else {
-                    $this->settings->errmsg = "Upload Form Error<br>Competition $comp_date/$classification/$medium not found in database<br>";
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                // Prepare the title and client file name for storing in the database
-                if (get_magic_quotes_gpc()) {
-                    $title = stripslashes(trim($this->request->input('title')));
-                } else {
-                    $title = trim($this->request->input('title'));
-                }
-                $client_file_name = $file->getClientOriginalName();
-
-                // Before we go any further, make sure the title is not a duplicate of
-                // an entry already submitted to this competition. Duplicate title result in duplicate
-                // file names on the server
-                if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
-                    $this->settings->errmsg = "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.";
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                // Do a final check that the user hasn't exceeded the maximum images per competition.
-                // If we don't check this at the last minute it may be possible to exceed the
-                // maximum images per competition by having two upload windows open simultaneously.
-                $max_per_id = $query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
-                if ($max_per_id >= $max_entries) {
-                    $this->settings->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
-                if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
-                    $x = $this->settings->get('club_max_entries_per_member_per_date');
-                    $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-
-                // Move the file to its final location
-                $path = $this->request->server('DOCUMENT_ROOT') . $photo_helper->getCompetitionPath($comp_date, $classification, $medium);
-
-                $user = wp_get_current_user();
-                $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
-                $full_path = $path . '/' . $dest_name;
-                // Need to create the destination folder?
-                if (!is_dir($path)) {
-                    mkdir($path, 0755);
-                }
-
-                // If the .jpg file is too big resize it
-                if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
-
-                    // Resize the image and deposit it in the destination directory
-                    $photo_helper->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
-                    $resized = 1;
-                } else {
-                    // The uploaded image does not need to be resized so just move it to the destination directory
-                    $resized = 0;
-                    try {
-                        $file->move($path, $dest_name . '.jpg');
-                    } catch (FileException $e) {
-                        $this->settings->errmsg = $e->getMessage();
-                        unset($query_entries, $query_competitions);
-
-                        return;
-                    }
-                }
-                $server_file_name = str_replace($this->request->server('DOCUMENT_ROOT'), '', $full_path . '.jpg');
-                $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
-                $result = $query_entries->addEntry($data, get_current_user_id());
-                if ($result === false) {
-                    $this->settings->errmsg = "Failed to INSERT entry record into database";
-                    unset($query_entries, $query_competitions);
-
-                    return;
-                }
-                $query = build_query(array('resized' => $resized));
-                wp_redirect($redirect_to . '/?' . $query);
+            // Just return if user clicked Cancel
+            if ($this->request->has('cancel')) {
+                wp_redirect($redirect_to);
                 exit();
             }
+
+            $file = $this->request->file('file_name');
+            if ($file === null) {
+                $this->settings->errmsg = 'You did not select a file to upload';
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            if (!$file->isValid()) {
+                $this->settings->errmsg = $file->getErrorMessage();
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            // Verify that the uploaded image is a JPEG
+            $uploaded_file_name = $file->getRealPath();
+            $uploaded_file_info = getimagesize($uploaded_file_name);
+            if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
+                $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+            if (!$this->request->has('title')) {
+                $this->settings->errmsg = 'Please enter your image title in the Title field.';
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            // Retrieve and parse the selected competition cookie
+            if ($this->request->hasCookie('RPS_MyEntries')) {
+                list ($comp_date, $classification, $medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
+            } else {
+                $this->settings->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            $recs = $query_competitions->getCompetitionByDateClassMedium($comp_date, $classification, $medium, ARRAY_A);
+            if ($recs) {
+                $comp_id = $recs['ID'];
+                $max_entries = $recs['Max_Entries'];
+            } else {
+                $this->settings->errmsg = "Upload Form Error<br>Competition $comp_date/$classification/$medium not found in database<br>";
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            // Prepare the title and client file name for storing in the database
+            if (get_magic_quotes_gpc()) {
+                $title = stripslashes(trim($this->request->input('title')));
+            } else {
+                $title = trim($this->request->input('title'));
+            }
+            $client_file_name = $file->getClientOriginalName();
+
+            // Before we go any further, make sure the title is not a duplicate of
+            // an entry already submitted to this competition. Duplicate title result in duplicate
+            // file names on the server
+            if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
+                $this->settings->errmsg = "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.";
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            // Do a final check that the user hasn't exceeded the maximum images per competition.
+            // If we don't check this at the last minute it may be possible to exceed the
+            // maximum images per competition by having two upload windows open simultaneously.
+            $max_per_id = $query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
+            if ($max_per_id >= $max_entries) {
+                $this->settings->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
+            if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
+                $x = $this->settings->get('club_max_entries_per_member_per_date');
+                $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+
+            // Move the file to its final location
+            $path = $this->request->server('DOCUMENT_ROOT') . $photo_helper->getCompetitionPath($comp_date, $classification, $medium);
+
+            $user = wp_get_current_user();
+            $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
+            $full_path = $path . '/' . $dest_name;
+            // Need to create the destination folder?
+            if (!is_dir($path)) {
+                mkdir($path, 0755);
+            }
+
+            // If the .jpg file is too big resize it
+            if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
+
+                // Resize the image and deposit it in the destination directory
+                $photo_helper->rpsResizeImage($uploaded_file_name, $full_path . '.jpg', 'FULL');
+                $resized = 1;
+            } else {
+                // The uploaded image does not need to be resized so just move it to the destination directory
+                $resized = 0;
+                try {
+                    $file->move($path, $dest_name . '.jpg');
+                } catch (FileException $e) {
+                    $this->settings->errmsg = $e->getMessage();
+                    unset($query_entries, $query_competitions, $photo_helper);
+
+                    return;
+                }
+            }
+            $server_file_name = str_replace($this->request->server('DOCUMENT_ROOT'), '', $full_path . '.jpg');
+            $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
+            $result = $query_entries->addEntry($data, get_current_user_id());
+            if ($result === false) {
+                $this->settings->errmsg = "Failed to INSERT entry record into database";
+                unset($query_entries, $query_competitions, $photo_helper);
+
+                return;
+            }
+            $query = build_query(array('resized' => $resized));
+            wp_redirect($redirect_to . '/?' . $query);
+            exit();
         }
         unset($query_entries, $query_competitions, $photo_helper);
     }
