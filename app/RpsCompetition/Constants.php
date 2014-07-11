@@ -40,7 +40,14 @@ final class Constants
     );
     // @formatter:on
 
-    public static function get_image_size($size)
+    /**
+     * Returns the width and height for the given image size.
+     *
+     * @param string $size
+     * @uses $image_sizes
+     *
+     * @return array
+     */public static function get_image_size($size)
     {
         if (array_key_exists($size, self::$image_sizes)) {
             return self::$image_sizes[(string) $size];
