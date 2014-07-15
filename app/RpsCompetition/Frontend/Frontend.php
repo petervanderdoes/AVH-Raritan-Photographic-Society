@@ -5,6 +5,7 @@ use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
+use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
@@ -14,8 +15,6 @@ use RpsCompetition\Options\General as Options;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
-
-;
 
 class Frontend
 {
@@ -97,7 +96,7 @@ class Frontend
             // Just return if user clicked Cancel
             if ($this->request->has('cancel')) {
                 wp_redirect($redirect_to);
-                exit();
+                die();
             }
 
             if ($this->request->has('submit')) {
@@ -117,10 +116,7 @@ class Frontend
                         if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
                             // Move the file to its final location
                             $path = $photo_helper->getCompetitionPath($banquet_record->Competition_Date, $banquet_record->Classification, $banquet_record->Medium);
-                            if (!is_dir($this->request->server('DOCUMENT_ROOT') . $path)) {
-                                mkdir($this->request->server('DOCUMENT_ROOT') . $path, 0755);
-                            }
-
+                            CommonHelper::createDirectory($path);
                             $file_info = pathinfo($entry->Server_File_Name);
                             $new_file_name = $path . '/' . $file_info['basename'];
                             $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name, ENT_QUOTES, get_bloginfo('charset'));
@@ -400,9 +396,7 @@ class Frontend
             $user = wp_get_current_user();
             $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
             // Need to create the destination folder?
-            if (!is_dir($full_server_path)) {
-                mkdir($full_server_path, 0755);
-            }
+            CommonHelper::createDirectory($full_server_path);
 
             // If the .jpg file is too big resize it
             if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {

@@ -72,4 +72,17 @@ class Helper
 
         return in_array('s2member_level4', (array) $user->roles);
     }
+
+    /**
+     * Create a directory if it does not exist.
+     *
+     * @param $path
+     */
+    static public function createDirectory($path)
+    {
+        if (!is_dir($path)) {
+            mkdir($path, 0755);
+        }
+    }
+
 } 

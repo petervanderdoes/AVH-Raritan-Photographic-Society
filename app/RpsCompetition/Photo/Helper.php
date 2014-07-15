@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Intervention\Image\ImageManagerStatic as Image;
 use RpsCompetition\Constants;
 use RpsCompetition\Settings;
+use RpsCompetition\Common\Helper as CommonHelper;
 
 class Helper
 {
@@ -81,9 +82,7 @@ class Helper
         $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
         $thumb_name = $file_parts['filename'] . '_' . $size . '.jpg';
 
-        if (!is_dir($thumb_dir)) {
-            mkdir($thumb_dir, 0755);
-        }
+        CommonHelper::createDirectory($thumb_dir);
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
             $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
