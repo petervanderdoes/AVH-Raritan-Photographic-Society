@@ -76,7 +76,7 @@ class Helper
     /**
      * Create a directory if it does not exist.
      *
-     * @param $path
+     * @param string $path
      */
     static public function createDirectory($path)
     {
