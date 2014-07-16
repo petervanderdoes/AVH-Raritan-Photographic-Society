@@ -518,7 +518,6 @@ class Frontend
     private function deleteCompetitionEntries($entries)
     {
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_array($entries)) {
@@ -528,7 +527,6 @@ class Frontend
                 if ($entry_record == false) {
                     $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
                 } else {
-                    $server_file_name = $this->request->server('DOCUMENT_ROOT') . $entry_record->Server_File_Name;
                     // Delete the record from the database
                     $result = $query_entries->deleteEntry($id);
                     if ($result === false) {
