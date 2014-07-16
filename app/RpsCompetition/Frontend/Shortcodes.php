@@ -616,7 +616,6 @@ final class Shortcodes extends ShortcodesAbstract
      */
     public function displayMonthlyEntries($attr, $content, $tag)
     {
-        global $post;
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -670,33 +669,8 @@ final class Shortcodes extends ShortcodesAbstract
             }
         }
 
-        // Start displaying the form
-        echo '<script type="text/javascript">';
-        echo 'function submit_form(control_name) {' . "\n";
-        echo '	document.winners_form.submit_control.value = control_name;' . "\n";
-        echo '	document.winners_form.submit();' . "\n";
-        echo '}' . "\n";
-        echo '</script>';
-
         echo '<span class="competion-monthly-winners-form"> Monthly Entries for ';
-        $action = home_url('/' . get_page_uri($post->ID));
-        $form = '';
-        $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
-        $form .= '<input name="submit_control" type="hidden">' . "\n";
-        $form .= '<input name="selected_season" type="hidden" value="' . $selected_season . '">' . "\n";
-        $form .= '<input name="selected_year" type="hidden" value="' . $selected_year . '">' . "\n";
-        $form .= '<input name="selected_month" type="hidden" value="' . $selected_month . '">' . "\n";
-
-        if ($is_scored_competitions) {
-            // Drop down list for months
-            $form .= $this->getMonthsDropdown($months, $selected_year . '-' . $selected_month);
-        }
-
-        // Drop down list for season
-        $form .= $season_helper->getSeasonDropdown($selected_season);
-        $form .= '</form>';
-        echo $form;
-        unset($form);
+        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper);
         echo '</span>';
 
         $output = '';
@@ -718,7 +692,6 @@ final class Shortcodes extends ShortcodesAbstract
                     $recs->LastName = $user_info->user_lastname;
                     $recs->Username = $user_info->user_login;
 
-                    // Grab a new record from the database
                     $title = $recs->Title;
                     $last_name = $recs->LastName;
                     $first_name = $recs->FirstName;
@@ -828,31 +801,9 @@ final class Shortcodes extends ShortcodesAbstract
         $max_num_awards = $query_miscellaneous->getMaxAwards($min_date, $max_date);
 
         // Start displaying the form
-        echo '<script type="text/javascript">';
-        echo 'function submit_form(control_name) {' . "\n";
-        echo '	document.winners_form.submit_control.value = control_name;' . "\n";
-        echo '	document.winners_form.submit();' . "\n";
-        echo '}' . "\n";
-        echo '</script>';
 
         echo '<span class="competion-monthly-winners-form"> Monthly Award Winners for ';
-        $action = home_url('/' . get_page_uri($post->ID));
-        $form = '';
-        $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
-        $form .= '<input name="submit_control" type="hidden">' . "\n";
-        $form .= '<input id="select_season" name="selected_season" type="hidden" value="' . $selected_season . '">' . "\n";
-        $form .= '<input name="selected_year" type="hidden" value="' . $selected_year . '">' . "\n";
-        $form .= '<input name="selected_month" type="hidden" value="' . $selected_month . '">' . "\n";
-
-        if ($is_scored_competitions) {
-            $form .= $this->getMonthsDropdown($months, $selected_year . '-' . $selected_month);
-        }
-
-        // Drop down list for season
-        $form .= $season_helper->getSeasonDropdown($selected_season);
-        $form .= '</form>';
-        echo $form;
-        unset($form);
+        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper);
         echo '</span>';
 
         if ($is_scored_competitions) {
@@ -1380,22 +1331,21 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         $action = home_url('/' . get_page_uri($post->ID));
-        echo $this->formBuilder->open($action . '/?post=1',array('enctype' => 'multipart/form-data'));
-
+        echo $this->formBuilder->open($action . '/?post=1', array('enctype' => 'multipart/form-data'));
 
         if ($this->request->has('m')) {
             $medium_subset = "Digital";
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
             }
-            echo $this->formBuilder->hidden('medium_subset',$medium_subset);
+            echo $this->formBuilder->hidden('medium_subset', $medium_subset);
         }
         if ($this->request->has('wp_get_referer')) {
             $_ref = $this->request->input('wp_get_referer');
         } else {
             $_ref = wp_get_referer();
         }
-        echo $this->formBuilder->hidden('wp_get_referer',remove_query_arg(array('m'), $_ref));
+        echo $this->formBuilder->hidden('wp_get_referer', remove_query_arg(array('m'), $_ref));
         echo '<table class="form_frame" width="80%">';
         echo '<tr><th class="form_frame_header" colspan=2>';
         echo 'Submit Your Image';
@@ -1418,6 +1368,46 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo $this->formBuilder->close();
+    }
+
+    /**
+     * Display the form for selecting the month and season.
+     *
+     * @param string       $selected_season
+     * @param string       $selected_year
+     * @param string       $selected_month
+     * @param boolean      $is_scored_competitions
+     * @param array        $months
+     * @param SeasonHelper $season_helper
+     */
+    private function displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper)
+    {
+        global $post;
+        echo '<script type="text/javascript">';
+        echo 'function submit_form(control_name) {' . "\n";
+        echo '	document.month_season_form.submit_control.value = control_name;' . "\n";
+        echo '	document.month_season_form.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>';
+
+        $action = home_url('/' . get_page_uri($post->ID));
+        $form = '';
+        $form .= $this->formBuilder->open($action, array('name' => 'month_season_form'));
+        $form .= $this->formBuilder->hidden('submit_control');
+        $form .= $this->formBuilder->hidden('selected_season', $selected_season);
+        $form .= $this->formBuilder->hidden('selected_year', $selected_year);
+        $form .= $this->formBuilder->hidden('selected_month', $selected_month);
+
+        if ($is_scored_competitions) {
+            // Drop down list for months
+            $form .= $this->getMonthsDropdown($months, $selected_year . '-' . $selected_month);
+        }
+
+        // Drop down list for season
+        $form .= $season_helper->getSeasonDropdown($selected_season);
+        $form .= $this->formBuilder->close();
+        echo $form;
+        unset($form);
     }
 
     /**
