@@ -65,7 +65,6 @@ class Frontend
      * This method is called by the action after_setup_theme and is used to setup:
      *  - New actions
      *
-     * @version  GIT: $Id$
      * @internal Hook: after_setup_theme
      */
     public function actionAfterThemeSetup()
@@ -78,58 +77,22 @@ class Frontend
      * This method handles the POST request generated on the page for Banquet Entries
      * The action is called from the theme!
      *
-     * @uses     \RpsCompetition\Db\QueryEntries
-     * @uses     \RpsCompetition\Db\QueryCompetitions
-     * @see      Shortcodes::displayBanquetCurrentUser
      * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsBanquetEntries()
     {
         global $post;
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
 
         if (is_object($post) && $post->post_title == 'Banquet Entries') {
             $redirect_to = $this->request->input('wp_get_referer');
 
             // Just return if user clicked Cancel
-            if ($this->request->has('cancel')) {
-                wp_redirect($redirect_to);
-                die();
-            }
+            $this->isRequestCanceled($redirect_to);
 
             if ($this->request->has('submit')) {
-                if ($this->request->has('allentries')) {
-                    $all_entries = explode(',', $this->request->input('allentries'));
-                    foreach ($all_entries as $entry) {
-                        $query_entries->deleteEntry($entry);
-                    }
-                }
-                $entries = (array) $this->request->input('entry_id', array());
-                foreach ($entries as $entry_id) {
-                    $entry = $query_entries->getEntryById($entry_id, OBJECT);
-                    $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
-                    $banquet_ids = explode(',', $this->request->input('banquetids'));
-                    foreach ($banquet_ids as $banquet_id) {
-                        $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
-                        if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
-                            // Move the file to its final location
-                            $path = $photo_helper->getCompetitionPath($banquet_record->Competition_Date, $banquet_record->Classification, $banquet_record->Medium);
-                            CommonHelper::createDirectory($path);
-                            $file_info = pathinfo($entry->Server_File_Name);
-                            $new_file_name = $path . '/' . $file_info['basename'];
-                            $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name, ENT_QUOTES, get_bloginfo('charset'));
-                            // Need to create the destination folder?
-                            copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
-                            $data = array('Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $new_file_name);
-                            $query_entries->addEntry($data, get_current_user_id());
-                        }
-                    }
-                }
+                $this->handleSubmitBanquetEntries();
             }
         }
-        unset($query_entries, $query_competitions, $photo_helper);
     }
 
     /**
@@ -139,6 +102,7 @@ class Frontend
      *
      * @uses     \RpsCompetition\Db\QueryEntries
      * @uses     \RpsCompetition\Db\QueryCompetitions
+     * @uses     \RpsCompetition\Photo\Helper
      * @see      Shortcodes::displayEditTitle
      * @internal Hook: suffusion_before_post
      */
@@ -155,11 +119,7 @@ class Frontend
             $entry_id = $this->request->input('id');
 
             // Just return to the My Images page is the user clicked Cancel
-            if ($this->request->has('cancel')) {
-
-                wp_redirect($redirect_to);
-                exit();
-            }
+            $this->isRequestCanceled($redirect_to);
 
             // makes sure they filled in the title field
             if (!$this->request->has('new_title')) {
@@ -279,6 +239,7 @@ class Frontend
      *
      * @uses     \RpsCompetition\Db\QueryEntries
      * @uses     \RpsCompetition\Db\QueryCompetitions
+     * @uses     \RpsCompetition\Photo\Helper
      * @see      Shortcodes::displayUploadEntry
      * @internal Hook: suffusion_before_post
      */
@@ -294,10 +255,7 @@ class Frontend
             $redirect_to = $this->request->input('wp_get_referer');
 
             // Just return if user clicked Cancel
-            if ($this->request->has('cancel')) {
-                wp_redirect($redirect_to);
-                exit();
-            }
+            $this->isRequestCanceled($redirect_to);
 
             $file = $this->request->file('file_name');
             if ($file === null) {
@@ -553,6 +511,7 @@ class Frontend
      *
      * @uses  \RpsCompetition\Db\QueryEntries
      * @uses  \RpsCompetition\Db\QueryCompetitions
+     * @uses  \RpsCompetition\Photo\Helper
      *
      * @param array $entries Array of entries ID to delete.
      */
@@ -602,6 +561,69 @@ class Frontend
             }
         }
         unset($query_entries, $photo_helper);
+    }
+
+    /**
+     * Handles the required functions for when a user submits their Banquet Entries
+     *
+     * @uses \RpsCompetition\Db\QueryEntries
+     * @uses \RpsCompetition\Db\QueryCompetitions
+     * @uses \RpsCompetition\Photo\Helper
+     */
+    private function handleSubmitBanquetEntries()
+    {
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request);
+
+        if ($this->request->has('allentries')) {
+            $all_entries = explode(',', $this->request->input('allentries'));
+            foreach ($all_entries as $entry_id) {
+                $entry = $query_entries->getEntryById($entry_id, OBJECT);
+                if (!is_null($entry)) {
+                    $query_entries->deleteEntry($entry->ID);
+                    if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {
+                        unlink($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name);
+                    }
+                }
+            }
+        }
+
+        $entries = (array) $this->request->input('entry_id', array());
+        foreach ($entries as $entry_id) {
+            $entry = $query_entries->getEntryById($entry_id, OBJECT);
+            $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
+            $banquet_ids = explode(',', $this->request->input('banquetids'));
+            foreach ($banquet_ids as $banquet_id) {
+                $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
+                if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
+                    // Move the file to its final location
+                    $path = $photo_helper->getCompetitionPath($banquet_record->Competition_Date, $banquet_record->Classification, $banquet_record->Medium);
+                    CommonHelper::createDirectory($path);
+                    $file_info = pathinfo($entry->Server_File_Name);
+                    $new_file_name = $path . '/' . $file_info['basename'];
+                    $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name, ENT_QUOTES, get_bloginfo('charset'));
+                    // Need to create the destination folder?
+                    copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
+                    $data = array('Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $new_file_name);
+                    $query_entries->addEntry($data, get_current_user_id());
+                }
+            }
+        }
+        unset($query_entries, $query_competitions, $photo_helper);
+    }
+
+    /**
+     * Check if user pressed cancel and if so redirect the user
+     *
+     * @param string $redirect_to
+     */
+    private function isRequestCanceled($redirect_to)
+    {
+        if ($this->request->has('cancel')) {
+            wp_redirect($redirect_to);
+            die();
+        }
     }
 
     /**
