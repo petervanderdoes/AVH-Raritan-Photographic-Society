@@ -108,7 +108,7 @@ final class Shortcodes extends ShortcodesAbstract
             // Each row represents a competition month and each column holds the scores
             // of the submitted images for that month
             $member_scores = array();
-            $comp_dates_keys=array_keys($comp_dates);
+            $comp_dates_keys = array_keys($comp_dates);
             foreach ($comp_dates_keys as $key) {
                 $member_scores[$key] = array();
             }
@@ -657,10 +657,9 @@ final class Shortcodes extends ShortcodesAbstract
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
 
+        $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
-        } else {
-            $is_scored_competitions = false;
         }
 
         if ($is_scored_competitions) {
@@ -690,12 +689,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         if ($is_scored_competitions) {
             // Drop down list for months
-            $form .= '<select name="new_month" onchange="submit_form(\'new_month\')">';
-            foreach ($months as $key => $month) {
-                $selected = (substr($key, 5, 2) == $selected_month) ? ' selected="selected"' : '';
-                $form .= '<option value="' . $key . '"' . $selected . '>' . $month . '</option>';
-            }
-            $form .= "</select>\n";
+            $form .= $this->getMonthsDropdown($months, $selected_year . '-' . $selected_month);
         }
 
         // Drop down list for season
@@ -851,13 +845,7 @@ final class Shortcodes extends ShortcodesAbstract
         $form .= '<input name="selected_month" type="hidden" value="' . $selected_month . '">' . "\n";
 
         if ($is_scored_competitions) {
-            // Drop down list for months
-            $form .= '<select name="new_month" onchange="submit_form(\'new_month\')">';
-            foreach ($months as $key => $month) {
-                $selected = (substr($key, 5, 2) == $selected_month) ? ' selected="selected"' : '';
-                $form .= '<option value="' . $key . '"' . $selected . '>' . $month . '</option>';
-            }
-            $form .= "</select>\n";
+            $form .= $this->getMonthsDropdown($months, $selected_year . '-' . $selected_month);
         }
 
         // Drop down list for season
@@ -1198,14 +1186,14 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<span>';
         // Don't show the Add button if the max number of images per member reached
         if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
-            echo $this->formBuilder->input('submit[add]','Add',array('type'=>'submit','onclick'=>'submit_form(\'add\')')). "&nbsp;";
+            echo $this->formBuilder->input('submit[add]', 'Add', array('type' => 'submit', 'onclick' => 'submit_form(\'add\')')) . "&nbsp;";
         }
         if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
-            echo $this->formBuilder->input('submit[edit_title]','Change Title',array('type'=>'submit','onclick'=>'submit_form(\'add\')')). "&nbsp;";
+            echo $this->formBuilder->input('submit[edit_title]', 'Change Title', array('type' => 'submit', 'onclick' => 'submit_form(\'add\')')) . "&nbsp;";
             //echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
         }
         if ($num_rows > 0) {
-            echo $this->formBuilder->input('submit[delete]','Remove',array('type'=>'submit','onclick'=>'return  confirmSubmit()'));
+            echo $this->formBuilder->input('submit[delete]', 'Remove', array('type' => 'submit', 'onclick' => 'return  confirmSubmit()'));
             //echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
         }
         echo '</span></td></tr>';
@@ -1392,22 +1380,22 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         $action = home_url('/' . get_page_uri($post->ID));
-        echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
+        echo $this->formBuilder->open($action . '/?post=1',array('enctype' => 'multipart/form-data'));
+
 
         if ($this->request->has('m')) {
             $medium_subset = "Digital";
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
             }
-            echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
+            echo $this->formBuilder->hidden('medium_subset',$medium_subset);
         }
         if ($this->request->has('wp_get_referer')) {
             $_ref = $this->request->input('wp_get_referer');
         } else {
             $_ref = wp_get_referer();
         }
-        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m'), $_ref) . '" />';
-
+        echo $this->formBuilder->hidden('wp_get_referer',remove_query_arg(array('m'), $_ref));
         echo '<table class="form_frame" width="80%">';
         echo '<tr><th class="form_frame_header" colspan=2>';
         echo 'Submit Your Image';
@@ -1429,6 +1417,27 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</table>';
         echo '</td></tr>';
         echo '</table>';
-        echo '</form>';
+        echo $this->formBuilder->close();
+    }
+
+    /**
+     * Display a dropdown for the given months
+     *
+     * @param array   $months
+     * @param string  $selected_month
+     * @param boolean $echo
+     *
+     * @return string|void
+     */
+    private function getMonthsDropdown($months, $selected_month, $echo = false)
+    {
+
+        $form = $this->formBuilder->select('new_month', $months, $selected_month, array('onChange' => 'submit_form("new_month")'));
+
+        if ($echo) {
+            echo $form;
+        } else {
+            return $form;
+        }
     }
 }
