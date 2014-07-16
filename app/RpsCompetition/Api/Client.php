@@ -29,40 +29,40 @@ class Client
         $comp_date = $request->input('date');
         $db = $this->getDatabaseHandle();
 
-        if ($db !== false) {
+        if (is_object($db)) {
             $this->checkUserAuthentication($username, $password);
+            // Check to see if there were any file upload errors
+            $file = $request->file('file');
+            if ($file === null) {
+                $this->doRESTError('No file was given to upload!');
+                die();
+            }
+
+            if (!$file->isValid()) {
+                $this->doRESTError($file->getErrorMessage());
+                die();
+            }
+
+            // Move the file to its final location
+            $path = $request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
+            $dest_name = "scores_" . $comp_date . ".xml";
+            $file_name = $path . '/' . $dest_name;
+            try {
+                $file->move($path, $dest_name);
+            } catch (FileException $e) {
+                $this->doRESTError($e->getMessage());
+                die();
+            }
+
+            $warning = $this->handleUploadScoresFile($db, $file_name);
+
+            // Remove the uploaded .xml file
+            unlink($file_name);
+
+            // Return success to the client
+            $warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
+            $this->doRESTSuccess($warning);
         }
-        // Check to see if there were any file upload errors
-        $file = $request->file('file');
-        if ($file === null) {
-            $this->doRESTError('No file was given to upload!');
-            die();
-        }
-
-        if (!$file->isValid()) {
-            $this->doRESTError($file->getErrorMessage());
-            die();
-        }
-
-        // Move the file to its final location
-        $path = $request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
-        $dest_name = "scores_" . $comp_date . ".xml";
-        $file_name = $path . '/' . $dest_name;
-        try {
-            $file->move($path, $dest_name);
-        } catch (FileException $e) {
-            $this->doRESTError($e->getMessage());
-            die();
-        }
-
-        $warning = $this->handleUploadScoresFile($db, $file_name);
-
-        // Remove the uploaded .xml file
-        unlink($file_name);
-
-        // Return success to the client
-        $warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
-        $this->doRESTSuccess($warning);
         die();
     }
 
@@ -76,7 +76,7 @@ class Client
         $username = $request->input('username');
         $password = $request->input('password');
         $db = $this->getDatabaseHandle();
-        if ($db !== false) {
+        if (is_object($db)) {
             $this->checkUserAuthentication($username, $password);
             // @todo Check if the user has the role needed.
             $this->sendXmlCompetitions($db, $request->input('medium'), $request->input('comp_date'));
@@ -204,6 +204,7 @@ class Client
     {
         try {
             $db = new RpsPdo();
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
             $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
             die($e->getMessage());
