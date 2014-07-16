@@ -1093,7 +1093,7 @@ final class Admin
          */
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $updated = false;
 

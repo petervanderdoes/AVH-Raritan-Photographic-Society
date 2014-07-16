@@ -482,7 +482,7 @@ final class Shortcodes extends ShortcodesAbstract
     public function displayCategoryWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $class = 'Beginner';
         $award = '1';
@@ -539,7 +539,7 @@ final class Shortcodes extends ShortcodesAbstract
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $medium_subset = "Digital";
         $medium_param = "?m=digital";
@@ -622,7 +622,7 @@ final class Shortcodes extends ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $options = get_option('avh-rps');
 
@@ -762,7 +762,7 @@ final class Shortcodes extends ShortcodesAbstract
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $options = get_option('avh-rps');
 
@@ -961,7 +961,7 @@ final class Shortcodes extends ShortcodesAbstract
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $competition_helper = new CompetitionHelper($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $medium_subset_medium = $attr['medium'];
 
@@ -1214,7 +1214,7 @@ final class Shortcodes extends ShortcodesAbstract
     public function displayPersonWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $attr = shortcode_atts(array('id' => 0), $attr);
 

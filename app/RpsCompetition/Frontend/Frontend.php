@@ -112,7 +112,7 @@ class Frontend
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_object($post) && $post->ID == 75) {
             $redirect_to = $this->request->input('wp_get_referer');
@@ -248,7 +248,7 @@ class Frontend
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
@@ -427,7 +427,7 @@ class Frontend
     {
         if (is_front_page()) {
             $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-            $photo_helper = new PhotoHelper($this->settings, $this->request);
+            $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
             echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
@@ -519,7 +519,7 @@ class Frontend
     {
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_array($entries)) {
             foreach ($entries as $id) {
@@ -534,28 +534,8 @@ class Frontend
                     if ($result === false) {
                         $this->settings->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
                     } else {
-                        $competition_record = $query_competitions->getCompetitionById($entry_record->Competition_ID);
                         // Delete the file from the server file system
-                        if (file_exists($server_file_name)) {
-                            unlink($server_file_name);
-                        }
-                        // Delete any thumbnails of this image
-                        $path = $this->request->server('DOCUMENT_ROOT') . $photo_helper->getCompetitionPath($competition_record->Competition_Date, $competition_record->Classification, $competition_record->Medium);
-
-                        $old_file_parts = pathinfo($server_file_name);
-                        $old_file_name = $old_file_parts['filename'];
-
-                        if (is_dir($path . "/thumbnails")) {
-                            $thumb_base_name = $path . "/thumbnails/" . $old_file_name;
-                            // Get all the matching thumbnail files
-                            $thumbnails = glob("$thumb_base_name*");
-                            // Iterate through the list of matching thumbnails and delete each one
-                            if (is_array($thumbnails) && count($thumbnails) > 0) {
-                                foreach ($thumbnails as $thumb) {
-                                    unlink($thumb);
-                                }
-                            }
-                        }
+                        $photo_helper->deleteEntryFromDisk($entry_record->Server_File_Name);
                     }
                 }
             }
@@ -574,7 +554,7 @@ class Frontend
     {
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if ($this->request->has('allentries')) {
             $all_entries = explode(',', $this->request->input('allentries'));
@@ -582,9 +562,7 @@ class Frontend
                 $entry = $query_entries->getEntryById($entry_id, OBJECT);
                 if (!is_null($entry)) {
                     $query_entries->deleteEntry($entry->ID);
-                    if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {
-                        unlink($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name);
-                    }
+                    $photo_helper->deleteEntryFromDisk($entry->Server_File_Name);
                 }
             }
         }

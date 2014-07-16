@@ -3,23 +3,61 @@ namespace RpsCompetition\Photo;
 
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManagerStatic as Image;
-use RpsCompetition\Constants;
-use RpsCompetition\Settings;
 use RpsCompetition\Common\Helper as CommonHelper;
+use RpsCompetition\Constants;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Settings;
 
 class Helper
 {
     private $request;
+    private $rpsdb;
     private $settings;
 
     /**
      * @param Settings $settings
      * @param Request  $request
+     * @param RpsDb    $rpsdb
      */
-    public function __construct(Settings $settings, Request $request)
+    public function __construct(Settings $settings, Request $request, RpsDb $rpsdb)
     {
         $this->settings = $settings;
         $this->request = $request;
+        $this->rpsdb = $rpsdb;
+    }
+
+    /**
+     * Delete the files from server.
+     *
+     * @param QueryEntries $entry
+     */
+    public function deleteEntryFromDisk($entry)
+    {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+
+        // Remove main file from disk
+        if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {
+            unlink($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name);
+        }
+
+        // Remove thumbnails
+        $competition_record = $query_competitions->getCompetitionById($entry->Competition_ID);
+        $competition_path = $this->request->server('DOCUMENT_ROOT') . $this->getCompetitionPath($competition_record->Competition_Date, $competition_record->Classification, $competition_record->Medium);
+        $file_parts = pathinfo($entry->Server_File_Name);
+        $thumbnail_path = $competition_path . "/thumbnails";
+
+        if (is_dir($thumbnail_path)) {
+            $thumb_base_name = $thumbnail_path . '/' . $file_parts['filename'];
+            // Get all the matching thumbnail files
+            $thumbnails = glob("$thumb_base_name*");
+            // Iterate through the list of matching thumbnails and delete each one
+            if (is_array($thumbnails) && count($thumbnails) > 0) {
+                foreach ($thumbnails as $thumb) {
+                    unlink($thumb);
+                }
+            }
+        }
     }
 
     /**
@@ -76,9 +114,17 @@ class Helper
         return $status;
     }
 
-    public function rpsGetThumbnailUrl($record, $size)
+    /**
+     * Get the full URL for the requested thumbnail
+     *
+     * @param QueryEntries $entry
+     * @param string       $size
+     *
+     * @return string
+     */
+    public function rpsGetThumbnailUrl($entry, $size)
     {
-        $file_parts = pathinfo($record->Server_File_Name);
+        $file_parts = pathinfo($entry->Server_File_Name);
         $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
         $thumb_name = $file_parts['filename'] . '_' . $size . '.jpg';
 
