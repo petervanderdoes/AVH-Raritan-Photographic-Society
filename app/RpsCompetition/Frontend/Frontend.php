@@ -340,8 +340,8 @@ class Frontend
 
             $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
             if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
-                $x = $this->settings->get('club_max_entries_per_member_per_date');
-                $this->settings->errmsg = "You have already submitted the maximum of $x entries for this competition date<br>You must Remove an image before you can submit another";
+                $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
+                $this->settings->errmsg = "You have already submitted the maximum of $max_entries_member_date entries for this competition date<br>You must Remove an image before you can submit another";
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -656,8 +656,8 @@ class Frontend
     private function setupUserMeta()
     {
         $user_id = get_current_user_id();
-        $x = get_user_meta($user_id, 'rps_class_bw', true);
-        if (empty($x)) {
+        $user_meta = get_user_meta($user_id, 'rps_class_bw', true);
+        if (empty($user_meta)) {
             update_user_meta($user_id, "rps_class_bw", 'beginner');
             update_user_meta($user_id, "rps_class_color", 'beginner');
             update_user_meta($user_id, "rps_class_print_bw", 'beginner');

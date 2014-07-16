@@ -88,9 +88,9 @@ class Helper
             $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
         }
 
-        $p = explode('/', $file_parts['dirname']);
+        $path_parts = explode('/', $file_parts['dirname']);
         $path = home_url();
-        foreach ($p as $part) {
+        foreach ($path_parts as $part) {
             $path .= rawurlencode($part) . '/';
         }
         $path .= 'thumbnails/';

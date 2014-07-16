@@ -108,7 +108,8 @@ final class Shortcodes extends ShortcodesAbstract
             // Each row represents a competition month and each column holds the scores
             // of the submitted images for that month
             $member_scores = array();
-            foreach ($comp_dates as $key => $d) {
+            $comp_dates_keys=array_keys($comp_dates);
+            foreach ($comp_dates_keys as $key) {
                 $member_scores[$key] = array();
             }
             $total_score = 0;

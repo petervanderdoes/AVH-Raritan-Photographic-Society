@@ -153,8 +153,8 @@ class Client
     {
         $user = wp_authenticate($username, $password);
         if (is_wp_error($user)) {
-            $a = strip_tags($user->get_error_message());
-            $this->doRESTError($a);
+            $error_message = strip_tags($user->get_error_message());
+            $this->doRESTError($error_message);
             die();
         }
 

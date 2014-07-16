@@ -65,9 +65,9 @@ class QueryMiscellaneous
                                      $competition_date_start,
                                      $competition_date_end);
 
-        $x = $this->rpsdb->get_results($sql, ARRAY_A);
+        $records = $this->rpsdb->get_results($sql, ARRAY_A);
         $return = array();
-        foreach ($x as $rec) {
+        foreach ($records as $rec) {
             $user_info = get_userdata($rec['Member_ID']);
             $rec['FirstName'] = $user_info->user_firstname;
             $rec['LastName'] = $user_info->user_lastname;

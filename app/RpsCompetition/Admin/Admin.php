@@ -481,19 +481,19 @@ final class Admin
                     check_admin_referer(get_current_user_id());
                     $form_new_options = $this->request->input($formBuilder->getOptionName());
 
-                    $v = new Validator($form_new_options);
-                    $v->rule('required', 'date')
+                    $validator = new Validator($form_new_options);
+                    $validator->rule('required', 'date')
                         ->message('{field} is required')
                         ->label('Date');
-                    $v->rule('dateFormat', 'date', 'Y-m-d')
+                    $validator->rule('dateFormat', 'date', 'Y-m-d')
                         ->message('{field} should be in Y-m-d format')
                         ->label('Date');
-                    $v->rule('required', 'theme')
+                    $validator->rule('required', 'theme')
                         ->message('{field} is required')
                         ->label('Theme');
-                    $v->rule('required', 'medium')->message('No medium selected. At least one medium needs to be selected');
-                    $v->rule('required', 'classification')->message('No classification selected. At least one classification needs to be selected');
-                    $v->validate();
+                    $validator->rule('required', 'medium')->message('No medium selected. At least one medium needs to be selected');
+                    $validator->rule('required', 'classification')->message('No classification selected. At least one classification needs to be selected');
+                    $validator->validate();
 
                     foreach ($form_default_options['medium'] as $key => $value) {
                         $form_new_options['medium'][$key] = avh_array_get($form_new_options, 'medium.' . $key, false);
@@ -503,8 +503,8 @@ final class Admin
                     }
                     $form_new_options['special-event'] = avh_array_get($form_new_options, 'special-event', false);
 
-                    $x = $v->errors();
-                    if (empty($x)) {
+                    $validator_errors = $validator->errors();
+                    if (empty($validator_errors)) {
                         $this->message = 'Competition Added';
                         $this->status = 'updated';
 
@@ -541,7 +541,7 @@ final class Admin
                         }
                         unset ($medium_keys, $classification_keys);
                     } else {
-                        $this->message = $v->errors();
+                        $this->message = $validator->errors();
                         $this->status = 'error';
                     }
                     $this->displayMessage();

@@ -300,8 +300,8 @@ class ListTable extends \WP_List_Table
 
             $filter_theme = $this->request->input('filter-theme', 0);
             if ($filter_theme != 0) {
-                $x = $query_competitions->getCompetitionById($filter_theme);
-                $where .= $this->rpsdb->prepare(' AND Theme = %s', $x->Theme);
+                $record = $query_competitions->getCompetitionById($filter_theme);
+                $where .= $this->rpsdb->prepare(' AND Theme = %s', $record->Theme);
             }
             $sql_query = array('where' => $where);
 
