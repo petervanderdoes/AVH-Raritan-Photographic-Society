@@ -789,13 +789,8 @@ final class Admin
         if ($this->request->has('update')) {
             $updated = $this->updateCompetition();
         }
-        $vars = (array('action', 'redirect', 'competition', 'wp_http_referer'));
-        $total_vars = count($vars);
-        for ($i = 0; $i < $total_vars; $i += 1) {
-            $var = $vars[$i];
-            $$var = $this->request->input($var, '');
-        }
 
+        $wp_http_referer = $this->request->input('wp_http_referer', '');
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
 
         $competition = $query_competitions->getCompetitionById($this->request->input('competition'));
@@ -882,7 +877,7 @@ final class Admin
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
-        if ($wp_http_referer) {
+        if (!empty($wp_http_referer)) {
             echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
         }
         echo $formBuilder->hidden('competition', $competition->ID);
@@ -1108,13 +1103,7 @@ final class Admin
             $updated = $this->updateEntry();
         }
 
-        $vars = (array('action', 'redirect', 'entry', 'wp_http_referer'));
-        $total_vars = count($vars);
-        for ($i = 0; $i < $total_vars; $i += 1) {
-            $var = $vars[$i];
-            $$var = $this->request->input($var, '');
-        }
-
+        $wp_http_referer = $this->request->input('wp_http_referer', '');
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
         $entry = $query_entries->getEntryById($this->request->input('entry'), OBJECT);
         $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
@@ -1166,7 +1155,7 @@ final class Admin
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
-        if ($wp_http_referer) {
+        if (!empty($wp_http_referer)) {
             echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
         }
         echo $formBuilder->hidden('entry', $entry->ID);
