@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Intervention\Image\ImageManagerStatic as Image;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
+use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
