@@ -46,7 +46,7 @@ class Frontend
         $this->options = $container->make('RpsCompetition\Options\General');
         $this->core = new Core($this->settings);
 
-        $this->settings->errmsg = '';
+        $this->settings->set('errmsg', '');
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -123,7 +123,7 @@ class Frontend
 
             // makes sure they filled in the title field
             if (!$this->request->has('new_title')) {
-                $this->settings->errmsg = 'You must provide an image title.<br><br>';
+                $this->settings->set('errmsg', 'You must provide an image title.<br><br>');
             } else {
                 $server_file_name = $this->request->input('server_file_name');
                 $new_title = trim($this->request->input('new_title'));
@@ -179,7 +179,7 @@ class Frontend
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
-            $this->settings->errmsg = '';
+            $this->settings->set('errmsg', '');
 
             $page = explode('-', $post->post_name);
             $medium_subset = $page[1];
@@ -259,14 +259,14 @@ class Frontend
 
             $file = $this->request->file('file_name');
             if ($file === null) {
-                $this->settings->errmsg = 'You did not select a file to upload';
+                $this->settings->set('errmsg', 'You did not select a file to upload');
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
             }
 
             if (!$file->isValid()) {
-                $this->settings->errmsg = $file->getErrorMessage();
+                $this->settings->set('errmsg', $file->getErrorMessage());
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -276,13 +276,13 @@ class Frontend
             $uploaded_file_name = $file->getRealPath();
             $uploaded_file_info = getimagesize($uploaded_file_name);
             if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
-                $this->settings->errmsg = "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit";
+                $this->settings->set('errmsg', "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit");
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
             }
             if (!$this->request->has('title')) {
-                $this->settings->errmsg = 'Please enter your image title in the Title field.';
+                $this->settings->set('errmsg', 'Please enter your image title in the Title field.');
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -292,7 +292,7 @@ class Frontend
             if ($this->request->hasCookie('RPS_MyEntries')) {
                 list ($comp_date, $classification, $medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
             } else {
-                $this->settings->errmsg = "Upload Form Error<br>The Selected_Competition cookie is not set.";
+                $this->settings->set('errmsg', "Upload Form Error<br>The Selected_Competition cookie is not set.");
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -303,7 +303,7 @@ class Frontend
                 $comp_id = $recs['ID'];
                 $max_entries = $recs['Max_Entries'];
             } else {
-                $this->settings->errmsg = "Upload Form Error<br>Competition $comp_date/$classification/$medium not found in database<br>";
+                $this->settings->set('errmsg', "Upload Form Error<br>Competition $comp_date/$classification/$medium not found in database<br>");
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -321,7 +321,7 @@ class Frontend
             // an entry already submitted to this competition. Duplicate title result in duplicate
             // file names on the server
             if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
-                $this->settings->errmsg = "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.";
+                $this->settings->set('errmsg', "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.");
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -332,7 +332,7 @@ class Frontend
             // maximum images per competition by having two upload windows open simultaneously.
             $max_per_id = $query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
             if ($max_per_id >= $max_entries) {
-                $this->settings->errmsg = "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another";
+                $this->settings->set('errmsg', "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another");
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -341,7 +341,7 @@ class Frontend
             $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
             if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
                 $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
-                $this->settings->errmsg = "You have already submitted the maximum of $max_entries_member_date entries for this competition date<br>You must Remove an image before you can submit another";
+                $this->settings->set('errmsg', "You have already submitted the maximum of $max_entries_member_date entries for this competition date<br>You must Remove an image before you can submit another");
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -368,7 +368,7 @@ class Frontend
                 try {
                     $file->move($full_server_path, $dest_name . '.jpg');
                 } catch (FileException $e) {
-                    $this->settings->errmsg = $e->getMessage();
+                    $this->settings->set('errmsg', $e->getMessage());
                     unset($query_entries, $query_competitions, $photo_helper);
 
                     return;
@@ -378,7 +378,7 @@ class Frontend
             $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
             $result = $query_entries->addEntry($data, get_current_user_id());
             if ($result === false) {
-                $this->settings->errmsg = "Failed to INSERT entry record into database";
+                $this->settings->set('errmsg', "Failed to INSERT entry record into database");
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -525,12 +525,12 @@ class Frontend
 
                 $entry_record = $query_entries->getEntryById($id, OBJECT);
                 if ($entry_record == false) {
-                    $this->settings->errmsg = sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id);
+                    $this->settings->set('errmsg', sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id));
                 } else {
                     // Delete the record from the database
                     $result = $query_entries->deleteEntry($id);
                     if ($result === false) {
-                        $this->settings->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
+                        $this->settings->set('errmsg', sprintf("<b>Failed to DELETE competition entry %s from database</b><br>"));
                     } else {
                         // Delete the file from the server file system
                         $photo_helper->deleteEntryFromDisk($entry_record);

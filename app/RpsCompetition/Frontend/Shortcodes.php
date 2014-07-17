@@ -554,9 +554,9 @@ final class Shortcodes extends ShortcodesAbstract
         $title = $recs->Title;
         $server_file_name = $recs->Server_File_Name;
 
-        if (isset($this->settings->errmsg)) {
+        if ($this->settings->has('errmsg')) {
             echo '<div id="errmsg">';
-            echo $this->settings->errmsg;
+            echo $this->settings->get('errmsg');
             echo '</div>';
         }
         $action = home_url('/' . get_page_uri($post->ID));
@@ -920,8 +920,8 @@ final class Shortcodes extends ShortcodesAbstract
         $open_competitions = CommonHelper::arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
 
         if (empty($open_competitions)) {
-            $this->settings->errmsg = 'There are no competitions available to enter';
-            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
+            $this->settings->set('errmsg', 'There are no competitions available to enter');
+            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
 
             return;
         }
@@ -959,8 +959,8 @@ final class Shortcodes extends ShortcodesAbstract
         $session->set('myentries/classification', $current_competition->Classification);
         $session->save();
 
-        if (!empty($this->settings->errmsg)) {
-            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
+        if (!empty($this->settings->get('errmsg'))) {
+            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
         }
 
         echo '<script language="javascript">' . "\n";
@@ -1324,9 +1324,9 @@ final class Shortcodes extends ShortcodesAbstract
         global $post;
 
         // Error messages
-        if (isset($this->settings->errmsg)) {
+        if ($this->settings->has('errmsg')) {
             echo '<div id="errmsg">';
-            echo $this->settings->errmsg;
+            echo $this->settings->get('errmsg');
             echo '</div>';
         }
 
@@ -1429,6 +1429,7 @@ final class Shortcodes extends ShortcodesAbstract
         } else {
             return $form;
         }
+
         return null;
     }
 }
