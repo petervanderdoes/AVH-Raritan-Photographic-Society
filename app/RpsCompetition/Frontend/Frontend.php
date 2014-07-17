@@ -46,8 +46,6 @@ class Frontend
         $this->options = $container->make('RpsCompetition\Options\General');
         $this->core = new Core($this->settings);
 
-        $this->settings->set('errmsg', '');
-
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
@@ -179,7 +177,6 @@ class Frontend
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
-            $this->settings->set('errmsg', '');
 
             $page = explode('-', $post->post_name);
             $medium_subset = $page[1];

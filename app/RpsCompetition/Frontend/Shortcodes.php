@@ -959,7 +959,7 @@ final class Shortcodes extends ShortcodesAbstract
         $session->set('myentries/classification', $current_competition->Classification);
         $session->save();
 
-        if (!empty($this->settings->get('errmsg'))) {
+        if ($this->settings->has('errmsg')) {
             echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
         }
 
