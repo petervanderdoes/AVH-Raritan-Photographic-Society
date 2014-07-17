@@ -533,7 +533,7 @@ class Frontend
                         $this->settings->errmsg = sprintf("<b>Failed to DELETE competition entry %s from database</b><br>");
                     } else {
                         // Delete the file from the server file system
-                        $photo_helper->deleteEntryFromDisk($entry_record->Server_File_Name);
+                        $photo_helper->deleteEntryFromDisk($entry_record);
                     }
                 }
             }
@@ -560,7 +560,7 @@ class Frontend
                 $entry = $query_entries->getEntryById($entry_id, OBJECT);
                 if (!is_null($entry)) {
                     $query_entries->deleteEntry($entry->ID);
-                    $photo_helper->deleteEntryFromDisk($entry->Server_File_Name);
+                    $photo_helper->deleteEntryFromDisk($entry);
                 }
             }
         }
