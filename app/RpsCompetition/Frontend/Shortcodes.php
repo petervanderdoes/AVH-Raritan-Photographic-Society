@@ -1417,7 +1417,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string  $selected_month
      * @param boolean $echo
      *
-     * @return string|void
+     * @return string|null
      */
     private function getMonthsDropdown($months, $selected_month, $echo = false)
     {
@@ -1429,5 +1429,6 @@ final class Shortcodes extends ShortcodesAbstract
         } else {
             return $form;
         }
+        return null;
     }
 }
