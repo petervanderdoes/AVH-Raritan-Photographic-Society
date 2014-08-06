@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.4.0-dev.41
+#### Version 1.4.0
 * Improved check for uploaded files to the competitions.
 * Use image library.
 * Refactor RpsDb class
