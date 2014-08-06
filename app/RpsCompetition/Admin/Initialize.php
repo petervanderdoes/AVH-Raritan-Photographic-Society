@@ -3,7 +3,6 @@ namespace RpsCompetition\Admin;
 
 class Initialize
 {
-
     public function __construct()
     {
     }

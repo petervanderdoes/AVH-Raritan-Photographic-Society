@@ -1,329 +1,74 @@
 <?php
 namespace RpsCompetition\Frontend;
 
-use RpsCompetition\Settings;
-use RpsCompetition\Common\Core;
-use RpsCompetition\Db\RpsDb;
-use Avh\Html\HtmlBuilder;
 use Avh\Html\FormBuilder;
+use Avh\Html\HtmlBuilder;
+use Avh\Network\Session;
+use Avh\Utility\ShortcodesAbstract;
 use Illuminate\Http\Request;
+use RpsCompetition\Common\Helper as CommonHelper;
+use RpsCompetition\Competition\Helper as CompetitionHelper;
+use RpsCompetition\Db\QueryBanquet;
+use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Settings;
 
-final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
+final class Shortcodes extends ShortcodesAbstract
 {
-
-    /**
-     *
-     * @var Core
-     */
-    private $core;
-
-    /**
-     *
-     * @var Settings
-     */
+    private $html;
+    private $request;
+    private $rpsdb;
     private $settings;
 
     /**
-     *
-     * @var RpsDb
+     * @param Settings $settings
+     * @param RpsDb    $rpsdb
+     * @param Request  $request
      */
-    private $rpsdb;
-
-    /**
-     *
-     * @var HtmlBuilder
-     */
-    private $html;
-
-    /**
-     *
-     * @var Request
-     */
-    private $request;
-
-    public function __construct(Settings $settings, RpsDb $rpsdb, Core $core, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
     {
-        $this->core = $core;
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
-        $this->rpsdb->setUserId(get_current_user_id());
-        $this->html = new \Avh\Html\HtmlBuilder();
+        $this->html = new HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
         $this->request = $request;
     }
 
     /**
-     * Display the given awards for the given classification.
+     * Display all scores.
      *
-     * @param array $atts
-     * @param string $content
-     * @param string $tag
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
      */
-    public function displayCategoryWinners($atts, $content, $tag)
-    {
-        global $wpdb;
-
-        $class = 'Beginner';
-        $award = '1';
-        $date = '';
-        extract($atts, EXTR_OVERWRITE);
-
-        $competiton_date = date('Y-m-d H:i:s', strtotime($date));
-        $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
-
-        $entries = $this->rpsdb->getWinner($competiton_date, $award_map[$award], $class);
-
-        echo '<section class="rps-showcase-category-winner">';
-        echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
-
-        echo '<div class="suf-gradient suf-tile-topmost">';
-        echo '<h3>' . $class . '</h3>';
-        echo '</div>';
-
-        echo '<div class="gallery gallery-size-250">';
-        echo '<ul class="gallery-row gallery-row-equal">';
-        foreach ($entries as $entry) {
-            $dateParts = explode(" ", $entry->Competition_Date);
-            $comp_date = $dateParts[0];
-            $medium = $entry->Medium;
-            $classification = $entry->Classification;
-            $comp = "$classification<br>$medium";
-            $title = $entry->Title;
-            $last_name = $entry->LastName;
-            $first_name = $entry->FirstName;
-            $award = $entry->Award;
-
-            echo '<li class="gallery-item">';
-            echo '	<div class="gallery-item-content">';
-            echo '<div class="gallery-item-content-image">';
-            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($classification) . '" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
-
-            $caption = "$title<br /><span class='wp-caption-credit'>Credit: $first_name $last_name";
-            echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
-            echo '	</div></div>';
-            echo '</li>' . "\n";
-        }
-        echo '</ul>';
-        echo '</div>';
-        echo '</section>';
-    }
-
-    public function displayMonthlyWinners($atts, $content, $tag)
+    public function displayAllScores($attr, $content, $tag)
     {
         global $post;
-        $months = array();
-        $themes = array();
 
-        $this->settings->selected_season = '';
-        $this->settings->season_start_date = "";
-        $this->settings->season_end_date = "";
-        $this->settings->season_start_year = "";
-        $this->settings->selected_year = "";
-        $this->settings->selected_month = "";
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $seasons = $season_helper->getSeasons();
+        $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
 
-        if ($this->request->has('submit_control')) {
-            $this->settings->selected_season = esc_attr($this->request->input('selected_season'));
-            $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-            $this->settings->selected_year = esc_attr($this->request->input('selected_year'));
-            $this->settings->selected_month = esc_attr($this->request->input('selected_month'));
-
-            switch ($this->request->input('submit_control')) {
-                case 'new_season':
-                    $this->settings->selected_season = esc_attr($this->request->input('new_season'));
-                    $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-                    $this->settings->selected_month = "";
-                    break;
-                case 'new_month':
-                    $this->settings->selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
-                    $this->settings->selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
-            }
-        }
-        $seasons = $this->getSeasons();
-
-        $scores = $this->rpsdb->getMonthlyScores();
-
-        if (is_array($scores) && (!empty($scores))) {
-            $scored_competitions = true;
-        } else {
-            $scored_competitions = false;
-        }
-
-        if ($scored_competitions) {
-            foreach ($scores as $recs) {
-                $key = sprintf("%d-%02s", $recs['Year'], $recs['Month_Num']);
-                $months[$key] = $recs['Month'];
-                $themes[$key] = $recs['Theme'];
-            }
-
-            if (empty($this->settings->selected_month)) {
-                end($months);
-                $this->settings->selected_year = substr(key($months), 0, 4);
-                $this->settings->selected_month = substr(key($months), 5, 2);
-            }
-        }
-
-        // Count the maximum number of awards in the selected competitions
-        $this->settings->min_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month, 1);
-        if ($this->settings->selected_month == 12) {
-            $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year + 1, 1, 1);
-        } else {
-            $this->settings->max_date = sprintf("%d-%02s-%02s", $this->settings->selected_year, $this->settings->selected_month + 1, 1);
-        }
-
-        $max_num_awards = $this->rpsdb->getMaxAwards();
-
-        // Start displaying the form
-        echo '<script type="text/javascript">';
-        echo 'function submit_form(control_name) {' . "\n";
-        echo '	document.winners_form.submit_control.value = control_name;' . "\n";
-        echo '	document.winners_form.submit();' . "\n";
-        echo '}' . "\n";
-        echo '</script>';
-
-        echo '<span class="competion-monthly-winners-form"> Monthly Award Winners for ';
-        $action = home_url('/' . get_page_uri($post->ID));
-        $form = '';
-        $form .= '<form name="winners_form" action="' . $action . '" method="post">' . "\n";
-        $form .= '<input name="submit_control" type="hidden">' . "\n";
-        $form .= '<input name="selected_season" type="hidden" value="' . $this->settings->selected_season . '">' . "\n";
-        $form .= '<input name="selected_year" type="hidden" value="' . $this->settings->selected_year . '">' . "\n";
-        $form .= '<input name="selected_month" type="hidden" value="' . $this->settings->selected_month . '">' . "\n";
-
-        if ($scored_competitions) {
-            // Drop down list for months
-            $form .= '<select name="new_month" onchange="submit_form(\'new_month\')">' . "\n";
-            foreach ($months as $key => $month) {
-                $selected = (substr($key, 5, 2) == $this->settings->selected_month) ? " selected" : "";
-                $form .= '<option value="' . $key . '"' . $selected . '>' . $month . '</option>' . "\n";
-            }
-            $form .= "</select>\n";
-        }
-
-        // Drop down list for season
-        $form .= '<select name="new_season" onChange="submit_form(\'new_season\')">' . "\n";
-        foreach ($seasons as $season) {
-            $selected = ($season == $this->settings->selected_season) ? " selected" : "";
-            $form .= '<option value="' . $season . '"' . $selected . '>' . $season . '</option>' . "\n";
-        }
-        $form .= '</select>' . "\n";
-        $form .= '</form>';
-        echo $form;
-        unset($form);
-        echo '</span>';
-
-        if ($scored_competitions) {
-            $this_month = sprintf("%d-%02s", $this->settings->selected_year, $this->settings->selected_month);
-            echo '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
-
-            echo "<table class=\"thumb_grid\">\n";
-            // Output the column headings
-            echo "<tr><th class='thumb_col_header' align='center'>Competition</th>\n";
-            for ($i = 0; $i < $max_num_awards; $i++) {
-                switch ($i) {
-                    case 0:
-                        $award_title = "1st";
-                        break;
-                    case 1:
-                        $award_title = "2nd";
-                        break;
-                    case 2:
-                        $award_title = "3rd";
-                        break;
-                    default:
-                        $award_title = "HM";
-                }
-                echo "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
-            }
-            $award_winners = $this->rpsdb->getWinners();
-            // Iterate through all the award winners and display each thumbnail in a grid
-            $row = 0;
-            $column = 0;
-            $comp = "";
-            foreach ($award_winners as $recs) {
-
-                // Remember the important values from the previous record
-                $prev_comp = $comp;
-
-                // Grab a new record from the database
-                $dateParts = explode(" ", $recs->Competition_Date);
-                $comp_date = $dateParts[0];
-                $medium = $recs->Medium;
-                $classification = $recs->Classification;
-                $comp = "$classification<br>$medium";
-                $title = $recs->Title;
-                $last_name = $recs->LastName;
-                $first_name = $recs->FirstName;
-                $award = $recs->Award;
-
-                // If we're at the end of a row, finish off the row and get ready for the next one
-                if ($prev_comp != $comp) {
-                    // As necessary, pad the row out with empty cells
-                    if ($row > 0 && $column < $max_num_awards) {
-                        for ($i = $column; $i < $max_num_awards; $i++) {
-                            echo "<td align=\"center\" class=\"thumb_cell\">";
-                            echo "<div class=\"thumb_canvas\"></div></td>\n";
-                        }
-                    }
-                    // Terminate this row
-                    echo "</tr>\n";
-
-                    // Initialize the new row
-                    $row += 1;
-                    $column = 0;
-                    echo "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
-                }
-                // Display this thumbnail in the the next available column
-                echo "<td align=\"center\" class=\"thumb_cell\">\n";
-                echo "  <div class=\"thumb_canvas\">\n";
-                echo "    <a href=\"" . $this->core->rpsGetThumbnailUrl($recs, 400) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                echo "    <img class=\"thumb_img\" src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
-                echo "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
-                echo "  </div>\n</td>\n";
-                $prev_comp = $comp;
-                $column += 1;
-            }
-            // As necessary, pad the last row out with empty cells
-            if ($row > 0 && $column < $max_num_awards) {
-                for ($i = $column; $i < $max_num_awards; $i++) {
-                    echo "<td align=\"center\" class=\"thumb_cell\">";
-                    echo "<div class=\"thumb_canvas\"></div></td>\n";
-                }
-            }
-            // Close out the table
-            echo "</tr>\n</table>\n";
-        } else {
-            echo 'There are no scored competitions for the selected season.';
-        }
-        echo "<br />\n";
-    }
-
-    public function displayAllScores($atts, $content, $tag)
-    {
-        global $post;
-        if ($this->request->has('selected_season_list')) {
-            $this->settings->selected_season = $this->request->input('selected_season_list');
-        }
         $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
 
-        $seasons = $this->rpsdb->getSeasonListOneEntry();
-        arsort($seasons);
-        if (!isset($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
-        }
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
 
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, 9, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, 9, 1);
-
-        $competition_dates = $this->rpsdb->getClubCompetitionDates();
+        $competition_dates = $query_competitions->getCompetitionDates($season_start_date, $season_end_date);
         // Build an array of competition dates in "MM/DD" format for column titles.
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
         $total_max_entries = 0;
+        $comp_dates = array();
+        $comp_max_entries = array();
+        $comp_num_judges = array();
         foreach ($competition_dates as $key => $recs) {
-            $comp_date = $recs['Competition_Date'];
-            $date_parts = explode(" ", $comp_date);
+            $date_parts = explode(" ", $recs['Competition_Date']);
             list ($comp_year, $comp_month, $comp_day) = explode("-", $date_parts[0]);
             $comp_dates[$date_parts[0]] = sprintf("%d/%d", $comp_month, $comp_day);
             $comp_max_entries[$date_parts[0]] = $recs['Max_Entries'];
@@ -331,8 +76,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
         }
 
-        $club_competition_results_unsorted = $this->rpsdb->getClubCompetitionResults();
-        $club_competition_results = $this->core->arrayMsort($club_competition_results_unsorted, array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
+        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
+        $club_competition_results = CommonHelper::arrayMsort($club_competition_results_unsorted,
+                                                             array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -343,17 +89,9 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             $action = home_url('/' . get_page_uri($post->ID));
             $form = '';
             $form .= '<form name="all_scores_form" method="post" action="' . $action . '">';
-            $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '"/>';
-            $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
-            foreach ($seasons as $this_season) {
-                if ($this_season == $this->settings->selected_season) {
-                    $selected = " SELECTED";
-                } else {
-                    $selected = "";
-                }
-                $form .= "<option value=\"$this_season\"$selected>$this_season</option>\n";
-            }
-            $form .= "</select>";
+            $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '"/>';
+            // Drop down list for season
+            $form .= $season_helper->getSeasonDropdown($selected_season);
             $form .= '</form>';
             echo 'Select the season: ';
             echo $form;
@@ -365,15 +103,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             echo "<table class=\"form_frame\" width=\"99%\">\n";
 
             // Build the list of submitted images
-            $prev_member = "";
-            $prev_medium = "";
-            $prev_class = "";
-            $rowCount = 0;
+            $row_count = 0;
             // Initialize the 2D array to hold the members scores for each month
             // Each row represents a competition month and each column holds the scores
             // of the submitted images for that month
             $member_scores = array();
-            foreach ($comp_dates as $key => $d) {
+            $comp_dates_keys = array_keys($comp_dates);
+            foreach ($comp_dates_keys as $key) {
                 $member_scores[$key] = array();
             }
             $total_score = 0;
@@ -408,34 +144,35 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
                 // Is this the beginning of the next member's scores?
                 if ($member != $prev_member || $classification != $prev_class || $medium != $prev_medium) {
-                    $rowCount += 1;
-                    $rowStyle = $rowCount % 2 == 1 ? "odd_row" : "even_row";
+                    $row_count += 1;
+                    $row_style = $row_count % 2 == 1 ? "odd_row" : "even_row";
 
                     // Don't do anything yet if this is the very first member, otherwise, output all
                     // the accumulated scored for the member we just passed.
                     if ($prev_member != "") {
                         // Display the members name and classification
                         echo "<tr>";
-                        echo "<td align=\"left\" class=\"$rowStyle\">" . $prev_fname . " " . $prev_lname . "</td>\n";
-                        echo "<td align=\"center\" class=\"$rowStyle\">" . substr($prev_class, 0, 1) . "</td>\n";
+                        echo "<td align=\"left\" class=\"$row_style\">" . $prev_fname . " " . $prev_lname . "</td>\n";
+                        echo "<td align=\"center\" class=\"$row_style\">" . substr($prev_class, 0, 1) . "</td>\n";
 
                         // Iterate through all the accumulated scores for this member
-                        foreach ($member_scores as $key => $score_array) {
+                        foreach ($member_scores as $score_key => $score_array) {
                             // Print the scores for the submitted entries for this month
-                            for ($i = 0; $i < count($score_array); $i++) {
-                                echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
+                            $total_score_array = count($score_array);
+                            for ($i = 0; $i < $total_score_array; $i++) {
+                                echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                             }
                             // Pad the unused entries for this member for this month
-                            for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
-                                echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                            for ($i = 0; $i < $comp_max_entries[$score_key] - $total_score_array; $i++) {
+                                echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                             }
                         }
 
                         // Display the members annual average score
                         if ($total_score > 0 && $num_scores > 0) {
-                            echo "<td align=\"center\" class=\"$rowStyle\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                            echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
                         } else {
-                            echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                            echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                         }
                         echo "</tr>";
                     }
@@ -448,7 +185,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                         echo "<tr>";
                         echo "<td colspan=\"" . ($total_max_entries + 3) . "\" class=\"horizontal_separator\"></td>";
                         echo "</tr>\n";
-                        $prev_class = $classification;
                     }
 
                     // Are we at the beginning of a new medium?
@@ -465,13 +201,13 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
                         // Display the category title
                         echo '<tr><td align="left" class="form_title" colspan="' . ($total_max_entries + 3) . '">';
-                        echo $medium . ' scores for ' . $this->settings->selected_season . ' season';
+                        echo $medium . ' scores for ' . $selected_season . ' season';
                         echo '</td></tr>' . "\n";
 
                         // Display the first row column headers
                         echo "<tr>\n<th class=\"form_frame_header\" colspan=\"2\">&nbsp;</th>\n";
-                        foreach ($comp_dates as $key => $d) {
-                            echo "<th class=\"form_frame_header\" colspan=\"" . $comp_max_entries[$key] . "\">$d</th>\n";
+                        foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
+                            echo "<th class=\"form_frame_header\" colspan=\"" . $comp_max_entries[$comp_dates_key] . "\">$comp_dates_date</th>\n";
                         }
                         echo "<th class=\"form_frame_header\">&nbsp;</th>\n";
                         echo "</tr>\n";
@@ -479,8 +215,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                         echo "<tr>\n";
                         echo "<th class=\"form_frame_header\">Member</th>\n";
                         echo "<th class=\"form_frame_header\">Cl.</th>\n";
-                        foreach ($comp_dates as $key => $d) {
-                            for ($i = 1; $i <= $comp_max_entries[$key]; $i++) {
+                        foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
+                            for ($i = 1; $i <= $comp_max_entries[$comp_dates_key]; $i++) {
                                 echo "<th class=\"form_frame_header\">$i</th>\n";
                             }
                         }
@@ -491,8 +227,8 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                     // Reset the score array to be ready to start accumulating the scores for this
                     // new member we just started.
                     $member_scores = array();
-                    foreach ($comp_dates as $key => $d) {
-                        $member_scores[$key] = array();
+                    foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
+                        $member_scores[$comp_dates_key] = array();
                     }
                     $total_score = 0;
                     $num_scores = 0;
@@ -519,112 +255,158 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             }
 
             // Output the last remaining row of the table that hasn't been displayed yet
-            $rowCount += 1;
-            $rowStyle = $rowCount % 2 == 1 ? "odd_row" : "even_row";
+            $row_count += 1;
+            $row_style = $row_count % 2 == 1 ? "odd_row" : "even_row";
             // Display the members name and classification
             echo "<tr>";
-            echo "<td align=\"left\" class=\"$rowStyle\">" . $first_name . " " . $last_name . "</td>\n";
-            echo "<td align=\"center\" class=\"$rowStyle\">" . substr($classification, 0, 1) . "</td>\n";
+            echo "<td align=\"left\" class=\"$row_style\">" . $first_name . " " . $last_name . "</td>\n";
+            echo "<td align=\"center\" class=\"$row_style\">" . substr($classification, 0, 1) . "</td>\n";
             // Iterate through all the accumulated scores for this member
             foreach ($member_scores as $key => $score_array) {
                 // Print the scores for the submitted entries for this month
-                for ($i = 0; $i < count($score_array); $i++) {
-                    echo "<td align=\"center\" class=\"$rowStyle\">$score_array[$i]</td>\n";
+                $total_score_array = count($score_array);
+                for ($i = 0; $i < $total_score_array; $i++) {
+                    echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
                 }
                 // Pad the unused entries for this member for this month
-                for ($i = 0; $i < $comp_max_entries[$key] - count($score_array); $i++) {
-                    echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                for ($i = 0; $i < $comp_max_entries[$key] - $total_score_array; $i++) {
+                    echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                 }
             }
 
             // Display the members annual average score
             if ($total_score > 0 && $num_scores > 0) {
-                echo "<td align=\"center\" class=\"$rowStyle\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
             } else {
-                echo "<td align=\"center\" class=\"$rowStyle\">&nbsp;</td>\n";
+                echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
             }
             echo "</tr>";
 
             // We're all done
             echo "</table>";
         }
+        unset($query_competitions, $query_miscellaneous, $season_helper);
     }
 
-    public function displayScoresCurrentUser($atts, $content, $tag)
+    /**
+     * Display the possible Banquet entries for the current user.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsBanquetEntries
+     */
+    public function displayBanquetCurrentUser($attr, $content, $tag)
     {
         global $post;
 
-        if ($this->request->has('selected_season_list')) {
-            $this->settings->selected_season = $this->request->input('selected_season_list');
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_banquet = new QueryBanquet($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $seasons = $season_helper->getSeasons();
+        $selected_season = end($seasons);
+
+        if ($this->request->isMethod('POST')) {
+            $selected_season = esc_attr($this->request->input('new_season', $selected_season));
         }
-        $seasons = $this->getSeasons();
+
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
+        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $season_start_date, $season_end_date);
+        $banquet_id = $query_banquet->getBanquets($season_start_date, $season_end_date);
+        $banquet_id_string = '0';
+        $banquet_id_array = array();
+        $disabled = '';
+        if (is_array($banquet_id)) {
+            foreach ($banquet_id as $record) {
+                $banquet_id_array[] = $record['ID'];
+                if ($record['Closed'] == 'Y') {
+                    $disabled = 'disabled="1"';
+                }
+            }
+
+            $banquet_id_string = implode(',', $banquet_id_array);
+        }
+        $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
+        $banquet_entries = $query_entries->query(array('where' => $where));
+        if (!is_array($banquet_entries)) {
+            $banquet_entries = array();
+        }
+        $all_entries = array();
+        foreach ($banquet_entries as $banquet_entry) {
+            $all_entries[] = $banquet_entry->ID;
+        }
 
         // Start building the form
         $action = home_url('/' . get_page_uri($post->ID));
         $form = '';
-        $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
-        $form .= '<input type="hidden" name="selected_season" value="' . $this->settings->selected_season . '" />';
-        $form .= "&nbsp;<select name=\"selected_season_list\" onchange=\"submit_form()\">\n";
-        foreach ($seasons as $this_season) {
-            if ($this_season == $this->settings->selected_season) {
-                $selected = " SELECTED";
-            } else {
-                $selected = "";
-            }
-            $form .= "<option value=\"$this_season\"$selected>$this_season</option>\n";
-        }
-        $form .= "</select>&nbsp;season\n";
+        $form .= '<form name="banquet_form" method="post" action="' . $action . '">';
+        // Drop down list for season
+        $form .= $season_helper->getSeasonDropdown($selected_season);
+        $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '" />';
+        $form .= '<input name="submit_control" type="hidden">' . "\n";
         $form .= "</form>";
         echo '<script type="text/javascript">' . "\n";
-        echo 'function submit_form() {' . "\n";
-        echo '	document.my_scores_form.submit();' . "\n";
+        echo 'function submit_form(control_name) {' . "\n";
+        echo '	document.banquet_form.submit();' . "\n";
         echo '}' . "\n";
         echo '</script>' . "\n";
-        echo "My scores for ";
+        echo "My banquet entries for ";
         echo $form;
-        echo '<table class="form_frame" width="99%">';
+
+        echo '<p>Select up to 5 entries</p>';
+        echo '<form name="BanquetEntries" action=' . $action . ' method="post">' . "\n";
+        echo '<table class="banquet form_frame" width="99%">';
         echo '<tr>';
-        echo '<th class="form_frame_header" width="12%">Date</th>';
-        echo '<th class="form_frame_header">Theme</th>';
-        echo '<th class="form_frame_header">Competition</th>';
-        echo '<th class="form_frame_header">Title</th>';
-        echo '<th class="form_frame_header" width="8%">Score</th>';
-        echo '<th class="form_frame_header" width="8%">Award</th></tr>';
-        $scores = $this->rpsdb->getScoresCurrentUser();
+        echo '<th>Banquet Entry</th>';
+        echo '<th width="12%">Date</th>';
+        echo '<th>Theme</th>';
+        echo '<th>Competition</th>';
+        echo '<th>Title</th>';
+        echo '<th width="8%">Score</th>';
+        echo '<th width="8%">Award</th>';
+        echo '<th width="3%"></th>';
+        echo '</tr>';
 
         // Bail out if not entries found
         if (empty($scores)) {
-            echo "<tr><td colspan=\"6\">No entries submitted</td></tr>\n";
+            echo "<tr><td colspan=\"6\">No eligible banquet entries</td></tr>\n";
             echo "</table>\n";
+            echo '</form>';
         } else {
 
             // Build the list of submitted images
-            $compCount = 0;
+            $comp_count = 0;
             $prev_date = "";
             $prev_medium = "";
+            $row_style = 'odd_row';
             foreach ($scores as $recs) {
-                $dateParts = explode(" ", $recs['Competition_Date']);
-                $dateParts[0] = strftime('%d-%b-%Y', strtotime($dateParts[0]));
-                $comp_date = $dateParts[0];
+                if (empty($recs['Award'])) {
+                    continue;
+                }
+
+                $date_parts = explode(" ", $recs['Competition_Date']);
+                $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
+                $comp_date = $date_parts[0];
                 $medium = $recs['Medium'];
                 $theme = $recs['Theme'];
                 $title = $recs['Title'];
                 $score = $recs['Score'];
                 $award = $recs['Award'];
-                if ($dateParts[0] != $prev_date) {
-                    $compCount += 1;
-                    $rowStyle = $compCount % 2 == 1 ? "odd_row" : "even_row";
+                if ($date_parts[0] != $prev_date) {
+                    $comp_count += 1;
+                    $row_style = $comp_count % 2 == 1 ? "odd_row" : "even_row";
                     $prev_medium = "";
                 }
 
-                $a = realpath($recs['Server_File_Name']);
                 $image_url = home_url($recs['Server_File_Name']);
 
-                if ($prev_date == $dateParts[0]) {
-                    $dateParts[0] = "";
+                if ($prev_date == $date_parts[0]) {
+                    $date_parts[0] = "";
                     $theme = "";
                 } else {
-                    $prev_date = $dateParts[0];
+                    $prev_date = $date_parts[0];
                 }
                 if ($prev_medium == $medium) {
                     // $medium = "";
@@ -632,12 +414,6 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 } else {
                     $prev_medium = $medium;
                 }
-
-                echo "<tr>";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\" width=\"12%\">" . $dateParts[0] . "</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$theme</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\">$medium</td>\n";
-                // echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
                 $score_award = "";
                 if ($score > "") {
                     $score_award = " / {$score}pts";
@@ -645,38 +421,142 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 if ($award > "") {
                     $score_award .= " / $award";
                 }
-                echo "<td align=\"left\" valign=\"top\" class=\"$rowStyle\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / $comp_date / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
-                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
-                echo "<td class=\"$rowStyle\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
+
+                echo "<tr>";
+                echo "<td align=\"center\" valign=\"middle\" class=\"$row_style\" width=\"3%\">";
+                $checked = '';
+                foreach ($banquet_entries as $banquet_entry) {
+
+                    if (!empty($banquet_entry) && $banquet_entry->Title == $title) {
+                        $checked = 'checked="checked"';
+                        break;
+                    }
+                }
+
+                $entry_id = $recs['Entry_ID'];
+                echo "<input type=\"checkbox\" name=\"entry_id[]\" value=\"$entry_id\" {$checked} {$disabled}/>";
+                echo '</td>';
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\" width=\"12%\">" . $date_parts[0] . "</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\">{$theme}</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\">{$medium}</td>\n";
+                // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
+
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td>";
+                echo "<td align=\"center\" valign=\"middle\" class=\"$row_style\" width=\"3%\">";
+
+                echo "</tr>\n";
             }
             echo "</table>";
+            if (empty($disabled)) {
+                echo '<input type="submit" name="submit" value="Update">';
+                echo '<input type="submit" name="cancel" value="Cancel">';
+            }
+            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
+            echo '<input type="hidden" name="allentries" value="', implode(',', $all_entries) . '" />';
+            echo '<input type="hidden" name="banquetids" value="' . $banquet_id_string . '" />';
+            echo '</form>';
+            echo '<script type="text/javascript">' . "\n";
+            echo "jQuery('.banquet :checkbox').change(function () {\n";
+            echo "    var cs=jQuery(this).closest('.banquet').find(':checkbox:checked');\n";
+            echo "    if (cs.length > 5) {\n";
+            echo "        this.checked=false;\n";
+            echo "    }\n";
+            echo "});\n";
+            echo '</script>';
         }
+        unset($query_miscellaneous, $query_banquet, $query_entries, $season_helper);
     }
 
-    public function displayEditTitle($atts, $content, $tag)
+    /**
+     * Display the given awards for the given classification on a given date.
+     *
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - class
+     *                        - award
+     *                        - date
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayCategoryWinners($attr, $content, $tag)
+    {
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+
+        $class = 'Beginner';
+        $award = '1';
+        $date = '';
+        extract($attr, EXTR_OVERWRITE);
+
+        $competition_date = date('Y-m-d H:i:s', strtotime($date));
+        $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
+
+        $entries = $query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
+
+        if (is_array($entries)) {
+            echo '<section class="rps-showcase-category-winner">';
+            echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
+
+            echo '<div class="suf-gradient suf-tile-topmost">';
+            echo '<h3>' . $class . '</h3>';
+            echo '</div>';
+
+            echo '<div class="gallery gallery-size-250">';
+            echo '<ul class="gallery-row gallery-row-equal">';
+            foreach ($entries as $entry) {
+                $user_info = get_userdata($entry->Member_ID);
+
+                echo '<li class="gallery-item">';
+                echo '	<div class="gallery-item-content">';
+                echo '<div class="gallery-item-content-image">';
+                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry,
+                                                                         800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
+                echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
+
+                $caption = $entry->Title . "<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
+                echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
+                echo '	</div></div>';
+                echo '</li>' . "\n";
+            }
+            echo '</ul>';
+            echo '</div>';
+            echo '</section>';
+        }
+        unset($query_miscellaneous, $photo_helper);
+    }
+
+    /**
+     * Display the form to edit the title of the selected entry
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsEditTitle
+     */
+    public function displayEditTitle($attr, $content, $tag)
     {
         global $post;
-        if ($this->request->has('m')) {
-            if ($this->request->input('m') == "prints") {
-                $medium_subset = "Prints";
-                $medium_param = "?m=prints";
-            } else {
-                $medium_subset = "Digital";
-                $medium_param = "?m=digital";
-            }
+        $query_entries = new QueryEntries($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+
+        $medium_subset = "Digital";
+        $medium_param = "?m=digital";
+        if ($this->request->input('m') == "prints") {
+            $medium_subset = "Prints";
+            $medium_param = "?m=prints";
         }
         $entry_id = $this->request->input('id');
 
-        $recs = $this->rpsdb->getEntryInfo($entry_id);
+        $recs = $query_entries->getEntryById($entry_id);
         // Legacy need. Previously titles would be stores with added slashes.
         $title = $recs->Title;
         $server_file_name = $recs->Server_File_Name;
 
-        $relative_path = $server_file_name;
-
-        if (isset($this->settings->errmsg)) {
+        if ($this->settings->has('errmsg')) {
             echo '<div id="errmsg">';
-            echo $this->settings->errmsg;
+            echo $this->settings->get('errmsg');
             echo '</div>';
         }
         $action = home_url('/' . get_page_uri($post->ID));
@@ -688,7 +568,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '<table>';
         echo '<tr><td align="center" colspan="2">';
 
-        echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
+        echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
         echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
@@ -706,17 +586,382 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo '</form>';
+        unset($query_entries, $photo_helper);
     }
 
-    public function displayMyEntries($atts, $content, $tag)
+    /**
+     * Display an obfuscated email link.
+     *
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - email
+     *                        - HTML Attributes
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayEmail($attr, $content, $tag)
+    {
+        $email = $attr['email'];
+        unset($attr['email']);
+        echo $this->html->mailto($email, $content, $attr);
+    }
+
+    /**
+     * Show all entries for a month.
+     * The default is to show the entries for the latest closed competition.
+     * A dropdown selection to choose different months and/or season is also displayed.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayMonthlyEntries($attr, $content, $tag)
+    {
+
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+
+        $options = get_option('avh-rps');
+
+        $months = array();
+        $themes = array();
+
+        if ($this->request->has('submit_control')) {
+            switch ($this->request->input('submit_control')) {
+                case 'new_season':
+                    $selected_year = substr(esc_attr($this->request->input('new_season')), 0, 4);
+                    $selected_month = esc_attr($this->request->input('selected_month'));
+                    if ($selected_month < $options['season_start_month_num']) {
+                        $selected_year++;
+                    }
+                    break;
+                case 'new_month':
+                    $selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
+                    $selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
+                    break;
+                default:
+                    $selected_year = esc_attr($this->request->input('selected_year'));
+                    $selected_month = esc_attr($this->request->input('selected_month'));
+                    break;
+            }
+        } else {
+            $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+            $selected_year = substr($last_scored->Competition_Date, 0, 4);
+            $selected_month = substr($last_scored->Competition_Date, 5, 2);
+        }
+
+        $selected_season = $season_helper->getSeasonId($selected_year, $selected_month);
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
+        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
+
+        $is_scored_competitions = false;
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $is_scored_competitions = true;
+        }
+
+        if ($is_scored_competitions) {
+            foreach ($scored_competitions as $recs) {
+                $key = sprintf("%d-%02s", $recs['Year'], $recs['Month_Num']);
+                $months[$key] = $recs['Month'];
+                $themes[$key] = $recs['Theme'];
+            }
+        }
+
+        echo '<span class="competion-monthly-winners-form"> Monthly Entries for ';
+        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper);
+        echo '</span>';
+
+        $output = '';
+        if ($is_scored_competitions) {
+            $this_month = sprintf("%d-%02s", $selected_year, $selected_month);
+            $output = '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
+
+            // We display these in masonry style
+            $output .= $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
+            $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 194px'), true);
+            $date_object = new \DateTime($this_month);
+            $entries = $query_miscellaneous->getAllEntries($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
+            if (is_array($entries)) {
+                // Iterate through all the award winners and display each thumbnail in a grid
+                /** @var QueryEntries $recs */
+                foreach ($entries as $recs) {
+                    $user_info = get_userdata($recs->Member_ID);
+                    $recs->FirstName = $user_info->user_firstname;
+                    $recs->LastName = $user_info->user_lastname;
+                    $recs->Username = $user_info->user_login;
+
+                    $title = $recs->Title;
+                    $last_name = $recs->LastName;
+                    $first_name = $recs->FirstName;
+                    // Display this thumbnail in the the next available column
+
+                    $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
+                    $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
+                    $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
+                    $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+                    $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w'));
+                    $output .= '</a>';
+                    $output .= '</div>';
+                    $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
+                    $output .= $this->html->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
+                    $output .= '</div>';
+
+                    $output .= '</figure>' . "\n";
+                }
+            }
+            $output .= '</div>';
+        }
+        echo $output;
+        echo "<br />\n";
+
+        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $photo_helper);
+    }
+
+    /**
+     * Display all winners for the month.
+     * All winners of the month are shown, which defaults to the latest month.
+     * A dropdown selection to choose different months and/or season is also displayed.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayMonthlyWinners($attr, $content, $tag)
     {
         global $post;
 
-        // Default values
-        $medium = 'digital';
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
-        extract($atts, EXTR_OVERWRITE);
-        $this->settings->medium_subset = $medium;
+        $options = get_option('avh-rps');
+
+        $months = array();
+        $themes = array();
+
+        if ($this->request->has('submit_control')) {
+            switch ($this->request->input('submit_control')) {
+                case 'new_season':
+                    $selected_year = substr(esc_attr($this->request->input('new_season')), 0, 4);
+                    $selected_month = esc_attr($this->request->input('selected_month'));
+                    if ($selected_month < $options['season_start_month_num']) {
+                        $selected_year++;
+                    }
+                    break;
+                case 'new_month':
+                    $selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
+                    $selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
+                    break;
+                default:
+                    $selected_year = esc_attr($this->request->input('selected_year'));
+                    $selected_month = esc_attr($this->request->input('selected_month'));
+                    break;
+            }
+        } else {
+            $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+            $selected_year = substr($last_scored->Competition_Date, 0, 4);
+            $selected_month = substr($last_scored->Competition_Date, 5, 2);
+        }
+
+        $selected_season = $season_helper->getSeasonId($selected_year, $selected_month);
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
+        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
+
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $is_scored_competitions = true;
+        } else {
+            $is_scored_competitions = false;
+        }
+
+        if ($is_scored_competitions) {
+            foreach ($scored_competitions as $recs) {
+                $key = sprintf("%d-%02s", $recs['Year'], $recs['Month_Num']);
+                $months[$key] = $recs['Month'];
+                $themes[$key] = $recs['Theme'];
+            }
+
+            if (empty($selected_month)) {
+                end($months);
+                $selected_year = substr(key($months), 0, 4);
+                $selected_month = substr(key($months), 5, 2);
+            }
+        }
+
+        // Count the maximum number of awards in the selected competitions
+        $min_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month, 1);
+        if ($selected_month == 12) {
+            $max_date = sprintf("%d-%02s-%02s", $selected_year + 1, 1, 1);
+        } else {
+            $max_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month + 1, 1);
+        }
+
+        $max_num_awards = $query_miscellaneous->getMaxAwards($min_date, $max_date);
+
+        // Start displaying the form
+
+        echo '<span class="competion-monthly-winners-form"> Monthly Award Winners for ';
+        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper);
+        echo '</span>';
+
+        if ($is_scored_competitions) {
+            $this_month = sprintf("%d-%02s", $selected_year, $selected_month);
+            echo '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
+
+            echo "<table class=\"thumb_grid\">\n";
+            // Output the column headings
+            echo "<tr><th class='thumb_col_header' align='center'>Competition</th>\n";
+            for ($i = 0; $i < $max_num_awards; $i++) {
+                switch ($i) {
+                    case 0:
+                        $award_title = "1st";
+                        break;
+                    case 1:
+                        $award_title = "2nd";
+                        break;
+                    case 2:
+                        $award_title = "3rd";
+                        break;
+                    default:
+                        $award_title = "HM";
+                }
+                echo "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
+            }
+            $date_object = new \DateTime($this_month);
+            $award_winners = $query_miscellaneous->getWinners($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
+            // Iterate through all the award winners and display each thumbnail in a grid
+            $row = 0;
+            $column = 0;
+            $comp = "";
+            foreach ($award_winners as $recs) {
+
+                // Remember the important values from the previous record
+                $prev_comp = $comp;
+
+                // Grab a new record from the database
+                $medium = $recs->Medium;
+                $classification = $recs->Classification;
+                $comp = "$classification<br>$medium";
+                $title = $recs->Title;
+                $last_name = $recs->LastName;
+                $first_name = $recs->FirstName;
+                $award = $recs->Award;
+
+                // If we're at the end of a row, finish off the row and get ready for the next one
+                if ($prev_comp != $comp) {
+                    // As necessary, pad the row out with empty cells
+                    if ($row > 0 && $column < $max_num_awards) {
+                        for ($i = $column; $i < $max_num_awards; $i++) {
+                            echo "<td align=\"center\" class=\"thumb_cell\">";
+                            echo "<div class=\"thumb_canvas\"></div></td>\n";
+                        }
+                    }
+                    // Terminate this row
+                    echo "</tr>\n";
+
+                    // Initialize the new row
+                    $row += 1;
+                    $column = 0;
+                    echo "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
+                }
+                // Display this thumbnail in the the next available column
+                echo "<td align=\"center\" class=\"thumb_cell\">\n";
+                echo "  <div class=\"thumb_canvas\">\n";
+                echo "    <a href=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                echo "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 75) . "\" /></a>\n";
+                echo "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
+                echo "  </div>\n</td>\n";
+                $column += 1;
+            }
+            // As necessary, pad the last row out with empty cells
+            if ($row > 0 && $column < $max_num_awards) {
+                for ($i = $column; $i < $max_num_awards; $i++) {
+                    echo "<td align=\"center\" class=\"thumb_cell\">";
+                    echo "<div class=\"thumb_canvas\"></div></td>\n";
+                }
+            }
+            // Close out the table
+            echo "</tr>\n</table>\n";
+        } else {
+            echo 'There are no scored competitions for the selected season.';
+        }
+        echo "<br />\n";
+
+        unset($query_competitions, $query_miscellaneous, $season_helper, $photo_helper);
+    }
+
+    /**
+     * Display the entries of the current user.
+     * This page shows the current entries for a competition of the current user.
+     *
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - medium
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsMyEntries
+     */
+    public function displayMyEntries($attr, $content, $tag)
+    {
+        global $post;
+
+        $attr = shortcode_atts(array('medium' => 'digital'), $attr);
+
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $competition_helper = new CompetitionHelper($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+
+        $medium_subset_medium = $attr['medium'];
+
+        $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
+        $open_competitions = CommonHelper::arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
+
+        if (empty($open_competitions)) {
+            $this->settings->set('errmsg', 'There are no competitions available to enter');
+            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
+
+            return;
+        }
+
+        $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
+        $session->start();
+        if ($this->request->isMethod('POST')) {
+            switch ($this->request->input('submit_control')) {
+
+                case 'select_comp':
+                    $competition_date = $this->request->input('select_comp');
+                    $medium = $this->request->input('medium');
+                    break;
+
+                case 'select_medium':
+                    $competition_date = $this->request->input('comp_date');
+                    $medium = $this->request->input('selected_medium');
+                    break;
+                default:
+                    $competition_date = $this->request->input('comp_date');
+                    $medium = $this->request->input('medium');
+                    break;
+            }
+            $classification = $this->request->input('classification');
+        } else {
+            $current_competition = reset($open_competitions);
+            $competition_date = $session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+            $medium = $session->get('myentries/medium', $current_competition->Medium);
+            $classification = $session->get('myentries/classification', $current_competition->Classification);
+        }
+        $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+
+        $session->set('myentries/competition_date', $current_competition->Competition_Date);
+        $session->set('myentries/medium', $current_competition->Medium);
+        $session->set('myentries/classification', $current_competition->Classification);
+        $session->save();
+
+        if ($this->settings->has('errmsg')) {
+            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
+        }
 
         echo '<script language="javascript">' . "\n";
         echo '	function confirmSubmit() {' . "\n";
@@ -734,34 +979,24 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '}' . "\n";
         echo '</script>' . "\n";
 
-        if (!empty($this->settings->errmsg)) {
-            echo '<div id="errmsg">' . esc_html($this->settings->errmsg) . '</div>';
-        }
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
-        $form = '';
         echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
         echo '<input type="hidden" name="submit_control">' . "\n";
-        echo '<input type="hidden" name="comp_date" value="' . $this->settings->comp_date . '">' . "\n";
-        echo '<input type="hidden" name="classification" value="' . $this->settings->classification . '">' . "\n";
-        echo '<input type="hidden" name="medium" value="' . $this->settings->medium . '">' . "\n";
-        echo '<input type="hidden" name="medium_subset" value="' . $this->settings->medium_subset . '">' . "\n";
+        echo '<input type="hidden" name="comp_date" value="' . $current_competition->Competition_Date . '">' . "\n";
+        echo '<input type="hidden" name="classification" value="' . $current_competition->Classification . '">' . "\n";
+        echo '<input type="hidden" name="medium" value="' . $current_competition->Medium . '">' . "\n";
         echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce('avh-rps-myentries') . '" />' . "\n";
         echo '<table class="form_frame" width="90%">' . "\n";
 
         // Form Heading
-        if ($this->settings->validComp) {
-            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $this->settings->medium . " on " . strftime('%d-%b-%Y', strtotime($this->settings->comp_date)) . "</th></tr>\n";
-        } else {
-            echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">Make a selection</th></tr>\n";
-        }
+        echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $current_competition->Medium . " on " . mysql2date('Y-m-d', $current_competition->Competition_Date) . "</th></tr>\n";
         echo "<tr><td align=\"center\" colspan=\"6\">\n";
         echo "<table width=\"100%\">\n";
-        $theme_uri_images = get_stylesheet_directory_uri() . '/images';
         echo '<tr>';
         echo '<td width="25%">';
         // echo '<span class="rps-comp-medium">' . $this->settings->medium . '</span>';
-        switch ($this->settings->medium) {
+        switch ($current_competition->Medium) {
             case "Color Digital":
                 $img = '/thumb-comp-digital-color.jpg';
                 break;
@@ -778,7 +1013,7 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
                 $img = '';
         }
 
-        echo '<img src="' . plugins_url('/images' . $img, $this->settings->plugin_basename) . '">';
+        echo '<img src="' . plugins_url('/images' . $img, $this->settings->get('plugin_basename')) . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
         echo "<table width=\"100%\">\n";
@@ -788,56 +1023,40 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo "<td width=\"33%\" align=\"right\"><b>Competition Date:&nbsp;&nbsp;</b></td>\n";
         echo "<td width=\"64%\" align=\"left\">\n";
 
-        echo "<SELECT name=\"select_comp\" onchange=\"submit_form('select_comp')\">\n";
-        // Load the values into the dropdown list
-        $prev_date = "";
-        $compdates = array_unique($this->settings->open_comp_date);
-        foreach ($compdates as $key => $comp_date) {
-            $selected = '';
-            if ($this->settings->comp_date == $this->settings->open_comp_date[$key]) {
-                $selected = " SELECTED";
-                $theme = $this->settings->open_comp_theme[$key];
+        $previous_date = '';
+        $open_competitions_options = array();
+        foreach ($open_competitions as $open_competition) {
+            if ($previous_date == $open_competition->Competition_Date) {
+                continue;
             }
-            echo "<OPTION value=\"" . $comp_date . "\"$selected>" . strftime('%d-%b-%Y', strtotime($comp_date)) . " " . $this->settings->open_comp_theme[$key] . "</OPTION>\n";
+            $previous_date = $open_competition->Competition_Date;
+            $open_competitions_options[$open_competition->Competition_Date] = strftime('%d-%b-%Y', strtotime($open_competition->Competition_Date)) . " " . $open_competition->Theme;
         }
-        echo "</SELECT>\n";
+        echo $this->formBuilder->select('select_comp', $open_competitions_options, $current_competition->Competition_Date, array('onchange' => 'submit_form(\'select_comp\')'));
         echo "</td></tr>\n";
 
         // Competition medium dropdown list
         echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
         echo "<td width=\"64%\" align=\"left\">\n";
-        echo "<SELECT name=\"select_medium\" onchange=\"submit_form('select_medium')\">\n";
-
-        // Load the values into the dropdown list
-        $medium_array = array_keys($this->settings->open_comp_date, $this->settings->comp_date);
-        foreach ($medium_array as $comp_medium) {
-            $selected = '';
-            if ($this->settings->medium == $this->settings->open_comp_medium[$comp_medium]) {
-                $selected = " SELECTED";
-            }
-            echo "<OPTION value=\"" . $this->settings->open_comp_medium[$comp_medium] . "\"$selected>" . $this->settings->open_comp_medium[$comp_medium] . "</OPTION>\n";
-        }
-        echo "</SELECT>\n";
+        echo $this->formBuilder->select('selected_medium', $competition_helper->getMedium($open_competitions), $current_competition->Medium, array('onchange' => 'submit_form(\'select_medium\')'));
         echo "</td></tr>\n";
 
         // Display the Classification and Theme for the selected competition
         echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">" . $this->settings->classification . "</td></tr>\n";
+        echo "<td width=\"64%\" align=\"left\">" . $current_competition->Classification . "</td></tr>\n";
         echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">$theme</td></tr>\n";
+        echo "<td width=\"64%\" align=\"left\">$current_competition->Theme</td></tr>\n";
 
         echo "</table>\n";
         echo "</td></tr></table>\n";
 
         // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
-        if ($this->settings->comp_date != "") {
-            $close_date = $this->rpsdb->getCompetitionCloseDate();
-            if (!empty($close_date)) {
-                $close_epoch = strtotime($close_date);
-                $time_to_close = $close_epoch - current_time('timestamp');
-                if ($time_to_close >= 0 && $time_to_close <= 604800) {
-                    echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . mysql2date("F j, Y", $close_date) . " at " . mysql2date('h:i a', $close_date) . "</td></tr>\n";
-                }
+        $close_date = $query_competitions->getCompetitionCloseDate($current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
+        if ($close_date !== null) {
+            $close_epoch = strtotime($close_date);
+            $time_to_close = $close_epoch - current_time('timestamp');
+            if ($time_to_close >= 0 && $time_to_close <= 604800) {
+                echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . mysql2date("F j, Y", $close_date) . " at " . mysql2date('h:i a', $close_date) . "</td></tr>\n";
             }
         }
 
@@ -852,36 +1071,34 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</tr>';
 
         // Retrieve the maximum number of entries per member for this competition
-        $max_entries_per_member_per_comp = $this->rpsdb->getCompetitionMaxEntries();
+        $max_entries_per_member_per_comp = $query_competitions->getCompetitionMaxEntries($current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
 
-        // Retrive the total number of entries submitted by this member for this competition date
-        $total_entries_submitted = $this->rpsdb->getCompetitionEntriesUser();
+        // Retrieve the total number of entries submitted by this member for this competition date
+        $total_entries_submitted = $query_entries->countEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date);
 
-        $entries = $this->rpsdb->getCompetitionSubmittedEntriesUser();
+        $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
         // Build the rows of submitted images
-        $numRows = 0;
-        $numOversize = 0;
+        $num_rows = 0;
+        /** @var QueryEntries $recs */
         foreach ($entries as $recs) {
-            $numRows += 1;
-            $rowStyle = $numRows % 2 == 1 ? "odd_row" : "even_row";
+            $competition = $query_competitions->getCompetitionById($recs->Competition_ID);
+            $num_rows += 1;
+            $row_style = $num_rows % 2 == 1 ? "odd_row" : "even_row";
 
             // Checkbox column
-            echo '<tr class="' . $rowStyle . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
+            echo '<tr class="' . $row_style . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
 
             // Thumbnail column
-            $user = wp_get_current_user();
-            $a = realpath($recs->Server_File_Name);
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
-            echo '<a href="' . $image_url . '" rel="' . $this->settings->comp_date . '" title="' . $recs->Title . ' ' . $this->settings->classification . ' ' . $this->settings->medium . '">' . "\n";
-            echo "<img src=\"" . $this->core->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
+            echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium . '">' . "\n";
+            echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
             echo '<td align="left" width="40%">';
-            // echo "<div id='rps_colorbox_title'>" . htmlentities($recs->Title) . "<br />" . $this->settings->classification . " " . $this->settings->medium . "</div>";
             echo htmlentities($recs->Title) . "</td>\n";
+
             // File Name
             echo '<td align="left" width="25%">' . $recs->Client_File_Name . "</td>\n";
 
@@ -890,45 +1107,25 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
             if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name)) {
                 $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
             } else {
-                $size[0] = 0;
-                $size[1] = 0;
+                $size = array(0, 0);
             }
             if ($recs->Client_File_Name > "") {
-                if ($size[0] > 1024) {
-                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[0] . "</td>\n";
-                } else {
-                    echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
-                }
-                if ($size[1] > 768) {
-                    echo '<td align="center" style="color:red; font-weight:bold" width="10%">' . $size[1] . "</td>\n";
-                } else {
-                    echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
-                }
+                echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
+                echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
             } else {
                 echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
                 echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
             }
-            if ($size[0] > 1024 || $size[1] > 768) {
-                $numOversize += 1;
-            }
         }
 
         // Add some instructional bullet points above the buttons
-        echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\">";
-        echo "<ul style=\"margin:0;margin-left:15px;padding:0\">\n";
-        if ($numRows > 0) {
+        echo '<tr><td align="left" style="padding-top: 5px;" colspan="6">';
+        echo '<ul style="margin: 0 0 0 15px;padding:0">';
+        if ($num_rows > 0) {
             echo "<li>Click the thumbnail or title to view the full size image</li>\n";
         }
         echo "<ul></td></tr>\n";
 
-        // Warn the user about oversized images.
-        if ($numOversize > 0) {
-            echo "<tr><td align=\"left\" style=\"padding-top: 5px;\" colspan=\"6\" class=\"warning_cell\">";
-            echo "<ul style=\"margin:0;margin-left:15px;padding:0;color:red\"><li>When the Width or Height value is red, the image is too large to display on the projector. &nbsp;Here's what you need to do:\n";
-            echo "<ul style=\"margin:0;margin-left:15px;padding:0\"><li>Remove the image from the competition. (check the corresponding checkbox and click Remove)</li>\n";
-            echo "<li>Resize the image. &nbsp;Click <a href=\"/digital/Resize Digital Images.shtml\">here</a> for instructions.</li>\n";
-            echo "<li>Upload the resized image.</li></ul></ul>\n";
-        }
         if ($this->request->has('resized') && ('1' == $this->request->input('resized'))) {
             echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
             echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
@@ -937,54 +1134,218 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
 
         // Buttons at the bottom of the list of submitted images
         echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
+        echo '<span>';
         // Don't show the Add button if the max number of images per member reached
-        if ($numRows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->club_max_entries_per_member_per_date) {
-            echo "<input type=\"submit\" name=\"submit[add]\" value=\"Add\" onclick=\"submit_form('add')\">&nbsp;\n";
+        if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
+            echo $this->formBuilder->input('submit[add]', 'Add', array('type' => 'submit', 'onclick' => 'submit_form(\'add\')')) . "&nbsp;";
         }
-        if ($numRows > 0 && $max_entries_per_member_per_comp > 0) {
-            echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
+        if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
+            echo $this->formBuilder->input('submit[edit_title]', 'Change Title', array('type' => 'submit', 'onclick' => 'submit_form(\'add\')')) . "&nbsp;";
+            //echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
         }
-        if ($numRows > 0) {
-            echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
+        if ($num_rows > 0) {
+            echo $this->formBuilder->input('submit[delete]', 'Remove', array('type' => 'submit', 'onclick' => 'return  confirmSubmit()'));
+            //echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
         }
-
+        echo '</span></td></tr>';
         // All done, close out the table and the form
         echo "</table>\n</form>\n<br />\n";
+
+        unset($query_entries, $query_competitions, $competition_helper, $photo_helper);
     }
 
-    public function displayUploadEntry($atts, $content, $tag)
+    /**
+     * Display the eights and higher for a given member ID.
+     *
+     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     *                        - id => The member ID
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayPersonWinners($attr, $content, $tag)
+    {
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+
+        $attr = shortcode_atts(array('id' => 0), $attr);
+
+        echo '<section class="rps-showcases">';
+
+        echo '<div class="rps-sc-text entry-content">';
+        echo '<ul>';
+        $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
+        $images = array_rand($entries, 3);
+
+        foreach ($images as $key) {
+            $recs = $entries[$key];
+            $user_info = get_userdata($recs->Member_ID);
+            $recs->FirstName = $user_info->user_firstname;
+            $recs->LastName = $user_info->user_lastname;
+            $recs->Username = $user_info->user_login;
+
+            $title = $recs->Title;
+            $last_name = $recs->LastName;
+            $first_name = $recs->FirstName;
+            // Display this thumbnail in the the next available column
+            echo '<li>';
+            echo '<div>';
+            echo '	<div class="image">';
+            echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+            echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+            echo '	</div>';
+            echo "</div>\n";
+
+            echo '</li>';
+        }
+        echo '</ul>';
+        echo '</div>';
+        echo '</section>';
+
+        unset($query_miscellaneous, $photo_helper);
+    }
+
+    /**
+     * Displays the scores of the current user.
+     * By default the scores of the latest season is shown.
+     * A drop down with a season list is shown for the user to select.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     */
+    public function displayScoresCurrentUser($attr, $content, $tag)
     {
         global $post;
-        if ($this->request->has('m')) {
-            if ($this->request->input('m') == "prints") {
-                $medium_subset = "Prints";
-                $medium_param = "?m=prints";
-            } else {
-                $medium_subset = "Digital";
-                $medium_param = "?m=digital";
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+
+        $seasons = $season_helper->getSeasons();
+        $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
+
+        // Start building the form
+        $action = home_url('/' . get_page_uri($post->ID));
+        $form = '';
+        $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
+        $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '" />';
+        // Drop down list for season
+        $form .= $season_helper->getSeasonDropdown($selected_season);
+        $form .= "</form>";
+        echo '<script type="text/javascript">' . "\n";
+        echo 'function submit_form() {' . "\n";
+        echo '	document.my_scores_form.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>' . "\n";
+        echo "My scores for ";
+        echo $form;
+        echo '<table class="form_frame" width="99%">';
+        echo '<tr>';
+        echo '<th class="form_frame_header" width="12%">Date</th>';
+        echo '<th class="form_frame_header">Theme</th>';
+        echo '<th class="form_frame_header">Competition</th>';
+        echo '<th class="form_frame_header">Title</th>';
+        echo '<th class="form_frame_header" width="8%">Score</th>';
+        echo '<th class="form_frame_header" width="8%">Award</th></tr>';
+        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $season_start_date, $season_end_date);
+
+        // Bail out if not entries found
+        if (empty($scores)) {
+            echo "<tr><td colspan=\"6\">No entries submitted</td></tr>\n";
+            echo "</table>\n";
+        } else {
+
+            // Build the list of submitted images
+            $comp_count = 0;
+            $prev_date = "";
+            $prev_medium = "";
+            $row_style = 'odd_row';
+            foreach ($scores as $recs) {
+                $date_parts = explode(" ", $recs['Competition_Date']);
+                $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
+                $comp_date = $date_parts[0];
+                $medium = $recs['Medium'];
+                $theme = $recs['Theme'];
+                $title = $recs['Title'];
+                $score = $recs['Score'];
+                $award = $recs['Award'];
+                if ($date_parts[0] != $prev_date) {
+                    $comp_count += 1;
+                    $row_style = $comp_count % 2 == 1 ? "odd_row" : "even_row";
+                    $prev_medium = "";
+                }
+
+                $image_url = home_url($recs['Server_File_Name']);
+
+                if ($prev_date == $date_parts[0]) {
+                    $date_parts[0] = "";
+                    $theme = "";
+                } else {
+                    $prev_date = $date_parts[0];
+                }
+                if ($prev_medium == $medium) {
+                    // $medium = "";
+                    $theme = "";
+                } else {
+                    $prev_medium = $medium;
+                }
+                $score_award = "";
+                if ($score > "") {
+                    $score_award = " / {$score}pts";
+                }
+                if ($award > "") {
+                    $score_award .= " / $award";
+                }
+
+                echo "<tr>";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\" width=\"12%\">" . $date_parts[0] . "</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
+                // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
+                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
             }
+            echo "</table>";
         }
+        unset($query_miscellaneous, $season_helper);
+    }
+
+    /**
+     * Displays the form to upload a new entry.
+     *
+     * @param array  $attr    The shortcode argument list
+     * @param string $content The content of a shortcode when it wraps some content.
+     * @param string $tag     The shortcode name
+     *
+     * @see Frontend::actionHandleHttpPostRpsUploadEntry
+     */
+    public function displayUploadEntry($attr, $content, $tag)
+    {
+        global $post;
 
         // Error messages
-        if (isset($this->settings->errmsg)) {
+        if ($this->settings->has('errmsg')) {
             echo '<div id="errmsg">';
-            echo $this->settings->errmsg;
+            echo $this->settings->get('errmsg');
             echo '</div>';
         }
 
         $action = home_url('/' . get_page_uri($post->ID));
-        echo '<form action="' . $action . '/?post=1" enctype="multipart/form-data" method="post">';
+        echo $this->formBuilder->open($action . '/?post=1', array('enctype' => 'multipart/form-data'));
 
         if ($this->request->has('m')) {
-            echo '<input type="hidden" name="medium_subset" value="' . $medium_subset . '" />';
+            $medium_subset = "Digital";
+            if ($this->request->input('m') == "prints") {
+                $medium_subset = "Prints";
+            }
+            echo $this->formBuilder->hidden('medium_subset', $medium_subset);
         }
         if ($this->request->has('wp_get_referer')) {
             $_ref = $this->request->input('wp_get_referer');
         } else {
             $_ref = wp_get_referer();
         }
-        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m'), $_ref) . '" />';
-
+        echo $this->formBuilder->hidden('wp_get_referer', remove_query_arg(array('m'), $_ref));
         echo '<table class="form_frame" width="80%">';
         echo '<tr><th class="form_frame_header" colspan=2>';
         echo 'Submit Your Image';
@@ -1006,84 +1367,69 @@ final class Shortcodes extends \Avh\Utility\ShortcodesAbstract
         echo '</table>';
         echo '</td></tr>';
         echo '</table>';
-        echo '</form>';
-    }
-
-    public function displayEmail($atts, $content, $tag)
-    {
-        $email = $atts['email'];
-        unset($atts['email']);
-        echo $this->html->mailto($email, $content, $atts);
+        echo $this->formBuilder->close();
     }
 
     /**
-     * Display the eights and higher for a given member ID.
+     * Display the form for selecting the month and season.
      *
-     * @param array $atts
-     * @param string $content
-     * @param string $tag
+     * @param string       $selected_season
+     * @param string       $selected_year
+     * @param string       $selected_month
+     * @param boolean      $is_scored_competitions
+     * @param array        $months
+     * @param SeasonHelper $season_helper
      */
-    public function displayPersonWinners($atts, $content, $tag)
+    private function displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper)
     {
-        global $wpdb;
+        global $post;
+        echo '<script type="text/javascript">';
+        echo 'function submit_form(control_name) {' . "\n";
+        echo '	document.month_season_form.submit_control.value = control_name;' . "\n";
+        echo '	document.month_season_form.submit();' . "\n";
+        echo '}' . "\n";
+        echo '</script>';
 
-        $id = 0;
-        extract($atts, EXTR_OVERWRITE);
+        $action = home_url('/' . get_page_uri($post->ID));
+        $form = '';
+        $form .= $this->formBuilder->open($action, array('name' => 'month_season_form'));
+        $form .= $this->formBuilder->hidden('submit_control');
+        $form .= $this->formBuilder->hidden('selected_season', $selected_season);
+        $form .= $this->formBuilder->hidden('selected_year', $selected_year);
+        $form .= $this->formBuilder->hidden('selected_month', $selected_month);
 
-        echo '<section class="rps-showcases">';
-
-        echo '<div class="rps-sc-text entry-content">';
-        echo '<ul>';
-        $entries = $this->rpsdb->getEightsAndHigherPerson($id);
-        $images = array_rand($entries, 3);
-
-        foreach ($images as $key) {
-            $recs = $entries[$key];
-            $user_info = get_userdata($recs->Member_ID);
-            $recs->FirstName = $user_info->user_firstname;
-            $recs->LastName = $user_info->user_lastname;
-            $recs->Username = $user_info->user_login;
-
-            // Grab a new record from the database
-            $dateParts = explode(" ", $recs->Competition_Date);
-            $comp_date = $dateParts[0];
-            $medium = $recs->Medium;
-            $classification = $recs->Classification;
-            $comp = "$classification<br>$medium";
-            $title = $recs->Title;
-            $last_name = $recs->LastName;
-            $first_name = $recs->FirstName;
-            $award = $recs->Award;
-            // Display this thumbnail in the the next available column
-            echo '<li>';
-            echo '<div>';
-            echo '	<div class="image">';
-            echo '	<a href="' . $this->core->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $this->core->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
-            echo '	</div>';
-            echo "</div>\n";
-
-            echo '</li>';
+        if ($is_scored_competitions) {
+            // Drop down list for months
+            $form .= $this->getMonthsDropdown($months, $selected_year . '-' . $selected_month);
         }
-        echo '</ul>';
-        echo '</div>';
-        echo '</section>';
+
+        // Drop down list for season
+        $form .= $season_helper->getSeasonDropdown($selected_season);
+        $form .= $this->formBuilder->close();
+        echo $form;
+        unset($form);
     }
 
     /**
-     * Get the seasons list
+     * Display a dropdown for the given months
      *
-     * @return Ambigous <multitype:, NULL>
+     * @param array   $months
+     * @param string  $selected_month
+     * @param boolean $echo
+     *
+     * @return string|null
      */
-    private function getSeasons()
+    private function getMonthsDropdown($months, $selected_month, $echo = false)
     {
-        $seasons = $this->rpsdb->getSeasonList();
-        if (empty($this->settings->selected_season)) {
-            $this->settings->selected_season = $seasons[count($seasons) - 1];
+
+        $form = $this->formBuilder->select('new_month', $months, $selected_month, array('onChange' => 'submit_form("new_month")'));
+
+        if ($echo) {
+            echo $form;
+        } else {
+            return $form;
         }
-        $this->settings->season_start_year = substr($this->settings->selected_season, 0, 4);
-        $this->settings->season_start_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year, $this->settings->club_season_start_month_num, 1);
-        $this->settings->season_end_date = sprintf("%d-%02s-%02s", $this->settings->season_start_year + 1, $this->settings->club_season_start_month_num, 1);
-        return $seasons;
+
+        return null;
     }
 }

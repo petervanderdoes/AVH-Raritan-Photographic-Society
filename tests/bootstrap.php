@@ -1,7 +1,6 @@
 <?php
 /**
  * Bootstrap the plugin unit testing environment.
- *
  * Edit 'active_plugins' setting below to point to your main plugin file.
  *
  * @package wordpress-plugin-tests
@@ -9,16 +8,15 @@
 
 // Activates this plugin in WordPress so it can be tested.
 $GLOBALS['wp_tests_options'] = array(
-	'active_plugins' => array( 'avh-rps-competition/avh-rps-competition.php' ),
+    'active_plugins' => array('avh-rps-competition/avh-rps-competition.php'),
 );
-
 
 // If the develop repo location is defined (as WP_DEVELOP_DIR), use that
 // location. Otherwise, we'll just assume that this plugin is installed in a
 // WordPress develop SVN checkout.
 
-if( false !== getenv( 'WP_DEVELOP_DIR' ) ) {
-	require getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit/includes/bootstrap.php';
+if (false !== getenv('WP_DEVELOP_DIR')) {
+    require getenv('WP_DEVELOP_DIR') . '/tests/phpunit/includes/bootstrap.php';
 } else {
     $pdo = new PDO($GLOBALS['db_dsn'], $GLOBALS['db_username'], $GLOBALS['db_password']);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -101,5 +99,5 @@ if( false !== getenv( 'WP_DEVELOP_DIR' ) ) {
         `Date_Modified` datetime DEFAULT NULL,
         KEY `Member_ID` (`Member_ID`)
         )");
-	require '../../../../tests/phpunit/includes/bootstrap.php';
+    require '../../../../tests/phpunit/includes/bootstrap.php';
 }

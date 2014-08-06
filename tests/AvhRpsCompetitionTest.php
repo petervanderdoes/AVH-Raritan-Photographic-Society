@@ -2,9 +2,7 @@
 
 class AvhRpsCompetitiontest extends WP_UnitTestCase
 {
-
     /**
-     *
      * @var PDO
      */
     private $pdo;
@@ -14,7 +12,7 @@ class AvhRpsCompetitiontest extends WP_UnitTestCase
      */
     public function setUp()
     {
-       parent::setUp();
+        parent::setUp();
     }
 
     /**

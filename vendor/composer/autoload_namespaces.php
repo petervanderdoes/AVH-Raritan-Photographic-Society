@@ -6,4 +6,15 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Symfony\\Component\\Yaml\\' => array($vendorDir . '/symfony/yaml'),
+    'Symfony\\Component\\Finder\\' => array($vendorDir . '/symfony/finder'),
+    'Symfony\\Component\\Filesystem\\' => array($vendorDir . '/symfony/filesystem'),
+    'Symfony\\Component\\DependencyInjection\\' => array($vendorDir . '/symfony/dependency-injection'),
+    'Symfony\\Component\\Config\\' => array($vendorDir . '/symfony/config'),
+    'PHPMD\\' => array($vendorDir . '/phpmd/phpmd/src/main/php'),
+    'PDepend\\' => array($vendorDir . '/pdepend/pdepend/src/main/php', $vendorDir . '/phpmd/phpmd/vendor/pdepend/pdepend/src/main/php'),
+    'Intervention\\Image\\' => array($vendorDir . '/intervention/image/src'),
+    'Illuminate\\Support' => array($vendorDir . '/illuminate/support'),
+    'Illuminate\\Filesystem' => array($vendorDir . '/illuminate/filesystem'),
+    'Illuminate\\Config' => array($vendorDir . '/illuminate/config'),
 );

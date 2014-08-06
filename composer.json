@@ -1,5 +1,6 @@
 {
-	"name" : "RPS Competition",
+	"name" : "avh/rps-competition",
+    "description" : "Package written for the Raritan Photographic Society",
 	"type" : "wordpress-plugin",
 	"authors" : [{
 			"name" : "Peter van der Does",
@@ -14,7 +15,12 @@
 	"license" : "BSD-3-Clause",
 	"autoload" : {
 		"psr-4" : {
-			"RpsCompetition\\" : "app/"
+			"RpsCompetition\\" : "app/RpsCompetition"
 		}
+	},
+	"require" : {
+		"intervention/image" : "~2.0",
+		"phpmd/phpmd" : "2.0.0",
+		"phpunit/phpunit" : "~4.1"
 	}
 }

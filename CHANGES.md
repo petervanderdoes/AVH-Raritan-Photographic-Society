@@ -1,11 +1,16 @@
 ## Changelog
 
-### Version 1.3.11-rc1
+#### Version 1.4.0
+* Improved check for uploaded files to the competitions.
+* Use image library.
+* Refactor RpsDb class
+
+#### Version 1.3.11
 * The stripslashes function is no longer needed
 * Fix XML file. Make sure UTF-8 encoding is done.
 * Use object for data retrieval instead of objects.
 
-#### Version 1.3.11
+#### Version 1.3.10
 * Use Request class
 
 #### Version 1.3.6
