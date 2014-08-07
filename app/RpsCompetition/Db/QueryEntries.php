@@ -268,7 +268,7 @@ class QueryEntries
      *
      * @param array $data
      *
-     * @return object WP_Error on failure. The post ID on success.
+     * @return \WP_Error|boolean
      */
     public function updateEntry($data)
     {

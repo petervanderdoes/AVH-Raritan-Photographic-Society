@@ -191,8 +191,7 @@ class QueryCompetitions
      * Get the whole competition record
      *
      * @param integer $id
-     * @param string  $output
-     *            default is OBJECT
+     * @param string  $output default is OBJECT
      *
      * @return QueryCompetitions|array
      */
@@ -355,7 +354,7 @@ class QueryCompetitions
      *
      * @param array $data
      *
-     * @return object WP_Error on failure. The post ID on success.
+     * @return \WP_Error|integer
      */
     public function insertCompetition(array $data)
     {
@@ -407,7 +406,7 @@ class QueryCompetitions
      * @param array  $query_vars
      * @param string $output
      *
-     * @return object|array
+     * @return QueryCompetitions|array
      */
     public function query(array $query_vars, $output = OBJECT)
     {

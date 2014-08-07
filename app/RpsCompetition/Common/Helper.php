@@ -54,7 +54,7 @@ class Helper
     /**
      * Check if the user is a paid member
      *
-     * @param int $user_id UserID to check
+     * @param integer|null $user_id UserID to check
      *
      * @return boolean true if a paid member, false if non-existing user or non-paid member.`
      */
