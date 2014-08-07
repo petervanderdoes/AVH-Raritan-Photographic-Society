@@ -740,6 +740,7 @@ final class Admin
             $entries = $query_entries->query(array('where' => $sqlWhere, 'count' => true));
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
             $competition = $query_competitions->query(array('where' => $sqlWhere));
+            /** @var QueryCompetitions $competition */
             $competition = $competition[0];
             if ($entries !== "0") {
                 echo "<li>" . sprintf(__('ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'),
@@ -1469,7 +1470,7 @@ final class Admin
     /**
      * Update an entry after a POST
      *
-     * @return boolean
+     * @return \WP_Error|boolean
      */
     private function updateEntry()
     {

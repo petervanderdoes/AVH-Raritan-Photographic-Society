@@ -41,6 +41,13 @@ class Core
         return $this->comment . ' ' . trim($str) . ' -->';
     }
 
+    /**
+     * Convert a shorthand size to bytes.
+     *
+     * @param $size_str
+     *
+     * @return int
+     */
     public function getShorthandToBytes($size_str)
     {
         switch (substr($size_str, -1)) {
@@ -58,6 +65,11 @@ class Core
         }
     }
 
+    /**
+     * Initialize the plugin
+     * Set the required settings to be used throughout the plugin
+
+     */
     public function handleInitializePlugin()
     {
         // $old_db_version = get_option('avhrps_db_version', 0);

@@ -26,7 +26,7 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '1.4.1';
+    const PLUGIN_VERSION = '1.4.2';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
     private static $image_sizes = array (
@@ -44,10 +44,11 @@ final class Constants
      * Returns the width and height for the given image size.
      *
      * @param string $size
-     * @uses $image_sizes
      *
+     * @uses $image_sizes
      * @return array
-     */public static function get_image_size($size)
+     */
+    public static function get_image_size($size)
     {
         if (array_key_exists($size, self::$image_sizes)) {
             return self::$image_sizes[(string) $size];
