@@ -52,6 +52,18 @@ class Helper
     }
 
     /**
+     * Create a directory if it does not exist.
+     *
+     * @param string $path
+     */
+    static public function createDirectory($path)
+    {
+        if (!is_dir($path)) {
+            mkdir($path, 0755);
+        }
+    }
+
+    /**
      * Check if the user is a paid member
      *
      * @param integer|null $user_id UserID to check
@@ -72,17 +84,4 @@ class Helper
 
         return in_array('s2member_level4', (array) $user->roles);
     }
-
-    /**
-     * Create a directory if it does not exist.
-     *
-     * @param string $path
-     */
-    static public function createDirectory($path)
-    {
-        if (!is_dir($path)) {
-            mkdir($path, 0755);
-        }
-    }
-
-} 
+}

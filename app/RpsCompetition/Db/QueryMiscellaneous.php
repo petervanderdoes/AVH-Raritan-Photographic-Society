@@ -13,7 +13,7 @@ class QueryMiscellaneous
     /**
      * Get all photos for competitions between the given dates.
      *
-     * @param string $competition_date_start
+     * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
      * @return array
@@ -43,7 +43,7 @@ class QueryMiscellaneous
      * Get result by given date.
      * This will return the results, scores & awards, including member info for competitions given between the dates
      *
-     * @param string $competition_date_start
+     * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
      * @return array
@@ -132,7 +132,7 @@ class QueryMiscellaneous
     /**
      * Get the maximum awards per competition date, classification and medium between the given competition dates
      *
-     * @param string $competition_date_start
+     * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
      * @return int
@@ -160,7 +160,7 @@ class QueryMiscellaneous
     /**
      * Get scores ordered by competition date for competitions between the given dates
      *
-     * @param string $competition_date_start
+     * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
      * @return array
@@ -187,9 +187,9 @@ class QueryMiscellaneous
     /**
      * Get the scores for the given user for competitions between the given dates.
      *
-     * @param integer $user_id
-     * @param string  $competition_date_start
-     * @param null|string  $competition_date_end
+     * @param integer     $user_id
+     * @param string      $competition_date_start
+     * @param null|string $competition_date_end
      *
      * @return array
      */
@@ -306,7 +306,7 @@ class QueryMiscellaneous
     /**
      * Get all photos that have an award for competitions between the given dates.
      *
-     * @param string $competition_date_start
+     * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
      * @return array
