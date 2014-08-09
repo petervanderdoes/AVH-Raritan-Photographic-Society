@@ -681,7 +681,8 @@ final class Shortcodes extends ShortcodesAbstract
             // We display these in masonry style
             $output .= $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
             $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
-            $output .= $this->html->element('div', array('id' => 'images'), true);
+            $output .= '</div>';
+            $output .= $this->html->element('div', array('id' => 'images'));
             $date_object = new \DateTime($this_month);
             $entries = $query_miscellaneous->getAllEntries($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
             if (is_array($entries)) {
