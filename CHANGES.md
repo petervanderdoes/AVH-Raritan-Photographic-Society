@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.4.4-rc.1
+#### Version 1.4.4
 * Preparation for new development cycle.
 
 #### Version 1.4.3
