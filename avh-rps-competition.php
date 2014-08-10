@@ -60,8 +60,8 @@ class AVH_RPS_Client
         $this->container->make('RpsCompetition\Db\RpsDb');
         $this->container->make('RpsCompetition\Options\General');
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
-        $this->settings->set('plugin_dir',$dir);
-        $this->settings->set('plugin_basename',$basename);
+        $this->settings->set('plugin_dir', $dir);
+        $this->settings->set('plugin_basename', $basename);
         $this->settings->set('plugin_file', $basename);
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
 
