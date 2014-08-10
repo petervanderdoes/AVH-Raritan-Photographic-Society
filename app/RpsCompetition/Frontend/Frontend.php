@@ -81,7 +81,7 @@ class Frontend
         global $wp_query;
 
         if (!is_admin()) {
-            $scripts_directory_uri = get_stylesheet_directory_uri() . '/js/';
+            $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
             if (WP_LOCAL_DEV == true) {
                 $rps_masonry_script = 'rps.masonry.js';
             } else {
