@@ -49,6 +49,7 @@ class Frontend
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
+        add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
         if ($this->request->isMethod('POST')) {
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsMyEntries'));
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsEditTitle'));
@@ -68,6 +69,32 @@ class Frontend
     public function actionAfterThemeSetup()
     {
         add_action('rps_showcase', array($this, 'actionShowcaseCompetitionThumbnails'));
+    }
+
+    /**
+     * Enqueue the needed javascripts.
+     *
+     * @internal Hook: wp_enqueue_scripts
+     */
+    public function actionEnqueueScripts()
+    {
+        global $wp_query;
+
+        if (!is_admin()) {
+            $scripts_directory_uri = get_stylesheet_directory_uri() . '/scripts/';
+            if (WP_LOCAL_DEV == true) {
+                $rps_masonry_script = 'rps.masonry.js';
+            } else {
+                $rps_masonry_version = "1fab244";
+                $rps_masonry_script = 'rps.masonry-' . $rps_masonry_version . '.js';
+            }
+
+            //todo Make as an option in the admin section.
+            $all_masonry_pages = array(1005, 987);
+            if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
+                wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
+            }
+        }
     }
 
     /**
