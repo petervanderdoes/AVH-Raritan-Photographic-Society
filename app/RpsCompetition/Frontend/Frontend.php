@@ -85,7 +85,7 @@ class Frontend
             if (WP_LOCAL_DEV == true) {
                 $rps_masonry_script = 'rps.masonry.js';
             } else {
-                $rps_masonry_version = "1fab244";
+                $rps_masonry_version = "a128c24";
                 $rps_masonry_script = 'rps.masonry-' . $rps_masonry_version . '.js';
             }
 
