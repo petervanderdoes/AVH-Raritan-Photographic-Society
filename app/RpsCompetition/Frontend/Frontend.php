@@ -85,12 +85,12 @@ class Frontend
             if (WP_LOCAL_DEV == true) {
                 $rps_masonry_script = 'rps.masonry.js';
             } else {
-                $rps_masonry_version = "1fab244";
+                $rps_masonry_version = "a128c24";
                 $rps_masonry_script = 'rps.masonry-' . $rps_masonry_version . '.js';
             }
 
             //todo Make as an option in the admin section.
-            $all_masonry_pages = array(1005, 987);
+            $all_masonry_pages = array(1005);
             if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
                 wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
             }
