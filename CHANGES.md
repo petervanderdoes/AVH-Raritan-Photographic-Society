@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 1.4.8
+* Preparation for new development cycle.
+
 #### Version 1.4.7
 * Preparation for new development cycle.
 
