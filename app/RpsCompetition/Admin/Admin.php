@@ -596,7 +596,9 @@ final class Admin
         $message = '';
         if (is_array($this->message)) {
             foreach ($this->message as $_msg) {
-                $message .= $_msg . "<br>";
+                foreach ($_msg as $msg) {
+                    $message .= $msg . "<br>";
+                }
             }
         } else {
             $message = $this->message;
@@ -645,7 +647,7 @@ final class Admin
                 'checked' => $form_options['medium']['medium_bwp']
             ),
             'medium_cp'  => array(
-                'text'    => 'Color Digital',
+                'text'    => 'Color Print',
                 'value'   => $form_options['medium']['medium_cp'],
                 'checked' => $form_options['medium']['medium_cp']
             )
