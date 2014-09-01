@@ -496,10 +496,10 @@ final class Admin
                     $validator->validate();
 
                     foreach ($form_default_options['medium'] as $key => $value) {
-                        $form_new_options['medium'][$key] = avh_array_get($form_new_options, 'medium.' . $key, false);
+                        $form_new_options['medium'][$key] = (bool) avh_array_get($form_new_options, 'medium.' . $key, false);
                     }
                     foreach ($form_default_options['classification'] as $key => $value) {
-                        $form_new_options['classification'][$key] = avh_array_get($form_new_options, 'classification.' . $key, false);
+                        $form_new_options['classification'][$key] = (bool) avh_array_get($form_new_options, 'classification.' . $key, false);
                     }
                     $form_new_options['special_event'] = (bool) avh_array_get($form_new_options, 'special_event', false);
 
@@ -529,9 +529,15 @@ final class Admin
                         $data['Special_Event'] = ($form_new_options['special_event'] ? 'Y' : 'N');
                         $medium_keys = array_keys($form_new_options['medium']);
                         foreach ($medium_keys as $medium_key) {
+                            if ($form_new_options['medium'][$medium_key] === false) {
+                                continue;
+                            }
                             $data['Medium'] = $medium_convert[$medium_key];
                             $classification_keys = array_keys($form_new_options['classification']);
                             foreach ($classification_keys as $classification_key) {
+                                if ($form_new_options['classification'][$classification_key] === false) {
+                                    continue;
+                                }
                                 $data['Classification'] = $classification_convert[$classification_key];
                                 $competition_ID = $query_competitions->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
