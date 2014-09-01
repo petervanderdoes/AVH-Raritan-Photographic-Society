@@ -1235,7 +1235,7 @@ final class Admin
             case 'open':
             case 'close':
                 check_admin_referer('bulk-competitions');
-                if (!($this->request->has('competitions') && $this->request->has('competition'))) {
+                if (!($this->request->has('competitions') || $this->request->has('competition'))) {
                     wp_redirect($redirect);
                     exit();
                 }
@@ -1362,7 +1362,7 @@ final class Admin
         switch ($doAction) {
             case 'delete':
                 check_admin_referer('bulk-entries');
-                if (!($this->request->has('entries') && $this->request->has('entry'))) {
+                if (!($this->request->has('entries') || $this->request->has('entry'))) {
                     wp_redirect($redirect);
                     exit();
                 }
