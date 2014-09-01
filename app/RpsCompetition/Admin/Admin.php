@@ -471,7 +471,7 @@ final class Admin
             ),
             'max-entries'    => '2',
             'judges'         => '1',
-            'special-event'  => false
+            'special_event'  => false
         );
 
         $form_options = $form_default_options;
@@ -501,7 +501,7 @@ final class Admin
                     foreach ($form_default_options['classification'] as $key => $value) {
                         $form_new_options['classification'][$key] = avh_array_get($form_new_options, 'classification.' . $key, false);
                     }
-                    $form_new_options['special-event'] = avh_array_get($form_new_options, 'special-event', false);
+                    $form_new_options['special_event'] = (bool) avh_array_get($form_new_options, 'special_event', false);
 
                     $validator_errors = $validator->errors();
                     if (empty($validator_errors)) {
@@ -526,8 +526,8 @@ final class Admin
                         $data['Theme'] = $form_new_options['theme'];
                         $data['Max_Entries'] = $form_new_options['max-entries'];
                         $data['Num_Judges'] = $form_new_options['judges'];
-                        $data['Special_Event'] = ($form_new_options['special-event'] ? 'Y' : 'N');
-                        $medium_keys = array_keys($form_new_options['Medium']);
+                        $data['Special_Event'] = ($form_new_options['special_event'] ? 'Y' : 'N');
+                        $medium_keys = array_keys($form_new_options['medium']);
                         foreach ($medium_keys as $medium_key) {
                             $data['Medium'] = $medium_convert[$medium_key];
                             $classification_keys = array_keys($form_new_options['classification']);
@@ -689,10 +689,8 @@ final class Admin
         echo $formBuilder->outputField($formBuilder->select('judges', $array_judges, $form_options['judges']));
         unset($array_judges);
 
-        $array_special_event = array('special-event' => array('text' => '', 'checked' => $form_options['special-event']));
-        echo $formBuilder->outputLabel($formBuilder->label('special-event', 'Special Event'));
-        echo $formBuilder->outputField($formBuilder->checkbox('special-event', $form_options['special-event'], $form_options['special-event']));
-        unset($array_special_event);
+        echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
+        echo $formBuilder->outputField($formBuilder->checkbox('special_event', $form_options['special_event'], $form_options['special_event']));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
@@ -866,17 +864,14 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
         echo $formBuilder->outputField($formBuilder->select('judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off')));
 
-        $_special_event = array('special-event' => array('text' => '', 'checked' => $competition->Special_Event));
-        echo $formBuilder->outputLabel($formBuilder->label('special-event', 'Special Event'));
-        echo $formBuilder->outputField($formBuilder->checkbox('special-event', $_special_event));
+        echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
+        echo $formBuilder->outputField($formBuilder->checkbox('special_event', ($competition->Special_Event == 'Y' ? true : false), ($competition->Special_Event == 'Y' ? true : false)));
 
-        $_closed = array('closed' => array('text' => '', 'checked' => ($competition->Closed == 'Y' ? true : false)));
         echo $formBuilder->outputLabel($formBuilder->label('closed', 'Closed'));
-        echo $formBuilder->outputField($formBuilder->checkbox('closed', $_closed));
+        echo $formBuilder->outputField($formBuilder->checkbox('closed', ($competition->Closed == 'Y' ? true : false),($competition->Closed == 'Y' ? true : false)));
 
-        $_scored = array('scored' => array('text' => '', 'checked' => ($competition->Scored == 'Y' ? true : false)));
         echo $formBuilder->outputLabel($formBuilder->label('scored', 'Scored'));
-        echo $formBuilder->outputField($formBuilder->checkbox('scored', $_scored));
+        echo $formBuilder->outputField($formBuilder->checkbox('scored', ($competition->Scored == 'Y' ? true : false),($competition->Scored == 'Y' ? true : false)));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
@@ -1444,7 +1439,7 @@ final class Admin
         $formOptionsNew['classification'] = $formOptions['classification'];
         $formOptionsNew['max-entries'] = $formOptions['max-entries'];
         $formOptionsNew['judges'] = $formOptions['judges'];
-        $formOptionsNew['special-event'] = isset($formOptions['special-event']) ? $formOptions['special-event'] : '';
+        $formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
@@ -1457,7 +1452,7 @@ final class Admin
         $data['Theme'] = $formOptionsNew['theme'];
         $data['Max_Entries'] = $formOptionsNew['max-entries'];
         $data['Num_Judges'] = $formOptionsNew['judges'];
-        $data['Special_Event'] = ($formOptionsNew['special-event'] ? 'Y' : 'N');
+        $data['Special_Event'] = ($formOptionsNew['special_event'] ? 'Y' : 'N');
         $data['Closed'] = ($formOptionsNew['closed'] ? 'Y' : 'N');
         $data['Scored'] = ($formOptionsNew['scored'] ? 'Y' : 'N');
         $data['Medium'] = $_medium[$formOptionsNew['medium']];
