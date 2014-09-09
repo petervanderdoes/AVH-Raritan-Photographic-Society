@@ -32,15 +32,15 @@ class Helper
 
         $params = array();
         foreach ($cols as $col => $order) {
-            $params[] = & $sort_column_array[$col];
+            $params[] = &$sort_column_array[$col];
             foreach ($order as $order_element) {
                 // pass by reference, as required by php 5.3
-                $params[] = & $order_element;
+                $params[] = &$order_element;
                 unset($order_element);
             }
         }
 
-        $params[] = & $array;
+        $params[] = &$array;
         call_user_func_array('array_multisort', $params);
         if ($row_is_object) {
             foreach ($array as $key => $row) {
@@ -61,6 +61,34 @@ class Helper
         if (!is_dir($path)) {
             mkdir($path, 0755);
         }
+    }
+
+    /**
+     * Get the user classification based on the medium
+     *
+     * @param int    $userID
+     * @param string $medium
+     *
+     * @return string
+     */
+    static public function getUserClassification($userID, $medium)
+    {
+        switch ($medium) {
+            case 'B&W Digital':
+                $index = get_user_meta($userID, 'rps_class_bw', true);
+                break;
+            case 'Color Digital':
+                $index = get_user_meta($userID, 'rps_class_color', true);
+                break;
+            case 'B&W Prints':
+                $index = get_user_meta($userID, 'rps_class_print_bw', true);
+                break;
+            case 'Color Prints':
+                $index = get_user_meta($userID, 'rps_class_print_color', true);
+                break;
+        }
+
+        return ucfirst($index);
     }
 
     /**

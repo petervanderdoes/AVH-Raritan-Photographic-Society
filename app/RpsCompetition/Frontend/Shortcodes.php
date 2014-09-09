@@ -947,18 +947,16 @@ final class Shortcodes extends ShortcodesAbstract
                     $medium = $this->request->input('medium');
                     break;
             }
-            $classification = $this->request->input('classification');
         } else {
             $current_competition = reset($open_competitions);
             $competition_date = $session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
             $medium = $session->get('myentries/medium', $current_competition->Medium);
-            $classification = $session->get('myentries/classification', $current_competition->Classification);
         }
+        $classification = CommonHelper::getUserClassification(get_current_user_id(),$medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
 
         $session->set('myentries/competition_date', $current_competition->Competition_Date);
         $session->set('myentries/medium', $current_competition->Medium);
-        $session->set('myentries/classification', $current_competition->Classification);
         $session->save();
 
         if ($this->settings->has('errmsg')) {
@@ -986,7 +984,6 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
         echo '<input type="hidden" name="submit_control">' . "\n";
         echo '<input type="hidden" name="comp_date" value="' . $current_competition->Competition_Date . '">' . "\n";
-        echo '<input type="hidden" name="classification" value="' . $current_competition->Classification . '">' . "\n";
         echo '<input type="hidden" name="medium" value="' . $current_competition->Medium . '">' . "\n";
         echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce('avh-rps-myentries') . '" />' . "\n";
         echo '<table class="form_frame" width="90%">' . "\n";
