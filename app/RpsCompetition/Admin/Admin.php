@@ -44,6 +44,7 @@ final class Admin
 
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $this->request = $this->container->make('Illuminate\Http\Request');
+        $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->core = new Core($this->settings);
 
         // Admin menu
