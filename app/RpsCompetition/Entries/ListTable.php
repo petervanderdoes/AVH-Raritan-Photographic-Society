@@ -159,7 +159,7 @@ class ListTable extends \WP_List_Table
 
     public function display()
     {
-        extract($this->_args);
+        //extract($this->_args);
 
         $this->display_tablenav('top');
 

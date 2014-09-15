@@ -985,6 +985,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<input type="hidden" name="submit_control">' . "\n";
         echo '<input type="hidden" name="comp_date" value="' . $current_competition->Competition_Date . '">' . "\n";
         echo '<input type="hidden" name="medium" value="' . $current_competition->Medium . '">' . "\n";
+        echo '<input type="hidden" name="classification" value="' . $current_competition->Classification . '">' . "\n";
         echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce('avh-rps-myentries') . '" />' . "\n";
         echo '<table class="form_frame" width="90%">' . "\n";
 
