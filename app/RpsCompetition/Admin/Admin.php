@@ -6,6 +6,7 @@ use Avh\Html\HtmlBuilder;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Core;
+use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\ListTable as CompetitionListTable;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
@@ -482,15 +483,9 @@ final class Admin
                     $form_new_options = $this->request->input($formBuilder->getOptionName());
 
                     $validator = new Validator($form_new_options);
-                    $validator->rule('required', 'date')
-                        ->message('{field} is required')
-                        ->label('Date');
-                    $validator->rule('dateFormat', 'date', 'Y-m-d')
-                        ->message('{field} should be in Y-m-d format')
-                        ->label('Date');
-                    $validator->rule('required', 'theme')
-                        ->message('{field} is required')
-                        ->label('Theme');
+                    $validator->rule('required', 'date')->message('{field} is required')->label('Date');
+                    $validator->rule('dateFormat', 'date', 'Y-m-d')->message('{field} should be in Y-m-d format')->label('Date');
+                    $validator->rule('required', 'theme')->message('{field} is required')->label('Theme');
                     $validator->rule('required', 'medium')->message('No medium selected. At least one medium needs to be selected');
                     $validator->rule('required', 'classification')->message('No classification selected. At least one classification needs to be selected');
                     $validator->validate();
@@ -874,10 +869,10 @@ final class Admin
         echo $formBuilder->outputField($formBuilder->checkbox('special_event', ($competition->Special_Event == 'Y' ? true : false), ($competition->Special_Event == 'Y' ? true : false)));
 
         echo $formBuilder->outputLabel($formBuilder->label('closed', 'Closed'));
-        echo $formBuilder->outputField($formBuilder->checkbox('closed', ($competition->Closed == 'Y' ? true : false),($competition->Closed == 'Y' ? true : false)));
+        echo $formBuilder->outputField($formBuilder->checkbox('closed', ($competition->Closed == 'Y' ? true : false), ($competition->Closed == 'Y' ? true : false)));
 
         echo $formBuilder->outputLabel($formBuilder->label('scored', 'Scored'));
-        echo $formBuilder->outputField($formBuilder->checkbox('scored', ($competition->Scored == 'Y' ? true : false),($competition->Scored == 'Y' ? true : false)));
+        echo $formBuilder->outputField($formBuilder->checkbox('scored', ($competition->Scored == 'Y' ? true : false), ($competition->Scored == 'Y' ? true : false)));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
@@ -1478,18 +1473,57 @@ final class Admin
     private function updateEntry()
     {
         $query_entries = new QueryEntries($this->rpsdb);
+        $competition_query = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+
         $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
-        $entry = $query_entries->getEntryById($id);
+        $entry = $query_entries->getEntryById($id, OBJECT);
+        $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
         $return = false;
+        $medium_array = array(
+            'medium_bwd' => 'B&W Digital',
+            'medium_cd'  => 'Color Digital',
+            'medium_bwp' => 'B&W Prints',
+            'medium_cp'  => 'Color Prints'
+        );
+        $_classification = array(
+            'class_b' => 'Beginner',
+            'class_a' => 'Advanced',
+            'class_s' => 'Salon'
+        );
+        $selectedMedium = array_search($competition->Medium, $medium_array);
+        $selectedClassification = array_search($competition->Classification, $_classification);
+
         $formOptionsNew = array();
-        $formOptionsNew['title'] = empty($formOptions['title']) ? $entry['Title'] : $formOptions['title'];
-        if ($entry['Title'] != $formOptionsNew['title']) {
-            $data = array('ID' => $id, 'Title' => $formOptionsNew['title']);
+        $formOptionsNew['title'] = empty($formOptions['title']) ? $entry->Title : $formOptions['title'];
+        $formOptionsNew['medium'] = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
+        $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
+
+        if (($entry->Title != $formOptionsNew['title']) || ($selectedMedium != $formOptionsNew['medium']) || ($selectedClassification != $formOptionsNew['classification'])) {
+            $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
+            $user = get_user_by('id', $entry->Member_ID);
+            $relative_server_path = $photo_helper->getCompetitionPath($competition->Competition_Date, $_classification[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
+            $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
+            $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
+            // Need to create the destination folder?
+            CommonHelper::createDirectory($full_server_path);
+            try {
+                rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
+                $updated = true;
+            } catch (FileException $e) {
+                $updated = false;
+            }
+        }
+        if ($updated) {
+            $new_competition = $competition_query->getCompetitionByDateClassMedium($competition->Competition_Date, $_classification[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
+            $data['Competition_ID'] = $new_competition->ID;
+            $data['ID'] = $id;
+            $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
+            $data['Title'] = $formOptionsNew['title'];
             $return = $query_entries->updateEntry($data);
         }
-
         unset($query_entries);
 
         return $return;
