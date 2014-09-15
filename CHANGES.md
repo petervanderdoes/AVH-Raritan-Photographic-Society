@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.5.0-dev.1
+#### Version 1.4.11
 * Preparation for new development cycle.
 
 #### Version 1.4.10
