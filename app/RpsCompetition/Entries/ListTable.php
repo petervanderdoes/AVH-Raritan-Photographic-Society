@@ -288,6 +288,11 @@ class ListTable extends \WP_List_Table
         return array('cb' => '<input type="checkbox" />', 'season' => 'Season', 'competition' => 'Competition', 'name' => 'Photographer', 'title' => 'Title', 'score' => 'Score', 'award' => 'Award');
     }
 
+    /**
+     * @param string $entry_status
+     *
+     * @return int|mixed|void
+     */
     public function get_per_page($entry_status = 'all')
     {
         $entries_per_page = $this->get_items_per_page('entries_per_page');
