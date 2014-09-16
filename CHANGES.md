@@ -1,7 +1,7 @@
 ## Changelog
 
 #### Version 1.5.0-dev.1
-* Preparation for new development cycle.
+* Improve the page "Monthly Entries"
 
 #### Version 1.4.12
 * Ajax call fails.

@@ -169,9 +169,7 @@ class QueryMiscellaneous
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
-        $sql = $this->rpsdb->prepare('SELECT DISTINCT YEAR(Competition_Date) as "Year",
-            MONTH(Competition_Date) as "Month_Num",
-            MONTHNAME(Competition_Date) AS "Month",
+        $sql = $this->rpsdb->prepare('SELECT DISTINCT Competition_Date,
             Theme
             FROM competitions
             WHERE Competition_Date >= %s AND

@@ -623,68 +623,62 @@ final class Shortcodes extends ShortcodesAbstract
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
-        $options = get_option('avh-rps');
-
         $months = array();
         $themes = array();
 
         if ($this->request->has('submit_control')) {
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
-                    $selected_year = substr(esc_attr($this->request->input('new_season')), 0, 4);
-                    $selected_month = esc_attr($this->request->input('selected_month'));
-                    if ($selected_month < $options['season_start_month_num']) {
-                        $selected_year++;
-                    }
+                    $selected_season = esc_attr($this->request->input('new_season'));
                     break;
                 case 'new_month':
-                    $selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
-                    $selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
+                    $selected_date = esc_attr($this->request->input('new_month'));
+                    $selected_season = esc_attr($this->request->input('selected_season'));
                     break;
                 default:
-                    $selected_year = esc_attr($this->request->input('selected_year'));
-                    $selected_month = esc_attr($this->request->input('selected_month'));
                     break;
             }
         } else {
             $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
-            $selected_year = substr($last_scored->Competition_Date, 0, 4);
-            $selected_month = substr($last_scored->Competition_Date, 5, 2);
+            $date_object = new \DateTime($last_scored->Competition_Date);
+            $selected_date = $date_object->format(('Y-m-d'));
+            $selected_season = $season_helper->getSeasonId($selected_date);
         }
 
-        $selected_season = $season_helper->getSeasonId($selected_year, $selected_month);
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
 
         $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
-        }
-
-        if ($is_scored_competitions) {
             foreach ($scored_competitions as $recs) {
-                $key = sprintf("%d-%02s", $recs['Year'], $recs['Month_Num']);
-                $months[$key] = $recs['Month'];
+                $date_object = new \DateTime($recs['Competition_Date']);
+                $key = $date_object->format('Y-m-d');
+                $months[$key] = $date_object->format('F') . ': ' . $recs['Theme'];
                 $themes[$key] = $recs['Theme'];
+            }
+
+            if ($selected_season != esc_attr($this->request->input('selected_season'))) {
+                $scored_competition = end($scored_competitions);
+                $date_object = new \DateTime($scored_competition['Competition_Date']);
+                $selected_date = $date_object->format(('Y-m-d'));
             }
         }
 
-        echo '<span class="competion-monthly-winners-form"> Monthly Entries for ';
-        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper);
+        echo '<span class="competition-monthly-winners-form"> Monthly Entries for ';
+        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper);
         echo '</span>';
 
         $output = '';
         if ($is_scored_competitions) {
-            $this_month = sprintf("%d-%02s", $selected_year, $selected_month);
-            $output = '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
+            $output = '<h4 class="competition-theme">Theme is ' . $themes[$selected_date] . '</h4>';
 
             // We display these in masonry style
             $output .= $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
             $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
             $output .= '</div>';
             $output .= $this->html->element('div', array('id' => 'images'));
-            $date_object = new \DateTime($this_month);
-            $entries = $query_miscellaneous->getAllEntries($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
+            $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
             if (is_array($entries)) {
                 // Iterate through all the award winners and display each thumbnail in a grid
                 /** @var QueryEntries $recs */
@@ -747,28 +741,22 @@ final class Shortcodes extends ShortcodesAbstract
         if ($this->request->has('submit_control')) {
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
-                    $selected_year = substr(esc_attr($this->request->input('new_season')), 0, 4);
-                    $selected_month = esc_attr($this->request->input('selected_month'));
-                    if ($selected_month < $options['season_start_month_num']) {
-                        $selected_year++;
-                    }
+                    $selected_season = esc_attr($this->request->input('new_season'));
                     break;
                 case 'new_month':
-                    $selected_year = substr(esc_attr($this->request->input('new_month')), 0, 4);
-                    $selected_month = substr(esc_attr($this->request->input('new_month')), 5, 2);
+                    $selected_date = esc_attr($this->request->input('new_month'));
+                    $selected_season = esc_attr($this->request->input('selected_season'));
                     break;
                 default:
-                    $selected_year = esc_attr($this->request->input('selected_year'));
-                    $selected_month = esc_attr($this->request->input('selected_month'));
                     break;
             }
         } else {
-            $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
-            $selected_year = substr($last_scored->Competition_Date, 0, 4);
-            $selected_month = substr($last_scored->Competition_Date, 5, 2);
+            $last_scored = $query_competitions->query(array('where' => 'Scored="Y" AND Special_Event="N"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+            $date_object = new \DateTime($last_scored->Competition_Date);
+            $selected_date = $date_object->format(('Y-m-d'));
+            $selected_season = $season_helper->getSeasonId($selected_date);
         }
 
-        $selected_season = $season_helper->getSeasonId($selected_year, $selected_month);
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
 
@@ -780,37 +768,29 @@ final class Shortcodes extends ShortcodesAbstract
 
         if ($is_scored_competitions) {
             foreach ($scored_competitions as $recs) {
-                $key = sprintf("%d-%02s", $recs['Year'], $recs['Month_Num']);
-                $months[$key] = $recs['Month'];
+                $date_object = new \DateTime($recs['Competition_Date']);
+                $key = $date_object->format('Y-m-d');
+                $months[$key] = $date_object->format('F') . ': ' . $recs['Theme'];
                 $themes[$key] = $recs['Theme'];
             }
 
-            if (empty($selected_month)) {
-                end($months);
-                $selected_year = substr(key($months), 0, 4);
-                $selected_month = substr(key($months), 5, 2);
+            if ($selected_season != esc_attr($this->request->input('selected_season'))) {
+                $scored_competition = end($scored_competitions);
+                $date_object = new \DateTime($scored_competition['Competition_Date']);
+                $selected_date = $date_object->format(('Y-m-d'));
             }
         }
 
-        // Count the maximum number of awards in the selected competitions
-        $min_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month, 1);
-        if ($selected_month == 12) {
-            $max_date = sprintf("%d-%02s-%02s", $selected_year + 1, 1, 1);
-        } else {
-            $max_date = sprintf("%d-%02s-%02s", $selected_year, $selected_month + 1, 1);
-        }
-
-        $max_num_awards = $query_miscellaneous->getMaxAwards($min_date, $max_date);
+        $max_num_awards = $query_miscellaneous->getMaxAwards($selected_date);
 
         // Start displaying the form
 
-        echo '<span class="competion-monthly-winners-form"> Monthly Award Winners for ';
-        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper);
+        echo '<span class="competition-monthly-winners-form"> Monthly Award Winners for ';
+        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper);
         echo '</span>';
 
         if ($is_scored_competitions) {
-            $this_month = sprintf("%d-%02s", $selected_year, $selected_month);
-            echo '<h4 class="competition-theme">Theme is ' . $themes[$this_month] . '</h4>';
+            echo '<h4 class="competition-theme">Theme is ' . $themes[$selected_date] . '</h4>';
 
             echo "<table class=\"thumb_grid\">\n";
             // Output the column headings
@@ -831,8 +811,7 @@ final class Shortcodes extends ShortcodesAbstract
                 }
                 echo "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
             }
-            $date_object = new \DateTime($this_month);
-            $award_winners = $query_miscellaneous->getWinners($date_object->format('Y-m-d'), $date_object->format('Y-m-t'));
+            $award_winners = $query_miscellaneous->getWinners($selected_date);
             // Iterate through all the award winners and display each thumbnail in a grid
             $row = 0;
             $column = 0;
@@ -952,7 +931,7 @@ final class Shortcodes extends ShortcodesAbstract
             $competition_date = $session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
             $medium = $session->get('myentries/medium', $current_competition->Medium);
         }
-        $classification = CommonHelper::getUserClassification(get_current_user_id(),$medium);
+        $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
 
         $session->set('myentries/competition_date', $current_competition->Competition_Date);
@@ -1374,13 +1353,12 @@ final class Shortcodes extends ShortcodesAbstract
      * Display the form for selecting the month and season.
      *
      * @param string       $selected_season
-     * @param string       $selected_year
-     * @param string       $selected_month
+     * @param string       $selected_date
      * @param boolean      $is_scored_competitions
      * @param array        $months
      * @param SeasonHelper $season_helper
      */
-    private function displayMonthAndSeasonSelectionForm($selected_season, $selected_year, $selected_month, $is_scored_competitions, $months, $season_helper)
+    private function displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper)
     {
         global $post;
         echo '<script type="text/javascript">';
@@ -1395,12 +1373,13 @@ final class Shortcodes extends ShortcodesAbstract
         $form .= $this->formBuilder->open($action, array('name' => 'month_season_form'));
         $form .= $this->formBuilder->hidden('submit_control');
         $form .= $this->formBuilder->hidden('selected_season', $selected_season);
-        $form .= $this->formBuilder->hidden('selected_year', $selected_year);
-        $form .= $this->formBuilder->hidden('selected_month', $selected_month);
+        $form .= $this->formBuilder->hidden('selected_date', $selected_date);
 
         if ($is_scored_competitions) {
             // Drop down list for months
-            $form .= $this->getMonthsDropdown($months, $selected_year . '-' . $selected_month);
+            $form .= $this->getMonthsDropdown($months, $selected_date);
+        } else {
+            $form .= 'No scored competitions this season. ';
         }
 
         // Drop down list for season

@@ -53,17 +53,18 @@ class Helper
     }
 
     /**
-     * Returns the season of the given year and month as YYYY-YY
+     * Returns the season of the given date
      *
-     * @param $selected_year
-     * @param $selected_month
+     * @param $date
      *
      * @return string
      */
-    public function getSeasonId($selected_year, $selected_month)
+    public function getSeasonId($date)
     {
         $options = get_option('avh-rps');
-        if ($selected_month < $options['season_start_month_num']) {
+        $date_object = new \DateTime($date);
+        $selected_year = (int) $date_object->format('Y');
+        if ($date_object->format('m') < $options['season_start_month_num']) {
             $selected_year--;
         }
 
