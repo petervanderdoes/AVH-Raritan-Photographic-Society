@@ -636,6 +636,8 @@ final class Shortcodes extends ShortcodesAbstract
                     $selected_season = esc_attr($this->request->input('selected_season'));
                     break;
                 default:
+                    $selected_date = esc_attr($this->request->input('selected_date'));
+                    $selected_season = esc_attr($this->request->input('selected_season'));
                     break;
             }
         } else {
@@ -733,8 +735,6 @@ final class Shortcodes extends ShortcodesAbstract
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
-        $options = get_option('avh-rps');
-
         $months = array();
         $themes = array();
 
@@ -748,6 +748,8 @@ final class Shortcodes extends ShortcodesAbstract
                     $selected_season = esc_attr($this->request->input('selected_season'));
                     break;
                 default:
+                    $selected_date = esc_attr($this->request->input('selected_date'));
+                    $selected_season = esc_attr($this->request->input('selected_season'));
                     break;
             }
         } else {

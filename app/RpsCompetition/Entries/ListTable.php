@@ -148,6 +148,9 @@ class ListTable extends \WP_List_Table
         echo '</div>';
     }
 
+    /**
+     * @return bool|string
+     */
     public function current_action()
     {
         if ($this->request->has('clear-recent-list')) {
@@ -235,6 +238,9 @@ class ListTable extends \WP_List_Table
         unset($query_miscellaneous, $query_competitions, $season_helper);
     }
 
+    /**
+     * @return array
+     */
     public function get_bulk_actions()
     {
         $actions = array();
@@ -243,6 +249,9 @@ class ListTable extends \WP_List_Table
         return $actions;
     }
 
+    /**
+     * @return array
+     */
     public function get_columns()
     {
         return array('cb' => '<input type="checkbox" />', 'season' => 'Season', 'competition' => 'Competition', 'name' => 'Photographer', 'title' => 'Title', 'score' => 'Score', 'award' => 'Award');

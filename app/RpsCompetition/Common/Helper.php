@@ -86,6 +86,8 @@ class Helper
             case 'Color Prints':
                 $index = get_user_meta($userID, 'rps_class_print_color', true);
                 break;
+            default:
+                $index = '';
         }
 
         return ucfirst($index);

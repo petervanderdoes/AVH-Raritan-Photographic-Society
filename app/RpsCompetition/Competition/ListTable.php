@@ -176,6 +176,9 @@ class ListTable extends \WP_List_Table
         echo $competition->Theme;
     }
 
+    /**
+     * @return bool|string
+     */
     public function current_action()
     {
         if ($this->request->input('clear-recent-list')) {
@@ -248,6 +251,9 @@ class ListTable extends \WP_List_Table
         return $actions;
     }
 
+    /**
+     * @return array
+     */
     public function get_columns()
     {
         return array('cb' => '<input type="checkbox" />', 'date' => 'Date', 'theme' => 'Theme', 'classification' => 'Classification', 'medium' => 'Medium', 'status' => 'Closed', 'scored' => 'Scored', 'entries' => 'Entries');
