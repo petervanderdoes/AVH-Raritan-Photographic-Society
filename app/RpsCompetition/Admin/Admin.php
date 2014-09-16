@@ -504,19 +504,10 @@ final class Admin
                         $this->message = 'Competition Added';
                         $this->status = 'updated';
 
-                        // @TODO: This is needed because of the old program, someday it needs to be cleaned up.
-                        $medium_convert = array(
-                            'medium_bwd' => 'B&W Digital',
-                            'medium_cd'  => 'Color Digital',
-                            'medium_bwp' => 'B&W Prints',
-                            'medium_cp'  => 'Color Prints'
-                        );
 
-                        $classification_convert = array(
-                            'class_b' => 'Beginner',
-                            'class_a' => 'Advanced',
-                            'class_s' => 'Salon'
-                        );
+                        $medium_convert = CommonHelper::getMediums();
+
+                        $classification_convert = CommonHelper::getClassifications();
 
                         $data['Competition_Date'] = $form_new_options['date'];
                         $data['Theme'] = $form_new_options['theme'];
@@ -837,22 +828,13 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('close-time', 'Closing Time'));
         echo $formBuilder->outputField($formBuilder->select('close-time', $time, $formOptions['close-time']));
 
-        $_medium = array(
-            'medium_bwd' => 'B&W Digital',
-            'medium_cd'  => 'Color Digital',
-            'medium_bwp' => 'B&W Prints',
-            'medium_cp'  => 'Color Prints'
-        );
+        $_medium = CommonHelper::getMediums();
 
         $selectedMedium = array_search($competition->Medium, $_medium);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField($formBuilder->select('medium', $_medium, $selectedMedium, array('autocomplete' => 'off')));
 
-        $_classification = array(
-            'class_b' => 'Beginner',
-            'class_a' => 'Advanced',
-            'class_s' => 'Salon'
-        );
+        $_classification = CommonHelper::getClassifications();
 
         $selectedClassification = array_search($competition->Classification, $_classification);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
@@ -1134,21 +1116,12 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));
         echo $formBuilder->outputField($formBuilder->text('title', $entry->Title));
 
-        $medium_array = array(
-            'medium_bwd' => 'B&W Digital',
-            'medium_cd'  => 'Color Digital',
-            'medium_bwp' => 'B&W Prints',
-            'medium_cp'  => 'Color Prints'
-        );
+        $medium_array = CommonHelper::getMediums();
         $selectedMedium = array_search($competition->Medium, $medium_array);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
 
-        $_classification = array(
-            'class_b' => 'Beginner',
-            'class_a' => 'Advanced',
-            'class_s' => 'Salon'
-        );
+        $_classification = CommonHelper::getClassifications();
         $selectedClassification = array_search($competition->Classification, $_classification);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
         echo $formBuilder->outputField($formBuilder->select('classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
@@ -1445,9 +1418,9 @@ final class Admin
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
-        $_medium = array('medium_bwd' => 'B&W Digital', 'medium_cd' => 'Color Digital', 'medium_bwp' => 'B&W Prints', 'medium_cp' => 'Color Prints');
+        $_medium = CommonHelper::getMediums();
 
-        $_classification = array('class_b' => 'Beginner', 'class_a' => 'Advanced', 'class_s' => 'Salon');
+        $_classification = CommonHelper::getClassifications();
         $data['ID'] = $this->request->input('competition');
         $data['Competition_Date'] = $formOptionsNew['date'];
         $data['Close_Date'] = $formOptionsNew['close-date'] . ' ' . $formOptionsNew['close-time'];
@@ -1483,17 +1456,9 @@ final class Admin
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
         $return = false;
-        $medium_array = array(
-            'medium_bwd' => 'B&W Digital',
-            'medium_cd'  => 'Color Digital',
-            'medium_bwp' => 'B&W Prints',
-            'medium_cp'  => 'Color Prints'
-        );
-        $_classification = array(
-            'class_b' => 'Beginner',
-            'class_a' => 'Advanced',
-            'class_s' => 'Salon'
-        );
+        $medium_array = CommonHelper::getMediums();
+        $_classification = CommonHelper::getClassifications();
+
         $selectedMedium = array_search($competition->Medium, $medium_array);
         $selectedClassification = array_search($competition->Classification, $_classification);
 
