@@ -1502,16 +1502,15 @@ final class Admin
         $formOptionsNew['medium'] = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
 
-        $updated = false;
         if (($entry->Title != $formOptionsNew['title']) || ($selectedMedium != $formOptionsNew['medium']) || ($selectedClassification != $formOptionsNew['classification'])) {
             $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
             $user = get_user_by('id', $entry->Member_ID);
             $relative_server_path = $photo_helper->getCompetitionPath($competition->Competition_Date, $_classification[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
             $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
             $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
-            
+
             $new_competition = $competition_query->getCompetitionByDateClassMedium($competition->Competition_Date, $_classification[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
-            $data=array();
+            $data = array();
             $data['Competition_ID'] = $new_competition->ID;
             $data['ID'] = $id;
             $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
@@ -1525,10 +1524,11 @@ final class Admin
             } catch (FileException $e) {
                 $updated = false;
             }
+            if ($updated) {
+                $return = $query_entries->updateEntry($data);
+            }
         }
-        if ($updated) {
-            $return = $query_entries->updateEntry($data);
-        }
+
         unset($query_entries);
 
         return $return;
