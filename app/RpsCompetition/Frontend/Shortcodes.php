@@ -630,6 +630,7 @@ final class Shortcodes extends ShortcodesAbstract
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
                     $selected_season = esc_attr($this->request->input('new_season'));
+                    $selected_date = 0;
                     break;
                 case 'new_month':
                     $selected_date = esc_attr($this->request->input('new_month'));
@@ -660,6 +661,7 @@ final class Shortcodes extends ShortcodesAbstract
                 $themes[$key] = $recs['Theme'];
             }
 
+            // If we selected a new season we select the latest competition of that season
             if ($selected_season != esc_attr($this->request->input('selected_season'))) {
                 $scored_competition = end($scored_competitions);
                 $date_object = new \DateTime($scored_competition['Competition_Date']);
@@ -742,6 +744,7 @@ final class Shortcodes extends ShortcodesAbstract
             switch ($this->request->input('submit_control')) {
                 case 'new_season':
                     $selected_season = esc_attr($this->request->input('new_season'));
+                    $selected_date = 0;
                     break;
                 case 'new_month':
                     $selected_date = esc_attr($this->request->input('new_month'));
@@ -762,13 +765,9 @@ final class Shortcodes extends ShortcodesAbstract
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
 
+        $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
-        } else {
-            $is_scored_competitions = false;
-        }
-
-        if ($is_scored_competitions) {
             foreach ($scored_competitions as $recs) {
                 $date_object = new \DateTime($recs['Competition_Date']);
                 $key = $date_object->format('Y-m-d');
@@ -776,6 +775,7 @@ final class Shortcodes extends ShortcodesAbstract
                 $themes[$key] = $recs['Theme'];
             }
 
+            // If we selected a new season we select the latest competition of that season
             if ($selected_season != esc_attr($this->request->input('selected_season'))) {
                 $scored_competition = end($scored_competitions);
                 $date_object = new \DateTime($scored_competition['Competition_Date']);
