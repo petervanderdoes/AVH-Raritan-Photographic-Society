@@ -504,7 +504,6 @@ final class Admin
                         $this->message = 'Competition Added';
                         $this->status = 'updated';
 
-
                         $medium_array = Constants::getMediums();
 
                         $classification_array = Constants::getClassifications();
@@ -1192,6 +1191,55 @@ final class Admin
     }
 
     /**
+     * Perform the actual update of an entry.
+     *
+     * @param array                    $formOptionsNew
+     * @param int                      $id
+     * @param object|QueryEntries      $entry
+     * @param object|QueryCompetitions $competition
+     *
+     * @return bool
+     */
+    private function doUpdateEntry($formOptionsNew, $id, $entry, $competition)
+    {
+        $query_entries = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $medium_array = Constants::getMediums();
+        $classification_array = Constants::getClassifications();
+
+        $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
+        $user = get_user_by('id', $entry->Member_ID);
+        $relative_server_path = $photo_helper->getCompetitionPath($competition->Competition_Date, $classification_array[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
+        $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
+        $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
+
+        $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date, $classification_array[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
+        $data = array();
+        $data['Competition_ID'] = $new_competition->ID;
+        $data['ID'] = $id;
+        $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
+        $data['Title'] = $formOptionsNew['title'];
+
+        // Need to create the destination folder?
+        CommonHelper::createDirectory($full_server_path);
+        try {
+            rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
+            $updated = true;
+        } catch (FileException $e) {
+            $updated = false;
+        }
+
+        if ($updated) {
+            $return = $query_entries->updateEntry($data);
+        }
+
+        unset ($query_entries, $query_competitions, $photo_helper);
+
+        return $return;
+    }
+
+    /**
      * Handle the HTTP Request before the page of the menu Competition is displayed.
      * This is needed for the redirects.
      */
@@ -1448,7 +1496,6 @@ final class Admin
     {
         $query_entries = new QueryEntries($this->rpsdb);
         $competition_query = new QueryCompetitions($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
@@ -1467,31 +1514,8 @@ final class Admin
         $formOptionsNew['medium'] = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
 
-        if (($entry->Title != $formOptionsNew['title']) || ($selectedMedium != $formOptionsNew['medium']) || ($selectedClassification != $formOptionsNew['classification'])) {
-            $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
-            $user = get_user_by('id', $entry->Member_ID);
-            $relative_server_path = $photo_helper->getCompetitionPath($competition->Competition_Date, $classification_array[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
-            $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
-            $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
-
-            $new_competition = $competition_query->getCompetitionByDateClassMedium($competition->Competition_Date, $classification_array[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
-            $data = array();
-            $data['Competition_ID'] = $new_competition->ID;
-            $data['ID'] = $id;
-            $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
-            $data['Title'] = $formOptionsNew['title'];
-
-            // Need to create the destination folder?
-            CommonHelper::createDirectory($full_server_path);
-            try {
-                rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
-                $updated = true;
-            } catch (FileException $e) {
-                $updated = false;
-            }
-            if ($updated) {
-                $return = $query_entries->updateEntry($data);
-            }
+        if ($formOptions != $formOptionsNew) {
+            $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);
         }
 
         unset($query_entries);
