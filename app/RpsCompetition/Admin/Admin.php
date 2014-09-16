@@ -505,9 +505,9 @@ final class Admin
                         $this->status = 'updated';
 
 
-                        $medium_convert = Constants::getMediums();
+                        $medium_array = Constants::getMediums();
 
-                        $classification_convert = Constants::getClassifications();
+                        $classification_array = Constants::getClassifications();
 
                         $data['Competition_Date'] = $form_new_options['date'];
                         $data['Theme'] = $form_new_options['theme'];
@@ -519,13 +519,13 @@ final class Admin
                             if ($form_new_options['medium'][$medium_key] === false) {
                                 continue;
                             }
-                            $data['Medium'] = $medium_convert[$medium_key];
+                            $data['Medium'] = $medium_array[$medium_key];
                             $classification_keys = array_keys($form_new_options['classification']);
                             foreach ($classification_keys as $classification_key) {
                                 if ($form_new_options['classification'][$classification_key] === false) {
                                     continue;
                                 }
-                                $data['Classification'] = $classification_convert[$classification_key];
+                                $data['Classification'] = $classification_array[$classification_key];
                                 $competition_ID = $query_competitions->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
                                     wp_die($competition_ID);
@@ -828,17 +828,17 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('close-time', 'Closing Time'));
         echo $formBuilder->outputField($formBuilder->select('close-time', $time, $formOptions['close-time']));
 
-        $_medium = Constants::getMediums();
+        $medium_array = Constants::getMediums();
 
-        $selectedMedium = array_search($competition->Medium, $_medium);
+        $selectedMedium = array_search($competition->Medium, $medium_array);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
-        echo $formBuilder->outputField($formBuilder->select('medium', $_medium, $selectedMedium, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
 
-        $_classification = Constants::getClassifications();
+        $classification_array = Constants::getClassifications();
 
-        $selectedClassification = array_search($competition->Classification, $_classification);
+        $selectedClassification = array_search($competition->Classification, $classification_array);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
-        echo $formBuilder->outputField($formBuilder->select('classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('classification', $classification_array, $selectedClassification, array('autocomplete' => 'off')));
 
         $_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
         echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
@@ -1121,10 +1121,10 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
 
-        $_classification = Constants::getClassifications();
-        $selectedClassification = array_search($competition->Classification, $_classification);
+        $classification_array = Constants::getClassifications();
+        $selectedClassification = array_search($competition->Classification, $classification_array);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
-        echo $formBuilder->outputField($formBuilder->select('classification', $_classification, $selectedClassification, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('classification', $classification_array, $selectedClassification, array('autocomplete' => 'off')));
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
@@ -1418,9 +1418,9 @@ final class Admin
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
-        $_medium = Constants::getMediums();
+        $medium_array = Constants::getMediums();
 
-        $_classification = Constants::getClassifications();
+        $classification_array = Constants::getClassifications();
         $data['ID'] = $this->request->input('competition');
         $data['Competition_Date'] = $formOptionsNew['date'];
         $data['Close_Date'] = $formOptionsNew['close-date'] . ' ' . $formOptionsNew['close-time'];
@@ -1430,8 +1430,8 @@ final class Admin
         $data['Special_Event'] = ($formOptionsNew['special_event'] ? 'Y' : 'N');
         $data['Closed'] = ($formOptionsNew['closed'] ? 'Y' : 'N');
         $data['Scored'] = ($formOptionsNew['scored'] ? 'Y' : 'N');
-        $data['Medium'] = $_medium[$formOptionsNew['medium']];
-        $data['Classification'] = $_classification[$formOptionsNew['classification']];
+        $data['Medium'] = $medium_array[$formOptionsNew['medium']];
+        $data['Classification'] = $classification_array[$formOptionsNew['classification']];
         $competition_ID = $query_competitions->insertCompetition($data);
 
         unset($query_competitions);
@@ -1457,10 +1457,10 @@ final class Admin
 
         $return = false;
         $medium_array = Constants::getMediums();
-        $_classification = Constants::getClassifications();
+        $classification_array = Constants::getClassifications();
 
         $selectedMedium = array_search($competition->Medium, $medium_array);
-        $selectedClassification = array_search($competition->Classification, $_classification);
+        $selectedClassification = array_search($competition->Classification, $classification_array);
 
         $formOptionsNew = array();
         $formOptionsNew['title'] = empty($formOptions['title']) ? $entry->Title : $formOptions['title'];
@@ -1470,11 +1470,11 @@ final class Admin
         if (($entry->Title != $formOptionsNew['title']) || ($selectedMedium != $formOptionsNew['medium']) || ($selectedClassification != $formOptionsNew['classification'])) {
             $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
             $user = get_user_by('id', $entry->Member_ID);
-            $relative_server_path = $photo_helper->getCompetitionPath($competition->Competition_Date, $_classification[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
+            $relative_server_path = $photo_helper->getCompetitionPath($competition->Competition_Date, $classification_array[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
             $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
             $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
 
-            $new_competition = $competition_query->getCompetitionByDateClassMedium($competition->Competition_Date, $_classification[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
+            $new_competition = $competition_query->getCompetitionByDateClassMedium($competition->Competition_Date, $classification_array[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
             $data = array();
             $data['Competition_ID'] = $new_competition->ID;
             $data['ID'] = $id;
