@@ -63,36 +63,6 @@ class Helper
         }
     }
 
-    /**
-     * Return an array with the available classifications.
-     *
-     * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
-     * @return array
-     */
-    static public function getClassifications()
-    {
-        return array(
-            'class_b' => 'Beginner',
-            'class_a' => 'Advanced',
-            'class_s' => 'Salon'
-        );
-    }
-
-    /**
-     * Return an array with the available mediums.
-     *
-     * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
-     * @return array
-     */
-    static public function getMediums()
-    {
-        return array(
-            'medium_bwd' => 'B&W Digital',
-            'medium_cd'  => 'Color Digital',
-            'medium_bwp' => 'B&W Prints',
-            'medium_cp'  => 'Color Prints'
-        );
-    }
 
     /**
      * Get the user classification based on the medium

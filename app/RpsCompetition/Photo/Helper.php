@@ -167,7 +167,7 @@ class Helper
         }
         /** @var \Intervention\Image\Image $image */
         $image = Image::make($image_name);
-        $new_size = Constants::get_image_size($size);
+        $new_size = Constants::getImageSize($size);
         if ($new_size['height'] == null) {
             if ($image->getHeight() <= $image->getWidth()) {
                 $image->resize($new_size['width'],
