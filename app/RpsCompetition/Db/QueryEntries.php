@@ -170,7 +170,7 @@ class QueryEntries
     {
         $competition_date = $this->rpsdb->getMysqldate($competition_date);
 
-        $sql = $this->rpsdb->prepare("SELECT entries.ID, entries.Title, entries.Client_File_Name, entries.Server_File_Name, competitions.Max_Entries
+        $sql = $this->rpsdb->prepare("SELECT entries.*
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND entries.Member_ID = %s

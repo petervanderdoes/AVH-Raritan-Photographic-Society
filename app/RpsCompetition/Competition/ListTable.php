@@ -187,7 +187,7 @@ class ListTable extends \WP_List_Table
 
     public function display()
     {
-        extract($this->_args);
+        //extract($this->_args);
 
         wp_nonce_field("fetch-list-" . get_class($this), '_ajax_fetch_list_nonce', false);
 
