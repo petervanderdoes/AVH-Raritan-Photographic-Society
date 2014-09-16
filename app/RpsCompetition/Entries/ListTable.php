@@ -60,21 +60,34 @@ class ListTable extends \WP_List_Table
         parent::__construct(array('plural' => 'entries', 'singular' => 'entry', 'ajax' => false));
     }
 
+    /**
+     * @return bool|void
+     */
     public function ajax_user_can()
     {
         return true;
     }
 
+    /**
+     * @param object $entry
+     */
     public function column_award($entry)
     {
         echo $entry->Award;
     }
+
+    /**
+     * @param object $entry
+     */
 
     public function column_cb($entry)
     {
         echo "<input type='checkbox' name='entries[]' value='$entry->ID' />";
     }
 
+    /**
+     * @param object $entry
+     */
     public function column_competition($entry)
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
@@ -86,6 +99,9 @@ class ListTable extends \WP_List_Table
         unset($query_competitions);
     }
 
+    /**
+     * @param object $entry
+     */
     public function column_name($entry)
     {
         $_user = get_user_by('id', $entry->Member_ID);
@@ -94,11 +110,17 @@ class ListTable extends \WP_List_Table
         echo $this->html->anchor($urlUser, $_user->first_name . ' ' . $_user->last_name, array('title' => 'Entries for ' . $_user->first_name . ' ' . $_user->last_name));
     }
 
+    /**
+     * @param object $entry
+     */
     public function column_score($entry)
     {
         echo $entry->Score;
     }
 
+    /**
+     * @param object $entry
+     */
     public function column_season($entry)
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
@@ -120,6 +142,9 @@ class ListTable extends \WP_List_Table
         unset($query_competitions);
     }
 
+    /**
+     * @param object $entry
+     */
     public function column_title($entry)
     {
         echo $entry->Title;
@@ -160,6 +185,9 @@ class ListTable extends \WP_List_Table
         return parent::current_action();
     }
 
+    /**
+     *
+     */
     public function display()
     {
         //extract($this->_args);
@@ -192,6 +220,9 @@ class ListTable extends \WP_List_Table
         $this->display_tablenav('bottom');
     }
 
+    /**
+     * @param string $which
+     */
     public function extra_tablenav($which)
     {
 
@@ -265,16 +296,25 @@ class ListTable extends \WP_List_Table
         return $entries_per_page;
     }
 
+    /**
+     * @return array
+     */
     public function get_sortable_columns()
     {
         return array('');
     }
 
+    /**
+     *
+     */
     public function no_items()
     {
         _e('No entries.');
     }
 
+    /**
+     *
+     */
     public function prepare_items()
     {
         global $entry_status, $search;
@@ -344,6 +384,9 @@ class ListTable extends \WP_List_Table
         unset($query_competitions, $query_entries, $season_helper);
     }
 
+    /**
+     * @param object $a_entry
+     */
     public function single_row($a_entry)
     {
         $entry = $a_entry;

@@ -30,6 +30,11 @@ class ListTable extends \WP_List_Table
      */
     private $settings;
 
+    /**
+     * @param Settings $settings
+     * @param RpsDb    $rpsdb
+     * @param Request  $request
+     */
     public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
     {
         $this->settings = $settings;
@@ -53,21 +58,33 @@ class ListTable extends \WP_List_Table
         parent::__construct(array('plural' => 'competitions', 'singular' => 'competition', 'ajax' => false));
     }
 
+    /**
+     * @return bool|void
+     */
     public function ajax_user_can()
     {
         return true;
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_cb($competition)
     {
         echo "<input type='checkbox' name='competitions[]' value='$competition->ID' />";
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_classification($competition)
     {
         echo $competition->Classification;
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_date($competition)
     {
         $date_text = mysql2date(get_option('date_format'), $competition->Competition_Date);
@@ -109,6 +126,9 @@ class ListTable extends \WP_List_Table
         echo '</div>';
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_entries($competition)
     {
         /**
@@ -124,11 +144,17 @@ class ListTable extends \WP_List_Table
         unset($query_entries);
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_medium($competition)
     {
         echo $competition->Medium;
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_scored($competition)
     {
         echo '<span class="text">' . $competition->Scored . '</span>';
@@ -163,6 +189,9 @@ class ListTable extends \WP_List_Table
         echo '</div>';
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_status($competition)
     {
         echo $competition->Closed;
@@ -171,6 +200,9 @@ class ListTable extends \WP_List_Table
         }
     }
 
+    /**
+     * @param object $competition
+     */
     public function column_theme($competition)
     {
         echo $competition->Theme;
@@ -188,6 +220,9 @@ class ListTable extends \WP_List_Table
         return parent::current_action();
     }
 
+    /**
+     *
+     */
     public function display()
     {
         //extract($this->_args);
@@ -222,6 +257,9 @@ class ListTable extends \WP_List_Table
         $this->display_tablenav('bottom');
     }
 
+    /**
+     * @param string $which
+     */
     public function extra_tablenav($which)
     {
         global $status;
@@ -235,6 +273,9 @@ class ListTable extends \WP_List_Table
         }
     }
 
+    /**
+     * @return array
+     */
     public function get_bulk_actions()
     {
         global $competition_status;
@@ -259,6 +300,11 @@ class ListTable extends \WP_List_Table
         return array('cb' => '<input type="checkbox" />', 'date' => 'Date', 'theme' => 'Theme', 'classification' => 'Classification', 'medium' => 'Medium', 'status' => 'Closed', 'scored' => 'Scored', 'entries' => 'Entries');
     }
 
+    /**
+     * @param string $competition_status
+     *
+     * @return int|mixed|void
+     */
     public function get_per_page($competition_status = 'open')
     {
         $competitions_per_page = $this->get_items_per_page('competitions_per_page');
@@ -267,11 +313,17 @@ class ListTable extends \WP_List_Table
         return $competitions_per_page;
     }
 
+    /**
+     * @return array
+     */
     public function get_sortable_columns()
     {
         return array('');
     }
 
+    /**
+     * @return array
+     */
     public function get_views()
     {
         global $competition_status;
@@ -304,11 +356,17 @@ class ListTable extends \WP_List_Table
         return $status_links;
     }
 
+    /**
+     *
+     */
     public function no_items()
     {
         _e('No competitions.');
     }
 
+    /**
+     *
+     */
     public function prepare_items()
     {
         global $competition_status, $search;
@@ -356,6 +414,9 @@ class ListTable extends \WP_List_Table
         unset($query_competitions);
     }
 
+    /**
+     * @param object $a_competition
+     */
     public function single_row($a_competition)
     {
         $competition = $a_competition;
