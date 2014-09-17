@@ -67,7 +67,7 @@ class Helper
     /**
      * Get the user classification based on the medium
      *
-     * @param int    $userID
+     * @param integer    $userID
      * @param string $medium
      *
      * @return string

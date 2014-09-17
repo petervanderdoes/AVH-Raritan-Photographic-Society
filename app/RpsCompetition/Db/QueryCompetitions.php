@@ -5,7 +5,7 @@ namespace RpsCompetition\Db;
  * Class QueryCompetitions
  *
  * @package RpsCompetition\Db
- * @property  int     ID
+ * @property  integer     ID
  * @property  string  Competition_Date
  * @property  string  Medium
  * @property  string  Classification
@@ -15,8 +15,8 @@ namespace RpsCompetition\Db;
  * @property  string  Closed
  * @property  string  Scored
  * @property  string  Close_Date
- * @property  int     Max_Entries
- * @property  int     Num_Judges
+ * @property  integer     Max_Entries
+ * @property  integer     Num_Judges
  * @property  string  Special_Event
  */
 class QueryCompetitions
@@ -41,7 +41,7 @@ class QueryCompetitions
      * @param string $classification
      * @param string $medium
      *
-     * @return bool
+     * @return boolean
      */
     public function checkCompetitionClosed($competition_date, $classification, $medium)
     {
@@ -68,9 +68,9 @@ class QueryCompetitions
      * Count competitions.
      * Return an object with the count of open, closed and total competitions.
      *
-     * @property int open
-     * @property int closed
-     * @property int all
+     * @property integer open
+     * @property integer closed
+     * @property integer all
      * @return QueryCompetitions|array
      */
     public function countCompetitions()
@@ -170,7 +170,7 @@ class QueryCompetitions
     /**
      * Get competition by entry ID
      *
-     * @param int    $entry_id
+     * @param integer    $entry_id
      * @param string $output
      *
      * @return QueryCompetitions|array
@@ -259,7 +259,7 @@ class QueryCompetitions
      * @param string $classification
      * @param string $medium
      *
-     * @return int
+     * @return integer
      */
     public function getCompetitionMaxEntries($competition_date, $classification, $medium)
     {
@@ -280,7 +280,7 @@ class QueryCompetitions
     /**
      * Get open competitions
      *
-     * @param int    $user_id
+     * @param integer    $user_id
      * @param string $subset
      * @param string $output
      *
@@ -417,7 +417,7 @@ class QueryCompetitions
          * @var string  $join
          * @var string  $where
          * @var string  $offset
-         * @var int     $number
+         * @var integer     $number
          * @var string  $orderby
          * @var string  $order
          * @var boolean $count

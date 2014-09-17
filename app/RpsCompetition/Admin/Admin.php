@@ -299,11 +299,11 @@ final class Admin
      *
      * @see      filter screen_meta_screen
      *
-     * @param int $columns
-     * @param int $screen
+     * @param integer $columns
+     * @param integer $screen
      *
      * @internal Hook: screen_layout_columns
-     * @return int
+     * @return integer
      */
     public function filterScreenLayoutColumns($columns, $screen)
     {
@@ -324,12 +324,12 @@ final class Admin
      * Used when we set our own screen options.
      * The filter needs to be set during construct otherwise it's not recognized.
      *
-     * @param int    $error_value
+     * @param integer    $error_value
      * @param string $option
-     * @param int    $value
+     * @param integer    $value
      *
      * @internal Hook:
-     * @return int
+     * @return integer
      */
     public function filterSetScreenOption($error_value, $option, $value)
     {
@@ -1193,10 +1193,10 @@ final class Admin
     /**
      * Perform the actual update of an entry.
      *
-     * @param array                    $formOptionsNew
-     * @param int                      $id
-     * @param object|QueryEntries      $entry
-     * @param object|QueryCompetitions $competition
+     * @param array             $formOptionsNew
+     * @param integer               $id
+     * @param QueryEntries      $entry       Entry record
+     * @param QueryCompetitions $competition Competition record
      *
      * @return \WP_Error|boolean
      */
@@ -1207,7 +1207,7 @@ final class Admin
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         $medium_array = Constants::getMediums();
         $classification_array = Constants::getClassifications();
-        $return =  false;
+        $return = false;
 
         $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
         $user = get_user_by('id', $entry->Member_ID);

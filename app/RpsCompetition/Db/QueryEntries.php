@@ -159,7 +159,7 @@ class QueryEntries
     /**
      * Get entries submitted for the member on the given competition date in the given classification and medium
      *
-     * @param int    $user_id
+     * @param integer    $user_id
      * @param string $competition_date
      * @param string $classification
      * @param string $medium

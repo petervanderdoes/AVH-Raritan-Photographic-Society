@@ -59,7 +59,7 @@ class ListTable extends \WP_List_Table
     }
 
     /**
-     * @return bool|void
+     * @return boolean
      */
     public function ajax_user_can()
     {
@@ -209,7 +209,7 @@ class ListTable extends \WP_List_Table
     }
 
     /**
-     * @return bool|string
+     * @return boolean|string
      */
     public function current_action()
     {
@@ -303,7 +303,7 @@ class ListTable extends \WP_List_Table
     /**
      * @param string $competition_status
      *
-     * @return int|mixed|void
+     * @return integer|mixed|void
      */
     public function get_per_page($competition_status = 'open')
     {
@@ -314,7 +314,7 @@ class ListTable extends \WP_List_Table
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function get_sortable_columns()
     {

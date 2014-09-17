@@ -82,7 +82,7 @@ class QueryMiscellaneous
      * Get random entries that scored 8 or higher.
      * The amount of records returned can be set by the $limit argument.
      *
-     * @param int $limit Amount of records to return. Default is 5.
+     * @param integer $limit Amount of records to return. Default is 5.
      *
      * @return mixed
      */
@@ -135,7 +135,7 @@ class QueryMiscellaneous
      * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
-     * @return int
+     * @return integer
      */
     public function getMaxAwards($competition_date_start, $competition_date_end = null)
     {

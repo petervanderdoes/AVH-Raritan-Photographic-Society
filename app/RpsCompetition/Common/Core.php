@@ -46,7 +46,7 @@ class Core
      *
      * @param $size_str
      *
-     * @return int
+     * @return integer
      */
     public function getShorthandToBytes($size_str)
     {

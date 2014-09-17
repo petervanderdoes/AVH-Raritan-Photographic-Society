@@ -87,7 +87,7 @@ class Helper
      * @param string $new_name
      * @param string $ext
      *
-     * @return bool
+     * @return boolean
      */
     public function renameImageFile($path, $old_name, $new_name, $ext)
     {
@@ -154,7 +154,7 @@ class Helper
      * @param string $thumb_name
      * @param string $size
      *
-     * @return bool
+     * @return boolean
      */
     public function rpsResizeImage($image_name, $thumb_path, $thumb_name, $size)
     {
