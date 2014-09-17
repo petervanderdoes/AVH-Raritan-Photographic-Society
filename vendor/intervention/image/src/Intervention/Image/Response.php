@@ -48,7 +48,7 @@ class Response
     {
         $this->image->encode($this->format, $this->quality);
         $data = $this->image->getEncoded();
-        //$mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $data);
+        $mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $data);
 
         if (function_exists('app') && is_a($app = app(), 'Illuminate\Foundation\Application')) {
 

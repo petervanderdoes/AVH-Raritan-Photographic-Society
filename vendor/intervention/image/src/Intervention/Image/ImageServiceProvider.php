@@ -1,4 +1,6 @@
-<?php namespace Intervention\Image;
+<?php
+
+namespace Intervention\Image;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Http\Response as IlluminateResponse;
@@ -20,23 +22,11 @@ class ImageServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->package('intervention/image');
-    }
-
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $app = $this->app;
-
-        $app['image'] = $app->share(function ($app) {
-            return new ImageManager($app['config']);
-        });
 
         // try to create imagecache route only if imagecache is present
-        if (class_exists('Intervention\Image\ImageCache')) {
+        if (class_exists('Intervention\\Image\\ImageCache')) {
+
+            $app = $this->app;
 
             // load imagecache config
             $app['config']->package('intervention/imagecache', __DIR__.'/../../../../imagecache/src/config', 'imagecache');
@@ -56,7 +46,8 @@ class ImageServiceProvider extends ServiceProvider
 
                     // find file
                     foreach ($config->get('imagecache::paths') as $path) {
-                        $image_path = $path.'/'.$filename;
+                        // don't allow '..' in filenames
+                        $image_path = $path.'/'.str_replace('..', '', $filename);
                         if (file_exists($image_path) && is_file($image_path)) {
                             break;
                         } else {
@@ -86,7 +77,7 @@ class ImageServiceProvider extends ServiceProvider
                     }
 
                     // define mime type
-                    //$mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $content);
+                    $mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $content);
 
                     // return http response
                     return new IlluminateResponse($content, 200, array(
@@ -95,9 +86,23 @@ class ImageServiceProvider extends ServiceProvider
                         'Etag' => md5($content)
                     ));
 
-                }))->where(array('template' => join('|', array_keys($config->get('imagecache::templates'))), 'filename' => '^[\/\w.-]+$'));
+                }))->where(array('template' => join('|', array_keys($config->get('imagecache::templates'))), 'filename' => '[ \w\\.\\/\\-]+'));
             }
         }
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $app = $this->app;
+
+        $app['image'] = $app->share(function ($app) {
+            return new ImageManager($app['config']->get('image::config'));
+        });
     }
 
     /**
