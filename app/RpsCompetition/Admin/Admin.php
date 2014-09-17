@@ -324,9 +324,9 @@ final class Admin
      * Used when we set our own screen options.
      * The filter needs to be set during construct otherwise it's not recognized.
      *
-     * @param integer    $error_value
-     * @param string $option
-     * @param integer    $value
+     * @param integer $error_value
+     * @param string  $option
+     * @param integer $value
      *
      * @internal Hook:
      * @return integer
@@ -985,7 +985,8 @@ final class Admin
 
         foreach ($competitionIdsArray as $competitionID) {
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $query_competitions->query(array('where' => $sqlWhere), ARRAY_A);
+            $competition = $query_competitions->query(array('where' => $sqlWhere));
+            /** @var QueryCompetitions $competition */
             $competition = $competition[0];
             echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'),
                                                                                                                               $competitionID,
@@ -1194,7 +1195,7 @@ final class Admin
      * Perform the actual update of an entry.
      *
      * @param array             $formOptionsNew
-     * @param integer               $id
+     * @param integer           $id
      * @param QueryEntries      $entry       Entry record
      * @param QueryCompetitions $competition Competition record
      *
