@@ -547,7 +547,7 @@ class Frontend
         if (is_array($entries)) {
             foreach ($entries as $id) {
 
-                $entry_record = $query_entries->getEntryById($id, OBJECT);
+                $entry_record = $query_entries->getEntryById($id);
                 if ($entry_record == false) {
                     $this->settings->set('errmsg', sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id));
                 } else {
@@ -581,7 +581,7 @@ class Frontend
         if ($this->request->has('allentries')) {
             $all_entries = explode(',', $this->request->input('allentries'));
             foreach ($all_entries as $entry_id) {
-                $entry = $query_entries->getEntryById($entry_id, OBJECT);
+                $entry = $query_entries->getEntryById($entry_id);
                 if (!is_null($entry)) {
                     $query_entries->deleteEntry($entry->ID);
                     $photo_helper->deleteEntryFromDisk($entry);
@@ -591,7 +591,7 @@ class Frontend
 
         $entries = (array) $this->request->input('entry_id', array());
         foreach ($entries as $entry_id) {
-            $entry = $query_entries->getEntryById($entry_id, OBJECT);
+            $entry = $query_entries->getEntryById($entry_id);
             $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
             $banquet_ids = explode(',', $this->request->input('banquetids'));
             foreach ($banquet_ids as $banquet_id) {

@@ -1027,7 +1027,7 @@ final class Admin
         $goDelete = 0;
         foreach ($entryIdsArray as $entryID) {
 
-            $entry = $query_entries->getEntryById($entryID, OBJECT);
+            $entry = $query_entries->getEntryById($entryID);
             if ($entry !== null) {
                 $user = get_user_by('id', $entry->Member_ID);
                 $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
@@ -1086,7 +1086,7 @@ final class Admin
 
         $wp_http_referer = $this->request->input('wp_http_referer', '');
         $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
-        $entry = $query_entries->getEntryById($this->request->input('entry'), OBJECT);
+        $entry = $query_entries->getEntryById($this->request->input('entry'));
         $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
 
         $this->displayAdminHeader('Edit Entry');
@@ -1198,7 +1198,7 @@ final class Admin
      * @param object|QueryEntries      $entry
      * @param object|QueryCompetitions $competition
      *
-     * @return bool
+     * @return \WP_Error|boolean
      */
     private function doUpdateEntry($formOptionsNew, $id, $entry, $competition)
     {
@@ -1207,6 +1207,7 @@ final class Admin
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         $medium_array = Constants::getMediums();
         $classification_array = Constants::getClassifications();
+        $return =  false;
 
         $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
         $user = get_user_by('id', $entry->Member_ID);
@@ -1499,7 +1500,7 @@ final class Admin
 
         $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
-        $entry = $query_entries->getEntryById($id, OBJECT);
+        $entry = $query_entries->getEntryById($id);
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
         $return = false;

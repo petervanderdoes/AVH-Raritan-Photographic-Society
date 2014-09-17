@@ -192,9 +192,9 @@ class QueryEntries
      * @param integer $id
      * @param string  $output
      *
-     * @return QueryEntries|array
+     * @return QueryEntries
      */
-    public function getEntryById($id, $output = ARRAY_A)
+    public function getEntryById($id, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare("SELECT *
             FROM entries
