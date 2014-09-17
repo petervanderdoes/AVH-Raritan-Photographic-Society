@@ -318,7 +318,8 @@ final class Shortcodes extends ShortcodesAbstract
         $banquet_id_string = '0';
         $banquet_id_array = array();
         $disabled = '';
-        if (is_array($banquet_id)) {
+        $banquet_entries = array();
+        if (is_array($banquet_id) && !empty($banquet_id)) {
             foreach ($banquet_id as $record) {
                 $banquet_id_array[] = $record['ID'];
                 if ($record['Closed'] == 'Y') {
@@ -327,9 +328,10 @@ final class Shortcodes extends ShortcodesAbstract
             }
 
             $banquet_id_string = implode(',', $banquet_id_array);
+            $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
+            $banquet_entries = $query_entries->query(array('where' => $where));
         }
-        $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
-        $banquet_entries = $query_entries->query(array('where' => $where));
+
         if (!is_array($banquet_entries)) {
             $banquet_entries = array();
         }
