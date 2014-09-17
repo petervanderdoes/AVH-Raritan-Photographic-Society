@@ -45,7 +45,6 @@ final class Constants
      *
      * @param string $size
      *
-     * @uses $image_sizes
      * @return array
      */
     public static function getImageSize($size)

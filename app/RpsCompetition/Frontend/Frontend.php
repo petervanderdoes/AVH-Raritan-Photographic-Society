@@ -125,9 +125,6 @@ class Frontend
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
      *
-     * @uses     \RpsCompetition\Db\QueryEntries
-     * @uses     \RpsCompetition\Db\QueryCompetitions
-     * @uses     \RpsCompetition\Photo\Helper
      * @see      Shortcodes::displayEditTitle
      * @internal Hook: suffusion_before_post
      */
@@ -194,7 +191,6 @@ class Frontend
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
      *
-     * @uses     \RpsCompetition\Db\QueryCompetitions
      * @see      Shortcodes::displayMyEntries
      * @internal Hook: suffusion_before_post
      */
@@ -261,9 +257,6 @@ class Frontend
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
      *
-     * @uses     \RpsCompetition\Db\QueryEntries
-     * @uses     \RpsCompetition\Db\QueryCompetitions
-     * @uses     \RpsCompetition\Photo\Helper
      * @see      Shortcodes::displayUploadEntry
      * @internal Hook: suffusion_before_post
      */
@@ -421,7 +414,6 @@ class Frontend
      * - Shortcodes
      * - User meta information concerning their classification
      *
-     * @uses     \RpsCompetition\Db\QueryCompetitions
      * @internal Hook: init
      */
     public function actionInit()
@@ -441,7 +433,6 @@ class Frontend
      * Display the showcase on the front page.
      * This will display the showcase as used on the front page.
      *
-     * @uses     \RpsCompetition\Db\QueryMiscellaneous
      * @see      actionAfterThemeSetup
      * @internal Hook: rps_showcase
      *
@@ -498,7 +489,6 @@ class Frontend
     /**
      * Handles the requests by the RPS Windows Client
      *
-     * @uses     \RpsCompetition\Api\Client
      * @internal Hook: template_redirect
      */
     public function actionTemplateRedirectRpsWindowsClient()
@@ -533,10 +523,6 @@ class Frontend
     /**
      * Delete competition entries
      *
-     * @uses  \RpsCompetition\Db\QueryEntries
-     * @uses  \RpsCompetition\Db\QueryCompetitions
-     * @uses  \RpsCompetition\Photo\Helper
-     *
      * @param array $entries Array of entries ID to delete.
      */
     private function deleteCompetitionEntries($entries)
@@ -568,9 +554,6 @@ class Frontend
     /**
      * Handles the required functions for when a user submits their Banquet Entries
      *
-     * @uses \RpsCompetition\Db\QueryEntries
-     * @uses \RpsCompetition\Db\QueryCompetitions
-     * @uses \RpsCompetition\Photo\Helper
      */
     private function handleSubmitBanquetEntries()
     {
@@ -630,7 +613,6 @@ class Frontend
      * Setup shortcodes.
      * Setup all the need shortcodes.
      *
-     * @uses  \RpsCompetition\Frontend\Shortcodes
      */
     private function setupShortcodes()
     {
