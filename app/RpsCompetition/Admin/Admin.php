@@ -1225,14 +1225,10 @@ final class Admin
 
         // Need to create the destination folder?
         CommonHelper::createDirectory($full_server_path);
-        try {
-            rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
-            $updated = true;
-        } catch (FileException $e) {
-            $updated = false;
-        }
+        $updated = rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
 
         if ($updated) {
+            $photo_helper->removeThumbnails(pathinfo($old_file, PATHINFO_DIRNAME), pathinfo($old_file, PATHINFO_FILENAME));
             $return = $query_entries->updateEntry($data);
         }
 
