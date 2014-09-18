@@ -79,6 +79,27 @@ class Helper
     }
 
     /**
+     * Remove the thumbnails of the given entry.
+     *
+     * @param string $path Path to original file. The thumbnails directory is located in this directory.
+     * @param string $name
+     */
+    public function removeThumbnails($path, $name)
+    {
+        if (is_dir($path . "/thumbnails")) {
+            $thumb_base_name = $path . "/thumbnails/" . $name;
+            // Get all the matching thumbnail files
+            $thumbnails = glob("$thumb_base_name*");
+            // Iterate through the list of matching thumbnails and rename each one
+            if (is_array($thumbnails) && count($thumbnails) > 0) {
+                foreach ($thumbnails as $thumb) {
+                    unlink($thumb);
+                }
+            }
+        }
+    }
+
+    /**
      * Rename an already uploaded entry.
      * Besides renaming the original upload, we also rename all the thumbnails.
      *
@@ -96,20 +117,7 @@ class Helper
         $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
         if ($status) {
             // Rename any and all thumbnails of this file
-            if (is_dir($path . "/thumbnails")) {
-                $thumb_base_name = $path . "/thumbnails/" . $old_name;
-                // Get all the matching thumbnail files
-                $thumbnails = glob("$thumb_base_name*");
-                // Iterate through the list of matching thumbnails and rename each one
-                if (is_array($thumbnails) && count($thumbnails) > 0) {
-                    foreach ($thumbnails as $thumb) {
-                        $start = strlen($thumb_base_name);
-                        $length = strpos($thumb, $ext) - $start;
-                        $suffix = substr($thumb, $start, $length);
-                        rename($thumb, $path . "/thumbnails/" . $new_name . $suffix . $ext);
-                    }
-                }
-            }
+            $this->removeThumbnails($path, $old_name);
         }
 
         return $status;
