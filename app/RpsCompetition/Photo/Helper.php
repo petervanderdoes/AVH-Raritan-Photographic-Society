@@ -29,6 +29,39 @@ class Helper
     }
 
     /**
+     * Create the most commonly used thumbnails.
+     *
+     * @param QueryEntries $entry
+     */
+    public function createCommonThumbnails($entry)
+    {
+        $standard_size = array('75', '150w', '800', 'fb_thumb');
+
+        foreach ($standard_size as $size) {
+            $this->createThumbnail($entry, $size);
+        }
+    }
+
+    /**
+     * Create a thumbnail of the given size.
+     *
+     * @param QueryEntries $entry
+     * @param string       $size
+     */
+    public function createThumbnail($entry, $size)
+    {
+        $file_parts = pathinfo($entry->Server_File_Name);
+        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
+
+        CommonHelper::createDirectory($thumb_dir);
+
+        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
+        }
+    }
+
+    /**
      * Delete the files from server.
      *
      * @param QueryEntries $entry
@@ -133,16 +166,8 @@ class Helper
      */
     public function rpsGetThumbnailUrl($entry, $size)
     {
+        $this->createThumbnail($entry, $size);
         $file_parts = pathinfo($entry->Server_File_Name);
-        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
-        $thumb_name = $file_parts['filename'] . '_' . $size . '.jpg';
-
-        CommonHelper::createDirectory($thumb_dir);
-
-        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
-        }
-
         $path_parts = explode('/', $file_parts['dirname']);
         $path = home_url();
         foreach ($path_parts as $part) {
@@ -150,7 +175,9 @@ class Helper
         }
         $path .= 'thumbnails/';
 
-        return ($path . rawurlencode($file_parts['filename'] . '_' . $size . '.jpg'));
+        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
+
+        return ($path);
     }
 
     /**
@@ -178,24 +205,18 @@ class Helper
         $new_size = Constants::getImageSize($size);
         if ($new_size['height'] == null) {
             if ($image->getHeight() <= $image->getWidth()) {
-                $image->resize($new_size['width'],
-                               $new_size['width'],
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    });
-            } else {
-                $image->resize($new_size['width'],
-                               null,
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    });
-            }
-        } else {
-            $image->resize($new_size['width'],
-                           $new_size['height'],
-                function ($constraint) {
+                $image->resize($new_size['width'], $new_size['width'], function ($constraint) {
                     $constraint->aspectRatio();
                 });
+            } else {
+                $image->resize($new_size['width'], null, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+            }
+        } else {
+            $image->resize($new_size['width'], $new_size['height'], function ($constraint) {
+                $constraint->aspectRatio();
+            });
         }
         $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
 
