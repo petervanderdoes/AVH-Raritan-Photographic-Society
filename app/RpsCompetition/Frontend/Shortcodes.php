@@ -77,8 +77,13 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
-        $club_competition_results = CommonHelper::arrayMsort($club_competition_results_unsorted,
-                                                             array('Medium' => array(SORT_DESC), 'Class_Code' => array(SORT_ASC), 'LastName' => array(SORT_ASC), 'FirstName' => array(SORT_ASC), 'Competition_Date' => array(SORT_ASC)));
+        $club_competition_results = CommonHelper::arrayMsort($club_competition_results_unsorted, array(
+            'Medium'           => array(SORT_DESC),
+            'Class_Code'       => array(SORT_ASC),
+            'LastName'         => array(SORT_ASC),
+            'FirstName'        => array(SORT_ASC),
+            'Competition_Date' => array(SORT_ASC)
+        ));
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -496,7 +501,21 @@ final class Shortcodes extends ShortcodesAbstract
 
         $entries = $query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
 
+        /**
+         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+         *
+         * @see Frontend::filterWpseoPreAnalysisPostsContent
+         */
+        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+
         if (is_array($entries)) {
+            if (!$didFilterWpseoPreAnalysisPostsContent) {
+                $this->displayCategoryWinnersFacebookThumbs($entries);
+                unset($query_miscellaneous, $photo_helper);
+
+                return;
+            }
+
             echo '<section class="rps-showcase-category-winner">';
             echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
 
@@ -512,8 +531,7 @@ final class Shortcodes extends ShortcodesAbstract
                 echo '<li class="gallery-item">';
                 echo '	<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
-                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry,
-                                                                         800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
+                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
                 echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
                 $caption = $entry->Title . "<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
@@ -1351,6 +1369,20 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo $this->formBuilder->close();
+    }
+
+    /**
+     * Display the Facebook thumbs for the Category Winners Page.
+     *
+     * @param array $entries
+     */
+    private function displayCategoryWinnersFacebookThumbs($entries)
+    {
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        foreach ($entries as $entry) {
+            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry, 'fb_thumb') . '" /></a>';
+        }
+        unset($photo_helper);
     }
 
     /**

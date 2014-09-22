@@ -400,6 +400,8 @@ class Frontend
 
                 return;
             }
+
+            $photo_helper->createCommonThumbnails($query_entries->getEntryById($this->rpsdb->insert_id));
             $query = build_query(array('resized' => $resized));
             wp_redirect($redirect_to . '/?' . $query);
             exit();
@@ -423,6 +425,9 @@ class Frontend
 
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_competitions->setAllPastCompetitionsClose();
+
+        add_filter('wpseo_pre_analysis_post_content', array($this, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
+        add_filter('wpseo_opengraph_image', array($this, 'filterWpseoOpengraphImage'), 10, 1);
 
         $this->setupUserMeta();
 
@@ -521,6 +526,46 @@ class Frontend
     }
 
     /**
+     * Filter for WordPress SEO plugin by Yoast: Use for the OpenGraph image property.
+     * We only want to use images that are resized for Facebook shared link.
+     * We add "_fb_thumb" to those thumbnail files.
+     * If we return an empty string the image is not selected for the og:image meta information.
+     *
+     * @param string $img
+     *
+     * @return string
+     */
+    public function filterWpseoOpengraphImage($img)
+    {
+        if (strpos($img, '_fb_thumb.jpg') !== false) {
+            return $img;
+        }
+
+        return '';
+    }
+
+    /**
+     * Filter for WordPress SEO plugin by Yoast: Before analyzing the post content.
+     * As some of the pages create dynamic images through shortcode we need to run the shortcode.
+     * That's the only way the WordPress SEO plugin can see the images.
+     * Running the shortcodes now does not effect the final rendering of the post.
+     *
+     * @param string $post_content
+     * @param object $post
+     *
+     * @return string
+     */
+    public function filterWpseoPreAnalysisPostsContent($post_content, $post)
+    {
+        if (has_shortcode($post_content, 'rps_category_winners')) {
+            $post_content = do_shortcode($post_content);
+            $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
+        }
+
+        return $post_content;
+    }
+
+    /**
      * Delete competition entries
      *
      * @param array $entries Array of entries ID to delete.
@@ -553,7 +598,7 @@ class Frontend
 
     /**
      * Handles the required functions for when a user submits their Banquet Entries
-     *
+
      */
     private function handleSubmitBanquetEntries()
     {
@@ -612,7 +657,7 @@ class Frontend
     /**
      * Setup shortcodes.
      * Setup all the need shortcodes.
-     *
+
      */
     private function setupShortcodes()
     {
