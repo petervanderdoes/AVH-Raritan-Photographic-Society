@@ -63,12 +63,11 @@ class Helper
         }
     }
 
-
     /**
      * Get the user classification based on the medium
      *
-     * @param integer    $userID
-     * @param string $medium
+     * @param integer $userID
+     * @param string  $medium
      *
      * @return string
      */

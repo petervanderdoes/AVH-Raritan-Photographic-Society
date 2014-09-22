@@ -43,18 +43,24 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->singleton('RpsCompetition\Settings',
+        $this->container->singleton(
+            'RpsCompetition\Settings',
             function () {
                 return new Settings(new Avh\DataHandler\NamespacedAttributeBag());
-            });
-        $this->container->singleton('RpsCompetition\Db\RpsDb',
+            }
+        );
+        $this->container->singleton(
+            'RpsCompetition\Db\RpsDb',
             function () {
                 return new RpsDb();
-            });
-        $this->container->singleton('RpsCompetition\Options\General',
+            }
+        );
+        $this->container->singleton(
+            'RpsCompetition\Options\General',
             function () {
                 return new OptionsGeneral();
-            });
+            }
+        );
 
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $this->container->make('RpsCompetition\Db\RpsDb');

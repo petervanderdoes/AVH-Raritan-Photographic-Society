@@ -205,18 +205,30 @@ class Helper
         $new_size = Constants::getImageSize($size);
         if ($new_size['height'] == null) {
             if ($image->getHeight() <= $image->getWidth()) {
-                $image->resize($new_size['width'], $new_size['width'], function ($constraint) {
-                    $constraint->aspectRatio();
-                });
+                $image->resize(
+                    $new_size['width'],
+                    $new_size['width'],
+                    function ($constraint) {
+                        $constraint->aspectRatio();
+                    }
+                );
             } else {
-                $image->resize($new_size['width'], null, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
+                $image->resize(
+                    $new_size['width'],
+                    null,
+                    function ($constraint) {
+                        $constraint->aspectRatio();
+                    }
+                );
             }
         } else {
-            $image->resize($new_size['width'], $new_size['height'], function ($constraint) {
-                $constraint->aspectRatio();
-            });
+            $image->resize(
+                $new_size['width'],
+                $new_size['height'],
+                function ($constraint) {
+                    $constraint->aspectRatio();
+                }
+            );
         }
         $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
 

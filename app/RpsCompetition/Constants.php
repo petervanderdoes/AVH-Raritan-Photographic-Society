@@ -42,6 +42,21 @@ final class Constants
     // @formatter:on
 
     /**
+     * Return an array with the available classifications.
+     *
+     * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
+     * @return array
+     */
+    static public function getClassifications()
+    {
+        return array(
+            'class_b' => 'Beginner',
+            'class_a' => 'Advanced',
+            'class_s' => 'Salon'
+        );
+    }
+
+    /**
      * Returns the width and height for the given image size.
      *
      * @param string $size
@@ -55,21 +70,6 @@ final class Constants
         }
 
         return null;
-    }
-
-    /**
-     * Return an array with the available classifications.
-     *
-     * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
-     * @return array
-     */
-    static public function getClassifications()
-    {
-        return array(
-            'class_b' => 'Beginner',
-            'class_a' => 'Advanced',
-            'class_s' => 'Salon'
-        );
     }
 
     /**
@@ -87,5 +87,4 @@ final class Constants
             'medium_cp'  => 'Color Prints'
         );
     }
-
 }

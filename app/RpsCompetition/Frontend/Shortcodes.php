@@ -77,13 +77,16 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
-        $club_competition_results = CommonHelper::arrayMsort($club_competition_results_unsorted, array(
-            'Medium'           => array(SORT_DESC),
-            'Class_Code'       => array(SORT_ASC),
-            'LastName'         => array(SORT_ASC),
-            'FirstName'        => array(SORT_ASC),
-            'Competition_Date' => array(SORT_ASC)
-        ));
+        $club_competition_results = CommonHelper::arrayMsort(
+            $club_competition_results_unsorted,
+            array(
+                'Medium'           => array(SORT_DESC),
+                'Class_Code'       => array(SORT_ASC),
+                'LastName'         => array(SORT_ASC),
+                'FirstName'        => array(SORT_ASC),
+                'Competition_Date' => array(SORT_ASC)
+            )
+        );
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -448,7 +451,9 @@ final class Shortcodes extends ShortcodesAbstract
                 echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\">{$medium}</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
 
-                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities(
+                        $title
+                    ) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td>";
                 echo "<td align=\"center\" valign=\"middle\" class=\"$row_style\" width=\"3%\">";
@@ -531,7 +536,9 @@ final class Shortcodes extends ShortcodesAbstract
                 echo '<li class="gallery-item">';
                 echo '	<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
-                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape($entry->Classification) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
+                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape(
+                        $entry->Classification
+                    ) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
                 echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
 
                 $caption = $entry->Title . "<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
@@ -1302,7 +1309,9 @@ final class Shortcodes extends ShortcodesAbstract
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities($title) . "</a></td>\n";
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities(
+                        $title
+                    ) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
             }

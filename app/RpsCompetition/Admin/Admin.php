@@ -86,13 +86,28 @@ final class Admin
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this, 'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
 
-        $this->hooks['avhrps_menu_competition'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION, 'All Competitions', 'All Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this, 'menuCompetition'));
-        $this->hooks['avhrps_menu_competition_add'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION,
-                                                                       'Add Competition',
-                                                                       'Add Competition',
-                                                                       'rps_edit_competitions',
-                                                                       Constants::MENU_SLUG_COMPETITION_ADD,
-                                                                       array($this, 'menuCompetitionAdd'));
+        $this->hooks['avhrps_menu_competition'] = add_submenu_page(
+            Constants::MENU_SLUG_COMPETITION,
+            'All Competitions',
+            'All Competitions',
+            'rps_edit_competitions',
+            Constants::MENU_SLUG_COMPETITION,
+            array(
+                $this,
+                'menuCompetition'
+            )
+        );
+        $this->hooks['avhrps_menu_competition_add'] = add_submenu_page(
+            Constants::MENU_SLUG_COMPETITION,
+            'Add Competition',
+            'Add Competition',
+            'rps_edit_competitions',
+            Constants::MENU_SLUG_COMPETITION_ADD,
+            array(
+                $this,
+                'menuCompetitionAdd'
+            )
+        );
 
         add_action('load-' . $this->hooks['avhrps_menu_competition'], array($this, 'actionLoadPagehookCompetition'));
         add_action('load-' . $this->hooks['avhrps_menu_competition_add'], array($this, 'actionLoadPagehookCompetitionAdd'));
@@ -735,20 +750,24 @@ final class Admin
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
             if ($entries !== "0") {
-                echo "<li>" . sprintf(__('ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'),
-                                      $competitionID,
-                                      mysql2date(get_option('date_format'), $competition->Competition_Date),
-                                      $competition->Theme,
-                                      $competition->Classification,
-                                      $competition->Medium,
-                                      $entries) . "</li>\n";
+                echo "<li>" . sprintf(
+                        __('ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'),
+                        $competitionID,
+                        mysql2date(get_option('date_format'), $competition->Competition_Date),
+                        $competition->Theme,
+                        $competition->Classification,
+                        $competition->Medium,
+                        $entries
+                    ) . "</li>\n";
             } else {
-                echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'),
-                                                                                                                                  $competitionID,
-                                                                                                                                  mysql2date(get_option('date_format'), $competition->Competition_Date),
-                                                                                                                                  $competition->Theme,
-                                                                                                                                  $competition->Classification,
-                                                                                                                                  $competition->Medium) . "</li>\n";
+                echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(
+                        __('ID #%1s: %2s - %3s - %4s - %5s'),
+                        $competitionID,
+                        mysql2date(get_option('date_format'), $competition->Competition_Date),
+                        $competition->Theme,
+                        $competition->Classification,
+                        $competition->Medium
+                    ) . "</li>\n";
                 $goDelete++;
             }
         }
@@ -988,12 +1007,14 @@ final class Admin
             $competition = $query_competitions->query(array('where' => $sqlWhere));
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
-            echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(__('ID #%1s: %2s - %3s - %4s - %5s'),
-                                                                                                                              $competitionID,
-                                                                                                                              mysql2date(get_option('date_format'), $competition->Competition_Date),
-                                                                                                                              $competition->Theme,
-                                                                                                                              $competition->Classification,
-                                                                                                                              $competition->Medium) . "</li>\n";
+            echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(
+                    __('ID #%1s: %2s - %3s - %4s - %5s'),
+                    $competitionID,
+                    mysql2date(get_option('date_format'), $competition->Competition_Date),
+                    $competition->Theme,
+                    $competition->Classification,
+                    $competition->Medium
+                ) . "</li>\n";
         }
 
         echo $formBuilder->hidden('action', 'do' . $action);
@@ -1034,13 +1055,15 @@ final class Admin
                 $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
                 echo "<li>";
                 echo $formBuilder->hidden('entries[]', $entryID);
-                printf(__('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'),
-                       $entryID,
-                       $entry->Title,
-                       $user->first_name,
-                       $user->last_name,
-                       $competition->Theme,
-                       mysql2date(get_option('date_format'), $competition->Competition_Date));
+                printf(
+                    __('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'),
+                    $entryID,
+                    $entry->Title,
+                    $user->first_name,
+                    $user->last_name,
+                    $competition->Theme,
+                    mysql2date(get_option('date_format'), $competition->Competition_Date)
+                );
                 echo "</li>\n";
                 $goDelete++;
             }
