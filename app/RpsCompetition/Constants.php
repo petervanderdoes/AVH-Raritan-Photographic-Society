@@ -37,6 +37,7 @@ final class Constants
         '150' => array('width'=>150,'height'=>150),
         '150w' => array('width'=>150,'height'=>null),
         '75' => array('width'=>75,'height'=>75),
+        'fb_thumb' => array('width'=>1200,'height'=>628),
     );
     // @formatter:on
 
