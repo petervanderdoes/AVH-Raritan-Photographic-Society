@@ -51,7 +51,7 @@ class Frontend
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
-        add_action('parse_query', array($this, 'actionHandleRequestMonthlyEntries'));
+        add_action('parse_query', array($this, 'actionHandleRequests'));
         add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
 
         if ($this->request->isMethod('POST')) {
@@ -417,51 +417,16 @@ class Frontend
     }
 
     /**
-     * Handle HTTP requests for Monthly Entries before the page is displayed.
+     * Handle HTTP Requests.
      *
-     * @param \WP_Query $wp_query
+     * @param $wp_query
      */
-    public function actionHandleRequestMonthlyEntries($wp_query)
+    public function actionHandleRequests($wp_query)
     {
         $options = get_option('avh-rps');
-        if (isset($wp_query->query['page_id']) && $wp_query->query['page_id'] == $options['monthly_entries_post_id']) {
-            $query_competitions = new QueryCompetitions($this->rpsdb);
-            $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-
-            $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
-            $session->start();
-            $redirect = false;
-            /**
-             * When a new season or new month is selected from the form the submit_control is set.
-             * If it's not set we came to page directly and that's handles by the default section.
-             */
-            switch ($this->request->input('submit_control', null)) {
-                case 'new_season':
-                    $selected_season = esc_attr($this->request->input('new_season'));
-                    $selected_date = 'latest';
-                    $redirect = true;
-                    break;
-                case 'new_month':
-                    $selected_date = esc_attr($this->request->input('new_month'));
-                    $selected_season = esc_attr($this->request->input('selected_season'));
-                    $redirect = true;
-                    break;
-                default:
-                    $selected_date = get_query_var('selected_date', false);
-                    if ($selected_date === false || (!CommonHelper::isValidDate($selected_date, 'Y-m-d'))) {
-                        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
-                        $date_object = new \DateTime($last_scored->Competition_Date);
-                        $selected_date = $date_object->format(('Y-m-d'));
-                        $redirect = true;
-                    }
-                    $selected_season = $season_helper->getSeasonId($selected_date);
-                    break;
-            }
-            $session->set('selected_date', $selected_date);
-            $session->set('selected_season', $selected_season);
-            $session->save();
-            if ($redirect) {
-                wp_redirect('/events/monthly-entries/' . $selected_date . '/');
+        if (isset($wp_query->query['page_id'])) {
+            if ($wp_query->query['page_id'] == $options['monthly_entries_post_id']) {
+                $this->handleRequestMonthlyEntries();
             }
         }
     }
@@ -489,7 +454,7 @@ class Frontend
 
         $this->setupUserMeta();
 
-        $this->addRewriteRules();
+        $this->setupRewriteRules();
 
         unset($query_competitions);
     }
@@ -744,12 +709,6 @@ class Frontend
         return $new[0];
     }
 
-    private function addRewriteRules()
-    {
-        add_rewrite_rule('events/monthly-entries/?([^/]*)', 'index.php?page_id=1005&selected_date=$matches[1]', 'top');
-        flush_rewrite_rules();
-    }
-
     /**
      * Delete competition entries
      *
@@ -779,6 +738,52 @@ class Frontend
             }
         }
         unset($query_entries, $photo_helper);
+    }
+
+    /**
+     * Handle HTTP requests for Monthly Entries before the page is displayed.
+     *
+     */
+    private function handleRequestMonthlyEntries()
+    {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+
+        $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
+        $session->start();
+        $redirect = false;
+        /**
+         * When a new season or new month is selected from the form the submit_control is set.
+         * If it's not set we came to page directly and that's handles by the default section.
+         */
+        switch ($this->request->input('submit_control', null)) {
+            case 'new_season':
+                $selected_season = esc_attr($this->request->input('new_season'));
+                $selected_date = 'latest';
+                $redirect = true;
+                break;
+            case 'new_month':
+                $selected_date = esc_attr($this->request->input('new_month'));
+                $selected_season = esc_attr($this->request->input('selected_season'));
+                $redirect = true;
+                break;
+            default:
+                $selected_date = get_query_var('selected_date', false);
+                if ($selected_date === false || (!CommonHelper::isValidDate($selected_date, 'Y-m-d'))) {
+                    $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+                    $date_object = new \DateTime($last_scored->Competition_Date);
+                    $selected_date = $date_object->format(('Y-m-d'));
+                    $redirect = true;
+                }
+                $selected_season = $season_helper->getSeasonId($selected_date);
+                break;
+        }
+        $session->set('selected_date', $selected_date);
+        $session->set('selected_season', $selected_season);
+        $session->save();
+        if ($redirect) {
+            wp_redirect('/events/monthly-entries/' . $selected_date . '/');
+        }
     }
 
     /**
@@ -837,6 +842,18 @@ class Frontend
             wp_redirect($redirect_to);
             die();
         }
+    }
+
+    private function setupRewriteRules()
+    {
+        $options = get_option('avh-rps');
+        $url = substr(parse_url(get_permalink($options['monthly_entries_post_id']), PHP_URL_PATH), 1);
+        add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
+
+        $url = substr(parse_url(get_permalink($options['monthly_winners_post_id']), PHP_URL_PATH), 1);
+        add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
+
+        flush_rewrite_rules();
     }
 
     /**
