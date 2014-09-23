@@ -423,7 +423,8 @@ class Frontend
      */
     public function actionHandleRequestMonthlyEntries($wp_query)
     {
-        if (isset($wp_query->query['page_id']) && $wp_query->query['page_id'] == 1005) {
+        $options = get_option('avh-rps');
+        if (isset($wp_query->query['page_id']) && $wp_query->query['page_id'] == $options['monthly_entries_post_id']) {
             $query_competitions = new QueryCompetitions($this->rpsdb);
             $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
 
