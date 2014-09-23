@@ -1,6 +1,4 @@
 <?php
-
-
 namespace RpsCompetition\Common;
 
 class Helper
@@ -113,5 +111,20 @@ class Helper
         }
 
         return in_array('s2member_level4', (array) $user->roles);
+    }
+
+    /**
+     * Check if the given date in the given format is valid.
+     *
+     * @param  string $date
+     * @param string  $format
+     *
+     * @return bool
+     */
+    static public function isValidDate($date, $format = 'Y-m-d H:i:s')
+    {
+        $d = \DateTime::createFromFormat($format, $date);
+
+        return $d && $d->format($format) == $date;
     }
 }
