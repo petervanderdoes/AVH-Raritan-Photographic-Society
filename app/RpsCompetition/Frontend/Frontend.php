@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend;
 
+use Avh\Network\Session;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
@@ -50,7 +51,9 @@ class Frontend
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
+        add_action('parse_query', array($this, 'actionHandleRequestMonthlyEntries'));
         add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
+
         if ($this->request->isMethod('POST')) {
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsMyEntries'));
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsEditTitle'));
@@ -60,6 +63,7 @@ class Frontend
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
         add_filter('wp_title_parts', array($this, 'filterWpTitleParts'), 10, 1);
         add_action('wpseo_register_extra_replacements', array($this, 'actionWpseoRegisterExtraReplacements'));
+        add_filter('query_vars', array($this, 'filterQueryVars'));
     }
 
     /**
@@ -413,11 +417,61 @@ class Frontend
     }
 
     /**
+     * Handle HTTP requests for Monthly Entries before the page is displayed.
+     *
+     * @param \WP_Query $wp_query
+     */
+    public function actionHandleRequestMonthlyEntries($wp_query)
+    {
+        if (isset($wp_query->query['page_id']) && $wp_query->query['page_id'] == 1005) {
+            $query_competitions = new QueryCompetitions($this->rpsdb);
+            $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+
+            $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
+            $session->start();
+            $redirect = false;
+            /**
+             * When a new season or new month is selected from the form the submit_control is set.
+             * If it's not set we came to page directly and that's handles by the default section.
+             */
+            switch ($this->request->input('submit_control', null)) {
+                case 'new_season':
+                    $selected_season = esc_attr($this->request->input('new_season'));
+                    $selected_date = 'latest';
+                    $redirect = true;
+                    break;
+                case 'new_month':
+                    $selected_date = esc_attr($this->request->input('new_month'));
+                    $selected_season = esc_attr($this->request->input('selected_season'));
+                    $redirect = true;
+                    break;
+                default:
+                    $selected_date = get_query_var('selected_date', false);
+                    if ($selected_date === false || (!CommonHelper::isValidDate($selected_date, 'Y-m-d'))) {
+                        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+                        $date_object = new \DateTime($last_scored->Competition_Date);
+                        $selected_date = $date_object->format(('Y-m-d'));
+                        $redirect = true;
+                    }
+                    $selected_season = $season_helper->getSeasonId($selected_date);
+                    break;
+            }
+            $session->set('selected_date', $selected_date);
+            $session->set('selected_season', $selected_season);
+            $session->save();
+            if ($redirect) {
+                wp_redirect('/events/monthly-entries/' . $selected_date . '/');
+            }
+        }
+    }
+
+    /**
      * Setup all that is needed to run the plugin.
      * This method runs during the init hook and you can basically add everything that needs
      * to be setup for plugin.
      * - Shortcodes
      * - User meta information concerning their classification
+     * - Rewrite rules
      *
      * @internal Hook: init
      */
@@ -433,6 +487,8 @@ class Frontend
         add_filter('wpseo_opengraph_image', array($this, 'filterWpseoOpengraphImage'), 10, 1);
 
         $this->setupUserMeta();
+
+        $this->addRewriteRules();
 
         unset($query_competitions);
     }
@@ -535,6 +591,23 @@ class Frontend
     public function actionWpseoRegisterExtraReplacements()
     {
         wpseo_register_var_replacement('%%rpstitle%%', array($this, 'handleWpSeoTitleReplace'));
+    }
+
+    /**
+     * Add custom query vars.
+     *  - selected_date
+     *
+     * @see Shortcodes::displayMonthlyEntries
+     *
+     * @param array $vars
+     *
+     * @return array
+     */
+    function filterQueryVars($vars)
+    {
+        $vars[] = 'selected_date';
+
+        return $vars;
     }
 
     /**
@@ -668,6 +741,12 @@ class Frontend
         $new = $this->filterWpTitleParts($title_array);
 
         return $new[0];
+    }
+
+    private function addRewriteRules()
+    {
+        add_rewrite_rule('events/monthly-entries/?([^/]*)', 'index.php?page_id=1005&selected_date=$matches[1]', 'top');
+        flush_rewrite_rules();
     }
 
     /**
