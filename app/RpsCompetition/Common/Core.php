@@ -68,7 +68,6 @@ class Core
     /**
      * Initialize the plugin
      * Set the required settings to be used throughout the plugin
-
      */
     public function handleInitializePlugin()
     {
