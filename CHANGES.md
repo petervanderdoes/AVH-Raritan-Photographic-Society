@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.5.0-dev.1
+#### Version 1.5.0-dev.37
 * Improve the page "Monthly Entries"
 
 #### Version 1.4.12
