@@ -567,12 +567,13 @@ class Frontend
      *  - selected_date
      *
      * @see Shortcodes::displayMonthlyEntries
+     * @see Shortcodes::displayMonthlyWinners
      *
      * @param array $vars
      *
      * @return array
      */
-    function filterQueryVars($vars)
+    public function filterQueryVars($vars)
     {
         $vars[] = 'selected_date';
 
@@ -591,12 +592,14 @@ class Frontend
         global $post;
 
         $options = get_option('avh-rps');
-        if ($post->ID == $options['monthly_entries_post_id'] || $post->ID == $options['monthly_winners_post_id']) {
+        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        if (isset($pages_array[$post->ID])) {
             $query_competitions = new QueryCompetitions($this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = $competitions[0];
 
+            $new_title_array = array();
             $new_title_array[] = $post->post_title . ' - ' . $selected_date . ' - ' . $competition->Theme;
             $title_array = $new_title_array;
         }
@@ -618,7 +621,9 @@ class Frontend
         global $post;
 
         $options = get_option('avh-rps');
-        if ($post->ID == $options['monthly_entries_post_id'] || $post->ID == $options['monthly_winners_post_id']) {
+        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        if (isset($pages_array[$post->ID])) {
+
             $query_competitions = new QueryCompetitions($this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
@@ -626,14 +631,14 @@ class Frontend
             $theme = ucfirst($competition->Theme);
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
-        }
-        if ($post->ID == $options['monthly_entries_post_id']) {
-            $meta_description = 'All entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
-        }
-        if ($post->ID == $options['monthly_winners_post_id']) {
-            $meta_description = 'All winners of the competition held by Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
-        }
 
+            if ($post->ID == $options['monthly_entries_post_id']) {
+                $meta_description = 'All entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
+            }
+            if ($post->ID == $options['monthly_winners_post_id']) {
+                $meta_description = 'All winners of the competition held by Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
+            }
+        }
         return $meta_description;
     }
 
@@ -689,6 +694,8 @@ class Frontend
         global $post;
 
         $replacement = null;
+        $title_array = array();
+
         if (is_string($post->post_title) && $post->post_title !== '') {
             $replacement = stripslashes($post->post_title);
         }
@@ -886,13 +893,17 @@ class Frontend
     private function setupRewriteRules()
     {
         $options = get_option('avh-rps');
-        $url = substr(parse_url(get_permalink($options['monthly_entries_post_id']), PHP_URL_PATH), 1);
-        add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
+        $url = get_permalink($options['monthly_entries_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
+        }
 
-        $url = substr(parse_url(get_permalink($options['monthly_winners_post_id']), PHP_URL_PATH), 1);
-        add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
-
-        flush_rewrite_rules();
+        $url = get_permalink($options['monthly_winners_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
+        }
     }
 
     /**
