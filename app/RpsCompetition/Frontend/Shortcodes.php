@@ -750,8 +750,6 @@ final class Shortcodes extends ShortcodesAbstract
      */
     public function displayMonthlyWinners($attr, $content, $tag)
     {
-        global $post;
-
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
@@ -760,21 +758,11 @@ final class Shortcodes extends ShortcodesAbstract
         $months = array();
         $themes = array();
 
-        if ($this->request->has('submit_control')) {
-            switch ($this->request->input('submit_control')) {
-                case 'new_season':
-                    $selected_season = esc_attr($this->request->input('new_season'));
-                    $selected_date = 0;
-                    break;
-                case 'new_month':
-                    $selected_date = esc_attr($this->request->input('new_month'));
-                    $selected_season = esc_attr($this->request->input('selected_season'));
-                    break;
-                default:
-                    $selected_date = esc_attr($this->request->input('selected_date'));
-                    $selected_season = esc_attr($this->request->input('selected_season'));
-                    break;
-            }
+        $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
+        $session->start();
+        if ($session->has('selected_date')) {
+            $selected_date = $session->get('selected_date');
+            $selected_season = $session->get('selected_season');
         } else {
             $last_scored = $query_competitions->query(array('where' => 'Scored="Y" AND Special_Event="N"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
             $date_object = new \DateTime($last_scored->Competition_Date);
@@ -788,21 +776,24 @@ final class Shortcodes extends ShortcodesAbstract
         $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
+            $competition_dates = array();
             foreach ($scored_competitions as $recs) {
                 $date_object = new \DateTime($recs['Competition_Date']);
                 $key = $date_object->format('Y-m-d');
+                $competition_dates[] = $key;
                 $months[$key] = $date_object->format('F') . ': ' . $recs['Theme'];
                 $themes[$key] = $recs['Theme'];
             }
+            $competition_dates = array_unique($competition_dates);
 
-            // If we selected a new season we select the latest competition of that season
-            if ($selected_season != esc_attr($this->request->input('selected_season'))) {
+            //If we selected a new season we select the latest competition of that season
+            if (!in_array($selected_date, $competition_dates)) {
                 $scored_competition = end($scored_competitions);
                 $date_object = new \DateTime($scored_competition['Competition_Date']);
                 $selected_date = $date_object->format(('Y-m-d'));
+                wp_redirect('/events/monthly-winners/' . $selected_date . '/');
             }
         }
-
         $max_num_awards = $query_miscellaneous->getMaxAwards($selected_date);
 
         // Start displaying the form

@@ -12,7 +12,8 @@ final class General extends OptionsAbstract
     protected $defaults = array(
         'season_start_month_num' => 9,
         'season_end_month_num'   => 12,
-        'monthly_entries_post_id' => 1005
+        'monthly_entries_post_id' => 1005,
+        'monthly_winners_post_id' => 61
     );
 
     public function __construct()
