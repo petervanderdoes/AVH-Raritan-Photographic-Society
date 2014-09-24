@@ -149,24 +149,26 @@ class QueryCompetitions
     /**
      * Get all competitions by date.
      *
-     * @param string $date_start
-     * @param string $date_end
+     * @param string $competition_date_start
+     * @param null   $competition_date_end
      * @param string $output
      *
      * @return array
      */
-    public function getCompetitionByDates($date_start, $date_end, $output = OBJECT)
+    public function getCompetitionByDates($competition_date_start, $competition_date_end = null, $output = OBJECT)
     {
-        $date_start = $this->rpsdb->getMysqldate($date_start);
-        $date_end = $this->rpsdb->getMysqldate($date_end);
+        $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
+
+        $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
+        $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
 
         $sql = $this->rpsdb->prepare(
             "SELECT *
             FROM competitions
             WHERE Competition_Date >= %s AND
                 Competition_Date <= %s",
-            $date_start,
-            $date_end
+            $competition_date_start,
+            $competition_date_end
         );
         $result = $this->rpsdb->get_results($sql, $output);
 
