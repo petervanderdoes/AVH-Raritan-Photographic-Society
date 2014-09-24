@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend;
 
+use Avh\Network\Session;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
@@ -50,7 +51,9 @@ class Frontend
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
+        add_action('parse_query', array($this, 'actionHandleRequests'));
         add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
+
         if ($this->request->isMethod('POST')) {
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsMyEntries'));
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsEditTitle'));
@@ -60,6 +63,7 @@ class Frontend
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
         add_filter('wp_title_parts', array($this, 'filterWpTitleParts'), 10, 1);
         add_action('wpseo_register_extra_replacements', array($this, 'actionWpseoRegisterExtraReplacements'));
+        add_filter('query_vars', array($this, 'filterQueryVars'));
     }
 
     /**
@@ -413,11 +417,30 @@ class Frontend
     }
 
     /**
+     * Handle HTTP Requests.
+     *
+     * @param $wp_query
+     */
+    public function actionHandleRequests($wp_query)
+    {
+        $options = get_option('avh-rps');
+        if (isset($wp_query->query['page_id'])) {
+            if ($wp_query->query['page_id'] == $options['monthly_entries_post_id']) {
+                $this->handleRequestMonthlyEntries();
+            }
+            if ($wp_query->query['page_id'] == $options['monthly_winners_post_id']) {
+                $this->handleRequestMonthlyWinners();
+            }
+        }
+    }
+
+    /**
      * Setup all that is needed to run the plugin.
      * This method runs during the init hook and you can basically add everything that needs
      * to be setup for plugin.
      * - Shortcodes
      * - User meta information concerning their classification
+     * - Rewrite rules
      *
      * @internal Hook: init
      */
@@ -431,8 +454,10 @@ class Frontend
 
         add_filter('wpseo_pre_analysis_post_content', array($this, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
         add_filter('wpseo_opengraph_image', array($this, 'filterWpseoOpengraphImage'), 10, 1);
-
+        add_filter('wpseo_metadesc', array($this, 'filterWpseoMetaDescription'), 10, 1);
         $this->setupUserMeta();
+
+        $this->setupRewriteRules();
 
         unset($query_competitions);
     }
@@ -538,6 +563,23 @@ class Frontend
     }
 
     /**
+     * Add custom query vars.
+     *  - selected_date
+     *
+     * @see Shortcodes::displayMonthlyEntries
+     *
+     * @param array $vars
+     *
+     * @return array
+     */
+    function filterQueryVars($vars)
+    {
+        $vars[] = 'selected_date';
+
+        return $vars;
+    }
+
+    /**
      * Filter for the title of pages.
      *
      * @param array $title_array
@@ -548,64 +590,51 @@ class Frontend
     {
         global $post;
 
-        if (has_shortcode($post->post_content, 'rps_monthly_entries')) {
+        $options = get_option('avh-rps');
+        if ($post->ID == $options['monthly_entries_post_id'] || $post->ID == $options['monthly_winners_post_id']) {
             $query_competitions = new QueryCompetitions($this->rpsdb);
-            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-            $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+            $selected_date = get_query_var('selected_date');
+            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competition = $competitions[0];
 
-            $months = array();
-            $themes = array();
-
-            if ($this->request->has('submit_control')) {
-                switch ($this->request->input('submit_control')) {
-                    case 'new_season':
-                        $selected_season = esc_attr($this->request->input('new_season'));
-                        $selected_date = 0;
-                        break;
-                    case 'new_month':
-                        $selected_date = esc_attr($this->request->input('new_month'));
-                        $selected_season = esc_attr($this->request->input('selected_season'));
-                        break;
-                    default:
-                        $selected_date = esc_attr($this->request->input('selected_date'));
-                        $selected_season = esc_attr($this->request->input('selected_season'));
-                        break;
-                }
-            } else {
-                $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
-                $date_object = new \DateTime($last_scored->Competition_Date);
-                $selected_date = $date_object->format(('Y-m-d'));
-                $selected_season = $season_helper->getSeasonId($selected_date);
-            }
-
-            list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-            $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
-
-            $is_scored_competitions = false;
-            if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-                $is_scored_competitions = true;
-                foreach ($scored_competitions as $recs) {
-                    $date_object = new \DateTime($recs['Competition_Date']);
-                    $key = $date_object->format('Y-m-d');
-                    $months[$key] = $date_object->format('F') . ': ' . $recs['Theme'];
-                    $themes[$key] = $recs['Theme'];
-                }
-
-                // If we selected a new season we select the latest competition of that season
-                if ($selected_season != esc_attr($this->request->input('selected_season'))) {
-                    $scored_competition = end($scored_competitions);
-                    $date_object = new \DateTime($scored_competition['Competition_Date']);
-                    $selected_date = $date_object->format(('Y-m-d'));
-                }
-            }
-
-            if ($is_scored_competitions) {
-                $new_title_array[] = $post->post_title . ' - ' . $selected_date . ' - ' . $themes[$selected_date];
-                $title_array = $new_title_array;
-            }
+            $new_title_array[] = $post->post_title . ' - ' . $selected_date . ' - ' . $competition->Theme;
+            $title_array = $new_title_array;
         }
 
         return $title_array;
+    }
+
+    /**
+     * Filter the meta description for the following pages:
+     * - Monthly Entries
+     * - Monthly Winners
+     *
+     * @param string $meta_description
+     *
+     * @return string
+     */
+    public function filterWpseoMetaDescription($meta_description)
+    {
+        global $post;
+
+        $options = get_option('avh-rps');
+        if ($post->ID == $options['monthly_entries_post_id'] || $post->ID == $options['monthly_winners_post_id']) {
+            $query_competitions = new QueryCompetitions($this->rpsdb);
+            $selected_date = get_query_var('selected_date');
+            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competition = $competitions[0];
+            $theme = ucfirst($competition->Theme);
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
+        }
+        if ($post->ID == $options['monthly_entries_post_id']) {
+            $meta_description = 'All entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
+        }
+        if ($post->ID == $options['monthly_winners_post_id']) {
+            $meta_description = 'All winners of the competition held by Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
+        }
+
+        return $meta_description;
     }
 
     /**
@@ -702,6 +731,101 @@ class Frontend
     }
 
     /**
+     * Handle HTTP requests for Monthly Entries before the page is displayed.
+
+     */
+    private function handleRequestMonthlyEntries()
+    {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+
+        $redirect = false;
+        /**
+         * When a new season or new month is selected from the form the submit_control is set.
+         * If it's not set we came to page directly and that's handles by the default section.
+         */
+        switch ($this->request->input('submit_control', null)) {
+            case 'new_season':
+                $selected_season = esc_attr($this->request->input('new_season'));
+                $selected_date = 'latest';
+                $redirect = true;
+                break;
+            case 'new_month':
+                $selected_date = esc_attr($this->request->input('new_month'));
+                $selected_season = esc_attr($this->request->input('selected_season'));
+                $redirect = true;
+                break;
+            default:
+                $selected_date = get_query_var('selected_date', false);
+                if ($selected_date === false || (!CommonHelper::isValidDate($selected_date, 'Y-m-d'))) {
+                    $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+                    $date_object = new \DateTime($last_scored->Competition_Date);
+                    $selected_date = $date_object->format(('Y-m-d'));
+                    $redirect = true;
+                }
+                $selected_season = $season_helper->getSeasonId($selected_date);
+                break;
+        }
+
+        $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
+        $session->start();
+        $session->set('selected_date', $selected_date);
+        $session->set('selected_season', $selected_season);
+        $session->save();
+
+        if ($redirect) {
+            wp_redirect('/events/monthly-entries/' . $selected_date . '/');
+        }
+    }
+
+    /**
+     * Handle HTTP requests for Monthly Winners before the page is displayed.
+
+     */
+    private function handleRequestMonthlyWinners()
+    {
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+
+        $redirect = false;
+        /**
+         * When a new season or new month is selected from the form the submit_control is set.
+         * If it's not set we came to page directly and that's handles by the default section.
+         */
+        switch ($this->request->input('submit_control', null)) {
+            case 'new_season':
+                $selected_season = esc_attr($this->request->input('new_season'));
+                $selected_date = 'latest';
+                $redirect = true;
+                break;
+            case 'new_month':
+                $selected_date = esc_attr($this->request->input('new_month'));
+                $selected_season = esc_attr($this->request->input('selected_season'));
+                $redirect = true;
+                break;
+            default:
+                $selected_date = get_query_var('selected_date', false);
+                if ($selected_date === false || (!CommonHelper::isValidDate($selected_date, 'Y-m-d'))) {
+                    $last_scored = $query_competitions->query(array('where' => 'Scored="Y" AND Special_Event="N"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+                    $date_object = new \DateTime($last_scored->Competition_Date);
+                    $selected_date = $date_object->format(('Y-m-d'));
+                    $redirect = true;
+                }
+                $selected_season = $season_helper->getSeasonId($selected_date);
+                break;
+        }
+
+        $session = new Session(array('name' => 'monthly_winners_' . COOKIEHASH));
+        $session->start();
+        $session->set('selected_date', $selected_date);
+        $session->set('selected_season', $selected_season);
+        $session->save();
+        if ($redirect) {
+            wp_redirect('/events/monthly-winners/' . $selected_date . '/');
+        }
+    }
+
+    /**
      * Handles the required functions for when a user submits their Banquet Entries
 
      */
@@ -757,6 +881,18 @@ class Frontend
             wp_redirect($redirect_to);
             die();
         }
+    }
+
+    private function setupRewriteRules()
+    {
+        $options = get_option('avh-rps');
+        $url = substr(parse_url(get_permalink($options['monthly_entries_post_id']), PHP_URL_PATH), 1);
+        add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
+
+        $url = substr(parse_url(get_permalink($options['monthly_winners_post_id']), PHP_URL_PATH), 1);
+        add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
+
+        flush_rewrite_rules();
     }
 
     /**
