@@ -1309,6 +1309,7 @@ final class Admin
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
                 wp_redirect($redirect);
+                exit();
                 break;
 
             case 'doopen':
@@ -1329,6 +1330,7 @@ final class Admin
                 }
                 $redirect = add_query_arg(array('count' => $count, 'update' => 'open_many'), $redirect);
                 wp_redirect($redirect);
+                exit();
                 break;
 
             case 'doclose':
@@ -1349,6 +1351,7 @@ final class Admin
                 }
                 $redirect = add_query_arg(array('count' => $count, 'update' => 'close_many'), $redirect);
                 wp_redirect($redirect);
+                exit();
                 break;
 
             case 'setscore':
@@ -1360,6 +1363,7 @@ final class Admin
                     $query_competitions->insertCompetition($data);
                 }
                 wp_redirect($redirect);
+                exit();
                 break;
             case 'Unsetscore':
                 if ($this->request->input('competition') !== '') {
@@ -1370,6 +1374,7 @@ final class Admin
                     $query_competitions->insertCompetition($data);
                 }
                 wp_redirect($redirect);
+                exit();
                 break;
             default:
                 if ($this->request->has('_wp_http_referer')) {
@@ -1435,7 +1440,7 @@ final class Admin
                 }
                 $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
                 wp_redirect($redirect);
-                break;
+                exit();
 
             default:
                 if ($this->request->has('_wp_http_referer')) {

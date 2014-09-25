@@ -36,6 +36,7 @@ class Frontend
 
     /**
      * PHP5 Constructor
+     *
      * @param Container $container
      */
     public function __construct(Container $container)
@@ -69,6 +70,7 @@ class Frontend
      * Implement actions.
      * This method is called by the action after_setup_theme and is used to setup:
      *  - New actions
+     *
      * @internal Hook: after_setup_theme
      */
     public function actionAfterThemeSetup()
@@ -78,6 +80,7 @@ class Frontend
 
     /**
      * Enqueue the needed javascripts.
+     *
      * @internal Hook: wp_enqueue_scripts
      */
     public function actionEnqueueScripts()
@@ -105,6 +108,7 @@ class Frontend
      * Handle POST request for the Banquet Entries.
      * This method handles the POST request generated on the page for Banquet Entries
      * The action is called from the theme!
+     *
      * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsBanquetEntries()
@@ -127,6 +131,7 @@ class Frontend
      * Handle POST request for the editing the title of a photo.
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
+     *
      * @see      Shortcodes::displayEditTitle
      * @internal Hook: suffusion_before_post
      */
@@ -192,6 +197,7 @@ class Frontend
      * Handle POST request for editing the entries of a user.
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
+     *
      * @see      Shortcodes::displayMyEntries
      * @internal Hook: suffusion_before_post
      */
@@ -223,6 +229,7 @@ class Frontend
                             $_query = build_query($_query);
                             $loc = '/member/upload-image/?' . $_query;
                             wp_redirect($loc);
+                            exit();
                         }
                         break;
 
@@ -235,6 +242,7 @@ class Frontend
                                     $_query = build_query($_query);
                                     $loc = '/member/edit-title/?' . $_query;
                                     wp_redirect($loc);
+                                    exit();
                                 }
                             }
                         }
@@ -257,6 +265,7 @@ class Frontend
      * Handle POST request for uploading a photo.
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
+     *
      * @see      Shortcodes::displayUploadEntry
      * @internal Hook: suffusion_before_post
      */
@@ -411,6 +420,7 @@ class Frontend
 
     /**
      * Handle HTTP Requests.
+     *
      * @param $wp_query
      */
     public function actionHandleRequests($wp_query)
@@ -434,6 +444,7 @@ class Frontend
      * - Shortcodes
      * - User meta information concerning their classification
      * - Rewrite rules
+     *
      * @internal Hook: init
      */
     public function actionInit()
@@ -458,8 +469,10 @@ class Frontend
     /**
      * Display the showcase on the front page.
      * This will display the showcase as used on the front page.
+     *
      * @see      actionAfterThemeSetup
      * @internal Hook: rps_showcase
+     *
      * @param null $foo
      */
     public function actionShowcaseCompetitionThumbnails($foo)
@@ -512,6 +525,7 @@ class Frontend
 
     /**
      * Handles the requests by the RPS Windows Client
+     *
      * @internal Hook: template_redirect
      */
     public function actionTemplateRedirectRpsWindowsClient()
@@ -555,9 +569,12 @@ class Frontend
     /**
      * Add custom query vars.
      *  - selected_date
+     *
      * @see Shortcodes::displayMonthlyEntries
      * @see Shortcodes::displayMonthlyWinners
+     *
      * @param array $vars
+     *
      * @return array
      */
     public function filterQueryVars($vars)
@@ -569,7 +586,9 @@ class Frontend
 
     /**
      * Filter for the title of pages.
+     *
      * @param array $title_array
+     *
      * @return array
      */
     public function filterWpTitleParts($title_array)
@@ -596,7 +615,9 @@ class Frontend
      * Filter the meta description for the following pages:
      * - Monthly Entries
      * - Monthly Winners
+     *
      * @param string $meta_description
+     *
      * @return string
      */
     public function filterWpseoMetaDescription($meta_description)
@@ -631,7 +652,9 @@ class Frontend
      * We only want to use images that are resized for Facebook shared link.
      * We add "_fb_thumb" to those thumbnail files.
      * If we return an empty string the image is not selected for the og:image meta information.
+     *
      * @param string $img
+     *
      * @return string
      */
     public function filterWpseoOpengraphImage($img)
@@ -648,8 +671,10 @@ class Frontend
      * As some of the pages create dynamic images through shortcode we need to run the shortcode.
      * That's the only way the WordPress SEO plugin can see the images.
      * Running the shortcodes now does not effect the final rendering of the post.
+     *
      * @param string $post_content
      * @param object $post
+     *
      * @return string
      */
     public function filterWpseoPreAnalysisPostsContent($post_content, $post)
@@ -664,7 +689,9 @@ class Frontend
 
     /**
      * Handle the replacement variable for WordPress Seo by Yoast.
+     *
      * @param $foo
+     *
      * @return string
      */
     public function handleWpSeoTitleReplace($foo)
@@ -687,8 +714,10 @@ class Frontend
     /**
      * Check if the selected date is a scored competition in the selected season.
      * If it's not a scored competition, return the date of the last scored competition of the selected season.
+     *
      * @param $selected_date
      * @param $selected_season
+     *
      * @return array
      */
     private function checkScoredCompetitionDate($selected_date)
@@ -707,6 +736,7 @@ class Frontend
 
     /**
      * Delete competition entries
+     *
      * @param array $entries Array of entries ID to delete.
      */
     private function deleteCompetitionEntries($entries)
@@ -797,8 +827,8 @@ class Frontend
         }
 
         if ($redirect) {
-            ob_end_clean();
             wp_redirect('/events/monthly-entries/' . $selected_date . '/');
+            exit();
         }
 
         $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
@@ -852,6 +882,7 @@ class Frontend
 
         if ($redirect) {
             wp_redirect('/events/monthly-winners/' . $selected_date . '/', 303);
+            exit();
         }
 
         $session = new Session(array('name' => 'monthly_winners_' . COOKIEHASH));
@@ -907,13 +938,14 @@ class Frontend
 
     /**
      * Check if user pressed cancel and if so redirect the user
+     *
      * @param string $redirect_to
      */
     private function isRequestCanceled($redirect_to)
     {
         if ($this->request->has('cancel')) {
             wp_redirect($redirect_to);
-            die();
+            exit();
         }
     }
 
