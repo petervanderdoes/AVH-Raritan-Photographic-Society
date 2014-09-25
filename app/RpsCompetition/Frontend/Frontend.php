@@ -140,7 +140,7 @@ class Frontend
         global $post;
 
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_object($post) && $post->ID == 75) {
@@ -204,7 +204,7 @@ class Frontend
     public function actionHandleHttpPostRpsMyEntries()
     {
         global $post;
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
 
@@ -273,7 +273,7 @@ class Frontend
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
@@ -452,7 +452,7 @@ class Frontend
 
         $this->setupShortcodes();
 
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_competitions->setAllPastCompetitionsClose();
 
         add_filter('wpseo_pre_analysis_post_content', array($this, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
@@ -598,7 +598,7 @@ class Frontend
         $options = get_option('avh-rps');
         $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
         if (isset($pages_array[$post->ID])) {
-            $query_competitions = new QueryCompetitions($this->rpsdb);
+            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
@@ -628,7 +628,7 @@ class Frontend
         $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
         if (isset($pages_array[$post->ID])) {
 
-            $query_competitions = new QueryCompetitions($this->rpsdb);
+            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
@@ -712,29 +712,6 @@ class Frontend
     }
 
     /**
-     * Check if the selected date is a scored competition in the selected season.
-     * If it's not a scored competition, return the date of the last scored competition of the selected season.
-     *
-     * @param $selected_date
-     * @param $selected_season
-     *
-     * @return array
-     */
-    private function checkScoredCompetitionDate($selected_date)
-    {
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $return = false;
-
-        $scored_competitions = $query_miscellaneous->getScoredCompetitions($selected_date);
-
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $return = true;
-        }
-
-        return $return;
-    }
-
-    /**
      * Delete competition entries
      *
      * @param array $entries Array of entries ID to delete.
@@ -771,11 +748,13 @@ class Frontend
     private function handleRequestMonthlyEntries()
     {
 
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $competition_helper = new CompetitionHelper($this->rpsdb);
+        $competition_helper = new CompetitionHelper($this->settings, $this->rpsdb);
 
         $redirect = false;
+        $query_var_selected_date = get_query_var('selected_date', false);
+
         /**
          * When a new season or new month is selected from the form the submit_control is set.
          * If it's not set we came to page directly and that's handles by the default section.
@@ -784,15 +763,12 @@ class Frontend
             case 'new_season':
                 $selected_season = esc_attr($this->request->input('new_season'));
                 $selected_date = 'latest';
-                $redirect = true;
                 break;
             case 'new_month':
                 $selected_date = esc_attr($this->request->input('new_month'));
                 $selected_season = esc_attr($this->request->input('selected_season'));
-                $redirect = true;
                 break;
             default:
-                $query_var_selected_date = get_query_var('selected_date', false);
                 if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date, 'Y-m-d'))) {
                     $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
                     $date_object = new \DateTime($last_scored->Competition_Date);
@@ -843,10 +819,13 @@ class Frontend
      */
     private function handleRequestMonthlyWinners()
     {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $competition_helper = new CompetitionHelper($this->settings, $this->rpsdb);
 
         $redirect = false;
+        $query_var_selected_date = get_query_var('selected_date', false);
+
         /**
          * When a new season or new month is selected from the form the submit_control is set.
          * If it's not set we came to page directly and that's handles by the default section.
@@ -855,41 +834,56 @@ class Frontend
             case 'new_season':
                 $selected_season = esc_attr($this->request->input('new_season'));
                 $selected_date = 'latest';
-                $redirect = true;
                 break;
             case 'new_month':
                 $selected_date = esc_attr($this->request->input('new_month'));
                 $selected_season = esc_attr($this->request->input('selected_season'));
-                $redirect = true;
                 break;
             default:
-                $selected_date = get_query_var('selected_date', false);
-                if ($selected_date === false || (!CommonHelper::isValidDate($selected_date, 'Y-m-d'))) {
+                if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date, 'Y-m-d'))) {
                     $last_scored = $query_competitions->query(array('where' => 'Scored="Y" AND Special_Event="N"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $selected_date = $date_object->format(('Y-m-d'));
                     $redirect = true;
+                } else {
+                    $selected_date = $query_var_selected_date;
                 }
                 $selected_season = $season_helper->getSeasonId($selected_date);
                 break;
         }
 
-        $new_selected_date = $this->checkScoredCompetitionDate($selected_date, $selected_season);
-        if ($new_selected_date !== $selected_date) {
-            $selected_date = $new_selected_date;
+        if (!$season_helper->isValidSeason($selected_season)) {
+            $selected_season = $season_helper->getSeasonId(date('r'));
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season);
+            /** @var QueryCompetitions $competition */
+            $competition = end($competitions);
+            $date_object = new \DateTime($competition->Competition_Date);
+            $selected_date = $date_object->format(('Y-m-d'));
+        }
+
+        if (!$competition_helper->isScoredCompetitionDate($selected_date)) {
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season);
+            /** @var QueryCompetitions $competition */
+            $competition = end($competitions);
+            $date_object = new \DateTime($competition->Competition_Date);
+            $selected_date = $date_object->format(('Y-m-d'));
+        }
+
+        if ($selected_date != $query_var_selected_date) {
             $redirect = true;
         }
 
         if ($redirect) {
-            wp_redirect('/events/monthly-winners/' . $selected_date . '/', 303);
+            wp_redirect('/events/monthly-entries/' . $selected_date . '/');
             exit();
         }
 
-        $session = new Session(array('name' => 'monthly_winners_' . COOKIEHASH));
+        $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
         $session->start();
         $session->set('selected_date', $selected_date);
         $session->set('selected_season', $selected_season);
         $session->save();
+
     }
 
     /**
@@ -898,7 +892,7 @@ class Frontend
     private function handleSubmitBanquetEntries()
     {
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if ($this->request->has('allentries')) {

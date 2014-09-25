@@ -68,7 +68,7 @@ class Helper
      */
     public function deleteEntryFromDisk($entry)
     {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         // Remove main file from disk
         if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {

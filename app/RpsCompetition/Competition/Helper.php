@@ -3,14 +3,17 @@ namespace RpsCompetition\Competition;
 
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Settings;
 
 class Helper
 {
     private $rpsdb;
+    private $settings;
 
-    public function __construct(RpsDb $rpsdb)
+    public function __construct(Settings $settings, RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;
+        $this->settings = $settings;
     }
 
     public function getMedium($competitions)
@@ -28,21 +31,22 @@ class Helper
         return $medium;
     }
 
+    /**
+     * Check if there is a Scored competition for the given date.
+     *
+     * @param string $date
+     *
+     * @return bool
+     */
     public function isScoredCompetitionDate($date)
     {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $date = $this->rpsdb->getMysqldate($date);
         $return = false;
-        $competitions = $query_competitions->getCompetitionByDates($date);
+        $competitions = $query_competitions->getScoredCompetitions($date);
         if (is_array($competitions) && (!empty($competitions))) {
-            /** @var QueryCompetitions $competition */
-            foreach ($competitions as $competition) {
-                if ($competition->Scored == 'Y' && $competition->Competition_Date) {
-                    $return = true;
-                    break;
-                }
-            }
+            $return = true;
         }
 
         return $return;

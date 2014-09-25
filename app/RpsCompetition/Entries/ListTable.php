@@ -90,7 +90,7 @@ class ListTable extends \WP_List_Table
      */
     public function column_competition($entry)
     {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
         $competition_text = $_competition->Theme . ' - ' . $_competition->Medium . ' - ' . $_competition->Classification;
@@ -123,7 +123,7 @@ class ListTable extends \WP_List_Table
      */
     public function column_season($entry)
     {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $options = get_option('avh-rps');
 
         $_competition = $query_competitions->getCompetitionById($entry->Competition_ID);
@@ -227,7 +227,7 @@ class ListTable extends \WP_List_Table
     {
 
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $options = get_option('avh-rps');
 
@@ -325,7 +325,7 @@ class ListTable extends \WP_List_Table
         global $entry_status, $search;
 
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
 
         $entry_status = $this->request->input('entry_status', 'all');

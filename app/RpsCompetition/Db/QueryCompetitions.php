@@ -2,6 +2,7 @@
 namespace RpsCompetition\Db;
 
 use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Settings;
 
 /**
  * Class QueryCompetitions
@@ -24,15 +25,18 @@ use RpsCompetition\Season\Helper as SeasonHelper;
 class QueryCompetitions
 {
     private $rpsdb;
+    private $settings;
 
     /**
      * PHP5 constructor
      *
-     * @param RpsDb $rpsdb
+     * @param Settings $settings
+     * @param RpsDb    $rpsdb
      */
-    public function __construct(RpsDb $rpsdb)
+    public function __construct(Settings $settings, RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;
+        $this->settings = $settings;
     }
 
     /**
@@ -215,6 +219,15 @@ class QueryCompetitions
         return $result;
     }
 
+    /**
+     * Get season per season id.
+     *
+     * @param string      $season_id
+     * @param string|null $scored
+     * @param string      $output
+     *
+     * @return mixed
+     */
     public function getCompetitionBySeasonId($season_id, $scored = null, $output = OBJECT)
     {
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
@@ -367,27 +380,41 @@ class QueryCompetitions
     }
 
     /**
-     * Get all regular (non-special-event) scored competitions.
+     * Get all scored competitions.
      *
-     * @param string $date_start
-     * @param string $date_end
-     * @param string $output
+     * With the filter you can set extra filters for the select like Special_Event = "N"
+     * The format of the filter array is "field"=>"value"
+     *
+     * @param string      $competition_date_start
+     * @param string|null $competition_date_end
+     * @param array       $filter
+     * @param string      $output
      *
      * @return QueryCompetitions|array
      */
-    public function getScoredCompetitions($date_start, $date_end, $output = OBJECT)
+    public function getScoredCompetitions($competition_date_start, $competition_date_end = null, $filter = array(), $output = OBJECT)
     {
+        $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
+        $sql_filter_array = array('1=1');
+
+        if (is_array($filter) && !empty($filter)) {
+            $sql_filter_array = array();
+            foreach ($filter as $field => $value) {
+                $sql_filter_array[] = $field . ' = "' . $value . '" AND ';
+            }
+        }
+
+        $sql_filter = implode($sql_filter_array, ' AND ');
         $sql = $this->rpsdb->prepare(
             'SELECT *
             FROM competitions
             WHERE Competition_Date >= %s AND
                 Competition_Date <= %s AND
-                Special_Event = "N" AND
+                ' . $sql_filter . ' AND
                 Scored = "Y"
-            GROUP BY Competition_Date
             ORDER BY Competition_Date',
-            $date_start,
-            $date_end
+            $competition_date_start,
+            $competition_date_end
         );
         $return = $this->rpsdb->get_results($sql, $output);
 

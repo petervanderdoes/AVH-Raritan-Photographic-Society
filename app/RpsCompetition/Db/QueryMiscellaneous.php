@@ -168,33 +168,6 @@ class QueryMiscellaneous
     }
 
     /**
-     * Get scores ordered by competition date for competitions between the given dates
-     *
-     * @param string      $competition_date_start
-     * @param null|string $competition_date_end
-     *
-     * @return array
-     */
-    public function getScoredCompetitions($competition_date_start, $competition_date_end = null)
-    {
-        $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
-
-        $sql = $this->rpsdb->prepare(
-            'SELECT DISTINCT Competition_Date,
-            Theme
-            FROM competitions
-            WHERE Competition_Date >= %s AND
-                Competition_Date <= %s AND
-                Scored="Y" ORDER BY Competition_Date',
-            $competition_date_start,
-            $competition_date_end
-        );
-        $return = $this->rpsdb->get_results($sql, ARRAY_A);
-
-        return $return;
-    }
-
-    /**
      * Get the scores for the given user for competitions between the given dates.
      *
      * @param integer     $user_id

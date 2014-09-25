@@ -328,7 +328,7 @@ class ListTable extends \WP_List_Table
     {
         global $competition_status;
 
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $num_competitions = $query_competitions->countCompetitions();
         $status_links = array();
@@ -371,7 +371,7 @@ class ListTable extends \WP_List_Table
     {
         global $competition_status, $search;
 
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $competition_status = $this->request->input('competition_status', 'open');
         if (!in_array($competition_status, array('all', 'open', 'closed'))) {
