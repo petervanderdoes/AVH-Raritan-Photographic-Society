@@ -402,6 +402,10 @@ class QueryCompetitions
     public function getScoredCompetitions($competition_date_start, $competition_date_end = null, $filter = array(), $output = OBJECT)
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
+
+        $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
+        $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
+
         $sql_filter_array = array('1=1');
 
         if (is_array($filter) && !empty($filter)) {
