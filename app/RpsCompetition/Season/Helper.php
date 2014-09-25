@@ -110,4 +110,22 @@ class Helper
 
         return $seasons;
     }
+
+    /**
+     * Check if given season-id is a valid season.
+     *
+     * @param string $season
+     *
+     * @return bool
+     */
+    public function isValidSeason($season)
+    {
+        $return = true;
+        $seasons = $this->getSeasons();
+        if (!in_array($season, $seasons)) {
+            $return = false;
+        }
+
+        return $return;
+    }
 }

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
+use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
@@ -35,7 +36,6 @@ class Frontend
 
     /**
      * PHP5 Constructor
-     *
      * @param Container $container
      */
     public function __construct(Container $container)
@@ -61,7 +61,6 @@ class Frontend
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
         }
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
-        add_filter('wp_title_parts', array($this, 'filterWpTitleParts'), 10, 1);
         add_action('wpseo_register_extra_replacements', array($this, 'actionWpseoRegisterExtraReplacements'));
         add_filter('query_vars', array($this, 'filterQueryVars'));
     }
@@ -70,7 +69,6 @@ class Frontend
      * Implement actions.
      * This method is called by the action after_setup_theme and is used to setup:
      *  - New actions
-     *
      * @internal Hook: after_setup_theme
      */
     public function actionAfterThemeSetup()
@@ -80,7 +78,6 @@ class Frontend
 
     /**
      * Enqueue the needed javascripts.
-     *
      * @internal Hook: wp_enqueue_scripts
      */
     public function actionEnqueueScripts()
@@ -108,7 +105,6 @@ class Frontend
      * Handle POST request for the Banquet Entries.
      * This method handles the POST request generated on the page for Banquet Entries
      * The action is called from the theme!
-     *
      * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsBanquetEntries()
@@ -131,7 +127,6 @@ class Frontend
      * Handle POST request for the editing the title of a photo.
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
-     *
      * @see      Shortcodes::displayEditTitle
      * @internal Hook: suffusion_before_post
      */
@@ -197,7 +192,6 @@ class Frontend
      * Handle POST request for editing the entries of a user.
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
-     *
      * @see      Shortcodes::displayMyEntries
      * @internal Hook: suffusion_before_post
      */
@@ -263,7 +257,6 @@ class Frontend
      * Handle POST request for uploading a photo.
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
-     *
      * @see      Shortcodes::displayUploadEntry
      * @internal Hook: suffusion_before_post
      */
@@ -418,11 +411,11 @@ class Frontend
 
     /**
      * Handle HTTP Requests.
-     *
      * @param $wp_query
      */
     public function actionHandleRequests($wp_query)
     {
+
         $options = get_option('avh-rps');
         if (isset($wp_query->query['page_id'])) {
             if ($wp_query->query['page_id'] == $options['monthly_entries_post_id']) {
@@ -441,7 +434,6 @@ class Frontend
      * - Shortcodes
      * - User meta information concerning their classification
      * - Rewrite rules
-     *
      * @internal Hook: init
      */
     public function actionInit()
@@ -455,6 +447,7 @@ class Frontend
         add_filter('wpseo_pre_analysis_post_content', array($this, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
         add_filter('wpseo_opengraph_image', array($this, 'filterWpseoOpengraphImage'), 10, 1);
         add_filter('wpseo_metadesc', array($this, 'filterWpseoMetaDescription'), 10, 1);
+        add_filter('wp_title_parts', array($this, 'filterWpTitleParts'), 10, 1);
         $this->setupUserMeta();
 
         $this->setupRewriteRules();
@@ -465,10 +458,8 @@ class Frontend
     /**
      * Display the showcase on the front page.
      * This will display the showcase as used on the front page.
-     *
      * @see      actionAfterThemeSetup
      * @internal Hook: rps_showcase
-     *
      * @param null $foo
      */
     public function actionShowcaseCompetitionThumbnails($foo)
@@ -521,7 +512,6 @@ class Frontend
 
     /**
      * Handles the requests by the RPS Windows Client
-     *
      * @internal Hook: template_redirect
      */
     public function actionTemplateRedirectRpsWindowsClient()
@@ -565,12 +555,9 @@ class Frontend
     /**
      * Add custom query vars.
      *  - selected_date
-     *
      * @see Shortcodes::displayMonthlyEntries
      * @see Shortcodes::displayMonthlyWinners
-     *
      * @param array $vars
-     *
      * @return array
      */
     public function filterQueryVars($vars)
@@ -582,9 +569,7 @@ class Frontend
 
     /**
      * Filter for the title of pages.
-     *
      * @param array $title_array
-     *
      * @return array
      */
     public function filterWpTitleParts($title_array)
@@ -611,9 +596,7 @@ class Frontend
      * Filter the meta description for the following pages:
      * - Monthly Entries
      * - Monthly Winners
-     *
      * @param string $meta_description
-     *
      * @return string
      */
     public function filterWpseoMetaDescription($meta_description)
@@ -648,9 +631,7 @@ class Frontend
      * We only want to use images that are resized for Facebook shared link.
      * We add "_fb_thumb" to those thumbnail files.
      * If we return an empty string the image is not selected for the og:image meta information.
-     *
      * @param string $img
-     *
      * @return string
      */
     public function filterWpseoOpengraphImage($img)
@@ -667,10 +648,8 @@ class Frontend
      * As some of the pages create dynamic images through shortcode we need to run the shortcode.
      * That's the only way the WordPress SEO plugin can see the images.
      * Running the shortcodes now does not effect the final rendering of the post.
-     *
      * @param string $post_content
      * @param object $post
-     *
      * @return string
      */
     public function filterWpseoPreAnalysisPostsContent($post_content, $post)
@@ -685,9 +664,7 @@ class Frontend
 
     /**
      * Handle the replacement variable for WordPress Seo by Yoast.
-     *
      * @param $foo
-     *
      * @return string
      */
     public function handleWpSeoTitleReplace($foo)
@@ -708,8 +685,28 @@ class Frontend
     }
 
     /**
+     * Check if the selected date is a scored competition in the selected season.
+     * If it's not a scored competition, return the date of the last scored competition of the selected season.
+     * @param $selected_date
+     * @param $selected_season
+     * @return array
+     */
+    private function checkScoredCompetitionDate($selected_date)
+    {
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $return = false;
+
+        $scored_competitions = $query_miscellaneous->getScoredCompetitions($selected_date);
+
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
      * Delete competition entries
-     *
      * @param array $entries Array of entries ID to delete.
      */
     private function deleteCompetitionEntries($entries)
@@ -740,13 +737,13 @@ class Frontend
 
     /**
      * Handle HTTP requests for Monthly Entries before the page is displayed.
-
      */
     private function handleRequestMonthlyEntries()
     {
+
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $competition_helper = new CompetitionHelper($this->rpsdb);
 
         $redirect = false;
         /**
@@ -765,36 +762,43 @@ class Frontend
                 $redirect = true;
                 break;
             default:
-                $selected_date = get_query_var('selected_date', false);
-                if ($selected_date === false || (!CommonHelper::isValidDate($selected_date, 'Y-m-d'))) {
+                $query_var_selected_date = get_query_var('selected_date', false);
+                if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date, 'Y-m-d'))) {
                     $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $selected_date = $date_object->format(('Y-m-d'));
                     $redirect = true;
+                } else {
+                    $selected_date = $query_var_selected_date;
                 }
                 $selected_season = $season_helper->getSeasonId($selected_date);
                 break;
         }
 
-        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
+        if (!$season_helper->isValidSeason($selected_season)) {
+            $selected_season = $season_helper->getSeasonId(date('r'));
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season);
+            /** @var QueryCompetitions $competition */
+            $competition = end($competitions);
+            $date_object = new \DateTime($competition->Competition_Date);
+            $selected_date = $date_object->format(('Y-m-d'));
+        }
 
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $competition_dates = array();
-            foreach ($scored_competitions as $recs) {
-                $date_object = new \DateTime($recs['Competition_Date']);
-                $key = $date_object->format('Y-m-d');
-                $competition_dates[$key] = true;
-            }
+        if (!$competition_helper->isScoredCompetitionDate($selected_date)) {
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season);
+            /** @var QueryCompetitions $competition */
+            $competition = end($competitions);
+            $date_object = new \DateTime($competition->Competition_Date);
+            $selected_date = $date_object->format(('Y-m-d'));
+        }
 
-            if (!isset($competition_dates[$selected_date])) {
-                $selected_date = $key;
-                $redirect = true;
-            }
+        if ($selected_date != $query_var_selected_date) {
+            $redirect = true;
         }
 
         if ($redirect) {
-            wp_redirect('/events/monthly-entries/' . $selected_date . '/', 303);
+            ob_end_clean();
+            wp_redirect('/events/monthly-entries/' . $selected_date . '/');
         }
 
         $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
@@ -806,13 +810,11 @@ class Frontend
 
     /**
      * Handle HTTP requests for Monthly Winners before the page is displayed.
-
      */
     private function handleRequestMonthlyWinners()
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $redirect = false;
         /**
@@ -842,21 +844,10 @@ class Frontend
                 break;
         }
 
-        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
-
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $competition_dates = array();
-            foreach ($scored_competitions as $recs) {
-                $date_object = new \DateTime($recs['Competition_Date']);
-                $key = $date_object->format('Y-m-d');
-                $competition_dates[$key] = true;
-            }
-
-            if (!isset($competition_dates[$selected_date])) {
-                $selected_date = $key;
-                $redirect = true;
-            }
+        $new_selected_date = $this->checkScoredCompetitionDate($selected_date, $selected_season);
+        if ($new_selected_date !== $selected_date) {
+            $selected_date = $new_selected_date;
+            $redirect = true;
         }
 
         if ($redirect) {
@@ -872,7 +863,6 @@ class Frontend
 
     /**
      * Handles the required functions for when a user submits their Banquet Entries
-
      */
     private function handleSubmitBanquetEntries()
     {
@@ -917,7 +907,6 @@ class Frontend
 
     /**
      * Check if user pressed cancel and if so redirect the user
-     *
      * @param string $redirect_to
      */
     private function isRequestCanceled($redirect_to)
@@ -947,7 +936,6 @@ class Frontend
     /**
      * Setup shortcodes.
      * Setup all the need shortcodes.
-
      */
     private function setupShortcodes()
     {
@@ -968,7 +956,6 @@ class Frontend
 
     /**
      * Setup the needed user meta information.
-
      */
     private function setupUserMeta()
     {
