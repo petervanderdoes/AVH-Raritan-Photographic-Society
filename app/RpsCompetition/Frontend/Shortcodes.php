@@ -654,15 +654,8 @@ final class Shortcodes extends ShortcodesAbstract
 
         $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
         $session->start();
-        if ($session->has('selected_date')) {
-            $selected_date = $session->get('selected_date');
-            $selected_season = $session->get('selected_season');
-        } else {
-            $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
-            $date_object = new \DateTime($last_scored->Competition_Date);
-            $selected_date = $date_object->format(('Y-m-d'));
-            $selected_season = $season_helper->getSeasonId($selected_date);
-        }
+        $selected_date = $session->get('selected_date');
+        $selected_season = $session->get('selected_season');
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
@@ -670,22 +663,11 @@ final class Shortcodes extends ShortcodesAbstract
         $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
-            $competition_dates = array();
             foreach ($scored_competitions as $recs) {
                 $date_object = new \DateTime($recs['Competition_Date']);
                 $key = $date_object->format('Y-m-d');
-                $competition_dates[] = $key;
                 $months[$key] = $date_object->format('F') . ': ' . $recs['Theme'];
                 $themes[$key] = $recs['Theme'];
-            }
-            $competition_dates = array_unique($competition_dates);
-
-            //If we selected a new season we select the latest competition of that season
-            if (!in_array($selected_date, $competition_dates)) {
-                $scored_competition = end($scored_competitions);
-                $date_object = new \DateTime($scored_competition['Competition_Date']);
-                $selected_date = $date_object->format(('Y-m-d'));
-                wp_redirect('/events/monthly-entries/' . $selected_date . '/');
             }
         }
 
@@ -760,15 +742,8 @@ final class Shortcodes extends ShortcodesAbstract
 
         $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
         $session->start();
-        if ($session->has('selected_date')) {
-            $selected_date = $session->get('selected_date');
-            $selected_season = $session->get('selected_season');
-        } else {
-            $last_scored = $query_competitions->query(array('where' => 'Scored="Y" AND Special_Event="N"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
-            $date_object = new \DateTime($last_scored->Competition_Date);
-            $selected_date = $date_object->format(('Y-m-d'));
-            $selected_season = $season_helper->getSeasonId($selected_date);
-        }
+        $selected_date = $session->get('selected_date');
+        $selected_season = $session->get('selected_season');
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
@@ -776,22 +751,11 @@ final class Shortcodes extends ShortcodesAbstract
         $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
-            $competition_dates = array();
             foreach ($scored_competitions as $recs) {
                 $date_object = new \DateTime($recs['Competition_Date']);
                 $key = $date_object->format('Y-m-d');
-                $competition_dates[] = $key;
                 $months[$key] = $date_object->format('F') . ': ' . $recs['Theme'];
                 $themes[$key] = $recs['Theme'];
-            }
-            $competition_dates = array_unique($competition_dates);
-
-            //If we selected a new season we select the latest competition of that season
-            if (!in_array($selected_date, $competition_dates)) {
-                $scored_competition = end($scored_competitions);
-                $date_object = new \DateTime($scored_competition['Competition_Date']);
-                $selected_date = $date_object->format(('Y-m-d'));
-                wp_redirect('/events/monthly-winners/' . $selected_date . '/');
             }
         }
         $max_num_awards = $query_miscellaneous->getMaxAwards($selected_date);

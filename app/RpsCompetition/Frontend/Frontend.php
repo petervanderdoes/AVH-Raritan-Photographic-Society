@@ -597,7 +597,7 @@ class Frontend
             $query_competitions = new QueryCompetitions($this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
-            $competition = $competitions[0];
+            $competition = current($competitions);
 
             $new_title_array = array();
             $new_title_array[] = $post->post_title . ' - ' . $selected_date . ' - ' . $competition->Theme;
@@ -627,7 +627,7 @@ class Frontend
             $query_competitions = new QueryCompetitions($this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
-            $competition = $competitions[0];
+            $competition = current($competitions);
             $theme = ucfirst($competition->Theme);
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
@@ -639,6 +639,7 @@ class Frontend
                 $meta_description = 'All winners of the competition held by Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
             }
         }
+
         return $meta_description;
     }
 
@@ -745,6 +746,7 @@ class Frontend
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $redirect = false;
         /**
@@ -774,15 +776,32 @@ class Frontend
                 break;
         }
 
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
+        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
+
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $competition_dates = array();
+            foreach ($scored_competitions as $recs) {
+                $date_object = new \DateTime($recs['Competition_Date']);
+                $key = $date_object->format('Y-m-d');
+                $competition_dates[$key] = true;
+            }
+
+            if (!isset($competition_dates[$selected_date])) {
+                $selected_date = $key;
+                $redirect = true;
+            }
+        }
+
+        if ($redirect) {
+            wp_redirect('/events/monthly-entries/' . $selected_date . '/', 303);
+        }
+
         $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
         $session->start();
         $session->set('selected_date', $selected_date);
         $session->set('selected_season', $selected_season);
         $session->save();
-
-        if ($redirect) {
-            wp_redirect('/events/monthly-entries/' . $selected_date . '/');
-        }
     }
 
     /**
@@ -793,6 +812,7 @@ class Frontend
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
         $redirect = false;
         /**
@@ -822,14 +842,32 @@ class Frontend
                 break;
         }
 
+        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
+        $scored_competitions = $query_miscellaneous->getScoredCompetitions($season_start_date, $season_end_date);
+
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $competition_dates = array();
+            foreach ($scored_competitions as $recs) {
+                $date_object = new \DateTime($recs['Competition_Date']);
+                $key = $date_object->format('Y-m-d');
+                $competition_dates[$key] = true;
+            }
+
+            if (!isset($competition_dates[$selected_date])) {
+                $selected_date = $key;
+                $redirect = true;
+            }
+        }
+
+        if ($redirect) {
+            wp_redirect('/events/monthly-winners/' . $selected_date . '/', 303);
+        }
+
         $session = new Session(array('name' => 'monthly_winners_' . COOKIEHASH));
         $session->start();
         $session->set('selected_date', $selected_date);
         $session->set('selected_season', $selected_season);
         $session->save();
-        if ($redirect) {
-            wp_redirect('/events/monthly-winners/' . $selected_date . '/');
-        }
     }
 
     /**
