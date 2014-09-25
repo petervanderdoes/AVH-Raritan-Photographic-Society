@@ -222,20 +222,26 @@ class QueryCompetitions
     /**
      * Get season per season id.
      *
-     * @param string      $season_id
-     * @param string|null $scored
-     * @param string      $output
+     * @param string     $season_id
+     * @param array|null $filter
+     * @param string     $output
      *
      * @return mixed
      */
-    public function getCompetitionBySeasonId($season_id, $scored = null, $output = OBJECT)
+    public function getCompetitionBySeasonId($season_id, $filter = null, $output = OBJECT)
     {
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
 
-        $get_scored = '';
-        if ($scored !== null) {
-            $get_scored = ' AND Scored="' . $scored . '"';
+        $sql_filter_array = array('1=1');
+
+        if (is_array($filter) && !empty($filter)) {
+            $sql_filter_array = array();
+            foreach ($filter as $field => $value) {
+                $sql_filter_array[] = $field . ' = "' . $value . '" AND ';
+            }
         }
+
+        $sql_filter = implode($sql_filter_array, ' AND ');
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($season_id);
 
@@ -243,7 +249,8 @@ class QueryCompetitions
             'SELECT *
             FROM competitions
             WHERE Competition_Date >= %s AND
-                Competition_Date <= %s' . $get_scored . '
+                Competition_Date <= %s AND
+                ' . $sql_filter . '
             GROUP BY Competition_Date
             ORDER BY Competition_Date',
             $season_start_date,
