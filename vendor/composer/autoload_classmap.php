@@ -798,6 +798,7 @@ return array(
     'RpsCompetition\\Entries\\ListTable' => $baseDir . '/app/RpsCompetition/Entries/ListTable.php',
     'RpsCompetition\\Frontend\\Frontend' => $baseDir . '/app/RpsCompetition/Frontend/Frontend.php',
     'RpsCompetition\\Frontend\\Shortcodes' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes.php',
+    'RpsCompetition\\Frontend\\WpseoHelper' => $baseDir . '/app/RpsCompetition/Frontend/WpseoHelper.php',
     'RpsCompetition\\Options\\General' => $baseDir . '/app/RpsCompetition/Options/General.php',
     'RpsCompetition\\Photo\\Helper' => $baseDir . '/app/RpsCompetition/Photo/Helper.php',
     'RpsCompetition\\Season\\Helper' => $baseDir . '/app/RpsCompetition/Season/Helper.php',

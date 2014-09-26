@@ -454,7 +454,6 @@ class Frontend
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_competitions->setAllPastCompetitionsClose();
 
-        add_filter('wp_title_parts', array($this, 'filterWpTitleParts'), 10, 1);
         $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
 
@@ -555,38 +554,6 @@ class Frontend
     }
 
     /**
-     * Setup replace variables for WordPress Seo by Yoast.
-     */
-    public function actionWpseoRegisterExtraReplacements()
-    {
-        wpseo_register_var_replacement('%%rpstitle%%', array($this, 'handleWpSeoTitleReplace'));
-    }
-
-    /**
-     * Build sitemap for Competition Entries
-     *
-     */
-    public function actionWpseoSitemapCompetitionEntries()
-    {
-        $options = get_option('avh-rps');
-        $url = get_permalink($options['monthly_entries_post_id']);
-        $this->buildWpseoSitemap($url);
-        exit();
-    }
-
-    /**
-     * Build sitemap for Competition Winners
-     *
-     */
-    public function actionWpseoSitemapCompetitionWinners()
-    {
-        $options = get_option('avh-rps');
-        $url = get_permalink($options['monthly_winners_post_id']);
-        $this->buildWpseoSitemap($url);
-        exit();
-    }
-
-    /**
      * Add custom query vars.
      *  - selected_date
      *
@@ -602,220 +569,6 @@ class Frontend
         $vars[] = 'selected_date';
 
         return $vars;
-    }
-
-    /**
-     * Filter for the title of pages.
-     *
-     * @param array $title_array
-     *
-     * @return array
-     */
-    public function filterWpTitleParts($title_array)
-    {
-        global $post;
-
-        $options = get_option('avh-rps');
-        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
-        if (isset($pages_array[$post->ID])) {
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-            $selected_date = get_query_var('selected_date');
-            $competitions = $query_competitions->getCompetitionByDates($selected_date);
-            $competition = current($competitions);
-
-            $new_title_array = array();
-            $new_title_array[] = $post->post_title . ' - ' . $selected_date . ' - ' . $competition->Theme;
-            $title_array = $new_title_array;
-        }
-
-        return $title_array;
-    }
-
-    /**
-     * Filter the meta description for the following pages:
-     * - Monthly Entries
-     * - Monthly Winners
-     *
-     * @param string $meta_description
-     *
-     * @return string
-     */
-    public function filterWpseoMetaDescription($meta_description)
-    {
-        global $post;
-
-        $options = get_option('avh-rps');
-        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
-        if (isset($pages_array[$post->ID])) {
-
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-
-            $selected_date = get_query_var('selected_date');
-            $competitions = $query_competitions->getCompetitionByDates($selected_date);
-            $competition = current($competitions);
-            $theme = ucfirst($competition->Theme);
-            $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
-            $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
-
-            if ($post->ID == $options['monthly_entries_post_id']) {
-                $meta_description = 'The ' . $entries_amount . ' entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
-            }
-            if ($post->ID == $options['monthly_winners_post_id']) {
-                $meta_description = 'Out of ' . $entries_amount . ' entries, a jury selected these winners of the competition with the theme "' . $theme . '" held on ' . $date_text;
-            }
-        }
-
-        return $meta_description;
-    }
-
-    /**
-     * Filter for WordPress SEO plugin by Yoast: Use for the OpenGraph image property.
-     * We only want to use images that are resized for Facebook shared link.
-     * We add "_fb_thumb" to those thumbnail files.
-     * If we return an empty string the image is not selected for the og:image meta information.
-     *
-     * @param string $img
-     *
-     * @return string
-     */
-    public function filterWpseoOpengraphImage($img)
-    {
-        if (strpos($img, '_fb_thumb.jpg') !== false) {
-            return $img;
-        }
-
-        return '';
-    }
-
-    /**
-     * Filter for WordPress SEO plugin by Yoast: Before analyzing the post content.
-     * As some of the pages create dynamic images through shortcode we need to run the shortcode.
-     * That's the only way the WordPress SEO plugin can see the images.
-     * Running the shortcodes now does not effect the final rendering of the post.
-     *
-     * @param string $post_content
-     * @param object $post
-     *
-     * @return string
-     */
-    public function filterWpseoPreAnalysisPostsContent($post_content, $post)
-    {
-        if (has_shortcode($post_content, 'rps_category_winners')) {
-            $post_content = do_shortcode($post_content);
-            $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
-        }
-
-        return $post_content;
-    }
-
-    public function filterWpseoSitemapIndex()
-    {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-
-        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
-        $date = new \DateTime($last_scored->Date_Modified);
-
-        $sitemap = '';
-        $sitemap .= '<sitemap>' . "\n";
-        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-entries') . '-sitemap.xml</loc>' . "\n";
-        $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
-        $sitemap .= '</sitemap>' . "\n";
-        $sitemap .= '<sitemap>' . "\n";
-        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-winners') . '-sitemap.xml</loc>' . "\n";
-        $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
-        $sitemap .= '</sitemap>' . "\n";
-
-        return $sitemap;
-    }
-
-    /**
-     * Handle the replacement variable for WordPress Seo by Yoast.
-     *
-     * @param $foo
-     *
-     * @return string
-     */
-    public function handleWpSeoTitleReplace($foo)
-    {
-        global $post;
-
-        $replacement = null;
-        $title_array = array();
-
-        if (is_string($post->post_title) && $post->post_title !== '') {
-            $replacement = stripslashes($post->post_title);
-        }
-        $title_array[] = $replacement;
-
-        $new = $this->filterWpTitleParts($title_array);
-
-        return $new[0];
-    }
-
-    /**
-     * Build actual sitemap for Competition Entries or Competition Winners
-     *
-     * @param string $url
-     */
-    private function buildWpseoSitemap($url)
-    {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $scored_competitions = $query_competitions->getScoredCompetitions('1970-01-01', '2200-01-01');
-
-        $old_mod_date = 0;
-        $old_key = 0;
-        $site_url = array();
-        $sitemap_loc = '';
-        $sitemap_date = '';
-        /** @var QueryCompetitions $competition */
-        foreach ($scored_competitions as $competition) {
-            $competition_date = new \DateTime($competition->Competition_Date);
-            $key = $competition_date->format('U');
-            $date = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
-            $mod_date = $date->format('U');
-
-            if ($key != $old_key) {
-                $old_mod_date = 0;
-                $sitemap_loc = $url . $competition_date->format('Y-m-d') . '/';
-            }
-            if ($mod_date > $old_mod_date) {
-                $old_mod_date = $mod_date;
-                $sitemap_date = $date->format('c');
-            }
-
-            $site_url[$key] = array(
-                'loc' => $sitemap_loc,
-                'pri' => 0.8,
-                'chf' => 'monthly',
-                'mod' => $sitemap_date,
-            );
-        }
-        $output = '';
-        foreach ($site_url as $url) {
-            $output .= "\t<url>\n";
-            $output .= "\t\t<loc>" . $url['loc'] . "</loc>\n";
-            $output .= "\t\t<lastmod>" . $url['mod'] . "</lastmod>\n";
-            $output .= "\t\t<changefreq>" . $url['chf'] . "</changefreq>\n";
-            $output .= "\t\t<priority>" . $url['pri'] . "</priority>\n";
-            $output .= "\t</url>\n";
-        }
-
-        $sitemap = '<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
-        $sitemap .= 'xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" ';
-        $sitemap .= 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-        $sitemap .= $output;
-        $sitemap .= '</urlset>';
-
-        header('HTTP/1.1 200 OK', true, 200);
-        // Prevent the search engines from indexing the XML Sitemap.
-        header('X-Robots-Tag: noindex,follow', true);
-        header('Content-Type: text/xml');
-        echo '<?xml version="1.0" encoding="UTF-16"?>';
-        echo '<?xml-stylesheet type="text/xsl" href="' . preg_replace('/(^http[s]?:)/', '', esc_url(home_url('main-sitemap.xsl'))) . '"?>';
-        echo $sitemap;
-        echo "\n";
     }
 
     /**
@@ -1109,12 +862,15 @@ class Frontend
      */
     private function setupWpSeoActionsFilters()
     {
-        add_action('wpseo_register_extra_replacements', array($this, 'actionWpseoRegisterExtraReplacements'));
-        add_filter('wpseo_pre_analysis_post_content', array($this, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
-        add_filter('wpseo_opengraph_image', array($this, 'filterWpseoOpengraphImage'), 10, 1);
-        add_filter('wpseo_metadesc', array($this, 'filterWpseoMetaDescription'), 10, 1);
-        add_filter('wpseo_sitemap_index', array($this, 'filterWpseoSitemapIndex'));
-        add_action('wpseo_do_sitemap_competition-entries', array($this, 'actionWpseoSitemapCompetitionEntries'));
-        add_action('wpseo_do_sitemap_competition-winners', array($this, 'actionWpseoSitemapCompetitionWinners'));
+        $wpseo = new WpseoHelper($this->settings, $this->rpsdb, $this->options, $this->request);
+        add_action('wpseo_register_extra_replacements', array($wpseo, 'actionWpseoRegisterExtraReplacements'));
+        add_action('wpseo_do_sitemap_competition-entries', array($wpseo, 'actionWpseoSitemapCompetitionEntries'));
+        add_action('wpseo_do_sitemap_competition-winners', array($wpseo, 'actionWpseoSitemapCompetitionWinners'));
+
+        add_filter('wpseo_pre_analysis_post_content', array($wpseo, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
+        add_filter('wpseo_opengraph_image', array($wpseo, 'filterWpseoOpengraphImage'), 10, 1);
+        add_filter('wpseo_metadesc', array($wpseo, 'filterWpseoMetaDescription'), 10, 1);
+        add_filter('wpseo_sitemap_index', array($wpseo, 'filterWpseoSitemapIndex'));
+        add_filter('wp_title_parts', array($wpseo, 'filterWpTitleParts'), 10, 1);
     }
 }
