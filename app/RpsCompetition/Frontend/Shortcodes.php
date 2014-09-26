@@ -663,7 +663,7 @@ final class Shortcodes extends ShortcodesAbstract
         $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
-            /** @var QueryCompetition $competition */
+            /** @var QueryCompetitions $competition */
             foreach ($scored_competitions as $competition) {
                 $date_object = new \DateTime($competition->Competition_Date);
                 $key = $date_object->format('Y-m-d');
@@ -689,23 +689,19 @@ final class Shortcodes extends ShortcodesAbstract
             $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
             if (is_array($entries)) {
                 // Iterate through all the award winners and display each thumbnail in a grid
-                /** @var QueryEntries $competition */
-                foreach ($entries as $competition) {
-                    $user_info = get_userdata($competition->Member_ID);
-                    $competition->FirstName = $user_info->user_firstname;
-                    $competition->LastName = $user_info->user_lastname;
-                    $competition->Username = $user_info->user_login;
-
-                    $title = $competition->Title;
-                    $last_name = $competition->LastName;
-                    $first_name = $competition->FirstName;
+                /** @var QueryEntries $entry */
+                foreach ($entries as $entry) {
+                    $user_info = get_userdata($entry->Member_ID);
+                    $title = $entry->Title;
+                    $last_name = $user_info->user_lastname;
+                    $first_name = $user_info->user_firstname;
                     // Display this thumbnail in the the next available column
 
                     $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
                     $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
                     $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
-                    $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($competition, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-                    $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($competition, '150w'));
+                    $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($entry, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+                    $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($entry, '150w'));
                     $output .= '</a>';
                     $output .= '</div>';
                     $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
@@ -716,12 +712,13 @@ final class Shortcodes extends ShortcodesAbstract
                 }
             }
             $output .= '</div>';
+            $header = '<p class="competition-theme">The '.count($entries).' entries submitted to Raritan Photographic Society for the theme "' . $themes[$selected_date] . '" held on ' . $date_text.'</p>';
+            $output = $header . $output;
         }
 
-        $header = '<p class="competition-theme">The '.count($entries).' entries submitted to Raritan Photographic Society for the theme "' . $themes[$selected_date] . '" held on ' . $date_text.'</p>';
 
-        echo $header.$output;
-        echo "<br />\n";
+
+        echo $output;
 
         unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $photo_helper);
     }
@@ -739,7 +736,6 @@ final class Shortcodes extends ShortcodesAbstract
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
@@ -757,7 +753,7 @@ final class Shortcodes extends ShortcodesAbstract
         $is_scored_competitions = false;
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $is_scored_competitions = true;
-            /** @var QueryCompetition $competition */
+            /** @var QueryCompetitions $competition */
             foreach ($scored_competitions as $competition) {
                 $date_object = new \DateTime($competition->Competition_Date);
                 $key = $date_object->format('Y-m-d');
@@ -801,6 +797,7 @@ final class Shortcodes extends ShortcodesAbstract
             $column = 0;
             $comp = "";
             foreach ($award_winners as $competition) {
+                $user_info = get_userdata($competition->Member_ID);
 
                 // Remember the important values from the previous record
                 $prev_comp = $comp;
@@ -810,8 +807,8 @@ final class Shortcodes extends ShortcodesAbstract
                 $classification = $competition->Classification;
                 $comp = "$classification<br>$medium";
                 $title = $competition->Title;
-                $last_name = $competition->LastName;
-                $first_name = $competition->FirstName;
+                $last_name = $user_info->user_lastname;
+                $first_name = $user_info->user_firstname;
                 $award = $competition->Award;
 
                 // If we're at the end of a row, finish off the row and get ready for the next one

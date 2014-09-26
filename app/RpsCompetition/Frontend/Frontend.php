@@ -595,7 +595,7 @@ class Frontend
      *
      * @param array $vars
      *
-     * @return array
+     * @return string[]
      */
     public function filterQueryVars($vars)
     {
@@ -719,11 +719,11 @@ class Frontend
 
         $sitemap = '';
         $sitemap .= '<sitemap>' . "\n";
-        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-entries') . '-sitemap.xml' . '</loc>' . "\n";
+        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-entries') . '-sitemap.xml</loc>' . "\n";
         $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
         $sitemap .= '</sitemap>' . "\n";
         $sitemap .= '<sitemap>' . "\n";
-        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-winners') . '-sitemap.xml' . '</loc>' . "\n";
+        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-winners') . '-sitemap.xml</loc>' . "\n";
         $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
         $sitemap .= '</sitemap>' . "\n";
 
@@ -766,6 +766,9 @@ class Frontend
 
         $old_mod_date = 0;
         $old_key = 0;
+        $site_url = array();
+        $sitemap_loc = '';
+        $sitemap_date = '';
         /** @var QueryCompetitions $competition */
         foreach ($scored_competitions as $competition) {
             $competition_date = new \DateTime($competition->Competition_Date);

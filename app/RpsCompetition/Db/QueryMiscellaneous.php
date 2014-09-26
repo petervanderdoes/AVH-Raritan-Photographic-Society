@@ -10,6 +10,17 @@ class QueryMiscellaneous
         $this->rpsdb = $rpsdb;
     }
 
+    public function countAllEntries($competition_date_start, $competition_date_end = null)
+    {
+        $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
+        $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
+        $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
+
+        $return = $this->getAllEntries($competition_date_start, $competition_date_end);
+
+        return count($return);
+    }
+
     /**
      * Get all photos for competitions between the given dates.
      *
@@ -26,11 +37,7 @@ class QueryMiscellaneous
         $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
 
         $sql = $this->rpsdb->prepare(
-            "SELECT c.Competition_Date, c.Classification,
-                if(c.Classification = 'Beginner',1,
-                if(c.Classification = 'Advanced',2,
-                if(c.Classification = 'Salon',3,0))) as \"Class_Code\",
-                c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
+            "SELECT e.*
             FROM competitions c, entries e
                 WHERE c.ID = e.Competition_ID and
                     c.Competition_Date >= %s AND
@@ -44,16 +51,6 @@ class QueryMiscellaneous
         return $return;
     }
 
-    public function countAllEntries($competition_date_start, $competition_date_end = null)
-    {
-        $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
-        $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
-        $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
-
-        $return = $this->getAllEntries($competition_date_start, $competition_date_end);
-
-        return count($return);
-    }
     /**
      * Get result by given date.
      * This will return the results, scores & awards, including member info for competitions given between the dates
@@ -338,15 +335,7 @@ class QueryMiscellaneous
             $competition_date_end
         );
         $results = $this->rpsdb->get_results($sql);
-        $return = array();
-        foreach ($results as $rec) {
-            $user_info = get_userdata($rec->Member_ID);
-            $rec->FirstName = $user_info->user_firstname;
-            $rec->LastName = $user_info->user_lastname;
-            $rec->Username = $user_info->user_login;
-            $return[] = $rec;
-        }
 
-        return $return;
+        return $results;
     }
 }
