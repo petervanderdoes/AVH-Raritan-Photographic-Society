@@ -237,7 +237,7 @@ class QueryCompetitions
         if (is_array($filter) && !empty($filter)) {
             $sql_filter_array = array();
             foreach ($filter as $field => $value) {
-                $sql_filter_array[] = $field . ' = "' . $value . '" AND ';
+                $sql_filter_array[] = $field . ' = "' . $value . '"';
             }
         }
 
