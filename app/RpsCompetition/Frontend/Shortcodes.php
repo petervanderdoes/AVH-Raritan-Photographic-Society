@@ -741,7 +741,7 @@ final class Shortcodes extends ShortcodesAbstract
         $months = array();
         $themes = array();
 
-        $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
+        $session = new Session(array('name' => 'monthly_winners_' . COOKIEHASH));
         $session->start();
         $selected_date = $session->get('selected_date');
         $selected_season = $session->get('selected_season');
