@@ -862,7 +862,7 @@ class Frontend
      */
     private function setupWpSeoActionsFilters()
     {
-        $wpseo = new WpseoHelper($this->settings, $this->rpsdb, $this->options, $this->request);
+        $wpseo = new WpseoHelper($this->settings, $this->rpsdb);
         add_action('wpseo_register_extra_replacements', array($wpseo, 'actionWpseoRegisterExtraReplacements'));
         add_action('wpseo_do_sitemap_competition-entries', array($wpseo, 'actionWpseoSitemapCompetitionEntries'));
         add_action('wpseo_do_sitemap_competition-winners', array($wpseo, 'actionWpseoSitemapCompetitionWinners'));

@@ -6,17 +6,13 @@ use RpsCompetition\Db\QueryMiscellaneous;
 
 class WpseoHelper
 {
-    private $options;
-    private $request;
     private $rpsdb;
     private $settings;
 
-    public function __construct($settings, $rpsdb, $options, $request)
+    public function __construct($settings, $rpsdb)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
-        $this->request = $request;
-        $this->options = $options;
     }
 
     /**
