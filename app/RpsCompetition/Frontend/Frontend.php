@@ -62,7 +62,6 @@ class Frontend
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
         }
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
-        add_action('wpseo_register_extra_replacements', array($this, 'actionWpseoRegisterExtraReplacements'));
         add_filter('query_vars', array($this, 'filterQueryVars'));
     }
 
@@ -455,13 +454,8 @@ class Frontend
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_competitions->setAllPastCompetitionsClose();
 
-        add_filter('wpseo_pre_analysis_post_content', array($this, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
-        add_filter('wpseo_opengraph_image', array($this, 'filterWpseoOpengraphImage'), 10, 1);
-        add_filter('wpseo_metadesc', array($this, 'filterWpseoMetaDescription'), 10, 1);
-        add_filter('wpseo_sitemap_index', array($this, 'filterWpseoSitemapIndex'));
         add_filter('wp_title_parts', array($this, 'filterWpTitleParts'), 10, 1);
-        add_action('wpseo_do_sitemap_competition-entries', array($this, 'actionWpseoSitemapCompetitionEntries'));
-        add_action('wpseo_do_sitemap_competition-winners', array($this, 'actionWpseoSitemapCompetitionWinners'));
+        $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
 
         $this->setupRewriteRules();
@@ -1101,5 +1095,20 @@ class Frontend
             update_user_meta($user_id, "rps_class_print_bw", 'beginner');
             update_user_meta($user_id, "rps_class_print_color", 'beginner');
         }
+    }
+
+    /**
+     * Setup the filters and action for the plugin WordPress Seo by Yoast
+     *
+     */
+    private function setupWpSeoActionsFilters()
+    {
+        add_action('wpseo_register_extra_replacements', array($this, 'actionWpseoRegisterExtraReplacements'));
+        add_filter('wpseo_pre_analysis_post_content', array($this, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
+        add_filter('wpseo_opengraph_image', array($this, 'filterWpseoOpengraphImage'), 10, 1);
+        add_filter('wpseo_metadesc', array($this, 'filterWpseoMetaDescription'), 10, 1);
+        add_filter('wpseo_sitemap_index', array($this, 'filterWpseoSitemapIndex'));
+        add_action('wpseo_do_sitemap_competition-entries', array($this, 'actionWpseoSitemapCompetitionEntries'));
+        add_action('wpseo_do_sitemap_competition-winners', array($this, 'actionWpseoSitemapCompetitionWinners'));
     }
 }
