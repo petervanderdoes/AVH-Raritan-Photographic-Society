@@ -649,18 +649,21 @@ class Frontend
         if (isset($pages_array[$post->ID])) {
 
             $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
             $theme = ucfirst($competition->Theme);
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
+            $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
 
             if ($post->ID == $options['monthly_entries_post_id']) {
-                $meta_description = 'All entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
+                $meta_description = 'The ' . $entries_amount . ' entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
             }
             if ($post->ID == $options['monthly_winners_post_id']) {
-                $meta_description = 'All winners of the competition held by Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
+                $meta_description = 'Out of ' . $entries_amount . ' entries, a jury selected these winners of the competition with the theme "' . $theme . '" held on ' . $date_text;
             }
         }
 
