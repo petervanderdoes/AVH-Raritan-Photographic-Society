@@ -672,16 +672,17 @@ final class Shortcodes extends ShortcodesAbstract
             }
         }
 
-        echo '<span class="competition-monthly-winners-form"> Monthly Entries for ';
+        echo '<span class="competition-monthly-winners-form">Select a theme or season';
         $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper);
-        echo '</span>';
+        echo '<p></p></span>';
 
         $output = '';
         if ($is_scored_competitions) {
-            $output = '<h4 class="competition-theme">Theme is ' . $themes[$selected_date] . '</h4>';
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
 
             // We display these in masonry style
-            $output .= $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
+            $output = $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
             $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
             $output .= '</div>';
             $output .= $this->html->element('div', array('id' => 'images'));
@@ -716,7 +717,10 @@ final class Shortcodes extends ShortcodesAbstract
             }
             $output .= '</div>';
         }
-        echo $output;
+
+        $header = '<p class="competition-theme">The '.count($entries).' entries submitted to Raritan Photographic Society for the theme "' . $themes[$selected_date] . '" held on ' . $date_text.'</p>';
+
+        echo $header.$output;
         echo "<br />\n";
 
         unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $photo_helper);
@@ -735,6 +739,7 @@ final class Shortcodes extends ShortcodesAbstract
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
@@ -764,16 +769,16 @@ final class Shortcodes extends ShortcodesAbstract
 
         // Start displaying the form
 
-        echo '<span class="competition-monthly-winners-form"> Monthly Award Winners for ';
+        echo '<span class="competition-monthly-winners-form">Select a theme or season ';
         $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper);
-        echo '</span>';
+        echo '<p></p></span>';
 
+        $output ='';
         if ($is_scored_competitions) {
-            echo '<h4 class="competition-theme">Theme is ' . $themes[$selected_date] . '</h4>';
 
-            echo "<table class=\"thumb_grid\">\n";
+            $output .= "<table class=\"thumb_grid\">\n";
             // Output the column headings
-            echo "<tr><th class='thumb_col_header' align='center'>Competition</th>\n";
+            $output .= "<tr><th class='thumb_col_header' align='center'></th>\n";
             for ($i = 0; $i < $max_num_awards; $i++) {
                 switch ($i) {
                     case 0:
@@ -788,7 +793,7 @@ final class Shortcodes extends ShortcodesAbstract
                     default:
                         $award_title = "HM";
                 }
-                echo "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
+                $output .= "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
             }
             $award_winners = $query_miscellaneous->getWinners($selected_date);
             // Iterate through all the award winners and display each thumbnail in a grid
@@ -814,40 +819,46 @@ final class Shortcodes extends ShortcodesAbstract
                     // As necessary, pad the row out with empty cells
                     if ($row > 0 && $column < $max_num_awards) {
                         for ($i = $column; $i < $max_num_awards; $i++) {
-                            echo "<td align=\"center\" class=\"thumb_cell\">";
-                            echo "<div class=\"thumb_canvas\"></div></td>\n";
+                            $output .= "<td align=\"center\" class=\"thumb_cell\">";
+                            $output .= "<div class=\"thumb_canvas\"></div></td>\n";
                         }
                     }
                     // Terminate this row
-                    echo "</tr>\n";
+                    $output .= "</tr>\n";
 
                     // Initialize the new row
                     $row += 1;
                     $column = 0;
-                    echo "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
+                    $output .= "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
                 }
                 // Display this thumbnail in the the next available column
-                echo "<td align=\"center\" class=\"thumb_cell\">\n";
-                echo "  <div class=\"thumb_canvas\">\n";
-                echo "    <a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                echo "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition, 75) . "\" /></a>\n";
-                echo "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
-                echo "  </div>\n</td>\n";
+                $output .= "<td align=\"center\" class=\"thumb_cell\">\n";
+                $output .= "  <div class=\"thumb_canvas\">\n";
+                $output .= "    <a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                $output .= "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition, 75) . "\" /></a>\n";
+                $output .= "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
+                $output .= "  </div>\n</td>\n";
                 $column += 1;
             }
             // As necessary, pad the last row out with empty cells
             if ($row > 0 && $column < $max_num_awards) {
                 for ($i = $column; $i < $max_num_awards; $i++) {
-                    echo "<td align=\"center\" class=\"thumb_cell\">";
-                    echo "<div class=\"thumb_canvas\"></div></td>\n";
+                    $output .= "<td align=\"center\" class=\"thumb_cell\">";
+                    $output .= "<div class=\"thumb_canvas\"></div></td>\n";
                 }
             }
             // Close out the table
-            echo "</tr>\n</table>\n";
+            $output .= "</tr>\n</table>\n";
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
+            $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
+            $header = '<p class="competition-theme">Out of '.$entries_amount.' entries, a jury selected these winners of the competition with the theme "' . $themes[$selected_date] . '" held on ' . $date_text.', which was organized by Raritan Photographic Society.</p>';
+            $output = $header . $output;
         } else {
-            echo 'There are no scored competitions for the selected season.';
+            $output = '<p>There are no scored competitions for the selected season.</p>';
         }
-        echo "<br />\n";
+
+        echo $output;
 
         unset($query_competitions, $query_miscellaneous, $season_helper, $photo_helper);
     }

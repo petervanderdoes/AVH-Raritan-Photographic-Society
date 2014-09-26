@@ -22,6 +22,9 @@ class QueryMiscellaneous
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
+        $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
+        $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
+
         $sql = $this->rpsdb->prepare(
             "SELECT c.Competition_Date, c.Classification,
                 if(c.Classification = 'Beginner',1,
@@ -41,6 +44,16 @@ class QueryMiscellaneous
         return $return;
     }
 
+    public function countAllEntries($competition_date_start, $competition_date_end = null)
+    {
+        $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
+        $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
+        $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
+
+        $return = $this->getAllEntries($competition_date_start, $competition_date_end);
+
+        return count($return);
+    }
     /**
      * Get result by given date.
      * This will return the results, scores & awards, including member info for competitions given between the dates
@@ -149,13 +162,16 @@ class QueryMiscellaneous
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
+        $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
+        $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
+
         $sql = $this->rpsdb->prepare(
             "SELECT MAX(z.Num_Awards) AS Max_Num_Awards FROM
                 (SELECT c.Competition_Date, c.Classification, c.Medium, COUNT(e.Award) AS Num_Awards
                     FROM competitions c, entries e
                         WHERE c.ID = e.Competition_ID AND
                             c.Competition_Date >= %s AND
-                            c.Competition_Date < %s AND
+                            c.Competition_Date <= %s AND
                             Scored = 'Y' AND
                             e.Award <> ''
                         GROUP BY c.Competition_Date, c.Classification, c.Medium) z",
