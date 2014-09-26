@@ -939,7 +939,7 @@ class Frontend
         switch ($this->request->input('submit_control', null)) {
             case 'new_season':
                 $selected_season = esc_attr($this->request->input('new_season'));
-                $selected_date = 'latest';
+                $selected_date = '';
                 break;
             case 'new_month':
                 $selected_date = esc_attr($this->request->input('new_month'));
