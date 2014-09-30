@@ -153,6 +153,11 @@ class WpseoHelper
         return $post_content;
     }
 
+    /**
+     * Add extra sitemap link to existing sitemap root.
+     *
+     * @return string
+     */
     public function filterWpseoSitemapIndex()
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
@@ -209,9 +214,9 @@ class WpseoHelper
 
         $old_mod_date = 0;
         $old_key = 0;
-        $site_url = array();
-        $sitemap_loc = '';
-        $sitemap_date = '';
+        $sitemap_data = array();
+        $location = '';
+        $last_modified_date = '';
         /** @var QueryCompetitions $competition */
         foreach ($scored_competitions as $competition) {
             $competition_date = new \DateTime($competition->Competition_Date);
@@ -221,27 +226,37 @@ class WpseoHelper
 
             if ($key != $old_key) {
                 $old_mod_date = 0;
-                $sitemap_loc = $url . $competition_date->format('Y-m-d') . '/';
+                $location = $url . $competition_date->format('Y-m-d') . '/';
             }
             if ($mod_date > $old_mod_date) {
                 $old_mod_date = $mod_date;
-                $sitemap_date = $date->format('c');
+                $last_modified_date = $date->format('c');
             }
 
-            $site_url[$key] = array(
-                'loc' => $sitemap_loc,
+            $sitemap_data[$key] = array(
+                'loc' => $location,
                 'pri' => 0.8,
                 'chf' => 'monthly',
-                'mod' => $sitemap_date,
+                'mod' => $last_modified_date,
             );
         }
+        $this->outputWpseoSitemap($sitemap_data);
+    }
+
+    /**
+     * Output the sitemap XML file.
+     *
+     * @param array $sitemap_data
+     */
+    private function outputWpseoSitemap($sitemap_data)
+    {
         $output = '';
-        foreach ($site_url as $url) {
+        foreach ($sitemap_data as $data) {
             $output .= "\t<url>\n";
-            $output .= "\t\t<loc>" . $url['loc'] . "</loc>\n";
-            $output .= "\t\t<lastmod>" . $url['mod'] . "</lastmod>\n";
-            $output .= "\t\t<changefreq>" . $url['chf'] . "</changefreq>\n";
-            $output .= "\t\t<priority>" . $url['pri'] . "</priority>\n";
+            $output .= "\t\t<loc>" . $data['loc'] . "</loc>\n";
+            $output .= "\t\t<lastmod>" . $data['mod'] . "</lastmod>\n";
+            $output .= "\t\t<changefreq>" . $data['chf'] . "</changefreq>\n";
+            $output .= "\t\t<priority>" . $data['pri'] . "</priority>\n";
             $output .= "\t</url>\n";
         }
 
