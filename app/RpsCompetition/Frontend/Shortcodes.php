@@ -1133,39 +1133,43 @@ final class Shortcodes extends ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
-        $attr = shortcode_atts(array('id' => 0), $attr);
+        $attr = shortcode_atts(array('id' => 0, 'images'=>6), $attr);
 
         echo '<section class="rps-showcases">';
 
         echo '<div class="rps-sc-text entry-content">';
-        echo '<ul>';
         $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
-        $images = array_rand($entries, 3);
+        $images = array_rand($entries, $attr['images']);
 
+        $output = $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-3'));
+        $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
+        $output .= '</div>';
+        $output .= $this->html->element('div', array('id' => 'images'));
         foreach ($images as $key) {
             $recs = $entries[$key];
             $user_info = get_userdata($recs->Member_ID);
-            $recs->FirstName = $user_info->user_firstname;
-            $recs->LastName = $user_info->user_lastname;
-            $recs->Username = $user_info->user_login;
+
 
             $title = $recs->Title;
-            $last_name = $recs->LastName;
-            $first_name = $recs->FirstName;
+            $last_name = $user_info->user_lastname;
+            $first_name = $user_info->user_firstname;
             // Display this thumbnail in the the next available column
-            echo '<li>';
-            echo '<div>';
-            echo '	<div class="image">';
-            echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-            echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
-            echo '	</div>';
-            echo "</div>\n";
+            $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
+            $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
+            $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
+            $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+            $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w'));
+            $output .= '</a>';
+            $output .= '</div>';
+            $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
+            $output .= $this->html->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
+            $output .= '</div>';
 
-            echo '</li>';
+            $output .= '</figure>' . "\n";
         }
-        echo '</ul>';
-        echo '</div>';
-        echo '</section>';
+        $output .= '</div>';
+
+        echo $output;
 
         unset($query_miscellaneous, $photo_helper);
     }

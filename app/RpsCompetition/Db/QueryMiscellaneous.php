@@ -142,7 +142,7 @@ class QueryMiscellaneous
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
             $member_id
         );
-        $return = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->rpsdb->get_results($sql);
 
         return $return;
     }

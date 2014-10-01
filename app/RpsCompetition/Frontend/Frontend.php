@@ -85,6 +85,7 @@ class Frontend
     public function actionEnqueueScripts()
     {
         global $wp_query;
+        global $post;
 
         if (!is_admin()) {
             $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
@@ -98,6 +99,11 @@ class Frontend
             //todo Make as an option in the admin section.
             $all_masonry_pages = array(1005);
             if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
+                wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
+            }
+
+
+            if (has_shortcode($post->post_content, 'rps_person_winners')) {
                 wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
             }
         }
