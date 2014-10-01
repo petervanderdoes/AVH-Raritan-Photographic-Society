@@ -148,6 +148,7 @@ final class Admin
         wp_enqueue_script('wp-lists');
         // Plugin Style and Scripts
         wp_enqueue_script('avhrps-comp-ajax');
+        wp_enqueue_script('jquery-ui-datepicker');
 
         wp_enqueue_style('avhrps-admin-css');
         wp_enqueue_style('avhrps-jquery-css');
@@ -704,9 +705,10 @@ final class Admin
         echo $formBuilder->hidden('action', 'add');
         echo $formBuilder->fieldNonce(get_current_user_id());
         echo $formBuilder->close();
+        $this->printDatepickerDefaults();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
-        echo '	$( "#date" ).datepicker({ dateFormat: \'yy-mm-dd\', showButtonPanel: true });' . "\n";
+        echo '	$( "#date" ).datepicker();' . "\n";
         echo '});', "\n";
         echo "</script>";
         $this->displayAdminFooter();
@@ -885,19 +887,14 @@ final class Admin
         echo $formBuilder->hidden('action', 'edit');
         echo $formBuilder->fieldNonce($competition->ID);
         echo $formBuilder->close();
+        $this->printDatepickerDefaults();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
-        echo ' $.datepicker.setDefaults({' . "\n";
-        echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
-        echo '   showButtonPanel: true, ' . "\n";
-        echo '   buttonImageOnly: true, ' . "\n";
-        echo '   buttonImage: "' . plugins_url("/images/calendar.png", $this->settings->get('plugin_basename')) . '", ' . "\n";
-        echo '   showOn: "both"' . "\n";
-        echo ' });' . "\n";
         echo '	$( "#date" ).datepicker();' . "\n";
         echo '	$( "#close-date" ).datepicker();' . "\n";
         echo '});', "\n";
         echo "</script>";
+
         $this->displayAdminFooter();
 
         unset($query_competitions);
@@ -1464,6 +1461,25 @@ final class Admin
         echo '<p class="footer_avhfdas">';
         printf('&copy; Copyright 2012-%s <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s', date("Y"), Constants::PLUGIN_VERSION);
         echo '</p>';
+    }
+
+    /**
+     * Set the default values for teh jQuery Datepicker plugin
+     *
+     */
+    private function printDatepickerDefaults()
+    {
+        echo '<script type="text/javascript">' . "\n";
+        echo 'jQuery(function($) {' . "\n";
+        echo ' $.datepicker.setDefaults({' . "\n";
+        echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
+        echo '   showButtonPanel: true, ' . "\n";
+        echo '   buttonImageOnly: true, ' . "\n";
+        echo '   buttonImage: "' . plugins_url("/images/calendar.png", $this->settings->get('plugin_basename')) . '", ' . "\n";
+        echo '   showOn: "both"' . "\n";
+        echo ' });' . "\n";
+        echo '});', "\n";
+        echo "</script>";
     }
 
     /**
