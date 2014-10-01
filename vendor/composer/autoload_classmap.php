@@ -797,6 +797,7 @@ return array(
     'RpsCompetition\\Db\\RpsPdo' => $baseDir . '/app/RpsCompetition/Db/RpsPdo.php',
     'RpsCompetition\\Entries\\ListTable' => $baseDir . '/app/RpsCompetition/Entries/ListTable.php',
     'RpsCompetition\\Frontend\\Frontend' => $baseDir . '/app/RpsCompetition/Frontend/Frontend.php',
+    'RpsCompetition\\Frontend\\Requests' => $baseDir . '/app/RpsCompetition/Frontend/Requests.php',
     'RpsCompetition\\Frontend\\Shortcodes' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes.php',
     'RpsCompetition\\Frontend\\WpseoHelper' => $baseDir . '/app/RpsCompetition/Frontend/WpseoHelper.php',
     'RpsCompetition\\Options\\General' => $baseDir . '/app/RpsCompetition/Options/General.php',
