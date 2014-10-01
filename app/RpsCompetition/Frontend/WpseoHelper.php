@@ -162,7 +162,7 @@ class WpseoHelper
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
-        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Date_Modified', 'order' => 'DESC', 'number' => 1));
         $date = new \DateTime($last_scored->Date_Modified);
 
         $sitemap = '';
