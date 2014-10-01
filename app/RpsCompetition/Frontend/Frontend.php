@@ -97,7 +97,9 @@ class Frontend
             }
 
             //todo Make as an option in the admin section.
-            $all_masonry_pages = array(1005);
+            $options = get_option('avh-rps');
+            $all_masonry_pages = array();
+            $all_masonry_pages[]=$options['monthly_entries_post_id'];
             if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
                 wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
             }
