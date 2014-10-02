@@ -475,14 +475,9 @@ class Frontend
 
             foreach ($records as $recs) {
                 $user_info = get_userdata($recs->Member_ID);
-                $recs->FirstName = $user_info->user_firstname;
-                $recs->LastName = $user_info->user_lastname;
-                $recs->Username = $user_info->user_login;
-
-                // Grab a new record from the database
                 $title = $recs->Title;
-                $last_name = $recs->LastName;
-                $first_name = $recs->FirstName;
+                $last_name = $user_info->user_lastname;
+                $first_name = $user_info->user_firstname;
 
                 // Display this thumbnail in the the next available column
                 echo '<figure class="gallery-item">';
