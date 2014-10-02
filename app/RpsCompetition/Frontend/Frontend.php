@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend;
 
+use Avh\Network\Session;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
@@ -31,6 +32,7 @@ class Frontend
     private $rpsdb;
     /** @var Settings */
     private $settings;
+    private $session;
 
     /**
      * PHP5 Constructor
@@ -39,6 +41,9 @@ class Frontend
      */
     public function __construct(Container $container)
     {
+        $this->session = new Session(array('name' => 'raritan_' . COOKIEHASH));
+        $this->session->start();
+
         $this->container = $container;
 
         $this->settings = $container->make('RpsCompetition\Settings');
@@ -46,8 +51,7 @@ class Frontend
         $this->request = $container->make('Illuminate\Http\Request');
         $this->options = $container->make('RpsCompetition\Options\General');
         $this->core = new Core($this->settings);
-
-        $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request);
+        $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request, $this->session);
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -666,8 +670,7 @@ class Frontend
      */
     private function setupShortcodes()
     {
-        /** @var \RpsCompetition\Frontend\Shortcodes $shortcode */
-        $shortcode = $this->container->make('RpsCompetition\Frontend\Shortcodes');
+        $shortcode = new Shortcodes($this->settings, $this->rpsdb, $this->request, $this->session);
         $shortcode->register('rps_category_winners', 'displayCategoryWinners');
         $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
         $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');

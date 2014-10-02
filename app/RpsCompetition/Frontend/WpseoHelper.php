@@ -148,6 +148,19 @@ class WpseoHelper
         if (has_shortcode($post_content, 'rps_category_winners')) {
             $post_content = do_shortcode($post_content);
             $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
+            return $post_content;
+        }
+
+        if (has_shortcode($post_content, 'rps_monthly_entries')) {
+            $post_content = do_shortcode($post_content);
+            $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
+            return $post_content;
+        }
+
+        if (has_shortcode($post_content, 'rps_monthly_winners')) {
+            $post_content = do_shortcode($post_content);
+            $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
+            return $post_content;
         }
 
         return $post_content;

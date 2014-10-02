@@ -22,6 +22,7 @@ final class Shortcodes extends ShortcodesAbstract
     private $html;
     private $request;
     private $rpsdb;
+    private $session;
     private $settings;
     private $view;
 
@@ -29,14 +30,18 @@ final class Shortcodes extends ShortcodesAbstract
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      * @param Request  $request
+     * @param Session  $session
+     *
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request, Session $session)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
+        $this->request = $request;
+        $this->session = $session;
+
         $this->html = new HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
-        $this->request = $request;
         $this->view = new View($this->settings, $this->rpsdb, $this->request);
     }
 
@@ -518,7 +523,6 @@ final class Shortcodes extends ShortcodesAbstract
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $this->displayCategoryWinnersFacebookThumbs($entries);
-                unset($query_miscellaneous, $photo_helper);
 
                 return;
             }
@@ -653,10 +657,8 @@ final class Shortcodes extends ShortcodesAbstract
         $months = array();
         $themes = array();
 
-        $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
-        $session->start();
-        $selected_date = $session->get('selected_date');
-        $selected_season = $session->get('selected_season');
+        $selected_date = $this->session->get('monthly_entries_selected_date');
+        $selected_season = $this->session->get('monthly_entries_selected_season');
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_competitions->getScoredCompetitions($season_start_date, $season_end_date);
@@ -671,6 +673,19 @@ final class Shortcodes extends ShortcodesAbstract
                 $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
                 $themes[$key] = $competition->Theme;
             }
+        }
+
+        /**
+         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+         *
+         * @see Frontend::filterWpseoPreAnalysisPostsContent
+         */
+        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+        if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
+            $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
+            $this->displayCategoryWinnersFacebookThumbs($entries);
+
+            return;
         }
 
         echo '<span class="competition-monthly-winners-form">Select a theme or season';
@@ -696,11 +711,9 @@ final class Shortcodes extends ShortcodesAbstract
                 }
             }
             $output .= '</div>';
-            $header = '<p class="competition-theme">The '.count($entries).' entries submitted to Raritan Photographic Society for the theme "' . $themes[$selected_date] . '" held on ' . $date_text.'</p>';
+            $header = '<p class="competition-theme">The ' . count($entries) . ' entries submitted to Raritan Photographic Society for the theme "' . $themes[$selected_date] . '" held on ' . $date_text . '</p>';
             $output = $header . $output;
         }
-
-
 
         echo $output;
 
@@ -726,10 +739,8 @@ final class Shortcodes extends ShortcodesAbstract
         $months = array();
         $themes = array();
 
-        $session = new Session(array('name' => 'monthly_winners_' . COOKIEHASH));
-        $session->start();
-        $selected_date = $session->get('selected_date');
-        $selected_season = $session->get('selected_season');
+        $selected_date = $this->session->get('monthly_winners_selected_date');
+        $selected_season = $this->session->get('monthly_winners_selected_season');
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
         $scored_competitions = $query_competitions->getScoredCompetitions($season_start_date, $season_end_date);
@@ -747,13 +758,25 @@ final class Shortcodes extends ShortcodesAbstract
         }
         $max_num_awards = $query_miscellaneous->getMaxAwards($selected_date);
 
+        /**
+         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+         *
+         * @see Frontend::filterWpseoPreAnalysisPostsContent
+         */
+        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+        if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
+            $entries = $query_miscellaneous->getWinners($selected_date);
+            $this->displayCategoryWinnersFacebookThumbs($entries);
+
+            return;
+        }
         // Start displaying the form
 
         echo '<span class="competition-monthly-winners-form">Select a theme or season ';
         echo $this->view->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
         echo '<p></p></span>';
 
-        $output ='';
+        $output = '';
         if ($is_scored_competitions) {
 
             $output .= "<table class=\"thumb_grid\">\n";
@@ -833,7 +856,7 @@ final class Shortcodes extends ShortcodesAbstract
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
             $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
-            $header = '<p class="competition-theme">Out of '.$entries_amount.' entries, a jury selected these winners of the competition with the theme "' . $themes[$selected_date] . '" held on ' . $date_text.', which was organized by Raritan Photographic Society.</p>';
+            $header = '<p class="competition-theme">Out of ' . $entries_amount . ' entries, a jury selected these winners of the competition with the theme "' . $themes[$selected_date] . '" held on ' . $date_text . ', which was organized by Raritan Photographic Society.</p>';
             $output = $header . $output;
         } else {
             $output = '<p>There are no scored competitions for the selected season.</p>';
@@ -1116,7 +1139,7 @@ final class Shortcodes extends ShortcodesAbstract
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
-        $attr = shortcode_atts(array('id' => 0, 'images'=>6), $attr);
+        $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
         echo '<section class="rps-showcases">';
 

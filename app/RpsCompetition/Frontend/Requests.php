@@ -15,12 +15,14 @@ class Requests
     private $request;
     private $rpsdb;
     private $settings;
+    private $session;
 
-    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request, Session $session)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
         $this->request = $request;
+        $this->session = $session;
     }
 
     /**
@@ -111,11 +113,9 @@ class Requests
             exit();
         }
 
-        $session = new Session(array('name' => 'monthly_entries_' . COOKIEHASH));
-        $session->start();
-        $session->set('selected_date', $selected_date);
-        $session->set('selected_season', $selected_season);
-        $session->save();
+        $this->session->set('monthly_entries_selected_date', $selected_date);
+        $this->session->set('monthly_entries_selected_season', $selected_season);
+        $this->session->save();
     }
 
     /**
@@ -183,10 +183,8 @@ class Requests
             exit();
         }
 
-        $session = new Session(array('name' => 'monthly_winners_' . COOKIEHASH));
-        $session->start();
-        $session->set('selected_date', $selected_date);
-        $session->set('selected_season', $selected_season);
-        $session->save();
+        $this->session->set('monthly_winners_selected_date', $selected_date);
+        $this->session->set('monthly_winners_selected_season', $selected_season);
+        $this->session->save();
     }
 } 
