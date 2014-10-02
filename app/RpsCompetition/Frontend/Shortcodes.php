@@ -23,6 +23,7 @@ final class Shortcodes extends ShortcodesAbstract
     private $request;
     private $rpsdb;
     private $settings;
+    private $view;
 
     /**
      * @param Settings $settings
@@ -36,6 +37,7 @@ final class Shortcodes extends ShortcodesAbstract
         $this->html = new HtmlBuilder();
         $this->formBuilder = new FormBuilder($this->html);
         $this->request = $request;
+        $this->view = new View($this->settings, $this->rpsdb, $this->request);
     }
 
     /**
@@ -647,7 +649,6 @@ final class Shortcodes extends ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $months = array();
         $themes = array();
@@ -673,7 +674,7 @@ final class Shortcodes extends ShortcodesAbstract
         }
 
         echo '<span class="competition-monthly-winners-form">Select a theme or season';
-        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper);
+        echo $this->view->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
         echo '<p></p></span>';
 
         $output = '';
@@ -691,24 +692,7 @@ final class Shortcodes extends ShortcodesAbstract
                 // Iterate through all the award winners and display each thumbnail in a grid
                 /** @var QueryEntries $entry */
                 foreach ($entries as $entry) {
-                    $user_info = get_userdata($entry->Member_ID);
-                    $title = $entry->Title;
-                    $last_name = $user_info->user_lastname;
-                    $first_name = $user_info->user_firstname;
-                    // Display this thumbnail in the the next available column
-
-                    $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
-                    $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
-                    $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
-                    $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($entry, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-                    $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($entry, '150w'));
-                    $output .= '</a>';
-                    $output .= '</div>';
-                    $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-                    $output .= $this->html->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
-                    $output .= '</div>';
-
-                    $output .= '</figure>' . "\n";
+                    $output .= $this->view->displayPhotoMasonry($entry);
                 }
             }
             $output .= '</div>';
@@ -720,7 +704,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         echo $output;
 
-        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $photo_helper);
+        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper);
     }
 
     /**
@@ -766,7 +750,7 @@ final class Shortcodes extends ShortcodesAbstract
         // Start displaying the form
 
         echo '<span class="competition-monthly-winners-form">Select a theme or season ';
-        $this->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper);
+        echo $this->view->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
         echo '<p></p></span>';
 
         $output ='';
@@ -1131,7 +1115,6 @@ final class Shortcodes extends ShortcodesAbstract
     public function displayPersonWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         $attr = shortcode_atts(array('id' => 0, 'images'=>6), $attr);
 
@@ -1147,31 +1130,13 @@ final class Shortcodes extends ShortcodesAbstract
         $output .= $this->html->element('div', array('id' => 'images'));
         foreach ($images as $key) {
             $recs = $entries[$key];
-            $user_info = get_userdata($recs->Member_ID);
-
-
-            $title = $recs->Title;
-            $last_name = $user_info->user_lastname;
-            $first_name = $user_info->user_firstname;
-            // Display this thumbnail in the the next available column
-            $output .= $this->html->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
-            $output .= $this->html->element('div', array('class' => 'gallery-item-content'));
-            $output .= $this->html->element('div', array('class' => 'gallery-item-content-images'));
-            $output .= $this->html->element('a', array('href' => $photo_helper->rpsGetThumbnailUrl($recs, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-            $output .= $this->html->image($photo_helper->rpsGetThumbnailUrl($recs, '150w'));
-            $output .= '</a>';
-            $output .= '</div>';
-            $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-            $output .= $this->html->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
-            $output .= '</div>';
-
-            $output .= '</figure>' . "\n";
+            $output .= $this->view->displayPhotoMasonry($recs);
         }
         $output .= '</div>';
 
         echo $output;
 
-        unset($query_miscellaneous, $photo_helper);
+        unset($query_miscellaneous);
     }
 
     /**
@@ -1354,68 +1319,5 @@ final class Shortcodes extends ShortcodesAbstract
             echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry, 'fb_thumb') . '" /></a>';
         }
         unset($photo_helper);
-    }
-
-    /**
-     * Display the form for selecting the month and season.
-     *
-     * @param string       $selected_season
-     * @param string       $selected_date
-     * @param boolean      $is_scored_competitions
-     * @param array        $months
-     * @param SeasonHelper $season_helper
-     */
-    private function displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $season_helper)
-    {
-        global $post;
-        echo '<script type="text/javascript">';
-        echo 'function submit_form(control_name) {' . "\n";
-        echo '	document.month_season_form.submit_control.value = control_name;' . "\n";
-        echo '	document.month_season_form.submit();' . "\n";
-        echo '}' . "\n";
-        echo '</script>';
-
-        $action = home_url('/' . get_page_uri($post->ID));
-        $form = '';
-        $form .= $this->formBuilder->open($action, array('name' => 'month_season_form'));
-        $form .= $this->formBuilder->hidden('submit_control');
-        $form .= $this->formBuilder->hidden('selected_season', $selected_season);
-        $form .= $this->formBuilder->hidden('selected_date', $selected_date);
-
-        if ($is_scored_competitions) {
-            // Drop down list for months
-            $form .= $this->getMonthsDropdown($months, $selected_date);
-        } else {
-            $form .= 'No scored competitions this season. ';
-        }
-
-        // Drop down list for season
-        $form .= $season_helper->getSeasonDropdown($selected_season);
-        $form .= $this->formBuilder->close();
-        echo $form;
-        unset($form);
-    }
-
-    /**
-     * Display a dropdown for the given months
-     *
-     * @param array   $months
-     * @param string  $selected_month
-     * @param boolean $echo
-     *
-     * @return string|null
-     */
-    private function getMonthsDropdown($months, $selected_month, $echo = false)
-    {
-
-        $form = $this->formBuilder->select('new_month', $months, $selected_month, array('onChange' => 'submit_form("new_month")'));
-
-        if ($echo) {
-            echo $form;
-        } else {
-            return $form;
-        }
-
-        return null;
     }
 }
