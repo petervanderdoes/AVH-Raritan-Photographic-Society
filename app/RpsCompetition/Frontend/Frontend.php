@@ -11,6 +11,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Frontend\Requests as FrontendRequests;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
@@ -46,12 +47,12 @@ class Frontend
         $this->options = $container->make('RpsCompetition\Options\General');
         $this->core = new Core($this->settings);
 
-        $request = new Requests($this->settings, $this->rpsdb, $this->request);
+        $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request);
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
-        add_action('parse_query', array($request, 'actionHandleRequests'));
+        add_action('parse_query', array($requests, 'actionHandleRequests'));
         add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
 
         if ($this->request->isMethod('POST')) {
@@ -586,8 +587,6 @@ class Frontend
         }
         unset($query_entries, $photo_helper);
     }
-
-
 
     /**
      * Handles the required functions for when a user submits their Banquet Entries
