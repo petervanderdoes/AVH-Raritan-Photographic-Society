@@ -70,23 +70,45 @@ class AVH_RPS_Client
         $this->settings->set('plugin_basename', $basename);
         $this->settings->set('plugin_file', $basename);
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
-
-        add_action('plugins_loaded', array($this, 'load'));
-    }
-
-    public function admin()
-    {
-        new Admin($this->container);
+        if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
+            add_action('plugins_loaded', array($this, 'load'));
+        }
     }
 
     public function load()
     {
         if (is_admin()) {
-            //Initialize::load();
-            add_action('wp_loaded', array($this->admin()));
+            add_action('activate_' . $this->settings->get('plugin_basename'), array($this, 'pluginActivation'));
+            add_action('deactivate_' . $this->settings->get('plugin_basename'), array($this, 'pluginDeactivation'));
+
+            new Admin($this->container);
         } else {
             new Frontend($this->container);
         }
+    }
+
+    /**
+     * Runs after we activate the plugin.
+     *
+     * @internal Hook: activate_
+     * @see      AVH_RPS_Client::load
+     *
+     */
+    public function pluginActivation()
+    {
+        flush_rewrite_rules();
+    }
+
+    /**
+     * Runs after we deactivate the plugin.
+     *
+     * @internal Hook: deactivate_
+     * @see      AVH_RPS_Client::load
+     *
+     */
+    public function pluginDeactivation()
+    {
+        flush_rewrite_rules();
     }
 }
 
