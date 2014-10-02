@@ -27,6 +27,9 @@ class Requests
      * Handle HTTP Requests.
      *
      * @param $wp_query
+     *
+     * @internal Hook: parse_query
+     * @see      Frontend::__construct
      */
     public function actionHandleRequests($wp_query)
     {
