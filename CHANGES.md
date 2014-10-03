@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 1.5.1-rc.1
+#### Version 1.5.1
 * Preparation for new development cycle.
 
 #### Version 1.5.0
