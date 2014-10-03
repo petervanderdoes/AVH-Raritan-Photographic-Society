@@ -30,14 +30,14 @@ final class Constants
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
     private static $image_sizes = array (
-        'FULL' => array('width'=>1024,'height'=>768),
-        '800' => array('width'=>800,'height'=>800),
-        '250' => array('width'=>250,'height'=>250),
-        '200' => array('width'=>200,'height'=>200),
+        '75' => array('width'=>75,'height'=>75),
         '150' => array('width'=>150,'height'=>150),
         '150w' => array('width'=>150,'height'=>null),
-        '75' => array('width'=>75,'height'=>75),
+        '200' => array('width'=>200,'height'=>200),
+        '250' => array('width'=>250,'height'=>250),
+        '800' => array('width'=>800,'height'=>800),
         'fb_thumb' => array('width'=>1200,'height'=>628),
+        'FULL' => array('width'=>1024,'height'=>768),
     );
     // @formatter:on
 

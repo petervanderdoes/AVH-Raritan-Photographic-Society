@@ -487,8 +487,8 @@ class Frontend
                 echo '<figure class="gallery-item">';
                 echo '<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
-                echo '<a href="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, 150) . '" /></a>';
+                echo '<a href="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '800') . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+                echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '150') . '" /></a>';
                 echo '</div>';
                 $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
                 echo "<figcaption class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</figcaption>\n";

@@ -89,7 +89,7 @@ class View
      *
      * @return string|void
      */
-    public function displayPhotoMasonry(QueryEntries $record, $echo = false)
+    public function displayPhotoMasonry($record, $echo = false)
     {
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
@@ -100,7 +100,7 @@ class View
         $output .= $this->html_builder->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
         $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content'));
         $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content-images'));
-        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800'), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
         $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w'));
         $output .= '</a>';
         $output .= '</div>';
