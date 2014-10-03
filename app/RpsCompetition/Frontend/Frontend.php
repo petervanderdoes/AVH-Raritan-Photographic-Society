@@ -55,7 +55,7 @@ class Frontend
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
-        add_action('init', array($this, 'actionInit'),11);
+        add_action('init', array($this, 'actionInit'), 11);
         add_action('parse_query', array($requests, 'actionHandleRequests'));
         add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
 
