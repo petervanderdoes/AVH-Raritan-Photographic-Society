@@ -52,7 +52,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayAllScores($attr, $content, $tag)
+    public function shortcodeAllScores($attr, $content, $tag)
     {
         global $post;
 
@@ -312,7 +312,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsBanquetEntries
      */
-    public function displayBanquetCurrentUser($attr, $content, $tag)
+    public function shortcodeBanquetCurrentUser($attr, $content, $tag)
     {
         global $post;
 
@@ -498,7 +498,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayCategoryWinners($attr, $content, $tag)
+    public function shortcodeCategoryWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
@@ -522,7 +522,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $this->view->displayCategoryWinnersFacebookThumbs($entries);
+                $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
                 return;
             }
@@ -568,7 +568,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
      */
-    public function displayEditTitle($attr, $content, $tag)
+    public function shortcodeEditTitle($attr, $content, $tag)
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
@@ -631,7 +631,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayEmail($attr, $content, $tag)
+    public function shortcodeEmail($attr, $content, $tag)
     {
         $email = $attr['email'];
         unset($attr['email']);
@@ -647,7 +647,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayMonthlyEntries($attr, $content, $tag)
+    public function shortcodeMonthlyEntries($attr, $content, $tag)
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -684,7 +684,7 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $this->view->displayCategoryWinnersFacebookThumbs($entries);
+            $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
@@ -702,7 +702,7 @@ final class Shortcodes extends ShortcodesAbstract
             $view_data['count_entries'] = count($view_data['entries']);
         }
 
-        echo $this->view->displayMonthlyEntries($view_data);
+        echo $this->view->renderMonthlyEntries($view_data);
 
         unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $view_data);
     }
@@ -716,7 +716,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayMonthlyWinners($attr, $content, $tag)
+    public function shortcodeMonthlyWinners($attr, $content, $tag)
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -753,14 +753,14 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getWinners($selected_date);
-            $this->view->displayCategoryWinnersFacebookThumbs($entries);
+            $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
         // Start displaying the form
 
         echo '<span class="competition-monthly-winners-form">Select a theme or season ';
-        echo $this->view->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
+        echo $this->view->renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
         echo '<p></p></span>';
 
         $output = '';
@@ -867,7 +867,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsMyEntries
      */
-    public function displayMyEntries($attr, $content, $tag)
+    public function shortcodeMyEntries($attr, $content, $tag)
     {
         global $post;
 
@@ -1124,7 +1124,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayPersonWinners($attr, $content, $tag)
+    public function shortcodePersonWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
@@ -1142,7 +1142,7 @@ final class Shortcodes extends ShortcodesAbstract
         $output .= $this->html->element('div', array('id' => 'images'));
         foreach ($images as $key) {
             $recs = $entries[$key];
-            $output .= $this->view->displayPhotoMasonry($recs);
+            $output .= $this->view->renderPhotoMasonry($recs);
         }
         $output .= '</div>';
 
@@ -1160,7 +1160,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayScoresCurrentUser($attr, $content, $tag)
+    public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
         global $post;
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -1268,7 +1268,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
      */
-    public function displayUploadEntry($attr, $content, $tag)
+    public function shortcodeUploadImage($attr, $content, $tag)
     {
         global $post;
 

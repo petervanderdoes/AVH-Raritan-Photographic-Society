@@ -41,7 +41,7 @@ class View
      *
      * @param array $entries
      */
-    public function displayCategoryWinnersFacebookThumbs($entries)
+    public function renderCategoryWinnersFacebookThumbs($entries)
     {
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         foreach ($entries as $entry) {
@@ -61,7 +61,7 @@ class View
      *
      * @return string|void
      */
-    public function displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $echo = false)
+    public function renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $echo = false)
     {
         global $post;
         $output = '<script type="text/javascript">';
@@ -97,7 +97,7 @@ class View
         return;
     }
 
-    public function displayMonthlyEntries($data, $echo = false)
+    public function renderMonthlyEntries($data, $echo = false)
     {
         $output = $this->html_builder->element('p', array('class' => 'competition-theme'));
         $output .= 'The ' . $data['count_entries'] . ' entries submitted to Raritan Photographic Society for the theme "' . $data['theme_name'] . '" held on ' . $data['date_text'];
@@ -105,7 +105,7 @@ class View
 
         $output .= $this->html_builder->element('span ', array('class' => 'month-season-form'));
         $output .= 'Select a theme or season';
-        $output .= $this->displayMonthAndSeasonSelectionForm($data['selected_season'], $data['selected_date'], $data['is_scored_competitions'], $data['months']);
+        $output .= $this->renderMonthAndSeasonSelectionForm($data['selected_season'], $data['selected_date'], $data['is_scored_competitions'], $data['months']);
         $output .= $this->html_builder->element('p', array(), true);
         $output .= $this->html_builder->closeElement('span');
 
@@ -118,7 +118,7 @@ class View
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
-                $output .= $this->displayPhotoMasonry($entry);
+                $output .= $this->renderPhotoMasonry($entry);
             }
         }
         $output .= $this->html_builder->closeElement('div');
@@ -140,7 +140,7 @@ class View
      *
      * @return string|void
      */
-    public function displayPhotoMasonry($record, $echo = false)
+    public function renderPhotoMasonry($record, $echo = false)
     {
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;

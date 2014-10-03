@@ -140,7 +140,7 @@ class Frontend
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
      *
-     * @see      Shortcodes::displayEditTitle
+     * @see      Shortcodes::shortcodeEditTitle
      * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsEditTitle()
@@ -206,7 +206,7 @@ class Frontend
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
      *
-     * @see      Shortcodes::displayMyEntries
+     * @see      Shortcodes::shortcodeMyEntries
      * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsMyEntries()
@@ -274,7 +274,7 @@ class Frontend
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
      *
-     * @see      Shortcodes::displayUploadEntry
+     * @see      Shortcodes::shortcodeUploadImage
      * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsUploadEntry()
@@ -540,8 +540,8 @@ class Frontend
      * Add custom query vars.
      *  - selected_date
      *
-     * @see Shortcodes::displayMonthlyEntries
-     * @see Shortcodes::displayMonthlyWinners
+     * @see Shortcodes::shortcodeMonthlyEntries
+     * @see Shortcodes::shortcodeMonthlyWinners
      *
      * @param array $vars
      *
@@ -649,17 +649,17 @@ class Frontend
     private function setupShortcodes()
     {
         $shortcode = new Shortcodes($this->settings, $this->rpsdb, $this->request, $this->session);
-        $shortcode->register('rps_category_winners', 'displayCategoryWinners');
-        $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
-        $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');
-        $shortcode->register('rps_banquet_current_user', 'displayBanquetCurrentUser');
-        $shortcode->register('rps_all_scores', 'displayAllScores');
-        $shortcode->register('rps_my_entries', 'displayMyEntries');
-        $shortcode->register('rps_edit_title', 'displayEditTitle');
-        $shortcode->register('rps_upload_image', 'displayUploadEntry');
-        $shortcode->register('rps_email', 'displayEmail');
-        $shortcode->register('rps_person_winners', 'displayPersonWinners');
-        $shortcode->register('rps_monthly_entries', 'displayMonthlyEntries');
+        $shortcode->register('rps_category_winners', 'shortcodeCategoryWinners');
+        $shortcode->register('rps_monthly_winners', 'shortcodeMonthlyWinners');
+        $shortcode->register('rps_scores_current_user', 'shortcodeScoresCurrentUser');
+        $shortcode->register('rps_banquet_current_user', 'shortcodeBanquetCurrentUser');
+        $shortcode->register('rps_all_scores', 'shortcodeAllScores');
+        $shortcode->register('rps_my_entries', 'shortcodeMyEntries');
+        $shortcode->register('rps_edit_title', 'shortcodeEditTitle');
+        $shortcode->register('rps_upload_image', 'shortcodeUploadImage');
+        $shortcode->register('rps_email', 'shortcodeEmail');
+        $shortcode->register('rps_person_winners', 'shortcodePersonWinners');
+        $shortcode->register('rps_monthly_entries', 'shortcodeMonthlyEntries');
     }
 
     /**
