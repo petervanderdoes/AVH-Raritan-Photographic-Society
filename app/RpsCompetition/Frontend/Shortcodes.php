@@ -522,7 +522,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $this->displayCategoryWinnersFacebookThumbs($entries);
+                $this->view->displayCategoryWinnersFacebookThumbs($entries);
 
                 return;
             }
@@ -684,7 +684,8 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $this->displayCategoryWinnersFacebookThumbs($entries);
+            $this->view->displayCategoryWinnersFacebookThumbs($entries);
+
             return;
         }
 
@@ -698,8 +699,7 @@ final class Shortcodes extends ShortcodesAbstract
             $view_data['date_text'] = $date->format('F j, Y');
             $view_data['theme_name'] = $themes[$selected_date];
             $view_data['entries'] = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $view_data['count_entries'] = count ($view_data['entries']);
-
+            $view_data['count_entries'] = count($view_data['entries']);
         }
 
         echo $this->view->displayMonthlyEntries($view_data);
@@ -753,7 +753,7 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getWinners($selected_date);
-            $this->displayCategoryWinnersFacebookThumbs($entries);
+            $this->view->displayCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
@@ -1317,19 +1317,5 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo $this->formBuilder->close();
-    }
-
-    /**
-     * Display the Facebook thumbs for the Category Winners Page.
-     *
-     * @param array $entries
-     */
-    private function displayCategoryWinnersFacebookThumbs($entries)
-    {
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-        foreach ($entries as $entry) {
-            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb') . '" /></a>';
-        }
-        unset($photo_helper);
     }
 }
