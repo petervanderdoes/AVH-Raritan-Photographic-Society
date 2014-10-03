@@ -446,7 +446,7 @@ class Frontend
 
         $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
-        
+
         unset($query_competitions);
     }
 
