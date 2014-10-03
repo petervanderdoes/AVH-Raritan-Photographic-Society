@@ -58,14 +58,16 @@ class QueryEntries
      */
     public function checkDuplicateTitle($id, $title, $user_id)
     {
-        $sql = $this->rpsdb->prepare("SELECT ID
+        $sql = $this->rpsdb->prepare(
+            "SELECT ID
             FROM entries
             WHERE Competition_ID = %s
                 AND Member_ID = %s
                 AND Title = %s",
-                                     $id,
-                                     $user_id,
-                                     $title);
+            $id,
+            $user_id,
+            $title
+        );
         $return = $this->rpsdb->get_var($sql);
         if ($return > 0) {
             $return = true;
@@ -86,13 +88,15 @@ class QueryEntries
      */
     public function countEntriesByCompetitionDate($date, $user_id)
     {
-        $sql = $this->rpsdb->prepare("SELECT count(e.ID) as Total_Entries_Submitted
+        $sql = $this->rpsdb->prepare(
+            "SELECT count(e.ID) as Total_Entries_Submitted
                     FROM entries e, competitions c
                     WHERE e.Competition_ID = c.ID AND
                     c.Competition_Date = DATE(%s) AND
                     e.Member_ID = %s",
-                                     $date,
-                                     $user_id);
+            $date,
+            $user_id
+        );
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -108,11 +112,13 @@ class QueryEntries
      */
     public function countEntriesByCompetitionId($id, $user_id)
     {
-        $sql = $this->rpsdb->prepare("SELECT count(ID) FROM entries
+        $sql = $this->rpsdb->prepare(
+            "SELECT count(ID) FROM entries
             WHERE Competition_ID = %s
                 AND Member_ID = %s",
-                                     $id,
-                                     $user_id);
+            $id,
+            $user_id
+        );
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -130,13 +136,15 @@ class QueryEntries
     {
         $competition_date = $this->rpsdb->getMysqldate($competition_date);
 
-        $sql = $this->rpsdb->prepare("SELECT COUNT(entries.ID) as Total_Submitted
+        $sql = $this->rpsdb->prepare(
+            "SELECT COUNT(entries.ID) as Total_Submitted
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND	entries.Member_ID=%s
                 AND competitions.Competition_Date = %s ",
-                                     $user_id,
-                                     $competition_date);
+            $user_id,
+            $competition_date
+        );
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -159,10 +167,10 @@ class QueryEntries
     /**
      * Get entries submitted for the member on the given competition date in the given classification and medium
      *
-     * @param int    $user_id
-     * @param string $competition_date
-     * @param string $classification
-     * @param string $medium
+     * @param integer $user_id
+     * @param string  $competition_date
+     * @param string  $classification
+     * @param string  $medium
      *
      * @return array
      */
@@ -170,17 +178,19 @@ class QueryEntries
     {
         $competition_date = $this->rpsdb->getMysqldate($competition_date);
 
-        $sql = $this->rpsdb->prepare("SELECT entries.*
+        $sql = $this->rpsdb->prepare(
+            "SELECT entries.*
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND entries.Member_ID = %s
                 AND competitions.Competition_Date = %s
                 AND competitions.Classification = %s
                 AND competitions.Medium = %s",
-                                     $user_id,
-                                     $competition_date,
-                                     $classification,
-                                     $medium);
+            $user_id,
+            $competition_date,
+            $classification,
+            $medium
+        );
         $return = $this->rpsdb->get_results($sql);
 
         return $return;
@@ -192,14 +202,16 @@ class QueryEntries
      * @param integer $id
      * @param string  $output
      *
-     * @return QueryEntries|array
+     * @return QueryEntries
      */
-    public function getEntryById($id, $output = ARRAY_A)
+    public function getEntryById($id, $output = OBJECT)
     {
-        $sql = $this->rpsdb->prepare("SELECT *
+        $sql = $this->rpsdb->prepare(
+            "SELECT *
             FROM entries
             WHERE ID = %s",
-                                     $id);
+            $id
+        );
 
         return $this->rpsdb->get_row($sql, $output);
     }

@@ -26,34 +26,65 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '1.4.12';
+    const PLUGIN_VERSION = '1.5.0';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
     private static $image_sizes = array (
-        'FULL' => array('width'=>1024,'height'=>768),
-        '800' => array('width'=>800,'height'=>800),
-        '250' => array('width'=>250,'height'=>250),
-        '200' => array('width'=>200,'height'=>200),
+        '75' => array('width'=>75,'height'=>75),
         '150' => array('width'=>150,'height'=>150),
         '150w' => array('width'=>150,'height'=>null),
-        '75' => array('width'=>75,'height'=>75),
+        '200' => array('width'=>200,'height'=>200),
+        '250' => array('width'=>250,'height'=>250),
+        '800' => array('width'=>800,'height'=>800),
+        'fb_thumb' => array('width'=>1200,'height'=>628),
+        'FULL' => array('width'=>1024,'height'=>768),
     );
     // @formatter:on
+
+    /**
+     * Return an array with the available classifications.
+     *
+     * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
+     * @return array
+     */
+    static public function getClassifications()
+    {
+        return array(
+            'class_b' => 'Beginner',
+            'class_a' => 'Advanced',
+            'class_s' => 'Salon'
+        );
+    }
 
     /**
      * Returns the width and height for the given image size.
      *
      * @param string $size
      *
-     * @uses $image_sizes
      * @return array
      */
-    public static function get_image_size($size)
+    public static function getImageSize($size)
     {
         if (array_key_exists($size, self::$image_sizes)) {
             return self::$image_sizes[(string) $size];
         }
 
         return null;
+    }
+
+    /**
+     * Return an array with the available mediums.
+     *
+     * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
+     * @return array
+     */
+    static public function getMediums()
+    {
+        return array(
+            'medium_bwd' => 'B&W Digital',
+            'medium_cd'  => 'Color Digital',
+            'medium_bwp' => 'B&W Prints',
+            'medium_cp'  => 'Color Prints'
+        );
     }
 }

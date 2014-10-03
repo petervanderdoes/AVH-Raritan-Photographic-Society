@@ -1,40 +1,29 @@
 ## Changelog
 
+#### Version 1.5.0
+* Improve the page "Monthly Entries"
+
 #### Version 1.4.12
-* Preparation for new development cycle.
+* Ajax call fails.
 
 #### Version 1.4.11
-* Preparation for new development cycle.
+* Fix upload entry problem.
+* Extend ability to edit entries in admin.
+  Have the ability to not only rename a entry but also change the classification and/or medium.
 
 #### Version 1.4.10
-* Preparation for new development cycle.
+* Fix display of error message.
+* Fix checkbox problem.
+* Fix bulk delete.
+* Fix unneeded competitions when adding
+* Fix for mixed classifications.
+  When a user is has a different class for B&W compared to Color the classification is wrong.
 
 #### Version 1.4.9
-* Preparation for new development cycle.
-
-#### Version 1.4.8
-* Preparation for new development cycle.
-
-#### Version 1.4.7
-* Preparation for new development cycle.
-
-#### Version 1.4.6
-* Preparation for new development cycle.
-
-#### Version 1.4.5
-* Preparation for new development cycle.
-
-#### Version 1.4.4
-* Preparation for new development cycle.
+* Improve masonry layout.
 
 #### Version 1.4.3
-* Preparation for new development cycle.
-
-#### Version 1.4.2
-* Preparation for new development cycle.
-
-#### Version 1.4.1
-* Preparation for new development cycle.
+* Allow more photos to displayed horizontally.
 
 #### Version 1.4.0
 * Improved check for uploaded files to the competitions.

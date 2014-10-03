@@ -29,13 +29,46 @@ class Helper
     }
 
     /**
+     * Create the most commonly used thumbnails.
+     *
+     * @param QueryEntries $entry
+     */
+    public function createCommonThumbnails($entry)
+    {
+        $standard_size = array('75', '150w', '800', 'fb_thumb');
+
+        foreach ($standard_size as $size) {
+            $this->createThumbnail($entry, $size);
+        }
+    }
+
+    /**
+     * Create a thumbnail of the given size.
+     *
+     * @param string $file_path
+     * @param string $size
+     */
+    public function createThumbnail($file_path, $size)
+    {
+        $file_parts = pathinfo($file_path);
+        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
+
+        CommonHelper::createDirectory($thumb_dir);
+
+        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
+        }
+    }
+
+    /**
      * Delete the files from server.
      *
      * @param QueryEntries $entry
      */
     public function deleteEntryFromDisk($entry)
     {
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         // Remove main file from disk
         if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {
@@ -79,6 +112,27 @@ class Helper
     }
 
     /**
+     * Remove the thumbnails of the given entry.
+     *
+     * @param string $path Path to original file. The thumbnails directory is located in this directory.
+     * @param string $name
+     */
+    public function removeThumbnails($path, $name)
+    {
+        if (is_dir($path . "/thumbnails")) {
+            $thumb_base_name = $path . "/thumbnails/" . $name;
+            // Get all the matching thumbnail files
+            $thumbnails = glob("$thumb_base_name*");
+            // Iterate through the list of matching thumbnails and rename each one
+            if (is_array($thumbnails) && count($thumbnails) > 0) {
+                foreach ($thumbnails as $thumb) {
+                    unlink($thumb);
+                }
+            }
+        }
+    }
+
+    /**
      * Rename an already uploaded entry.
      * Besides renaming the original upload, we also rename all the thumbnails.
      *
@@ -87,7 +141,7 @@ class Helper
      * @param string $new_name
      * @param string $ext
      *
-     * @return bool
+     * @return boolean
      */
     public function renameImageFile($path, $old_name, $new_name, $ext)
     {
@@ -96,20 +150,7 @@ class Helper
         $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
         if ($status) {
             // Rename any and all thumbnails of this file
-            if (is_dir($path . "/thumbnails")) {
-                $thumb_base_name = $path . "/thumbnails/" . $old_name;
-                // Get all the matching thumbnail files
-                $thumbnails = glob("$thumb_base_name*");
-                // Iterate through the list of matching thumbnails and rename each one
-                if (is_array($thumbnails) && count($thumbnails) > 0) {
-                    foreach ($thumbnails as $thumb) {
-                        $start = strlen($thumb_base_name);
-                        $length = strpos($thumb, $ext) - $start;
-                        $suffix = substr($thumb, $start, $length);
-                        rename($thumb, $path . "/thumbnails/" . $new_name . $suffix . $ext);
-                    }
-                }
-            }
+            $this->removeThumbnails($path, $old_name);
         }
 
         return $status;
@@ -118,23 +159,15 @@ class Helper
     /**
      * Get the full URL for the requested thumbnail
      *
-     * @param QueryEntries $entry
-     * @param string       $size
+     * @param string $file_path
+     * @param string $size
      *
      * @return string
      */
-    public function rpsGetThumbnailUrl($entry, $size)
+    public function rpsGetThumbnailUrl($file_path, $size)
     {
-        $file_parts = pathinfo($entry->Server_File_Name);
-        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
-        $thumb_name = $file_parts['filename'] . '_' . $size . '.jpg';
-
-        CommonHelper::createDirectory($thumb_dir);
-
-        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
-        }
-
+        $this->createThumbnail($file_path, $size);
+        $file_parts = pathinfo($file_path);
         $path_parts = explode('/', $file_parts['dirname']);
         $path = home_url();
         foreach ($path_parts as $part) {
@@ -142,7 +175,9 @@ class Helper
         }
         $path .= 'thumbnails/';
 
-        return ($path . rawurlencode($file_parts['filename'] . '_' . $size . '.jpg'));
+        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
+
+        return ($path);
     }
 
     /**
@@ -154,7 +189,7 @@ class Helper
      * @param string $thumb_name
      * @param string $size
      *
-     * @return bool
+     * @return boolean
      */
     public function rpsResizeImage($image_name, $thumb_path, $thumb_name, $size)
     {
@@ -167,27 +202,33 @@ class Helper
         }
         /** @var \Intervention\Image\Image $image */
         $image = Image::make($image_name);
-        $new_size = Constants::get_image_size($size);
+        $new_size = Constants::getImageSize($size);
         if ($new_size['height'] == null) {
             if ($image->getHeight() <= $image->getWidth()) {
-                $image->resize($new_size['width'],
-                               $new_size['width'],
+                $image->resize(
+                    $new_size['width'],
+                    $new_size['width'],
                     function ($constraint) {
                         $constraint->aspectRatio();
-                    });
+                    }
+                );
             } else {
-                $image->resize($new_size['width'],
-                               null,
+                $image->resize(
+                    $new_size['width'],
+                    null,
                     function ($constraint) {
                         $constraint->aspectRatio();
-                    });
+                    }
+                );
             }
         } else {
-            $image->resize($new_size['width'],
-                           $new_size['height'],
+            $image->resize(
+                $new_size['width'],
+                $new_size['height'],
                 function ($constraint) {
                     $constraint->aspectRatio();
-                });
+                }
+            );
         }
         $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
 

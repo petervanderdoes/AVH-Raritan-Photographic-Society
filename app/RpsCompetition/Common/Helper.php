@@ -1,6 +1,4 @@
 <?php
-
-
 namespace RpsCompetition\Common;
 
 class Helper
@@ -66,8 +64,8 @@ class Helper
     /**
      * Get the user classification based on the medium
      *
-     * @param int    $userID
-     * @param string $medium
+     * @param integer $userID
+     * @param string  $medium
      *
      * @return string
      */
@@ -86,6 +84,8 @@ class Helper
             case 'Color Prints':
                 $index = get_user_meta($userID, 'rps_class_print_color', true);
                 break;
+            default:
+                $index = '';
         }
 
         return ucfirst($index);
@@ -111,5 +111,20 @@ class Helper
         }
 
         return in_array('s2member_level4', (array) $user->roles);
+    }
+
+    /**
+     * Check if the given date in the given format is valid.
+     *
+     * @param  string $date
+     * @param string  $format
+     *
+     * @return bool
+     */
+    static public function isValidDate($date, $format = 'Y-m-d H:i:s')
+    {
+        $d = \DateTime::createFromFormat($format, $date);
+
+        return $d && $d->format($format) == $date;
     }
 }

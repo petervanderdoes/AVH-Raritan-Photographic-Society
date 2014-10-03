@@ -11,7 +11,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
      * Initiates new image from path in filesystem
      *
      * @param  string $path
-     * @return Intervention\Image\Image
+     * @return \Intervention\Image\Image
      */
     public function initFromPath($path)
     {
@@ -39,7 +39,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
      * Initiates new image from GD resource
      *
      * @param  Resource $resource
-     * @return Intervention\Image\Image
+     * @return \Intervention\Image\Image
      */
     public function initFromGdResource($resource)
     {
@@ -52,7 +52,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
      * Initiates new image from Imagick object
      *
      * @param  Imagick $object
-     * @return Intervention\Image\Image
+     * @return \Intervention\Image\Image
      */
     public function initFromImagick(\Imagick $object)
     {
@@ -70,7 +70,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
      * Initiates new image from binary data
      *
      * @param  string $data
-     * @return Intervention\Image\Image
+     * @return \Intervention\Image\Image
      */
     public function initFromBinary($binary)
     {
@@ -88,7 +88,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
 
         // build image
         $image = $this->initFromImagick($core);
-        //$image->mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $binary);
+        $image->mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $binary);
 
         return $image;
     }

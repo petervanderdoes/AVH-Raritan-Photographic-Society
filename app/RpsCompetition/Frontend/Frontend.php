@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend;
 
+use Avh\Network\Session;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
@@ -11,6 +12,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Frontend\Requests as FrontendRequests;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
@@ -28,6 +30,7 @@ class Frontend
     private $request;
     /** @var RpsDb */
     private $rpsdb;
+    private $session;
     /** @var Settings */
     private $settings;
 
@@ -38,6 +41,9 @@ class Frontend
      */
     public function __construct(Container $container)
     {
+        $this->session = new Session(array('name' => 'raritan_' . COOKIEHASH));
+        $this->session->start();
+
         $this->container = $container;
 
         $this->settings = $container->make('RpsCompetition\Settings');
@@ -45,11 +51,14 @@ class Frontend
         $this->request = $container->make('Illuminate\Http\Request');
         $this->options = $container->make('RpsCompetition\Options\General');
         $this->core = new Core($this->settings);
+        $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request, $this->session);
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'));
+        add_action('parse_query', array($requests, 'actionHandleRequests'));
         add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
+
         if ($this->request->isMethod('POST')) {
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsMyEntries'));
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsEditTitle'));
@@ -57,6 +66,7 @@ class Frontend
             add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
         }
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
+        add_filter('query_vars', array($this, 'filterQueryVars'));
     }
 
     /**
@@ -79,21 +89,26 @@ class Frontend
     public function actionEnqueueScripts()
     {
         global $wp_query;
+        global $post;
 
-        if (!is_admin()) {
-            $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
-            if (WP_LOCAL_DEV == true) {
-                $rps_masonry_script = 'rps.masonry.js';
-            } else {
-                $rps_masonry_version = "a128c24";
-                $rps_masonry_script = 'rps.masonry-' . $rps_masonry_version . '.js';
-            }
+        $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
+        if (WP_LOCAL_DEV == true) {
+            $rps_masonry_script = 'rps.masonry.js';
+        } else {
+            $rps_masonry_version = "a128c24";
+            $rps_masonry_script = 'rps.masonry-' . $rps_masonry_version . '.js';
+        }
 
-            //todo Make as an option in the admin section.
-            $all_masonry_pages = array(1005);
-            if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
-                wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
-            }
+        //todo Make as an option in the admin section.
+        $options = get_option('avh-rps');
+        $all_masonry_pages = array();
+        $all_masonry_pages[] = $options['monthly_entries_post_id'];
+        if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
+            wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
+        }
+
+        if (has_shortcode($post->post_content, 'rps_person_winners')) {
+            wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
         }
     }
 
@@ -125,9 +140,6 @@ class Frontend
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
      *
-     * @uses     \RpsCompetition\Db\QueryEntries
-     * @uses     \RpsCompetition\Db\QueryCompetitions
-     * @uses     \RpsCompetition\Photo\Helper
      * @see      Shortcodes::displayEditTitle
      * @internal Hook: suffusion_before_post
      */
@@ -136,7 +148,7 @@ class Frontend
         global $post;
 
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_object($post) && $post->ID == 75) {
@@ -176,8 +188,8 @@ class Frontend
 
                 // Update the Title and File Name in the database
                 $updated_data = array('ID' => $entry_id, 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
-                $_result = $query_entries->updateEntry($updated_data);
-                if ($_result === false) {
+                $result = $query_entries->updateEntry($updated_data);
+                if ($result === false) {
                     wp_die("Failed to UPDATE entry record from database");
                 }
 
@@ -194,14 +206,13 @@ class Frontend
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
      *
-     * @uses     \RpsCompetition\Db\QueryCompetitions
      * @see      Shortcodes::displayMyEntries
      * @internal Hook: suffusion_before_post
      */
     public function actionHandleHttpPostRpsMyEntries()
     {
         global $post;
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
 
@@ -222,10 +233,11 @@ class Frontend
                 switch ($this->request->input('submit_control')) {
                     case 'add':
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
-                            $_query = array('m' => $medium_subset);
-                            $_query = build_query($_query);
-                            $loc = '/member/upload-image/?' . $_query;
+                            $query = array('m' => $medium_subset);
+                            $query = build_query($query);
+                            $loc = '/member/upload-image/?' . $query;
                             wp_redirect($loc);
+                            exit();
                         }
                         break;
 
@@ -234,10 +246,11 @@ class Frontend
                             if (is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
-                                    $_query = array('id' => $id, 'm' => $medium_subset);
-                                    $_query = build_query($_query);
-                                    $loc = '/member/edit-title/?' . $_query;
+                                    $query = array('id' => $id, 'm' => $medium_subset);
+                                    $query = build_query($query);
+                                    $loc = '/member/edit-title/?' . $query;
                                     wp_redirect($loc);
+                                    exit();
                                 }
                             }
                         }
@@ -261,9 +274,6 @@ class Frontend
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
      *
-     * @uses     \RpsCompetition\Db\QueryEntries
-     * @uses     \RpsCompetition\Db\QueryCompetitions
-     * @uses     \RpsCompetition\Photo\Helper
      * @see      Shortcodes::displayUploadEntry
      * @internal Hook: suffusion_before_post
      */
@@ -271,7 +281,7 @@ class Frontend
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
@@ -407,6 +417,8 @@ class Frontend
 
                 return;
             }
+
+            $photo_helper->createCommonThumbnails($query_entries->getEntryById($this->rpsdb->insert_id));
             $query = build_query(array('resized' => $resized));
             wp_redirect($redirect_to . '/?' . $query);
             exit();
@@ -420,8 +432,8 @@ class Frontend
      * to be setup for plugin.
      * - Shortcodes
      * - User meta information concerning their classification
+     * - Rewrite rules
      *
-     * @uses     \RpsCompetition\Db\QueryCompetitions
      * @internal Hook: init
      */
     public function actionInit()
@@ -429,10 +441,13 @@ class Frontend
 
         $this->setupShortcodes();
 
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_competitions->setAllPastCompetitionsClose();
 
+        $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
+
+        $this->setupRewriteRules();
 
         unset($query_competitions);
     }
@@ -441,7 +456,6 @@ class Frontend
      * Display the showcase on the front page.
      * This will display the showcase as used on the front page.
      *
-     * @uses     \RpsCompetition\Db\QueryMiscellaneous
      * @see      actionAfterThemeSetup
      * @internal Hook: rps_showcase
      *
@@ -465,21 +479,16 @@ class Frontend
 
             foreach ($records as $recs) {
                 $user_info = get_userdata($recs->Member_ID);
-                $recs->FirstName = $user_info->user_firstname;
-                $recs->LastName = $user_info->user_lastname;
-                $recs->Username = $user_info->user_login;
-
-                // Grab a new record from the database
                 $title = $recs->Title;
-                $last_name = $recs->LastName;
-                $first_name = $recs->FirstName;
+                $last_name = $user_info->user_lastname;
+                $first_name = $user_info->user_firstname;
 
                 // Display this thumbnail in the the next available column
                 echo '<figure class="gallery-item">';
                 echo '<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
-                echo '<a href="' . $photo_helper->rpsGetThumbnailUrl($recs, 800) . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($recs, 150) . '" /></a>';
+                echo '<a href="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '800') . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
+                echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '150') . '" /></a>';
                 echo '</div>';
                 $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
                 echo "<figcaption class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</figcaption>\n";
@@ -498,7 +507,6 @@ class Frontend
     /**
      * Handles the requests by the RPS Windows Client
      *
-     * @uses     \RpsCompetition\Api\Client
      * @internal Hook: template_redirect
      */
     public function actionTemplateRedirectRpsWindowsClient()
@@ -531,11 +539,25 @@ class Frontend
     }
 
     /**
-     * Delete competition entries
+     * Add custom query vars.
+     *  - selected_date
      *
-     * @uses  \RpsCompetition\Db\QueryEntries
-     * @uses  \RpsCompetition\Db\QueryCompetitions
-     * @uses  \RpsCompetition\Photo\Helper
+     * @see Shortcodes::displayMonthlyEntries
+     * @see Shortcodes::displayMonthlyWinners
+     *
+     * @param array $vars
+     *
+     * @return string[]
+     */
+    public function filterQueryVars($vars)
+    {
+        $vars[] = 'selected_date';
+
+        return $vars;
+    }
+
+    /**
+     * Delete competition entries
      *
      * @param array $entries Array of entries ID to delete.
      */
@@ -547,7 +569,7 @@ class Frontend
         if (is_array($entries)) {
             foreach ($entries as $id) {
 
-                $entry_record = $query_entries->getEntryById($id, OBJECT);
+                $entry_record = $query_entries->getEntryById($id);
                 if ($entry_record == false) {
                     $this->settings->set('errmsg', sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id));
                 } else {
@@ -567,21 +589,17 @@ class Frontend
 
     /**
      * Handles the required functions for when a user submits their Banquet Entries
-     *
-     * @uses \RpsCompetition\Db\QueryEntries
-     * @uses \RpsCompetition\Db\QueryCompetitions
-     * @uses \RpsCompetition\Photo\Helper
      */
     private function handleSubmitBanquetEntries()
     {
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
 
         if ($this->request->has('allentries')) {
             $all_entries = explode(',', $this->request->input('allentries'));
             foreach ($all_entries as $entry_id) {
-                $entry = $query_entries->getEntryById($entry_id, OBJECT);
+                $entry = $query_entries->getEntryById($entry_id);
                 if (!is_null($entry)) {
                     $query_entries->deleteEntry($entry->ID);
                     $photo_helper->deleteEntryFromDisk($entry);
@@ -591,7 +609,7 @@ class Frontend
 
         $entries = (array) $this->request->input('entry_id', array());
         foreach ($entries as $entry_id) {
-            $entry = $query_entries->getEntryById($entry_id, OBJECT);
+            $entry = $query_entries->getEntryById($entry_id);
             $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
             $banquet_ids = explode(',', $this->request->input('banquetids'));
             foreach ($banquet_ids as $banquet_id) {
@@ -622,20 +640,37 @@ class Frontend
     {
         if ($this->request->has('cancel')) {
             wp_redirect($redirect_to);
-            die();
+            exit();
+        }
+    }
+
+    /**
+     * Setup Rewrite rules
+     *
+     */
+    private function setupRewriteRules()
+    {
+        $options = get_option('avh-rps');
+        $url = get_permalink($options['monthly_entries_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
+        }
+
+        $url = get_permalink($options['monthly_winners_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
         }
     }
 
     /**
      * Setup shortcodes.
      * Setup all the need shortcodes.
-     *
-     * @uses  \RpsCompetition\Frontend\Shortcodes
      */
     private function setupShortcodes()
     {
-        /** @var \RpsCompetition\Frontend\Shortcodes $shortcode */
-        $shortcode = $this->container->make('RpsCompetition\Frontend\Shortcodes');
+        $shortcode = new Shortcodes($this->settings, $this->rpsdb, $this->request, $this->session);
         $shortcode->register('rps_category_winners', 'displayCategoryWinners');
         $shortcode->register('rps_monthly_winners', 'displayMonthlyWinners');
         $shortcode->register('rps_scores_current_user', 'displayScoresCurrentUser');
@@ -651,7 +686,6 @@ class Frontend
 
     /**
      * Setup the needed user meta information.
-
      */
     private function setupUserMeta()
     {
@@ -663,5 +697,23 @@ class Frontend
             update_user_meta($user_id, "rps_class_print_bw", 'beginner');
             update_user_meta($user_id, "rps_class_print_color", 'beginner');
         }
+    }
+
+    /**
+     * Setup the filters and action for the plugin WordPress Seo by Yoast
+     *
+     */
+    private function setupWpSeoActionsFilters()
+    {
+        $wpseo = new WpseoHelper($this->settings, $this->rpsdb);
+        add_action('wpseo_register_extra_replacements', array($wpseo, 'actionWpseoRegisterExtraReplacements'));
+        add_action('wpseo_do_sitemap_competition-entries', array($wpseo, 'actionWpseoSitemapCompetitionEntries'));
+        add_action('wpseo_do_sitemap_competition-winners', array($wpseo, 'actionWpseoSitemapCompetitionWinners'));
+
+        add_filter('wpseo_pre_analysis_post_content', array($wpseo, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
+        add_filter('wpseo_opengraph_image', array($wpseo, 'filterWpseoOpengraphImage'), 10, 1);
+        add_filter('wpseo_metadesc', array($wpseo, 'filterWpseoMetaDescription'), 10, 1);
+        add_filter('wpseo_sitemap_index', array($wpseo, 'filterWpseoSitemapIndex'));
+        add_filter('wp_title_parts', array($wpseo, 'filterWpTitleParts'), 10, 1);
     }
 }

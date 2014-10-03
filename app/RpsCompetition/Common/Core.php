@@ -46,7 +46,7 @@ class Core
      *
      * @param $size_str
      *
-     * @return int
+     * @return integer
      */
     public function getShorthandToBytes($size_str)
     {
@@ -68,7 +68,6 @@ class Core
     /**
      * Initialize the plugin
      * Set the required settings to be used throughout the plugin
-
      */
     public function handleInitializePlugin()
     {

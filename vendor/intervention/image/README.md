@@ -1,6 +1,6 @@
 # Intervention Image
 
-Intervention Image is a **PHP image handling and manipulation** library providing an easier and expressive way to create, edit, and compose images. The package includes ServiceProviders and Facades for easy **Laravel 4** integration.
+Intervention Image is a **PHP image handling and manipulation** library providing an easier and expressive way to create, edit, and compose images. The package includes ServiceProviders and Facades for easy **Laravel** integration.
 
 [![Build Status](https://travis-ci.org/Intervention/image.png?branch=master)](https://travis-ci.org/Intervention/image)
 
@@ -17,7 +17,7 @@ Intervention Image is a **PHP image handling and manipulation** library providin
 ## Getting started
 
 - [Installation](http://image.intervention.io/getting_started/installation)
-- [Laravel Framework Integration](http://image.intervention.io/getting_started/laravel)
+- [Laravel Framework Integration](http://image.intervention.io/getting_started/installation#laravel)
 - [Official Documentation](http://image.intervention.io/)
 
 ## Code Examples
