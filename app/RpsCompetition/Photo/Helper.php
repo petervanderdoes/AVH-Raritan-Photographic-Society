@@ -45,12 +45,12 @@ class Helper
     /**
      * Create a thumbnail of the given size.
      *
-     * @param QueryEntries $entry
-     * @param string       $size
+     * @param string $file_path
+     * @param string $size
      */
-    public function createThumbnail($entry, $size)
+    public function createThumbnail($file_path, $size)
     {
-        $file_parts = pathinfo($entry->Server_File_Name);
+        $file_parts = pathinfo($file_path);
         $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
         $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
 
@@ -159,15 +159,15 @@ class Helper
     /**
      * Get the full URL for the requested thumbnail
      *
-     * @param QueryEntries $entry
-     * @param string       $size
+     * @param string $file_path
+     * @param string $size
      *
      * @return string
      */
-    public function rpsGetThumbnailUrl($entry, $size)
+    public function rpsGetThumbnailUrl($file_path, $size)
     {
-        $this->createThumbnail($entry, $size);
-        $file_parts = pathinfo($entry->Server_File_Name);
+        $this->createThumbnail($file_path, $size);
+        $file_parts = pathinfo($file_path);
         $path_parts = explode('/', $file_parts['dirname']);
         $path = home_url();
         foreach ($path_parts as $part) {

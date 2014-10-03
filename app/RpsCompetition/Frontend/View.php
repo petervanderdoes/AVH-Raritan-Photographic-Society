@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend;
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
 use Illuminate\Http\Request;
+use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
@@ -88,7 +89,7 @@ class View
      *
      * @return string|void
      */
-    public function displayPhotoMasonry($record, $echo = false)
+    public function displayPhotoMasonry(QueryEntries $record, $echo = false)
     {
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
@@ -99,8 +100,8 @@ class View
         $output .= $this->html_builder->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
         $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content'));
         $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content-images'));
-        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($record, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-        $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($record, '150w'));
+        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, 800), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
+        $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w'));
         $output .= '</a>';
         $output .= '</div>';
         $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";

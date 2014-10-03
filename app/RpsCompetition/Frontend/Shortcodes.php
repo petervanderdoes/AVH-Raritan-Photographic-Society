@@ -542,10 +542,10 @@ final class Shortcodes extends ShortcodesAbstract
                 echo '<li class="gallery-item">';
                 echo '	<div class="gallery-item-content">';
                 echo '<div class="gallery-item-content-image">';
-                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry, 800) . '" rel="rps-showcase' . tag_escape(
+                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 800) . '" rel="rps-showcase' . tag_escape(
                         $entry->Classification
                     ) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
-                echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry, 250) . '" /></a>' . "\n";
+                echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 250) . '" /></a>' . "\n";
 
                 $caption = $entry->Title . "<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
                 echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
@@ -601,7 +601,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<table>';
         echo '<tr><td align="center" colspan="2">';
 
-        echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 200) . "\" />\n";
+        echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, 200) . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
         echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
@@ -803,6 +803,7 @@ final class Shortcodes extends ShortcodesAbstract
             $row = 0;
             $column = 0;
             $comp = "";
+            /** @var QueryEntries $competition */
             foreach ($award_winners as $competition) {
                 $user_info = get_userdata($competition->Member_ID);
 
@@ -838,8 +839,8 @@ final class Shortcodes extends ShortcodesAbstract
                 // Display this thumbnail in the the next available column
                 $output .= "<td align=\"center\" class=\"thumb_cell\">\n";
                 $output .= "  <div class=\"thumb_canvas\">\n";
-                $output .= "    <a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                $output .= "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition, 75) . "\" /></a>\n";
+                $output .= "    <a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                $output .= "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, 75) . "\" /></a>\n";
                 $output .= "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
                 $output .= "  </div>\n</td>\n";
                 $column += 1;
@@ -1065,7 +1066,7 @@ final class Shortcodes extends ShortcodesAbstract
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
             echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium . '">' . "\n";
-            echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs, 75) . "\" />\n";
+            echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, 75) . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
@@ -1339,7 +1340,7 @@ final class Shortcodes extends ShortcodesAbstract
     {
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         foreach ($entries as $entry) {
-            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry, 'fb_thumb') . '" /></a>';
+            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb') . '" /></a>';
         }
         unset($photo_helper);
     }
