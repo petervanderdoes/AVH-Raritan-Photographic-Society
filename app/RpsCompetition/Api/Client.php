@@ -110,12 +110,12 @@ class Client
 
             $sth = $db->prepare($select . $where);
             if ($request->has('closed')) {
-                $_closed = $request->input('closed');
-                $sth->bindParam(':closed', $_closed, \PDO::PARAM_STR, 1);
+                $closed = $request->input('closed');
+                $sth->bindParam(':closed', $closed, \PDO::PARAM_STR, 1);
             }
             if ($request->has('scored')) {
-                $_scored = $request->input('scored');
-                $sth->bindParam(':scored', $_scored, \PDO::PARAM_STR, 1);
+                $scored = $request->input('scored');
+                $sth->bindParam(':scored', $scored, \PDO::PARAM_STR, 1);
             }
             $sth->execute();
         } catch (\PDOException $e) {

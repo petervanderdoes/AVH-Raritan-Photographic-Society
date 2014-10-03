@@ -188,8 +188,8 @@ class Frontend
 
                 // Update the Title and File Name in the database
                 $updated_data = array('ID' => $entry_id, 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
-                $_result = $query_entries->updateEntry($updated_data);
-                if ($_result === false) {
+                $result = $query_entries->updateEntry($updated_data);
+                if ($result === false) {
                     wp_die("Failed to UPDATE entry record from database");
                 }
 
@@ -233,9 +233,9 @@ class Frontend
                 switch ($this->request->input('submit_control')) {
                     case 'add':
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
-                            $_query = array('m' => $medium_subset);
-                            $_query = build_query($_query);
-                            $loc = '/member/upload-image/?' . $_query;
+                            $query = array('m' => $medium_subset);
+                            $query = build_query($query);
+                            $loc = '/member/upload-image/?' . $query;
                             wp_redirect($loc);
                             exit();
                         }
@@ -246,9 +246,9 @@ class Frontend
                             if (is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
-                                    $_query = array('id' => $id, 'm' => $medium_subset);
-                                    $_query = build_query($_query);
-                                    $loc = '/member/edit-title/?' . $_query;
+                                    $query = array('id' => $id, 'm' => $medium_subset);
+                                    $query = build_query($query);
+                                    $loc = '/member/edit-title/?' . $query;
                                     wp_redirect($loc);
                                     exit();
                                 }

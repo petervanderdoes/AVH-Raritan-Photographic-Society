@@ -603,8 +603,8 @@ final class Admin
     {
         $message = '';
         if (is_array($this->message)) {
-            foreach ($this->message as $_msg) {
-                foreach ($_msg as $msg) {
+            foreach ($this->message as $messages) {
+                foreach ($messages as $msg) {
                     $message .= $msg . "<br>";
                 }
             }
@@ -860,13 +860,13 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
         echo $formBuilder->outputField($formBuilder->select('classification', $classification_array, $selectedClassification, array('autocomplete' => 'off')));
 
-        $_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
+        $max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
         echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
-        echo $formBuilder->outputField($formBuilder->select('max-entries', $_max_entries, $competition->Max_Entries, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('max-entries', $max_entries, $competition->Max_Entries, array('autocomplete' => 'off')));
 
-        $_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
+        $judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
         echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
-        echo $formBuilder->outputField($formBuilder->select('judges', $_judges, $competition->Num_Judges, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('judges', $judges, $competition->Num_Judges, array('autocomplete' => 'off')));
 
         echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
         echo $formBuilder->outputField($formBuilder->checkbox('special_event', ($competition->Special_Event == 'Y' ? true : false), ($competition->Special_Event == 'Y' ? true : false)));
@@ -1129,8 +1129,8 @@ final class Admin
         echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-entryedit', 'accept-charset' => get_bloginfo('charset')));
         echo $formBuilder->openTable();
 
-        $_user = get_user_by('id', $entry->Member_ID);
-        echo '<h3>Photographer: ' . $_user->first_name . ' ' . $_user->last_name . "</h3>\n";
+        $user = get_user_by('id', $entry->Member_ID);
+        echo '<h3>Photographer: ' . $user->first_name . ' ' . $user->last_name . "</h3>\n";
         echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, '200') . "\" />\n";
 
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));

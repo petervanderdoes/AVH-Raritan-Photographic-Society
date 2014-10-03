@@ -403,9 +403,9 @@ class ListTable extends \WP_List_Table
 
         $args = array('status' => $competition_status, 'search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order);
 
-        $_competitions = $query_competitions->query($args);
-        $this->items = array_slice($_competitions, 0, $competitions_per_page);
-        $this->extra_items = array_slice($_competitions, $competitions_per_page);
+        $competitions = $query_competitions->query($args);
+        $this->items = array_slice($competitions, 0, $competitions_per_page);
+        $this->extra_items = array_slice($competitions, $competitions_per_page);
 
         $total_competitions = $query_competitions->query(array_merge($args, array('count' => true, 'offset' => 0, 'number' => 0)));
 

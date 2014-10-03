@@ -1303,11 +1303,11 @@ final class Shortcodes extends ShortcodesAbstract
             echo $this->formBuilder->hidden('medium_subset', $medium_subset);
         }
         if ($this->request->has('wp_get_referer')) {
-            $_ref = $this->request->input('wp_get_referer');
+            $ref = $this->request->input('wp_get_referer');
         } else {
-            $_ref = wp_get_referer();
+            $ref = wp_get_referer();
         }
-        echo $this->formBuilder->hidden('wp_get_referer', remove_query_arg(array('m'), $_ref));
+        echo $this->formBuilder->hidden('wp_get_referer', remove_query_arg(array('m'), $ref));
         echo '<table class="form_frame" width="80%">';
         echo '<tr><th class="form_frame_header" colspan=2>';
         echo 'Submit Your Image';
