@@ -3,13 +3,19 @@ namespace RpsCompetition\Frontend;
 
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Settings;
 
 class WpseoHelper
 {
     private $rpsdb;
     private $settings;
 
-    public function __construct($settings, $rpsdb)
+    /**
+     * @param Settings $settings
+     * @param RpsDb $rpsdb
+     */
+    public function __construct(Settings $settings, RpsDb $rpsdb)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
