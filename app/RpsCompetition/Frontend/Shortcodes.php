@@ -653,6 +653,7 @@ final class Shortcodes extends ShortcodesAbstract
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $view_data = array();
 
         $months = array();
         $themes = array();
@@ -684,40 +685,26 @@ final class Shortcodes extends ShortcodesAbstract
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
             $this->displayCategoryWinnersFacebookThumbs($entries);
-
             return;
         }
 
-        echo '<span class="competition-monthly-winners-form">Select a theme or season';
-        echo $this->view->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
-        echo '<p></p></span>';
+        $view_data['selected_season'] = $selected_season;
+        $view_data['selected_date'] = $selected_date;
+        $view_data['is_scored_competitions'] = $is_scored_competitions;
+        $view_data['months'] = $months;
 
-        $output = '';
         if ($is_scored_competitions) {
             $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
+            $view_data['date_text'] = $date->format('F j, Y');
+            $view_data['theme_name'] = $themes[$selected_date];
+            $view_data['entries'] = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
+            $view_data['count_entries'] = count ($view_data['entries']);
 
-            // We display these in masonry style
-            $output = $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
-            $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
-            $output .= '</div>';
-            $output .= $this->html->element('div', array('id' => 'images'));
-            $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            if (is_array($entries)) {
-                // Iterate through all the award winners and display each thumbnail in a grid
-                /** @var QueryEntries $entry */
-                foreach ($entries as $entry) {
-                    $output .= $this->view->displayPhotoMasonry($entry);
-                }
-            }
-            $output .= '</div>';
-            $header = '<p class="competition-theme">The ' . count($entries) . ' entries submitted to Raritan Photographic Society for the theme "' . $themes[$selected_date] . '" held on ' . $date_text . '</p>';
-            $output = $header . $output;
         }
 
-        echo $output;
+        echo $this->view->displayMonthlyEntries($view_data);
 
-        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper);
+        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $view_data);
     }
 
     /**
