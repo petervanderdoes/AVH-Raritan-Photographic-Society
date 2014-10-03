@@ -14,8 +14,8 @@ class Requests
 {
     private $request;
     private $rpsdb;
-    private $settings;
     private $session;
+    private $settings;
 
     public function __construct(Settings $settings, RpsDb $rpsdb, Request $request, Session $session)
     {

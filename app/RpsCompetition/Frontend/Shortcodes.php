@@ -838,11 +838,12 @@ final class Shortcodes extends ShortcodesAbstract
                 }
                 // Display this thumbnail in the the next available column
                 $output .= "<td align=\"center\" class=\"thumb_cell\">\n";
-                $output .= "  <div class=\"thumb_canvas\">\n";
-                $output .= "    <a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, 800) . "\" rel=\"" . tag_escape($classification) . tag_escape($medium) . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                $output .= "    <img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, 75) . "\" /></a>\n";
+                $output .= "<div class=\"thumb_canvas\">\n";
+                $rel_text = tag_escape($classification) . tag_escape($medium);
+                $output .= "<a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, 800) . "\" rel=\"" . $rel_text . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                $output .= "<img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, 75) . "\" /></a>\n";
                 $output .= "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
-                $output .= "  </div>\n</td>\n";
+                $output .= "</div>\n</td>\n";
                 $column += 1;
             }
             // As necessary, pad the last row out with empty cells

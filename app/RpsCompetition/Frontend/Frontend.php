@@ -30,9 +30,9 @@ class Frontend
     private $request;
     /** @var RpsDb */
     private $rpsdb;
+    private $session;
     /** @var Settings */
     private $settings;
-    private $session;
 
     /**
      * PHP5 Constructor

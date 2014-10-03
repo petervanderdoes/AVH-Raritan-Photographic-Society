@@ -241,7 +241,7 @@ class QueryCompetitions
             }
         }
 
-        $sql_filter = implode(' AND ', $sql_filter_array );
+        $sql_filter = implode(' AND ', $sql_filter_array);
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($season_id);
 
