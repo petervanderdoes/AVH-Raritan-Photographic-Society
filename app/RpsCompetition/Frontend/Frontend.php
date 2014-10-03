@@ -55,7 +55,7 @@ class Frontend
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
-        add_action('init', array($this, 'actionInit'));
+        add_action('init', array($this, 'actionInit'),11);
         add_action('parse_query', array($requests, 'actionHandleRequests'));
         add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
 
@@ -446,9 +446,7 @@ class Frontend
 
         $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
-
-        $this->setupRewriteRules();
-
+        
         unset($query_competitions);
     }
 
@@ -641,26 +639,6 @@ class Frontend
         if ($this->request->has('cancel')) {
             wp_redirect($redirect_to);
             exit();
-        }
-    }
-
-    /**
-     * Setup Rewrite rules
-     *
-     */
-    private function setupRewriteRules()
-    {
-        $options = get_option('avh-rps');
-        $url = get_permalink($options['monthly_entries_post_id']);
-        if ($url !== false) {
-            $url = substr(parse_url($url, PHP_URL_PATH), 1);
-            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
-        }
-
-        $url = get_permalink($options['monthly_winners_post_id']);
-        if ($url !== false) {
-            $url = substr(parse_url($url, PHP_URL_PATH), 1);
-            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
         }
     }
 
