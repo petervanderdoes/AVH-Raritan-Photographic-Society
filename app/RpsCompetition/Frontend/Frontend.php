@@ -39,6 +39,7 @@ class Frontend
     /** @var Settings */
     private $settings;
 
+    private $view;
     /**
      * Constructor
      *
@@ -57,6 +58,7 @@ class Frontend
         $this->options = $container->make('RpsCompetition\Options\General');
         $this->core = new Core($this->settings);
         $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request, $this->session);
+        $this->view = new View($this->settings, $this->rpsdb, $this->request);
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -468,42 +470,10 @@ class Frontend
     {
         if (is_front_page()) {
             $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-            $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-
-            echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
-
-            echo '<div class="suf-gradient suf-tile-topmost">';
-            echo '<h3>Showcase</h3>';
-            echo '</div>';
-
-            echo '<div class="gallery gallery-columns-5 gallery-size-150">';
-            echo '<div class="gallery-row gallery-row-equal">';
             $records = $query_miscellaneous->getEightsAndHigher(5);
-
-            foreach ($records as $recs) {
-                $user_info = get_userdata($recs->Member_ID);
-                $title = $recs->Title;
-                $last_name = $user_info->user_lastname;
-                $first_name = $user_info->user_firstname;
-
-                // Display this thumbnail in the the next available column
-                echo '<figure class="gallery-item">';
-                echo '<div class="gallery-item-content">';
-                echo '<div class="gallery-item-content-image">';
-                echo '<a href="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '800') . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '150') . '" /></a>';
-                echo '</div>';
-                $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-                echo "<figcaption class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</figcaption>\n";
-                echo '</div>';
-
-                echo '</figure>' . "\n";
-            }
-            echo '</div>';
-            echo '</div>';
-            echo '</div>';
-
-            unset($query_miscellaneous, $photo_helper);
+            $data['records'] = $records;
+            echo $this->view->renderShowcaseCompetitionThumbnails($data);
+            unset($query_miscellaneous);
         }
     }
 

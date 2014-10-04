@@ -159,6 +159,34 @@ class View
     }
 
     /**
+     * Render a photo in Gallery style.
+     *
+     * @param string $file_name
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return string
+     */
+    public function renderPhotoGallery($file_name, $title, $first_name, $last_name)
+    {
+        $output = $this->html_builder->element('figure', array('class' => 'gallery-item'));
+        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content'));
+        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content-image'));
+        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($file_name, '800'), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-showcase'));
+        $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($file_name, '150'));
+        $output .= $this->html_builder->closeElement('a');
+        $output .= $this->html_builder->closeElement('div');
+        $output .= $this->html_builder->element('figcaption', array('class' => 'wp-caption-text showcase-caption'));
+        $output .= $this->renderPhotoCredit($title, $first_name, $last_name);
+        $output .= $this->html_builder->closeElement('figcaption') . "\n";
+        $output .= $this->html_builder->closeElement('div');
+        $output .= $this->html_builder->closeElement('figure') . "\n";
+        
+       return $output;
+    }
+
+    /**
      * Display a photo in masonry style.
      *
      * @param QueryEntries $record
@@ -186,6 +214,40 @@ class View
         $output .= $this->html_builder->closeElement('div');
 
         $output .= $this->html_builder->closeElement('figure') . "\n";
+
+        return $output;
+    }
+
+    /**
+     * Render the Showcase competition thumbnails
+     *
+     * @param array $data
+     *
+     * @see Frontend::actionShowcaseCompetitionThumbnails
+     *
+     * @return string
+     */
+    public function renderShowcaseCompetitionThumbnails($data)
+    {
+        $output = '';
+        $output .= $this->html_builder->element('div', array('class' => 'rps-sc-tile suf-tile-1c entry-content bottom'));
+        $output .= $this->html_builder->element('div', array('class' => 'suf-gradient suf-tile-topmost'));
+        $output .= $this->html_builder->element('h3') . 'Showcase' . $this->html_builder->closeElement('h3');
+        $output .= $this->html_builder->closeElement('div');
+
+        $output .= $this->html_builder->element('div', array('class' => 'gallery gallery-columns-5 gallery-size-150'));
+        $output .= $this->html_builder->element('div', array('class' => 'gallery-row gallery-row-equal'));
+        foreach ($data['records'] as $recs) {
+            $user_info = get_userdata($recs->Member_ID);
+            $title = $recs->Title;
+            $last_name = $user_info->user_lastname;
+            $first_name = $user_info->user_firstname;
+            // Display this thumbnail in the the next available column
+            $output .= $this->renderPhotoGallery($recs->Server_File_Name, $title, $first_name, $last_name);
+        }
+        $output .= $this->html_builder->closeElement('div');
+        $output .= $this->html_builder->closeElement('div');
+        $output .= $this->html_builder->closeElement('div');
 
         return $output;
     }
