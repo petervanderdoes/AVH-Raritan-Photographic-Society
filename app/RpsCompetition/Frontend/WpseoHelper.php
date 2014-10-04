@@ -6,12 +6,19 @@ use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+/**
+ * Class WpseoHelper
+ *
+ * @package RpsCompetition\Frontend
+ */
 class WpseoHelper
 {
     private $rpsdb;
     private $settings;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      */

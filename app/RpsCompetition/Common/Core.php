@@ -3,6 +3,11 @@ namespace RpsCompetition\Common;
 
 use RpsCompetition\Settings;
 
+/**
+ * Class Core
+ *
+ * @package RpsCompetition\Common
+ */
 class Core
 {
     /**
@@ -15,11 +20,10 @@ class Core
     private $settings;
 
     /**
-     * PHP5 constructor
+     * Constructor
      *
      * @param Settings $settings
      *
-     * @internal param Request $request
      */
     public function __construct(Settings $settings)
     {

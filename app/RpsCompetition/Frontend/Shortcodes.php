@@ -17,6 +17,11 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
+/**
+ * Class Shortcodes
+ *
+ * @package RpsCompetition\Frontend
+ */
 final class Shortcodes extends ShortcodesAbstract
 {
     private $html;
@@ -27,6 +32,8 @@ final class Shortcodes extends ShortcodesAbstract
     private $view;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      * @param Request  $request

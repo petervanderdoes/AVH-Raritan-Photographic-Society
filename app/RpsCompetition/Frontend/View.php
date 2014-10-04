@@ -10,6 +10,11 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
+/**
+ * Class View
+ *
+ * @package RpsCompetition\Frontend
+ */
 class View
 {
     private $form_builder;
@@ -21,6 +26,8 @@ class View
     private $settings;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      * @param Request  $request
@@ -97,6 +104,14 @@ class View
         return;
     }
 
+    /**
+     * Render the HTML for the Monthly Entries
+     *
+     * @param array $data
+     * @param bool  $echo
+     *
+     * @return string
+     */
     public function renderMonthlyEntries($data, $echo = false)
     {
         $output = $this->html_builder->element('p', array('class' => 'competition-theme'));

@@ -28,7 +28,7 @@ class QueryCompetitions
     private $settings;
 
     /**
-     * PHP5 constructor
+     * Constructor
      *
      * @param Settings $settings
      * @param RpsDb    $rpsdb

@@ -3,6 +3,11 @@ namespace RpsCompetition\Db;
 
 use PDO;
 
+/**
+ * Class RpsPdo
+ *
+ * @package RpsCompetition\Db
+ */
 class RpsPdo extends \PDO
 {
     private $database;
@@ -11,6 +16,10 @@ class RpsPdo extends \PDO
     private $pass;
     private $user;
 
+    /**
+     * Constructor
+     *
+     */
     public function __construct()
     {
         $this->engine = 'mysql';

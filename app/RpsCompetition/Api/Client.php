@@ -8,10 +8,16 @@ use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsPdo;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
+/**
+ * Class Client
+ *
+ * @package RpsCompetition\Api
+ */
 class Client
 {
     /**
-     * @internal param Core $core
+     * Constructor
+     *
      */
     public function __construct()
     {

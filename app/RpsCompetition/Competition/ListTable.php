@@ -9,6 +9,11 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+/**
+ * Class ListTable
+ *
+ * @package RpsCompetition\Competition
+ */
 class ListTable extends \WP_List_Table
 {
     public $messages;
@@ -31,6 +36,8 @@ class ListTable extends \WP_List_Table
     private $settings;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      * @param Request  $request

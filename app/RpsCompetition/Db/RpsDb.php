@@ -1,10 +1,16 @@
 <?php
 namespace RpsCompetition\Db;
 
+/**
+ * Class RpsDb
+ *
+ * @package RpsCompetition\Db
+ */
 class RpsDb extends \wpdb
 {
     /**
-     * PHP5 constructor
+     * Constructor
+     *
      */
     public function __construct()
     {

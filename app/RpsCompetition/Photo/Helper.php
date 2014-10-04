@@ -10,6 +10,11 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+/**
+ * Class Helper
+ *
+ * @package RpsCompetition\Photo
+ */
 class Helper
 {
     private $request;
@@ -17,6 +22,8 @@ class Helper
     private $settings;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param Request  $request
      * @param RpsDb    $rpsdb

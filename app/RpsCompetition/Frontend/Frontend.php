@@ -18,6 +18,11 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
+/**
+ * Class Frontend
+ *
+ * @package RpsCompetition\Frontend
+ */
 class Frontend
 {
     /** @var Container */
@@ -35,7 +40,7 @@ class Frontend
     private $settings;
 
     /**
-     * PHP5 Constructor
+     * Constructor
      *
      * @param Container $container
      */

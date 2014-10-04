@@ -1,6 +1,11 @@
 <?php
 namespace RpsCompetition;
 
+/**
+ * Class Constants
+ *
+ * @package RpsCompetition
+ */
 final class Constants
 {
     const IMAGE_MAX_HEIGHT_ENTRY = 768;
