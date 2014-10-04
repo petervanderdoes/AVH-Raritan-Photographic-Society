@@ -36,9 +36,9 @@ class View
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
+        $this->request = $request;
         $this->html_builder = new HtmlBuilder();
         $this->form_builder = new FormBuilder($this->html_builder);
-        $this->request = $request;
         $this->photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         $this->season_helper = new SeasonHelper($this->settings, $this->rpsdb);
     }
@@ -47,14 +47,19 @@ class View
      * Display the Facebook thumbs for the Category Winners Page.
      *
      * @param array $entries
+     *
+     * @return string
      */
     public function renderCategoryWinnersFacebookThumbs($entries)
     {
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $output = '';
         foreach ($entries as $entry) {
-            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb') . '" />';
+            $output .= $this->html_builder->image($photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb'));
         }
         unset($photo_helper);
+
+        return $output;
     }
 
     /**
@@ -64,11 +69,10 @@ class View
      * @param string  $selected_date
      * @param boolean $is_scored_competitions
      * @param array   $months
-     * @param bool    $echo
      *
-     * @return string|void
+     * @return string
      */
-    public function renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $echo = false)
+    public function renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months)
     {
         global $post;
         $output = '<script type="text/javascript">';
@@ -95,24 +99,17 @@ class View
         $output .= $this->season_helper->getSeasonDropdown($selected_season);
         $output .= $this->form_builder->close();
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
-
-        return;
+        return $output;
     }
 
     /**
      * Render the HTML for the Monthly Entries
      *
      * @param array $data
-     * @param bool  $echo
      *
      * @return string
      */
-    public function renderMonthlyEntries($data, $echo = false)
+    public function renderMonthlyEntries($data)
     {
         $output = $this->html_builder->element('p', array('class' => 'competition-theme'));
         $output .= 'The ' . $data['count_entries'] . ' entries submitted to Raritan Photographic Society for the theme "' . $data['theme_name'] . '" held on ' . $data['date_text'];
@@ -138,24 +135,37 @@ class View
         }
         $output .= $this->html_builder->closeElement('div');
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
+        return $output;
+    }
 
-        return;
+    /**
+     * Render the Photo Credit
+     *
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return string
+     */
+    public function renderPhotoCredit($title, $first_name, $last_name)
+    {
+        $caption = $title;
+        $caption .= $this->html_builder->element('br');
+        $caption .= $this->html_builder->element('span', array('class' => 'wp-caption-credit'));
+        $caption .= "Credit: ${first_name} ${last_name}";
+        $caption .= $this->html_builder->closeElement('span');
+
+        return wptexturize($caption);
     }
 
     /**
      * Display a photo in masonry style.
      *
      * @param QueryEntries $record
-     * @param bool         $echo
      *
-     * @return string|void
+     * @return string
      */
-    public function renderPhotoMasonry($record, $echo = false)
+    public function renderPhotoMasonry($record)
     {
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
@@ -168,43 +178,31 @@ class View
         $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content-images'));
         $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800'), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
         $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w'));
-        $output .= '</a>';
-        $output .= '</div>';
-        $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-        $output .= $this->html_builder->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
-        $output .= '</div>';
+        $output .= $this->html_builder->closeElement('a');
+        $output .= $this->html_builder->closeElement('div');
+        $output .= $this->html_builder->element('figcaption', array('class' => 'wp-caption-text showcase-caption'));
+        $output .= $this->renderPhotoCredit($title, $first_name, $last_name);
+        $output .= $this->html_builder->closeElement('figcaption') . "\n";
+        $output .= $this->html_builder->closeElement('div');
 
-        $output .= '</figure>' . "\n";
+        $output .= $this->html_builder->closeElement('figure') . "\n";
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
-
-        return;
+        return $output;
     }
 
     /**
      * Display a dropdown for the given months
      *
-     * @param array   $months
-     * @param string  $selected_month
-     * @param boolean $echo
+     * @param array  $months
+     * @param string $selected_month
      *
-     * @return string|void
+     * @return string
      */
-    private function getMonthsDropdown($months, $selected_month, $echo = false)
+    private function getMonthsDropdown($months, $selected_month)
     {
 
         $output = $this->form_builder->select('new_month', $months, $selected_month, array('onChange' => 'submit_form("new_month")'));
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
-
-        return;
+        return $output;
     }
 }

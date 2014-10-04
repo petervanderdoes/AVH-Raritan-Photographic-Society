@@ -529,7 +529,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $this->view->renderCategoryWinnersFacebookThumbs($entries);
+                echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
                 return;
             }
@@ -691,7 +691,7 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $this->view->renderCategoryWinnersFacebookThumbs($entries);
+            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
@@ -760,7 +760,7 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getWinners($selected_date);
-            $this->view->renderCategoryWinnersFacebookThumbs($entries);
+            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
