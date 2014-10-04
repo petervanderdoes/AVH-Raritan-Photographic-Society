@@ -10,6 +10,11 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
+/**
+ * Class Requests
+ *
+ * @package RpsCompetition\Frontend
+ */
 class Requests
 {
     private $request;
@@ -17,6 +22,14 @@ class Requests
     private $session;
     private $settings;
 
+    /**
+     * Constructor
+     *
+     * @param Settings $settings
+     * @param RpsDb    $rpsdb
+     * @param Request  $request
+     * @param Session  $session
+     */
     public function __construct(Settings $settings, RpsDb $rpsdb, Request $request, Session $session)
     {
         $this->settings = $settings;

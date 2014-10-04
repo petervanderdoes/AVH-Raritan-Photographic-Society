@@ -10,6 +10,11 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
+/**
+ * Class View
+ *
+ * @package RpsCompetition\Frontend
+ */
 class View
 {
     private $form_builder;
@@ -21,6 +26,8 @@ class View
     private $settings;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      * @param Request  $request
@@ -37,6 +44,20 @@ class View
     }
 
     /**
+     * Display the Facebook thumbs for the Category Winners Page.
+     *
+     * @param array $entries
+     */
+    public function renderCategoryWinnersFacebookThumbs($entries)
+    {
+        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        foreach ($entries as $entry) {
+            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb') . '" />';
+        }
+        unset($photo_helper);
+    }
+
+    /**
      * Display the form for selecting the month and season.
      *
      * @param string  $selected_season
@@ -47,7 +68,7 @@ class View
      *
      * @return string|void
      */
-    public function displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $echo = false)
+    public function renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $echo = false)
     {
         global $post;
         $output = '<script type="text/javascript">';
@@ -79,6 +100,51 @@ class View
         } else {
             return $output;
         }
+
+        return;
+    }
+
+    /**
+     * Render the HTML for the Monthly Entries
+     *
+     * @param array $data
+     * @param bool  $echo
+     *
+     * @return string
+     */
+    public function renderMonthlyEntries($data, $echo = false)
+    {
+        $output = $this->html_builder->element('p', array('class' => 'competition-theme'));
+        $output .= 'The ' . $data['count_entries'] . ' entries submitted to Raritan Photographic Society for the theme "' . $data['theme_name'] . '" held on ' . $data['date_text'];
+        $output .= $this->html_builder->closeElement('p');
+
+        $output .= $this->html_builder->element('span ', array('class' => 'month-season-form'));
+        $output .= 'Select a theme or season';
+        $output .= $this->renderMonthAndSeasonSelectionForm($data['selected_season'], $data['selected_date'], $data['is_scored_competitions'], $data['months']);
+        $output .= $this->html_builder->element('p', array(), true);
+        $output .= $this->html_builder->closeElement('span');
+
+        // We display these in masonry style
+        $output .= $this->html_builder->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
+        $output .= $this->html_builder->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
+        $output .= $this->html_builder->closeElement('div');
+        $output .= $this->html_builder->element('div', array('id' => 'images'));
+        if (is_array($data['entries'])) {
+            // Iterate through all the award winners and display each thumbnail in a grid
+            /** @var QueryEntries $entry */
+            foreach ($data['entries'] as $entry) {
+                $output .= $this->renderPhotoMasonry($entry);
+            }
+        }
+        $output .= $this->html_builder->closeElement('div');
+
+        if ($echo === true) {
+            echo $output;
+        } else {
+            return $output;
+        }
+
+        return;
     }
 
     /**
@@ -89,7 +155,7 @@ class View
      *
      * @return string|void
      */
-    public function displayPhotoMasonry($record, $echo = false)
+    public function renderPhotoMasonry($record, $echo = false)
     {
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
@@ -115,6 +181,8 @@ class View
         } else {
             return $output;
         }
+
+        return;
     }
 
     /**
@@ -136,5 +204,7 @@ class View
         } else {
             return $output;
         }
+
+        return;
     }
 }

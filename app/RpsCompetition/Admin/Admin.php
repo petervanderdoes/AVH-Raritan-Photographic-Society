@@ -36,6 +36,8 @@ final class Admin
     private $status = '';
 
     /**
+     * Constructor
+     *
      * @param Container $container
      */
     public function __construct(Container $container)

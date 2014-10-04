@@ -1,12 +1,17 @@
 <?php
 namespace RpsCompetition\Db;
 
+/**
+ * Class QueryBanquet
+ *
+ * @package RpsCompetition\Db
+ */
 class QueryBanquet
 {
     private $rpsdb;
 
     /**
-     * PHP5 constructor
+     * Constructor
      *
      * @param RpsDb $rpsdb
      */

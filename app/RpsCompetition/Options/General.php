@@ -3,6 +3,11 @@ namespace RpsCompetition\Options;
 
 use Avh\Utility\OptionsAbstract;
 
+/**
+ * Class General
+ *
+ * @package RpsCompetition\Options
+ */
 final class General extends OptionsAbstract
 {
     /**
@@ -16,6 +21,10 @@ final class General extends OptionsAbstract
         'monthly_winners_post_id' => 61
     );
 
+    /**
+     * Constructor
+     *
+     */
     public function __construct()
     {
         parent::__construct();

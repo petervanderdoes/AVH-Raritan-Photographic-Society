@@ -5,17 +5,35 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+/**
+ * Class Helper
+ *
+ * @package RpsCompetition\Competition
+ */
 class Helper
 {
     private $rpsdb;
     private $settings;
 
+    /**
+     * Constructor
+     *
+     * @param Settings $settings
+     * @param RpsDb    $rpsdb
+     */
     public function __construct(Settings $settings, RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;
         $this->settings = $settings;
     }
 
+    /**
+     * Get all the media for the given competitions
+     *
+     * @param array $competitions
+     *
+     * @return array
+     */
     public function getMedium($competitions)
     {
 

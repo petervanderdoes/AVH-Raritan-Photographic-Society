@@ -17,6 +17,11 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
+/**
+ * Class Shortcodes
+ *
+ * @package RpsCompetition\Frontend
+ */
 final class Shortcodes extends ShortcodesAbstract
 {
     private $html;
@@ -27,6 +32,8 @@ final class Shortcodes extends ShortcodesAbstract
     private $view;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      * @param Request  $request
@@ -52,7 +59,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayAllScores($attr, $content, $tag)
+    public function shortcodeAllScores($attr, $content, $tag)
     {
         global $post;
 
@@ -312,7 +319,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsBanquetEntries
      */
-    public function displayBanquetCurrentUser($attr, $content, $tag)
+    public function shortcodeBanquetCurrentUser($attr, $content, $tag)
     {
         global $post;
 
@@ -498,7 +505,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayCategoryWinners($attr, $content, $tag)
+    public function shortcodeCategoryWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
@@ -522,7 +529,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $this->displayCategoryWinnersFacebookThumbs($entries);
+                $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
                 return;
             }
@@ -568,7 +575,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
      */
-    public function displayEditTitle($attr, $content, $tag)
+    public function shortcodeEditTitle($attr, $content, $tag)
     {
         global $post;
         $query_entries = new QueryEntries($this->rpsdb);
@@ -631,7 +638,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayEmail($attr, $content, $tag)
+    public function shortcodeEmail($attr, $content, $tag)
     {
         $email = $attr['email'];
         unset($attr['email']);
@@ -647,12 +654,13 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayMonthlyEntries($attr, $content, $tag)
+    public function shortcodeMonthlyEntries($attr, $content, $tag)
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_entries = new QueryEntries($this->rpsdb);
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $view_data = array();
 
         $months = array();
         $themes = array();
@@ -683,41 +691,27 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $this->displayCategoryWinnersFacebookThumbs($entries);
+            $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
 
-        echo '<span class="competition-monthly-winners-form">Select a theme or season';
-        echo $this->view->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
-        echo '<p></p></span>';
+        $view_data['selected_season'] = $selected_season;
+        $view_data['selected_date'] = $selected_date;
+        $view_data['is_scored_competitions'] = $is_scored_competitions;
+        $view_data['months'] = $months;
 
-        $output = '';
         if ($is_scored_competitions) {
             $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
-
-            // We display these in masonry style
-            $output = $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
-            $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
-            $output .= '</div>';
-            $output .= $this->html->element('div', array('id' => 'images'));
-            $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            if (is_array($entries)) {
-                // Iterate through all the award winners and display each thumbnail in a grid
-                /** @var QueryEntries $entry */
-                foreach ($entries as $entry) {
-                    $output .= $this->view->displayPhotoMasonry($entry);
-                }
-            }
-            $output .= '</div>';
-            $header = '<p class="competition-theme">The ' . count($entries) . ' entries submitted to Raritan Photographic Society for the theme "' . $themes[$selected_date] . '" held on ' . $date_text . '</p>';
-            $output = $header . $output;
+            $view_data['date_text'] = $date->format('F j, Y');
+            $view_data['theme_name'] = $themes[$selected_date];
+            $view_data['entries'] = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
+            $view_data['count_entries'] = count($view_data['entries']);
         }
 
-        echo $output;
+        echo $this->view->renderMonthlyEntries($view_data);
 
-        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper);
+        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $view_data);
     }
 
     /**
@@ -729,7 +723,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayMonthlyWinners($attr, $content, $tag)
+    public function shortcodeMonthlyWinners($attr, $content, $tag)
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -766,14 +760,14 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getWinners($selected_date);
-            $this->displayCategoryWinnersFacebookThumbs($entries);
+            $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
         // Start displaying the form
 
         echo '<span class="competition-monthly-winners-form">Select a theme or season ';
-        echo $this->view->displayMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
+        echo $this->view->renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
         echo '<p></p></span>';
 
         $output = '';
@@ -880,7 +874,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsMyEntries
      */
-    public function displayMyEntries($attr, $content, $tag)
+    public function shortcodeMyEntries($attr, $content, $tag)
     {
         global $post;
 
@@ -1137,7 +1131,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayPersonWinners($attr, $content, $tag)
+    public function shortcodePersonWinners($attr, $content, $tag)
     {
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
 
@@ -1155,7 +1149,7 @@ final class Shortcodes extends ShortcodesAbstract
         $output .= $this->html->element('div', array('id' => 'images'));
         foreach ($images as $key) {
             $recs = $entries[$key];
-            $output .= $this->view->displayPhotoMasonry($recs);
+            $output .= $this->view->renderPhotoMasonry($recs);
         }
         $output .= '</div>';
 
@@ -1173,7 +1167,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      */
-    public function displayScoresCurrentUser($attr, $content, $tag)
+    public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
         global $post;
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
@@ -1281,7 +1275,7 @@ final class Shortcodes extends ShortcodesAbstract
      *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
      */
-    public function displayUploadEntry($attr, $content, $tag)
+    public function shortcodeUploadImage($attr, $content, $tag)
     {
         global $post;
 
@@ -1330,19 +1324,5 @@ final class Shortcodes extends ShortcodesAbstract
         echo '</td></tr>';
         echo '</table>';
         echo $this->formBuilder->close();
-    }
-
-    /**
-     * Display the Facebook thumbs for the Category Winners Page.
-     *
-     * @param array $entries
-     */
-    private function displayCategoryWinnersFacebookThumbs($entries)
-    {
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-        foreach ($entries as $entry) {
-            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb') . '" /></a>';
-        }
-        unset($photo_helper);
     }
 }

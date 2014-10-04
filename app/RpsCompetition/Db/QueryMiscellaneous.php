@@ -1,15 +1,33 @@
 <?php
 namespace RpsCompetition\Db;
 
+/**
+ * Class QueryMiscellaneous
+ *
+ * @package RpsCompetition\Db
+ */
 class QueryMiscellaneous
 {
     private $rpsdb;
 
+    /**
+     * Constructor
+     *
+     * @param RpsDb $rpsdb
+     */
     public function __construct(RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;
     }
 
+    /**
+     * Count all entries between the given competition dates.
+     *
+     * @param string      $competition_date_start
+     * @param string|null $competition_date_end
+     *
+     * @return int
+     */
     public function countAllEntries($competition_date_start, $competition_date_end = null)
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;

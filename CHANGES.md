@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 1.5.2
+* Preparation for new development cycle.
+
 #### Version 1.5.1
 * Preparation for new development cycle.
 

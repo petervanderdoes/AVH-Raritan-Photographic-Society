@@ -1,6 +1,11 @@
 <?php
 namespace RpsCompetition;
 
+/**
+ * Class Constants
+ *
+ * @package RpsCompetition
+ */
 final class Constants
 {
     const IMAGE_MAX_HEIGHT_ENTRY = 768;
@@ -26,7 +31,7 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '1.5.1';
+    const PLUGIN_VERSION = '1.5.2';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
     private static $image_sizes = array (

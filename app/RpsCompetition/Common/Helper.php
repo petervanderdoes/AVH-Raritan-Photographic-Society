@@ -1,6 +1,11 @@
 <?php
 namespace RpsCompetition\Common;
 
+/**
+ * Class Helper
+ *
+ * @package RpsCompetition\Common
+ */
 class Helper
 {
     /**

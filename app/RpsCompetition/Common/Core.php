@@ -3,6 +3,11 @@ namespace RpsCompetition\Common;
 
 use RpsCompetition\Settings;
 
+/**
+ * Class Core
+ *
+ * @package RpsCompetition\Common
+ */
 class Core
 {
     /**
@@ -15,11 +20,10 @@ class Core
     private $settings;
 
     /**
-     * PHP5 constructor
+     * Constructor
      *
      * @param Settings $settings
      *
-     * @internal param Request $request
      */
     public function __construct(Settings $settings)
     {
@@ -27,34 +31,14 @@ class Core
         $this->options = get_option('avh-rps');
 
         $this->handleInitializePlugin();
-        add_action('init', array($this, 'actionInit'),10);
+        add_action('init', array($this, 'actionInit'), 10);
 
         return;
     }
 
-    public function actionInit() {
-        $this->setupRewriteRules();
-    }
-    /**
-     * Setup Rewrite rules
-     *
-     */
-    private function setupRewriteRules()
+    public function actionInit()
     {
-        $options = get_option('avh-rps');
-        $url = get_permalink($options['monthly_entries_post_id']);
-        if ($url !== false) {
-            $url = substr(parse_url($url, PHP_URL_PATH), 1);
-            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
-        }
-
-        $url = get_permalink($options['monthly_winners_post_id']);
-        if ($url !== false) {
-            $url = substr(parse_url($url, PHP_URL_PATH), 1);
-            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
-        }
-
-        flush_rewrite_rules();
+        $this->setupRewriteRules();
     }
 
     /**
@@ -108,5 +92,27 @@ class Core
         $this->settings->set('graphics_url', plugins_url('images', $this->settings->get('plugin_basename')));
         $this->settings->set('js_url', plugins_url('js', $this->settings->get('plugin_basename')));
         $this->settings->set('css_url', plugins_url('css', $this->settings->get('plugin_basename')));
+    }
+
+    /**
+     * Setup Rewrite rules
+     *
+     */
+    private function setupRewriteRules()
+    {
+        $options = get_option('avh-rps');
+        $url = get_permalink($options['monthly_entries_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
+        }
+
+        $url = get_permalink($options['monthly_winners_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
+        }
+
+        flush_rewrite_rules();
     }
 }

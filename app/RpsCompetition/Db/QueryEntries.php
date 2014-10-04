@@ -21,7 +21,7 @@ class QueryEntries
     private $rpsdb;
 
     /**
-     * PHP5 constructor
+     * Constructor
      *
      * @param RpsDb $rpsdb
      */

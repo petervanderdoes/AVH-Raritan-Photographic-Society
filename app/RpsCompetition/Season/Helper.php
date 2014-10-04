@@ -18,6 +18,8 @@ class Helper
     private $settings;
 
     /**
+     * Constructor
+     *
      * @param Settings $settings
      * @param RpsDb    $rpsdb
      */
