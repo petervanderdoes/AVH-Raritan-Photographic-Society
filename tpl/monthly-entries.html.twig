@@ -3,9 +3,15 @@
 {% if images %}
     <div id="gallery-month-entries" class="gallery gallery-masonry gallery-columns-5">
         <div class="grid-sizer" style="width: 193px"></div>
-        <div id="images"> </div>
-        {% for image in images %}
-            {% include 'inc/photo_masonry.html.twig' %}
-        {% endfor %}
+        <div id="images"></div>
+        <script type="text/javascript">
+            function getRpsMasonaryItems() {
+                var items = '';
+                {% for image in images %}
+                items += '{% include 'inc/photo_masonry.js.twig' %}';
+                {% endfor %}
+                return jQuery(items);
+            }
+        </script>
     </div>
 {% endif %}
