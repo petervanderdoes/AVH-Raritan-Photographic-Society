@@ -6,6 +6,7 @@ use Avh\Html\HtmlBuilder;
 use Avh\Network\Session;
 use Avh\Utility\ShortcodesAbstract;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryBanquet;
@@ -897,8 +898,6 @@ final class Shortcodes extends ShortcodesAbstract
             return;
         }
 
-        $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
-        $session->start();
         if ($this->request->isMethod('POST')) {
             switch ($this->request->input('submit_control')) {
 
@@ -918,15 +917,15 @@ final class Shortcodes extends ShortcodesAbstract
             }
         } else {
             $current_competition = reset($open_competitions);
-            $competition_date = $session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-            $medium = $session->get('myentries/medium', $current_competition->Medium);
+            $competition_date = $this->session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+            $medium = $this->session->get('myentries/medium', $current_competition->Medium);
         }
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
 
-        $session->set('myentries/competition_date', $current_competition->Competition_Date);
-        $session->set('myentries/medium', $current_competition->Medium);
-        $session->save();
+        $this->session->set('myentries/competition_date', $current_competition->Competition_Date);
+        $this->session->set('myentries/medium', $current_competition->Medium);
+        $this->session->save();
 
         if ($this->settings->has('errmsg')) {
             echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
