@@ -163,6 +163,19 @@ class Helper
         return $status;
     }
 
+    public function rpsGetImageSize($file_path, $size) {
+
+        $file_parts = pathinfo($file_path);
+        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
+
+        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+            $this->createThumbnail($file_path, $size);
+        }
+        $data = getimagesize($thumb_dir . '/' . $thumb_name);
+
+        return array('width'=>$data[0], 'height' => $data[1]);
+    }
     /**
      * Get the full URL for the requested thumbnail
      *

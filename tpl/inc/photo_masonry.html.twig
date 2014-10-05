@@ -2,7 +2,7 @@
     <div class="gallery-item-content">
         <div class="gallery-item-content-images">
             <a href="{{ image.url_800 }}" rel="gallery-0" title="{{ image.title }}">
-                <img src="{{ image.url_150w }}">
+                <img src="{{ image.url_150w }}" width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}">
             </a>
         </div>
         <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title }}<br><span class="wp-caption-credit">Credit: {{ image.caption.credit }}</span></figcaption>

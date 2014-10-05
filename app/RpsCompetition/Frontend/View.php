@@ -304,6 +304,7 @@ class View
         $first_name = $user_info->user_firstname;
         $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
         $data['url_150w'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w');
+        $data['dimensions'] = $this->photo_helper->rpsGetImageSize($record->Server_File_Name, '150w');
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
