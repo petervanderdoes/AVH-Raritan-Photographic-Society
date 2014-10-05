@@ -128,6 +128,7 @@ class View
         }
         $template = $this->twig->loadTemplate('monthly-entries.html.twig');
         unset ($data['entries']);
+
         return $template->render($data);
     }
 
@@ -215,27 +216,15 @@ class View
      */
     public function renderShowcaseCompetitionThumbnails($data)
     {
-        $output = '';
-        $output .= $this->html_builder->element('div', array('class' => 'rps-sc-tile suf-tile-1c entry-content bottom'));
-        $output .= $this->html_builder->element('div', array('class' => 'suf-gradient suf-tile-topmost'));
-        $output .= $this->html_builder->element('h3') . 'Showcase' . $this->html_builder->closeElement('h3');
-        $output .= $this->html_builder->closeElement('div');
 
-        $output .= $this->html_builder->element('div', array('class' => 'gallery gallery-columns-5 gallery-size-150'));
-        $output .= $this->html_builder->element('div', array('class' => 'gallery-row gallery-row-equal'));
+        $data['images'] = array();
         foreach ($data['records'] as $recs) {
-            $user_info = get_userdata($recs->Member_ID);
-            $title = $recs->Title;
-            $last_name = $user_info->user_lastname;
-            $first_name = $user_info->user_firstname;
-            // Display this thumbnail in the the next available column
-            $output .= $this->renderPhotoGallery($recs->Server_File_Name, $title, $first_name, $last_name);
+            $data['images'][] = $this->dataPhotoGallery($recs);
         }
-        $output .= $this->html_builder->closeElement('div');
-        $output .= $this->html_builder->closeElement('div');
-        $output .= $this->html_builder->closeElement('div');
+        $template = $this->twig->loadTemplate('showcase.html.twig');
+        unset ($data['records']);
 
-        return $output;
+        return $template->render($data);
     }
 
     /**
@@ -273,6 +262,30 @@ class View
         $data['credit'] = "Credit: ${first_name} ${last_name}";
 
         return $data;;
+    }
+
+    /**
+     * Collect needed data to render a photo in masonry style.
+     *
+     * @param QueryEntries $record
+     *
+     * @return string
+     */
+    private function dataPhotoGallery($record)
+    {
+
+        $data = array();
+        $user_info = get_userdata($record->Member_ID);
+        $title = $record->Title;
+        $last_name = $user_info->user_lastname;
+        $first_name = $user_info->user_firstname;
+        $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_150'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150');
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption_title'] = $title;
+        $data['caption_credit'] = $first_name . ' ' . $last_name;
+
+        return $data;
     }
 
     /**
