@@ -9,6 +9,8 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
+use Twig_Environment;
+use Twig_Loader_Filesystem;
 
 /**
  * Class View
@@ -24,6 +26,7 @@ class View
     private $rpsdb;
     private $season_helper;
     private $settings;
+    private $twig;
 
     /**
      * Constructor
@@ -41,6 +44,9 @@ class View
         $this->form_builder = new FormBuilder($this->html_builder);
         $this->photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         $this->season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
+        //$this->twig = new Twig_Environment($loader, array('cache' => $this->settings->get('upload_dir') .'/avh-rps/twig-cache/'));
+        $this->twig = new Twig_Environment($loader);
     }
 
     /**
@@ -52,12 +58,12 @@ class View
      */
     public function renderCategoryWinnersFacebookThumbs($entries)
     {
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-        $output = '';
+        $images = array();
         foreach ($entries as $entry) {
-            $output .= $this->html_builder->image($photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb'));
+            $images[] = $this->photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
         }
-        unset($photo_helper);
+        $template = $this->twig->loadTemplate('facebook.html.twig');
+        $output = $template->render(array('images' => $images));
 
         return $output;
     }
@@ -111,31 +117,18 @@ class View
      */
     public function renderMonthlyEntries($data)
     {
-        $output = $this->html_builder->element('p', array('class' => 'competition-theme'));
-        $output .= 'The ' . $data['count_entries'] . ' entries submitted to Raritan Photographic Society for the theme "' . $data['theme_name'] . '" held on ' . $data['date_text'];
-        $output .= $this->html_builder->closeElement('p');
-
-        $output .= $this->html_builder->element('span ', array('class' => 'month-season-form'));
-        $output .= 'Select a theme or season';
-        $output .= $this->renderMonthAndSeasonSelectionForm($data['selected_season'], $data['selected_date'], $data['is_scored_competitions'], $data['months']);
-        $output .= $this->html_builder->element('p', array(), true);
-        $output .= $this->html_builder->closeElement('span');
-
-        // We display these in masonry style
-        $output .= $this->html_builder->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
-        $output .= $this->html_builder->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
-        $output .= $this->html_builder->closeElement('div');
-        $output .= $this->html_builder->element('div', array('id' => 'images'));
+        $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($data['months']);
+        $data['images'] = array();
         if (is_array($data['entries'])) {
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
-                $output .= $this->renderPhotoMasonry($entry);
+                $data['images'][] = $this->dataPhotoMasonry($entry);
             }
         }
-        $output .= $this->html_builder->closeElement('div');
-
-        return $output;
+        $template = $this->twig->loadTemplate('monthly-entries.html.twig');
+        unset ($data['entries']);
+        return $template->render($data);
     }
 
     /**
@@ -182,17 +175,10 @@ class View
         $output .= $this->html_builder->closeElement('figcaption') . "\n";
         $output .= $this->html_builder->closeElement('div');
         $output .= $this->html_builder->closeElement('figure') . "\n";
-        
-       return $output;
+
+        return $output;
     }
 
-    /**
-     * Display a photo in masonry style.
-     *
-     * @param QueryEntries $record
-     *
-     * @return string
-     */
     public function renderPhotoMasonry($record)
     {
         $user_info = get_userdata($record->Member_ID);
@@ -250,6 +236,67 @@ class View
         $output .= $this->html_builder->closeElement('div');
 
         return $output;
+    }
+
+    /**
+     * Collect needed data to render the Month and Season select form
+     *
+     * @param array $months
+     *
+     * @return array
+     */
+    private function dataMonthAndSeasonSelectionForm($months)
+    {
+        global $post;
+        $data = array();
+        $data['action'] = home_url('/' . get_page_uri($post->ID));
+        $data['months'] = $months;
+        $seasons = $this->season_helper->getSeasons();
+        $data['seasons'] = array_combine($seasons, $seasons);
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render the phot credit
+     *
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return array
+     */
+    private function dataPhotoCredit($title, $first_name, $last_name)
+    {
+        $data = array();
+        $data['title'] = $title;
+        $data['credit'] = "Credit: ${first_name} ${last_name}";
+
+        return $data;;
+    }
+
+    /**
+     * Collect needed data to render a photo in masonry style.
+     *
+     * @param QueryEntries $record
+     *
+     * @return string
+     */
+    private function dataPhotoMasonry($record)
+    {
+
+        $data = array();
+        $user_info = get_userdata($record->Member_ID);
+        $title = $record->Title;
+        $last_name = $user_info->user_lastname;
+        $first_name = $user_info->user_firstname;
+        $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_150w'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w');
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption_title'] = $title;
+        $data['caption_credit'] = $first_name . ' ' . $last_name;
+
+        return $data;
     }
 
     /**
