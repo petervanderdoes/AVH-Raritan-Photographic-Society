@@ -61,14 +61,16 @@ class AVH_RPS_Client
                 return new OptionsGeneral();
             }
         );
-
+        $upload_dir_info = wp_upload_dir();
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $this->container->make('RpsCompetition\Db\RpsDb');
         $this->container->make('RpsCompetition\Options\General');
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->set('plugin_dir', $dir);
-        $this->settings->set('plugin_basename', $basename);
         $this->settings->set('plugin_file', $basename);
+        $this->settings->set('template_dir', $dir.'/tpl/');
+        $this->settings->set('plugin_basename', $basename);
+        $this->settings->set('upload_dir', $upload_dir_info['basedir']);
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
         if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
             add_action('plugins_loaded', array($this, 'load'));
