@@ -259,7 +259,7 @@ class View
     {
         $data = array();
         $data['title'] = $title;
-        $data['credit'] = "Credit: ${first_name} ${last_name}";
+        $data['credit'] = "${first_name} ${last_name}";
 
         return $data;;
     }
@@ -282,8 +282,7 @@ class View
         $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
         $data['url_150'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150');
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption_title'] = $title;
-        $data['caption_credit'] = $first_name . ' ' . $last_name;
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
@@ -306,8 +305,7 @@ class View
         $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
         $data['url_150w'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w');
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption_title'] = $title;
-        $data['caption_credit'] = $first_name . ' ' . $last_name;
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }

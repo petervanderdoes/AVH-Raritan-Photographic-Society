@@ -3,7 +3,7 @@
 {% if images %}
     <div id="gallery-month-entries" class="gallery gallery-masonry gallery-columns-5">
         <div class="grid-sizer" style="width: 193px"></div>
-        <div id="images"></div>
+        <div id="images"> </div>
         {% for image in images %}
             {% include 'inc/photo_masonry.html.twig' %}
         {% endfor %}
