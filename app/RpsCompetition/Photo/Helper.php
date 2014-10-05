@@ -45,7 +45,7 @@ class Helper
         $standard_size = array('75', '150w', '800', 'fb_thumb');
 
         foreach ($standard_size as $size) {
-            $this->createThumbnail($entry, $size);
+            $this->createThumbnail($entry->Server_File_Name, $size);
         }
     }
 
