@@ -489,6 +489,7 @@ class Frontend
             $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
             $records = $query_miscellaneous->getEightsAndHigher(5);
             $data['records'] = $records;
+            $data['thumb_size'] = '150';
             echo $this->view->renderShowcaseCompetitionThumbnails($data);
             unset($query_miscellaneous);
         }

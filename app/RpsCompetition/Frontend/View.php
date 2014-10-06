@@ -219,7 +219,7 @@ class View
 
         $data['images'] = array();
         foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->dataPhotoGallery($recs);
+            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
         }
         $template = $this->twig->loadTemplate('showcase.html.twig');
         unset ($data['records']);
@@ -227,6 +227,16 @@ class View
         return $template->render($data);
     }
 
+    public function renderCategoryWinners($data) {
+        $data['images'] = array();
+        foreach ($data['records'] as $recs) {
+            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
+        }
+        $template = $this->twig->loadTemplate('category-winners.html.twig');
+        unset ($data['records']);
+
+        return $template->render($data);
+    }
     /**
      * Collect needed data to render the Month and Season select form
      *
@@ -271,7 +281,7 @@ class View
      *
      * @return string
      */
-    private function dataPhotoGallery($record)
+    private function dataPhotoGallery($record, $thumb_size)
     {
 
         $data = array();
@@ -280,7 +290,7 @@ class View
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
         $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_150'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150');
+        $data['url_thumb'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 

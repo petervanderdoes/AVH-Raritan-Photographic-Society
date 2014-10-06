@@ -3,7 +3,7 @@
     <div class="gallery gallery-columns-5 gallery-size-150">
         <div class="gallery-row gallery-row-equal">
             {% for image in images %}
-                {% include 'inc/photo_gallery.html.twig' %}
+                {% include 'inc/photo_gallery.html.twig' with {'url_popup': image.url_800, 'url_thumb': image.url_thumb} %}
             {% endfor %}
         </div>
     </div>

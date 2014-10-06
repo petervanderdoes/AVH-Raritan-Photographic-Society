@@ -534,34 +534,11 @@ final class Shortcodes extends ShortcodesAbstract
                 return;
             }
 
-            echo '<section class="rps-showcase-category-winner">';
-            echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
-
-            echo '<div class="suf-gradient suf-tile-topmost">';
-            echo '<h3>' . $class . '</h3>';
-            echo '</div>';
-
-            echo '<div class="gallery gallery-size-250">';
-            echo '<ul class="gallery-row gallery-row-equal">';
-            foreach ($entries as $entry) {
-                $user_info = get_userdata($entry->Member_ID);
-
-                echo '<li class="gallery-item">';
-                echo '	<div class="gallery-item-content">';
-                echo '<div class="gallery-item-content-image">';
-                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, '800') . '" rel="rps-showcase' . tag_escape(
-                        $entry->Classification
-                    ) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
-                echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, '250') . '" /></a>' . "\n";
-
-                $caption = $entry->Title . "<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
-                echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
-                echo '	</div></div>';
-                echo '</li>' . "\n";
-            }
-            echo '</ul>';
-            echo '</div>';
-            echo '</section>';
+            $data=array();
+            $data['class'] = $class;
+            $data['records'] = $entries;
+            $data['thumb_size'] = '250';
+            echo $this->view->renderCategoryWinners($data);
         }
         unset($query_miscellaneous, $photo_helper);
     }
