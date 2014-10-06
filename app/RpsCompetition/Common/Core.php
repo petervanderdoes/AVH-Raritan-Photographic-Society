@@ -39,7 +39,6 @@ class Core
     public function actionInit()
     {
         $this->setupRewriteRules();
-
     }
 
     /**

@@ -38,8 +38,8 @@ class Frontend
     private $session;
     /** @var Settings */
     private $settings;
-
     private $view;
+
     /**
      * Constructor
      *
@@ -97,7 +97,6 @@ class Frontend
     {
         global $wp_query;
         global $post;
-
 
         $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
         if (WP_LOCAL_DEV !== true) {
