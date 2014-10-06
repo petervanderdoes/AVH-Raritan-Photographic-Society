@@ -50,6 +50,27 @@ class View
     }
 
     /**
+     * Collect needed data to render the Category Winners
+     *
+     * @param array $data
+     *
+     * @see Shortcodes::shortcodeCategoryWinners
+     *
+     * @return string
+     */
+    public function renderCategoryWinners($data)
+    {
+        $data['images'] = array();
+        foreach ($data['records'] as $recs) {
+            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
+        }
+        $template = $this->twig->loadTemplate('category-winners.html.twig');
+        unset ($data['records']);
+
+        return $template->render($data);
+    }
+
+    /**
      * Display the Facebook thumbs for the Category Winners Page.
      *
      * @param array $entries
@@ -63,9 +84,8 @@ class View
             $images[] = $this->photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
         }
         $template = $this->twig->loadTemplate('facebook.html.twig');
-        $output = $template->render(array('images' => $images));
 
-        return $output;
+        return $template->render(array('images' => $images));
     }
 
     /**
@@ -133,6 +153,28 @@ class View
     }
 
     /**
+     *  Render the Person winners thumbnails.
+     *
+     * @param array $data
+     *
+     * @see Shortcodes::shortcodePersonWinners
+     *
+     * @return string
+     */
+    public function renderPersonWinners($data)
+    {
+        $data['images'] = array();
+        foreach ($data['records'] as $recs) {
+            $data['images'][] = $this->dataPhotoMasonry($recs, $data['thumb_size']);
+        }
+        unset ($data['records']);
+
+        $template = $this->twig->loadTemplate('person-winners.html.twig');
+
+        return $template->render($data);
+    }
+
+    /**
      * Render the Photo Credit
      *
      * @param string $title
@@ -150,34 +192,6 @@ class View
         $caption .= $this->html_builder->closeElement('span');
 
         return wptexturize($caption);
-    }
-
-    /**
-     * Render a photo in Gallery style.
-     *
-     * @param string $file_name
-     * @param string $title
-     * @param string $first_name
-     * @param string $last_name
-     *
-     * @return string
-     */
-    public function renderPhotoGallery($file_name, $title, $first_name, $last_name)
-    {
-        $output = $this->html_builder->element('figure', array('class' => 'gallery-item'));
-        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content'));
-        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content-image'));
-        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($file_name, '800'), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-showcase'));
-        $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($file_name, '150'));
-        $output .= $this->html_builder->closeElement('a');
-        $output .= $this->html_builder->closeElement('div');
-        $output .= $this->html_builder->element('figcaption', array('class' => 'wp-caption-text showcase-caption'));
-        $output .= $this->renderPhotoCredit($title, $first_name, $last_name);
-        $output .= $this->html_builder->closeElement('figcaption') . "\n";
-        $output .= $this->html_builder->closeElement('div');
-        $output .= $this->html_builder->closeElement('figure') . "\n";
-
-        return $output;
     }
 
     public function renderPhotoMasonry($record)
@@ -216,7 +230,6 @@ class View
      */
     public function renderShowcaseCompetitionThumbnails($data)
     {
-
         $data['images'] = array();
         foreach ($data['records'] as $recs) {
             $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
@@ -227,25 +240,6 @@ class View
         return $template->render($data);
     }
 
-    /**
-     * Collect needed data to render the Category Winners
-     *
-     * @param array $data
-     *
-     * @see Shortcodes::shortcodeCategoryWinners
-     *
-     * @return string
-     */
-    public function renderCategoryWinners($data) {
-        $data['images'] = array();
-        foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
-        }
-        $template = $this->twig->loadTemplate('category-winners.html.twig');
-        unset ($data['records']);
-
-        return $template->render($data);
-    }
     /**
      * Collect needed data to render the Month and Season select form
      *
@@ -313,7 +307,7 @@ class View
      *
      * @return string
      */
-    private function dataPhotoMasonry($record)
+    private function dataPhotoMasonry($record, $thumb_size)
     {
 
         $data = array();
@@ -322,8 +316,8 @@ class View
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
         $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_150w'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w');
-        $data['dimensions'] = $this->photo_helper->rpsGetImageSize($record->Server_File_Name, '150w');
+        $data['url_thumb'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->photo_helper->rpsGetImageSize($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 

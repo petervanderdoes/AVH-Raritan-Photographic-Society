@@ -534,7 +534,7 @@ final class Shortcodes extends ShortcodesAbstract
                 return;
             }
 
-            $data=array();
+            $data = array();
             $data['class'] = $class;
             $data['records'] = $entries;
             $data['thumb_size'] = '250';
@@ -1114,23 +1114,14 @@ final class Shortcodes extends ShortcodesAbstract
 
         $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
-        echo '<section class="rps-showcases">';
-
-        echo '<div class="rps-sc-text entry-content">';
         $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
-        $images = array_rand($entries, $attr['images']);
-
-        $output = $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-3'));
-        $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
-        $output .= '</div>';
-        $output .= $this->html->element('div', array('id' => 'images'));
-        foreach ($images as $key) {
-            $recs = $entries[$key];
-            $output .= $this->view->renderPhotoMasonry($recs);
+        $entries_id = array_rand($entries, $attr['images']);
+        $data['records'] = array();
+        foreach ($entries_id as $key) {
+            $data['records'][] = $entries[$key];
         }
-        $output .= '</div>';
-
-        echo $output;
+        $data['thumb_size'] = '150w';
+        echo $this->view->renderPersonWinners($data);
 
         unset($query_miscellaneous);
     }
