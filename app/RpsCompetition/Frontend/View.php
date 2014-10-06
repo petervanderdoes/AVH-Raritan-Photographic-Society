@@ -227,6 +227,15 @@ class View
         return $template->render($data);
     }
 
+    /**
+     * Collect needed data to render the Category Winners
+     *
+     * @param array $data
+     *
+     * @see Shortcodes::shortcodeCategoryWinners
+     *
+     * @return string
+     */
     public function renderCategoryWinners($data) {
         $data['images'] = array();
         foreach ($data['records'] as $recs) {
@@ -257,7 +266,7 @@ class View
     }
 
     /**
-     * Collect needed data to render the phot credit
+     * Collect needed data to render the photo credit
      *
      * @param string $title
      * @param string $first_name
