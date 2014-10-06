@@ -143,7 +143,7 @@ class View
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
-                $data['images'][] = $this->dataPhotoMasonry($entry);
+                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size']);
             }
         }
         $template = $this->twig->loadTemplate('monthly-entries.html.twig');
@@ -172,51 +172,6 @@ class View
         $template = $this->twig->loadTemplate('person-winners.html.twig');
 
         return $template->render($data);
-    }
-
-    /**
-     * Render the Photo Credit
-     *
-     * @param string $title
-     * @param string $first_name
-     * @param string $last_name
-     *
-     * @return string
-     */
-    public function renderPhotoCredit($title, $first_name, $last_name)
-    {
-        $caption = $title;
-        $caption .= $this->html_builder->element('br');
-        $caption .= $this->html_builder->element('span', array('class' => 'wp-caption-credit'));
-        $caption .= "Credit: ${first_name} ${last_name}";
-        $caption .= $this->html_builder->closeElement('span');
-
-        return wptexturize($caption);
-    }
-
-    public function renderPhotoMasonry($record)
-    {
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
-        // Display this thumbnail in the the next available column
-        $output = '';
-        $output .= $this->html_builder->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
-        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content'));
-        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content-images'));
-        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800'), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-        $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w'));
-        $output .= $this->html_builder->closeElement('a');
-        $output .= $this->html_builder->closeElement('div');
-        $output .= $this->html_builder->element('figcaption', array('class' => 'wp-caption-text showcase-caption'));
-        $output .= $this->renderPhotoCredit($title, $first_name, $last_name);
-        $output .= $this->html_builder->closeElement('figcaption') . "\n";
-        $output .= $this->html_builder->closeElement('div');
-
-        $output .= $this->html_builder->closeElement('figure') . "\n";
-
-        return $output;
     }
 
     /**
