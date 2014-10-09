@@ -121,8 +121,8 @@ class Frontend
         $all_masonry_pages[] = $options['monthly_entries_post_id'];
         $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
         wp_deregister_script('masonry');
-        wp_register_script('masonry', $scripts_directory_uri . 'masonry.js', array(), 'to_remove', 1);
-        wp_register_script('rps-imagesloaded', $scripts_directory_uri . 'imagesloaded.js', array('masonry'), 'to_remove', true);
+        wp_register_script('masonry', $scripts_directory_uri . $masonry_script, array(), 'to_remove', 1);
+        wp_register_script('rps-imagesloaded', $scripts_directory_uri . $imagesloaded_script, array('masonry'), 'to_remove', true);
 
         //wp_enqueue_script('rps-masonry');
         //wp_enqueue_script('rps-imagesloaded');
