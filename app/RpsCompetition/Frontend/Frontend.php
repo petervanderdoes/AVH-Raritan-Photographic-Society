@@ -98,7 +98,6 @@ class Frontend
         global $wp_query;
         global $post;
 
-        $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
         if (WP_LOCAL_DEV !== true) {
             $rps_masonry_version = "a128c24";
             $masonry_version = "";
