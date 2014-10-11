@@ -12,6 +12,12 @@ use RpsCompetition\Settings;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class View
  *
