@@ -1,0 +1,17 @@
+<p class="competition-theme first-para">The {{ count_entries }} entries submitted to Raritan Photographic Society for the theme "{{ theme_name }}" held on {{ date_text }}</p>
+{% include 'inc/month_and_season_select_form.html.twig' %}
+{% if images %}
+    <div id="gallery-month-entries" class="gallery gallery-masonry gallery-columns-5">
+        <div class="grid-sizer" style="width: 193px"></div>
+        <div id="images"></div>
+        <script type="text/javascript">
+            function getRpsMasonaryItems() {
+                var items = '';
+                {% for image in images %}
+                items += '{% include 'inc/photo_masonry.js.twig' with {'url_popup': image.url_800, 'url_thumb': image.url_thumb} %}';
+                {% endfor %}
+                return jQuery(items);
+            }
+        </script>
+    </div>
+{% endif %}

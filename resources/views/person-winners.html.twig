@@ -1,0 +1,17 @@
+<section class="rps-showcases">
+    <div class="rps-sc-text entry-content">
+        <div class="gallery gallery-masonry gallery-columns-3" id="gallery-month-entries">
+            <div style="width: 193px" class="grid-sizer"></div>
+        </div>
+        <div id="images"></div>
+        <script type="text/javascript">
+            function getRpsMasonaryItems() {
+                var items = '';
+                {% for image in images %}
+                items += '{% include 'inc/photo_masonry.js.twig' with {'url_popup': image.url_800, 'url_thumb': image.url_thumb} %}';
+                {% endfor %}
+                return jQuery(items);
+            }
+        </script>
+    </div>
+</section>

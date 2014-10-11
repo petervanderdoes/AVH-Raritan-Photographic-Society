@@ -1,6 +1,12 @@
 <?php
 namespace RpsCompetition;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class Constants
  *
@@ -31,7 +37,7 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '1.6.0-dev.1';
+    const PLUGIN_VERSION = '1.6.0-dev.22';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
     private static $image_sizes = array (

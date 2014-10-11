@@ -1,6 +1,12 @@
 <?php
 namespace RpsCompetition\Common;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class Helper
  *
@@ -64,6 +70,24 @@ class Helper
         if (!is_dir($path)) {
             mkdir($path, 0755);
         }
+    }
+
+    /**
+     * Improve the default WordPress plugins_url.
+     * The standard function requires a file at the end of the 2nd parameter.
+     *
+     * @param string $file
+     * @param string $directory
+     *
+     * @return string
+     */
+    static public function getPluginUrl($file, $directory)
+    {
+        if (is_dir($directory)) {
+            $directory .= '/foo';
+        }
+
+        return plugins_url($file, $directory);
     }
 
     /**

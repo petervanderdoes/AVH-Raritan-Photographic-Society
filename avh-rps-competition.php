@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 1.6.0-dev.1
+ * Version: 1.6.0-dev.22
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -17,6 +17,12 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Settings;
+
+if(realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
+    header( 'Status: 403 Forbidden' );
+    header( 'HTTP/1.1 403 Forbidden' );
+    exit();
+}
 
 /**
  * Register The Composer Auto Loader
@@ -61,14 +67,19 @@ class AVH_RPS_Client
                 return new OptionsGeneral();
             }
         );
-
+        $upload_dir_info = wp_upload_dir();
         $this->settings = $this->container->make('RpsCompetition\Settings');
         $this->container->make('RpsCompetition\Db\RpsDb');
         $this->container->make('RpsCompetition\Options\General');
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->set('plugin_dir', $dir);
-        $this->settings->set('plugin_basename', $basename);
         $this->settings->set('plugin_file', $basename);
+        $this->settings->set('template_dir', $dir . '/resources/views/');
+        $this->settings->set('plugin_basename', $basename);
+        $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
+        $this->settings->set('javascript_dir', $dir . '/assets/js/');
+        $this->settings->set('css_dir', $dir . '/assets/css/');
+        $this->settings->set('images_dir', $dir . '/assets/images/');
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
         if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
             add_action('plugins_loaded', array($this, 'load'));

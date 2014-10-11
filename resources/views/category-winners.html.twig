@@ -1,0 +1,14 @@
+<section class="rps-showcase-category-winner">
+    <div class="rps-sc-tile suf-tile-1c entry-content bottom">
+        <div class="suf-gradient suf-tile-topmost">
+            <h3>{{ class }}</h3>
+        </div>
+        <div class="gallery gallery-columns-2 gallery-size-250">
+            <div class="gallery-row gallery-row-equal">
+                {% for image in images %}
+                    {% include 'inc/photo_gallery.html.twig' with {'url_popup': image.url_800, 'url_thumb': image.url_thumb} %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>

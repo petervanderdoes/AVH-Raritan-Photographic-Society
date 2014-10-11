@@ -10,6 +10,12 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class Helper
  *
@@ -161,6 +167,21 @@ class Helper
         }
 
         return $status;
+    }
+
+    public function rpsGetImageSize($file_path, $size)
+    {
+
+        $file_parts = pathinfo($file_path);
+        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
+
+        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+            $this->createThumbnail($file_path, $size);
+        }
+        $data = getimagesize($thumb_dir . '/' . $thumb_name);
+
+        return array('width' => $data[0], 'height' => $data[1]);
     }
 
     /**

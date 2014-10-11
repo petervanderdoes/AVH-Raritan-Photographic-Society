@@ -7,7 +7,8 @@
             isFitWidth: true
         });
         // reveal initial images
-        $container.masonryImagesReveal($('#images').find('.gallery-item-masonry'));
+        var $items = getRpsMasonaryItems();
+        $container.masonryImagesReveal($items);
     });
 
 }(window.jQuery, window, document));
@@ -20,6 +21,7 @@ jQuery.fn.masonryImagesReveal = function ($items) {
     // append to container
     this.append($items);
     $items.imagesLoaded().progress(function (imgLoad, image) {
+
         // get item
         // image is imagesLoaded class, not <img>, <img> is image.img
         var $item = jQuery(image.img).parents(itemSelector);

@@ -1,0 +1,35 @@
+<span class="month-season-form">
+    Select a theme or season<script type="text/javascript">function submit_form(control_name) {
+            document.month_season_form.submit_control.value = control_name;
+            document.month_season_form.submit();
+        }
+    </script>
+    <form action="{{ month_season_form.action }}" method="POST" name="month_season_form" accept-charset="UTF-8">
+        <input name="submit_control" type="hidden">
+        <input name="selected_season" value="{{ selected_season }}" type="hidden">
+        <input name="selected_date" value="{{ selected_date }}" type="hidden">
+        {% if is_scored_competitions == true %}
+            <select name="new_month" onchange="submit_form('new_month')">
+                {% for value,month in month_season_form.months %}
+                    {% if value == selected_date %}
+                        <option value="{{ value }}" selected="selected">{{ month }}</option>
+                    {% else %}
+                        <option value="{{ value }}">{{ month }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        {% else %}
+            No scored competitions this season.
+        {% endif %}
+        <select name="new_season" onchange="submit_form('new_season')">
+            {% for value,text in month_season_form.seasons %}
+                {% if value == selected_season %}
+                    <option value="{{ value }}" selected="selected">{{ text }}</option>
+                {% else %}
+                    <option value="{{ value }}">{{ text }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </form>
+    <p></p>
+</span>
