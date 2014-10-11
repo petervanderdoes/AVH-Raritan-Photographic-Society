@@ -118,19 +118,19 @@ class Frontend
         $options = get_option('avh-rps');
         $all_masonry_pages = array();
         $all_masonry_pages[] = $options['monthly_entries_post_id'];
-        $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
+        $javascript_directory = $this->settings->get('javascript_dir');
         wp_deregister_script('masonry');
-        wp_register_script('masonry', $scripts_directory_uri . $masonry_script, array(), 'to_remove', 1);
-        wp_register_script('rps-imagesloaded', $scripts_directory_uri . $imagesloaded_script, array('masonry'), 'to_remove', true);
+        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);
+        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), array('masonry'), 'to_remove', true);
 
         //wp_enqueue_script('rps-masonry');
         //wp_enqueue_script('rps-imagesloaded');
         if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
-            wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('rps-imagesloaded'), 'to_remove', true);
+            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
         }
 
         if (has_shortcode($post->post_content, 'rps_person_winners')) {
-            wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('rps-imagesloaded'), 'to_remove', true);
+            wp_enqueue_script('rps-masonryInit', $javascript_directory . $rps_masonry_script, array('rps-imagesloaded'), 'to_remove', true);
         }
     }
 

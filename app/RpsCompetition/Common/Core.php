@@ -89,9 +89,6 @@ class Core
         $this->settings->set('digital_chair_email', 'digitalchair@raritanphoto.com');
 
         $this->settings->set('siteurl', get_option('siteurl'));
-        $this->settings->set('graphics_url', plugins_url('images', $this->settings->get('plugin_basename')));
-        $this->settings->set('js_url', plugins_url('js', $this->settings->get('plugin_basename')));
-        $this->settings->set('css_url', plugins_url('css', $this->settings->get('plugin_basename')));
     }
 
     /**

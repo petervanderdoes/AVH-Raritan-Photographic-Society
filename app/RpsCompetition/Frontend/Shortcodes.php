@@ -960,7 +960,7 @@ final class Shortcodes extends ShortcodesAbstract
                 $img = '';
         }
 
-        echo '<img src="' . plugins_url('/images' . $img, $this->settings->get('plugin_basename')) . '">';
+        echo '<img src="' . CommonHelper::getPluginUrl($img, $this->settings->get('images_dir')) . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
         echo "<table width=\"100%\">\n";

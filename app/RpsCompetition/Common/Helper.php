@@ -67,6 +67,24 @@ class Helper
     }
 
     /**
+     * Improve the default WordPress plugins_url.
+     * The standard function requires a file at the end of the 2nd parameter.
+     *
+     * @param string $file
+     * @param string $directory
+     *
+     * @return string
+     */
+    static public function getPluginUrl($file, $directory)
+    {
+        if (is_dir($directory)) {
+            $directory .= '/foo';
+        }
+
+        return plugins_url($file, $directory);
+    }
+
+    /**
      * Get the user classification based on the medium
      *
      * @param integer $userID

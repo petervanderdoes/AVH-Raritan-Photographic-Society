@@ -68,9 +68,12 @@ class AVH_RPS_Client
         $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
         $this->settings->set('plugin_dir', $dir);
         $this->settings->set('plugin_file', $basename);
-        $this->settings->set('template_dir', $dir.'/tpl/');
+        $this->settings->set('template_dir', $dir . '/resources/views/');
         $this->settings->set('plugin_basename', $basename);
-        $this->settings->set('upload_dir', $upload_dir_info['basedir']);
+        $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
+        $this->settings->set('javascript_dir', $dir . '/assets/js/');
+        $this->settings->set('css_dir', $dir . '/assets/css/');
+        $this->settings->set('images_dir', $dir . '/assets/images/');
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
         if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
             add_action('plugins_loaded', array($this, 'load'));

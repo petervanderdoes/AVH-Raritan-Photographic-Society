@@ -82,9 +82,9 @@ final class Admin
      */
     public function actionAdminMenu()
     {
-        wp_register_style('avhrps-admin-css', plugins_url('/css/avh-rps.admin.css', $this->settings->get('plugin_basename')), array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
-        wp_register_style('avhrps-jquery-css', plugins_url('/css/smoothness/jquery-ui-1.8.22.custom.css', $this->settings->get('plugin_basename')), array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', plugins_url('/js/avh-rps.admin.ajax.js', $this->settings->get('plugin_basename')), array('jquery'), false, true);
+        wp_register_style('avhrps-admin-css', CommonHelper::getPluginUrl('avh-rps.admin.css', $this->settings->get('css_dir')), array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-jquery-css', CommonHelper::getPluginUrl('smoothness/jquery-ui-1.8.22.custom.css', $this->settings->get('css_dir')), array('wp-admin'), '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', CommonHelper::getPluginUrl('avh-rps.admin.ajax.js', $this->settings->get('javascript_dir')), array('jquery'), false, true);
 
         add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this, 'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
 
@@ -1477,7 +1477,7 @@ final class Admin
         echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
-        echo '   buttonImage: "' . plugins_url("/images/calendar.png", $this->settings->get('plugin_basename')) . '", ' . "\n";
+        echo '   buttonImage: "' . CommonHelper::getPluginUrl("calendar.png", $this->settings->get('images_dir')) . '", ' . "\n";
         echo '   showOn: "both"' . "\n";
         echo ' });' . "\n";
         echo '});', "\n";

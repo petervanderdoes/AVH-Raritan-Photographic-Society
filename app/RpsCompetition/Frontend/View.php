@@ -45,7 +45,7 @@ class View
         $this->photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         $this->season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
-        //$this->twig = new Twig_Environment($loader, array('cache' => $this->settings->get('upload_dir') .'/avh-rps/twig-cache/'));
+        //$this->twig = new Twig_Environment($loader, array('cache' => $this->settings->get('upload_dir') .'/twig-cache/'));
         $this->twig = new Twig_Environment($loader);
     }
 
