@@ -105,7 +105,7 @@ class Frontend
         global $post;
 
         if (WP_LOCAL_DEV !== true) {
-            $rps_masonry_version = "a128c24";
+            $rps_masonry_version = "";
             $masonry_version = "";
             $imagesloaded_version = "";
             $version_separator = '-';
