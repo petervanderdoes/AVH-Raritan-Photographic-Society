@@ -246,9 +246,9 @@ class Frontend
                 $comp_date = $this->request->input('comp_date');
                 $classification = $this->request->input('classification');
                 $medium = $this->request->input('medium');
-                $t = time() + (2 * 24 * 3600);
+                $time = time() + (2 * 24 * 3600);
                 $url = parse_url(get_bloginfo('url'));
-                setcookie("RPS_MyEntries", $comp_date . "|" . $classification . "|" . $medium, $t, '/', $url['host']);
+                setcookie("RPS_MyEntries", $comp_date . "|" . $classification . "|" . $medium, $time, '/', $url['host']);
 
                 $entry_array = $this->request->input('EntryID', null);
 
