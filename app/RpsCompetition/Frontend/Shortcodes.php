@@ -6,7 +6,6 @@ use Avh\Html\HtmlBuilder;
 use Avh\Network\Session;
 use Avh\Utility\ShortcodesAbstract;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cookie;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryBanquet;
@@ -592,7 +591,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<table>';
         echo '<tr><td align="center" colspan="2">';
 
-        echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '200') . "\" />\n";
+        echo "<img src=\"" . $photo_helper->getThumbnailUrl($recs->Server_File_Name, '200') . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
         echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
@@ -819,8 +818,8 @@ final class Shortcodes extends ShortcodesAbstract
                 $output .= "<td align=\"center\" class=\"thumb_cell\">\n";
                 $output .= "<div class=\"thumb_canvas\">\n";
                 $rel_text = tag_escape($classification) . tag_escape($medium);
-                $output .= "<a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, '800') . "\" rel=\"" . $rel_text . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                $output .= "<img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, '75') . "\" /></a>\n";
+                $output .= "<a href=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '800') . "\" rel=\"" . $rel_text . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                $output .= "<img class=\"thumb_img\" src=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '75') . "\" /></a>\n";
                 $output .= "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
                 $output .= "</div>\n</td>\n";
                 $column += 1;
@@ -1044,7 +1043,7 @@ final class Shortcodes extends ShortcodesAbstract
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
             echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium . '">' . "\n";
-            echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '75') . "\" />\n";
+            echo "<img src=\"" . $photo_helper->getThumbnailUrl($recs->Server_File_Name, '75') . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
@@ -1122,6 +1121,7 @@ final class Shortcodes extends ShortcodesAbstract
 
         $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
         $entries_id = array_rand($entries, $attr['images']);
+        $data = array();
         $data['records'] = array();
         foreach ($entries_id as $key) {
             $data['records'][] = $entries[$key];

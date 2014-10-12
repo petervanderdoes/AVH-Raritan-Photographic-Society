@@ -422,7 +422,7 @@ class Frontend
             if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
 
                 // Resize the image and deposit it in the destination directory
-                $photo_helper->rpsResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
+                $photo_helper->doResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
                 $resized = 1;
             } else {
                 // The uploaded image does not need to be resized so just move it to the destination directory
@@ -492,6 +492,7 @@ class Frontend
         if (is_front_page()) {
             $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
             $records = $query_miscellaneous->getEightsAndHigher(5);
+            $data = array();
             $data['records'] = $records;
             $data['thumb_size'] = '150';
             echo $this->view->renderShowcaseCompetitionThumbnails($data);

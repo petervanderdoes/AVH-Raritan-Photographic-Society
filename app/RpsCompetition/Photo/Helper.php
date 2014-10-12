@@ -70,7 +70,7 @@ class Helper
         CommonHelper::createDirectory($thumb_dir);
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
+            $this->doResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
         }
     }
 
@@ -169,7 +169,15 @@ class Helper
         return $status;
     }
 
-    public function rpsGetImageSize($file_path, $size)
+    /**
+     * Get the image size of the given thumbnail file
+     *
+     * @param string $file_path
+     * @param string $size
+     *
+     * @return array
+     */
+    public function getThumbnailImageSize($file_path, $size)
     {
 
         $file_parts = pathinfo($file_path);
@@ -192,7 +200,7 @@ class Helper
      *
      * @return string
      */
-    public function rpsGetThumbnailUrl($file_path, $size)
+    public function getThumbnailUrl($file_path, $size)
     {
         $this->createThumbnail($file_path, $size);
         $file_parts = pathinfo($file_path);
@@ -219,7 +227,7 @@ class Helper
      *
      * @return boolean
      */
-    public function rpsResizeImage($image_name, $thumb_path, $thumb_name, $size)
+    public function doResizeImage($image_name, $thumb_path, $thumb_name, $size)
     {
         // Open the original image
         if (!file_exists($image_name)) {

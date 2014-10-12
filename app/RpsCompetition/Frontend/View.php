@@ -87,7 +87,7 @@ class View
     {
         $images = array();
         foreach ($entries as $entry) {
-            $images[] = $this->photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
+            $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
         }
         $template = $this->twig->loadTemplate('facebook.html.twig');
 
@@ -233,7 +233,7 @@ class View
     {
         $data = array();
         $data['title'] = $title;
-        $data['credit'] = "${first_name} ${last_name}";
+        $data['credit'] = "$first_name $last_name";
 
         return $data;;
     }
@@ -243,7 +243,7 @@ class View
      *
      * @param QueryEntries $record
      *
-     * @return string
+     * @return array<string,string|array>
      */
     private function dataPhotoGallery($record, $thumb_size)
     {
@@ -253,8 +253,8 @@ class View
         $title = $record->Title;
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
-        $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
@@ -266,7 +266,7 @@ class View
      *
      * @param QueryEntries $record
      *
-     * @return string
+     * @return array<string,string|array>
      */
     private function dataPhotoMasonry($record, $thumb_size)
     {
@@ -276,9 +276,9 @@ class View
         $title = $record->Title;
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
-        $data['url_800'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, $thumb_size);
-        $data['dimensions'] = $this->photo_helper->rpsGetImageSize($record->Server_File_Name, $thumb_size);
+        $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
