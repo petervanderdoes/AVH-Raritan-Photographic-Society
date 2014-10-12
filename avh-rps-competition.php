@@ -18,9 +18,9 @@ use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Settings;
 
-if(realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
-    header( 'Status: 403 Forbidden' );
-    header( 'HTTP/1.1 403 Forbidden' );
+if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
     exit();
 }
 

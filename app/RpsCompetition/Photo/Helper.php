@@ -108,115 +108,6 @@ class Helper
     }
 
     /**
-     * Get the path to the competition
-     * Returns the path to the competition where we store the photo entries.
-     *
-     * @param string $competition_date
-     * @param string $classification
-     * @param string $medium
-     *
-     * @return string
-     */
-    public function getCompetitionPath($competition_date, $classification, $medium)
-    {
-        $date = new \DateTime($competition_date);
-
-        return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
-    }
-
-    /**
-     * Remove the thumbnails of the given entry.
-     *
-     * @param string $path Path to original file. The thumbnails directory is located in this directory.
-     * @param string $name
-     */
-    public function removeThumbnails($path, $name)
-    {
-        if (is_dir($path . "/thumbnails")) {
-            $thumb_base_name = $path . "/thumbnails/" . $name;
-            // Get all the matching thumbnail files
-            $thumbnails = glob("$thumb_base_name*");
-            // Iterate through the list of matching thumbnails and rename each one
-            if (is_array($thumbnails) && count($thumbnails) > 0) {
-                foreach ($thumbnails as $thumb) {
-                    unlink($thumb);
-                }
-            }
-        }
-    }
-
-    /**
-     * Rename an already uploaded entry.
-     * Besides renaming the original upload, we also rename all the thumbnails.
-     *
-     * @param string $path
-     * @param string $old_name
-     * @param string $new_name
-     * @param string $ext
-     *
-     * @return boolean
-     */
-    public function renameImageFile($path, $old_name, $new_name, $ext)
-    {
-        $path = $this->request->server('DOCUMENT_ROOT') . $path;
-        // Rename the main image file
-        $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
-        if ($status) {
-            // Rename any and all thumbnails of this file
-            $this->removeThumbnails($path, $old_name);
-        }
-
-        return $status;
-    }
-
-    /**
-     * Get the image size of the given thumbnail file
-     *
-     * @param string $file_path
-     * @param string $size
-     *
-     * @return array
-     */
-    public function getThumbnailImageSize($file_path, $size)
-    {
-
-        $file_parts = pathinfo($file_path);
-        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
-        $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
-
-        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->createThumbnail($file_path, $size);
-        }
-        $data = getimagesize($thumb_dir . '/' . $thumb_name);
-
-        return array('width' => $data[0], 'height' => $data[1]);
-    }
-
-    /**
-     * Get the full URL for the requested thumbnail
-     *
-     * @param string $file_path
-     * @param string $size
-     *
-     * @return string
-     */
-    public function getThumbnailUrl($file_path, $size)
-    {
-        $this->createThumbnail($file_path, $size);
-        $file_parts = pathinfo($file_path);
-        $path_parts = explode('/', $file_parts['dirname']);
-        $path = home_url();
-        foreach ($path_parts as $part) {
-            $path .= rawurlencode($part) . '/';
-        }
-        $path .= 'thumbnails/';
-
-        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
-
-        return ($path);
-    }
-
-    /**
      * Resize an image.
      * Resize a given image to the given size
      *
@@ -269,5 +160,114 @@ class Helper
         $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
 
         return true;
+    }
+
+    /**
+     * Get the path to the competition
+     * Returns the path to the competition where we store the photo entries.
+     *
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
+     *
+     * @return string
+     */
+    public function getCompetitionPath($competition_date, $classification, $medium)
+    {
+        $date = new \DateTime($competition_date);
+
+        return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
+    }
+
+    /**
+     * Get the image size of the given thumbnail file
+     *
+     * @param string $file_path
+     * @param string $size
+     *
+     * @return array
+     */
+    public function getThumbnailImageSize($file_path, $size)
+    {
+
+        $file_parts = pathinfo($file_path);
+        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
+
+        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+            $this->createThumbnail($file_path, $size);
+        }
+        $data = getimagesize($thumb_dir . '/' . $thumb_name);
+
+        return array('width' => $data[0], 'height' => $data[1]);
+    }
+
+    /**
+     * Get the full URL for the requested thumbnail
+     *
+     * @param string $file_path
+     * @param string $size
+     *
+     * @return string
+     */
+    public function getThumbnailUrl($file_path, $size)
+    {
+        $this->createThumbnail($file_path, $size);
+        $file_parts = pathinfo($file_path);
+        $path_parts = explode('/', $file_parts['dirname']);
+        $path = home_url();
+        foreach ($path_parts as $part) {
+            $path .= rawurlencode($part) . '/';
+        }
+        $path .= 'thumbnails/';
+
+        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
+
+        return ($path);
+    }
+
+    /**
+     * Remove the thumbnails of the given entry.
+     *
+     * @param string $path Path to original file. The thumbnails directory is located in this directory.
+     * @param string $name
+     */
+    public function removeThumbnails($path, $name)
+    {
+        if (is_dir($path . "/thumbnails")) {
+            $thumb_base_name = $path . "/thumbnails/" . $name;
+            // Get all the matching thumbnail files
+            $thumbnails = glob("$thumb_base_name*");
+            // Iterate through the list of matching thumbnails and rename each one
+            if (is_array($thumbnails) && count($thumbnails) > 0) {
+                foreach ($thumbnails as $thumb) {
+                    unlink($thumb);
+                }
+            }
+        }
+    }
+
+    /**
+     * Rename an already uploaded entry.
+     * Besides renaming the original upload, we also rename all the thumbnails.
+     *
+     * @param string $path
+     * @param string $old_name
+     * @param string $new_name
+     * @param string $ext
+     *
+     * @return boolean
+     */
+    public function renameImageFile($path, $old_name, $new_name, $ext)
+    {
+        $path = $this->request->server('DOCUMENT_ROOT') . $path;
+        // Rename the main image file
+        $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
+        if ($status) {
+            // Rename any and all thumbnails of this file
+            $this->removeThumbnails($path, $old_name);
+        }
+
+        return $status;
     }
 }
