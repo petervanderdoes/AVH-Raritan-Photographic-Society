@@ -238,13 +238,14 @@ class View
         $data['title'] = $title;
         $data['credit'] = "$first_name $last_name";
 
-        return $data;;
+        return $data;
     }
 
     /**
      * Collect needed data to render a photo in masonry style.
      *
      * @param QueryEntries $record
+     * @param string       $thumb_size
      *
      * @return array<string,string|array>
      */
@@ -268,6 +269,7 @@ class View
      * Collect needed data to render a photo in masonry style.
      *
      * @param QueryEntries $record
+     * @param string       $thumb_size
      *
      * @return array<string,string|array>
      */
