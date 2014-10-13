@@ -7,7 +7,7 @@
             isFitWidth: true
         });
         // reveal initial images
-        var $items = getRpsMasonaryItems();
+        var $items = getRpsMasonryItems();
         $container.masonryImagesReveal($items);
     });
 

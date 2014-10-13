@@ -5,7 +5,7 @@
         </div>
         <div id="images"></div>
         <script type="text/javascript">
-            function getRpsMasonaryItems() {
+            function getRpsMasonryItems() {
                 var items = '';
                 {% for image in images %}
                 items += '{% include 'inc/photo_masonry.js.twig' with {'url_popup': image.url_800, 'url_thumb': image.url_thumb} %}';
