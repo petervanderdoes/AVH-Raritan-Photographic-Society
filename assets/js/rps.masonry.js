@@ -1,7 +1,7 @@
 (function ($, window, document) {
     // The $ is now locally scoped
     $(document).ready(function () {
-        var $container = $('#gallery-month-entries').masonry({
+        var $container = $('.gallery-masonry').masonry({
             itemSelector: '.gallery-item-masonry',
             columnWidth: '.grid-sizer',
             isFitWidth: true

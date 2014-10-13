@@ -683,7 +683,7 @@ final class Shortcodes extends ShortcodesAbstract
         $view_data['selected_date'] = $selected_date;
         $view_data['is_scored_competitions'] = $is_scored_competitions;
         $view_data['months'] = $months;
-        $view_data['thumb_size'] = '150';
+        $view_data['thumb_size'] = '150w';
 
         if ($is_scored_competitions) {
             $date = new \DateTime($selected_date);
