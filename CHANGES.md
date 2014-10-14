@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.0-rc.1
+#### Version 2.0.0
 * Start using twig templates.
 * Creation of common thumbnails fails
 * Sitemap failure
