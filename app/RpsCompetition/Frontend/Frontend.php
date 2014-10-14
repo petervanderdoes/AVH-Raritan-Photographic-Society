@@ -111,9 +111,9 @@ class Frontend
             $imagesloaded_version = "37b35d4";
             $version_separator = '-';
         } else {
-            $rps_masonry_version = "867ece1";
-            $masonry_version = "37b35d4";
-            $imagesloaded_version = "37b35d4";
+            $rps_masonry_version = "";
+            $masonry_version = "";
+            $imagesloaded_version = "";
             $version_separator = '';
         }
 
