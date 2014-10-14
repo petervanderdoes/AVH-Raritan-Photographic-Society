@@ -9,6 +9,14 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
+use Twig_Environment;
+use Twig_Loader_Filesystem;
+
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
 
 /**
  * Class View
@@ -24,6 +32,7 @@ class View
     private $rpsdb;
     private $season_helper;
     private $settings;
+    private $twig;
 
     /**
      * Constructor
@@ -36,25 +45,97 @@ class View
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
+        $this->request = $request;
         $this->html_builder = new HtmlBuilder();
         $this->form_builder = new FormBuilder($this->html_builder);
-        $this->request = $request;
         $this->photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
         $this->season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
+        if (WP_LOCAL_DEV !== true) {
+            $this->twig = new Twig_Environment($loader, array('cache' => $this->settings->get('upload_dir') . '/twig-cache/'));
+        } else {
+            $this->twig = new Twig_Environment($loader);
+        }
+    }
+
+    /**
+     * Collect needed data to render the Category Winners
+     *
+     * @param array $data
+     *
+     * @see Shortcodes::shortcodeCategoryWinners
+     *
+     * @return string
+     */
+    public function renderCategoryWinners($data)
+    {
+        $data['images'] = array();
+        foreach ($data['records'] as $recs) {
+            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
+        }
+        $template = $this->twig->loadTemplate('category-winners.html.twig');
+        unset ($data['records']);
+
+        return $template->render($data);
     }
 
     /**
      * Display the Facebook thumbs for the Category Winners Page.
      *
      * @param array $entries
+     *
+     * @return string
      */
     public function renderCategoryWinnersFacebookThumbs($entries)
     {
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $images = array();
         foreach ($entries as $entry) {
-            echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, 'fb_thumb') . '" />';
+            $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
         }
-        unset($photo_helper);
+        $template = $this->twig->loadTemplate('facebook.html.twig');
+
+        return $template->render(array('images' => $images));
+    }
+
+    /**
+     * Display the Gallery as Masonry.
+     *
+     * @param array $attachments
+     *
+     * @return string
+     */
+    public function renderGalleryMasonry($attachments)
+    {
+        $data = array();
+
+        $data['thumb_size'] = '150w';
+        foreach ($attachments as $id => $attachment) {
+            $img_url = wp_get_attachment_url($id);
+            $home_url = home_url();
+            if (substr($img_url, 0, strlen($home_url)) == $home_url) {
+                $entry = new \stdClass;
+                $img_relative_path = substr($img_url, strlen($home_url));
+                $entry->Server_File_Name = $img_relative_path;
+                $entry->ID = $attachment->ID;
+                $entries[] = $entry;
+            }
+        }
+
+        foreach ($entries as $entry) {
+            if (trim($attachment->post_excerpt)) {
+                $caption_data['title'] = $attachment->post_excerpt;
+            } else {
+                $caption_data['title'] = '';
+            }
+            $caption_data['first_name'] = get_post_meta($entry->ID, '_rps_photographer_name', true);
+            $caption_data['last_name'] = '';
+
+            $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
+        }
+
+        $template = $this->twig->loadTemplate('gallery-masonry.html.twig');
+
+        return $template->render($data);
     }
 
     /**
@@ -64,11 +145,10 @@ class View
      * @param string  $selected_date
      * @param boolean $is_scored_competitions
      * @param array   $months
-     * @param bool    $echo
      *
-     * @return string|void
+     * @return string
      */
-    public function renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months, $echo = false)
+    public function renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months)
     {
         global $post;
         $output = '<script type="text/javascript">';
@@ -95,116 +175,174 @@ class View
         $output .= $this->season_helper->getSeasonDropdown($selected_season);
         $output .= $this->form_builder->close();
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
-
-        return;
+        return $output;
     }
 
     /**
      * Render the HTML for the Monthly Entries
      *
      * @param array $data
-     * @param bool  $echo
      *
      * @return string
      */
-    public function renderMonthlyEntries($data, $echo = false)
+    public function renderMonthlyEntries($data)
     {
-        $output = $this->html_builder->element('p', array('class' => 'competition-theme'));
-        $output .= 'The ' . $data['count_entries'] . ' entries submitted to Raritan Photographic Society for the theme "' . $data['theme_name'] . '" held on ' . $data['date_text'];
-        $output .= $this->html_builder->closeElement('p');
-
-        $output .= $this->html_builder->element('span ', array('class' => 'month-season-form'));
-        $output .= 'Select a theme or season';
-        $output .= $this->renderMonthAndSeasonSelectionForm($data['selected_season'], $data['selected_date'], $data['is_scored_competitions'], $data['months']);
-        $output .= $this->html_builder->element('p', array(), true);
-        $output .= $this->html_builder->closeElement('span');
-
-        // We display these in masonry style
-        $output .= $this->html_builder->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-5'));
-        $output .= $this->html_builder->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
-        $output .= $this->html_builder->closeElement('div');
-        $output .= $this->html_builder->element('div', array('id' => 'images'));
+        $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($data['months']);
+        $data['images'] = array();
         if (is_array($data['entries'])) {
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
-                $output .= $this->renderPhotoMasonry($entry);
+                $user_info = get_userdata($entry->Member_ID);
+                $caption_data = array('title' => $entry->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname);
+                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
             }
         }
-        $output .= $this->html_builder->closeElement('div');
+        $template = $this->twig->loadTemplate('monthly-entries.html.twig');
+        unset ($data['entries']);
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
-
-        return;
+        return $template->render($data);
     }
 
     /**
-     * Display a photo in masonry style.
+     *  Render the Person winners thumbnails.
+     *
+     * @param array $data
+     *
+     * @see Shortcodes::shortcodePersonWinners
+     *
+     * @return string
+     */
+    public function renderPersonWinners($data)
+    {
+        $data['images'] = array();
+        foreach ($data['records'] as $recs) {
+            $user_info = get_userdata($recs->Member_ID);
+            $caption_data = array('title' => $recs->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname);
+            $data['images'][] = $this->dataPhotoMasonry($recs, $data['thumb_size'], $caption_data);
+        }
+        unset ($data['records']);
+
+        $template = $this->twig->loadTemplate('person-winners.html.twig');
+
+        return $template->render($data);
+    }
+
+    /**
+     * Render the Showcase competition thumbnails
+     *
+     * @param array $data
+     *
+     * @see Frontend::actionShowcaseCompetitionThumbnails
+     *
+     * @return string
+     */
+    public function renderShowcaseCompetitionThumbnails($data)
+    {
+        $data['images'] = array();
+        foreach ($data['records'] as $recs) {
+            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
+        }
+        $template = $this->twig->loadTemplate('showcase.html.twig');
+        unset ($data['records']);
+
+        return $template->render($data);
+    }
+
+    /**
+     * Collect needed data to render the Month and Season select form
+     *
+     * @param array $months
+     *
+     * @return array
+     */
+    private function dataMonthAndSeasonSelectionForm($months)
+    {
+        global $post;
+        $data = array();
+        $data['action'] = home_url('/' . get_page_uri($post->ID));
+        $data['months'] = $months;
+        $seasons = $this->season_helper->getSeasons();
+        $data['seasons'] = array_combine($seasons, $seasons);
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render the photo credit
+     *
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return array
+     */
+    private function dataPhotoCredit($title, $first_name, $last_name)
+    {
+        $data = array();
+        $data['title'] = $title;
+        $data['credit'] = "$first_name $last_name";
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render a photo in masonry style.
      *
      * @param QueryEntries $record
-     * @param bool         $echo
+     * @param string       $thumb_size
      *
-     * @return string|void
+     * @return array<string,string|array>
      */
-    public function renderPhotoMasonry($record, $echo = false)
+    private function dataPhotoGallery($record, $thumb_size)
     {
+
+        $data = array();
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
-        // Display this thumbnail in the the next available column
-        $output = '';
-        $output .= $this->html_builder->element('figure', array('class' => 'gallery-item-masonry masonry-150'));
-        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content'));
-        $output .= $this->html_builder->element('div', array('class' => 'gallery-item-content-images'));
-        $output .= $this->html_builder->element('a', array('href' => $this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '800'), 'title' => $title . ' by ' . $first_name . ' ' . $last_name, 'rel' => 'rps-entries'));
-        $output .= $this->html_builder->image($this->photo_helper->rpsGetThumbnailUrl($record->Server_File_Name, '150w'));
-        $output .= '</a>';
-        $output .= '</div>';
-        $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-        $output .= $this->html_builder->element('figcaption', array('class' => 'wp-caption-text showcase-caption')) . wptexturize($caption) . "</figcaption>\n";
-        $output .= '</div>';
+        $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
-        $output .= '</figure>' . "\n";
+        return $data;
+    }
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
+    /**
+     * Collect needed data to render a photo in masonry style.
+     *
+     * @param QueryEntries $record
+     * @param string       $thumb_size
+     * @param  array       $caption
+     *
+     * @return array<string,string|array>
+     */
+    private function dataPhotoMasonry($record, $thumb_size, $caption)
+    {
+        $data = array();
+        $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
+        $data['caption'] = $this->dataPhotoCredit($caption['title'], $caption['first_name'], $caption['last_name']);
 
-        return;
+        return $data;
     }
 
     /**
      * Display a dropdown for the given months
      *
-     * @param array   $months
-     * @param string  $selected_month
-     * @param boolean $echo
+     * @param array  $months
+     * @param string $selected_month
      *
-     * @return string|void
+     * @return string
      */
-    private function getMonthsDropdown($months, $selected_month, $echo = false)
+    private function getMonthsDropdown($months, $selected_month)
     {
 
         $output = $this->form_builder->select('new_month', $months, $selected_month, array('onChange' => 'submit_form("new_month")'));
 
-        if ($echo === true) {
-            echo $output;
-        } else {
-            return $output;
-        }
-
-        return;
+        return $output;
     }
 }

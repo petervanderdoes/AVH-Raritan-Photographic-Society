@@ -6,6 +6,12 @@ use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class WpseoHelper
  *
@@ -173,6 +179,13 @@ class WpseoHelper
         }
 
         if (has_shortcode($post_content, 'rps_monthly_winners')) {
+            $post_content = do_shortcode($post_content);
+            $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
+
+            return $post_content;
+        }
+
+        if (has_shortcode($post_content, 'gallery')) {
             $post_content = do_shortcode($post_content);
             $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
 

@@ -17,6 +17,12 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class Shortcodes
  *
@@ -529,39 +535,16 @@ final class Shortcodes extends ShortcodesAbstract
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $this->view->renderCategoryWinnersFacebookThumbs($entries);
+                echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
                 return;
             }
 
-            echo '<section class="rps-showcase-category-winner">';
-            echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
-
-            echo '<div class="suf-gradient suf-tile-topmost">';
-            echo '<h3>' . $class . '</h3>';
-            echo '</div>';
-
-            echo '<div class="gallery gallery-size-250">';
-            echo '<ul class="gallery-row gallery-row-equal">';
-            foreach ($entries as $entry) {
-                $user_info = get_userdata($entry->Member_ID);
-
-                echo '<li class="gallery-item">';
-                echo '	<div class="gallery-item-content">';
-                echo '<div class="gallery-item-content-image">';
-                echo '	<a href="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, '800') . '" rel="rps-showcase' . tag_escape(
-                        $entry->Classification
-                    ) . '" title="' . $entry->Title . ' by ' . $user_info->user_firstname . ' ' . $user_info->user_lastname . '">';
-                echo '	<img class="thumb_img" src="' . $photo_helper->rpsGetThumbnailUrl($entry->Server_File_Name, '250') . '" /></a>' . "\n";
-
-                $caption = $entry->Title . "<br /><span class='wp-caption-credit'>Credit: $user_info->user_firstname $user_info->user_lastname";
-                echo "<p class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</p>\n";
-                echo '	</div></div>';
-                echo '</li>' . "\n";
-            }
-            echo '</ul>';
-            echo '</div>';
-            echo '</section>';
+            $data = array();
+            $data['class'] = $class;
+            $data['records'] = $entries;
+            $data['thumb_size'] = '250';
+            echo $this->view->renderCategoryWinners($data);
         }
         unset($query_miscellaneous, $photo_helper);
     }
@@ -608,7 +591,7 @@ final class Shortcodes extends ShortcodesAbstract
         echo '<table>';
         echo '<tr><td align="center" colspan="2">';
 
-        echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '200') . "\" />\n";
+        echo "<img src=\"" . $photo_helper->getThumbnailUrl($recs->Server_File_Name, '200') . "\" />\n";
         echo '</td></tr>';
         echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
         echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
@@ -691,7 +674,7 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $this->view->renderCategoryWinnersFacebookThumbs($entries);
+            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
@@ -700,6 +683,7 @@ final class Shortcodes extends ShortcodesAbstract
         $view_data['selected_date'] = $selected_date;
         $view_data['is_scored_competitions'] = $is_scored_competitions;
         $view_data['months'] = $months;
+        $view_data['thumb_size'] = '150w';
 
         if ($is_scored_competitions) {
             $date = new \DateTime($selected_date);
@@ -760,7 +744,7 @@ final class Shortcodes extends ShortcodesAbstract
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
             $entries = $query_miscellaneous->getWinners($selected_date);
-            $this->view->renderCategoryWinnersFacebookThumbs($entries);
+            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
 
             return;
         }
@@ -834,8 +818,8 @@ final class Shortcodes extends ShortcodesAbstract
                 $output .= "<td align=\"center\" class=\"thumb_cell\">\n";
                 $output .= "<div class=\"thumb_canvas\">\n";
                 $rel_text = tag_escape($classification) . tag_escape($medium);
-                $output .= "<a href=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, '800') . "\" rel=\"" . $rel_text . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                $output .= "<img class=\"thumb_img\" src=\"" . $photo_helper->rpsGetThumbnailUrl($competition->Server_File_Name, '75') . "\" /></a>\n";
+                $output .= "<a href=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '800') . "\" rel=\"" . $rel_text . "\" title=\"($award) $title - $first_name $last_name\">\n";
+                $output .= "<img class=\"thumb_img\" src=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '75') . "\" /></a>\n";
                 $output .= "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
                 $output .= "</div>\n</td>\n";
                 $column += 1;
@@ -897,8 +881,6 @@ final class Shortcodes extends ShortcodesAbstract
             return;
         }
 
-        $session = new Session(array('name' => 'rps_my_entries_' . COOKIEHASH, 'cookie_path' => get_page_uri($post->ID)));
-        $session->start();
         if ($this->request->isMethod('POST')) {
             switch ($this->request->input('submit_control')) {
 
@@ -918,15 +900,15 @@ final class Shortcodes extends ShortcodesAbstract
             }
         } else {
             $current_competition = reset($open_competitions);
-            $competition_date = $session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-            $medium = $session->get('myentries/medium', $current_competition->Medium);
+            $competition_date = $this->session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+            $medium = $this->session->get('myentries/medium', $current_competition->Medium);
         }
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
 
-        $session->set('myentries/competition_date', $current_competition->Competition_Date);
-        $session->set('myentries/medium', $current_competition->Medium);
-        $session->save();
+        $this->session->set('myentries/competition_date', $current_competition->Competition_Date);
+        $this->session->set('myentries/medium', $current_competition->Medium);
+        $this->session->save();
 
         if ($this->settings->has('errmsg')) {
             echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
@@ -982,7 +964,7 @@ final class Shortcodes extends ShortcodesAbstract
                 $img = '';
         }
 
-        echo '<img src="' . plugins_url('/images' . $img, $this->settings->get('plugin_basename')) . '">';
+        echo '<img src="' . CommonHelper::getPluginUrl($img, $this->settings->get('images_dir')) . '">';
         echo '</td>';
         echo "<td width=\"75%\">\n";
         echo "<table width=\"100%\">\n";
@@ -1061,7 +1043,7 @@ final class Shortcodes extends ShortcodesAbstract
             $image_url = home_url($recs->Server_File_Name);
             echo "<td align=\"center\" width=\"10%\">\n";
             echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium . '">' . "\n";
-            echo "<img src=\"" . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '75') . "\" />\n";
+            echo "<img src=\"" . $photo_helper->getThumbnailUrl($recs->Server_File_Name, '75') . "\" />\n";
             echo "</a></td>\n";
 
             // Title column
@@ -1137,23 +1119,15 @@ final class Shortcodes extends ShortcodesAbstract
 
         $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
-        echo '<section class="rps-showcases">';
-
-        echo '<div class="rps-sc-text entry-content">';
         $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
-        $images = array_rand($entries, $attr['images']);
-
-        $output = $this->html->element('div', array('id' => 'gallery-month-entries', 'class' => 'gallery gallery-masonry gallery-columns-3'));
-        $output .= $this->html->element('div', array('class' => 'grid-sizer', 'style' => 'width: 193px'), true);
-        $output .= '</div>';
-        $output .= $this->html->element('div', array('id' => 'images'));
-        foreach ($images as $key) {
-            $recs = $entries[$key];
-            $output .= $this->view->renderPhotoMasonry($recs);
+        $entries_id = array_rand($entries, $attr['images']);
+        $data = array();
+        $data['records'] = array();
+        foreach ($entries_id as $key) {
+            $data['records'][] = $entries[$key];
         }
-        $output .= '</div>';
-
-        echo $output;
+        $data['thumb_size'] = '150w';
+        echo $this->view->renderPersonWinners($data);
 
         unset($query_miscellaneous);
     }

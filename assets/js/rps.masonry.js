@@ -1,13 +1,16 @@
 (function ($, window, document) {
     // The $ is now locally scoped
     $(document).ready(function () {
-        var $container = $('#gallery-month-entries').masonry({
+        var $container = $('.gallery-masonry').masonry({
             itemSelector: '.gallery-item-masonry',
             columnWidth: '.grid-sizer',
             isFitWidth: true
         });
-        // reveal initial images
-        $container.masonryImagesReveal($('#images').find('.gallery-item-masonry'));
+        if (typeof getRpsMasonryItems == 'function') {
+            // reveal initial images
+            var $items = getRpsMasonryItems();
+            $container.masonryImagesReveal($items);
+        }
     });
 
 }(window.jQuery, window, document));
@@ -20,6 +23,7 @@ jQuery.fn.masonryImagesReveal = function ($items) {
     // append to container
     this.append($items);
     $items.imagesLoaded().progress(function (imgLoad, image) {
+
         // get item
         // image is imagesLoaded class, not <img>, <img> is image.img
         var $item = jQuery(image.img).parents(itemSelector);

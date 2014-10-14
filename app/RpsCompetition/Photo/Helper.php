@@ -10,6 +10,12 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Settings;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class Helper
  *
@@ -45,7 +51,7 @@ class Helper
         $standard_size = array('75', '150w', '800', 'fb_thumb');
 
         foreach ($standard_size as $size) {
-            $this->createThumbnail($entry, $size);
+            $this->createThumbnail($entry->Server_File_Name, $size);
         }
     }
 
@@ -64,7 +70,7 @@ class Helper
         CommonHelper::createDirectory($thumb_dir);
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->rpsResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
+            $this->doResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
         }
     }
 
@@ -102,6 +108,61 @@ class Helper
     }
 
     /**
+     * Resize an image.
+     * Resize a given image to the given size
+     *
+     * @param string $image_name
+     * @param string $thumb_path
+     * @param string $thumb_name
+     * @param string $size
+     *
+     * @return boolean
+     */
+    public function doResizeImage($image_name, $thumb_path, $thumb_name, $size)
+    {
+        // Open the original image
+        if (!file_exists($image_name)) {
+            return false;
+        }
+        if (file_exists($thumb_path . '/' . $thumb_name)) {
+            return true;
+        }
+        /** @var \Intervention\Image\Image $image */
+        $image = Image::make($image_name);
+        $new_size = Constants::getImageSize($size);
+        if ($new_size['height'] == null) {
+            if ($image->getHeight() <= $image->getWidth()) {
+                $image->resize(
+                    $new_size['width'],
+                    $new_size['width'],
+                    function ($constraint) {
+                        $constraint->aspectRatio();
+                    }
+                );
+            } else {
+                $image->resize(
+                    $new_size['width'],
+                    null,
+                    function ($constraint) {
+                        $constraint->aspectRatio();
+                    }
+                );
+            }
+        } else {
+            $image->resize(
+                $new_size['width'],
+                $new_size['height'],
+                function ($constraint) {
+                    $constraint->aspectRatio();
+                }
+            );
+        }
+        $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
+
+        return true;
+    }
+
+    /**
      * Get the path to the competition
      * Returns the path to the competition where we store the photo entries.
      *
@@ -116,6 +177,53 @@ class Helper
         $date = new \DateTime($competition_date);
 
         return '/Digital_Competitions/' . $date->format('Y-m-d') . '_' . $classification . '_' . $medium;
+    }
+
+    /**
+     * Get the image size of the given thumbnail file
+     *
+     * @param string $file_path
+     * @param string $size
+     *
+     * @return array
+     */
+    public function getThumbnailImageSize($file_path, $size)
+    {
+
+        $file_parts = pathinfo($file_path);
+        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
+
+        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+            $this->createThumbnail($file_path, $size);
+        }
+        $data = getimagesize($thumb_dir . '/' . $thumb_name);
+
+        return array('width' => $data[0], 'height' => $data[1]);
+    }
+
+    /**
+     * Get the full URL for the requested thumbnail
+     *
+     * @param string $file_path
+     * @param string $size
+     *
+     * @return string
+     */
+    public function getThumbnailUrl($file_path, $size)
+    {
+        $this->createThumbnail($file_path, $size);
+        $file_parts = pathinfo($file_path);
+        $path_parts = explode('/', $file_parts['dirname']);
+        $path = home_url();
+        foreach ($path_parts as $part) {
+            $path .= rawurlencode($part) . '/';
+        }
+        $path .= 'thumbnails/';
+
+        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
+
+        return ($path);
     }
 
     /**
@@ -161,84 +269,5 @@ class Helper
         }
 
         return $status;
-    }
-
-    /**
-     * Get the full URL for the requested thumbnail
-     *
-     * @param string $file_path
-     * @param string $size
-     *
-     * @return string
-     */
-    public function rpsGetThumbnailUrl($file_path, $size)
-    {
-        $this->createThumbnail($file_path, $size);
-        $file_parts = pathinfo($file_path);
-        $path_parts = explode('/', $file_parts['dirname']);
-        $path = home_url();
-        foreach ($path_parts as $part) {
-            $path .= rawurlencode($part) . '/';
-        }
-        $path .= 'thumbnails/';
-
-        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
-
-        return ($path);
-    }
-
-    /**
-     * Resize an image.
-     * Resize a given image to the given size
-     *
-     * @param string $image_name
-     * @param string $thumb_path
-     * @param string $thumb_name
-     * @param string $size
-     *
-     * @return boolean
-     */
-    public function rpsResizeImage($image_name, $thumb_path, $thumb_name, $size)
-    {
-        // Open the original image
-        if (!file_exists($image_name)) {
-            return false;
-        }
-        if (file_exists($thumb_path . '/' . $thumb_name)) {
-            return true;
-        }
-        /** @var \Intervention\Image\Image $image */
-        $image = Image::make($image_name);
-        $new_size = Constants::getImageSize($size);
-        if ($new_size['height'] == null) {
-            if ($image->getHeight() <= $image->getWidth()) {
-                $image->resize(
-                    $new_size['width'],
-                    $new_size['width'],
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    }
-                );
-            } else {
-                $image->resize(
-                    $new_size['width'],
-                    null,
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    }
-                );
-            }
-        } else {
-            $image->resize(
-                $new_size['width'],
-                $new_size['height'],
-                function ($constraint) {
-                    $constraint->aspectRatio();
-                }
-            );
-        }
-        $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
-
-        return true;
     }
 }

@@ -18,6 +18,12 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class Frontend
  *
@@ -38,6 +44,7 @@ class Frontend
     private $session;
     /** @var Settings */
     private $settings;
+    private $view;
 
     /**
      * Constructor
@@ -57,6 +64,7 @@ class Frontend
         $this->options = $container->make('RpsCompetition\Options\General');
         $this->core = new Core($this->settings);
         $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request, $this->session);
+        $this->view = new View($this->settings, $this->rpsdb, $this->request);
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -72,6 +80,7 @@ class Frontend
         }
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
         add_filter('query_vars', array($this, 'filterQueryVars'));
+        add_filter('post_gallery', array($this, 'filterPostGallery'), 10, 2);
     }
 
     /**
@@ -96,24 +105,43 @@ class Frontend
         global $wp_query;
         global $post;
 
-        $scripts_directory_uri = $this->settings->get('plugin_url') . '/js/';
-        if (WP_LOCAL_DEV == true) {
-            $rps_masonry_script = 'rps.masonry.js';
+        if (WP_LOCAL_DEV !== true) {
+            $rps_masonry_version = "867ece1";
+            $masonry_version = "37b35d4";
+            $imagesloaded_version = "37b35d4";
+            $version_separator = '-';
         } else {
-            $rps_masonry_version = "a128c24";
-            $rps_masonry_script = 'rps.masonry-' . $rps_masonry_version . '.js';
+            $rps_masonry_version = "867ece1";
+            $masonry_version = "37b35d4";
+            $imagesloaded_version = "37b35d4";
+            $version_separator = '';
         }
+
+        $rps_masonry_script = 'rps.masonry' . $version_separator . $rps_masonry_version . '.js';
+        $masonry_script = 'masonry' . $version_separator . $masonry_version . '.js';
+        $imagesloaded_script = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
 
         //todo Make as an option in the admin section.
         $options = get_option('avh-rps');
         $all_masonry_pages = array();
-        $all_masonry_pages[] = $options['monthly_entries_post_id'];
-        if (in_array($wp_query->get_queried_object_id(), $all_masonry_pages)) {
-            wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
+        $all_masonry_pages[$options['monthly_entries_post_id']] = true;
+        $javascript_directory = $this->settings->get('javascript_dir');
+        wp_deregister_script('masonry');
+        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);
+        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), array('masonry'), 'to_remove', true);
+
+        //wp_enqueue_script('rps-masonry');
+        //wp_enqueue_script('rps-imagesloaded');
+        if (array_key_exists($wp_query->get_queried_object_id(), $all_masonry_pages)) {
+            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
         }
 
         if (has_shortcode($post->post_content, 'rps_person_winners')) {
-            wp_enqueue_script('rps-masonryInit', $scripts_directory_uri . $rps_masonry_script, array('masonry'), 'to_remove', false);
+            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+        }
+
+        if (has_shortcode($post->post_content, 'gallery')) {
+            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
         }
     }
 
@@ -229,9 +257,9 @@ class Frontend
                 $comp_date = $this->request->input('comp_date');
                 $classification = $this->request->input('classification');
                 $medium = $this->request->input('medium');
-                $t = time() + (2 * 24 * 3600);
+                $time = time() + (2 * 24 * 3600);
                 $url = parse_url(get_bloginfo('url'));
-                setcookie("RPS_MyEntries", $comp_date . "|" . $classification . "|" . $medium, $t, '/', $url['host']);
+                setcookie("RPS_MyEntries", $comp_date . "|" . $classification . "|" . $medium, $time, '/', $url['host']);
 
                 $entry_array = $this->request->input('EntryID', null);
 
@@ -399,7 +427,7 @@ class Frontend
             if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
 
                 // Resize the image and deposit it in the destination directory
-                $photo_helper->rpsResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
+                $photo_helper->doResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
                 $resized = 1;
             } else {
                 // The uploaded image does not need to be resized so just move it to the destination directory
@@ -468,42 +496,12 @@ class Frontend
     {
         if (is_front_page()) {
             $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-            $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-
-            echo '<div class="rps-sc-tile suf-tile-1c entry-content bottom">';
-
-            echo '<div class="suf-gradient suf-tile-topmost">';
-            echo '<h3>Showcase</h3>';
-            echo '</div>';
-
-            echo '<div class="gallery gallery-columns-5 gallery-size-150">';
-            echo '<div class="gallery-row gallery-row-equal">';
             $records = $query_miscellaneous->getEightsAndHigher(5);
-
-            foreach ($records as $recs) {
-                $user_info = get_userdata($recs->Member_ID);
-                $title = $recs->Title;
-                $last_name = $user_info->user_lastname;
-                $first_name = $user_info->user_firstname;
-
-                // Display this thumbnail in the the next available column
-                echo '<figure class="gallery-item">';
-                echo '<div class="gallery-item-content">';
-                echo '<div class="gallery-item-content-image">';
-                echo '<a href="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '800') . '" rel="rps-showcase" title="' . $title . ' by ' . $first_name . ' ' . $last_name . '">';
-                echo '<img src="' . $photo_helper->rpsGetThumbnailUrl($recs->Server_File_Name, '150') . '" /></a>';
-                echo '</div>';
-                $caption = "${title}<br /><span class='wp-caption-credit'>Credit: ${first_name} ${last_name}";
-                echo "<figcaption class='wp-caption-text showcase-caption'>" . wptexturize($caption) . "</figcaption>\n";
-                echo '</div>';
-
-                echo '</figure>' . "\n";
-            }
-            echo '</div>';
-            echo '</div>';
-            echo '</div>';
-
-            unset($query_miscellaneous, $photo_helper);
+            $data = array();
+            $data['records'] = $records;
+            $data['thumb_size'] = '150';
+            echo $this->view->renderShowcaseCompetitionThumbnails($data);
+            unset($query_miscellaneous);
         }
     }
 
@@ -539,6 +537,216 @@ class Frontend
                     break;
             }
         }
+    }
+
+    /**
+     * Filter the output of the standard WordPress gallery.
+     * Through this filter we create our own gallery layout.
+     *
+     * @param string $output The gallery output. Default empty.
+     * @param array  $attr   Attributes of the gallery shortcode.
+     *
+     * @return mixed|string|void
+     */
+    public function filterPostGallery($output, $attr)
+    {
+        $post = get_post();
+
+        static $instance = 0;
+        $instance++;
+
+        if (!empty($attr['ids'])) {
+            // 'ids' is explicitly ordered, unless you specify otherwise.
+            if (empty($attr['orderby'])) {
+                $attr['orderby'] = 'post__in';
+            }
+            $attr['include'] = $attr['ids'];
+        }
+
+        // We're trusting author input, so let's at least make sure it looks like a valid orderby statement
+        if (isset($attr['orderby'])) {
+            $attr['orderby'] = sanitize_sql_orderby($attr['orderby']);
+            if (!$attr['orderby']) {
+                unset($attr['orderby']);
+            }
+        }
+
+        extract(
+            shortcode_atts(
+                array(
+                    'order'      => 'ASC',
+                    'orderby'    => 'menu_order ID',
+                    'id'         => $post ? $post->ID : 0,
+                    'itemtag'    => 'figure',
+                    'icontag'    => 'div',
+                    'captiontag' => 'figcaption',
+                    'columns'    => 3,
+                    'size'       => 'thumbnail',
+                    'include'    => '',
+                    'exclude'    => '',
+                    'link'       => '',
+                    'layout'     => 'row-equal'
+                ),
+                $attr,
+                'gallery'
+            )
+        );
+
+        $id = intval($id);
+        if ('RAND' == $order) {
+            $orderby = 'none';
+        }
+
+        if (!empty($include)) {
+            $_attachments = get_posts(array('include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
+
+            $attachments = array();
+            foreach ($_attachments as $key => $val) {
+                $attachments[$val->ID] = $_attachments[$key];
+            }
+        } elseif (!empty($exclude)) {
+            $attachments = get_children(array('post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
+        } else {
+            $attachments = get_children(array('post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
+        }
+
+        if (empty($attachments)) {
+            return '';
+        }
+
+        /**
+         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+         *
+         * @see Frontend::filterWpseoPreAnalysisPostsContent
+         */
+        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+
+        if (!$didFilterWpseoPreAnalysisPostsContent) {
+            $entries = array();
+            foreach ($attachments as $id => $attachment) {
+                $img_url = wp_get_attachment_url($id);
+                $home_url = home_url();
+                if (substr($img_url, 0, strlen($home_url)) == $home_url) {
+                    $entry = new \stdClass;
+                    $img_relative_path = substr($img_url, strlen($home_url));
+                    $entry->Server_File_Name = $img_relative_path;
+                    $entries[] = $entry;
+                }
+            }
+            $output = $this->view->renderCategoryWinnersFacebookThumbs($entries);
+
+            return $output;
+        }
+
+        if (is_feed()) {
+            $output = "\n";
+            foreach ($attachments as $att_id => $attachment) {
+                $output .= wp_get_attachment_link($att_id, $size, true) . "\n";
+            }
+
+            return $output;
+        }
+
+        if (strtolower($layout) == 'masonry') {
+            $output = $this->view->renderGalleryMasonry($attachments);
+
+            return $output;
+        }
+
+        $itemtag = tag_escape($itemtag);
+        $captiontag = tag_escape($captiontag);
+        $icontag = tag_escape($icontag);
+        $valid_tags = wp_kses_allowed_html('post');
+        if (!isset($valid_tags[$itemtag])) {
+            $itemtag = 'dl';
+        }
+        if (!isset($valid_tags[$captiontag])) {
+            $captiontag = 'dd';
+        }
+        if (!isset($valid_tags[$icontag])) {
+            $icontag = 'dt';
+        }
+
+        $columns = intval($columns);
+        $itemwidth = $columns > 0 ? floor(100 / $columns) : 100;
+        $float = is_rtl() ? 'right' : 'left';
+
+        $selector = "gallery-{$instance}";
+
+        $gallery_style = $gallery_div = '';
+
+        $layout = strtolower($layout);
+
+        $size_class = sanitize_html_class($size);
+        $gallery_div = "<div id='$selector' class='gallery galleryid-{$id} gallery-columns-{$columns} gallery-size-{$size_class}'>";
+
+        /**
+         * Filter the default gallery shortcode CSS styles.
+         *
+         * @param string $gallery_style Default gallery shortcode CSS styles.
+         * @param string $gallery_div   Opening HTML div container for the gallery shortcode output.
+         *
+         */
+        $output = apply_filters('gallery_style', $gallery_style . $gallery_div);
+        $i = 0;
+        foreach ($attachments as $id => $attachment) {
+            if ($i % $columns == 0) {
+                if ($layout == 'row-equal') {
+                    $output .= '<div class="gallery-row gallery-row-equal">';
+                } else {
+                    $output .= '<div class="gallery-row">';
+                }
+            }
+            if (!empty($link) && 'file' === $link) {
+                $image_output = wp_get_attachment_link($id, $size, false, false);
+            } elseif (!empty($link) && 'none' === $link) {
+                $image_output = wp_get_attachment_image($id, $size, false);
+            } else {
+                $image_output = wp_get_attachment_link($id, $size, true, false);
+            }
+
+            $image_meta = wp_get_attachment_metadata($id);
+
+            $orientation = '';
+            if (isset($image_meta['height'], $image_meta['width'])) {
+                $orientation = ($image_meta['height'] > $image_meta['width']) ? 'portrait' : 'landscape';
+            }
+
+            $output .= "<{$itemtag} class='gallery-item'>";
+            $output .= "<div class='gallery-item-content'>";
+            $output .= "<{$icontag} class='gallery-icon {$orientation}'>$image_output</{$icontag}>";
+
+            $caption_text = '';
+            if ($captiontag && trim($attachment->post_excerpt)) {
+                $caption_text .= $attachment->post_excerpt;
+            }
+            $photographer_name = get_post_meta($attachment->ID, '_rps_photographer_name', true);
+            // If image credit fields have data then attach the image credit
+            if ($photographer_name != '') {
+                if (!empty($caption_text)) {
+                    $caption_text .= '<br />';
+                }
+                $caption_text .= '<span class="wp-caption-credit">Credit: ' . $photographer_name . '</span>';
+            }
+            if (!empty($caption_text)) {
+                $output .= "<{$captiontag} class='wp-caption-text gallery-caption'>" . wptexturize($caption_text) . "</{$captiontag}>";
+            }
+
+            $output .= "</div>";
+            $output .= "</{$itemtag}>";
+
+            if ($columns > 0 && ++$i % $columns == 0) {
+                $output .= '</div>';
+            }
+        }
+
+        if ($columns > 0 && $i % $columns !== 0) {
+            $output .= '</div>';
+        }
+        $output .= "
+		</div>\n";
+
+        return $output;
     }
 
     /**
