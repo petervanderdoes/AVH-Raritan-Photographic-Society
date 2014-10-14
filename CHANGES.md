@@ -1,7 +1,7 @@
 ## Changelog
 
 #### Version 2.0.1-rc.1
-* Preparation for new development cycle.
+* Problem with .gitignore
 
 #### Version 2.0.0
 * Start using twig templates.
