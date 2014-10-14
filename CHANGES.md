@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.1
+* Problem with .gitignore
+
 #### Version 2.0.0
 * Start using twig templates.
 * Creation of common thumbnails fails
