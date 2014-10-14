@@ -106,14 +106,14 @@ class Frontend
         global $post;
 
         if (WP_LOCAL_DEV !== true) {
-            $rps_masonry_version = "";
-            $masonry_version = "";
-            $imagesloaded_version = "";
+            $rps_masonry_version = "867ece1";
+            $masonry_version = "37b35d4";
+            $imagesloaded_version = "37b35d4";
             $version_separator = '-';
         } else {
-            $rps_masonry_version = "";
-            $masonry_version = "";
-            $imagesloaded_version = "";
+            $rps_masonry_version = "867ece1";
+            $masonry_version = "37b35d4";
+            $imagesloaded_version = "37b35d4";
             $version_separator = '';
         }
 
