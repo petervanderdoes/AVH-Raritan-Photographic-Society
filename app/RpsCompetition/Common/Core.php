@@ -29,11 +29,11 @@ class Core
      * Constructor
      *
      * @param Settings $settings
-     *
      */
     public function __construct(Settings $settings)
     {
         $this->settings = $settings;
+
         $this->options = get_option('avh-rps');
 
         $this->handleInitializePlugin();
@@ -45,6 +45,7 @@ class Core
     public function actionInit()
     {
         $this->setupRewriteRules();
+        add_image_size('150w', 150, 9999);
     }
 
     /**

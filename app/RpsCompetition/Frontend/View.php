@@ -98,6 +98,47 @@ class View
     }
 
     /**
+     * Display the Gallery as Masonry.
+     *
+     * @param array $attachments
+     *
+     * @return string
+     */
+    public function renderGalleryMasonry($attachments)
+    {
+        $data = array();
+
+        $data['thumb_size'] = '150w';
+        foreach ($attachments as $id => $attachment) {
+            $img_url = wp_get_attachment_url($id);
+            $home_url = home_url();
+            if (substr($img_url, 0, strlen($home_url)) == $home_url) {
+                $entry = new \stdClass;
+                $img_relative_path = substr($img_url, strlen($home_url));
+                $entry->Server_File_Name = $img_relative_path;
+                $entry->ID = $attachment->ID;
+                $entries[] = $entry;
+            }
+        }
+
+        foreach ($entries as $entry) {
+            if (trim($attachment->post_excerpt)) {
+                $caption_data['title'] = $attachment->post_excerpt;
+            } else {
+                $caption_data['title'] = '';
+            }
+            $caption_data['first_name'] = get_post_meta($entry->ID, '_rps_photographer_name', true);
+            $caption_data['last_name'] = '';
+
+            $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
+        }
+
+        $template = $this->twig->loadTemplate('gallery-masonry.html.twig');
+
+        return $template->render($data);
+    }
+
+    /**
      * Display the form for selecting the month and season.
      *
      * @param string  $selected_season
@@ -152,7 +193,9 @@ class View
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
-                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size']);
+                $user_info = get_userdata($entry->Member_ID);
+                $caption_data = array('title' => $entry->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname);
+                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
             }
         }
         $template = $this->twig->loadTemplate('monthly-entries.html.twig');
@@ -174,7 +217,9 @@ class View
     {
         $data['images'] = array();
         foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->dataPhotoMasonry($recs, $data['thumb_size']);
+            $user_info = get_userdata($recs->Member_ID);
+            $caption_data = array('title' => $recs->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname);
+            $data['images'][] = $this->dataPhotoMasonry($recs, $data['thumb_size'], $caption_data);
         }
         unset ($data['records']);
 
@@ -270,22 +315,17 @@ class View
      *
      * @param QueryEntries $record
      * @param string       $thumb_size
+     * @param  array       $caption
      *
      * @return array<string,string|array>
      */
-    private function dataPhotoMasonry($record, $thumb_size)
+    private function dataPhotoMasonry($record, $thumb_size, $caption)
     {
-
         $data = array();
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
         $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+        $data['caption'] = $this->dataPhotoCredit($caption['title'], $caption['first_name'], $caption['last_name']);
 
         return $data;
     }

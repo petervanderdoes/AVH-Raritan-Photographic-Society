@@ -185,6 +185,13 @@ class WpseoHelper
             return $post_content;
         }
 
+        if (has_shortcode($post_content, 'gallery')) {
+            $post_content = do_shortcode($post_content);
+            $this->settings->set('didFilterWpseoPreAnalysisPostsContent', true);
+
+            return $post_content;
+        }
+
         return $post_content;
     }
 
