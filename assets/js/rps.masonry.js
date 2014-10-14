@@ -6,9 +6,11 @@
             columnWidth: '.grid-sizer',
             isFitWidth: true
         });
-        // reveal initial images
-        var $items = getRpsMasonryItems();
-        $container.masonryImagesReveal($items);
+        if (typeof getRpsMasonryItems == 'function') {
+            // reveal initial images
+            var $items = getRpsMasonryItems();
+            $container.masonryImagesReveal($items);
+        }
     });
 
 }(window.jQuery, window, document));
