@@ -1,0 +1,121 @@
+/**
+* Theme specific colors
+*
+* These color names should only be used in this file.
+* For all other files, the General Colors section colors should be used.
+*
+*/
+/**
+* Generalization
+*/
+/**
+* Font sizes
+*/
+/**
+* Basefont for Oswald font.
+* Our $base-font-size is 14px and this base font give the same width for Oswald
+*/
+/**
+* Font families
+*/
+/**
+* Social Media Brand Colors
+* @see http://designpieces.com/2012/12/social-media-colours-hex-and-rgb/ - Note URL shows old date but it is updated regularly
+* @see http://www.competethemes.com/social-media-colors/ - More sites
+* @see http://brandcolors.net/
+*/
+.share {
+  font-size: 12px;
+  font-size: 0.93rem;
+  line-height: 20px;
+  line-height: 1.5rem;
+}
+.share ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+.share .rrssb-buttons {
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+.share .rrssb-buttons li {
+  float: left;
+  list-style: outside none none;
+  margin: 0 0.25rem;
+  width: 16.66%;
+}
+.share .rrssb-buttons li:first-child {
+  margin-left: 0;
+}
+.share .rrssb-buttons li:last-child {
+  margin-right: 0;
+}
+.share .rrssb-buttons li a {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  color: #e6e6e6;
+  text-decoration: none;
+  -moz-transition-property: background-color;
+  -o-transition-property: background-color;
+  -webkit-transition-property: background-color;
+  transition-property: background-color;
+  -moz-transition-duration: 0.2s;
+  -o-transition-duration: 0.2s;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  -moz-transition-timing-function: ease-in-out;
+  -o-transition-timing-function: ease-in-out;
+  -webkit-transition-timing-function: ease-in-out;
+  transition-timing-function: ease-in-out;
+  display: block;
+  font-weight: bold;
+  height: 100%;
+  line-height: 26px;
+  position: relative;
+  text-decoration: none;
+  text-transform: small-caps;
+  width: 100%;
+}
+.share .rrssb-buttons li a:visited {
+  color: #e6e6e6;
+  text-decoration: none;
+}
+.share .rrssb-buttons li a:hover {
+  color: #e6e6e6;
+  text-decoration: none;
+}
+.share .rrssb-buttons li a i {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.share .rrssb-buttons li.facebook a {
+  background-color: #3b5998;
+}
+.share .rrssb-buttons li.facebook a:hover {
+  background-color: #2d4373;
+}
+.share .rrssb-buttons li.twitter a {
+  background-color: #55acee;
+}
+.share .rrssb-buttons li.twitter a:hover {
+  background-color: #2795e9;
+}
+.share .rrssb-buttons li.googleplus a {
+  background-color: #dd4b39;
+}
+.share .rrssb-buttons li.googleplus a:hover {
+  background-color: #c23321;
+}
+.share .rrssb-buttons li.email a {
+  background-color: #555555;
+}
+.share .rrssb-buttons li.email a:hover {
+  background-color: #3b3b3b;
+}

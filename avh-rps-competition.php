@@ -36,6 +36,9 @@ require __DIR__ . '/vendor/autoload.php';
 $rps_dir = pathinfo($plugin, PATHINFO_DIRNAME);
 $rps_basename = plugin_basename($plugin);
 
+/**
+ * Class AVH_RPS_Client
+ */
 class AVH_RPS_Client
 {
     /**
@@ -45,6 +48,12 @@ class AVH_RPS_Client
     /** @var  Settings */
     private $settings;
 
+    /**
+     * Constructor.
+     *
+     * @param string $dir
+     * @param string $basename
+     */
     public function __construct($dir, $basename)
     {
         $this->container = new Container();
