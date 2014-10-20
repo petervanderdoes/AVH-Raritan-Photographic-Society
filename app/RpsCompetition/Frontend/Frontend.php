@@ -895,7 +895,7 @@ class Frontend
         $data = array();
         $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
         $data['style'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_css_version . '.css';
-        $social_buttons->setup($data);
+        $social_buttons->initClass($data);
     }
 
     /**

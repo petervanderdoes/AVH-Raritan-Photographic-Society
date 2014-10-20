@@ -86,7 +86,7 @@ class SocialNetworksHelper
      * @param array $data
      *
      */
-    public function setup($data)
+    public function initClass($data)
     {
         $rps_social_buttons_script = $data['script'];
         $social_buttons_style = $data['style'];
