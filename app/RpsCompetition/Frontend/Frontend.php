@@ -881,7 +881,7 @@ class Frontend
     private function setupSocialButtons()
     {
         $view = new SocialNetworksView($this->settings);
-        $social_buttons = new SocialNetworksHelper($view, $this->settings);
+        $social_buttons = new SocialNetworksHelper($view, $this->settings, $this->options);
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = "867ece1";

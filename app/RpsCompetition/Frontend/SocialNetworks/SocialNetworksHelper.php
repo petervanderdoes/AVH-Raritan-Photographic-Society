@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend\SocialNetworks;
 
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
+use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Settings;
 
 /**
@@ -23,10 +24,11 @@ class SocialNetworksHelper
      * @param Settings $settings
      *
      */
-    public function __construct(SocialNetworksView $view, Settings $settings)
+    public function __construct(SocialNetworksView $view, Settings $settings, OptionsGeneral $options)
     {
         $this->settings = $settings;
         $this->view = $view;
+        $this->options = $options;
     }
 
     /**
@@ -40,7 +42,9 @@ class SocialNetworksHelper
     public function actionSocialButtons()
     {
         global $post;
-        if ($post->post_type == 'page' && ($post->ID == 54 || $post->post_parent == 54)) {
+        $options = get_option('avh-rps');
+
+        if ($post->post_type == 'page' && ($post->ID == $options['members_page'] || $post->post_parent == $options['members_page'])) {
             return;
         }
         $networks = $this->getNetworks();
