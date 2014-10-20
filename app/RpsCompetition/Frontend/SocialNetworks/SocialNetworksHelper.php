@@ -39,6 +39,10 @@ class SocialNetworksHelper
      */
     public function actionSocialButtons()
     {
+        global $post;
+        if ($post->post_type == 'page' && ($post->ID == 54 || $post->post_parent == 54)) {
+            return;
+        }
         $networks = $this->getNetworks();
 
         $this->displaySocialButtons($networks);
