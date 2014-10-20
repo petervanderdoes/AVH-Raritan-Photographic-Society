@@ -13,6 +13,8 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Requests as FrontendRequests;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksHelper;
+use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
@@ -479,6 +481,7 @@ class Frontend
 
         $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
+        $this->setupSocialButtons();
 
         unset($query_competitions);
     }
@@ -873,6 +876,26 @@ class Frontend
         $shortcode->register('rps_email', 'shortcodeEmail');
         $shortcode->register('rps_person_winners', 'shortcodePersonWinners');
         $shortcode->register('rps_monthly_entries', 'shortcodeMonthlyEntries');
+    }
+
+    private function setupSocialButtons()
+    {
+        $view = new SocialNetworksView($this->settings);
+        $social_buttons = new SocialNetworksHelper($view, $this->settings, $this->options);
+
+        if (WP_LOCAL_DEV !== true) {
+            $social_buttons_script_version = "867ece1";
+            $social_buttons_css_version = "c9c4aab";
+            $version_separator = '-';
+        } else {
+            $social_buttons_script_version = "";
+            $social_buttons_css_version = "";
+            $version_separator = '';
+        }
+        $data = array();
+        $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
+        $data['style'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_css_version . '.css';
+        $social_buttons->initClass($data);
     }
 
     /**

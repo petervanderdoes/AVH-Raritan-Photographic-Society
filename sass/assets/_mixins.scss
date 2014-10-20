@@ -1,0 +1,12 @@
+@mixin link-style($color: inherit, $visit-color: $color, $hover-color: $color-link) {
+  color: $color;
+  text-decoration: none;
+  &:visited {
+    color: $visit-color;
+    text-decoration: none;
+  }
+  &:hover {
+    color: $hover-color;
+    text-decoration: none;
+  }
+}
