@@ -1,65 +1,73 @@
 @mixin social-color-link-style($color) {
-    background-color: $color;
-    &:hover {
-        background-color: darken($color, 10);
-    }
+  //background-color: $color;
+  &:hover {
+    color: $color;
+  }
 }
 
 .share {
-    @include adjust-font-size-to($base-font-size * 0.93);
-    ul {
-        padding: 0;
-        margin: 0;
-        list-style-type: none;
-    }
-    .rrssb-buttons {       
-        height: $base-font-size * 2;
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        li {
-            float: left;
-            list-style: outside none none;
-            margin: 0 0.25rem;
-            width: 16.66%;
-            &:first-child {
-                margin-left: 0;
-            }
-            &:last-child {
-                margin-right: 0;
-            }
-            a {
-                @include box-sizing(border-box);
-                @include border-radius(3px);
-                @include link-style($color: $color-text-highlight, $hover-color: $color-text-highlight);
-                @include transition-property(background-color);
-                @include transition-duration(0.2s);
-                @include transition-timing-function(ease-in-out);
-                display: block;
-                font-weight: bold;
-                height: 100%;
-                line-height: $base-font-size * 2;
-                position: relative;
-                text-decoration: none;
-                text-transform: small-caps;
-                width: 100%;
-                i {
-                    padding-left: 0.5rem;
-                    padding-right: 0.5rem;
-                }
-            }
-            &.facebook a {
-                @include social-color-link-style($bc-facebook);
-            }
-            &.twitter a {
-                @include social-color-link-style($bc-twitter);
-            }
-            &.googleplus a {
-                @include social-color-link-style($bc-googleplus);
-            }
-            &.email a {
-                @include social-color-link-style($color-grey-3);
-            }
+  @include adjust-font-size-to($base-font-size * 0.93);
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+  }
+  .rps-share-buttons {
+    //height: $base-font-size * 2;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    li {
+      float: left;
+      list-style: outside none none;
+      color: $color-text-lowlight;
+      &:first-child {
+        &:after {
+          margin-left: 0.25rem;
+          margin-right: 0;
+          content: "";
         }
+      }
+      &:last-child {
+        &:after {
+          content: "";
+          margin-right: 0;
+        }
+      }
+      &:after {
+        content: "\2219";
+        margin-left: 0.25rem;
+        margin-right: 0.5rem;
+      }
+      &.active {
+        color: #008000;
+      }
     }
+    a {
+      @include box-sizing(border-box);
+      @include border-radius(3px);
+      @include link-style($color: $color-text-highlight, $hover-color: $color-text-highlight);
+      @include transition-property(background-color);
+      @include transition-duration(0.2s);
+      @include transition-timing-function(ease-in-out);
+      text-transform: capitalize;
+
+      i {
+        //padding-left: 0.5rem;
+        padding-right: 0.25rem;
+      }
+    }
+    .share-facebook a {
+      @include social-color-link-style($bc-facebook);
+    }
+    .share-twitter a {
+      @include social-color-link-style($bc-twitter);
+    }
+    .share-googleplus a {
+      @include social-color-link-style($bc-googleplus);
+    }
+    .share-email a {
+      @include social-color-link-style($color-grey-3);
+    }
+  }
 }

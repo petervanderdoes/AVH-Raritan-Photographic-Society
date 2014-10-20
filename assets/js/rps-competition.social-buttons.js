@@ -118,79 +118,79 @@ var rpssocial = {
                 return 'mailto:?subject=[Raritan Photographic Society] ' + t_obj.title + '&body=' + t_obj.title + ': ' + rpssocial.addurlparam(t_obj.url, 'sr', 'email');
             },
             'popwidth': 1, 'popheight': 1, 'popscroll': 'no'
-        },
-        'digg': {
-            'buildurl': function (t_obj) {
-                return 'http://www.digg.com/submit?phase=2&url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'digg')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 970, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'stumbleupon': {
-            'buildurl': function (t_obj) {
-                return 'http://www.stumbleupon.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'stumbleupon')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'delicious': {
-            'buildurl': function (t_obj) {
-                return 'http://del.icio.us/post?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'delicious')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'technorati': {
-            'buildurl': function (t_obj) {
-                return 'http://technorati.com/faves?add=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'technorati')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'posterous': {
-            'buildurl': function (t_obj) {
-                return 'http://posterous.com/share?linkto=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'posterous'));
-            },
-            'popwidth': 1020, 'popheight': 650, 'popscroll': 'yes'
-        },
-        'tumblr': {
-            'buildurl': function (t_obj) {
-                return 'http://www.tumblr.com/share?v=3&u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'tumblr')) + '&t=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'reddit': {
-            'buildurl': function (t_obj) {
-                return 'http://www.reddit.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'reddit')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'googlebookmarks': {
-            'buildurl': function (t_obj) {
-                return 'http://www.google.com/bookmarks/mark?op=edit&bkmk=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'googlebookmarks')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'newsvine': {
-            'buildurl': function (t_obj) {
-                return 'http://www.newsvine.com/_tools/seed&save?u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'newsvine')) + '&h=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 1020, 'popheight': 500
-        },
-        'ping.fm': {
-            'buildurl': function (t_obj) {
-                return 'http://ping.fm/ref/?link=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'ping.fm')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'evernote': {
-            'buildurl': function (t_obj) {
-                return 'http://www.evernote.com/clip.action?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'evernote')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 980, 'popheight': 500, 'popscroll': 'yes'
-        },
-        'friendfeed': {
-            'buildurl': function (t_obj) {
-                return 'http://www.friendfeed.com/share?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'friendfeed')) + '&title=' + encodeURIComponent(t_obj.title);
-            },
-            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
         }
+        //'digg': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.digg.com/submit?phase=2&url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'digg')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 970, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'stumbleupon': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.stumbleupon.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'stumbleupon')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'delicious': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://del.icio.us/post?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'delicious')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'technorati': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://technorati.com/faves?add=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'technorati')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'posterous': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://posterous.com/share?linkto=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'posterous'));
+        //    },
+        //    'popwidth': 1020, 'popheight': 650, 'popscroll': 'yes'
+        //},
+        //'tumblr': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.tumblr.com/share?v=3&u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'tumblr')) + '&t=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'reddit': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.reddit.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'reddit')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'googlebookmarks': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.google.com/bookmarks/mark?op=edit&bkmk=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'googlebookmarks')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'newsvine': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.newsvine.com/_tools/seed&save?u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'newsvine')) + '&h=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 1020, 'popheight': 500
+        //},
+        //'ping.fm': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://ping.fm/ref/?link=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'ping.fm')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'evernote': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.evernote.com/clip.action?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'evernote')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 980, 'popheight': 500, 'popscroll': 'yes'
+        //},
+        //'friendfeed': {
+        //    'buildurl': function (t_obj) {
+        //        return 'http://www.friendfeed.com/share?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'friendfeed')) + '&title=' + encodeURIComponent(t_obj.title);
+        //    },
+        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        //}
     },
     /* share library will be defined below for cleaner code */
     'share': {},
@@ -198,7 +198,7 @@ var rpssocial = {
     'setapiconfig': function (api_arr) {
         rpssocial.apiconfig = api_arr;
     },
-    /* initialize cnn social library */
+    /* initialize RPS social library */
     'init': function () {
 
         /* load necessary social apis */
@@ -212,10 +212,10 @@ var rpssocial = {
                 rpssocial.sites[t_api.site].loadapi();
             }
         }
-        /* setup share instances */
-        if (typeof rpssocial.share.data.bars != 'undefined') {
-            rpssocial.share.init();
-        }
+        ///* setup share instances */
+        //if (typeof rpssocial.share.data.bars != 'undefined') {
+        //    rpssocial.share.init();
+        //}
     }
 };
 /* end rpssocial */
@@ -261,7 +261,7 @@ rpssocial.share = {
         var t_social = rpssocial.sites[t_site];
         rpssocial.share.popup(t_social.buildurl(t_bar), t_site, t_social.popwidth, t_social.popheight, t_social.popscroll);
         /* track click action */
-        rpssocial.share.track({'type': 'click', 'site': t_site});
+        //rpssocial.share.track({'type': 'click', 'site': t_site});
     },
     /* launch share url in popup window */
     'popup': function (t_url, t_site, t_width, t_height, t_scroll) {
@@ -294,38 +294,44 @@ rpssocial.share = {
                 console.log("error thrown while registering click tracking. Message - " + e.message);
             }
         }
-    },
-    /* start up the sharing */
-    'init': function () {
-        var t_bars = rpssocial.share.data.bars;
-        /* interate through each bar instance */
-        for (var t_bar in t_bars) {
-            var t_obj = t_bars[t_bar];
-            var t_cntr = '#' + t_obj.id + ' .c_sharebar_cntr';
-            /* remove loading class for container once DOM is ready */
-            jQuery(t_cntr).removeClass('c_sharebar_loading');
-        }
     }
+    /* start up the sharing */
+    //'init': function () {
+    //    var t_bars = rpssocial.share.data.bars;
+    //    /* interate through each bar instance */
+    //    for (var t_bar in t_bars) {
+    //        var t_obj = t_bars[t_bar];
+    //        var t_cntr = '#' + t_obj.id + ' .c_sharebar_cntr';
+    //        /* remove loading class for container once DOM is ready */
+    //        jQuery(t_cntr).removeClass('c_sharebar_loading');
+    //    }
+    //}
 };
 /* end rpssocial.share */
 
-/* default tracking functions for google, linkedin plugin buttons */
-var cnnsocial_google_click = function (data) {
-    if (data.state === "on") {
-        window.rpssocial.share.track({'type': 'click', 'site': 'googleplus'});
-    }
-    else if (data.state === "off") {
-    }
-};
-var cnnsocial_linkedin_click = function () {
-    window.rpssocial.share.track({'type': 'click', 'site': 'linkedin'});
-};
-
+///* default tracking functions for google, linkedin plugin buttons */
+//var rpssocial_google_click = function (data) {
+//    if (data.state === "on") {
+//        window.rpssocial.share.track({'type': 'click', 'site': 'googleplus'});
+//    }
+//    else if (data.state === "off") {
+//    }
+//};
+//var rpssocial_linkedin_click = function () {
+//    window.rpssocial.share.track({'type': 'click', 'site': 'linkedin'});
+//};
 (function ($, window, document) {
     $(document).ready(function () {
         'use strict';
         /* initialize rpssocial */
-        rpssocial.init();
+        //rpssocial.init();
+        $(".social-button").hover(
+            function () {
+                $(".share-icon").addClass("active");
+            }, function () {
+                $(".share-icon").removeClass("active");
+            }
+        );
     });
 }(window.jQuery, window, document));
 // The global jQuery object is passed as a parameter
