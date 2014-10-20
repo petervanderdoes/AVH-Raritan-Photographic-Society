@@ -574,25 +574,26 @@ class Frontend
             }
         }
 
+        $short_code_atts = shortcode_atts(
+            array(
+                'order'      => 'ASC',
+                'orderby'    => 'menu_order ID',
+                'id'         => $post ? $post->ID : 0,
+                'itemtag'    => 'figure',
+                'icontag'    => 'div',
+                'captiontag' => 'figcaption',
+                'columns'    => 3,
+                'size'       => 'thumbnail',
+                'include'    => '',
+                'exclude'    => '',
+                'link'       => '',
+                'layout'     => 'row-equal'
+            ),
+            $attr,
+            'gallery'
+        );
         extract(
-            shortcode_atts(
-                array(
-                    'order'      => 'ASC',
-                    'orderby'    => 'menu_order ID',
-                    'id'         => $post ? $post->ID : 0,
-                    'itemtag'    => 'figure',
-                    'icontag'    => 'div',
-                    'captiontag' => 'figcaption',
-                    'columns'    => 3,
-                    'size'       => 'thumbnail',
-                    'include'    => '',
-                    'exclude'    => '',
-                    'link'       => '',
-                    'layout'     => 'row-equal'
-                ),
-                $attr,
-                'gallery'
-            )
+            $short_code_atts
         );
 
         $id = intval($id);
@@ -671,8 +672,6 @@ class Frontend
         }
 
         $columns = intval($columns);
-        $itemwidth = $columns > 0 ? floor(100 / $columns) : 100;
-        $float = is_rtl() ? 'right' : 'left';
 
         $selector = "gallery-{$instance}";
 
