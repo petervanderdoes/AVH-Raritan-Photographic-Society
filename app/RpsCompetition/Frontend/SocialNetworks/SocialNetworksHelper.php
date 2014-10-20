@@ -16,13 +16,14 @@ class SocialNetworksHelper
 {
     private $settings;
     private $view;
+    private $options;
 
     /**
      * Constructor
      *
-     * @param View     $view
-     * @param Settings $settings
-     *
+     * @param View           $view
+     * @param Settings       $settings
+     * @param OptionsGeneral $options
      */
     public function __construct(SocialNetworksView $view, Settings $settings, OptionsGeneral $options)
     {
