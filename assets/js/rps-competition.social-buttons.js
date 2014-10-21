@@ -18,11 +18,18 @@ var rpssocial = {
             return url + '?' + param + '=' + value;
         }
     },
+    'defaulurlparam': function (url) {
+        url = rpssocial.addurlparam(url, 'utm_campaign', 'general');
+        url = rpssocial.addurlparam(url, 'utm_source', 'site');
+        return url;
+    },
     /* supported social site configurations */
     'sites': {
         'facebook': {
             'buildurl': function (t_obj) {
-                return 'http://www.facebook.com/share.php?u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'share_facebook')) + '&title=' + encodeURIComponent(t_obj.title);
+                var url = rpssocial.defaulurlparam(t_obj.url);
+                url = rpssocial.addurlparam(url, 'utm_medium', 'facebook');
+                return 'http://www.facebook.com/share.php?u=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(t_obj.title);
             },
             'popwidth': 550, 'popheight': 420, 'popscroll': 'no',
             'loadapi': function (cb) {
@@ -58,7 +65,9 @@ var rpssocial = {
         },
         'twitter': {
             'buildurl': function (t_obj) {
-                return 'http://twitter.com/intent/tweet?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'share_twitter')) + '&text=' + encodeURIComponent(t_obj.title);
+                var url = rpssocial.defaulurlparam(t_obj.url);
+                url = rpssocial.addurlparam(url, 'utm_medium', 'twitter');
+                return 'http://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(t_obj.title);
             },
             'popwidth': 550, 'popheight': 460, 'popscroll': 'no',
             'loadapi': function (cb) {
@@ -89,7 +98,9 @@ var rpssocial = {
         },
         'googleplus': {
             'buildurl': function (t_obj) {
-                return 'https://plus.google.com/share?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'share_google')) + '&hl=en';
+                var url = rpssocial.defaulurlparam(t_obj.url);
+                url = rpssocial.addurlparam(url, 'utm_medium', 'googleplus');
+                return 'https://plus.google.com/share?url=' + encodeURIComponent(url) + '&hl=en';
             },
             'popwidth': 600, 'popheight': 600, 'popscroll': 'yes',
             'loadapi': function (cb) {
@@ -118,79 +129,79 @@ var rpssocial = {
                 return 'mailto:?subject=[Raritan Photographic Society] ' + t_obj.title + '&body=' + t_obj.title + ': ' + rpssocial.addurlparam(t_obj.url, 'sr', 'email');
             },
             'popwidth': 1, 'popheight': 1, 'popscroll': 'no'
+        },
+        'digg': {
+            'buildurl': function (t_obj) {
+                return 'http://www.digg.com/submit?phase=2&url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'digg')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 970, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'stumbleupon': {
+            'buildurl': function (t_obj) {
+                return 'http://www.stumbleupon.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'stumbleupon')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'delicious': {
+            'buildurl': function (t_obj) {
+                return 'http://del.icio.us/post?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'delicious')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'technorati': {
+            'buildurl': function (t_obj) {
+                return 'http://technorati.com/faves?add=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'technorati')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'posterous': {
+            'buildurl': function (t_obj) {
+                return 'http://posterous.com/share?linkto=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'posterous'));
+            },
+            'popwidth': 1020, 'popheight': 650, 'popscroll': 'yes'
+        },
+        'tumblr': {
+            'buildurl': function (t_obj) {
+                return 'http://www.tumblr.com/share?v=3&u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'tumblr')) + '&t=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'reddit': {
+            'buildurl': function (t_obj) {
+                return 'http://www.reddit.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'reddit')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'googlebookmarks': {
+            'buildurl': function (t_obj) {
+                return 'http://www.google.com/bookmarks/mark?op=edit&bkmk=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'googlebookmarks')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'newsvine': {
+            'buildurl': function (t_obj) {
+                return 'http://www.newsvine.com/_tools/seed&save?u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'newsvine')) + '&h=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 1020, 'popheight': 500
+        },
+        'ping.fm': {
+            'buildurl': function (t_obj) {
+                return 'http://ping.fm/ref/?link=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'ping.fm')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'evernote': {
+            'buildurl': function (t_obj) {
+                return 'http://www.evernote.com/clip.action?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'evernote')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 980, 'popheight': 500, 'popscroll': 'yes'
+        },
+        'friendfeed': {
+            'buildurl': function (t_obj) {
+                return 'http://www.friendfeed.com/share?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'friendfeed')) + '&title=' + encodeURIComponent(t_obj.title);
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
         }
-        //'digg': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.digg.com/submit?phase=2&url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'digg')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 970, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'stumbleupon': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.stumbleupon.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'stumbleupon')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'delicious': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://del.icio.us/post?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'delicious')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'technorati': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://technorati.com/faves?add=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'technorati')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'posterous': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://posterous.com/share?linkto=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'posterous'));
-        //    },
-        //    'popwidth': 1020, 'popheight': 650, 'popscroll': 'yes'
-        //},
-        //'tumblr': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.tumblr.com/share?v=3&u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'tumblr')) + '&t=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'reddit': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.reddit.com/submit?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'reddit')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'googlebookmarks': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.google.com/bookmarks/mark?op=edit&bkmk=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'googlebookmarks')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'newsvine': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.newsvine.com/_tools/seed&save?u=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'newsvine')) + '&h=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 1020, 'popheight': 500
-        //},
-        //'ping.fm': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://ping.fm/ref/?link=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'ping.fm')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'evernote': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.evernote.com/clip.action?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'evernote')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 980, 'popheight': 500, 'popscroll': 'yes'
-        //},
-        //'friendfeed': {
-        //    'buildurl': function (t_obj) {
-        //        return 'http://www.friendfeed.com/share?url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'friendfeed')) + '&title=' + encodeURIComponent(t_obj.title);
-        //    },
-        //    'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
-        //}
     },
     /* share library will be defined below for cleaner code */
     'share': {},
