@@ -1,15 +1,7 @@
 <script>
     rpssocial.setapiconfig([
-        {% for key,network in networks %}
-        {% if network.api != false %}
-
-        {
-            'site': {{ key }},
-            'success': {{ value.api }}
-        },
-        {% else %}
-        {'site': {{ key }}},
-        {% endif %}
+        {% for network in networks %}
+        {'site': '{{ network }}'},
         {% endfor %}
     ]);
     rpssocial.share.setconfig(rps_shareconfig);

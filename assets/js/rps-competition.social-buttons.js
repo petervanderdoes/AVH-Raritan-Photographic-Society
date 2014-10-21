@@ -29,38 +29,29 @@ var rpssocial = {
             'buildurl': function (t_obj) {
                 var url = rpssocial.defaulurlparam(t_obj.url);
                 url = rpssocial.addurlparam(url, 'utm_medium', 'facebook');
-                return 'http://www.facebook.com/share.php?u=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(t_obj.title);
+                return 'http://www.facebook.com/share.php?u=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(t_obj.title);;
             },
             'popwidth': 550, 'popheight': 420, 'popscroll': 'no',
             'loadapi': function (cb) {
-                //
-                ///* call to load api */
-                //(function (d, debug) {
-                //    var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-                //    if (d.getElementById(id)) {
-                //        return;
-                //    }
-                //    js = d.createElement('script');
-                //    js.id = id;
-                //    js.async = true;
-                //    js.src = "//connect.facebook.net/en_US/all" + (debug ? "/debug" : "") + ".js";
-                //    ref.parentNode.insertBefore(js, ref);
-                //}(document, /*debug*/ false));
-                //window.fbAsyncInit = function () {
-                //    FB.init({
-                //        appId: '', /* App ID */
-                //        status: true, /* check login status */
-                //        cookie: true, /* enable cookies to allow the server to access the session */
-                //        xfbml: true, /* parse XFBML */
-                //        oauth: true
-                //    });
-                //    FB.Event.subscribe('edge.create', function (targetUrl) {
-                //        window.rpssocial.share.track({'type': 'click', 'site': 'facebook'});
-                //    });
-                //    if (typeof cb === 'function') {
-                //        cb.apply();
-                //    }
-                //};
+                /* call to load api */
+                (function (d, debug) {
+                    var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+                    if (d.getElementById(id)) {
+                        return;
+                    }
+                    js = d.createElement('script');
+                    js.id = id;
+                    js.async = true;
+                    js.src = "//connect.facebook.net/en_US/all" + (debug ? "/debug" : "") + ".js";
+                    ref.parentNode.insertBefore(js, ref);
+                }(document, /*debug*/ false));
+                window.fbAsyncInit = function() {
+                    FB.init({
+                        appId      : '1509711475952744',
+                        xfbml      : true,
+                        version    : 'v2.1'
+                    });
+                };
             }
         },
         'twitter': {
@@ -72,28 +63,28 @@ var rpssocial = {
             'popwidth': 550, 'popheight': 460, 'popscroll': 'no',
             'loadapi': function (cb) {
 
-                ///* call to load api */
-                //window.twttr = (function (d, s, id) {
-                //    var t, js, fjs = d.getElementsByTagName(s)[0];
-                //    if (d.getElementById(id)) return;
-                //    js = d.createElement(s);
-                //    js.id = id;
-                //    js.src = "//platform.twitter.com/widgets.js";
-                //    fjs.parentNode.insertBefore(js, fjs);
-                //    return window.twttr || (t = {
-                //        _e: [], ready: function (f) {
-                //            t._e.push(f)
-                //        }
-                //    });
-                //}(document, "script", "twitter-wjs"));
-                //window.twttr.ready(function (twttr) {
-                //    twttr.events.bind('click', function (event) {
-                //        window.rpssocial.share.track({'type': 'click', 'site': 'twitter'});
-                //    });
-                //    if (typeof cb === 'function') {
-                //        cb.apply();
-                //    }
-                //});
+                /* call to load api */
+                window.twttr = (function (d, s, id) {
+                    var t, js, fjs = d.getElementsByTagName(s)[0];
+                    if (d.getElementById(id)) return;
+                    js = d.createElement(s);
+                    js.id = id;
+                    js.src = "//platform.twitter.com/widgets.js";
+                    fjs.parentNode.insertBefore(js, fjs);
+                    return window.twttr || (t = {
+                        _e: [], ready: function (f) {
+                            t._e.push(f)
+                        }
+                    });
+                }(document, "script", "twitter-wjs"));
+                window.twttr.ready(function (twttr) {
+                    twttr.events.bind('click', function (event) {
+                        window.rpssocial.share.track({'type': 'click', 'site': 'twitter'});
+                    });
+                    if (typeof cb === 'function') {
+                        cb.apply();
+                    }
+                });
             }
         },
         'googleplus': {
@@ -104,11 +95,11 @@ var rpssocial = {
             },
             'popwidth': 600, 'popheight': 600, 'popscroll': 'yes',
             'loadapi': function (cb) {
-                //jQuery.getScript("https://apis.google.com/js/plusone.js", function success() {
-                //    if (typeof cb === 'function') {
-                //        cb.apply();
-                //    }
-                //});
+                jQuery.getScript("https://apis.google.com/js/plusone.js", function success() {
+                    if (typeof cb === 'function') {
+                        cb.apply();
+                    }
+                });
             }
         },
         'linkedin': {
@@ -343,6 +334,7 @@ rpssocial.share = {
                 $(".share-icon").removeClass("active");
             }
         );
+        rpssocial.init();
     });
 }(window.jQuery, window, document));
 // The global jQuery object is passed as a parameter

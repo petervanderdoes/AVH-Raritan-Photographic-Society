@@ -14,9 +14,9 @@ use RpsCompetition\Settings;
  */
 class SocialNetworksHelper
 {
+    private $options;
     private $settings;
     private $view;
-    private $options;
 
     /**
      * Constructor
@@ -65,7 +65,13 @@ class SocialNetworksHelper
     {
         $networks = $this->getNetworks();
 
-        $this->displayWpFooter($networks);
+        $data=[];
+        foreach($networks as $network => $value) {
+            if ($value['api'] === true ) {
+                $data['networks'][]= $network;
+            }
+        }
+        $this->displayWpFooter($data);
     }
 
     /**
