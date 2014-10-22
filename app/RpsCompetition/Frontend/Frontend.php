@@ -13,6 +13,8 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Requests as FrontendRequests;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksHelper;
+use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
@@ -81,6 +83,8 @@ class Frontend
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
         add_filter('query_vars', array($this, 'filterQueryVars'));
         add_filter('post_gallery', array($this, 'filterPostGallery'), 10, 2);
+        add_filter('_get_page_link', array($this, 'filterPostLink'), 10, 2);
+        add_filter('the_title', array($this, 'filterTheTitle'), 10, 2);
     }
 
     /**
@@ -111,9 +115,9 @@ class Frontend
             $imagesloaded_version = "37b35d4";
             $version_separator = '-';
         } else {
-            $rps_masonry_version = "867ece1";
-            $masonry_version = "37b35d4";
-            $imagesloaded_version = "37b35d4";
+            $rps_masonry_version = "";
+            $masonry_version = "";
+            $imagesloaded_version = "";
             $version_separator = '';
         }
 
@@ -479,6 +483,7 @@ class Frontend
 
         $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
+        $this->setupSocialButtons();
 
         unset($query_competitions);
     }
@@ -571,25 +576,26 @@ class Frontend
             }
         }
 
+        $short_code_atts = shortcode_atts(
+            array(
+                'order'      => 'ASC',
+                'orderby'    => 'menu_order ID',
+                'id'         => $post ? $post->ID : 0,
+                'itemtag'    => 'figure',
+                'icontag'    => 'div',
+                'captiontag' => 'figcaption',
+                'columns'    => 3,
+                'size'       => 'thumbnail',
+                'include'    => '',
+                'exclude'    => '',
+                'link'       => '',
+                'layout'     => 'row-equal'
+            ),
+            $attr,
+            'gallery'
+        );
         extract(
-            shortcode_atts(
-                array(
-                    'order'      => 'ASC',
-                    'orderby'    => 'menu_order ID',
-                    'id'         => $post ? $post->ID : 0,
-                    'itemtag'    => 'figure',
-                    'icontag'    => 'div',
-                    'captiontag' => 'figcaption',
-                    'columns'    => 3,
-                    'size'       => 'thumbnail',
-                    'include'    => '',
-                    'exclude'    => '',
-                    'link'       => '',
-                    'layout'     => 'row-equal'
-                ),
-                $attr,
-                'gallery'
-            )
+            $short_code_atts
         );
 
         $id = intval($id);
@@ -668,8 +674,6 @@ class Frontend
         }
 
         $columns = intval($columns);
-        $itemwidth = $columns > 0 ? floor(100 / $columns) : 100;
-        $float = is_rtl() ? 'right' : 'left';
 
         $selector = "gallery-{$instance}";
 
@@ -750,6 +754,26 @@ class Frontend
     }
 
     /**
+     * Change the permalink for the dynamic pages.
+     *
+     * @param string  $link
+     * @param integer $post_id
+     *
+     * @internal Hook: _get_page_link
+     * @return string
+     */
+    public function filterPostLink($link, $post_id)
+    {
+        $pages_array = CommonHelper::getDynamicPages();
+        if (isset($pages_array[$post_id])) {
+            $selected_date = get_query_var('selected_date');
+            $link = $link . $selected_date . '/';
+        }
+
+        return $link;
+    }
+
+    /**
      * Add custom query vars.
      *  - selected_date
      *
@@ -765,6 +789,34 @@ class Frontend
         $vars[] = 'selected_date';
 
         return $vars;
+    }
+
+    /**
+     * Filter the title
+     * For the Dynamic Pages we create a more elaborate title.
+     *
+     * @param string  $title
+     *
+     * @param integer $post_id
+     *
+     * @return string
+     */
+    public function filterTheTitle($title, $post_id)
+    {
+        $pages_array = CommonHelper::getDynamicPages();
+        if (isset($pages_array[$post_id])) {
+
+            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+            $selected_date = get_query_var('selected_date');
+            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competition = current($competitions);
+            $theme = ucfirst($competition->Theme);
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
+            $title .= ' for the theme "' . $theme . '" on ' . $date_text;
+        }
+
+        return $title;
     }
 
     /**
@@ -875,6 +927,26 @@ class Frontend
         $shortcode->register('rps_monthly_entries', 'shortcodeMonthlyEntries');
     }
 
+    private function setupSocialButtons()
+    {
+        $view = new SocialNetworksView($this->settings);
+        $social_buttons = new SocialNetworksHelper($view, $this->settings, $this->options);
+
+        if (WP_LOCAL_DEV !== true) {
+            $social_buttons_script_version = "f233109";
+            $social_buttons_css_version = "c9c4aab";
+            $version_separator = '-';
+        } else {
+            $social_buttons_script_version = "";
+            $social_buttons_css_version = "";
+            $version_separator = '';
+        }
+        $data = array();
+        $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
+        $data['style'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_css_version . '.css';
+        $social_buttons->initClass($data);
+    }
+
     /**
      * Setup the needed user meta information.
      */
@@ -906,5 +978,6 @@ class Frontend
         add_filter('wpseo_metadesc', array($wpseo, 'filterWpseoMetaDescription'), 10, 1);
         add_filter('wpseo_sitemap_index', array($wpseo, 'filterWpseoSitemapIndex'));
         add_filter('wp_title_parts', array($wpseo, 'filterWpTitleParts'), 10, 1);
+        add_filter('wpseo_opengraph_title', array($wpseo, 'filterOpenGraphTitle'), 10, 1);
     }
 }

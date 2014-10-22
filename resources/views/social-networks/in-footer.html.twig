@@ -1,0 +1,8 @@
+<script>
+    rpssocial.setapiconfig([
+        {% for network in networks %}
+        {'site': '{{ network }}'},
+        {% endfor %}
+    ]);
+    rpssocial.share.setconfig(rps_shareconfig);
+</script>

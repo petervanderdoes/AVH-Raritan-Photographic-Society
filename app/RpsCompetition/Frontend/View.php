@@ -107,8 +107,8 @@ class View
     public function renderGalleryMasonry($attachments)
     {
         $data = array();
+        $caption_data = array();
 
-        $data['thumb_size'] = '150w';
         foreach ($attachments as $id => $attachment) {
             $img_url = wp_get_attachment_url($id);
             $home_url = home_url();
@@ -117,20 +117,17 @@ class View
                 $img_relative_path = substr($img_url, strlen($home_url));
                 $entry->Server_File_Name = $img_relative_path;
                 $entry->ID = $attachment->ID;
-                $entries[] = $entry;
-            }
-        }
 
-        foreach ($entries as $entry) {
-            if (trim($attachment->post_excerpt)) {
-                $caption_data['title'] = $attachment->post_excerpt;
-            } else {
-                $caption_data['title'] = '';
-            }
-            $caption_data['first_name'] = get_post_meta($entry->ID, '_rps_photographer_name', true);
-            $caption_data['last_name'] = '';
+                if (trim($attachment->post_excerpt)) {
+                    $caption_data['title'] = $attachment->post_excerpt;
+                } else {
+                    $caption_data['title'] = $attachment->post_title;
+                }
+                $caption_data['first_name'] = get_post_meta($attachment->ID, '_rps_photographer_name', true);
+                $caption_data['last_name'] = '';
 
-            $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
+                $data['images'][] = $this->dataPhotoMasonry($entry, '150w', $caption_data);
+            }
         }
 
         $template = $this->twig->loadTemplate('gallery-masonry.html.twig');

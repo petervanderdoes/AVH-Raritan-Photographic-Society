@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend;
 
+use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
@@ -67,6 +68,25 @@ class WpseoHelper
     }
 
     /**
+     * Get title for og:title
+     * By default the plugin uses the title as created to be shown in the browser which includes the site name.
+     * Facebook recommends to exclude branding.
+     *
+     * @param string $title
+     *
+     * @see https://developers.facebook.com/docs/sharing/best-practices#tags
+     * @return string
+     */
+    public function filterOpenGraphTitle($title)
+    {
+        if (!is_front_page()) {
+            $title = get_the_title();
+        }
+
+        return $title;
+    }
+
+    /**
      * Filter for the title of pages.
      *
      * @param array $title_array
@@ -77,16 +97,17 @@ class WpseoHelper
     {
         global $post;
 
-        $options = get_option('avh-rps');
-        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
             $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
             $selected_date = get_query_var('selected_date');
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
 
             $new_title_array = array();
-            $new_title_array[] = $post->post_title . ' - ' . $selected_date . ' - ' . $competition->Theme;
+            $new_title_array[] = $post->post_title . ' for the theme "' .$competition->Theme . '" on ' . $date_text;
             $title_array = $new_title_array;
         }
 
@@ -107,7 +128,7 @@ class WpseoHelper
         global $post;
 
         $options = get_option('avh-rps');
-        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
 
             $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);

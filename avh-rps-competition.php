@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -36,6 +36,9 @@ require __DIR__ . '/vendor/autoload.php';
 $rps_dir = pathinfo($plugin, PATHINFO_DIRNAME);
 $rps_basename = plugin_basename($plugin);
 
+/**
+ * Class AVH_RPS_Client
+ */
 class AVH_RPS_Client
 {
     /**
@@ -45,6 +48,12 @@ class AVH_RPS_Client
     /** @var  Settings */
     private $settings;
 
+    /**
+     * Constructor.
+     *
+     * @param string $dir
+     * @param string $basename
+     */
     public function __construct($dir, $basename)
     {
         $this->container = new Container();
