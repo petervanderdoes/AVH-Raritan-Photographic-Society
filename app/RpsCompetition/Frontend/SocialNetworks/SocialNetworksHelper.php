@@ -161,7 +161,7 @@ class SocialNetworksHelper
      */
     private function getNetworks($networks = array())
     {
-        $networks['facebook'] = array('text' => 'facebook', 'api' => false);
+        $networks['facebook'] = array('text' => 'facebook', 'api' => true);
         $networks['googleplus'] = array('text' => 'google', 'api' => false);
         $networks['twitter'] = array('text' => 'twitter', 'api' => false);
         $networks['email'] = array('text' => 'email', 'api' => false);

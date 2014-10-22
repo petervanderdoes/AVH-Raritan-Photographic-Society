@@ -218,11 +218,17 @@ var rpssocial = {
         //if (typeof rpssocial.share.data.bars != 'undefined') {
         //    rpssocial.share.init();
         //}
+    },
+    'facebook': function(t_obj) {
+        var url = rpssocial.defaulurlparam(t_obj.url);
+        url = rpssocial.addurlparam(url, 'utm_medium', 'facebook');
+        FB.ui({
+            method: 'share',
+            href: url
+        }, function(response){});
     }
 };
 /* end rpssocial */
-
-
 
 /* share library */
 rpssocial.share = {
@@ -261,7 +267,11 @@ rpssocial.share = {
         /* trigger share actions */
         var t_bar = rpssocial.share.data.bars[t_id];
         var t_social = rpssocial.sites[t_site];
-        rpssocial.share.popup(t_social.buildurl(t_bar), t_site, t_social.popwidth, t_social.popheight, t_social.popscroll);
+        if ( t_site == 'facebook' ) {
+            rpssocial.facebook(t_bar);
+        } else {
+            rpssocial.share.popup(t_social.buildurl(t_bar), t_site, t_social.popwidth, t_social.popheight, t_social.popscroll);
+        }
         /* track click action */
         //rpssocial.share.track({'type': 'click', 'site': t_site});
     },
