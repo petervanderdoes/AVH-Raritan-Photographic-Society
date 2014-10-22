@@ -67,6 +67,40 @@ class WpseoHelper
     }
 
     /**
+     * Get title for og:title
+     * By default the plugin uses the title as created to be shown in the browser which includes the site name.
+     * Facebook recommends to exclude branding.
+     *
+     * For the Dynamic Pages we create a more elaborate title.
+     *
+     * @param string $title
+     *
+     * @see https://developers.facebook.com/docs/sharing/best-practices#tags
+     * @return string
+     */
+    public function filterOpenGraphTitle($title)
+    {
+        global $post;
+
+        $title = get_the_title();
+        $options = get_option('avh-rps');
+        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        if (isset($pages_array[$post->ID])) {
+
+            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+            $selected_date = get_query_var('selected_date');
+            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competition = current($competitions);
+            $theme = ucfirst($competition->Theme);
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
+            $title .= ' for the theme "' . $theme . '" on ' . $date_text;
+        }
+
+        return $title;
+    }
+
+    /**
      * Filter for the title of pages.
      *
      * @param array $title_array
