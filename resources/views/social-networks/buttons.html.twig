@@ -2,8 +2,8 @@
     /* push in config for this share instance */
     rps_shareconfig.push({
         "id": "{{ id }}",
-        "url": "{{ url }}",
-        "title": "{{ title }}"
+        "url": "{{ url|escape('js') }}",
+        "title": "{{ title|escape('js') }}"
     });
 </script>
 <div id="{{ id }}" class="share">
