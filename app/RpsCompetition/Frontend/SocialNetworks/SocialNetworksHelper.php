@@ -33,6 +33,17 @@ class SocialNetworksHelper
     }
 
     /**
+     * Add the fb-root div
+     *
+     * @internal Hook: suffusion_before_page
+     *
+     */
+    public function actionAddFbRoot()
+    {
+        echo '<div id="fb-root"></div>';
+    }
+
+    /**
      * Prepare for rendering of the social buttons.
      * We add this method as we can not add data that might be needed during the rendering.
      * We can not add the data at the hook level.
@@ -65,10 +76,10 @@ class SocialNetworksHelper
     {
         $networks = $this->getNetworks();
 
-        $data=[];
-        foreach($networks as $network => $value) {
-            if ($value['api'] === true ) {
-                $data['networks'][]= $network;
+        $data = [];
+        foreach ($networks as $network => $value) {
+            if ($value['api'] === true) {
+                $data['networks'][] = $network;
             }
         }
         $this->displayWpFooter($data);
@@ -106,6 +117,7 @@ class SocialNetworksHelper
 
         add_action('wp_head', array($this, 'actionWpHead'));
         add_action('wp_footer', array($this, 'actionWpFooter'), 999);
+        add_action('suffusion_before_page', array($this, 'actionAddFbRoot'));
         add_action('rps-social-buttons', array($this, 'actionSocialButtons'));
     }
 
