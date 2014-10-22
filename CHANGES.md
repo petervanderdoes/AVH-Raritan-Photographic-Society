@@ -1,7 +1,9 @@
 ## Changelog
 
-#### Version 2.1.0-dev.8
-* Preparation for new development cycle.
+#### Version 2.0.2
+* Implement Social Network share buttons.
+* Bugfix: Titles not displayed for photos in masonry gallery.
+* Improve title display for the Dynamic Pages
 
 #### Version 2.0.1
 * Problem with .gitignore

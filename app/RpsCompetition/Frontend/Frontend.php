@@ -933,7 +933,7 @@ class Frontend
         $social_buttons = new SocialNetworksHelper($view, $this->settings, $this->options);
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = "867ece1";
+            $social_buttons_script_version = "f233109";
             $social_buttons_css_version = "c9c4aab";
             $version_separator = '-';
         } else {
