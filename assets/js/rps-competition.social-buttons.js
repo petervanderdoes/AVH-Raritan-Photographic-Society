@@ -29,7 +29,7 @@ var rpssocial = {
             'buildurl': function (t_obj) {
                 var url = rpssocial.defaulurlparam(t_obj.url);
                 url = rpssocial.addurlparam(url, 'utm_medium', 'facebook');
-                return 'http://www.facebook.com/share.php?u=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(t_obj.title);;
+                return 'http://www.facebook.com/share.php?u=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(t_obj.title);
             },
             'popwidth': 550, 'popheight': 420, 'popscroll': 'no',
             'loadapi': function (cb) {
@@ -45,11 +45,11 @@ var rpssocial = {
                     js.src = "//connect.facebook.net/en_US/all" + (debug ? "/debug" : "") + ".js";
                     ref.parentNode.insertBefore(js, ref);
                 }(document, /*debug*/ false));
-                window.fbAsyncInit = function() {
+                window.fbAsyncInit = function () {
                     FB.init({
-                        appId      : '1509711475952744',
-                        xfbml      : true,
-                        version    : 'v2.1'
+                        appId: '1509711475952744',
+                        xfbml: true,
+                        version: 'v2.1'
                     });
                 };
             }
@@ -219,13 +219,14 @@ var rpssocial = {
         //    rpssocial.share.init();
         //}
     },
-    'facebook': function(t_obj) {
+    'facebook': function (t_obj) {
         var url = rpssocial.defaulurlparam(t_obj.url);
         url = rpssocial.addurlparam(url, 'utm_medium', 'facebook');
         FB.ui({
             method: 'share',
             href: url
-        }, function(response){});
+        }, function (response) {
+        });
     }
 };
 /* end rpssocial */
@@ -267,7 +268,7 @@ rpssocial.share = {
         /* trigger share actions */
         var t_bar = rpssocial.share.data.bars[t_id];
         var t_social = rpssocial.sites[t_site];
-        if ( t_site == 'facebook' ) {
+        if (t_site == 'facebook') {
             rpssocial.facebook(t_bar);
         } else {
             rpssocial.share.popup(t_social.buildurl(t_bar), t_site, t_social.popwidth, t_social.popheight, t_social.popscroll);
@@ -277,7 +278,12 @@ rpssocial.share = {
     },
     /* launch share url in popup window */
     'popup': function (t_url, t_site, t_width, t_height, t_scroll) {
-        return window.open(t_url, 'rps_pop_' + t_site, 'width=' + t_width + ',height=' + t_height + ',resizable=yes,scrollbars=' + t_scroll);
+        var width = t_width || 800;
+        var height = t_height || 500;
+        /* Position the popup in the middle */
+        var px = Math.floor(((screen.availWidth || 1024) - width) / 2);
+        var py = Math.floor(((screen.availHeight || 700) - height) / 2);
+        return window.open(t_url, 'rps_pop_' + t_site, 'width=' + t_width + ',height=' + t_height + ',left=' + px + ',top=' + py + ',resizable=yes,scrollbars=' + t_scroll);
     },
     /* default tracking callback but we would prefer the setting of a tracking callback in shareconfig */
     'track': function (t_obj) {
