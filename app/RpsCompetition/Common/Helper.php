@@ -73,6 +73,21 @@ class Helper
     }
 
     /**
+     * Get the Dynamic Pages.
+     *
+     * These are the pages where we implement javascript to get different competitions and seasons within the page.
+     *
+     * @return array
+     */
+    static public function getDynamicPages()
+    {
+        $options = get_option('avh-rps');
+        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+
+        return $pages_array;
+    }
+
+    /**
      * Improve the default WordPress plugins_url.
      * The standard function requires a file at the end of the 2nd parameter.
      *
