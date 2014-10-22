@@ -84,6 +84,7 @@ class Frontend
         add_filter('query_vars', array($this, 'filterQueryVars'));
         add_filter('post_gallery', array($this, 'filterPostGallery'), 10, 2);
         add_filter('_get_page_link', array($this, 'filterPostLink'), 10, 2);
+        add_filter('the_title', array($this, 'filterTheTitle'), 10, 2);
     }
 
     /**
@@ -756,17 +757,15 @@ class Frontend
      * Change the permalink for the dynamic pages.
      *
      * @param string  $link
-     * @param integer $post_ID
+     * @param integer $post_id
      *
      * @internal Hook: _get_page_link
      * @return string
      */
-    public function filterPostLink($link, $post_ID)
+    public function filterPostLink($link, $post_id)
     {
-
-        $options = get_option('avh-rps');
-        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
-        if (isset($pages_array[$post_ID])) {
+        $pages_array = CommonHelper::getDynamicPages();
+        if (isset($pages_array[$post_id])) {
             $selected_date = get_query_var('selected_date');
             $link = $link . $selected_date . '/';
         }
@@ -790,6 +789,34 @@ class Frontend
         $vars[] = 'selected_date';
 
         return $vars;
+    }
+
+    /**
+     * Filter the title
+     * For the Dynamic Pages we create a more elaborate title.
+     *
+     * @param string  $title
+     *
+     * @param integer $post_id
+     *
+     * @return string
+     */
+    public function filterTheTitle($title, $post_id)
+    {
+        $pages_array = CommonHelper::getDynamicPages();
+        if (isset($pages_array[$post_id])) {
+
+            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+            $selected_date = get_query_var('selected_date');
+            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competition = current($competitions);
+            $theme = ucfirst($competition->Theme);
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
+            $title .= ' for the theme "' . $theme . '" on ' . $date_text;
+        }
+
+        return $title;
     }
 
     /**
@@ -951,6 +978,6 @@ class Frontend
         add_filter('wpseo_metadesc', array($wpseo, 'filterWpseoMetaDescription'), 10, 1);
         add_filter('wpseo_sitemap_index', array($wpseo, 'filterWpseoSitemapIndex'));
         add_filter('wp_title_parts', array($wpseo, 'filterWpTitleParts'), 10, 1);
-        add_filter('wpseo_opengraph_title',array($wpseo, 'filterOpenGraphTitle'), 10, 1);
+        add_filter('wpseo_opengraph_title', array($wpseo, 'filterOpenGraphTitle'), 10, 1);
     }
 }
