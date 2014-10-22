@@ -121,6 +121,12 @@ var rpssocial = {
             },
             'popwidth': 1, 'popheight': 1, 'popscroll': 'no'
         },
+        'buffer': {
+            'buildurl': function (t_obj) {
+                return 'http://bufferapp.com/add?text=' + encodeURIComponent(t_obj.title) + '&url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'buffer'));
+            },
+            'popwidth': 750, 'popheight': 500, 'popscroll': 'yes'
+        },
         'digg': {
             'buildurl': function (t_obj) {
                 return 'http://www.digg.com/submit?phase=2&url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'digg')) + '&title=' + encodeURIComponent(t_obj.title);
