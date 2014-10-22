@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.2-rc.1
+#### Version 2.0.2
 * Implement Social Network share buttons.
 * Bugfix: Titles not displayed for photos in masonry gallery.
 * Improve title display for the Dynamic Pages
