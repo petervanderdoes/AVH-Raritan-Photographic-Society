@@ -83,6 +83,7 @@ class Frontend
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
         add_filter('query_vars', array($this, 'filterQueryVars'));
         add_filter('post_gallery', array($this, 'filterPostGallery'), 10, 2);
+        add_filter('_get_page_link', array($this, 'filterPostLink'), 10, 2);
     }
 
     /**
@@ -749,6 +750,28 @@ class Frontend
 		</div>\n";
 
         return $output;
+    }
+
+    /**
+     * Change the permalink for the dynamic pages.
+     *
+     * @param string  $link
+     * @param integer $post_ID
+     *
+     * @internal Hook: _get_page_link
+     * @return string
+     */
+    public function filterPostLink($link, $post_ID)
+    {
+
+        $options = get_option('avh-rps');
+        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        if (isset($pages_array[$post_ID])) {
+            $selected_date = get_query_var('selected_date');
+            $link = $link . $selected_date . '/';
+        }
+
+        return $link;
     }
 
     /**
