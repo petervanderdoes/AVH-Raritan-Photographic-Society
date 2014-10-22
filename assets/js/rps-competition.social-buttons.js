@@ -48,6 +48,7 @@ var rpssocial = {
                 window.fbAsyncInit = function () {
                     FB.init({
                         appId: '1509711475952744',
+                        //appId: '1509728749284350',
                         xfbml: true,
                         version: 'v2.1'
                     });
@@ -104,6 +105,8 @@ var rpssocial = {
         },
         'linkedin': {
             'buildurl': function (t_obj) {
+                var url = rpssocial.defaulurlparam(t_obj.url);
+                url = rpssocial.addurlparam(url, 'utm_medium', 'linkedin');
                 return 'http://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(rpssocial.addurlparam(t_obj.url, 'sr', 'share_linkedin')) + '&title=' + encodeURIComponent(t_obj.title);
             },
             'popwidth': 550, 'popheight': 570, 'popscroll': 'no',
@@ -232,6 +235,11 @@ var rpssocial = {
             method: 'share',
             href: url
         }, function (response) {
+            if (response && !response.error_code) {
+                console.log("OK: "+JSON.stringify(response));
+            } else {
+                console.log("Not OK: "+JSON.stringify(response));
+            }
         });
     }
 };
