@@ -43,9 +43,11 @@ class Frontend
     private $request;
     /** @var RpsDb */
     private $rpsdb;
+    /** @var Session  */
     private $session;
     /** @var Settings */
     private $settings;
+    /** @var Rpscompetition\Frontend\View */
     private $view;
 
     /**
@@ -55,18 +57,18 @@ class Frontend
      */
     public function __construct(Container $container)
     {
-        $this->session = new Session(array('name' => 'raritan_' . COOKIEHASH));
+        $this->session = $container->make('Session');
         $this->session->start();
 
         $this->container = $container;
 
-        $this->settings = $container->make('RpsCompetition\Settings');
-        $this->rpsdb = $container->make('RpsCompetition\Db\RpsDb');
+        $this->settings = $container->make('Settings');
+        $this->rpsdb = $container->make('RpsDb');
         $this->request = $container->make('Illuminate\Http\Request');
-        $this->options = $container->make('RpsCompetition\Options\General');
-        $this->core = new Core($this->settings);
-        $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request, $this->session);
-        $this->view = new View($this->settings, $this->rpsdb, $this->request);
+        $this->options = $container->make('OptionsGeneral');
+        $this->core = $container->make('Core');
+        $requests = $container->make('FrontendRequests');
+        $this->view = $container->make('FrontendView');
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -184,9 +186,9 @@ class Frontend
     {
         global $post;
 
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $query_competitions =$this->container->make('QueryCompetitions');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
             $redirect_to = $this->request->input('wp_get_referer');
@@ -249,7 +251,7 @@ class Frontend
     public function actionHandleHttpPostRpsMyEntries()
     {
         global $post;
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = $this->container->make('QueryCompetitions');
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
 
@@ -317,9 +319,9 @@ class Frontend
     public function actionHandleHttpPostRpsUploadEntry()
     {
         global $post;
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
@@ -478,7 +480,7 @@ class Frontend
 
         $this->setupShortcodes();
 
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = $this->container->make('QueryCompetitions');
         $query_competitions->setAllPastCompetitionsClose();
 
         $this->setupWpSeoActionsFilters();
@@ -500,7 +502,7 @@ class Frontend
     public function actionShowcaseCompetitionThumbnails($foo)
     {
         if (is_front_page()) {
-            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+            $query_miscellaneous = $this->container->make('QueryMiscellaneous');
             $records = $query_miscellaneous->getEightsAndHigher(5);
             $data = array();
             $data['records'] = $records;
@@ -806,7 +808,7 @@ class Frontend
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
 
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+            $query_competitions = $this->container->make('QueryCompetitions');
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
@@ -826,8 +828,8 @@ class Frontend
      */
     private function deleteCompetitionEntries($entries)
     {
-        $query_entries = new QueryEntries($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_array($entries)) {
             foreach ($entries as $id) {
@@ -855,9 +857,9 @@ class Frontend
      */
     private function handleSubmitBanquetEntries()
     {
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if ($this->request->has('allentries')) {
             $all_entries = explode(',', $this->request->input('allentries'));

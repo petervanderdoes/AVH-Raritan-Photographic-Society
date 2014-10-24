@@ -13,9 +13,8 @@
 use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Frontend;
-use RpsCompetition\Options\General as OptionsGeneral;
+use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Settings;
 
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
@@ -58,29 +57,9 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->singleton(
-            'RpsCompetition\Settings',
-            function () {
-                return new Settings(new Avh\DataHandler\NamespacedAttributeBag());
-            }
-        );
-        $this->container->singleton(
-            'RpsCompetition\Db\RpsDb',
-            function () {
-                return new RpsDb();
-            }
-        );
-        $this->container->singleton(
-            'RpsCompetition\Options\General',
-            function () {
-                return new OptionsGeneral();
-            }
-        );
+        $this->setupContainer();
         $upload_dir_info = wp_upload_dir();
-        $this->settings = $this->container->make('RpsCompetition\Settings');
-        $this->container->make('RpsCompetition\Db\RpsDb');
-        $this->container->make('RpsCompetition\Options\General');
-        $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
+        $this->settings = $this->container->make('Settings');
         $this->settings->set('plugin_dir', $dir);
         $this->settings->set('plugin_file', $basename);
         $this->settings->set('template_dir', $dir . '/resources/views/');
@@ -129,6 +108,83 @@ class AVH_RPS_Client
     public function pluginDeactivation()
     {
         flush_rewrite_rules();
+    }
+
+    public function setupContainer()
+    {
+        /**
+         * Run instances
+         *
+         */
+        $this->container->instance('IlluminateRequest', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
+
+        /**
+         * Setup Interfaces
+         *
+         */
+        $this->container->bind('Avh\DataHandler\AttributeBagInterface', 'Avh\DataHandler\NamespacedAttributeBag');
+
+        /**
+         * Setup Singleton classes
+         *
+         */
+        $this->container->singleton('Settings', 'RpsCompetition\Settings');
+        $this->container->singleton('RpsDb', 'RpsCompetition\Db\RpsDb');
+        $this->container->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
+        $this->container->singleton(
+            'Session',
+            function () {
+                return new Avh\Network\Session(array('name' => 'raritan_' . COOKIEHASH));
+            }
+        );
+
+        /**
+         * Setup Classes
+         *
+         */
+
+        $this->container->bind(
+            'Core',
+            function ($app) {
+                return new \RpsCompetition\Common\Core($app->make('Settings'));
+            }
+        );
+        $this->container->bind(
+            'FrontendRequests',
+            function ($app) {
+                return new RpsCompetition\Frontend\Requests($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
+            }
+        );
+        $this->container->bind(
+            'FrontendView',
+            function ($app) {
+                return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
+            }
+        );
+        $this->container->bind(
+            'QueryEntries',
+            function ($app) {
+                return new RpsCompetition\Db\QueryEntries($app->make('RpsDb'));
+            }
+        );
+        $this->container->bind(
+            'QueryCompetitions',
+            function ($app) {
+                return new RpsCompetition\Db\QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
+            }
+        );
+        $this->container->bind(
+            'QueryMiscellaneous',
+            function ($app) {
+                return new RpsCompetition\Db\QueryMiscellaneous($app->make('RpsDb'));
+            }
+        );
+        $this->container->bind(
+            'PhotoHelper',
+            function ($app) {
+                return new RpsCompetition\Photo\Helper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+            }
+        );
     }
 }
 
