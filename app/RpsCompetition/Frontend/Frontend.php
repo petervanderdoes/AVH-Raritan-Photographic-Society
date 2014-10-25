@@ -64,7 +64,7 @@ class Frontend
 
         $this->settings = $container->make('Settings');
         $this->rpsdb = $container->make('RpsDb');
-        $this->request = $container->make('Illuminate\Http\Request');
+        $this->request = $container->make('IlluminateRequest');
         $this->options = $container->make('OptionsGeneral');
         $this->core = $container->make('Core');
         $requests = $container->make('FrontendRequests');
