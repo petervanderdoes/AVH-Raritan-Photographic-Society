@@ -301,6 +301,7 @@ class View
         $first_name = $user_info->user_firstname;
         $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
