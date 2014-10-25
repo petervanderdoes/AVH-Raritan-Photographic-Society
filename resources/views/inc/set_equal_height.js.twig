@@ -1,0 +1,21 @@
+<script>
+    // The rest of your code goes here!
+    function set_equal_height(selectors) {
+        var tallest = 0;
+        // Reset all tiles to 0 min-height
+        selectors.css({
+            'height': 'auto'
+        });
+        selectors.each(function () {
+            if (jQuery(this).height() > tallest) {
+                tallest = jQuery(this).height();
+            }
+        });
+        selectors.css({
+            'height': tallest
+        });
+    }
+    jQuery('.gallery-row-equal').each(function () {
+        set_equal_height(jQuery(this).find('.gallery-item-content'));
+    });
+</script>
