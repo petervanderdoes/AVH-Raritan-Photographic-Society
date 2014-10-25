@@ -59,6 +59,11 @@ class SocialNetworksHelper
         if ($post->post_type == 'page' && ($post->ID == $options['members_page'] || $post->post_parent == $options['members_page'])) {
             return;
         }
+
+        if (has_shortcode($post->post_content, 'theme-my-login')) {
+            return;
+        }
+
         $networks = $this->getNetworks();
 
         $this->displaySocialButtons($networks);
