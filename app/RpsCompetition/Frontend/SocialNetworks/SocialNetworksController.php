@@ -6,6 +6,12 @@ use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Libs\Container;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 /**
  * Class SocialNetworksHelper
  *
@@ -62,9 +68,9 @@ class SocialNetworksController extends Container
             return;
         }
 
-        $data = $this->model->dataSocialButtons($this->model->getNetworks());
+        $data = $this->model->getSocialButtons($this->model->getNetworks());
 
-        echo $this->render('buttons.html.twig',$data);
+        echo $this->render('buttons.html.twig', $data);
     }
 
     /**
@@ -77,7 +83,7 @@ class SocialNetworksController extends Container
      */
     public function actionWpFooter()
     {
-        $data = $this->model->dataApiNetworks();
+        $data = $this->model->getNetworksWithApiEnabled();
         echo $this->render('in-footer.html.twig', $data);
     }
 
