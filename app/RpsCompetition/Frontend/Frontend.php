@@ -57,10 +57,9 @@ class Frontend
      */
     public function __construct(Container $container)
     {
+        $this->container = $container;
         $this->session = $container->make('Session');
         $this->session->start();
-
-        $this->container = $container;
 
         $this->settings = $container->make('Settings');
         $this->rpsdb = $container->make('RpsDb');
@@ -915,7 +914,7 @@ class Frontend
      */
     private function setupShortcodes()
     {
-        $shortcode = new Shortcodes($this->settings, $this->rpsdb, $this->request, $this->session);
+        $shortcode = $this->container->make('Shortcodes');
         $shortcode->register('rps_category_winners', 'shortcodeCategoryWinners');
         $shortcode->register('rps_monthly_winners', 'shortcodeMonthlyWinners');
         $shortcode->register('rps_scores_current_user', 'shortcodeScoresCurrentUser');
@@ -931,8 +930,7 @@ class Frontend
 
     private function setupSocialButtons()
     {
-        $view = new SocialNetworksView($this->settings);
-        $social_buttons = new SocialNetworksHelper($view, $this->settings, $this->options);
+        $social_buttons = $this->container->make('SocialNetworks');
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = "f233109";

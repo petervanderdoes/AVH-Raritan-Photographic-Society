@@ -2,34 +2,32 @@
 
 namespace RpsCompetition\Frontend\SocialNetworks;
 
+use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
-use RpsCompetition\Options\General as OptionsGeneral;
-use RpsCompetition\Settings;
+use RpsCompetition\Libs\Container;
 
 /**
  * Class SocialNetworksHelper
  *
  * @package RpsCompetition\Frontend\SocialNetworks
  */
-class SocialNetworksHelper
+class SocialNetworksController extends Container
 {
-    private $options;
-    private $settings;
-    private $view;
+    protected $model;
 
     /**
      * Constructor
      *
-     * @param View           $view
-     * @param Settings       $settings
-     * @param OptionsGeneral $options
+     * @param IlluminateContainer $container
      */
-    public function __construct(SocialNetworksView $view, Settings $settings, OptionsGeneral $options)
+    public function __construct(IlluminateContainer $container)
     {
-        $this->settings = $settings;
-        $this->view = $view;
-        $this->options = $options;
+        $this->setContainer($container);
+        $this->setSettings($this->container->make('Settings'));
+        $this->setOptions($this->container->make('OptionsGeneral'));
+        $this->setTemplateEngine($this->container->make('Templating', array('template_dir' => $this->settings->get('template_dir') . '/social-networks', 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/')));
+
+        $this->model = new SocialNetworksModel();
     }
 
     /**
@@ -40,7 +38,7 @@ class SocialNetworksHelper
      */
     public function actionAddFbRoot()
     {
-        echo '<div id="fb-root"></div>';
+        echo $this->render('fb-root.html.twig');
     }
 
     /**
@@ -64,9 +62,9 @@ class SocialNetworksHelper
             return;
         }
 
-        $networks = $this->getNetworks();
+        $data = $this->model->dataSocialButtons($this->model->getNetworks());
 
-        $this->displaySocialButtons($networks);
+        echo $this->render('buttons.html.twig',$data);
     }
 
     /**
@@ -79,15 +77,8 @@ class SocialNetworksHelper
      */
     public function actionWpFooter()
     {
-        $networks = $this->getNetworks();
-
-        $data = [];
-        foreach ($networks as $network => $value) {
-            if ($value['api'] === true) {
-                $data['networks'][] = $network;
-            }
-        }
-        $this->displayWpFooter($data);
+        $data = $this->model->dataApiNetworks();
+        echo $this->render('in-footer.html.twig', $data);
     }
 
     /**
@@ -100,7 +91,7 @@ class SocialNetworksHelper
      */
     public function actionWpHead()
     {
-        $this->displayWpHeader();
+        echo $this->render('in-header.html.twig');
     }
 
     /**
@@ -124,65 +115,5 @@ class SocialNetworksHelper
         add_action('wp_footer', array($this, 'actionWpFooter'), 999);
         add_action('suffusion_before_page', array($this, 'actionAddFbRoot'));
         add_action('rps-social-buttons', array($this, 'actionSocialButtons'));
-    }
-
-    /**
-     * Display the social buttons
-     *
-     * @param array $networks
-     * @param array $icons
-     *
-     */
-    private function displaySocialButtons(array $networks, $icons = array())
-    {
-        $default_icons = array('facebook' => 'facebook-square', 'twitter' => 'twitter', 'googleplus' => 'google-plus', 'email' => 'envelope-o');
-        $data = array();
-
-        $network_icons = array_merge($default_icons, $icons);
-        $data['url'] = get_permalink();
-        $data['id'] = 'share';
-        $data['title'] = get_the_title();
-        foreach ($networks as $network => $value) {
-            $data['networks'][$network] = array('text' => $value['text'], 'icon' => $network_icons[$network]);
-        }
-
-        echo $this->view->renderSocialNetworksButtons($data);
-    }
-
-    /**
-     * Display the content in the WordPress footer
-     *
-     * @param array $data
-     *
-     */
-    private function displayWpFooter($data)
-    {
-        echo $this->view->renderWpFooter($data);
-    }
-
-    /**
-     * Display the content in the WordPress header
-     *
-     */
-    private function displayWpHeader()
-    {
-        echo $this->view->renderWpHeader();
-    }
-
-    /**
-     * Get the default social networks data
-     *
-     * @param array $networks
-     *
-     * @return array
-     */
-    private function getNetworks($networks = array())
-    {
-        $networks['facebook'] = array('text' => 'facebook', 'api' => true);
-        $networks['googleplus'] = array('text' => 'google', 'api' => false);
-        $networks['twitter'] = array('text' => 'twitter', 'api' => false);
-        $networks['email'] = array('text' => 'email', 'api' => false);
-
-        return $networks;
     }
 }

@@ -185,6 +185,32 @@ class AVH_RPS_Client
                 return new RpsCompetition\Photo\Helper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
             }
         );
+
+        $this->container->bind(
+            'Shortcodes',
+            function ($app) {
+                return new \RpsCompetition\Frontend\Shortcodes($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
+            }
+        );
+        $this->container->bind(
+            'Templating',
+            function ($app, $param) {
+                $template_dir = $param['template_dir'];
+                $cache_dir = $param['cache_dir'];
+                if (WP_LOCAL_DEV !== true) {
+                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir), array('cache' => $cache_dir));
+                } else {
+                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir));
+                }
+            }
+        );
+
+        $this->container->bind(
+            'SocialNetworks',
+            function ($app) {
+                return new \RpsCompetition\Frontend\SocialNetworks\SocialNetworksController($app);
+            }
+        );
     }
 }
 
