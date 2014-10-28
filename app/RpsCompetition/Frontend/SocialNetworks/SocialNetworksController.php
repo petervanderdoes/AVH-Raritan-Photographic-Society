@@ -13,7 +13,7 @@ if (!class_exists('AVH_RPS_Client')) {
 }
 
 /**
- * Class SocialNetworksHelper
+ * Class SocialNetworksController
  *
  * @package RpsCompetition\Frontend\SocialNetworks
  */

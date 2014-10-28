@@ -914,7 +914,9 @@ class Frontend
      */
     private function setupShortcodes()
     {
-        $shortcode = $this->container->make('Shortcodes');
+        /** @var ShortcodeRouter $shortcode */
+        $shortcode = $this->container->make('ShortcodeRouter');
+        $shortcode->setShortcodeController($this->container->make('ShortcodeController'));
         $shortcode->register('rps_category_winners', 'shortcodeCategoryWinners');
         $shortcode->register('rps_monthly_winners', 'shortcodeMonthlyWinners');
         $shortcode->register('rps_scores_current_user', 'shortcodeScoresCurrentUser');

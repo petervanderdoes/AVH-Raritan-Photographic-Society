@@ -12,9 +12,19 @@
  */
 use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
+use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
+use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Frontend;
+use RpsCompetition\Frontend\Requests;
+use RpsCompetition\Frontend\Shortcodes;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\View as FrontendView;
+use RpsCompetition\Photo\Helper;
 use RpsCompetition\Settings;
 
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
@@ -62,7 +72,7 @@ class AVH_RPS_Client
         $this->settings = $this->container->make('Settings');
         $this->settings->set('plugin_dir', $dir);
         $this->settings->set('plugin_file', $basename);
-        $this->settings->set('template_dir', $dir . '/resources/views/');
+        $this->settings->set('template_dir', $dir . '/resources/views');
         $this->settings->set('plugin_basename', $basename);
         $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
         $this->settings->set('javascript_dir', $dir . '/assets/js/');
@@ -112,11 +122,6 @@ class AVH_RPS_Client
 
     public function setupContainer()
     {
-        /**
-         * Run instances
-         *
-         */
-        $this->container->instance('IlluminateRequest', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
 
         /**
          * Setup Interfaces
@@ -137,6 +142,8 @@ class AVH_RPS_Client
                 return new Avh\Network\Session(array('name' => 'raritan_' . COOKIEHASH));
             }
         );
+        $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
+        $this->container->instance('IlluminateRequest', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
 
         /**
          * Setup Classes
@@ -146,13 +153,13 @@ class AVH_RPS_Client
         $this->container->bind(
             'Core',
             function ($app) {
-                return new \RpsCompetition\Common\Core($app->make('Settings'));
+                return new Core($app->make('Settings'));
             }
         );
         $this->container->bind(
             'FrontendRequests',
             function ($app) {
-                return new RpsCompetition\Frontend\Requests($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
+                return new Requests($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
             }
         );
         $this->container->bind(
@@ -164,32 +171,40 @@ class AVH_RPS_Client
         $this->container->bind(
             'QueryEntries',
             function ($app) {
-                return new RpsCompetition\Db\QueryEntries($app->make('RpsDb'));
+                return new QueryEntries($app->make('RpsDb'));
             }
         );
         $this->container->bind(
             'QueryCompetitions',
             function ($app) {
-                return new RpsCompetition\Db\QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
+                return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
             }
         );
         $this->container->bind(
             'QueryMiscellaneous',
             function ($app) {
-                return new RpsCompetition\Db\QueryMiscellaneous($app->make('RpsDb'));
+                return new QueryMiscellaneous($app->make('RpsDb'));
             }
         );
         $this->container->bind(
             'PhotoHelper',
             function ($app) {
-                return new RpsCompetition\Photo\Helper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+                return new Helper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+            }
+        );
+
+        $this->container->bind('ShortcodeRouter', 'RpsCompetition\Frontend\Shortcodes\ShortcodeRouter');
+        $this->container->bind(
+            'ShortcodeController',
+            function ($app) {
+                return new ShortcodeController($app);
             }
         );
 
         $this->container->bind(
-            'Shortcodes',
+            'ShortcodeModel',
             function ($app) {
-                return new \RpsCompetition\Frontend\Shortcodes($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
+                return new ShortcodeModel($app->make('PhotoHelper'), $app->make('QueryMiscellaneous'));
             }
         );
         $this->container->bind(
@@ -208,7 +223,7 @@ class AVH_RPS_Client
         $this->container->bind(
             'SocialNetworks',
             function ($app) {
-                return new \RpsCompetition\Frontend\SocialNetworks\SocialNetworksController($app);
+                return new SocialNetworksController($app);
             }
         );
     }

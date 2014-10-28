@@ -4,6 +4,10 @@ namespace RpsCompetition\Libs;
 
 
 use Illuminate\Container\Container as IlluminateContainer;
+use Illuminate\Http\Request;
+use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Options\General;
+use RpsCompetition\Settings;
 
 class Container
 {
@@ -12,6 +16,9 @@ class Container
     protected $twig;
     protected $settings;
     protected $options;
+    protected $rpsdb;
+    protected $session;
+    protected $request;
 
     /**
      * Sets the Container associated with this Controller.
@@ -24,21 +31,44 @@ class Container
     }
 
     /**
-     * @param mixed $options
+     * @param General $options
      */
-    public function setOptions($options)
+    public function setOptions(General $options)
     {
         $this->options = $options;
     }
 
+
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
+    }
+
     /**
-     * @param mixed $settings
+     * @param RpsDb $rpsdb
      */
-    public function setSettings($settings)
+    public function setRpsdb(RpsDb $rpsdb)
+    {
+        $this->rpsdb = $rpsdb;
+    }
+
+
+    public function setSession($session)
+    {
+        $this->session = $session;
+    }
+
+    /**
+     * @param Settings $settings
+     */
+    public function setSettings(Settings $settings)
     {
         $this->settings = $settings;
     }
 
+    /**
+     * @param \Twig_Environment $twig
+     */
     public function setTemplateEngine(\Twig_Environment $twig) {
         $this->twig = $twig;
     }
@@ -46,7 +76,7 @@ class Container
     /**
      * Renders a view.
      *
-     * @param string   $view       The view name
+     * @param string   $view The view name
      * @param array    $data An array of parameters to pass to the view
      *
      * @return string Rendered output
