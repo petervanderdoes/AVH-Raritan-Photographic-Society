@@ -24,7 +24,8 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\View as FrontendView;
-use RpsCompetition\Photo\Helper;
+use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
@@ -189,7 +190,14 @@ class AVH_RPS_Client
         $this->container->bind(
             'PhotoHelper',
             function ($app) {
-                return new Helper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+                return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+            }
+        );
+
+        $this->container->bind(
+            'SeasonHelper',
+            function ($app) {
+                return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
             }
         );
 
@@ -204,7 +212,7 @@ class AVH_RPS_Client
         $this->container->bind(
             'ShortcodeModel',
             function ($app) {
-                return new ShortcodeModel($app->make('PhotoHelper'), $app->make('QueryMiscellaneous'));
+                return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries') , $app->make('QueryMiscellaneous'),$app->make('PhotoHelper'),$app->make('SeasonHelper'));
             }
         );
         $this->container->bind(

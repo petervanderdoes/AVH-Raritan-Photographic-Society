@@ -529,7 +529,7 @@ final class ShortcodeController extends Container
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $data = $this->model->getCategoryWinnersFacebookThumbs($entries);
+                $data = $this->model->getFacebookThumbs($entries);
                 echo $this->twig->render('facebook.html.twig', $data);
 
                 return;
@@ -628,35 +628,15 @@ final class ShortcodeController extends Container
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @internal Shortcode: rps_monthly_entries
      */
     public function shortcodeMonthlyEntries($attr, $content, $tag)
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_entries = new QueryEntries($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $view_data = array();
-
-        $months = array();
-        $themes = array();
-
         $selected_date = $this->session->get('monthly_entries_selected_date');
         $selected_season = $this->session->get('monthly_entries_selected_season');
 
-        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_competitions->getScoredCompetitions($season_start_date, $season_end_date);
-
-        $is_scored_competitions = false;
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $is_scored_competitions = true;
-            /** @var QueryCompetitions $competition */
-            foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
-                $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
-                $themes[$key] = $competition->Theme;
-            }
-        }
+        $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
@@ -664,30 +644,17 @@ final class ShortcodeController extends Container
          * @see Frontend::filterWpseoPreAnalysisPostsContent
          */
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
-            $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
+        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $entries = $this->model->getAllEntries($selected_date, $selected_date);
+            $data = $this->model->getFacebookThumbs($entries);
+            echo $this->twig->render('facebook.html.twig', $data);
 
             return;
         }
 
-        $view_data['selected_season'] = $selected_season;
-        $view_data['selected_date'] = $selected_date;
-        $view_data['is_scored_competitions'] = $is_scored_competitions;
-        $view_data['months'] = $months;
-        $view_data['thumb_size'] = '150w';
+        $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
 
-        if ($is_scored_competitions) {
-            $date = new \DateTime($selected_date);
-            $view_data['date_text'] = $date->format('F j, Y');
-            $view_data['theme_name'] = $themes[$selected_date];
-            $view_data['entries'] = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $view_data['count_entries'] = count($view_data['entries']);
-        }
-
-        echo $this->view->renderMonthlyEntries($view_data);
-
-        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $view_data);
+        echo $this->twig->render('monthly-entries.html.twig', $data);
     }
 
     /**
