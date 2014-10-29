@@ -212,7 +212,7 @@ class AVH_RPS_Client
         $this->container->bind(
             'ShortcodeModel',
             function ($app) {
-                return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries') , $app->make('QueryMiscellaneous'),$app->make('PhotoHelper'),$app->make('SeasonHelper'));
+                return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'), $app->make('SeasonHelper'));
             }
         );
         $this->container->bind(
@@ -234,6 +234,8 @@ class AVH_RPS_Client
                 return new SocialNetworksController($app);
             }
         );
+
+        $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
     }
 }
 
