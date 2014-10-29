@@ -668,142 +668,31 @@ final class ShortcodeController extends Container
      */
     public function shortcodeMonthlyWinners($attr, $content, $tag)
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-
-        $months = array();
-        $themes = array();
 
         $selected_date = $this->session->get('monthly_winners_selected_date');
         $selected_season = $this->session->get('monthly_winners_selected_season');
 
-        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_competitions->getScoredCompetitions($season_start_date, $season_end_date);
+        $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
-        $is_scored_competitions = false;
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $is_scored_competitions = true;
-            /** @var QueryCompetitions $competition */
-            foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
-                $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
-                $themes[$key] = $competition->Theme;
-            }
-        }
-        $max_num_awards = $query_miscellaneous->getMaxAwards($selected_date);
-
-        /**
+         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
          *
          * @see Frontend::filterWpseoPreAnalysisPostsContent
          */
-        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
-            $entries = $query_miscellaneous->getWinners($selected_date);
-            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
+         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $entries = $this->model->getWinners($selected_date);
+            $data = $this->model->getFacebookThumbs($entries);
+            echo $this->twig->render('facebook.html.twig', $data);
 
             return;
         }
-        // Start displaying the form
 
-        echo '<span class="competition-monthly-winners-form">Select a theme or season ';
-        echo $this->view->renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
-        echo '<p></p></span>';
-
-        $output = '';
-        if ($is_scored_competitions) {
-
-            $output .= "<table class=\"thumb_grid\">\n";
-            // Output the column headings
-            $output .= "<tr><th class='thumb_col_header' align='center'></th>\n";
-            for ($i = 0; $i < $max_num_awards; $i++) {
-                switch ($i) {
-                    case 0:
-                        $award_title = "1st";
-                        break;
-                    case 1:
-                        $award_title = "2nd";
-                        break;
-                    case 2:
-                        $award_title = "3rd";
-                        break;
-                    default:
-                        $award_title = "HM";
-                }
-                $output .= "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
-            }
-            $award_winners = $query_miscellaneous->getWinners($selected_date);
-            // Iterate through all the award winners and display each thumbnail in a grid
-            $row = 0;
-            $column = 0;
-            $comp = "";
-            /** @var QueryEntries $competition */
-            foreach ($award_winners as $competition) {
-                $user_info = get_userdata($competition->Member_ID);
-
-                // Remember the important values from the previous record
-                $prev_comp = $comp;
-
-                // Grab a new record from the database
-                $medium = $competition->Medium;
-                $classification = $competition->Classification;
-                $comp = "$classification<br>$medium";
-                $title = $competition->Title;
-                $last_name = $user_info->user_lastname;
-                $first_name = $user_info->user_firstname;
-                $award = $competition->Award;
-
-                // If we're at the end of a row, finish off the row and get ready for the next one
-                if ($prev_comp != $comp) {
-                    // As necessary, pad the row out with empty cells
-                    if ($row > 0 && $column < $max_num_awards) {
-                        for ($i = $column; $i < $max_num_awards; $i++) {
-                            $output .= "<td align=\"center\" class=\"thumb_cell\">";
-                            $output .= "<div class=\"thumb_canvas\"></div></td>\n";
-                        }
-                    }
-                    // Terminate this row
-                    $output .= "</tr>\n";
-
-                    // Initialize the new row
-                    $row += 1;
-                    $column = 0;
-                    $output .= "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
-                }
-                // Display this thumbnail in the the next available column
-                $output .= "<td align=\"center\" class=\"thumb_cell\">\n";
-                $output .= "<div class=\"thumb_canvas\">\n";
-                $rel_text = tag_escape($classification) . tag_escape($medium);
-                $output .= "<a href=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '800') . "\" rel=\"" . $rel_text . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                $output .= "<img class=\"thumb_img\" src=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '75') . "\" /></a>\n";
-                $output .= "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
-                $output .= "</div>\n</td>\n";
-                $column += 1;
-            }
-            // As necessary, pad the last row out with empty cells
-            if ($row > 0 && $column < $max_num_awards) {
-                for ($i = $column; $i < $max_num_awards; $i++) {
-                    $output .= "<td align=\"center\" class=\"thumb_cell\">";
-                    $output .= "<div class=\"thumb_canvas\"></div></td>\n";
-                }
-            }
-            // Close out the table
-            $output .= "</tr>\n</table>\n";
-            $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
-            $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
-            $header = '<p class="competition-theme">Out of ' . $entries_amount . ' entries, a jury selected these winners of the competition with the theme "' . $themes[$selected_date] . '" held on ' . $date_text . ', which was organized by Raritan Photographic Society.</p>';
-            $output = $header . $output;
-        } else {
-            $output = '<p>There are no scored competitions for the selected season.</p>';
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
+            echo $this->render('monthly-winners.html.twig', $data);
         }
 
-        echo $output;
-
-        unset($query_competitions, $query_miscellaneous, $season_helper, $photo_helper);
     }
 
     /**

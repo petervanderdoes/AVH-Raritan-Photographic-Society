@@ -344,7 +344,7 @@ class QueryMiscellaneous
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
         $sql = $this->rpsdb->prepare(
-            "SELECT c.Competition_Date, c.Classification,
+            "SELECT c.ID, c.Competition_Date, c.Classification,
                 if(c.Classification = 'Beginner',1,
                 if(c.Classification = 'Advanced',2,
                 if(c.Classification = 'Salon',3,0))) as \"Class_Code\",

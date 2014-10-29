@@ -5,6 +5,10 @@
                 <img width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}" src="{{ url_thumb }}">
             </a>
         </div>
-        <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title }}<br><span class="wp-caption-credit">Credit: {{ image.caption.credit }}</span></figcaption>
+        <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title }}<br><span class="wp-caption-credit">Credit: {{ image.caption.credit }}</span>
+            {% if award %}
+                <br><span class="gallery-item-award">Award: {{ award }}</span>
+            {% endif %}
+        </figcaption>
     </div>
 </figure>
