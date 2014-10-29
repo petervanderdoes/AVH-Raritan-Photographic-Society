@@ -665,6 +665,8 @@ final class ShortcodeController extends Container
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @internal Shortcode: rps_monthly_winners
      */
     public function shortcodeMonthlyWinners($attr, $content, $tag)
     {
@@ -674,12 +676,12 @@ final class ShortcodeController extends Container
 
         $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
-         /**
+        /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
          *
          * @see Frontend::filterWpseoPreAnalysisPostsContent
          */
-         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
         if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
             $entries = $this->model->getWinners($selected_date);
             $data = $this->model->getFacebookThumbs($entries);
@@ -692,7 +694,6 @@ final class ShortcodeController extends Container
             $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
             echo $this->render('monthly-winners.html.twig', $data);
         }
-
     }
 
     /**

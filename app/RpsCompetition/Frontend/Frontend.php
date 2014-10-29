@@ -13,6 +13,7 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Requests as FrontendRequests;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksHelper;
 use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
 use RpsCompetition\Options\General as Options;
@@ -917,17 +918,7 @@ class Frontend
         /** @var ShortcodeRouter $shortcode */
         $shortcode = $this->container->make('ShortcodeRouter');
         $shortcode->setShortcodeController($this->container->make('ShortcodeController'));
-        $shortcode->register('rps_category_winners', 'shortcodeCategoryWinners');
-        $shortcode->register('rps_monthly_winners', 'shortcodeMonthlyWinners');
-        $shortcode->register('rps_scores_current_user', 'shortcodeScoresCurrentUser');
-        $shortcode->register('rps_banquet_current_user', 'shortcodeBanquetCurrentUser');
-        $shortcode->register('rps_all_scores', 'shortcodeAllScores');
-        $shortcode->register('rps_my_entries', 'shortcodeMyEntries');
-        $shortcode->register('rps_edit_title', 'shortcodeEditTitle');
-        $shortcode->register('rps_upload_image', 'shortcodeUploadImage');
-        $shortcode->register('rps_email', 'shortcodeEmail');
-        $shortcode->register('rps_person_winners', 'shortcodePersonWinners');
-        $shortcode->register('rps_monthly_entries', 'shortcodeMonthlyEntries');
+        $shortcode->initializeShortcodes();
     }
 
     private function setupSocialButtons()

@@ -35,6 +35,35 @@ class ShortcodeModel
     }
 
     /**
+     * return an array with the awards up to the maximum number of awrads.
+     *
+     * @param integer $max_num_awards
+     *
+     * @return array
+     */
+    public function getAwardsData($max_num_awards)
+    {
+        $data = array();
+        for ($i = 0; $i < $max_num_awards; $i++) {
+            switch ($i) {
+                case 0:
+                    $data[] = "1st";
+                    break;
+                case 1:
+                    $data[] = "2nd";
+                    break;
+                case 2:
+                    $data[] = "3rd";
+                    break;
+                default:
+                    $data[] = "HM";
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Collect needed data to render the Category Winners
      *
      * @param string $class
@@ -127,6 +156,73 @@ class ShortcodeModel
     }
 
     /**
+     * Get the monthly winners
+     *
+     * @param string $selected_season
+     * @param string $selected_date
+     * @param array  $scored_competitions
+     *
+     * @return array
+     */
+    public function getMonthlyWinners($selected_season, $selected_date, $scored_competitions)
+    {
+
+        $is_scored_competitions = false;
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $is_scored_competitions = true;
+            foreach ($scored_competitions as $competition) {
+                $date_object = new \DateTime($competition->Competition_Date);
+                $key = $date_object->format('Y-m-d');
+                $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
+                $themes[$key] = $competition->Theme;
+            }
+        }
+
+        $max_num_awards = $this->query_miscellaneous->getMaxAwards($selected_date);
+
+        $data = array();
+        $data['selected_season'] = $selected_season;
+        $data['selected_date'] = $selected_date;
+        $data['is_scored_competitions'] = $is_scored_competitions;
+        $data['months'] = $months;
+        $data['thumb_size'] = '75';
+        $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
+        if ($is_scored_competitions) {
+
+            $date = new \DateTime($selected_date);
+            $data['date_text'] = $date->format('F j, Y');
+            $data['count_entries'] = $this->query_miscellaneous->countAllEntries($selected_date);
+            $data['theme_name'] = $themes[$selected_date];
+            $data['winners'] = true;
+            $data['max_awards'] = $max_num_awards;
+            $data['awards'] = $this->getAwardsData($max_num_awards);
+            $award_winners = $this->query_miscellaneous->getWinners($selected_date);
+            // Iterate through all the award winners and display each thumbnail in a grid
+            $row = 0;
+            $column = 0;
+            $prev_comp = "";
+            foreach ($award_winners as $competition) {
+                $comp = $competition->ID;
+                // If we're at the end of a row, finish off the row and get ready for the next one
+                if ($prev_comp != $comp) {
+                    $prev_comp = $comp;
+                    // Initialize the new row
+                    $row += 1;
+                    $column = 0;
+                    $data['row'][$row]['competition']['classification'] = $competition->Classification;
+                    $data['row'][$row]['competition']['medium'] = $competition->Medium;
+                }
+                // Display this thumbnail in the the next available column
+                $data['row'][$row]['images'][] = $this->dataPhotoGallery($competition, '75');
+            }
+            // Close out the table
+
+        }
+
+        return $data;
+    }
+
+    /**
      * Get the scored competitions for the given season
      *
      * @param string $season
@@ -155,6 +251,18 @@ class ShortcodeModel
         $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
 
         return $this->query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
+    }
+
+    /**
+     * Retrieve the award winners for the given date.
+     *
+     * @param string $selected_date
+     *
+     * @return array
+     */
+    public function getWinners($selected_date)
+    {
+        return $this->query_miscellaneous->getWinners($selected_date);
     }
 
     /**
@@ -250,88 +358,6 @@ class ShortcodeModel
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['caption'] = $this->dataPhotoCredit($caption['title'], $caption['first_name'], $caption['last_name']);
 
-        return $data;
-    }
-
-    public function getWinners($selected_date) {
-        return $this->query_miscellaneous->getWinners($selected_date);
-    }
-
-    public function getAwardsData($max_num_awards) {
-        $data=array();
-        for ($i = 0; $i < $max_num_awards; $i++) {
-            switch ($i) {
-                case 0:
-                    $data[] = "1st";
-                    break;
-                case 1:
-                    $data[] = "2nd";
-                    break;
-                case 2:
-                    $data[] = "3rd";
-                    break;
-                default:
-                    $data[] = "HM";
-            }
-        }
-
-        return $data;
-    }
-
-    public function getMonthlyWinners($selected_season,$selected_date,$scored_competitions) {
-
-        $is_scored_competitions = false;
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $is_scored_competitions = true;
-            foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
-                $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
-                $themes[$key] = $competition->Theme;
-            }
-        }
-
-        $max_num_awards = $this->query_miscellaneous->getMaxAwards($selected_date);
-
-        $data=array();
-        $data['selected_season'] = $selected_season;
-        $data['selected_date'] = $selected_date;
-        $data['is_scored_competitions'] = $is_scored_competitions;
-        $data['months'] = $months;
-        $data['thumb_size'] = '75';
-        $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
-        if ($is_scored_competitions) {
-
-            $date = new \DateTime($selected_date);
-            $data['date_text'] = $date->format('F j, Y');
-            $data['count_entries'] = $this->query_miscellaneous->countAllEntries($selected_date);
-            $data['theme_name'] = $themes[$selected_date];
-            $data['winners'] = true;
-            $data['max_awards'] = $max_num_awards;
-            $data['awards']=$this->getAwardsData($max_num_awards);
-            $award_winners = $this->query_miscellaneous->getWinners($selected_date);
-            // Iterate through all the award winners and display each thumbnail in a grid
-            $row = 0;
-            $column = 0;
-            $prev_comp = "";
-            foreach ($award_winners as $competition) {
-                $comp = $competition->ID;
-                // If we're at the end of a row, finish off the row and get ready for the next one
-                if ($prev_comp != $comp) {
-                    $prev_comp = $comp;
-                    // Initialize the new row
-                    $row += 1;
-                    $column = 0;
-                    $data['row'][$row]['competition']['classification']=$competition->Classification;
-                    $data['row'][$row]['competition']['medium']=$competition->Medium;
-                }
-                // Display this thumbnail in the the next available column
-                $data['row'][$row]['images'][] = $this->dataPhotoGallery($competition,'75');
-            }
-
-            // Close out the table
-
-        }
         return $data;
     }
 } 
