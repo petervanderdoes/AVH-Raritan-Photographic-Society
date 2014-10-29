@@ -49,7 +49,7 @@ final class ShortcodeController extends Container
         $template[] = $this->settings->get('template_dir') . '/social-networks';
         $this->setTemplateEngine($this->container->make('Templating', array('template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/')));
 
-        $this->html = new HtmlBuilder();
+        $this->html = $this->container->make('HtmlBuilder');
         $this->formBuilder = new FormBuilder($this->html);
 
         $this->model = $this->container->make('ShortcodeModel');
@@ -61,6 +61,7 @@ final class ShortcodeController extends Container
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     * @todo: MVC
      */
     public function shortcodeAllScores($attr, $content, $tag)
     {
@@ -321,6 +322,7 @@ final class ShortcodeController extends Container
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsBanquetEntries
+     * @todo: MVC
      */
     public function shortcodeBanquetCurrentUser($attr, $content, $tag)
     {
@@ -549,6 +551,7 @@ final class ShortcodeController extends Container
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
+     * @todo: MVC
      */
     public function shortcodeEditTitle($attr, $content, $tag)
     {
@@ -615,9 +618,7 @@ final class ShortcodeController extends Container
      */
     public function shortcodeEmail($attr, $content, $tag)
     {
-        $email = $attr['email'];
-        unset($attr['email']);
-        echo $this->html->mailto($email, $content, $attr);
+        echo $this->html->mailto($attr['email'], $content, $attr);
     }
 
     /**
@@ -706,6 +707,7 @@ final class ShortcodeController extends Container
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsMyEntries
+     * @todo: MVC
      */
     public function shortcodeMyEntries($attr, $content, $tag)
     {
@@ -961,24 +963,16 @@ final class ShortcodeController extends Container
      *                        - id => The member ID
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @internal Shortcode: rps_person_winners
      */
     public function shortcodePersonWinners($attr, $content, $tag)
     {
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-
         $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
-        $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
-        $entries_id = array_rand($entries, $attr['images']);
-        $data = array();
-        $data['records'] = array();
-        foreach ($entries_id as $key) {
-            $data['records'][] = $entries[$key];
-        }
-        $data['thumb_size'] = '150w';
-        echo $this->view->renderPersonWinners($data);
+        $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
+        echo $this->twig->render('person-winners.html.twig',$data);
 
-        unset($query_miscellaneous);
     }
 
     /**
@@ -989,6 +983,7 @@ final class ShortcodeController extends Container
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *                        @todo: MVC
      */
     public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
@@ -1097,6 +1092,7 @@ final class ShortcodeController extends Container
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
+     * @todo: MVC
      */
     public function shortcodeUploadImage($attr, $content, $tag)
     {

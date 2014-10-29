@@ -24,6 +24,7 @@ class ShortcodeModel
      * @param QueryMiscellaneous $query_miscellaneous
      * @param PhotoHelper        $photo_helper
      * @param SeasonHelper       $season_helper
+     * @param HtmlBuilder        $html
      */
     public function __construct(QueryCompetitions $query_competitions, QueryEntries $query_entries, QueryMiscellaneous $query_miscellaneous, PhotoHelper $photo_helper, SeasonHelper $season_helper)
     {
@@ -218,6 +219,28 @@ class ShortcodeModel
             // Close out the table
 
         }
+
+        return $data;
+    }
+
+    /**
+     * Get given amount of random images for the given user.
+     *
+     * @param integer $user_id
+     * @param integer $amount_of_images
+     *
+     * @return array
+     */
+    public function getPersonWinners($user_id, $amount_of_images)
+    {
+        $entries = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
+        $entries_id = array_rand($entries, $amount_of_images);
+        $data = array();
+        $data['records'] = array();
+        foreach ($entries_id as $key) {
+            $data['records'][] = $entries[$key];
+        }
+        $data['thumb_size'] = '150w';
 
         return $data;
     }
