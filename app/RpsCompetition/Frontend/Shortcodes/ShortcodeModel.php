@@ -147,9 +147,7 @@ class ShortcodeModel
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
-                $user_info = get_userdata($entry->Member_ID);
-                $caption_data = array('title' => $entry->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname);
-                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
+                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size']);
             }
         }
 
@@ -236,11 +234,14 @@ class ShortcodeModel
         $entries = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
         $entries_id = array_rand($entries, $amount_of_images);
         $data = array();
+        $data['thumb_size'] = '150w';
         $data['records'] = array();
         foreach ($entries_id as $key) {
-            $data['records'][] = $entries[$key];
+            $data['entries'][] = $entries[$key];
         }
-        $data['thumb_size'] = '150w';
+        foreach ($data['entries'] as $entry) {
+            $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size']);
+        }
 
         return $data;
     }
@@ -373,13 +374,17 @@ class ShortcodeModel
      *
      * @return array<string,string|array>
      */
-    private function dataPhotoMasonry($record, $thumb_size, $caption)
+    private function dataPhotoMasonry($record, $thumb_size)
     {
         $data = array();
+        $user_info = get_userdata($record->Member_ID);
+        $title = $record->Title;
+        $last_name = $user_info->user_lastname;
+        $first_name = $user_info->user_firstname;
         $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['caption'] = $this->dataPhotoCredit($caption['title'], $caption['first_name'], $caption['last_name']);
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
