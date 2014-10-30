@@ -187,7 +187,6 @@ class ShortcodeModel
         $data['thumb_size'] = '75';
         $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
         if ($is_scored_competitions) {
-
             $date = new \DateTime($selected_date);
             $data['date_text'] = $date->format('F j, Y');
             $data['count_entries'] = $this->query_miscellaneous->countAllEntries($selected_date);
@@ -196,9 +195,7 @@ class ShortcodeModel
             $data['max_awards'] = $max_num_awards;
             $data['awards'] = $this->getAwardsData($max_num_awards);
             $award_winners = $this->query_miscellaneous->getWinners($selected_date);
-            // Iterate through all the award winners and display each thumbnail in a grid
             $row = 0;
-            $column = 0;
             $prev_comp = "";
             foreach ($award_winners as $competition) {
                 $comp = $competition->ID;
@@ -206,16 +203,13 @@ class ShortcodeModel
                 if ($prev_comp != $comp) {
                     $prev_comp = $comp;
                     // Initialize the new row
-                    $row += 1;
-                    $column = 0;
+                    $row++;
                     $data['row'][$row]['competition']['classification'] = $competition->Classification;
                     $data['row'][$row]['competition']['medium'] = $competition->Medium;
                 }
                 // Display this thumbnail in the the next available column
                 $data['row'][$row]['images'][] = $this->dataPhotoGallery($competition, '75');
             }
-            // Close out the table
-
         }
 
         return $data;
