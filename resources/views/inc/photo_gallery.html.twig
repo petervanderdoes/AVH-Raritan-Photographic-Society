@@ -1,13 +1,13 @@
 <figure class="gallery-item">
     <div class="gallery-item-content">
         <div class="gallery-item-content-image">
-            <a href="{{ url_popup }}" rel="gallery-0" title="{{ image.title }}">
-                <img width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}" src="{{ url_thumb }}">
+            <a href="{{ image.url_large }}" rel="gallery-0" title="{{ image.title }}">
+                <img width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}" src="{{ image.url_thumb }}">
             </a>
         </div>
         <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title }}<br><span class="wp-caption-credit">Credit: {{ image.caption.credit }}</span>
-            {% if award %}
-                <br><span class="gallery-item-award">Award: {{ award }}</span>
+            {% if image.award %}
+                <br><span class="gallery-item-award">Award: {{ image.award }}</span>
             {% endif %}
         </figcaption>
     </div>

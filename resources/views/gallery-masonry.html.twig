@@ -6,7 +6,7 @@
             function getRpsMasonryItems() {
                 var items = '';
                 {% for image in images %}
-                items += '{% include 'inc/photo_masonry.js.twig' with {'url_popup': image.url_800, 'url_thumb': image.url_thumb} %}';
+                items += '{% include 'inc/photo_masonry.js.twig' %}';
                 {% endfor %}
                 return jQuery(items);
             }
