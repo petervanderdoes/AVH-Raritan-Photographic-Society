@@ -900,14 +900,14 @@ final class Shortcodes extends ShortcodesAbstract
             }
         } else {
             $current_competition = reset($open_competitions);
-            $competition_date = $this->session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-            $medium = $this->session->get('myentries/medium', $current_competition->Medium);
+            $competition_date = $this->session->get('myentries/' . $medium_subset_medium . '/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+            $medium = $this->session->get('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
         }
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
 
-        $this->session->set('myentries/competition_date', $current_competition->Competition_Date);
-        $this->session->set('myentries/medium', $current_competition->Medium);
+        $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
+        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
         $this->session->save();
 
         if ($this->settings->has('errmsg')) {
