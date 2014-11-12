@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Html\FormBuilder;
-use Avh\Html\HtmlBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
@@ -61,6 +60,7 @@ final class ShortcodeController extends Container
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
      * @todo: MVC
      */
     public function shortcodeAllScores($attr, $content, $tag)
@@ -751,14 +751,14 @@ final class ShortcodeController extends Container
             }
         } else {
             $current_competition = reset($open_competitions);
-            $competition_date = $this->session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-            $medium = $this->session->get('myentries/medium', $current_competition->Medium);
+            $competition_date = $this->session->get('myentries/' . $medium_subset_medium . '/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+            $medium = $this->session->get('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
         }
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
 
-        $this->session->set('myentries/competition_date', $current_competition->Competition_Date);
-        $this->session->set('myentries/medium', $current_competition->Medium);
+        $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
+        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
         $this->session->save();
 
         if ($this->settings->has('errmsg')) {
@@ -971,8 +971,7 @@ final class ShortcodeController extends Container
         $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
         $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
-        echo $this->twig->render('person-winners.html.twig',$data);
-
+        echo $this->twig->render('person-winners.html.twig', $data);
     }
 
     /**
@@ -983,7 +982,8 @@ final class ShortcodeController extends Container
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
-     *                        @todo: MVC
+     *
+     * @todo: MVC
      */
     public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
