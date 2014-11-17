@@ -8,16 +8,11 @@ use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Frontend\Requests as FrontendRequests;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksHelper;
 use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
 use RpsCompetition\Options\General as Options;
-use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -44,7 +39,7 @@ class Frontend
     private $request;
     /** @var RpsDb */
     private $rpsdb;
-    /** @var Session  */
+    /** @var Session */
     private $session;
     /** @var Settings */
     private $settings;
@@ -74,15 +69,16 @@ class Frontend
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'), 11);
         add_action('parse_query', array($requests, 'actionHandleRequests'));
-        add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
 
         if ($this->request->isMethod('POST')) {
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsMyEntries'));
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsEditTitle'));
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsUploadEntry'));
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsMyEntries'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsEditTitle'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsUploadEntry'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
         }
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
+        add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
+
         add_filter('query_vars', array($this, 'filterQueryVars'));
         add_filter('post_gallery', array($this, 'filterPostGallery'), 10, 2);
         add_filter('_get_page_link', array($this, 'filterPostLink'), 10, 2);
@@ -187,7 +183,7 @@ class Frontend
         global $post;
 
         $query_entries = $this->container->make('QueryEntries');
-        $query_competitions =$this->container->make('QueryCompetitions');
+        $query_competitions = $this->container->make('QueryCompetitions');
         $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
@@ -265,7 +261,6 @@ class Frontend
                 $medium = $this->request->input('medium');
                 $time = time() + (2 * 24 * 3600);
                 $url = parse_url(get_bloginfo('url'));
-                setcookie("RPS_MyEntries", $comp_date . "|" . $classification . "|" . $medium, $time, '/', $url['host']);
 
                 $entry_array = $this->request->input('EntryID', null);
 
@@ -362,8 +357,11 @@ class Frontend
             }
 
             // Retrieve and parse the selected competition cookie
-            if ($this->request->hasCookie('RPS_MyEntries')) {
-                list ($comp_date, $classification, $medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
+            if ($this->session->has('myentries')) {
+                $subset = $this->session->get('myentries/subset', null);
+                $comp_date = $this->session->get('myentries/' . $subset . '/competition_date', null);
+                $medium = $this->session->get('myentries/' . $subset . '/medium', null);
+                $classification = $this->session->get('myentries/' . $subset . '/classification', null);
             } else {
                 $this->settings->set('errmsg', "Upload Form Error<br>The Selected_Competition cookie is not set.");
                 unset($query_entries, $query_competitions, $photo_helper);
