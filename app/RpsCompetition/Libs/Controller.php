@@ -25,7 +25,7 @@ class Container
      *
      * @param IlluminateContainer $container
      */
-    public function setContainer(IlluminateContainer $container = null)
+    public function setContainer(IlluminateContainer $container)
     {
         $this->container = $container;
     }
