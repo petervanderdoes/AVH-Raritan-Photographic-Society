@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: pdoes
- * Date: 10/27/14
- * Time: 3:37 PM
- */
 
 namespace RpsCompetition\Frontend\Shortcodes;
 
