@@ -92,7 +92,7 @@ class ShortcodeModel
      *
      * @param array $entries
      *
-     * @return string
+     * @return array
      */
     public function getFacebookThumbs($entries)
     {
