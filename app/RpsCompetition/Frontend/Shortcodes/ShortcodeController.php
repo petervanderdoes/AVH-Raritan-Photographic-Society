@@ -87,7 +87,7 @@ final class ShortcodeController extends Container
         $comp_num_judges = array();
         foreach ($competition_dates as $key => $recs) {
             $date_parts = explode(" ", $recs['Competition_Date']);
-            list ($comp_year, $comp_month, $comp_day) = explode("-", $date_parts[0]);
+            list (, $comp_month, $comp_day) = explode("-", $date_parts[0]);
             $comp_dates[$date_parts[0]] = sprintf("%d/%d", $comp_month, $comp_day);
             $comp_max_entries[$date_parts[0]] = $recs['Max_Entries'];
             $total_max_entries += $recs['Max_Entries'];
