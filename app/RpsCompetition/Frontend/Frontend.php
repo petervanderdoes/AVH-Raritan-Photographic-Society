@@ -8,15 +8,11 @@ use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Frontend\Requests as FrontendRequests;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksHelper;
 use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
 use RpsCompetition\Options\General as Options;
-use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -43,9 +39,11 @@ class Frontend
     private $request;
     /** @var RpsDb */
     private $rpsdb;
+    /** @var Session */
     private $session;
     /** @var Settings */
     private $settings;
+    /** @var Rpscompetition\Frontend\View */
     private $view;
 
     /**
@@ -55,32 +53,32 @@ class Frontend
      */
     public function __construct(Container $container)
     {
-        $this->session = new Session(array('name' => 'raritan_' . COOKIEHASH));
+        $this->container = $container;
+        $this->session = $container->make('Session');
         $this->session->start();
 
-        $this->container = $container;
-
-        $this->settings = $container->make('RpsCompetition\Settings');
-        $this->rpsdb = $container->make('RpsCompetition\Db\RpsDb');
-        $this->request = $container->make('Illuminate\Http\Request');
-        $this->options = $container->make('RpsCompetition\Options\General');
-        $this->core = new Core($this->settings);
-        $requests = new FrontendRequests($this->settings, $this->rpsdb, $this->request, $this->session);
-        $this->view = new View($this->settings, $this->rpsdb, $this->request);
+        $this->settings = $container->make('Settings');
+        $this->rpsdb = $container->make('RpsDb');
+        $this->request = $container->make('IlluminateRequest');
+        $this->options = $container->make('OptionsGeneral');
+        $this->core = $container->make('Core');
+        $requests = $container->make('FrontendRequests');
+        $this->view = $container->make('FrontendView');
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
         add_action('init', array($this, 'actionInit'), 11);
         add_action('parse_query', array($requests, 'actionHandleRequests'));
-        add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
 
         if ($this->request->isMethod('POST')) {
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsMyEntries'));
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsEditTitle'));
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsUploadEntry'));
-            add_action('suffusion_before_post', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsMyEntries'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsEditTitle'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsUploadEntry'));
+            add_action('wp', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
         }
         add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
+        add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
+
         add_filter('query_vars', array($this, 'filterQueryVars'));
         add_filter('post_gallery', array($this, 'filterPostGallery'), 10, 2);
         add_filter('_get_page_link', array($this, 'filterPostLink'), 10, 2);
@@ -184,9 +182,9 @@ class Frontend
     {
         global $post;
 
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
             $redirect_to = $this->request->input('wp_get_referer');
@@ -249,7 +247,7 @@ class Frontend
     public function actionHandleHttpPostRpsMyEntries()
     {
         global $post;
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = $this->container->make('QueryCompetitions');
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
 
@@ -263,7 +261,6 @@ class Frontend
                 $medium = $this->request->input('medium');
                 $time = time() + (2 * 24 * 3600);
                 $url = parse_url(get_bloginfo('url'));
-                setcookie("RPS_MyEntries", $comp_date . "|" . $classification . "|" . $medium, $time, '/', $url['host']);
 
                 $entry_array = $this->request->input('EntryID', null);
 
@@ -317,9 +314,9 @@ class Frontend
     public function actionHandleHttpPostRpsUploadEntry()
     {
         global $post;
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
@@ -360,8 +357,11 @@ class Frontend
             }
 
             // Retrieve and parse the selected competition cookie
-            if ($this->request->hasCookie('RPS_MyEntries')) {
-                list ($comp_date, $classification, $medium) = explode("|", $this->request->cookie('RPS_MyEntries'));
+            if ($this->session->has('myentries')) {
+                $subset = $this->session->get('myentries/subset', null);
+                $comp_date = $this->session->get('myentries/' . $subset . '/competition_date', null);
+                $medium = $this->session->get('myentries/' . $subset . '/medium', null);
+                $classification = $this->session->get('myentries/' . $subset . '/classification', null);
             } else {
                 $this->settings->set('errmsg', "Upload Form Error<br>The Selected_Competition cookie is not set.");
                 unset($query_entries, $query_competitions, $photo_helper);
@@ -478,7 +478,7 @@ class Frontend
 
         $this->setupShortcodes();
 
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = $this->container->make('QueryCompetitions');
         $query_competitions->setAllPastCompetitionsClose();
 
         $this->setupWpSeoActionsFilters();
@@ -500,7 +500,7 @@ class Frontend
     public function actionShowcaseCompetitionThumbnails($foo)
     {
         if (is_front_page()) {
-            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
+            $query_miscellaneous = $this->container->make('QueryMiscellaneous');
             $records = $query_miscellaneous->getEightsAndHigher(5);
             $data = array();
             $data['records'] = $records;
@@ -806,7 +806,7 @@ class Frontend
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
 
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+            $query_competitions = $this->container->make('QueryCompetitions');
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
@@ -826,8 +826,8 @@ class Frontend
      */
     private function deleteCompetitionEntries($entries)
     {
-        $query_entries = new QueryEntries($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_array($entries)) {
             foreach ($entries as $id) {
@@ -855,9 +855,9 @@ class Frontend
      */
     private function handleSubmitBanquetEntries()
     {
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         if ($this->request->has('allentries')) {
             $all_entries = explode(',', $this->request->input('allentries'));
@@ -913,24 +913,15 @@ class Frontend
      */
     private function setupShortcodes()
     {
-        $shortcode = new Shortcodes($this->settings, $this->rpsdb, $this->request, $this->session);
-        $shortcode->register('rps_category_winners', 'shortcodeCategoryWinners');
-        $shortcode->register('rps_monthly_winners', 'shortcodeMonthlyWinners');
-        $shortcode->register('rps_scores_current_user', 'shortcodeScoresCurrentUser');
-        $shortcode->register('rps_banquet_current_user', 'shortcodeBanquetCurrentUser');
-        $shortcode->register('rps_all_scores', 'shortcodeAllScores');
-        $shortcode->register('rps_my_entries', 'shortcodeMyEntries');
-        $shortcode->register('rps_edit_title', 'shortcodeEditTitle');
-        $shortcode->register('rps_upload_image', 'shortcodeUploadImage');
-        $shortcode->register('rps_email', 'shortcodeEmail');
-        $shortcode->register('rps_person_winners', 'shortcodePersonWinners');
-        $shortcode->register('rps_monthly_entries', 'shortcodeMonthlyEntries');
+        /** @var ShortcodeRouter $shortcode */
+        $shortcode = $this->container->make('ShortcodeRouter');
+        $shortcode->setShortcodeController($this->container->make('ShortcodeController'));
+        $shortcode->initializeShortcodes();
     }
 
     private function setupSocialButtons()
     {
-        $view = new SocialNetworksView($this->settings);
-        $social_buttons = new SocialNetworksHelper($view, $this->settings, $this->options);
+        $social_buttons = $this->container->make('SocialNetworks');
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = "f233109";

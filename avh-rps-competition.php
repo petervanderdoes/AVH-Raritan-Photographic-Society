@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.3-dev.1
+ * Version: 2.0.3-dev.22
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -12,10 +12,20 @@
  */
 use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
+use RpsCompetition\Common\Core;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Frontend;
-use RpsCompetition\Options\General as OptionsGeneral;
+use RpsCompetition\Frontend\Requests;
+use RpsCompetition\Frontend\Shortcodes;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
+use RpsCompetition\Frontend\View as FrontendView;
+use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
@@ -58,32 +68,12 @@ class AVH_RPS_Client
     {
         $this->container = new Container();
 
-        $this->container->singleton(
-            'RpsCompetition\Settings',
-            function () {
-                return new Settings(new Avh\DataHandler\NamespacedAttributeBag());
-            }
-        );
-        $this->container->singleton(
-            'RpsCompetition\Db\RpsDb',
-            function () {
-                return new RpsDb();
-            }
-        );
-        $this->container->singleton(
-            'RpsCompetition\Options\General',
-            function () {
-                return new OptionsGeneral();
-            }
-        );
+        $this->setupContainer();
         $upload_dir_info = wp_upload_dir();
-        $this->settings = $this->container->make('RpsCompetition\Settings');
-        $this->container->make('RpsCompetition\Db\RpsDb');
-        $this->container->make('RpsCompetition\Options\General');
-        $this->container->instance('Illuminate\Http\Request', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
+        $this->settings = $this->container->make('Settings');
         $this->settings->set('plugin_dir', $dir);
         $this->settings->set('plugin_file', $basename);
-        $this->settings->set('template_dir', $dir . '/resources/views/');
+        $this->settings->set('template_dir', $dir . '/resources/views');
         $this->settings->set('plugin_basename', $basename);
         $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
         $this->settings->set('javascript_dir', $dir . '/assets/js/');
@@ -129,6 +119,123 @@ class AVH_RPS_Client
     public function pluginDeactivation()
     {
         flush_rewrite_rules();
+    }
+
+    public function setupContainer()
+    {
+
+        /**
+         * Setup Interfaces
+         *
+         */
+        $this->container->bind('Avh\DataHandler\AttributeBagInterface', 'Avh\DataHandler\NamespacedAttributeBag');
+
+        /**
+         * Setup Singleton classes
+         *
+         */
+        $this->container->singleton('Settings', 'RpsCompetition\Settings');
+        $this->container->singleton('RpsDb', 'RpsCompetition\Db\RpsDb');
+        $this->container->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
+        $this->container->singleton(
+            'Session',
+            function () {
+                return new Avh\Network\Session(array('name' => 'raritan_' . COOKIEHASH));
+            }
+        );
+        $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
+        $this->container->instance('IlluminateRequest', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
+
+        /**
+         * Setup Classes
+         *
+         */
+
+        $this->container->bind(
+            'Core',
+            function ($app) {
+                return new Core($app->make('Settings'));
+            }
+        );
+        $this->container->bind(
+            'FrontendRequests',
+            function ($app) {
+                return new Requests($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
+            }
+        );
+        $this->container->bind(
+            'FrontendView',
+            function ($app) {
+                return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
+            }
+        );
+        $this->container->bind(
+            'QueryEntries',
+            function ($app) {
+                return new QueryEntries($app->make('RpsDb'));
+            }
+        );
+        $this->container->bind(
+            'QueryCompetitions',
+            function ($app) {
+                return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
+            }
+        );
+        $this->container->bind(
+            'QueryMiscellaneous',
+            function ($app) {
+                return new QueryMiscellaneous($app->make('RpsDb'));
+            }
+        );
+        $this->container->bind(
+            'PhotoHelper',
+            function ($app) {
+                return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+            }
+        );
+
+        $this->container->bind(
+            'SeasonHelper',
+            function ($app) {
+                return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
+            }
+        );
+
+        $this->container->bind('ShortcodeRouter', 'RpsCompetition\Frontend\Shortcodes\ShortcodeRouter');
+        $this->container->bind(
+            'ShortcodeController',
+            function ($app) {
+                return new ShortcodeController($app);
+            }
+        );
+
+        $this->container->bind(
+            'ShortcodeModel',
+            function ($app) {
+                return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'), $app->make('SeasonHelper'));
+            }
+        );
+        $this->container->bind(
+            'Templating',
+            function ($app, $param) {
+                $template_dir = $param['template_dir'];
+                $cache_dir = $param['cache_dir'];
+                if (WP_LOCAL_DEV !== true) {
+                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir), array('cache' => $cache_dir));
+                } else {
+                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir));
+                }
+            }
+        );
+
+        $this->container->bind(
+            'SocialNetworks',
+            function ($app) {
+                return new SocialNetworksController($app);
+            }
+        );
+
+        $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
     }
 }
 

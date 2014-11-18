@@ -299,7 +299,7 @@ class View
         $title = $record->Title;
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
-        $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_large '] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
@@ -320,7 +320,7 @@ class View
     private function dataPhotoMasonry($record, $thumb_size, $caption)
     {
         $data = array();
-        $data['url_800'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_large '] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['caption'] = $this->dataPhotoCredit($caption['title'], $caption['first_name'], $caption['last_name']);
