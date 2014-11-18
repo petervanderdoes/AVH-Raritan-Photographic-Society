@@ -122,6 +122,8 @@ class ShortcodeModel
         $data['thumb_size'] = '150w';
 
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $months = [];
+            $themes = [];
             foreach ($scored_competitions as $competition) {
                 $date_object = new \DateTime($competition->Competition_Date);
                 $key = $date_object->format('Y-m-d');
@@ -170,6 +172,8 @@ class ShortcodeModel
         $data['thumb_size'] = '75';
 
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $months = [];
+            $themes = [];
             $data['is_scored_competitions'] = true;
             foreach ($scored_competitions as $competition) {
                 $date_object = new \DateTime($competition->Competition_Date);
