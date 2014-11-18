@@ -115,31 +115,26 @@ class ShortcodeModel
      */
     public function getMonthlyEntries($selected_season, $selected_date, $scored_competitions)
     {
-        $is_scored_competitions = false;
+        $data = array();
+        $data['selected_season'] = $selected_season;
+        $data['selected_date'] = $selected_date;
+        $data['is_scored_competitions'] = false;
+        $data['thumb_size'] = '150w';
+
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $is_scored_competitions = true;
             foreach ($scored_competitions as $competition) {
                 $date_object = new \DateTime($competition->Competition_Date);
                 $key = $date_object->format('Y-m-d');
                 $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
                 $themes[$key] = $competition->Theme;
             }
-        }
-
-        $data = array();
-        $data['selected_season'] = $selected_season;
-        $data['selected_date'] = $selected_date;
-        $data['is_scored_competitions'] = $is_scored_competitions;
-        $data['months'] = $months;
-        $data['thumb_size'] = '150w';
-        $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
-
-        if ($is_scored_competitions) {
+            $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
             $date = new \DateTime($selected_date);
             $data['date_text'] = $date->format('F j, Y');
             $data['theme_name'] = $themes[$selected_date];
             $data['entries'] = $this->query_miscellaneous->getAllEntries($selected_date, $selected_date);
             $data['count_entries'] = count($data['entries']);
+            $data['is_scored_competitions'] = true;
         }
 
         $data['images'] = array();
@@ -166,27 +161,23 @@ class ShortcodeModel
     public function getMonthlyWinners($selected_season, $selected_date, $scored_competitions)
     {
 
-        $is_scored_competitions = false;
+        $max_num_awards = $this->query_miscellaneous->getMaxAwards($selected_date);
+
+        $data = array();
+        $data['selected_season'] = $selected_season;
+        $data['selected_date'] = $selected_date;
+        $data['is_scored_competitions'] = false;
+        $data['thumb_size'] = '75';
+
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $is_scored_competitions = true;
+            $data['is_scored_competitions'] = true;
             foreach ($scored_competitions as $competition) {
                 $date_object = new \DateTime($competition->Competition_Date);
                 $key = $date_object->format('Y-m-d');
                 $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
                 $themes[$key] = $competition->Theme;
             }
-        }
-
-        $max_num_awards = $this->query_miscellaneous->getMaxAwards($selected_date);
-
-        $data = array();
-        $data['selected_season'] = $selected_season;
-        $data['selected_date'] = $selected_date;
-        $data['is_scored_competitions'] = $is_scored_competitions;
-        $data['months'] = $months;
-        $data['thumb_size'] = '75';
-        $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
-        if ($is_scored_competitions) {
+            $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
             $date = new \DateTime($selected_date);
             $data['date_text'] = $date->format('F j, Y');
             $data['count_entries'] = $this->query_miscellaneous->countAllEntries($selected_date);
