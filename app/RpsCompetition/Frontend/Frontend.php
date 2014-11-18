@@ -259,9 +259,6 @@ class Frontend
                 $comp_date = $this->request->input('comp_date');
                 $classification = $this->request->input('classification');
                 $medium = $this->request->input('medium');
-                $time = time() + (2 * 24 * 3600);
-                $url = parse_url(get_bloginfo('url'));
-
                 $entry_array = $this->request->input('EntryID', null);
 
                 switch ($this->request->input('submit_control')) {
