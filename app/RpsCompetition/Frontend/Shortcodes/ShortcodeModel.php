@@ -68,7 +68,7 @@ class ShortcodeModel
      * Collect needed data to render the Category Winners
      *
      * @param string $class
-     * @param string $entries
+     * @param array $entries
      * @param string $thumb_size
      *
      * @return array
