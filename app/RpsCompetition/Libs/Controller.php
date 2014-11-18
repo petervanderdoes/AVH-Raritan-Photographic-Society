@@ -2,23 +2,42 @@
 
 namespace RpsCompetition\Libs;
 
-
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Http\Request;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Options\General;
 use RpsCompetition\Settings;
 
+if (!class_exists('AVH_RPS_Client')) {
+    header('Status: 403 Forbidden');
+    header('HTTP/1.1 403 Forbidden');
+    exit();
+}
+
 class Container
 {
-
     protected $container;
-    protected $twig;
-    protected $settings;
     protected $options;
+    protected $request;
     protected $rpsdb;
     protected $session;
-    protected $request;
+    protected $settings;
+    protected $twig;
+
+    /**
+     * Renders a view.
+     *
+     * @param string $view The view name
+     * @param array  $data An array of parameters to pass to the view
+     *
+     * @return string Rendered output
+     */
+    public function render($view, array $data = array())
+    {
+        $template = $this->twig->loadTemplate($view);
+
+        return $template->render($data);
+    }
 
     /**
      * Sets the Container associated with this Controller.
@@ -38,7 +57,6 @@ class Container
         $this->options = $options;
     }
 
-
     public function setRequest(Request $request)
     {
         $this->request = $request;
@@ -51,7 +69,6 @@ class Container
     {
         $this->rpsdb = $rpsdb;
     }
-
 
     public function setSession($session)
     {
@@ -69,23 +86,8 @@ class Container
     /**
      * @param \Twig_Environment $twig
      */
-    public function setTemplateEngine(\Twig_Environment $twig) {
-        $this->twig = $twig;
-    }
-
-    /**
-     * Renders a view.
-     *
-     * @param string   $view The view name
-     * @param array    $data An array of parameters to pass to the view
-     *
-     * @return string Rendered output
-     */
-    public function render($view, array $data = array())
+    public function setTemplateEngine(\Twig_Environment $twig)
     {
-        $template = $this->twig->loadTemplate($view);
-
-        return $template->render($data);
-
+        $this->twig = $twig;
     }
 }
