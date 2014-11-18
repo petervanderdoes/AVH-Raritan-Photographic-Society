@@ -236,7 +236,7 @@ class ShortcodeModel
      *
      * @param string $season
      *
-     * @return array|QueryCompetitions
+     * @return array
      */
     public function getScoredCompetitions($season)
     {
