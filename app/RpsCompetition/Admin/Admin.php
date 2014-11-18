@@ -1548,7 +1548,6 @@ final class Admin
         $entry = $query_entries->getEntryById($id);
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
-        $return = false;
         $medium_array = Constants::getMediums();
         $classification_array = Constants::getClassifications();
 
@@ -1560,9 +1559,7 @@ final class Admin
         $formOptionsNew['medium'] = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
 
-        if ($formOptions != $formOptionsNew) {
-            $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);
-        }
+        $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);
 
         unset($query_entries);
 
