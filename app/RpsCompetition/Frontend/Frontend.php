@@ -764,7 +764,9 @@ class Frontend
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
             $selected_date = get_query_var('selected_date');
-            $link = $link . $selected_date . '/';
+            if (!empty($selected_date)) {
+                $link = $link . $selected_date . '/';
+            }
         }
 
         return $link;
