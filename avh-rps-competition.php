@@ -24,6 +24,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\View as FrontendView;
+use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
@@ -232,6 +233,13 @@ class AVH_RPS_Client
             'SocialNetworks',
             function ($app) {
                 return new SocialNetworksController($app);
+            }
+        );
+
+        $this->container->bind(
+            'WpSeoHelper',
+            function ($app) {
+                return new WpseoHelper($app->make('Settings'), $app->make('RpsDb'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
             }
         );
 
