@@ -916,6 +916,10 @@ class Frontend
         $shortcode->initializeShortcodes();
     }
 
+    /**
+     * Setup the Social Buttons.
+     *
+     */
     private function setupSocialButtons()
     {
         $social_buttons = $this->container->make('SocialNetworks');
