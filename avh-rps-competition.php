@@ -239,7 +239,7 @@ class AVH_RPS_Client
         $this->container->bind(
             'WpSeoHelper',
             function ($app) {
-                return new WpseoHelper($app->make('Settings'), $app->make('RpsDb'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+                return new WpseoHelper($app->make('Settings'), $app->make('RpsDb'), $app->make('QueryCompetitions'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
             }
         );
 

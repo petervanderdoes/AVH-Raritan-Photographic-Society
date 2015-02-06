@@ -21,9 +21,25 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class WpseoHelper
 {
+    /**
+     * @var PhotoHelper
+     */
     private $photo_helper;
+    /**
+     * @var QueryCompetitions
+     */
+    private $query_competitions;
+    /**
+     * @var QueryMiscellaneous
+     */
     private $query_miscellaneous;
+    /**
+     * @var RpsDb
+     */
     private $rpsdb;
+    /**
+     * @var Settings
+     */
     private $settings;
 
     /**
@@ -31,13 +47,16 @@ class WpseoHelper
      *
      * @param Settings           $settings
      * @param RpsDb              $rpsdb
+     * @param QueryCompetitions  $query_competitions
      * @param QueryMiscellaneous $query_miscellaneous
      * @param PhotoHelper        $photo_helper
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, QueryMiscellaneous $query_miscellaneous, PhotoHelper $photo_helper)
+    public function __construct(Settings $settings, RpsDb $rpsdb, QueryCompetitions $query_competitions, QueryMiscellaneous $query_miscellaneous, PhotoHelper $photo_helper)
     {
+
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
+        $this->query_competitions = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
         $this->photo_helper = $photo_helper;
     }
@@ -144,11 +163,10 @@ class WpseoHelper
 
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
-            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
 
             $new_title_array = array();
@@ -176,16 +194,13 @@ class WpseoHelper
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
 
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-
             $selected_date = get_query_var('selected_date');
-            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
             $theme = ucfirst($competition->Theme);
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
-            $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
+            $entries_amount = $this->query_miscellaneous->countAllEntries($selected_date);
 
             if ($post->ID == $options['monthly_entries_post_id']) {
                 $meta_description = 'The ' . $entries_amount . ' entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
@@ -268,9 +283,7 @@ class WpseoHelper
      */
     public function filterWpseoSitemapIndex()
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-
-        $all_competitions = $query_competitions->getScoredCompetitions('1970-01-01', '2200-01-01');
+        $all_competitions = $this->query_competitions->getScoredCompetitions('1970-01-01', '2200-01-01');
         $years = [];
         $old_year = 0;
         $old_mod_date = 0;
@@ -293,7 +306,7 @@ class WpseoHelper
             $years[$year] = $last_modified_date;
         }
 
-        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Date_Modified', 'order' => 'DESC', 'number' => 1));
+        $last_scored = $this->query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Date_Modified', 'order' => 'DESC', 'number' => 1));
         $date = new \DateTime($last_scored->Date_Modified);
 
         $sitemap = '';
@@ -354,8 +367,7 @@ class WpseoHelper
         $start_date = $date->format('Y-m-d');
         $date->setDate($n, 12, 31);
         $end_date = $date->format('Y-m-d');
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $scored_competitions = $query_competitions->getScoredCompetitions($start_date, $end_date);
+        $scored_competitions = $this->query_competitions->getScoredCompetitions($start_date, $end_date);
 
         $old_mod_date = 0;
         $old_key = 0;
@@ -390,7 +402,7 @@ class WpseoHelper
                 $data['images'] = array();
                 if (is_array($entries)) {
                     // Iterate through all the award winners and display each thumbnail in a grid
-                    /** @var QueryEntries $entry */
+                    /** @var QueryEntries $record */
                     foreach ($entries as $record) {
                         $user_info = get_userdata($record->Member_ID);
                         $title = $record->Title;
