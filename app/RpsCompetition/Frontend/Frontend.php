@@ -967,5 +967,6 @@ class Frontend
         add_filter('wpseo_sitemap_index', array($wpseo, 'filterWpseoSitemapIndex'));
         add_filter('wp_title_parts', array($wpseo, 'filterWpTitleParts'), 10, 1);
         add_filter('wpseo_opengraph_title', array($wpseo, 'filterOpenGraphTitle'), 10, 1);
+        add_filter('wpseo_sitemap_entry', array($wpseo, 'filterSitemapEntry'), 10, 3);
     }
 }

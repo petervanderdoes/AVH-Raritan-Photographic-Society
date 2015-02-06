@@ -94,6 +94,44 @@ class WpseoHelper
     }
 
     /**
+     * Change the Sitemap data for the front page.
+     * As WordPress SEO by Yoast does not change the data for the front page, we do this ourselves.
+     * We set the priority to 100%, the Change Frequency to Daily, and set the last modified date
+     * by getting the articles on the front page and using the most recent modified date of that post.
+     * If we don't do this, the entry will take the modified date from the actual page, which never changes.
+     *
+     * @param array  $data
+     * @param string $type
+     * @param object $current_post
+     *
+     * @return array
+     */
+    public function filterSitemapEntry($data, $type, $current_post)
+    {
+        if ($current_post->ID == get_option('page_on_front')) {
+            $data['pri'] = 1;
+            $data['chf'] = 'daily';
+
+            $post_date_modified = [];
+            // Setup query for sticky posts.
+            $sticky = get_option('sticky_posts');
+            // Get the query for articles marked for Magazine Excerpts marked per post and in the selected categories.
+            $queries = rps_suffusion_get_mag_section_queries(array('meta_check_field' => 'suf_magazine_excerpt', 'category_prefix' => 'suf_mag_excerpt_categories', 'to_skip' => $sticky));
+            foreach ($queries as $query) {
+                $posts = get_posts($query->query);
+                foreach ($posts as $p) {
+                    $post_date_modified[] = $p->post_modified;
+                }
+            }
+            rsort($post_date_modified);
+            $date_modified = new \DateTime(reset($post_date_modified));
+            $data['mod'] = $date_modified->format('c');
+        }
+
+        return $data;
+    }
+
+    /**
      * Filter for the title of pages.
      *
      * @param array $title_array
