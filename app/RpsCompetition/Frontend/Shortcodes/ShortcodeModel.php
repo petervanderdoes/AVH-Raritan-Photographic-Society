@@ -67,7 +67,7 @@ class ShortcodeModel
      * Collect needed data to render the Category Winners
      *
      * @param string $class
-     * @param array $entries
+     * @param array  $entries
      * @param string $thumb_size
      *
      * @return array
@@ -310,24 +310,6 @@ class ShortcodeModel
     }
 
     /**
-     * Collect needed data to render the photo credit
-     *
-     * @param string $title
-     * @param string $first_name
-     * @param string $last_name
-     *
-     * @return array
-     */
-    private function dataPhotoCredit($title, $first_name, $last_name)
-    {
-        $data = array();
-        $data['title'] = $title;
-        $data['credit'] = "$first_name $last_name";
-
-        return $data;
-    }
-
-    /**
      * Collect needed data to render a photo in masonry style.
      *
      * @param QueryEntries $record
@@ -348,7 +330,7 @@ class ShortcodeModel
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+        $data['caption'] = $this->photo_helper->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
@@ -371,7 +353,7 @@ class ShortcodeModel
         $data['url_large '] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+        $data['caption'] = $this->photo_helper->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
