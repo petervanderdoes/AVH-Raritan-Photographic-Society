@@ -75,6 +75,24 @@ class Helper
     }
 
     /**
+     * Collect needed data to render the photo credit
+     *
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return array
+     */
+    public function dataPhotoCredit($title, $first_name, $last_name)
+    {
+        $data = array();
+        $data['title'] = $title;
+        $data['credit'] = "$first_name $last_name";
+
+        return $data;
+    }
+
+    /**
      * Delete the files from server.
      *
      * @param QueryEntries $entry

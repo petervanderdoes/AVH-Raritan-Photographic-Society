@@ -1,5 +1,9 @@
 ## Changelog
 
+#### Version 2.0.3
+* Add images to the sitemap.
+* Enhance the entry in the sitemap of the front page.
+
 #### Version 2.0.2
 * Implement Social Network share buttons.
 * Bugfix: Titles not displayed for photos in masonry gallery.

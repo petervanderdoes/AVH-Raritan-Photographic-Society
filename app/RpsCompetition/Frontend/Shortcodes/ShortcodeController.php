@@ -1,21 +1,17 @@
 <?php
-namespace RpsCompetition\Frontend;
+namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Html\FormBuilder;
-use Avh\Html\HtmlBuilder;
-use Avh\Network\Session;
-use Avh\Utility\ShortcodesAbstract;
-use Illuminate\Http\Request;
+use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Libs\Container;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
-use RpsCompetition\Settings;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -24,38 +20,38 @@ if (!class_exists('AVH_RPS_Client')) {
 }
 
 /**
- * Class Shortcodes
+ * Class ShortcodeController
  *
- * @package RpsCompetition\Frontend
+ * @package RpsCompetition\Frontend\Shortcodes
  */
-final class Shortcodes extends ShortcodesAbstract
+final class ShortcodeController extends Container
 {
+    private $formBuilder;
     private $html;
-    private $request;
-    private $rpsdb;
-    private $session;
-    private $settings;
-    private $view;
+    /** @var  ShortcodeModel */
+    private $model;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
-     * @param Request  $request
-     * @param Session  $session
-     *
+     * @param IlluminateContainer $container
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request, Session $session)
+    public function __construct(IlluminateContainer $container)
     {
-        $this->settings = $settings;
-        $this->rpsdb = $rpsdb;
-        $this->request = $request;
-        $this->session = $session;
+        $this->setContainer($container);
+        $this->setSettings($this->container->make('Settings'));
+        $this->setRpsdb($this->container->make('RpsDb'));
+        $this->setRequest($this->container->make('IlluminateRequest'));
+        $this->setSession($this->container->make('Session'));
+        $template = [];
+        $template[] = $this->settings->get('template_dir');
+        $template[] = $this->settings->get('template_dir') . '/social-networks';
+        $this->setTemplateEngine($this->container->make('Templating', array('template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/')));
 
-        $this->html = new HtmlBuilder();
+        $this->html = $this->container->make('HtmlBuilder');
         $this->formBuilder = new FormBuilder($this->html);
-        $this->view = new View($this->settings, $this->rpsdb, $this->request);
+
+        $this->model = $this->container->make('ShortcodeModel');
     }
 
     /**
@@ -64,6 +60,8 @@ final class Shortcodes extends ShortcodesAbstract
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @todo: MVC
      */
     public function shortcodeAllScores($attr, $content, $tag)
     {
@@ -89,7 +87,7 @@ final class Shortcodes extends ShortcodesAbstract
         $comp_num_judges = array();
         foreach ($competition_dates as $key => $recs) {
             $date_parts = explode(" ", $recs['Competition_Date']);
-            list ($comp_year, $comp_month, $comp_day) = explode("-", $date_parts[0]);
+            list (, $comp_month, $comp_day) = explode("-", $date_parts[0]);
             $comp_dates[$date_parts[0]] = sprintf("%d/%d", $comp_month, $comp_day);
             $comp_max_entries[$date_parts[0]] = $recs['Max_Entries'];
             $total_max_entries += $recs['Max_Entries'];
@@ -324,6 +322,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsBanquetEntries
+     * @todo: MVC
      */
     public function shortcodeBanquetCurrentUser($attr, $content, $tag)
     {
@@ -510,21 +509,18 @@ final class Shortcodes extends ShortcodesAbstract
      *                        - date
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @internal Shortcode: rps_category_winners
+     *
      */
     public function shortcodeCategoryWinners($attr, $content, $tag)
     {
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-
         $class = 'Beginner';
         $award = '1';
         $date = '';
         extract($attr, EXTR_OVERWRITE);
 
-        $competition_date = date('Y-m-d H:i:s', strtotime($date));
-        $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
-
-        $entries = $query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
+        $entries = $this->model->getWinner($class, $award, $date);
 
         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
@@ -535,16 +531,14 @@ final class Shortcodes extends ShortcodesAbstract
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
+                $data = $this->model->getFacebookThumbs($entries);
+                echo $this->twig->render('facebook.html.twig', $data);
 
                 return;
             }
 
-            $data = array();
-            $data['class'] = $class;
-            $data['records'] = $entries;
-            $data['thumb_size'] = '250';
-            echo $this->view->renderCategoryWinners($data);
+            $data = $this->model->getCategoryWinners($class, $entries, '250');
+            echo $this->twig->render('category-winners.html.twig', $data);
         }
         unset($query_miscellaneous, $photo_helper);
     }
@@ -557,6 +551,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
+     * @todo: MVC
      */
     public function shortcodeEditTitle($attr, $content, $tag)
     {
@@ -623,9 +618,7 @@ final class Shortcodes extends ShortcodesAbstract
      */
     public function shortcodeEmail($attr, $content, $tag)
     {
-        $email = $attr['email'];
-        unset($attr['email']);
-        echo $this->html->mailto($email, $content, $attr);
+        echo $this->html->mailto($attr['email'], $content, $attr);
     }
 
     /**
@@ -636,35 +629,15 @@ final class Shortcodes extends ShortcodesAbstract
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @internal Shortcode: rps_monthly_entries
      */
     public function shortcodeMonthlyEntries($attr, $content, $tag)
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_entries = new QueryEntries($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $view_data = array();
-
-        $months = array();
-        $themes = array();
-
         $selected_date = $this->session->get('monthly_entries_selected_date');
         $selected_season = $this->session->get('monthly_entries_selected_season');
 
-        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_competitions->getScoredCompetitions($season_start_date, $season_end_date);
-
-        $is_scored_competitions = false;
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $is_scored_competitions = true;
-            /** @var QueryCompetitions $competition */
-            foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
-                $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
-                $themes[$key] = $competition->Theme;
-            }
-        }
+        $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
@@ -672,30 +645,17 @@ final class Shortcodes extends ShortcodesAbstract
          * @see Frontend::filterWpseoPreAnalysisPostsContent
          */
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
-            $entries = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
+        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $entries = $this->model->getAllEntries($selected_date, $selected_date);
+            $data = $this->model->getFacebookThumbs($entries);
+            echo $this->twig->render('facebook.html.twig', $data);
 
             return;
         }
 
-        $view_data['selected_season'] = $selected_season;
-        $view_data['selected_date'] = $selected_date;
-        $view_data['is_scored_competitions'] = $is_scored_competitions;
-        $view_data['months'] = $months;
-        $view_data['thumb_size'] = '150w';
+        $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
 
-        if ($is_scored_competitions) {
-            $date = new \DateTime($selected_date);
-            $view_data['date_text'] = $date->format('F j, Y');
-            $view_data['theme_name'] = $themes[$selected_date];
-            $view_data['entries'] = $query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $view_data['count_entries'] = count($view_data['entries']);
-        }
-
-        echo $this->view->renderMonthlyEntries($view_data);
-
-        unset($query_competitions, $query_miscellaneous, $query_entries, $season_helper, $view_data);
+        echo $this->twig->render('monthly-entries.html.twig', $data);
     }
 
     /**
@@ -706,35 +666,16 @@ final class Shortcodes extends ShortcodesAbstract
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @internal Shortcode: rps_monthly_winners
      */
     public function shortcodeMonthlyWinners($attr, $content, $tag)
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-
-        $months = array();
-        $themes = array();
 
         $selected_date = $this->session->get('monthly_winners_selected_date');
         $selected_season = $this->session->get('monthly_winners_selected_season');
 
-        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-        $scored_competitions = $query_competitions->getScoredCompetitions($season_start_date, $season_end_date);
-
-        $is_scored_competitions = false;
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $is_scored_competitions = true;
-            /** @var QueryCompetitions $competition */
-            foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
-                $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
-                $themes[$key] = $competition->Theme;
-            }
-        }
-        $max_num_awards = $query_miscellaneous->getMaxAwards($selected_date);
+        $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
@@ -742,109 +683,18 @@ final class Shortcodes extends ShortcodesAbstract
          * @see Frontend::filterWpseoPreAnalysisPostsContent
          */
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && $is_scored_competitions) {
-            $entries = $query_miscellaneous->getWinners($selected_date);
-            echo $this->view->renderCategoryWinnersFacebookThumbs($entries);
+        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $entries = $this->model->getWinners($selected_date);
+            $data = $this->model->getFacebookThumbs($entries);
+            echo $this->twig->render('facebook.html.twig', $data);
 
             return;
         }
-        // Start displaying the form
 
-        echo '<span class="competition-monthly-winners-form">Select a theme or season ';
-        echo $this->view->renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months);
-        echo '<p></p></span>';
-
-        $output = '';
-        if ($is_scored_competitions) {
-
-            $output .= "<table class=\"thumb_grid\">\n";
-            // Output the column headings
-            $output .= "<tr><th class='thumb_col_header' align='center'></th>\n";
-            for ($i = 0; $i < $max_num_awards; $i++) {
-                switch ($i) {
-                    case 0:
-                        $award_title = "1st";
-                        break;
-                    case 1:
-                        $award_title = "2nd";
-                        break;
-                    case 2:
-                        $award_title = "3rd";
-                        break;
-                    default:
-                        $award_title = "HM";
-                }
-                $output .= "<th class=\"thumb_col_header\" align=\"center\">$award_title</th>\n";
-            }
-            $award_winners = $query_miscellaneous->getWinners($selected_date);
-            // Iterate through all the award winners and display each thumbnail in a grid
-            $row = 0;
-            $column = 0;
-            $comp = "";
-            /** @var QueryEntries $competition */
-            foreach ($award_winners as $competition) {
-                $user_info = get_userdata($competition->Member_ID);
-
-                // Remember the important values from the previous record
-                $prev_comp = $comp;
-
-                // Grab a new record from the database
-                $medium = $competition->Medium;
-                $classification = $competition->Classification;
-                $comp = "$classification<br>$medium";
-                $title = $competition->Title;
-                $last_name = $user_info->user_lastname;
-                $first_name = $user_info->user_firstname;
-                $award = $competition->Award;
-
-                // If we're at the end of a row, finish off the row and get ready for the next one
-                if ($prev_comp != $comp) {
-                    // As necessary, pad the row out with empty cells
-                    if ($row > 0 && $column < $max_num_awards) {
-                        for ($i = $column; $i < $max_num_awards; $i++) {
-                            $output .= "<td align=\"center\" class=\"thumb_cell\">";
-                            $output .= "<div class=\"thumb_canvas\"></div></td>\n";
-                        }
-                    }
-                    // Terminate this row
-                    $output .= "</tr>\n";
-
-                    // Initialize the new row
-                    $row += 1;
-                    $column = 0;
-                    $output .= "<tr><td class=\"comp_cell\" align=\"center\">$comp</td>\n";
-                }
-                // Display this thumbnail in the the next available column
-                $output .= "<td align=\"center\" class=\"thumb_cell\">\n";
-                $output .= "<div class=\"thumb_canvas\">\n";
-                $rel_text = tag_escape($classification) . tag_escape($medium);
-                $output .= "<a href=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '800') . "\" rel=\"" . $rel_text . "\" title=\"($award) $title - $first_name $last_name\">\n";
-                $output .= "<img class=\"thumb_img\" src=\"" . $photo_helper->getThumbnailUrl($competition->Server_File_Name, '75') . "\" /></a>\n";
-                $output .= "<div id='rps_colorbox_title'>$title<br />$first_name $last_name</div>";
-                $output .= "</div>\n</td>\n";
-                $column += 1;
-            }
-            // As necessary, pad the last row out with empty cells
-            if ($row > 0 && $column < $max_num_awards) {
-                for ($i = $column; $i < $max_num_awards; $i++) {
-                    $output .= "<td align=\"center\" class=\"thumb_cell\">";
-                    $output .= "<div class=\"thumb_canvas\"></div></td>\n";
-                }
-            }
-            // Close out the table
-            $output .= "</tr>\n</table>\n";
-            $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
-            $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
-            $header = '<p class="competition-theme">Out of ' . $entries_amount . ' entries, a jury selected these winners of the competition with the theme "' . $themes[$selected_date] . '" held on ' . $date_text . ', which was organized by Raritan Photographic Society.</p>';
-            $output = $header . $output;
-        } else {
-            $output = '<p>There are no scored competitions for the selected season.</p>';
+        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
+            $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
+            echo $this->render('monthly-winners.html.twig', $data);
         }
-
-        echo $output;
-
-        unset($query_competitions, $query_miscellaneous, $season_helper, $photo_helper);
     }
 
     /**
@@ -857,6 +707,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsMyEntries
+     * @todo: MVC
      */
     public function shortcodeMyEntries($attr, $content, $tag)
     {
@@ -900,14 +751,16 @@ final class Shortcodes extends ShortcodesAbstract
             }
         } else {
             $current_competition = reset($open_competitions);
-            $competition_date = $this->session->get('myentries/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-            $medium = $this->session->get('myentries/medium', $current_competition->Medium);
+            $competition_date = $this->session->get('myentries/' . $medium_subset_medium . '/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+            $medium = $this->session->get('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
         }
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
 
-        $this->session->set('myentries/competition_date', $current_competition->Competition_Date);
-        $this->session->set('myentries/medium', $current_competition->Medium);
+        $this->session->set('myentries/subset', $medium_subset_medium);
+        $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
+        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+        $this->session->set('myentries/' . $medium_subset_medium . '/classification', $current_competition->Classification);
         $this->session->save();
 
         if ($this->settings->has('errmsg')) {
@@ -1112,24 +965,15 @@ final class Shortcodes extends ShortcodesAbstract
      *                        - id => The member ID
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @internal Shortcode: rps_person_winners
      */
     public function shortcodePersonWinners($attr, $content, $tag)
     {
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-
         $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
-        $entries = $query_miscellaneous->getEightsAndHigherPerson($attr['id']);
-        $entries_id = array_rand($entries, $attr['images']);
-        $data = array();
-        $data['records'] = array();
-        foreach ($entries_id as $key) {
-            $data['records'][] = $entries[$key];
-        }
-        $data['thumb_size'] = '150w';
-        echo $this->view->renderPersonWinners($data);
-
-        unset($query_miscellaneous);
+        $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
+        echo $this->twig->render('person-winners.html.twig', $data);
     }
 
     /**
@@ -1140,6 +984,8 @@ final class Shortcodes extends ShortcodesAbstract
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @todo: MVC
      */
     public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
@@ -1248,6 +1094,7 @@ final class Shortcodes extends ShortcodesAbstract
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
+     * @todo: MVC
      */
     public function shortcodeUploadImage($attr, $content, $tag)
     {

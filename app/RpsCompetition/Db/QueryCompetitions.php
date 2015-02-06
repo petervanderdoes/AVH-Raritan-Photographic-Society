@@ -403,7 +403,7 @@ class QueryCompetitions
      * @param array       $filter
      * @param string      $output
      *
-     * @return QueryCompetitions|array
+     * @return array
      */
     public function getScoredCompetitions($competition_date_start, $competition_date_end = null, $filter = array(), $output = OBJECT)
     {
