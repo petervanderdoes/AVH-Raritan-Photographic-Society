@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.3-dev.47
+#### Version 2.0.3
 * Add images to the sitemap.
 * Enhance the entry in the sitemap of the front page.
 
