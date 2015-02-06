@@ -21,7 +21,7 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class WpseoHelper
 {
-    private $query_entries;
+    private $photo_helper;
     private $query_miscellaneous;
     private $rpsdb;
     private $settings;
@@ -309,6 +309,7 @@ class WpseoHelper
         if (is_scalar($n) && intval($n) > 0) {
             $n = intval($n);
         }
+        $data = [];
         $date = new \DateTime();
         $date->setDate($n, 1, 1);
         $start_date = $date->format('Y-m-d');
@@ -390,10 +391,10 @@ class WpseoHelper
                     $output .= "\t\t<image:image>\n";
                     $output .= "\t\t\t<image:loc>" . esc_html($img['loc']) . "</image:loc>\n";
                     if (isset($img['title']) && !empty($img['title'])) {
-                        $output .= "\t\t\t<image:title><![CDATA[" . _wp_specialchars(html_entity_decode($img['title'], ENT_QUOTES, $this->charset)) . "]]></image:title>\n";
+                        $output .= "\t\t\t<image:title><![CDATA[" . _wp_specialchars(html_entity_decode($img['title'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "]]></image:title>\n";
                     }
                     if (isset($img['caption']) && !empty($img['caption'])) {
-                        $output .= "\t\t\t<image:caption><![CDATA[" . _wp_specialchars(html_entity_decode($img['caption'], ENT_QUOTES, $this->charset)) . "]]></image:caption>\n";
+                        $output .= "\t\t\t<image:caption><![CDATA[" . _wp_specialchars(html_entity_decode($img['caption'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "]]></image:caption>\n";
                     }
                     $output .= "\t\t</image:image>\n";
                 }

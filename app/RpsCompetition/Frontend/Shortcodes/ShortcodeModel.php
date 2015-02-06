@@ -24,7 +24,6 @@ class ShortcodeModel
      * @param QueryMiscellaneous $query_miscellaneous
      * @param PhotoHelper        $photo_helper
      * @param SeasonHelper       $season_helper
-     * @param HtmlBuilder        $html
      */
     public function __construct(QueryCompetitions $query_competitions, QueryEntries $query_entries, QueryMiscellaneous $query_miscellaneous, PhotoHelper $photo_helper, SeasonHelper $season_helper)
     {
@@ -359,7 +358,6 @@ class ShortcodeModel
      *
      * @param QueryEntries $record
      * @param string       $thumb_size
-     * @param  array       $caption
      *
      * @return array<string,string|array>
      */
