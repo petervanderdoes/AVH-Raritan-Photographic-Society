@@ -10,8 +10,6 @@ use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
-use RpsCompetition\Frontend\SocialNetworks\SocialNetworksHelper;
-use RpsCompetition\Frontend\SocialNetworks\View as SocialNetworksView;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
