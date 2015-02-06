@@ -1,7 +1,8 @@
 ## Changelog
 
 #### Version 2.0.3-dev.47
-* Preparation for new development cycle.
+* Add images to the sitemap.
+* Enhance the entry in the sitemap of the front page.
 
 #### Version 2.0.2
 * Implement Social Network share buttons.
