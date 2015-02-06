@@ -242,6 +242,7 @@ class WpseoHelper
 
             $date_modified = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
             $mod_date = $date_modified->format('U');
+            $last_modified_date = $date_modified->format('c');
 
             if ($year != $old_year) {
                 $old_mod_date = 0;
