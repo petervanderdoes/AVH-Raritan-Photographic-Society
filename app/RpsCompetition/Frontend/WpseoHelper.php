@@ -317,11 +317,13 @@ class WpseoHelper
             $sitemap .= '<lastmod>' . htmlspecialchars($lastmod) . '</lastmod>' . "\n";
             $sitemap .= '</sitemap>' . "\n";
         }
-        $sitemap .= '<sitemap>' . "\n";
-        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-winners') . '-sitemap.xml</loc>' . "\n";
-        $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
-        $sitemap .= '</sitemap>' . "\n";
 
+        foreach ($years as $year => $lastmod) {
+            $sitemap .= '<sitemap>' . "\n";
+            $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-winners') . '-sitemap' . $year . '.xml</loc>' . "\n";
+            $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
+            $sitemap .= '</sitemap>' . "\n";
+        }
         return $sitemap;
     }
 
