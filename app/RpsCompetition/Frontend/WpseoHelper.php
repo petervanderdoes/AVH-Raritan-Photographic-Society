@@ -306,9 +306,6 @@ class WpseoHelper
             $years[$year] = $last_modified_date;
         }
 
-        $last_scored = $this->query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Date_Modified', 'order' => 'DESC', 'number' => 1));
-        $date = new \DateTime($last_scored->Date_Modified);
-
         $sitemap = '';
 
         foreach ($years as $year => $lastmod) {
@@ -321,7 +318,7 @@ class WpseoHelper
         foreach ($years as $year => $lastmod) {
             $sitemap .= '<sitemap>' . "\n";
             $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-winners') . '-sitemap' . $year . '.xml</loc>' . "\n";
-            $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
+            $sitemap .= '<lastmod>' . htmlspecialchars($lastmod) . '</lastmod>' . "\n";
             $sitemap .= '</sitemap>' . "\n";
         }
         return $sitemap;
