@@ -67,8 +67,8 @@ class Helper
      */
     static public function createDirectory($path)
     {
-        if (!is_dir($path)) {
-            mkdir($path, 0755);
+        if (!file_exists($path)) { // Create the directory if it is missing
+            wp_mkdir_p($path);
         }
     }
 
