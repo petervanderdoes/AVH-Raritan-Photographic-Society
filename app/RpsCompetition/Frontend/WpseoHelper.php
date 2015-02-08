@@ -365,6 +365,9 @@ class WpseoHelper
         $n = get_query_var('sitemap_n');
         if (is_scalar($n) && intval($n) > 0) {
             $n = intval($n);
+        } else {
+            header("HTTP/1.1 404 Not Found");
+            exit();
         }
         $data = [];
         $date = new \DateTime();

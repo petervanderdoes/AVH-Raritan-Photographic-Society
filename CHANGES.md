@@ -2,6 +2,7 @@
 
 #### Version 2.0.4-dev.1
 * Split the sitemap for entries and winners per year.
+* Send 404 response code for the old entries and winners sitemap.
 
 #### Version 2.0.3
 * Add images to the sitemap.
