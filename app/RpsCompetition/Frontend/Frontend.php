@@ -136,12 +136,14 @@ class Frontend
             wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
         }
 
-        if (has_shortcode($post->post_content, 'rps_person_winners')) {
-            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
-        }
+        if (is_object($post)) {
+            if (has_shortcode($post->post_content, 'rps_person_winners')) {
+                wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+            }
 
-        if (has_shortcode($post->post_content, 'gallery')) {
-            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+            if (has_shortcode($post->post_content, 'gallery')) {
+                wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+            }
         }
     }
 

@@ -161,6 +161,9 @@ class WpseoHelper
     {
         global $post;
 
+        if (!is_object($post)) {
+            return $title_array;
+        }
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
             $selected_date = get_query_var('selected_date');
@@ -190,6 +193,9 @@ class WpseoHelper
     {
         global $post;
 
+        if (!is_object($post)) {
+            return $meta_description;
+        }
         $options = get_option('avh-rps');
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
