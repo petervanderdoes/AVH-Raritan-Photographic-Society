@@ -23,6 +23,7 @@ use RpsCompetition\Frontend\Shortcodes;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
 use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
@@ -230,7 +231,13 @@ class AVH_RPS_Client
         );
 
         $this->container->bind(
-            'SocialNetworks',
+            'SocialNetworksRouter',
+            function ($app) {
+                return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
+            }
+        );
+        $this->container->bind(
+            'SocialNetworksController',
             function ($app) {
                 return new SocialNetworksController($app);
             }

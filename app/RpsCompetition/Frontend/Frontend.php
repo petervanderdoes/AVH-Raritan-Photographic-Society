@@ -924,7 +924,7 @@ class Frontend
      */
     private function setupSocialButtons()
     {
-        $social_buttons = $this->container->make('SocialNetworks');
+        $social_networks_controller = $this->container->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = "f233109";
@@ -938,7 +938,7 @@ class Frontend
         $data = array();
         $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
         $data['style'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_css_version . '.css';
-        $social_buttons->initClass($data);
+        $social_networks_controller->initializeSocialNetworks($data);
     }
 
     /**
