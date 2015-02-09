@@ -327,6 +327,7 @@ class WpseoHelper
             $sitemap .= '<lastmod>' . htmlspecialchars($lastmod) . '</lastmod>' . "\n";
             $sitemap .= '</sitemap>' . "\n";
         }
+
         return $sitemap;
     }
 
@@ -402,7 +403,7 @@ class WpseoHelper
                         $image_data['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
                         $image_data['title'] = $record->Title;
                         $image_data['caption'] = $record->Title . ' Credit: ' . $user_info->user_firstname . ' ' . $user_info->user_lastname;
-                        $data_images[]=$image_data;
+                        $data_images[] = $image_data;
                     }
                 }
                 $sitemap_data[$key]['images'] = $data_images;
@@ -433,12 +434,8 @@ class WpseoHelper
                     }
                     $output .= "\t\t<image:image>\n";
                     $output .= "\t\t\t<image:loc>" . esc_html($img['loc']) . "</image:loc>\n";
-                    if (isset($img['title']) && !empty($img['title'])) {
-                        $output .= "\t\t\t<image:title>" . _wp_specialchars(html_entity_decode($img['title'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "</image:title>\n";
-                    }
-                    if (isset($img['caption']) && !empty($img['caption'])) {
-                        $output .= "\t\t\t<image:caption>" . _wp_specialchars(html_entity_decode($img['caption'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "</image:caption>\n";
-                    }
+                    $output .= "\t\t\t<image:title>" . _wp_specialchars(html_entity_decode($img['title'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "</image:title>\n";
+                    $output .= "\t\t\t<image:caption>" . _wp_specialchars(html_entity_decode($img['caption'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "</image:caption>\n";
                     $output .= "\t\t</image:image>\n";
                 }
             }
