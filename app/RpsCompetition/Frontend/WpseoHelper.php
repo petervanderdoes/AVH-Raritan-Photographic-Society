@@ -369,7 +369,7 @@ class WpseoHelper
             header("HTTP/1.1 404 Not Found");
             exit();
         }
-        $data = [];
+
         $date = new \DateTime();
         $date->setDate($n, 1, 1);
         $start_date = $date->format('Y-m-d');
@@ -377,51 +377,35 @@ class WpseoHelper
         $end_date = $date->format('Y-m-d');
         $scored_competitions = $this->query_competitions->getScoredCompetitions($start_date, $end_date);
 
-        $old_mod_date = 0;
-        $old_key = 0;
         $sitemap_data = array();
-        $location = '';
-        $last_modified_date = '';
         /** @var QueryCompetitions $competition */
         foreach ($scored_competitions as $competition) {
             $competition_date = new \DateTime($competition->Competition_Date);
             $key = $competition_date->format('U');
             $date = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
-            $mod_date = $date->format('U');
-
-            if ($key != $old_key) {
-                $old_mod_date = 0;
-                $location = $url . $competition_date->format('Y-m-d') . '/';
-            }
-            if ($mod_date > $old_mod_date) {
-                $old_mod_date = $mod_date;
-                $last_modified_date = $date->format('c');
-            }
 
             $sitemap_data[$key] = array(
-                'loc' => $location,
+                'loc' => $url . $competition_date->format('Y-m-d') . '/',
                 'pri' => 0.8,
                 'chf' => 'yearly',
-                'mod' => $last_modified_date,
+                'mod' => $date->format('c'),
             );
 
             if ($include_images) {
                 $entries = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
-                $data['images'] = array();
+                $data_images = [];
                 if (is_array($entries)) {
-                    // Iterate through all the award winners and display each thumbnail in a grid
                     /** @var QueryEntries $record */
                     foreach ($entries as $record) {
                         $user_info = get_userdata($record->Member_ID);
-                        $title = $record->Title;
-                        $last_name = $user_info->user_lastname;
-                        $first_name = $user_info->user_firstname;
-                        $data['images'][]['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-                        $data['images'][]['title'] = $title;
-                        $data['images'][]['caption'] = $title . ' Credit: ' . $first_name . ' ' . $last_name;
+
+                        $image_data['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+                        $image_data['title'] = $record->Title;
+                        $image_data['caption'] = $record->Title . ' Credit: ' . $user_info->user_firstname . ' ' . $user_info->user_lastname;
+                        $data_images[]=$image_data;
                     }
                 }
-                $sitemap_data[$key]['images'] = $data['images'];
+                $sitemap_data[$key]['images'] = $data_images;
             }
         }
         $this->outputWpseoSitemap($sitemap_data);
@@ -450,10 +434,10 @@ class WpseoHelper
                     $output .= "\t\t<image:image>\n";
                     $output .= "\t\t\t<image:loc>" . esc_html($img['loc']) . "</image:loc>\n";
                     if (isset($img['title']) && !empty($img['title'])) {
-                        $output .= "\t\t\t<image:title><![CDATA[" . _wp_specialchars(html_entity_decode($img['title'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "]]></image:title>\n";
+                        $output .= "\t\t\t<image:title>" . _wp_specialchars(html_entity_decode($img['title'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "</image:title>\n";
                     }
                     if (isset($img['caption']) && !empty($img['caption'])) {
-                        $output .= "\t\t\t<image:caption><![CDATA[" . _wp_specialchars(html_entity_decode($img['caption'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "]]></image:caption>\n";
+                        $output .= "\t\t\t<image:caption>" . _wp_specialchars(html_entity_decode($img['caption'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "</image:caption>\n";
                     }
                     $output .= "\t\t</image:image>\n";
                 }
