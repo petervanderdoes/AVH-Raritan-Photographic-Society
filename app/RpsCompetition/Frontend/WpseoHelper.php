@@ -397,6 +397,7 @@ class WpseoHelper
                 $data_images = [];
                 if (is_array($entries)) {
                     /** @var QueryEntries $record */
+                    $image_data = [];
                     foreach ($entries as $record) {
                         $user_info = get_userdata($record->Member_ID);
 
