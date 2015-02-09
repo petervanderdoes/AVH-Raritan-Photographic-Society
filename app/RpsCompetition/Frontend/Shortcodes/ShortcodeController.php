@@ -67,9 +67,9 @@ final class ShortcodeController extends Container
     {
         global $post;
 
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+        $season_helper = $this->container->make('SeasonHelper');
         $seasons = $season_helper->getSeasons();
         $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
 
@@ -328,10 +328,10 @@ final class ShortcodeController extends Container
     {
         global $post;
 
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_banquet = new QueryBanquet($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+        $query_entries = $this->container->make('QueryEntries');
+        $query_banquet = $this->container->make('QueryBanquet');
+        $season_helper = $this->container->make('SeasonHelper');
         $seasons = $season_helper->getSeasons();
         $selected_season = end($seasons);
 
@@ -556,8 +556,8 @@ final class ShortcodeController extends Container
     public function shortcodeEditTitle($attr, $content, $tag)
     {
         global $post;
-        $query_entries = new QueryEntries($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         $medium_subset = "Digital";
         $medium_param = "?m=digital";
@@ -715,10 +715,10 @@ final class ShortcodeController extends Container
 
         $attr = shortcode_atts(array('medium' => 'digital'), $attr);
 
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $competition_helper = new CompetitionHelper($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $competition_helper = $this->container->make('CompetitionHelper');
+        $photo_helper = $this->container->make('PhotoHelper');
 
         $medium_subset_medium = $attr['medium'];
 
@@ -990,8 +990,8 @@ final class ShortcodeController extends Container
     public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
         global $post;
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+        $season_helper = $this->container->make('SeasonHelper');
 
         $seasons = $season_helper->getSeasons();
         $selected_season = esc_attr($this->request->input('new_season', end($seasons)));

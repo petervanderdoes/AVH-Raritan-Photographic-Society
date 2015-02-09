@@ -190,6 +190,12 @@ class AVH_RPS_Client
             }
         );
         $this->container->bind(
+            'QueryBanquet',
+            function ($app) {
+                return new QueryBanquet($app->make('RpsDb'));
+            }
+        );
+        $this->container->bind(
             'PhotoHelper',
             function ($app) {
                 return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
@@ -247,6 +253,13 @@ class AVH_RPS_Client
             'WpSeoHelper',
             function ($app) {
                 return new WpseoHelper($app->make('Settings'), $app->make('RpsDb'), $app->make('QueryCompetitions'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+            }
+        );
+
+        $this->container->bind(
+            'CompetitionHelper',
+            function ($app) {
+                return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
             }
         );
 
