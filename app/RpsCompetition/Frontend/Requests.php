@@ -206,4 +206,4 @@ class Requests
         $this->session->set('monthly_winners_selected_season', $selected_season);
         $this->session->save();
     }
-} 
+}

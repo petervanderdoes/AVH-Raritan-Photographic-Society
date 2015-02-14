@@ -4,14 +4,8 @@ namespace RpsCompetition\Frontend\Shortcodes;
 use Avh\Html\FormBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
-use RpsCompetition\Db\QueryBanquet;
-use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Libs\Container;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');

@@ -3,7 +3,6 @@
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 use Illuminate\Container\Container as IlluminateContainer;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Libs\Container;
 
 if (!class_exists('AVH_RPS_Client')) {

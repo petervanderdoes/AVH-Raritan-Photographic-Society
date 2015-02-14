@@ -25,7 +25,7 @@ final class General extends OptionsAbstract
         'season_end_month_num'    => 12,
         'monthly_entries_post_id' => 1005,
         'monthly_winners_post_id' => 61,
-        'members_page' => 54
+        'members_page'            => 54
     );
 
     /**
