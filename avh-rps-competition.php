@@ -294,7 +294,7 @@ class AVH_RPS_Client
         $this->container->bind(
             'SocialNetworkModel',
             function ($app) {
-                return new SocialNetworksModel($app->make('QueryCompetitions'), $app->make('QueryEntries'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'), $app->make('SeasonHelper'));
+                return new SocialNetworksModel();
             }
         );
     }
