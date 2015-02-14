@@ -14,7 +14,7 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
-class Container
+class Controller
 {
     protected $container;
     protected $options;

@@ -5,7 +5,7 @@ use Avh\Html\FormBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Libs\Container;
+use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -18,7 +18,7 @@ if (!class_exists('AVH_RPS_Client')) {
  *
  * @package RpsCompetition\Frontend\Shortcodes
  */
-final class ShortcodeController extends Container
+final class ShortcodeController extends Controller
 {
     private $formBuilder;
     private $html;

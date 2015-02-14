@@ -3,7 +3,7 @@
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 use Illuminate\Container\Container as IlluminateContainer;
-use RpsCompetition\Libs\Container;
+use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -16,7 +16,7 @@ if (!class_exists('AVH_RPS_Client')) {
  *
  * @package RpsCompetition\Frontend\SocialNetworks
  */
-class SocialNetworksController extends Container
+class SocialNetworksController extends Controller
 {
     protected $model;
 
