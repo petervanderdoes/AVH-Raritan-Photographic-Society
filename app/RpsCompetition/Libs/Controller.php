@@ -21,6 +21,7 @@ class Controller
     protected $request;
     protected $rpsdb;
     protected $session;
+    /** @var  Settings $settings */
     protected $settings;
     protected $twig;
 
@@ -57,6 +58,9 @@ class Controller
         $this->options = $options;
     }
 
+    /**
+     * @param Request $request
+     */
     public function setRequest(Request $request)
     {
         $this->request = $request;
