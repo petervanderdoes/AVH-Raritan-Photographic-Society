@@ -504,6 +504,8 @@ final class ShortcodeController extends Controller
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_category_winners
      *
      */
@@ -512,6 +514,7 @@ final class ShortcodeController extends Controller
         $class = 'Beginner';
         $award = '1';
         $date = '';
+        $output = '';
         extract($attr, EXTR_OVERWRITE);
 
         $entries = $this->model->getWinner($class, $award, $date);
@@ -526,15 +529,14 @@ final class ShortcodeController extends Controller
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $data = $this->model->getFacebookThumbs($entries);
-                echo $this->twig->render('facebook.html.twig', $data);
-
-                return;
+                $output = $this->render('facebook.html.twig', $data);
+            } else {
+                $data = $this->model->getCategoryWinners($class, $entries, '250');
+                $output = $this->render('category-winners.html.twig', $data);
             }
-
-            $data = $this->model->getCategoryWinners($class, $entries, '250');
-            echo $this->twig->render('category-winners.html.twig', $data);
         }
-        unset($query_miscellaneous, $photo_helper);
+
+        return $output;
     }
 
     /**
@@ -609,10 +611,12 @@ final class ShortcodeController extends Controller
      *                        - HTML Attributes
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @return string
      */
     public function shortcodeEmail($attr, $content, $tag)
     {
-        echo $this->html->mailto($attr['email'], $content, $attr);
+        return $this->html->mailto($attr['email'], $content, $attr);
     }
 
     /**
@@ -624,32 +628,36 @@ final class ShortcodeController extends Controller
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_monthly_entries
      */
     public function shortcodeMonthlyEntries($attr, $content, $tag)
     {
+        $output = '';
         $selected_date = $this->session->get('monthly_entries_selected_date');
-        $selected_season = $this->session->get('monthly_entries_selected_season');
 
-        $scored_competitions = $this->model->getScoredCompetitions($selected_season);
+        if ($this->model->isScoredCompetition($selected_date)) {
+            /**
+             * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+             *
+             * @see Frontend::filterWpseoPreAnalysisPostsContent
+             */
+            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+            if (!$didFilterWpseoPreAnalysisPostsContent) {
+                $entries = $this->model->getAllEntries($selected_date, $selected_date);
+                $data = $this->model->getFacebookThumbs($entries);
+                $output = $this->render('facebook.html.twig', $data);
+            } else {
+                $selected_season = $this->session->get('monthly_entries_selected_season');
+                $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
-        /**
-         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
-         *
-         * @see Frontend::filterWpseoPreAnalysisPostsContent
-         */
-        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $entries = $this->model->getAllEntries($selected_date, $selected_date);
-            $data = $this->model->getFacebookThumbs($entries);
-            echo $this->twig->render('facebook.html.twig', $data);
-
-            return;
+                $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
+                $output = $this->render('monthly-entries.html.twig', $data);
+            }
         }
 
-        $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
-
-        echo $this->twig->render('monthly-entries.html.twig', $data);
+        return $output;
     }
 
     /**
@@ -661,34 +669,37 @@ final class ShortcodeController extends Controller
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_monthly_winners
      */
     public function shortcodeMonthlyWinners($attr, $content, $tag)
     {
 
+        $output = '';
         $selected_date = $this->session->get('monthly_winners_selected_date');
         $selected_season = $this->session->get('monthly_winners_selected_season');
 
         $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
-        /**
-         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
-         *
-         * @see Frontend::filterWpseoPreAnalysisPostsContent
-         */
-        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $entries = $this->model->getWinners($selected_date);
-            $data = $this->model->getFacebookThumbs($entries);
-            echo $this->twig->render('facebook.html.twig', $data);
-
-            return;
-        }
-
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
-            echo $this->render('monthly-winners.html.twig', $data);
+            /**
+             * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+             *
+             * @see Frontend::filterWpseoPreAnalysisPostsContent
+             */
+            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+            if (!$didFilterWpseoPreAnalysisPostsContent) {
+                $entries = $this->model->getWinners($selected_date);
+                $data = $this->model->getFacebookThumbs($entries);
+                $output = $this->render('facebook.html.twig', $data);
+            } else {
+                $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
+                $output = $this->render('monthly-winners.html.twig', $data);
+            }
         }
+
+        return $output;
     }
 
     /**
@@ -967,7 +978,7 @@ final class ShortcodeController extends Controller
         $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
         $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
-        echo $this->twig->render('person-winners.html.twig', $data);
+        return $this->render('person-winners.html.twig', $data);
     }
 
     /**

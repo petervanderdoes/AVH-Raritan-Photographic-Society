@@ -291,6 +291,23 @@ class ShortcodeModel
     }
 
     /**
+     * Check if the given date has scored competitions.
+     *
+     * @param $competition_date
+     *
+     * @return bool
+     */
+    public function isScoredCompetition($competition_date)
+    {
+        $return = $this->query_competitions->getScoredCompetitions($competition_date);
+        if (is_array($return) && !empty($return)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Collect needed data to render the Month and Season select form
      *
      * @param array $months
