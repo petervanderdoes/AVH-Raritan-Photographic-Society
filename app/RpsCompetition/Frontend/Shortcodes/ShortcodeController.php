@@ -24,6 +24,8 @@ final class ShortcodeController extends Controller
     private $html;
     /** @var  ShortcodeModel */
     private $model;
+    /** @var  ShortcodeView */
+    private $view;
 
     /**
      * Constructor
@@ -41,6 +43,7 @@ final class ShortcodeController extends Controller
         $template[] = $this->settings->get('template_dir');
         $template[] = $this->settings->get('template_dir') . '/social-networks';
         $this->setTemplateEngine($this->container->make('Templating', array('template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/')));
+        $this->view = $this->container->make('ShortcodeView', array('template_dir' => $this->settings->get('template_dir'), 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/'));
 
         $this->html = $this->container->make('HtmlBuilder');
         $this->formBuilder = new FormBuilder($this->html);
@@ -529,10 +532,10 @@ final class ShortcodeController extends Controller
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $data = $this->model->getFacebookThumbs($entries);
-                $output = $this->render('facebook.html.twig', $data);
+                $output = $this->view->fetch('facebook.html.twig', $data);
             } else {
                 $data = $this->model->getCategoryWinners($class, $entries, '250');
-                $output = $this->render('category-winners.html.twig', $data);
+                $output = $this->view->fetch('category-winners.html.twig', $data);
             }
         }
 
@@ -647,13 +650,13 @@ final class ShortcodeController extends Controller
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $entries = $this->model->getAllEntries($selected_date, $selected_date);
                 $data = $this->model->getFacebookThumbs($entries);
-                $output = $this->render('facebook.html.twig', $data);
+                $output = $this->view->fetch('facebook.html.twig', $data);
             } else {
                 $selected_season = $this->session->get('monthly_entries_selected_season');
                 $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
                 $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
-                $output = $this->render('monthly-entries.html.twig', $data);
+                $output = $this->view->fetch('monthly-entries.html.twig', $data);
             }
         }
 
@@ -692,10 +695,10 @@ final class ShortcodeController extends Controller
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $entries = $this->model->getWinners($selected_date);
                 $data = $this->model->getFacebookThumbs($entries);
-                $output = $this->render('facebook.html.twig', $data);
+                $output = $this->view->fetch('facebook.html.twig', $data);
             } else {
                 $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
-                $output = $this->render('monthly-winners.html.twig', $data);
+                $output = $this->view->fetch('monthly-winners.html.twig', $data);
             }
         }
 
@@ -971,6 +974,8 @@ final class ShortcodeController extends Controller
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_person_winners
      */
     public function shortcodePersonWinners($attr, $content, $tag)
@@ -978,7 +983,8 @@ final class ShortcodeController extends Controller
         $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
 
         $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
-        return $this->render('person-winners.html.twig', $data);
+
+        return $this->view->fetch('person-winners.html.twig', $data);
     }
 
     /**

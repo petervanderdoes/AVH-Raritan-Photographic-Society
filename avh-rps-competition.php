@@ -271,6 +271,14 @@ class AVH_RPS_Client
                 return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'), $app->make('SeasonHelper'));
             }
         );
+
+        $this->container->bind(
+            'ShortcodeView',
+            function ($app,$param) {
+                return new Shortcodes\ShortcodeView($param['template_dir'], $param['cache_dir']);
+            }
+        );
+
     }
 
     /**
