@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.4-dev.1
+#### Version 2.0.4-dev.33
 * Split the sitemap for entries and winners per year.
 * Send 404 response code for the old entries and winners sitemap.
 
