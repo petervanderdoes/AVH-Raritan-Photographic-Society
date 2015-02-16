@@ -11,8 +11,4 @@ if (!class_exists('AVH_RPS_Client')) {
 
 final class ShortcodeView extends View
 {
-    public function __construct($template_dir, $cache_dir)
-    {
-        parent::__construct($template_dir, $cache_dir);
-    }
 }
