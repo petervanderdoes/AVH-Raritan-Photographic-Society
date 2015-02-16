@@ -50,9 +50,10 @@ final class Admin
     {
         $this->container = $container;
 
-        $this->settings = $this->container->make('RpsCompetition\Settings');
-        $this->request = $this->container->make('Illuminate\Http\Request');
-        $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
+        $this->settings = $container->make('Settings');
+        $this->rpsdb = $container->make('RpsDb');
+        $this->request = $container->make('IlluminateRequest');
+        $this->options = $container->make('OptionsGeneral');
         $this->core = new Core($this->settings);
 
         // Admin menu
@@ -145,7 +146,6 @@ final class Admin
      */
     public function actionLoadPagehookCompetition()
     {
-        $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->competition_list = new CompetitionListTable($this->settings, $this->rpsdb, $this->request);
 
         $this->handleRequestCompetition();
@@ -172,7 +172,6 @@ final class Admin
      */
     public function actionLoadPagehookCompetitionAdd()
     {
-        $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->competition_list = new CompetitionListTable($this->settings, $this->rpsdb, $this->request);
 
         add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
@@ -193,7 +192,6 @@ final class Admin
      */
     public function actionLoadPagehookEntries()
     {
-        $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         $this->entries_list = $this->competition_list = new EntriesListTable($this->settings, $this->rpsdb, $this->request);
         $this->handleRequestEntries();
 
@@ -394,7 +392,6 @@ final class Admin
     public function handleAjax()
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $this->rpsdb = $this->container->make('RpsCompetition\Db\RpsDb');
         if ($this->request->has('scored')) {
             $data = array();
             $response = '';
