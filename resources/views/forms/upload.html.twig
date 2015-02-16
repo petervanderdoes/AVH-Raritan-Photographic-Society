@@ -1,0 +1,29 @@
+{{ form_start(form) }}
+<table width="80%" class="form_frame">
+    <tbody>
+    <tr>
+        <th colspan="2" class="form_frame_header">Submit Your Image</th>
+    </tr>
+    <tr>
+        <td align="center">
+            <table>
+                <tbody>
+                <tr>
+                    <td class="form_field_label">{{ form_label(form.title) }}</td>
+                    <td class="form_field">{{ form_widget(form.title) }}</td>
+                </tr>
+                <tr>
+                    <td class="form_field_label">{{ form_label(form.file_name) }}</td>
+                    <td class="form_field">{{ form_widget(form.file_name) }}</td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2" style="padding-top:20px">{{ form_widget(form.submit) }}{{ form_widget(form.cancel) }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+{{ form_end(form) }}

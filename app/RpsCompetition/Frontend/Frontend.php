@@ -9,6 +9,7 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Forms\Forms;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
@@ -317,12 +318,15 @@ class Frontend
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $redirect_to = $this->request->input('wp_get_referer');
+            $form = Forms::formUploadEntry('', '', '');
+            $form->submit($this->request->get($form->getName()));
+            $data = $form->getData();
 
+            $redirect_to = $data['wp_get_referer'];
             // Just return if user clicked Cancel
-            $this->isRequestCanceled($redirect_to);
+            $this->isRequestCanceled($form, 'cancel', $redirect_to);
 
-            $file = $this->request->file('file_name');
+            $file = $this->request->file('form.file_name');
             if ($file === null) {
                 $this->settings->set('errmsg', 'You did not select a file to upload');
                 unset($query_entries, $query_competitions, $photo_helper);
@@ -346,7 +350,7 @@ class Frontend
 
                 return;
             }
-            if (!$this->request->has('title')) {
+            if (!$this->request->has('form.title')) {
                 $this->settings->set('errmsg', 'Please enter your image title in the Title field.');
                 unset($query_entries, $query_competitions, $photo_helper);
 
@@ -896,11 +900,15 @@ class Frontend
     /**
      * Check if user pressed cancel and if so redirect the user
      *
+     * @param object $form   The Form that was submitted
+     * @param string $cancel The field to check for cancellation
      * @param string $redirect_to
      */
-    private function isRequestCanceled($redirect_to)
+    private function isRequestCanceled($form, $cancel, $redirect_to)
     {
-        if ($this->request->has('cancel')) {
+        if ($form->get($cancel)
+                 ->isClicked()
+        ) {
             wp_redirect($redirect_to);
             exit();
         }

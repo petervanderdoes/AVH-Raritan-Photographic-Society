@@ -248,7 +248,11 @@ class Command
                 echo PHP_EOL;
             }
 
-            echo PHP_EOL, 'Time: ', date('i:s', time() - $startTime);
+            $duration = time() - $startTime;
+            $hours = intval($duration / 3600);
+            $minutes = intval(($duration - $hours * 3600) / 60);
+            $seconds = $duration % 60;
+            echo PHP_EOL, 'Time: ', sprintf('%d:%02d:%02d', $hours, $minutes, $seconds);
             if (function_exists('memory_get_peak_usage')) {
                 $memory = (memory_get_peak_usage(true) / (1024 * 1024));
                 printf('; Memory: %4.2fMb', $memory);
@@ -392,13 +396,9 @@ class Command
      */
     protected function printVersion()
     {
-        $composer = __DIR__ . '/../../../../../composer.json';
-        $build = __DIR__ . '/../../../../../build.xml';
+        $build = __DIR__ . '/../../../../../build.properties';
 
-        if (file_exists($composer)) {
-            $data = json_decode(file_get_contents($composer));
-            $version = $data->version;
-        } elseif (file_exists($build)) {
+        if (file_exists($build)) {
             $data = @parse_ini_file($build);
             $version = $data['project.version'];
         } else {

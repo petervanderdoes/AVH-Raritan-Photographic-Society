@@ -5,6 +5,7 @@ use Avh\Html\FormBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Forms\Forms as RpsForms;
 use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -101,7 +102,8 @@ final class ShortcodeController extends Controller
                 'FirstName'        => array(SORT_ASC),
                 'Competition_Date' => array(SORT_ASC)
             )
-        );
+        )
+        ;
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -1119,42 +1121,20 @@ final class ShortcodeController extends Controller
         }
 
         $action = home_url('/' . get_page_uri($post->ID));
-        echo $this->formBuilder->open($action . '/?post=1', array('enctype' => 'multipart/form-data'));
-
+        $action .= '/?post=1';
         if ($this->request->has('m')) {
             $medium_subset = "Digital";
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
             }
-            echo $this->formBuilder->hidden('medium_subset', $medium_subset);
         }
         if ($this->request->has('wp_get_referer')) {
             $ref = $this->request->input('wp_get_referer');
         } else {
             $ref = wp_get_referer();
         }
-        echo $this->formBuilder->hidden('wp_get_referer', remove_query_arg(array('m'), $ref));
-        echo '<table class="form_frame" width="80%">';
-        echo '<tr><th class="form_frame_header" colspan=2>';
-        echo 'Submit Your Image';
-        echo '</th></tr>';
-        echo '<tr><td align="center">';
-        echo '<table>';
-        echo '<tr><td class="form_field_label"><span style="color:red"><sup>*</sup> </span>Title <i>(required)</i>:</td>';
-        echo '<td class="form_field">';
-        echo '<input style="width:300px" type="text" name="title" maxlength="128">';
-        echo '</td></tr>';
-        echo '<tr><td class="form_field_label"><span style="color:red"><sup>*</sup> </span>File Name <i>(required)</i>:</td>';
-        echo '<td class="form_field">';
-        echo '<input style="width:300px" type="file" name="file_name" maxlength="128">';
-        echo '</td></tr>';
-        echo '<tr><td align="center" style="padding-top:20px" colspan="2">';
-        echo '<input type="submit" name="submit" value="Submit">';
-        echo '<input type="submit" name="cancel" value="Cancel">';
-        echo '</td></tr>';
-        echo '</table>';
-        echo '</td></tr>';
-        echo '</table>';
-        echo $this->formBuilder->close();
+
+        $form = RpsForms::formUploadEntry($action, $medium_subset, $ref);
+        $this->view->display('upload.html.twig', array('form' => $form->createView()));
     }
 }

@@ -52,6 +52,7 @@ use PDepend\Source\AST\ASTInterface;
 use PDepend\Source\AST\ASTNode;
 use PDepend\Source\AST\ASTStatement;
 use PDepend\Source\AST\ASTSwitchStatement;
+use PDepend\Source\AST\ASTTrait;
 use PDepend\Source\AST\ASTValue;
 use PDepend\Source\AST\State;
 use PDepend\Source\Builder\Builder;
@@ -3413,13 +3414,22 @@ abstract class AbstractPHPParser
         if ($this->tokenizer->peek() === Tokens::T_BITWISE_AND) {
             $foreach->addChild($this->parseVariableOrMemberByReference());
         } else {
-            $foreach->addChild($this->parseVariableOrConstantOrPrimaryPrefix());
+            if ($this->tokenizer->peek() == Tokens::T_LIST) {
+                $foreach->addChild($this->parseListExpression());
+            } else {
+                $foreach->addChild($this->parseVariableOrConstantOrPrimaryPrefix());
 
-            if ($this->tokenizer->peek() === Tokens::T_DOUBLE_ARROW) {
-                $this->consumeToken(Tokens::T_DOUBLE_ARROW);
-                $foreach->addChild(
-                    $this->parseVariableOrMemberOptionalByReference()
-                );
+                if ($this->tokenizer->peek() === Tokens::T_DOUBLE_ARROW) {
+                    $this->consumeToken(Tokens::T_DOUBLE_ARROW);
+
+                    if ($this->tokenizer->peek() == Tokens::T_LIST) {
+                        $foreach->addChild($this->parseListExpression());
+                    } else {
+                        $foreach->addChild(
+                            $this->parseVariableOrMemberOptionalByReference()
+                        );
+                    }
+                }
             }
         }
 
@@ -4407,7 +4417,12 @@ abstract class AbstractPHPParser
             );
         }
 
-        $classReference = $this->classOrInterface->getParentClassReference();
+        if ($this->classOrInterface instanceof ASTTrait) {
+            $classReference = $this->builder->buildAstClassReference('__PDepend_TraitRuntimeReference');
+        } else {
+            $classReference = $this->classOrInterface->getParentClassReference();
+        }
+
         if ($classReference === null) {
             throw new InvalidStateException(
                 $token->startLine,
@@ -6586,12 +6601,15 @@ abstract class AbstractPHPParser
 
         $yield = $this->builder->buildAstYieldStatement($token->image);
 
-        $yield->addChild($this->parseOptionalExpression());
+        $node = $this->parseOptionalExpression();
+        if ($node) {
+            $yield->addChild($node);
 
-        if ($this->tokenizer->peek() === Tokens::T_DOUBLE_ARROW) {
-            $this->consumeToken(Tokens::T_DOUBLE_ARROW);
+            if ($this->tokenizer->peek() === Tokens::T_DOUBLE_ARROW) {
+                $this->consumeToken(Tokens::T_DOUBLE_ARROW);
 
-            $yield->addChild($this->parseOptionalExpression());
+                $yield->addChild($this->parseOptionalExpression());
+            }
         }
 
         $this->consumeComments();
