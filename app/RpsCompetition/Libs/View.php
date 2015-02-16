@@ -17,9 +17,12 @@ class View
      */
     public $environmentOptions = array();
     /**
-     * @var \Twig_Extension The Twig extensions you want to load
+     * @var array The Twig extensions you want to load
      */
     public $parserExtensions = array();
+    /**
+     * @var DataHandler Data available to the templates
+     */
     private $data;
     /**
      * @var \Twig_Environment The Twig environment for rendering templates.
