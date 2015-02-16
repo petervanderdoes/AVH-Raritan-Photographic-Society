@@ -300,11 +300,8 @@ class ShortcodeModel
     public function isScoredCompetition($competition_date)
     {
         $return = $this->query_competitions->getScoredCompetitions($competition_date);
-        if (is_array($return) && !empty($return)) {
-            return true;
-        }
 
-        return false;
+        return (is_array($return) && !empty($return));
     }
 
     /**
