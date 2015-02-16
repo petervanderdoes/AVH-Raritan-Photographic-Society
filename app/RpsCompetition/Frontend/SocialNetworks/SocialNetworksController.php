@@ -19,6 +19,8 @@ if (!class_exists('AVH_RPS_Client')) {
 class SocialNetworksController extends Controller
 {
     protected $model;
+    /** @var  SocialNetworksView */
+    private $view;
 
     /**
      * Constructor
@@ -33,6 +35,7 @@ class SocialNetworksController extends Controller
         $this->setTemplateEngine($this->container->make('Templating', array('template_dir' => $this->settings->get('template_dir') . '/social-networks', 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/')));
 
         $this->model = new SocialNetworksModel();
+        $this->view = $this->container->make('SocialNetworksView', array('template_dir' => $this->settings->get('template_dir'), 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/'));
     }
 
     /**
@@ -43,7 +46,7 @@ class SocialNetworksController extends Controller
      */
     public function actionAddFbRoot()
     {
-        echo $this->render('fb-root.html.twig');
+        $this->view->display('fb-root.html.twig');
     }
 
     /**
@@ -69,7 +72,7 @@ class SocialNetworksController extends Controller
 
         $data = $this->model->getSocialButtons($this->model->getNetworks());
 
-        echo $this->render('buttons.html.twig', $data);
+        $this->view->display('buttons.html.twig', $data);
     }
 
     /**
@@ -83,7 +86,7 @@ class SocialNetworksController extends Controller
     public function actionWpFooter()
     {
         $data = $this->model->getNetworksWithApiEnabled();
-        echo $this->render('in-footer.html.twig', $data);
+        $this->view->display('in-footer.html.twig', $data);
     }
 
     /**
@@ -96,6 +99,6 @@ class SocialNetworksController extends Controller
      */
     public function actionWpHead()
     {
-        echo $this->render('in-header.html.twig');
+        $this->view->display('in-header.html.twig');
     }
 }

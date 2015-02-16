@@ -22,8 +22,10 @@ use RpsCompetition\Frontend\Requests;
 use RpsCompetition\Frontend\Shortcodes;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
 use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
@@ -275,7 +277,7 @@ class AVH_RPS_Client
         $this->container->bind(
             'ShortcodeView',
             function ($app,$param) {
-                return new Shortcodes\ShortcodeView($param['template_dir'], $param['cache_dir']);
+                return new ShortcodeView($param['template_dir'], $param['cache_dir']);
             }
         );
 
@@ -299,6 +301,12 @@ class AVH_RPS_Client
             }
         );
         $this->container->bind('SocialNetworkModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
+        $this->container->bind(
+            'SocialNetworksView',
+            function ($app,$param) {
+                return new SocialNetworksView($param['template_dir'], $param['cache_dir']);
+            }
+        );
     }
 }
 
