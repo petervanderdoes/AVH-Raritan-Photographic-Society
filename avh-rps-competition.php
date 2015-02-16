@@ -30,6 +30,7 @@ use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Settings;
 
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
