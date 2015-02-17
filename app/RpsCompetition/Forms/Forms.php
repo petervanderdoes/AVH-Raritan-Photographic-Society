@@ -25,7 +25,7 @@ class Forms
                                    ->addExtension(new ValidatorExtension($validator))
                                    ->getFormFactory()
         ;
-        $form = $formFactory->createBuilder('form', null, array('action' => $action))
+        $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'uploadentry')))
                             ->add(
                                 'title',
                                 'text',
