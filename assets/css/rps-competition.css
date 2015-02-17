@@ -124,3 +124,8 @@
 .share .rps-share-buttons .share-email a:hover {
   color: #555555;
 }
+
+/* line 2, ../../sass/rps-competition/_forms.scss */
+#uploadentry #form_title {
+  width: 25rem;
+}

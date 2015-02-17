@@ -106,33 +106,6 @@ class Frontend
         global $wp_query;
         global $post;
 
-        if (WP_LOCAL_DEV !== true) {
-            $rps_masonry_version = "867ece1";
-            $masonry_version = "37b35d4";
-            $imagesloaded_version = "37b35d4";
-            $version_separator = '-';
-        } else {
-            $rps_masonry_version = "";
-            $masonry_version = "";
-            $imagesloaded_version = "";
-            $version_separator = '';
-        }
-
-        $rps_masonry_script = 'rps.masonry' . $version_separator . $rps_masonry_version . '.js';
-        $masonry_script = 'masonry' . $version_separator . $masonry_version . '.js';
-        $imagesloaded_script = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
-
-        //todo Make as an option in the admin section.
-        $options = get_option('avh-rps');
-        $all_masonry_pages = array();
-        $all_masonry_pages[$options['monthly_entries_post_id']] = true;
-        $javascript_directory = $this->settings->get('javascript_dir');
-        wp_deregister_script('masonry');
-        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);
-        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), array('masonry'), 'to_remove', true);
-
-        //wp_enqueue_script('rps-masonry');
-        //wp_enqueue_script('rps-imagesloaded');
         if (array_key_exists($wp_query->get_queried_object_id(), $all_masonry_pages)) {
             wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
         }
@@ -146,6 +119,8 @@ class Frontend
                 wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
             }
         }
+
+        wp_enqueue_style('rps-competition.general.style');
     }
 
     /**
@@ -485,6 +460,8 @@ class Frontend
         $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
         $this->setupSocialButtons();
+
+        $this->register_scripts_styles();
 
         unset($query_competitions);
     }
@@ -914,6 +891,41 @@ class Frontend
         }
     }
 
+    private function register_scripts_styles()
+    {
+        if (WP_LOCAL_DEV !== true) {
+            $rps_competition_css_version = "c9c4aab";
+            $rps_masonry_version = "867ece1";
+            $masonry_version = "37b35d4";
+            $imagesloaded_version = "37b35d4";
+            $version_separator = '-';
+        } else {
+            $rps_competition_css_version = "";
+            $rps_masonry_version = "";
+            $masonry_version = "";
+            $imagesloaded_version = "";
+            $version_separator = '';
+        }
+
+        $rps_masonry_script = 'rps.masonry' . $version_separator . $rps_masonry_version . '.js';
+        $masonry_script = 'masonry' . $version_separator . $masonry_version . '.js';
+        $imagesloaded_script = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
+        $rps_competition_style = 'rps-competition' . $version_separator . $rps_competition_css_version . '.css';
+
+        //todo Make as an option in the admin section.
+        $options = get_option('avh-rps');
+        $all_masonry_pages = array();
+        $all_masonry_pages[$options['monthly_entries_post_id']] = true;
+        $javascript_directory = $this->settings->get('javascript_dir');
+        wp_deregister_script('masonry');
+        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);
+        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), array('masonry'), 'to_remove', true);
+        wp_register_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+
+        wp_register_style('rps-competition.fontawesome.style', 'http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"');
+        wp_register_style('rps-competition.general.style', CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')), array('rps-competition.fontawesome.style'), 'to_remove');
+    }
+
     /**
      * Setup shortcodes.
      * Setup all the need shortcodes.
@@ -936,16 +948,13 @@ class Frontend
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = "f233109";
-            $social_buttons_css_version = "c9c4aab";
             $version_separator = '-';
         } else {
             $social_buttons_script_version = "";
-            $social_buttons_css_version = "";
             $version_separator = '';
         }
         $data = array();
         $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
-        $data['style'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_css_version . '.css';
         $social_networks_controller->initializeSocialNetworks($data);
     }
 
