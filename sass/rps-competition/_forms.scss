@@ -1,5 +1,31 @@
 #uploadentry {
-  #form_title {
-    width: 25rem;
+  #form_title, #form_file_name {
+    width: 100%;
+  }
+
+  .form_field_label {
+    width: 10rem;
+    display: inline-block;
+  }
+  .form_field {
+    width: 35rem;
+    display: inline-block;
+  }
+}
+
+.form_frame {
+  @include adjust-font-size-to($font-small);
+}
+
+.form_row {
+  @include rhythm-padding($padding-leader: 1, $padding-trailer: 0, $font-size: $font-small);
+}
+
+.form_buttons_row {
+  text-align: center;
+  @include rhythm-padding($padding-leader: 1, $padding-trailer: 0, $font-size: $font-small);
+  button {
+    margin-left: .25rem;
+    margin-right: .25rem;
   }
 }

@@ -126,6 +126,46 @@
 }
 
 /* line 2, ../../sass/rps-competition/_forms.scss */
-#uploadentry #form_title {
-  width: 25rem;
+#uploadentry #form_title, #uploadentry #form_file_name {
+  width: 100%;
+}
+/* line 6, ../../sass/rps-competition/_forms.scss */
+#uploadentry .form_field_label {
+  width: 10rem;
+  display: inline-block;
+}
+/* line 10, ../../sass/rps-competition/_forms.scss */
+#uploadentry .form_field {
+  width: 35rem;
+  display: inline-block;
+}
+
+/* line 16, ../../sass/rps-competition/_forms.scss */
+.form_frame {
+  font-size: 12px;
+  font-size: 0.93rem;
+  line-height: 20px;
+  line-height: 1.5rem;
+}
+
+/* line 20, ../../sass/rps-competition/_forms.scss */
+.form_row {
+  padding-top: 20px;
+  padding-top: 1.5rem;
+  padding-bottom: 0px;
+  padding-bottom: 0rem;
+}
+
+/* line 24, ../../sass/rps-competition/_forms.scss */
+.form_buttons_row {
+  text-align: center;
+  padding-top: 20px;
+  padding-top: 1.5rem;
+  padding-bottom: 0px;
+  padding-bottom: 0rem;
+}
+/* line 27, ../../sass/rps-competition/_forms.scss */
+.form_buttons_row button {
+  margin-left: .25rem;
+  margin-right: .25rem;
 }
