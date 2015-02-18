@@ -9,7 +9,7 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Forms\Forms;
+use RpsCompetition\Forms\Forms as RpsForms;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
@@ -106,17 +106,21 @@ class Frontend
         global $wp_query;
         global $post;
 
+        //todo Make as an option in the admin section.
+        $options = get_option('avh-rps');
+        $all_masonry_pages = array();
+        $all_masonry_pages[$options['monthly_entries_post_id']] = true;
         if (array_key_exists($wp_query->get_queried_object_id(), $all_masonry_pages)) {
-            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+            wp_enqueue_script('rps-masonryInit');
         }
 
         if (is_object($post)) {
             if (has_shortcode($post->post_content, 'rps_person_winners')) {
-                wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+                wp_enqueue_script('rps-masonryInit');
             }
 
             if (has_shortcode($post->post_content, 'gallery')) {
-                wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+                wp_enqueue_script('rps-masonryInit');
             }
         }
 
@@ -293,7 +297,7 @@ class Frontend
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $form = Forms::formUploadEntry('', '', '');
+            $form = RpsForms::formUploadEntry('', '', '');
             $form->submit($this->request->get($form->getName()));
             $data = $form->getData();
 
@@ -912,10 +916,6 @@ class Frontend
         $imagesloaded_script = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
         $rps_competition_style = 'rps-competition' . $version_separator . $rps_competition_css_version . '.css';
 
-        //todo Make as an option in the admin section.
-        $options = get_option('avh-rps');
-        $all_masonry_pages = array();
-        $all_masonry_pages[$options['monthly_entries_post_id']] = true;
         $javascript_directory = $this->settings->get('javascript_dir');
         wp_deregister_script('masonry');
         wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);

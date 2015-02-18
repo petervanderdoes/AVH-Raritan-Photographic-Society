@@ -10,6 +10,51 @@ use Symfony\Component\Validator\Validation;
 class Forms
 {
     /**
+     * The default dataset for the page MyEntries
+     *
+     * @return array
+     */
+    static function defaultDataMyEntries()
+    {
+        $data = [];
+        $data['competition_date'] = '';
+        $data['medium'] = '';
+        $data['classification'] = '';
+        $data['wp_nonce'] = '';
+        $data['select_competition']['options'] = [];
+        $data['select_medium']['options'] = [];
+
+        return $data;
+    }
+
+    /**
+     * @param $action
+     * @param $data
+     *
+     * @return \Symfony\Component\Form\Form
+     */
+    static function formMyEntries($action, $data)
+    {
+        $validator = Validation::createValidator();
+        $formFactory = SymfonyForms::createFormFactoryBuilder()
+                                   ->addExtension(new ValidatorExtension($validator))
+                                   ->getFormFactory()
+        ;
+        $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'myentries')))
+                            ->add('submit_control', 'hidden')
+                            ->add('comp_date', 'hidden', array('data' => $data['competition_date']))
+                            ->add('medium', 'hidden', array('data' => $data['medium']))
+                            ->add('classification', 'hidden', array('data' => $data['classification']))
+                            ->add('_wpnonce', 'hidden', array('data' => $data['wp_nonce']))
+                            ->add('select_comp', 'choice', array('choices' => $data['select_competition']['options'], 'attr' => array('onchange' => 'submit_form("select_comp")')))
+                            ->add('selected_medium', 'choice', array('choices' => $data['select_medium']['options'], 'attr' => array('onchange' => 'submit_form("select_medium")')))
+                            ->getForm()
+        ;
+
+        return $form;
+    }
+
+    /**
      * Create Entry Upload Form
      *
      * @param string $action
