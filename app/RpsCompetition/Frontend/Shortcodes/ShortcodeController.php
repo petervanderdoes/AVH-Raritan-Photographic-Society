@@ -870,7 +870,7 @@ final class ShortcodeController extends Controller
             $form->add('add', 'submit', array('label' => 'Add', 'attr' => array('onclick' => 'submit_form("add")')));
         }
         if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
-            $form->add('edit', 'submit', array('label' => 'Edit Title', 'attr' => array('onclick' => 'submit_form("add")')));
+            $form->add('edit', 'submit', array('label' => 'Edit Title', 'attr' => array('onclick' => 'submit_form("edit")')));
         }
         if ($num_rows > 0) {
             $form->add('delete', 'submit', array('label' => 'Remove', 'attr' => array('onclick' => 'return  confirmSubmit()')));
