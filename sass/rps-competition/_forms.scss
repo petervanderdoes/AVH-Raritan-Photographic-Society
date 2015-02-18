@@ -19,6 +19,23 @@
 
 .form_row {
   @include rhythm-padding($padding-leader: 1, $padding-trailer: 0, $font-size: $font-small);
+  display: table;
+}
+.form_col {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.form_error {
+  color: $color-message;
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  ul li {
+    list-style-type: none;
+  }
 }
 
 .form_buttons_row {
@@ -27,5 +44,13 @@
   button {
     margin-left: .25rem;
     margin-right: .25rem;
+  }
+}
+
+#myentries {
+  .message {
+    color: $color-message;
+    text-align: center;
+    font-weight: 600;
   }
 }

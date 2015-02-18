@@ -3,8 +3,7 @@ namespace RpsCompetition\Forms;
 
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\Forms as SymfonyForms;
-use Symfony\Component\Validator\Constraints\MinLength;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
 
 class Forms
@@ -76,7 +75,14 @@ class Forms
                                 'text',
                                 array(
                                     'label'       => 'Title (required)',
-                                    'constraints' => new NotBlank(),
+                                    'constraints' => new Assert\Length(
+                                        array(
+                                            'min'        => 2,
+                                            'max'        => 128,
+                                            'minMessage' => 'The title must be at least {{ limit }} characters long',
+                                            'maxMessage' => 'The title can not be longer than {{ limit }} characters',
+                                        )
+                                    ),
                                     'attr'        => array(
                                         'maxlength' => '128'
                                     )
@@ -86,8 +92,9 @@ class Forms
                                 'file_name',
                                 'file',
                                 array(
-                                    'label' => 'File Name (required)',
-                                    'attr'  => array(
+                                    'label'       => 'File Name (required)',
+                                    'constraints' => new Assert\Image(),
+                                    'attr'        => array(
                                         'accept' => 'image/*'
                                     )
                                 )

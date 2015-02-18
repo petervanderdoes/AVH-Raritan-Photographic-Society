@@ -239,7 +239,7 @@ class Frontend
                 $comp_date = $this->request->input('form.comp_date');
                 $classification = $this->request->input('form.classification');
                 $medium = $this->request->input('form.medium');
-                $entry_array = $this->request->input('EntryID', null);
+                $entry_array = $this->request->input('form.entryid', null);
 
                 switch ($this->request->input('form.submit_control')) {
                     case 'add':
@@ -305,6 +305,11 @@ class Frontend
             // Just return if user clicked Cancel
             $this->isRequestCanceled($form, 'cancel', $redirect_to);
 
+            if (!$form->isValid()) {
+                $errors = $form->getErrors();
+                $this->settings->set('formerror',$errors);
+                return;
+            }
             $file = $this->request->file('form.file_name');
             if ($file === null) {
                 $this->settings->set('errmsg', 'You did not select a file to upload');
@@ -325,12 +330,6 @@ class Frontend
             $uploaded_file_info = getimagesize($uploaded_file_name);
             if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
                 $this->settings->set('errmsg', "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit");
-                unset($query_entries, $query_competitions, $photo_helper);
-
-                return;
-            }
-            if (!$this->request->has('form.title')) {
-                $this->settings->set('errmsg', 'Please enter your image title in the Title field.');
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;

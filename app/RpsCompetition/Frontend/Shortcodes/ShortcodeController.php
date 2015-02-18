@@ -1045,7 +1045,13 @@ final class ShortcodeController extends Controller
             $ref = wp_get_referer();
         }
 
-        $form = RpsForms::formUploadEntry($action, $medium_subset, $ref);
+        if ($this->settings->has('formerror')) {
+            /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
+            $error_obj = $this->settings->get('formerror');
+            $form = $error_obj->getForm();
+        } else {
+            $form = RpsForms::formUploadEntry($action, $medium_subset, $ref);
+        }
         $this->view->display('upload.html.twig', array('form' => $form->createView()));
     }
 }
