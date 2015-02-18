@@ -233,15 +233,15 @@ class Frontend
 
             $page = explode('-', $post->post_name);
             $medium_subset = $page[1];
-            if ($this->request->has('submit_control')) {
+            if ($this->request->has('form.submit_control')) {
                 // @TODO Nonce check
 
-                $comp_date = $this->request->input('comp_date');
-                $classification = $this->request->input('classification');
-                $medium = $this->request->input('medium');
+                $comp_date = $this->request->input('form.comp_date');
+                $classification = $this->request->input('form.classification');
+                $medium = $this->request->input('form.medium');
                 $entry_array = $this->request->input('EntryID', null);
 
-                switch ($this->request->input('submit_control')) {
+                switch ($this->request->input('form.submit_control')) {
                     case 'add':
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
                             $query = array('m' => $medium_subset);
@@ -362,9 +362,9 @@ class Frontend
 
             // Prepare the title and client file name for storing in the database
             if (get_magic_quotes_gpc()) {
-                $title = stripslashes(trim($this->request->input('title')));
+                $title = stripslashes(trim($this->request->input('form.title')));
             } else {
-                $title = trim($this->request->input('title'));
+                $title = trim($this->request->input('form.title'));
             }
             $client_file_name = $file->getClientOriginalName();
 

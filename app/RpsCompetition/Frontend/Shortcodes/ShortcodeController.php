@@ -864,15 +864,16 @@ final class ShortcodeController extends Controller
             $entry['size']['y'] = $size[1];
             $data['entries'][] = $entry;
         }
+
         // Don't show the Add button if the max number of images per member reached
         if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
-            $form->add('add', 'submit', array('label' => 'Add', 'attr' => array('onchange' => 'submit_form("add")')));
+            $form->add('add', 'submit', array('label' => 'Add', 'attr' => array('onclick' => 'submit_form("add")')));
         }
         if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
-            $form->add('edit', 'submit', array('label' => 'Edit Title', 'attr' => array('onchange' => 'submit_form("add")')));
+            $form->add('edit', 'submit', array('label' => 'Edit Title', 'attr' => array('onclick' => 'submit_form("add")')));
         }
         if ($num_rows > 0) {
-            $form->add('delete', 'submit', array('label' => 'Remove', 'attr' => array('onchange' => 'return  confirmSubmit()')));
+            $form->add('delete', 'submit', array('label' => 'Remove', 'attr' => array('onclick' => 'return  confirmSubmit()')));
         }
         $this->view->display('add_entries.html.twig', array('data' => $data, 'form' => $form->createView()));
         unset($query_entries, $query_competitions, $competition_helper, $photo_helper);

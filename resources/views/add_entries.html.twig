@@ -65,13 +65,21 @@
         <th width="10%" class="form_frame_header">Width</th>
         <th width="10%" class="form_frame_header">Height</th>
     </tr>
-    <tr>
-        <td align="left" colspan="6" style="padding-top: 5px;">
-            <ul style="margin: 0 0 0 15px;padding:0">
-                <ul></ul>
-            </ul>
-        </td>
-    </tr>
+    {% for entry in data.entries %}
+        <tr>
+
+            <td align="center" width="5%"><input type="checkbox" value="{{ entry.id }}" name="EntryID[]">
+            </td>
+            <td align="center" width="10%">
+                <a title="{{ entry.title|escape }}" rel="1" href="{{ entry.image.url }}">
+                    <img src="{{ entry.image.source }}">
+                </a></td>
+            <td align="left" width="40%">{{ entry.title|escape }}</td>
+            <td align="left" width="25%">{{ entry.client_file_name }}</td>
+            <td align="center" width="10%" style="text-align:center">{{ entry.size.x }}</td>
+            <td align="center" width="10%">{{ entry.size.y }}</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="6" class="form_buttons_row">
             {% if form.add is defined %}
