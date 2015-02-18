@@ -54,7 +54,7 @@
     </tr>
     {% if data.close is defined %}
         <tr>
-            <td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on {{ data.close|date('F j, Y') }} at {{ data.close|date('h:i a') }}</td>
+            <td class="message" colspan="6"><b>Note:</b> This competition will close on {{ data.close|date('F j, Y') }} at {{ data.close|date('h:i a') }}</td>
         </tr>
     {% endif %}
     <tr>
@@ -65,10 +65,10 @@
         <th width="10%" class="form_frame_header">Width</th>
         <th width="10%" class="form_frame_header">Height</th>
     </tr>
+    {% set counter = 0 %}
     {% for entry in data.entries %}
         <tr>
-
-            <td align="center" width="5%"><input type="checkbox" value="{{ entry.id }}" name="EntryID[]">
+            <td align="center" width="5%"><input id="form_entryid_{{ counter }}" type="checkbox" value="{{ entry.id }}" name="form[entryid][]">
             </td>
             <td align="center" width="10%">
                 <a title="{{ entry.title|escape }}" rel="1" href="{{ entry.image.url }}">
@@ -79,6 +79,7 @@
             <td align="center" width="10%" style="text-align:center">{{ entry.size.x }}</td>
             <td align="center" width="10%">{{ entry.size.y }}</td>
         </tr>
+        {% set counter = counter + 1 %}
     {% endfor %}
     <tr>
         <td colspan="6" class="form_buttons_row">
