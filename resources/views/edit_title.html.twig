@@ -1,0 +1,11 @@
+{{ form_start(form) }}
+<div class="form_frame">
+    <div class="form_image"><img src="{{ data.image.source }}"></div>
+    <div class="form_row">
+        <div class="form_col form_field_label">{{ form_label(form.new_title) }}</div>
+        <div class="form_col form_field">{{ form_widget(form.new_title) }}<br>
+            <span class="form_error">{{ form_errors(form.new_title) }}</span></div>
+    </div>
+    <div class="form_buttons_row">{{ form_widget(form.submit) }}{{ form_widget(form.cancel) }}</div>
+</div>
+{{ form_end(form) }}

@@ -163,55 +163,61 @@ class Frontend
         global $post;
 
         $query_entries = $this->container->make('QueryEntries');
+        /** @var  QueryCompetitions $query_competitions */
         $query_competitions = $this->container->make('QueryCompetitions');
         $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
-            $redirect_to = $this->request->input('wp_get_referer');
-            $entry_id = $this->request->input('id');
+            $form = RpsForms::formEditTitle('', []);
+            $form->submit($this->request->get($form->getName()));
+            $data = $form->getData();
 
-            // Just return to the My Images page is the user clicked Cancel
-            $this->isRequestCanceled($redirect_to);
+            $redirect_to = $data['wp_get_referer'];
+            // Just return if user clicked Cancel
+            $this->isRequestCanceled($form, 'cancel', $redirect_to);
 
-            // makes sure they filled in the title field
-            if (!$this->request->has('new_title')) {
-                $this->settings->set('errmsg', 'You must provide an image title.<br><br>');
-            } else {
-                $server_file_name = $this->request->input('server_file_name');
-                $new_title = trim($this->request->input('new_title'));
-                if (get_magic_quotes_gpc()) {
-                    $server_file_name = stripslashes($this->request->input('server_file_name'));
-                    $new_title = stripslashes(trim($this->request->input('new_title')));
-                }
+            if (!$form->isValid()) {
+                $errors = $form->getErrors();
+                $this->settings->set('formerror', $errors);
 
-                $competition = $query_competitions->getCompetitionByEntryId($entry_id);
+                return;
+            }
+
+            $server_file_name = $data['server_file_name'];
+            $new_title = $data['new_title'];
+            if (get_magic_quotes_gpc()) {
+                $server_file_name = stripslashes($data['server_file_name']);
+                $new_title = stripslashes($data['new_title']);
+            }
+
+            if ($data['new_title'] !== $data['title']) {
+                $competition = $query_competitions->getCompetitionByEntryId($data['id']);
                 if ($competition == null) {
-                    wp_die("Failed to SELECT competition for entry ID: " . $entry_id);
+                    wp_die("Failed to SELECT competition for entry ID: " . $data['id']);
                 }
 
                 // Rename the image file on the server file system
                 $path = $photo_helper->getCompetitionPath($competition->Competition_Date, $competition->Classification, $competition->Medium);
                 $old_file_parts = pathinfo($server_file_name);
-                $old_file_name = $old_file_parts['filename'];
+                $old_file_name = $old_file_parts['basename'];
                 $ext = $old_file_parts['extension'];
                 $current_user = wp_get_current_user();
                 $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT') . $server_file_name);
-                $new_file_name = $new_file_name_noext . $ext;
-                if (!$photo_helper->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
+                $new_file_name = $new_file_name_noext . '.' . $ext;
+                if (!$photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
                     die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
                 }
 
                 // Update the Title and File Name in the database
-                $updated_data = array('ID' => $entry_id, 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
+                $updated_data = array('ID' => $data['id'], 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
                 $result = $query_entries->updateEntry($updated_data);
                 if ($result === false) {
                     wp_die("Failed to UPDATE entry record from database");
                 }
-
-                $redirect_to = $this->request->input('wp_get_referer');
-                wp_redirect($redirect_to);
-                exit();
             }
+            $redirect_to = $data['wp_get_referer'];
+            wp_redirect($redirect_to);
+            exit();
         }
         unset($query_entries, $query_competitions, $photo_helper);
     }
@@ -307,7 +313,8 @@ class Frontend
 
             if (!$form->isValid()) {
                 $errors = $form->getErrors();
-                $this->settings->set('formerror',$errors);
+                $this->settings->set('formerror', $errors);
+
                 return;
             }
             $file = $this->request->file('form.file_name');

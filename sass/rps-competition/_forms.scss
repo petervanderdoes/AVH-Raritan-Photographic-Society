@@ -13,6 +13,21 @@
   }
 }
 
+#edittitle {
+  #form_new_title {
+    width: 100%;
+  }
+
+  .form_field_label {
+    width: 10rem;
+    display: inline-block;
+  }
+  .form_field {
+    width: 35rem;
+    display: inline-block;
+  }
+}
+
 .form_frame {
   @include adjust-font-size-to($font-small);
 }
@@ -21,6 +36,7 @@
   @include rhythm-padding($padding-leader: 1, $padding-trailer: 0, $font-size: $font-small);
   display: table;
 }
+
 .form_col {
   display: table-cell;
   vertical-align: top;

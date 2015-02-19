@@ -195,7 +195,7 @@ class QueryCompetitions
      *
      * @return QueryCompetitions|array
      */
-    public function getCompetitionByEntryId($entry_id, $output = ARRAY_A)
+    public function getCompetitionByEntryId($entry_id, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare(
             "SELECT c.*

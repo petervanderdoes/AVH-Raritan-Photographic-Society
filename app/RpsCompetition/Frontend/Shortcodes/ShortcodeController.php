@@ -560,51 +560,40 @@ final class ShortcodeController extends Controller
         $query_entries = $this->container->make('QueryEntries');
         $photo_helper = $this->container->make('PhotoHelper');
 
-        $medium_subset = "Digital";
-        $medium_param = "?m=digital";
-        if ($this->request->input('m') == "prints") {
-            $medium_subset = "Prints";
-            $medium_param = "?m=prints";
+        if ($this->settings->has('formerror')) {
+            /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
+            $error_obj = $this->settings->get('formerror');
+            $form = $error_obj->getForm();
+            $server_file_name = $form->get('server_file_name')
+                                     ->getData()
+            ;
+        } else {
+            $medium_subset = "Digital";
+            $medium_param = "?m=digital";
+            if ($this->request->input('m') == "prints") {
+                $medium_subset = "Prints";
+                $medium_param = "?m=prints";
+            }
+            $entry_id = $this->request->input('id');
+
+            $recs = $query_entries->getEntryById($entry_id);
+            $title = $recs->Title;
+            $server_file_name = $recs->Server_File_Name;
+
+            $action = home_url('/' . get_page_uri($post->ID)) . $medium_param;
+            $form_data['entry_id'] = $entry_id;
+            $form_data['title'] = $title;
+            $form_data['server_file_name'] = $server_file_name;
+            $form_data['medium_subset'] = $medium_subset;
+            $form_data['ref'] = remove_query_arg(array('m', 'id'), wp_get_referer());
+            $form_data['$title'] = $title;
+            $form = RpsForms::formEditTitle($action, $form_data);
         }
-        $entry_id = $this->request->input('id');
 
-        $recs = $query_entries->getEntryById($entry_id);
-        // Legacy need. Previously titles would be stores with added slashes.
-        $title = $recs->Title;
-        $server_file_name = $recs->Server_File_Name;
+        $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
 
-        if ($this->settings->has('errmsg')) {
-            echo '<div id="errmsg">';
-            echo $this->settings->get('errmsg');
-            echo '</div>';
-        }
-        $action = home_url('/' . get_page_uri($post->ID));
-        echo '<form action="' . $action . $medium_param . '" method="post">';
+        $this->view->display('edit_title.html.twig', array('data' => $data, 'form' => $form->createView()));
 
-        echo '<table class="form_frame" width="80%">';
-        echo '<tr><th class="form_frame_header" colspan=2>Update Image Title</th></tr>';
-        echo '<tr><td align="center">';
-        echo '<table>';
-        echo '<tr><td align="center" colspan="2">';
-
-        echo "<img src=\"" . $photo_helper->getThumbnailUrl($recs->Server_File_Name, '200') . "\" />\n";
-        echo '</td></tr>';
-        echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
-        echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
-        echo '</td></tr>';
-        echo '<tr><td style="padding-top:20px" align="center" colspan="2">';
-        echo '<input type="submit" name="submit" value="Update">';
-        echo '<input type="submit" name="cancel" value="Cancel">';
-        echo '<input type="hidden" name="id" value="' . esc_attr($entry_id) . '" />';
-        echo '<input type="hidden" name="title" value="' . esc_attr($title) . '" />';
-        echo '<input type="hidden" name="server_file_name" value="' . esc_attr($server_file_name) . '" />';
-        echo '<input type="hidden" name="m" value="' . esc_attr(strtolower($medium_subset)) . '" />';
-        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
-        echo '</td></tr>';
-        echo '</table>';
-        echo '</td></tr>';
-        echo '</table>';
-        echo '</form>';
         unset($query_entries, $photo_helper);
     }
 

@@ -140,7 +140,22 @@
   display: inline-block;
 }
 
-/* line 16, ../../sass/rps-competition/_forms.scss */
+/* line 17, ../../sass/rps-competition/_forms.scss */
+#edittitle #form_new_title {
+  width: 100%;
+}
+/* line 21, ../../sass/rps-competition/_forms.scss */
+#edittitle .form_field_label {
+  width: 10rem;
+  display: inline-block;
+}
+/* line 25, ../../sass/rps-competition/_forms.scss */
+#edittitle .form_field {
+  width: 35rem;
+  display: inline-block;
+}
+
+/* line 31, ../../sass/rps-competition/_forms.scss */
 .form_frame {
   font-size: 12px;
   font-size: 0.93rem;
@@ -148,7 +163,7 @@
   line-height: 1.5rem;
 }
 
-/* line 20, ../../sass/rps-competition/_forms.scss */
+/* line 35, ../../sass/rps-competition/_forms.scss */
 .form_row {
   padding-top: 20px;
   padding-top: 1.5rem;
@@ -157,28 +172,28 @@
   display: table;
 }
 
-/* line 24, ../../sass/rps-competition/_forms.scss */
+/* line 40, ../../sass/rps-competition/_forms.scss */
 .form_col {
   display: table-cell;
   vertical-align: top;
 }
 
-/* line 29, ../../sass/rps-competition/_forms.scss */
+/* line 45, ../../sass/rps-competition/_forms.scss */
 .form_error {
   color: #ce1126;
 }
-/* line 31, ../../sass/rps-competition/_forms.scss */
+/* line 47, ../../sass/rps-competition/_forms.scss */
 .form_error ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
-/* line 36, ../../sass/rps-competition/_forms.scss */
+/* line 52, ../../sass/rps-competition/_forms.scss */
 .form_error ul li {
   list-style-type: none;
 }
 
-/* line 41, ../../sass/rps-competition/_forms.scss */
+/* line 57, ../../sass/rps-competition/_forms.scss */
 .form_buttons_row {
   text-align: center;
   padding-top: 20px;
@@ -186,13 +201,13 @@
   padding-bottom: 0px;
   padding-bottom: 0rem;
 }
-/* line 44, ../../sass/rps-competition/_forms.scss */
+/* line 60, ../../sass/rps-competition/_forms.scss */
 .form_buttons_row button {
   margin-left: .25rem;
   margin-right: .25rem;
 }
 
-/* line 51, ../../sass/rps-competition/_forms.scss */
+/* line 67, ../../sass/rps-competition/_forms.scss */
 #myentries .message {
   color: #ce1126;
   text-align: center;
