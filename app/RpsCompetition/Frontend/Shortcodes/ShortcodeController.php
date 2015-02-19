@@ -27,6 +27,8 @@ final class ShortcodeController extends Controller
     private $model;
     /** @var  ShortcodeView */
     private $view;
+    /** @var  \Symfony\Component\Form\Forms */
+    private $formFactory;
 
     /**
      * Constructor
@@ -40,6 +42,7 @@ final class ShortcodeController extends Controller
         $this->setRpsdb($this->container->make('RpsDb'));
         $this->setRequest($this->container->make('IlluminateRequest'));
         $this->setSession($this->container->make('Session'));
+        $this->formFactory = $this->container->make('formFactory');
         $template = [];
         $template[] = $this->settings->get('template_dir');
         $template[] = $this->settings->get('template_dir') . '/social-networks';
@@ -587,7 +590,7 @@ final class ShortcodeController extends Controller
             $form_data['medium_subset'] = $medium_subset;
             $form_data['ref'] = remove_query_arg(array('m', 'id'), wp_get_referer());
             $form_data['$title'] = $title;
-            $form = RpsForms::formEditTitle($action, $form_data);
+            $form = RpsForms::formEditTitle($this->formFactory, $action, $form_data);
         }
 
         $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
@@ -749,7 +752,7 @@ final class ShortcodeController extends Controller
         $form_data['select_medium']['options'] = $competition_helper->getMedium($open_competitions);
 
         if ($this->request->isMethod('POST')) {
-            $form = RpsForms::formMyEntries($action, $form_data);
+            $form = RpsForms::formMyEntries($this->formFactory, $action, $form_data);
             $form->submit($this->request->get($form->getName()));
             $submitted_data = $form->getData();
             switch ($submitted_data['submit_control']) {
@@ -778,7 +781,7 @@ final class ShortcodeController extends Controller
         $form_data['competition_date'] = $current_competition->Competition_Date;
         $form_data['medium'] = $current_competition->Medium;
         $form_data['classification'] = $current_competition->Classification;
-        $form = RpsForms::formMyEntries($action, $form_data);
+        $form = RpsForms::formMyEntries($this->formFactory, $action, $form_data);
 
         $this->session->set('myentries/subset', $medium_subset_medium);
         $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
@@ -1039,7 +1042,7 @@ final class ShortcodeController extends Controller
             $error_obj = $this->settings->get('formerror');
             $form = $error_obj->getForm();
         } else {
-            $form = RpsForms::formUploadEntry($action, $medium_subset, $ref);
+            $form = RpsForms::formUploadEntry($this->formFactory, $action, $medium_subset, $ref);
         }
         $this->view->display('upload.html.twig', array('form' => $form->createView()));
     }

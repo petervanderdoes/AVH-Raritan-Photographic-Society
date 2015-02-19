@@ -1,10 +1,7 @@
 <?php
 namespace RpsCompetition\Forms;
 
-use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
-use Symfony\Component\Form\Forms as SymfonyForms;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validation;
 
 class Forms
 {
@@ -29,19 +26,14 @@ class Forms
     /**
      * Setup form: Edit Title
      *
-     * @param string $action
-     * @param array  $data
+     * @param \Symfony\Component\Form\FormFactory $formFactory
+     * @param string                              $action
+     * @param array                               $data
      *
      * @return \Symfony\Component\Form\Form
      */
-    static function formEditTitle($action, $data)
+    static function formEditTitle($formFactory, $action, $data)
     {
-
-        $validator = Validation::createValidator();
-        $formFactory = SymfonyForms::createFormFactoryBuilder()
-                                   ->addExtension(new ValidatorExtension($validator))
-                                   ->getFormFactory()
-        ;
         $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'edittitle')))
                             ->add(
                                 'new_title',
@@ -111,18 +103,14 @@ class Forms
     /**
      * Setup form: My Digital/Print Entries
      *
-     * @param string $action
-     * @param array  $data
+     * @param \Symfony\Component\Form\FormFactory $formFactory
+     * @param string                              $action
+     * @param array                               $data
      *
      * @return \Symfony\Component\Form\Form
      */
-    static function formMyEntries($action, $data)
+    static function formMyEntries($formFactory, $action, $data)
     {
-        $validator = Validation::createValidator();
-        $formFactory = SymfonyForms::createFormFactoryBuilder()
-                                   ->addExtension(new ValidatorExtension($validator))
-                                   ->getFormFactory()
-        ;
         $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'myentries')))
                             ->add('submit_control', 'hidden')
                             ->add('comp_date', 'hidden', array('data' => $data['competition_date']))
@@ -140,19 +128,15 @@ class Forms
     /**
      * Setup form: Upload Entry
      *
-     * @param string $action
-     * @param string $medium_subset
-     * @param string $ref
+     * @param \Symfony\Component\Form\FormFactory $formFactory
+     * @param string                              $action
+     * @param string                              $medium_subset
+     * @param string                              $ref
      *
      * @return \Symfony\Component\Form\Form
      */
-    static function formUploadEntry($action, $medium_subset, $ref)
+    static function formUploadEntry($formFactory, $action, $medium_subset, $ref)
     {
-        $validator = Validation::createValidator();
-        $formFactory = SymfonyForms::createFormFactoryBuilder()
-                                   ->addExtension(new ValidatorExtension($validator))
-                                   ->getFormFactory()
-        ;
         $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'uploadentry')))
                             ->add(
                                 'title',

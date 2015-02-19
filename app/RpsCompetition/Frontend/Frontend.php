@@ -42,9 +42,9 @@ class Frontend
     private $session;
     /** @var Settings */
     private $settings;
-    /** @var Rpscompetition\Frontend\View */
+    /** @var \Rpscompetition\Frontend\View */
     private $view;
-
+private $formFactory;
     /**
      * Constructor
      *
@@ -63,6 +63,7 @@ class Frontend
         $this->core = $container->make('Core');
         $requests = $container->make('FrontendRequests');
         $this->view = $container->make('FrontendView');
+        $this->formFactory = $container->make('formFactory');
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -168,7 +169,7 @@ class Frontend
         $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
-            $form = RpsForms::formEditTitle('', []);
+            $form = RpsForms::formEditTitle($this->formFactory,'', []);
             $form->submit($this->request->get($form->getName()));
             $data = $form->getData();
 
@@ -303,7 +304,7 @@ class Frontend
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $form = RpsForms::formUploadEntry('', '', '');
+            $form = RpsForms::formUploadEntry($this->formFactory,'', '', '');
             $form->submit($this->request->get($form->getName()));
             $data = $form->getData();
 
