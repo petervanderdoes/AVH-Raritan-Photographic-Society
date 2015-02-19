@@ -26,6 +26,14 @@ class Forms
         return $data;
     }
 
+    /**
+     * Setup form: Edit Title
+     *
+     * @param string $action
+     * @param array  $data
+     *
+     * @return \Symfony\Component\Form\Form
+     */
     static function formEditTitle($action, $data)
     {
 
@@ -101,8 +109,10 @@ class Forms
     }
 
     /**
-     * @param $action
-     * @param $data
+     * Setup form: My Digital/Print Entries
+     *
+     * @param string $action
+     * @param array  $data
      *
      * @return \Symfony\Component\Form\Form
      */
@@ -128,7 +138,7 @@ class Forms
     }
 
     /**
-     * Create Entry Upload Form
+     * Setup form: Upload Entry
      *
      * @param string $action
      * @param string $medium_subset
