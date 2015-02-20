@@ -22,13 +22,13 @@ if (!class_exists('AVH_RPS_Client')) {
 final class ShortcodeController extends Controller
 {
     private $formBuilder;
+    /** @var  \Symfony\Component\Form\FormFactory */
+    private $formFactory;
     private $html;
     /** @var  ShortcodeModel */
     private $model;
     /** @var  ShortcodeView */
     private $view;
-    /** @var  \Symfony\Component\Form\Forms */
-    private $formFactory;
 
     /**
      * Constructor
@@ -753,7 +753,7 @@ final class ShortcodeController extends Controller
 
         if ($this->request->isMethod('POST')) {
             $form = RpsForms::formMyEntries($this->formFactory, $action, $form_data);
-            $form->submit($this->request->get($form->getName()));
+            $form->handleRequest($this->request);
             $submitted_data = $form->getData();
             switch ($submitted_data['submit_control']) {
                 case 'select_comp':

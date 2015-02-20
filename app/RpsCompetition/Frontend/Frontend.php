@@ -32,6 +32,8 @@ class Frontend
     private $container;
     /** @var Core */
     private $core;
+    /** @var \Symfony\Component\Form\FormFactory */
+    private $formFactory;
     /** @var Options */
     private $options;
     /** @var Request */
@@ -44,7 +46,7 @@ class Frontend
     private $settings;
     /** @var \Rpscompetition\Frontend\View */
     private $view;
-private $formFactory;
+
     /**
      * Constructor
      *
@@ -169,8 +171,8 @@ private $formFactory;
         $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
-            $form = RpsForms::formEditTitle($this->formFactory,'', []);
-            $form->submit($this->request->get($form->getName()));
+            $form = RpsForms::formEditTitle($this->formFactory, '', []);
+            $form->handleRequest($this->request);
             $data = $form->getData();
 
             $redirect_to = $data['wp_get_referer'];
@@ -304,8 +306,8 @@ private $formFactory;
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $form = RpsForms::formUploadEntry($this->formFactory,'', '', '');
-            $form->submit($this->request->get($form->getName()));
+            $form = RpsForms::formUploadEntry($this->formFactory, '', '', '');
+            $form->handleRequest($this->request);
             $data = $form->getData();
 
             $redirect_to = $data['wp_get_referer'];

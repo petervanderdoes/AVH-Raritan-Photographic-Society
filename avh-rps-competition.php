@@ -32,6 +32,7 @@ use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
+use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\Forms as SymfonyForms;
 use Symfony\Component\Validator\Validation;
@@ -343,6 +344,7 @@ class AVH_RPS_Client
                 $validator = Validation::createValidator();
                 $formFactory = SymfonyForms::createFormFactoryBuilder()
                                            ->addExtension(new ValidatorExtension($validator))
+                                           ->addExtension(new HttpFoundationExtension())
                                            ->getFormFactory()
                 ;
 
