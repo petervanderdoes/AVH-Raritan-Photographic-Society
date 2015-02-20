@@ -171,7 +171,7 @@ class Frontend
         $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
-            $form = RpsForms::formEditTitle($this->formFactory, '', []);
+            $form = RpsForms::formEditTitle($this->formFactory);
             $form->handleRequest($this->request);
             $data = $form->getData();
 
@@ -306,7 +306,7 @@ class Frontend
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $form = RpsForms::formUploadEntry($this->formFactory, '', '', '');
+            $form = RpsForms::formUploadEntry($this->formFactory);
             $form->handleRequest($this->request);
             $data = $form->getData();
 

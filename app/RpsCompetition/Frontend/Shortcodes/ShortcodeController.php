@@ -1023,18 +1023,19 @@ final class ShortcodeController extends Controller
             echo '</div>';
         }
 
+        $data=[];
         $action = home_url('/' . get_page_uri($post->ID));
         $action .= '/?post=1';
         if ($this->request->has('m')) {
-            $medium_subset = "Digital";
+            $data['medium_subset'] = "Digital";
             if ($this->request->input('m') == "prints") {
-                $medium_subset = "Prints";
+                $data['medium_subset'] = "Prints";
             }
         }
         if ($this->request->has('wp_get_referer')) {
-            $ref = $this->request->input('wp_get_referer');
+            $data['ref'] = $this->request->input('wp_get_referer');
         } else {
-            $ref = wp_get_referer();
+            $data['ref'] = wp_get_referer();
         }
 
         if ($this->settings->has('formerror')) {
@@ -1042,7 +1043,7 @@ final class ShortcodeController extends Controller
             $error_obj = $this->settings->get('formerror');
             $form = $error_obj->getForm();
         } else {
-            $form = RpsForms::formUploadEntry($this->formFactory, $action, $medium_subset, $ref);
+            $form = RpsForms::formUploadEntry($this->formFactory, $action, $data);
         }
         $this->view->display('upload.html.twig', array('form' => $form->createView()));
     }

@@ -32,7 +32,7 @@ class Forms
      *
      * @return \Symfony\Component\Form\Form
      */
-    static function formEditTitle($formFactory, $action, $data)
+    static function formEditTitle($formFactory, $action = '', $data=[])
     {
         $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'edittitle')))
                             ->add(
@@ -109,7 +109,7 @@ class Forms
      *
      * @return \Symfony\Component\Form\Form
      */
-    static function formMyEntries($formFactory, $action, $data)
+    static function formMyEntries($formFactory, $action='', $data=[])
     {
         $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'myentries')))
                             ->add('submit_control', 'hidden')
@@ -130,12 +130,12 @@ class Forms
      *
      * @param \Symfony\Component\Form\FormFactory $formFactory
      * @param string                              $action
-     * @param string                              $medium_subset
-     * @param string                              $ref
+     * @param array                               $data
      *
      * @return \Symfony\Component\Form\Form
+     *
      */
-    static function formUploadEntry($formFactory, $action, $medium_subset, $ref)
+    static function formUploadEntry($formFactory, $action='', $data=[])
     {
         $form = $formFactory->createBuilder('form', null, array('action' => $action, 'attr' => array('id' => 'uploadentry')))
                             ->add(
@@ -185,13 +185,13 @@ class Forms
                             ->add(
                                 'medium_subset',
                                 'hidden',
-                                array('data' => $medium_subset)
+                                array('data' => $data['medium_subset'])
                             )
                             ->add(
                                 'wp_get_referer',
                                 'hidden',
                                 array(
-                                    'data' => remove_query_arg(array('m'), $ref)
+                                    'data' => remove_query_arg(array('m'), $data['ref'])
                                 )
                             )
                             ->getForm()
