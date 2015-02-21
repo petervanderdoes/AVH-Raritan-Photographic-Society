@@ -20,6 +20,7 @@ class Controller
     protected $options;
     protected $request;
     protected $rpsdb;
+    /** @var  \Avh\Network\Session */
     protected $session;
     /** @var  Settings $settings */
     protected $settings;

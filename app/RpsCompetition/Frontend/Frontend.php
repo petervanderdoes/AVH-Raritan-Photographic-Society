@@ -9,7 +9,11 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
+use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
 use RpsCompetition\Forms\Forms as RpsForms;
+use RpsCompetition\Forms\Type\MyEntriesType;
+use RpsCompetition\Forms\Type\UploadEntryType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
@@ -239,18 +243,23 @@ class Frontend
         $query_competitions = $this->container->make('QueryCompetitions');
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
+            $entity = new EntityFormMyEntries();
+
+            $form = $this->formFactory->create(new MyEntriesType($entity), $entity, array('attr' => array('id' => 'myentries')));
+            $form->handleRequest($this->request);
 
             $page = explode('-', $post->post_name);
             $medium_subset = $page[1];
-            if ($this->request->has('form.submit_control')) {
+
+            if ($form->has('submit_control')) {
                 // @TODO Nonce check
 
-                $comp_date = $this->request->input('form.comp_date');
-                $classification = $this->request->input('form.classification');
-                $medium = $this->request->input('form.medium');
+                $comp_date = $entity->getCompDate();
+                $classification = $entity->getClassification();
+                $medium = $entity->getMedium();
                 $entry_array = $this->request->input('form.entryid', null);
 
-                switch ($this->request->input('form.submit_control')) {
+                switch ($entity->getSubmitControl()) {
                     case 'add':
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
                             $query = array('m' => $medium_subset);
@@ -280,10 +289,38 @@ class Frontend
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
                             if ($entry_array !== null) {
                                 $this->deleteCompetitionEntries($entry_array);
+                                $redirect = get_permalink($post->ID);
+                                wp_redirect($redirect);
+                                exit();
                             }
                         }
                         break;
+
+                    case 'select_comp':
+                        $competition_date = $entity->getSelectComp();
+                        $medium = $entity->getMedium();
+                        break;
+
+                    case 'select_medium':
+                        $competition_date = $entity->getCompDate();
+                        $medium = $entity->getSelectedMedium();
+                        break;
+                    default:
+                        $competition_date = $entity->getCompDate();
+                        $medium = $entity->getMedium();
+                        break;
                 }
+                $medium_subset_medium = $this->session->get('myentries/subset');
+                $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
+                $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+
+                $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
+                $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+                $this->session->set('myentries/' . $medium_subset_medium . '/classification', $current_competition->Classification);
+                $this->session->save();
+                $redirect = get_permalink($post->ID);
+                wp_redirect($redirect);
+                exit();
             }
         }
         unset($query_competitions);
@@ -306,11 +343,11 @@ class Frontend
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $form = RpsForms::formUploadEntry($this->formFactory);
+            $entity = new EntityFormUploadEntry();
+            $form = $this->formFactory->create(new UploadEntryType(), $entity, array('attr' => array('id' => 'uploadentry')));
             $form->handleRequest($this->request);
-            $data = $form->getData();
 
-            $redirect_to = $data['wp_get_referer'];
+            $redirect_to = $entity->getWpGetReferer();
             // Just return if user clicked Cancel
             $this->isRequestCanceled($form, 'cancel', $redirect_to);
 

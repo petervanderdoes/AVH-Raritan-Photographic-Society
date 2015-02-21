@@ -5,7 +5,11 @@ use Avh\Html\FormBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
+use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
 use RpsCompetition\Forms\Forms as RpsForms;
+use RpsCompetition\Forms\Type\MyEntriesType;
+use RpsCompetition\Forms\Type\UploadEntryType;
 use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -726,17 +730,6 @@ final class ShortcodeController extends Controller
 
         $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
         $open_competitions = CommonHelper::arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
-
-        if (empty($open_competitions)) {
-            $this->settings->set('errmsg', 'There are no competitions available to enter');
-            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
-
-            return;
-        }
-
-        // Start the form
-        $action = home_url('/' . get_page_uri($post->ID));
-        $form_data['wp_nonce'] = wp_create_nonce('avh-rps-myentries');
         $previous_date = '';
         $open_competitions_options = array();
         foreach ($open_competitions as $open_competition) {
@@ -747,41 +740,13 @@ final class ShortcodeController extends Controller
             $open_competitions_options[$open_competition->Competition_Date] = strftime('%d-%b-%Y', strtotime($open_competition->Competition_Date)) . " " . $open_competition->Theme;
         }
 
-        $form_data = RpsForms::defaultDataMyEntries();
-        $form_data['select_competition']['options'] = $open_competitions_options;
-        $form_data['select_medium']['options'] = $competition_helper->getMedium($open_competitions);
 
-        if ($this->request->isMethod('POST')) {
-            $form = RpsForms::formMyEntries($this->formFactory, $action, $form_data);
-            $form->handleRequest($this->request);
-            $submitted_data = $form->getData();
-            switch ($submitted_data['submit_control']) {
-                case 'select_comp':
-                    $competition_date = $submitted_data['select_comp'];
-                    $medium = $submitted_data['medium'];
-                    break;
 
-                case 'select_medium':
-                    $competition_date = $submitted_data['comp_date'];
-                    $medium = $submitted_data['selected_medium'];
-                    break;
-                default:
-                    $competition_date = $submitted_data['comp_date'];
-                    $medium = $submitted_data['medium'];
-                    break;
-            }
-        } else {
-            $current_competition = reset($open_competitions);
-            $competition_date = $this->session->get('myentries/' . $medium_subset_medium . '/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-            $medium = $this->session->get('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
-        }
-
+        $current_competition = reset($open_competitions);
+        $competition_date = $this->session->get('myentries/' . $medium_subset_medium . '/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
+        $medium = $this->session->get('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
-        $form_data['competition_date'] = $current_competition->Competition_Date;
-        $form_data['medium'] = $current_competition->Medium;
-        $form_data['classification'] = $current_competition->Classification;
-        $form = RpsForms::formMyEntries($this->formFactory, $action, $form_data);
 
         $this->session->set('myentries/subset', $medium_subset_medium);
         $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
@@ -789,11 +754,20 @@ final class ShortcodeController extends Controller
         $this->session->set('myentries/' . $medium_subset_medium . '/classification', $current_competition->Classification);
         $this->session->save();
 
-        if ($this->settings->has('errmsg')) {
-            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
-        }
+        // Start the form
+        $action = home_url('/' . get_page_uri($post->ID));
+        $entity = new EntityFormMyEntries();
+        $entity->setWpnonce(wp_create_nonce('avh-rps-myentries'));
+        $entity->setSelectComp($open_competitions_options);
+        $entity->setSelectedMedium($competition_helper->getMedium($open_competitions));
+        $entity->setCompDate($current_competition->Competition_Date);
+        $entity->setMedium($current_competition->Medium);
+        $entity->setClassification($current_competition->Classification);
+        $form = $this->formFactory->create(new MyEntriesType($entity), $entity, array('action' => $action, 'attr' => array('id' => 'myentries')));
 
-        $data = $form_data;
+        $data['competition_date'] = $current_competition->Competition_Date;
+        $data['medium'] = $current_competition->Medium;
+        $data['classification'] = $current_competition->Classification;
         $data['select_medium']['selected'] = $current_competition->Medium;
         $data['select_competition']['selected'] = $current_competition->Competition_Date;
         switch ($current_competition->Medium) {
@@ -1023,19 +997,18 @@ final class ShortcodeController extends Controller
             echo '</div>';
         }
 
-        $data=[];
         $action = home_url('/' . get_page_uri($post->ID));
         $action .= '/?post=1';
         if ($this->request->has('m')) {
-            $data['medium_subset'] = "Digital";
+            $medium_subset = "Digital";
             if ($this->request->input('m') == "prints") {
-                $data['medium_subset'] = "Prints";
+                $medium_subset = "Prints";
             }
         }
         if ($this->request->has('wp_get_referer')) {
-            $data['ref'] = $this->request->input('wp_get_referer');
+            $ref = $this->request->input('wp_get_referer');
         } else {
-            $data['ref'] = wp_get_referer();
+            $ref = wp_get_referer();
         }
 
         if ($this->settings->has('formerror')) {
@@ -1043,7 +1016,10 @@ final class ShortcodeController extends Controller
             $error_obj = $this->settings->get('formerror');
             $form = $error_obj->getForm();
         } else {
-            $form = RpsForms::formUploadEntry($this->formFactory, $action, $data);
+            $entity = new EntityFormUploadEntry();
+            $entity->setWpGetReferer($ref);
+            $entity->setMediumSubset($medium_subset);
+            $form = $this->formFactory->create(new UploadEntryType(), $entity, array('action' => $action, 'attr' => array('id' => 'uploadentry')));
         }
         $this->view->display('upload.html.twig', array('form' => $form->createView()));
     }
