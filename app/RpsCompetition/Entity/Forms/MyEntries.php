@@ -2,6 +2,11 @@
 
 namespace RpsCompetition\Entity\Forms;
 
+/**
+ * Class MyEntries
+ *
+ * @package RpsCompetition\Entity\Forms
+ */
 class MyEntries
 {
     protected $_wpnonce;

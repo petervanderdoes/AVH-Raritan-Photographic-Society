@@ -13,6 +13,11 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class View
+ *
+ * @package RpsCompetition\Libs
+ */
 class View
 {
     /**
@@ -36,6 +41,12 @@ class View
      */
     private $loader;
 
+    /**
+     * Constructor
+     *
+     * @param string $template_dir
+     * @param string $cache_dir
+     */
     public function __construct($template_dir, $cache_dir)
     {
         $this->loader = new \Twig_Loader_Filesystem(array($template_dir));

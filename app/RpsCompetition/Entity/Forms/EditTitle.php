@@ -2,6 +2,11 @@
 
 namespace RpsCompetition\Entity\Forms;
 
+/**
+ * Class EditTitle
+ *
+ * @package RpsCompetition\Entity\Forms
+ */
 class EditTitle
 {
     protected $id;

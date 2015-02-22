@@ -8,6 +8,7 @@ use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
+use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;

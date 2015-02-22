@@ -313,7 +313,7 @@ class View
      *
      * @param QueryEntries $record
      * @param string       $thumb_size
-     * @param  array       $caption
+     * @param array        $caption
      *
      * @return array<string,string|array>
      */

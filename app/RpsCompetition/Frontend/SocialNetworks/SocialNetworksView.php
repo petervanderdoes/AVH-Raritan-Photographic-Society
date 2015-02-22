@@ -9,7 +9,18 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class SocialNetworksView
+ *
+ * @package RpsCompetition\Frontend\SocialNetworks
+ */
 final class SocialNetworksView extends View {
+    /**
+     * Constructor
+     *
+     * @param string $template_dir
+     * @param string $cache_dir
+     */
     public function __construct($template_dir, $cache_dir) {
         parent::__construct($template_dir, $cache_dir);
         $this->addTemplateDir($template_dir . '/social-networks');

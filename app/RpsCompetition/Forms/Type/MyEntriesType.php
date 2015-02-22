@@ -9,13 +9,25 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Class MyEntriesType
+ *
+ * @package RpsCompetition\Forms\Type
+ */
 class MyEntriesType extends AbstractType
 {
+    /**
+     * @param $entity
+     *
+     */
     public function __construct($entity)
     {
         $this->entity = $entity;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function buildform(FormBuilderInterface $builder, array $options)
     {
         $builder->add('submit_control', 'hidden')
@@ -68,15 +80,16 @@ class MyEntriesType extends AbstractType
     }
 
     /**
-     * Returns the name of this type.
-     *
-     * @return string The name of this type
+     * {@inheritDoc}
      */
     public function getName()
     {
         return 'form';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(

@@ -7,13 +7,24 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Class EditTitleType
+ *
+ * @package RpsCompetition\Forms\Type
+ */
 class EditTitleType extends AbstractType
 {
+    /**
+     * @param $entity
+     */
     public function __construct($entity)
     {
         $this->entity = $entity;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function buildform(FormBuilderInterface $builder, array $options)
     {
         $builder->add(
@@ -73,15 +84,16 @@ class EditTitleType extends AbstractType
     }
 
     /**
-     * Returns the name of this type.
-     *
-     * @return string The name of this type
+     * {@inheritDoc}
      */
     public function getName()
     {
         return 'form';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(

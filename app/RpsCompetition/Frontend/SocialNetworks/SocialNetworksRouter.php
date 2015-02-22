@@ -11,6 +11,11 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class SocialNetworksRouter
+ *
+ * @package RpsCompetition\Frontend\SocialNetworks
+ */
 final class SocialNetworksRouter
 
 {
@@ -23,6 +28,11 @@ final class SocialNetworksRouter
      */
     private $settings;
 
+    /**
+     * Constructor
+     * @param Settings                 $settings
+     * @param SocialNetworksController $controller
+     */
     public function __construct(Settings $settings, SocialNetworksController $controller)
     {
 
@@ -30,6 +40,13 @@ final class SocialNetworksRouter
         $this->controller = $controller;
     }
 
+    /**
+     * Initialize for Social Networks
+     *
+     * Add the action/filter/style/scripts
+     *
+     * @param array $data
+     */
     public function initializeSocialNetworks($data)
     {
         $rps_social_buttons_script = $data['script'];
