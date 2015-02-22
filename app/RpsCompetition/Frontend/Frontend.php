@@ -583,7 +583,7 @@ class Frontend
      * @param string $output The gallery output. Default empty.
      * @param array  $attr   Attributes of the gallery shortcode.
      *
-     * @return mixed|string|void
+     * @return string
      */
     public function filterPostGallery($output, $attr)
     {
