@@ -709,7 +709,7 @@ class Frontend
 
         $selector = "gallery-{$instance}";
 
-        $gallery_style = $gallery_div = '';
+        $gallery_style = '';
 
         $layout = strtolower($layout);
 
