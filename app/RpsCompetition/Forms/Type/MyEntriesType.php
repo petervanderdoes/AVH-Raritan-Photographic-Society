@@ -11,9 +11,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class MyEntriesType extends AbstractType
 {
-    private $competition_options;
-    private $medium_options;
-
     public function __construct($entity)
     {
         $this->entity = $entity;

@@ -9,9 +9,10 @@ use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
-use RpsCompetition\Forms\Forms as RpsForms;
+use RpsCompetition\Forms\Type\EditTitleType;
 use RpsCompetition\Forms\Type\MyEntriesType;
 use RpsCompetition\Forms\Type\UploadEntryType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
@@ -175,11 +176,13 @@ class Frontend
         $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
-            $form = RpsForms::formEditTitle($this->formFactory);
-            $form->handleRequest($this->request);
-            $data = $form->getData();
+            $entity = new EntityFormEditTitle();
 
-            $redirect_to = $data['wp_get_referer'];
+            $form = $this->formFactory->create(new EditTitleType($entity), $entity, array('attr' => array('id' => 'edittitle')));
+            $form->handleRequest($this->request);
+
+            $redirect_to = $entity->getWpGetReferer();
+
             // Just return if user clicked Cancel
             $this->isRequestCanceled($form, 'cancel', $redirect_to);
 
@@ -190,17 +193,17 @@ class Frontend
                 return;
             }
 
-            $server_file_name = $data['server_file_name'];
-            $new_title = $data['new_title'];
+            $server_file_name = $entity->getServerFileName();
+            $new_title = $entity->getNewTitle();
             if (get_magic_quotes_gpc()) {
-                $server_file_name = stripslashes($data['server_file_name']);
-                $new_title = stripslashes($data['new_title']);
+                $server_file_name = stripslashes($server_file_name);
+                $new_title = stripslashes($new_title);
             }
 
-            if ($data['new_title'] !== $data['title']) {
-                $competition = $query_competitions->getCompetitionByEntryId($data['id']);
+            if ($entity->getNewTitle() !== $entity->getTitle()) {
+                $competition = $query_competitions->getCompetitionByEntryId($entity->getId());
                 if ($competition == null) {
-                    wp_die("Failed to SELECT competition for entry ID: " . $data['id']);
+                    wp_die("Failed to SELECT competition for entry ID: " . $entity->getId());
                 }
 
                 // Rename the image file on the server file system
@@ -216,13 +219,13 @@ class Frontend
                 }
 
                 // Update the Title and File Name in the database
-                $updated_data = array('ID' => $data['id'], 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
+                $updated_data = array('ID' => $entity->getId(), 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
                 $result = $query_entries->updateEntry($updated_data);
                 if ($result === false) {
                     wp_die("Failed to UPDATE entry record from database");
                 }
             }
-            $redirect_to = $data['wp_get_referer'];
+            $redirect_to = $entity->getWpGetReferer();
             wp_redirect($redirect_to);
             exit();
         }

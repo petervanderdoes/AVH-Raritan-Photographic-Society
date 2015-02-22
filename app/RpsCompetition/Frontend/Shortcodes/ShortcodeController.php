@@ -5,9 +5,10 @@ use Avh\Html\FormBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
-use RpsCompetition\Forms\Forms as RpsForms;
+use RpsCompetition\Forms\Type\EditTitleType;
 use RpsCompetition\Forms\Type\MyEntriesType;
 use RpsCompetition\Forms\Type\UploadEntryType;
 use RpsCompetition\Libs\Controller;
@@ -575,11 +576,10 @@ final class ShortcodeController extends Controller
                                      ->getData()
             ;
         } else {
+            $entity = new EntityFormEditTitle();
             $medium_subset = "Digital";
-            $medium_param = "?m=digital";
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
-                $medium_param = "?m=prints";
             }
             $entry_id = $this->request->input('id');
 
@@ -587,14 +587,15 @@ final class ShortcodeController extends Controller
             $title = $recs->Title;
             $server_file_name = $recs->Server_File_Name;
 
-            $action = home_url('/' . get_page_uri($post->ID)) . $medium_param;
-            $form_data['entry_id'] = $entry_id;
-            $form_data['title'] = $title;
-            $form_data['server_file_name'] = $server_file_name;
-            $form_data['medium_subset'] = $medium_subset;
-            $form_data['ref'] = remove_query_arg(array('m', 'id'), wp_get_referer());
-            $form_data['$title'] = $title;
-            $form = RpsForms::formEditTitle($this->formFactory, $action, $form_data);
+            $action = add_query_arg(array('id' => $entry_id, 'm' => strtolower($medium_subset)), get_permalink($post->ID));
+            $entity->setId($entry_id);
+
+            $entity->setNewTitle($title);
+            $entity->setTitle($title);
+            $entity->setServerFileName($server_file_name);
+            $entity->setM($medium_subset);
+            $entity->setWpGetReferer(remove_query_arg(array('m', 'id'), wp_get_referer()));
+            $form = $this->formFactory->create(new EditTitleType($entity), $entity, array('action' => $action, 'attr' => array('id' => 'edittitle')));
         }
 
         $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
@@ -739,8 +740,6 @@ final class ShortcodeController extends Controller
             $previous_date = $open_competition->Competition_Date;
             $open_competitions_options[$open_competition->Competition_Date] = strftime('%d-%b-%Y', strtotime($open_competition->Competition_Date)) . " " . $open_competition->Theme;
         }
-
-
 
         $current_competition = reset($open_competitions);
         $competition_date = $this->session->get('myentries/' . $medium_subset_medium . '/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
