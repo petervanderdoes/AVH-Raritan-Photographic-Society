@@ -597,7 +597,7 @@ final class ShortcodeController extends Controller
             $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
             $form = $this->formFactory->create(new EditTitleType($entity), $entity, ['action' => $action, 'attr' => ['id' => 'edittitle']]);
         }
-
+        $data = [];
         $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
 
         $this->view->display('edit_title.html.twig', ['data' => $data, 'form' => $form->createView()]);
@@ -764,6 +764,7 @@ final class ShortcodeController extends Controller
         $entity->setClassification($current_competition->Classification);
         $form = $this->formFactory->create(new MyEntriesType($entity), $entity, ['action' => $action, 'attr' => ['id' => 'myentries']]);
 
+        $data = [];
         $data['competition_date'] = $current_competition->Competition_Date;
         $data['medium'] = $current_competition->Medium;
         $data['classification'] = $current_competition->Classification;
