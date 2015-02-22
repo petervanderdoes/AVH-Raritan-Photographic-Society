@@ -999,8 +999,8 @@ final class ShortcodeController extends Controller
 
         $action = home_url('/' . get_page_uri($post->ID));
         $action .= '/?post=1';
+        $medium_subset = "Digital";
         if ($this->request->has('m')) {
-            $medium_subset = "Digital";
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
             }
