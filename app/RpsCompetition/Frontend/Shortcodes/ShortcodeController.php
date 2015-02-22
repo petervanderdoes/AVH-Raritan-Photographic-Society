@@ -812,6 +812,7 @@ final class ShortcodeController extends Controller
             $competition = $query_competitions->getCompetitionById($recs->Competition_ID);
             $num_rows += 1;
 
+            $entry = [];
             $entry['id'] = $recs->ID;
             $entry['image']['url'] = home_url($recs->Server_File_Name);
             $entry['image']['title'] = $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium;
