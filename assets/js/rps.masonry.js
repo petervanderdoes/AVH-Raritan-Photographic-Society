@@ -12,9 +12,7 @@
             $container.masonryImagesReveal($items);
         }
     });
-
 }(window.jQuery, window, document));
-
 jQuery.fn.masonryImagesReveal = function ($items) {
     var msnry = this.data('masonry');
     var itemSelector = msnry.options.itemSelector;
@@ -32,6 +30,5 @@ jQuery.fn.masonryImagesReveal = function ($items) {
         // masonry does its thing
         msnry.appended($item);
     });
-
     return this;
 };

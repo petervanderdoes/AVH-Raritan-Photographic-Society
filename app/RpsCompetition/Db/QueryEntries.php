@@ -73,7 +73,8 @@ class QueryEntries
             $id,
             $user_id,
             $title
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
         if ($return > 0) {
             $return = true;
@@ -102,7 +103,8 @@ class QueryEntries
                     e.Member_ID = %s",
             $date,
             $user_id
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -124,7 +126,8 @@ class QueryEntries
                 AND Member_ID = %s",
             $id,
             $user_id
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -150,7 +153,8 @@ class QueryEntries
                 AND competitions.Competition_Date = %s ",
             $user_id,
             $competition_date
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -196,7 +200,8 @@ class QueryEntries
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql);
 
         return $return;
@@ -217,7 +222,8 @@ class QueryEntries
             FROM entries
             WHERE ID = %s",
             $id
-        );
+        )
+        ;
 
         return $this->rpsdb->get_row($sql, $output);
     }

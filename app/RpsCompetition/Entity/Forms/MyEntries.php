@@ -58,7 +58,7 @@ class MyEntries
     }
 
     /**
-     * @param array$medium
+     * @param array $medium
      */
     public function setMedium($medium)
     {

@@ -30,6 +30,7 @@ final class SocialNetworksRouter
 
     /**
      * Constructor
+     *
      * @param Settings                 $settings
      * @param SocialNetworksController $controller
      */

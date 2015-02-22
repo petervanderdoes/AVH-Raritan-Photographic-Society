@@ -505,11 +505,24 @@ final class Admin
                     $form_new_options = $this->request->input($formBuilder->getOptionName());
 
                     $validator = new Validator($form_new_options);
-                    $validator->rule('required', 'date')->message('{field} is required')->label('Date');
-                    $validator->rule('dateFormat', 'date', 'Y-m-d')->message('{field} should be in Y-m-d format')->label('Date');
-                    $validator->rule('required', 'theme')->message('{field} is required')->label('Theme');
-                    $validator->rule('required', 'medium')->message('No medium selected. At least one medium needs to be selected');
-                    $validator->rule('required', 'classification')->message('No classification selected. At least one classification needs to be selected');
+                    $validator->rule('required', 'date')
+                              ->message('{field} is required')
+                              ->label('Date')
+                    ;
+                    $validator->rule('dateFormat', 'date', 'Y-m-d')
+                              ->message('{field} should be in Y-m-d format')
+                              ->label('Date')
+                    ;
+                    $validator->rule('required', 'theme')
+                              ->message('{field} is required')
+                              ->label('Theme')
+                    ;
+                    $validator->rule('required', 'medium')
+                              ->message('No medium selected. At least one medium needs to be selected')
+                    ;
+                    $validator->rule('required', 'classification')
+                              ->message('No classification selected. At least one classification needs to be selected')
+                    ;
                     $validator->validate();
 
                     foreach ($form_default_options['medium'] as $key => $value) {

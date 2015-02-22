@@ -55,7 +55,6 @@ class View
         }
 
         $this->data = new DataHandler(new NamespacedAttributeBag('_view'));
-
     }
 
     /**

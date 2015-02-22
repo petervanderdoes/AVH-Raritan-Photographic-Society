@@ -282,10 +282,10 @@ class Helper
     {
         $path = $this->request->server('DOCUMENT_ROOT') . $path;
         // Rename the main image file
-        $status = rename($path . '/' . $old_name , $path . '/' . $new_name );
+        $status = rename($path . '/' . $old_name, $path . '/' . $new_name);
         if ($status) {
-            $parts=pathinfo($old_name);
-            $name=$parts['filename'];
+            $parts = pathinfo($old_name);
+            $name = $parts['filename'];
             // Rename any and all thumbnails of this file
             $this->removeThumbnails($path, $name);
         }
