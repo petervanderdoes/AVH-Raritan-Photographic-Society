@@ -74,23 +74,23 @@ class Frontend
         $this->formFactory = $container->make('formFactory');
 
         // The actions are in order as how WordPress executes them
-        add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
-        add_action('init', array($this, 'actionInit'), 11);
-        add_action('parse_query', array($requests, 'actionHandleRequests'));
+        add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
+        add_action('init', [$this, 'actionInit'], 11);
+        add_action('parse_query', [$requests, 'actionHandleRequests']);
 
         if ($this->request->isMethod('POST')) {
-            add_action('wp', array($this, 'actionHandleHttpPostRpsMyEntries'));
-            add_action('wp', array($this, 'actionHandleHttpPostRpsEditTitle'));
-            add_action('wp', array($this, 'actionHandleHttpPostRpsUploadEntry'));
-            add_action('wp', array($this, 'actionHandleHttpPostRpsBanquetEntries'));
+            add_action('wp', [$this, 'actionHandleHttpPostRpsMyEntries']);
+            add_action('wp', [$this, 'actionHandleHttpPostRpsEditTitle']);
+            add_action('wp', [$this, 'actionHandleHttpPostRpsUploadEntry']);
+            add_action('wp', [$this, 'actionHandleHttpPostRpsBanquetEntries']);
         }
-        add_action('template_redirect', array($this, 'actionTemplateRedirectRpsWindowsClient'));
-        add_action('wp_enqueue_scripts', array($this, 'actionEnqueueScripts'), 999);
+        add_action('template_redirect', [$this, 'actionTemplateRedirectRpsWindowsClient']);
+        add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
 
-        add_filter('query_vars', array($this, 'filterQueryVars'));
-        add_filter('post_gallery', array($this, 'filterPostGallery'), 10, 2);
-        add_filter('_get_page_link', array($this, 'filterPostLink'), 10, 2);
-        add_filter('the_title', array($this, 'filterTheTitle'), 10, 2);
+        add_filter('query_vars', [$this, 'filterQueryVars']);
+        add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 2);
+        add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
+        add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
     }
 
     /**
@@ -102,7 +102,7 @@ class Frontend
      */
     public function actionAfterThemeSetup()
     {
-        add_action('rps_showcase', array($this, 'actionShowcaseCompetitionThumbnails'));
+        add_action('rps_showcase', [$this, 'actionShowcaseCompetitionThumbnails']);
     }
 
     /**
@@ -117,7 +117,7 @@ class Frontend
 
         //todo Make as an option in the admin section.
         $options = get_option('avh-rps');
-        $all_masonry_pages = array();
+        $all_masonry_pages = [];
         $all_masonry_pages[$options['monthly_entries_post_id']] = true;
         if (array_key_exists($wp_query->get_queried_object_id(), $all_masonry_pages)) {
             wp_enqueue_script('rps-masonryInit');
@@ -179,7 +179,7 @@ class Frontend
         if (is_object($post) && $post->ID == 75) {
             $entity = new EntityFormEditTitle();
 
-            $form = $this->formFactory->create(new EditTitleType($entity), $entity, array('attr' => array('id' => 'edittitle')));
+            $form = $this->formFactory->create(new EditTitleType($entity), $entity, ['attr' => ['id' => 'edittitle']]);
             $form->handleRequest($this->request);
 
             $redirect_to = $entity->getWpGetReferer();
@@ -220,7 +220,7 @@ class Frontend
                 }
 
                 // Update the Title and File Name in the database
-                $updated_data = array('ID' => $entity->getId(), 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
+                $updated_data = ['ID' => $entity->getId(), 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql')];
                 $result = $query_entries->updateEntry($updated_data);
                 if ($result === false) {
                     wp_die("Failed to UPDATE entry record from database");
@@ -249,7 +249,7 @@ class Frontend
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
             $entity = new EntityFormMyEntries();
 
-            $form = $this->formFactory->create(new MyEntriesType($entity), $entity, array('attr' => array('id' => 'myentries')));
+            $form = $this->formFactory->create(new MyEntriesType($entity), $entity, ['attr' => ['id' => 'myentries']]);
             $form->handleRequest($this->request);
 
             $page = explode('-', $post->post_name);
@@ -266,7 +266,7 @@ class Frontend
                 switch ($entity->getSubmitControl()) {
                     case 'add':
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
-                            $query = array('m' => $medium_subset);
+                            $query = ['m' => $medium_subset];
                             $query = build_query($query);
                             $loc = '/member/upload-image/?' . $query;
                             wp_redirect($loc);
@@ -279,7 +279,7 @@ class Frontend
                             if (is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
-                                    $query = array('id' => $id, 'm' => $medium_subset);
+                                    $query = ['id' => $id, 'm' => $medium_subset];
                                     $query = build_query($query);
                                     $loc = '/member/edit-title/?' . $query;
                                     wp_redirect($loc);
@@ -348,7 +348,7 @@ class Frontend
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
             $entity = new EntityFormUploadEntry();
-            $form = $this->formFactory->create(new UploadEntryType(), $entity, array('attr' => array('id' => 'uploadentry')));
+            $form = $this->formFactory->create(new UploadEntryType(), $entity, ['attr' => ['id' => 'uploadentry']]);
             $form->handleRequest($this->request);
 
             $redirect_to = $entity->getWpGetReferer();
@@ -476,7 +476,7 @@ class Frontend
                 }
             }
             $server_file_name = $relative_server_path . '/' . $dest_name . '.jpg';
-            $data = array('Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name);
+            $data = ['Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name];
             $result = $query_entries->addEntry($data, get_current_user_id());
             if ($result === false) {
                 $this->settings->set('errmsg', "Failed to INSERT entry record into database");
@@ -486,7 +486,7 @@ class Frontend
             }
 
             $photo_helper->createCommonThumbnails($query_entries->getEntryById($this->rpsdb->insert_id));
-            $query = build_query(array('resized' => $resized));
+            $query = build_query(['resized' => $resized]);
             wp_redirect($redirect_to . '/?' . $query);
             exit();
         }
@@ -534,7 +534,7 @@ class Frontend
         if (is_front_page()) {
             $query_miscellaneous = $this->container->make('QueryMiscellaneous');
             $records = $query_miscellaneous->getEightsAndHigher(5);
-            $data = array();
+            $data = [];
             $data['records'] = $records;
             $data['thumb_size'] = '150';
             echo $this->view->renderShowcaseCompetitionThumbnails($data);
@@ -609,7 +609,7 @@ class Frontend
         }
 
         $short_code_atts = shortcode_atts(
-            array(
+            [
                 'order'      => 'ASC',
                 'orderby'    => 'menu_order ID',
                 'id'         => $post ? $post->ID : 0,
@@ -622,7 +622,7 @@ class Frontend
                 'exclude'    => '',
                 'link'       => '',
                 'layout'     => 'row-equal'
-            ),
+            ],
             $attr,
             'gallery'
         );
@@ -636,16 +636,16 @@ class Frontend
         }
 
         if (!empty($include)) {
-            $_attachments = get_posts(array('include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
+            $_attachments = get_posts(['include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby]);
 
-            $attachments = array();
+            $attachments = [];
             foreach ($_attachments as $key => $val) {
                 $attachments[$val->ID] = $_attachments[$key];
             }
         } elseif (!empty($exclude)) {
-            $attachments = get_children(array('post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
+            $attachments = get_children(['post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby]);
         } else {
-            $attachments = get_children(array('post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
+            $attachments = get_children(['post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby]);
         }
 
         if (empty($attachments)) {
@@ -660,7 +660,7 @@ class Frontend
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
 
         if (!$didFilterWpseoPreAnalysisPostsContent) {
-            $entries = array();
+            $entries = [];
             foreach ($attachments as $id => $attachment) {
                 $img_url = wp_get_attachment_url($id);
                 $home_url = home_url();
@@ -904,7 +904,7 @@ class Frontend
             }
         }
 
-        $entries = (array) $this->request->input('entry_id', array());
+        $entries = (array) $this->request->input('entry_id', []);
         foreach ($entries as $entry_id) {
             $entry = $query_entries->getEntryById($entry_id);
             $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
@@ -920,7 +920,7 @@ class Frontend
                     $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name, ENT_QUOTES, get_bloginfo('charset'));
                     // Need to create the destination folder?
                     copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
-                    $data = array('Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $new_file_name);
+                    $data = ['Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $new_file_name];
                     $query_entries->addEntry($data, get_current_user_id());
                 }
             }
@@ -968,12 +968,12 @@ class Frontend
 
         $javascript_directory = $this->settings->get('javascript_dir');
         wp_deregister_script('masonry');
-        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);
-        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), array('masonry'), 'to_remove', true);
-        wp_register_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), [], 'to_remove', 1);
+        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), ['masonry'], 'to_remove', true);
+        wp_register_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), ['rps-imagesloaded'], 'to_remove', true);
 
         wp_register_style('rps-competition.fontawesome.style', 'http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"');
-        wp_register_style('rps-competition.general.style', CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')), array('rps-competition.fontawesome.style'), 'to_remove');
+        wp_register_style('rps-competition.general.style', CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')), ['rps-competition.fontawesome.style'], 'to_remove');
     }
 
     /**
@@ -1003,7 +1003,7 @@ class Frontend
             $social_buttons_script_version = "";
             $version_separator = '';
         }
-        $data = array();
+        $data = [];
         $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
         $social_networks_controller->initializeSocialNetworks($data);
     }
@@ -1030,16 +1030,16 @@ class Frontend
     private function setupWpSeoActionsFilters()
     {
         $wpseo = $this->container->make('WpSeoHelper');
-        add_action('wpseo_register_extra_replacements', array($wpseo, 'actionWpseoRegisterExtraReplacements'));
-        add_action('wpseo_do_sitemap_competition-entries', array($wpseo, 'actionWpseoSitemapCompetitionEntries'));
-        add_action('wpseo_do_sitemap_competition-winners', array($wpseo, 'actionWpseoSitemapCompetitionWinners'));
+        add_action('wpseo_register_extra_replacements', [$wpseo, 'actionWpseoRegisterExtraReplacements']);
+        add_action('wpseo_do_sitemap_competition-entries', [$wpseo, 'actionWpseoSitemapCompetitionEntries']);
+        add_action('wpseo_do_sitemap_competition-winners', [$wpseo, 'actionWpseoSitemapCompetitionWinners']);
 
-        add_filter('wpseo_pre_analysis_post_content', array($wpseo, 'filterWpseoPreAnalysisPostsContent'), 10, 2);
-        add_filter('wpseo_opengraph_image', array($wpseo, 'filterWpseoOpengraphImage'), 10, 1);
-        add_filter('wpseo_metadesc', array($wpseo, 'filterWpseoMetaDescription'), 10, 1);
-        add_filter('wpseo_sitemap_index', array($wpseo, 'filterWpseoSitemapIndex'));
-        add_filter('wp_title_parts', array($wpseo, 'filterWpTitleParts'), 10, 1);
-        add_filter('wpseo_opengraph_title', array($wpseo, 'filterOpenGraphTitle'), 10, 1);
-        add_filter('wpseo_sitemap_entry', array($wpseo, 'filterSitemapEntry'), 10, 3);
+        add_filter('wpseo_pre_analysis_post_content', [$wpseo, 'filterWpseoPreAnalysisPostsContent'], 10, 2);
+        add_filter('wpseo_opengraph_image', [$wpseo, 'filterWpseoOpengraphImage'], 10, 1);
+        add_filter('wpseo_metadesc', [$wpseo, 'filterWpseoMetaDescription'], 10, 1);
+        add_filter('wpseo_sitemap_index', [$wpseo, 'filterWpseoSitemapIndex']);
+        add_filter('wp_title_parts', [$wpseo, 'filterWpTitleParts'], 10, 1);
+        add_filter('wpseo_opengraph_title', [$wpseo, 'filterOpenGraphTitle'], 10, 1);
+        add_filter('wpseo_sitemap_entry', [$wpseo, 'filterSitemapEntry'], 10, 3);
     }
 }

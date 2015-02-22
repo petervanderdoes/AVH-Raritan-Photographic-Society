@@ -48,7 +48,7 @@ class Helper
      */
     public function createCommonThumbnails($entry)
     {
-        $standard_size = array('75', '150w', '800', 'fb_thumb');
+        $standard_size = ['75', '150w', '800', 'fb_thumb'];
 
         foreach ($standard_size as $size) {
             $this->createThumbnail($entry->Server_File_Name, $size);
@@ -85,7 +85,7 @@ class Helper
      */
     public function dataPhotoCredit($title, $first_name, $last_name)
     {
-        $data = array();
+        $data = [];
         $data['title'] = $title;
         $data['credit'] = "$first_name $last_name";
 
@@ -220,7 +220,7 @@ class Helper
         }
         $data = getimagesize($thumb_dir . '/' . $thumb_name);
 
-        return array('width' => $data[0], 'height' => $data[1]);
+        return ['width' => $data[0], 'height' => $data[1]];
     }
 
     /**

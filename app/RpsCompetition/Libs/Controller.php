@@ -45,7 +45,7 @@ class Controller
      *
      * @return string Rendered output
      */
-    public function render($view, array $data = array())
+    public function render($view, array $data = [])
     {
         $template = $this->twig->loadTemplate($view);
 

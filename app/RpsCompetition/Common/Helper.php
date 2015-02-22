@@ -25,11 +25,11 @@ class Helper
     static public function arrayMsort($array, $cols)
     {
         $row_is_object = false;
-        $sort_column_array = array();
+        $sort_column_array = [];
 
         // Create multiple arrays using the array $cols. These arrays hold the values of each field that we want to sort on.
         foreach ($cols as $col => $order) {
-            $sort_column_array[$col] = array();
+            $sort_column_array[$col] = [];
             foreach ($array as $key => $row) {
                 if (is_object($row)) {
                     $row = (array) $row;
@@ -39,7 +39,7 @@ class Helper
             }
         }
 
-        $params = array();
+        $params = [];
         foreach ($cols as $col => $order) {
             $params[] = &$sort_column_array[$col];
             foreach ($order as $order_element) {
@@ -82,7 +82,7 @@ class Helper
     static public function getDynamicPages()
     {
         $options = get_option('avh-rps');
-        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        $pages_array = [$options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true];
 
         return $pages_array;
     }

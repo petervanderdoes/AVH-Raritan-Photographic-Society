@@ -28,46 +28,46 @@ class UploadEntryType extends AbstractType
         $builder->add(
             'title',
             'text',
-            array(
+            [
                 'label'       => 'Title (required)',
                 'constraints' => new Assert\Length(
-                    array(
+                    [
                         'min'        => 2,
                         'max'        => 128,
                         'minMessage' => 'The title must be at least {{ limit }} characters long',
                         'maxMessage' => 'The title can not be longer than {{ limit }} characters',
-                    )
+                    ]
                 ),
-                'attr'        => array(
+                'attr'        => [
                     'maxlength' => '128'
-                )
-            )
+                ]
+            ]
         )
                 ->add(
                     'file_name',
                     'file',
-                    array(
+                    [
                         'label'       => 'File Name (required)',
                         'constraints' => new Assert\Image(),
-                        'attr'        => array(
+                        'attr'        => [
                             'accept' => 'image/*'
-                        )
-                    )
+                        ]
+                    ]
                 )
                 ->add(
                     'submit',
                     'submit',
-                    array('label' => 'Submit')
+                    ['label' => 'Submit']
                 )
                 ->add(
                     'cancel',
                     'submit',
-                    array(
+                    [
                         'label' => 'Cancel',
-                        'attr'  => array(
+                        'attr'  => [
                             'formnovalidate' => 'formnovalidate'
-                        )
-                    )
+                        ]
+                    ]
                 )
                 ->add(
                     'medium_subset',
@@ -94,9 +94,9 @@ class UploadEntryType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(
-            array(
+            [
                 'data_class' => 'RpsCompetition\Entity\Forms\UploadEntry',
-            )
+            ]
         )
         ;
     }

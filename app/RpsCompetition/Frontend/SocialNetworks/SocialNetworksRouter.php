@@ -52,12 +52,12 @@ final class SocialNetworksRouter
     {
         $rps_social_buttons_script = $data['script'];
 
-        wp_register_script('rps-competition.social-buttons.script', CommonHelper::getPluginUrl($rps_social_buttons_script, $this->settings->get('javascript_dir')), array(), 'to_remove', true);
+        wp_register_script('rps-competition.social-buttons.script', CommonHelper::getPluginUrl($rps_social_buttons_script, $this->settings->get('javascript_dir')), [], 'to_remove', true);
         wp_enqueue_script('rps-competition.social-buttons.script');
 
-        add_action('wp_head', array($this->controller, 'actionWpHead'));
-        add_action('wp_footer', array($this->controller, 'actionWpFooter'), 999);
-        add_action('suffusion_before_page', array($this->controller, 'actionAddFbRoot'));
-        add_action('rps-social-buttons', array($this->controller, 'actionSocialButtons'));
+        add_action('wp_head', [$this->controller, 'actionWpHead']);
+        add_action('wp_footer', [$this->controller, 'actionWpFooter'], 999);
+        add_action('suffusion_before_page', [$this->controller, 'actionAddFbRoot']);
+        add_action('rps-social-buttons', [$this->controller, 'actionSocialButtons']);
     }
 }

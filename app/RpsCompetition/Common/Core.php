@@ -37,7 +37,7 @@ class Core
         $this->options = get_option('avh-rps');
 
         $this->handleInitializePlugin();
-        add_action('init', array($this, 'actionInit'), 10);
+        add_action('init', [$this, 'actionInit'], 10);
 
         return;
     }

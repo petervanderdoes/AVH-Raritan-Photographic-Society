@@ -51,8 +51,8 @@ final class ShortcodeController extends Controller
         $template = [];
         $template[] = $this->settings->get('template_dir');
         $template[] = $this->settings->get('template_dir') . '/social-networks';
-        $this->setTemplateEngine($this->container->make('Templating', array('template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/')));
-        $this->view = $this->container->make('ShortcodeView', array('template_dir' => $this->settings->get('template_dir'), 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/'));
+        $this->setTemplateEngine($this->container->make('Templating', ['template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']));
+        $this->view = $this->container->make('ShortcodeView', ['template_dir' => $this->settings->get('template_dir'), 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']);
 
         $this->html = $this->container->make('HtmlBuilder');
         $this->formBuilder = new FormBuilder($this->html);
@@ -79,7 +79,7 @@ final class ShortcodeController extends Controller
         $seasons = $season_helper->getSeasons();
         $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
 
-        $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
+        $award_map = ['1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H'];
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
 
@@ -88,9 +88,9 @@ final class ShortcodeController extends Controller
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
         $total_max_entries = 0;
-        $comp_dates = array();
-        $comp_max_entries = array();
-        $comp_num_judges = array();
+        $comp_dates = [];
+        $comp_max_entries = [];
+        $comp_num_judges = [];
         foreach ($competition_dates as $key => $recs) {
             $date_parts = explode(" ", $recs['Competition_Date']);
             list (, $comp_month, $comp_day) = explode("-", $date_parts[0]);
@@ -103,13 +103,13 @@ final class ShortcodeController extends Controller
         $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
         $club_competition_results = CommonHelper::arrayMsort(
             $club_competition_results_unsorted,
-            array(
-                'Medium'           => array(SORT_DESC),
-                'Class_Code'       => array(SORT_ASC),
-                'LastName'         => array(SORT_ASC),
-                'FirstName'        => array(SORT_ASC),
-                'Competition_Date' => array(SORT_ASC)
-            )
+            [
+                'Medium'           => [SORT_DESC],
+                'Class_Code'       => [SORT_ASC],
+                'LastName'         => [SORT_ASC],
+                'FirstName'        => [SORT_ASC],
+                'Competition_Date' => [SORT_ASC]
+            ]
         )
         ;
         // Bail out if no entries found
@@ -140,10 +140,10 @@ final class ShortcodeController extends Controller
             // Initialize the 2D array to hold the members scores for each month
             // Each row represents a competition month and each column holds the scores
             // of the submitted images for that month
-            $member_scores = array();
+            $member_scores = [];
             $comp_dates_keys = array_keys($comp_dates);
             foreach ($comp_dates_keys as $key) {
-                $member_scores[$key] = array();
+                $member_scores[$key] = [];
             }
             $total_score = 0;
             $num_scores = 0;
@@ -259,9 +259,9 @@ final class ShortcodeController extends Controller
 
                     // Reset the score array to be ready to start accumulating the scores for this
                     // new member we just started.
-                    $member_scores = array();
+                    $member_scores = [];
                     foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
-                        $member_scores[$comp_dates_key] = array();
+                        $member_scores[$comp_dates_key] = [];
                     }
                     $total_score = 0;
                     $num_scores = 0;
@@ -350,9 +350,9 @@ final class ShortcodeController extends Controller
         $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $season_start_date, $season_end_date);
         $banquet_id = $query_banquet->getBanquets($season_start_date, $season_end_date);
         $banquet_id_string = '0';
-        $banquet_id_array = array();
+        $banquet_id_array = [];
         $disabled = '';
-        $banquet_entries = array();
+        $banquet_entries = [];
         if (is_array($banquet_id) && !empty($banquet_id)) {
             foreach ($banquet_id as $record) {
                 $banquet_id_array[] = $record['ID'];
@@ -363,13 +363,13 @@ final class ShortcodeController extends Controller
 
             $banquet_id_string = implode(',', $banquet_id_array);
             $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
-            $banquet_entries = $query_entries->query(array('where' => $where));
+            $banquet_entries = $query_entries->query(['where' => $where]);
         }
 
         if (!is_array($banquet_entries)) {
-            $banquet_entries = array();
+            $banquet_entries = [];
         }
-        $all_entries = array();
+        $all_entries = [];
         foreach ($banquet_entries as $banquet_entry) {
             $all_entries[] = $banquet_entry->ID;
         }
@@ -491,7 +491,7 @@ final class ShortcodeController extends Controller
                 echo '<input type="submit" name="submit" value="Update">';
                 echo '<input type="submit" name="cancel" value="Cancel">';
             }
-            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
+            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(['m', 'id'], wp_get_referer()) . '" />';
             echo '<input type="hidden" name="allentries" value="', implode(',', $all_entries) . '" />';
             echo '<input type="hidden" name="banquetids" value="' . $banquet_id_string . '" />';
             echo '</form>';
@@ -587,20 +587,20 @@ final class ShortcodeController extends Controller
             $title = $recs->Title;
             $server_file_name = $recs->Server_File_Name;
 
-            $action = add_query_arg(array('id' => $entry_id, 'm' => strtolower($medium_subset)), get_permalink($post->ID));
+            $action = add_query_arg(['id' => $entry_id, 'm' => strtolower($medium_subset)], get_permalink($post->ID));
             $entity->setId($entry_id);
 
             $entity->setNewTitle($title);
             $entity->setTitle($title);
             $entity->setServerFileName($server_file_name);
             $entity->setM($medium_subset);
-            $entity->setWpGetReferer(remove_query_arg(array('m', 'id'), wp_get_referer()));
-            $form = $this->formFactory->create(new EditTitleType($entity), $entity, array('action' => $action, 'attr' => array('id' => 'edittitle')));
+            $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
+            $form = $this->formFactory->create(new EditTitleType($entity), $entity, ['action' => $action, 'attr' => ['id' => 'edittitle']]);
         }
 
         $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
 
-        $this->view->display('edit_title.html.twig', array('data' => $data, 'form' => $form->createView()));
+        $this->view->display('edit_title.html.twig', ['data' => $data, 'form' => $form->createView()]);
 
         unset($query_entries, $photo_helper);
     }
@@ -720,7 +720,7 @@ final class ShortcodeController extends Controller
     {
         global $post;
 
-        $attr = shortcode_atts(array('medium' => 'digital'), $attr);
+        $attr = shortcode_atts(['medium' => 'digital'], $attr);
 
         $query_entries = $this->container->make('QueryEntries');
         $query_competitions = $this->container->make('QueryCompetitions');
@@ -730,9 +730,9 @@ final class ShortcodeController extends Controller
         $medium_subset_medium = $attr['medium'];
 
         $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
-        $open_competitions = CommonHelper::arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
+        $open_competitions = CommonHelper::arrayMsort($open_competitions, ['Competition_Date' => [SORT_ASC], 'Medium' => [SORT_ASC]]);
         $previous_date = '';
-        $open_competitions_options = array();
+        $open_competitions_options = [];
         foreach ($open_competitions as $open_competition) {
             if ($previous_date == $open_competition->Competition_Date) {
                 continue;
@@ -762,7 +762,7 @@ final class ShortcodeController extends Controller
         $entity->setCompDate($current_competition->Competition_Date);
         $entity->setMedium($current_competition->Medium);
         $entity->setClassification($current_competition->Classification);
-        $form = $this->formFactory->create(new MyEntriesType($entity), $entity, array('action' => $action, 'attr' => array('id' => 'myentries')));
+        $form = $this->formFactory->create(new MyEntriesType($entity), $entity, ['action' => $action, 'attr' => ['id' => 'myentries']]);
 
         $data['competition_date'] = $current_competition->Competition_Date;
         $data['medium'] = $current_competition->Medium;
@@ -824,7 +824,7 @@ final class ShortcodeController extends Controller
             if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name)) {
                 $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
             } else {
-                $size = array(0, 0);
+                $size = [0, 0];
             }
             $entry['size']['x'] = $size[0];
             $entry['size']['y'] = $size[1];
@@ -833,15 +833,15 @@ final class ShortcodeController extends Controller
 
         // Don't show the Add button if the max number of images per member reached
         if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
-            $form->add('add', 'submit', array('label' => 'Add', 'attr' => array('onclick' => 'submit_form("add")')));
+            $form->add('add', 'submit', ['label' => 'Add', 'attr' => ['onclick' => 'submit_form("add")']]);
         }
         if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
-            $form->add('edit', 'submit', array('label' => 'Edit Title', 'attr' => array('onclick' => 'submit_form("edit")')));
+            $form->add('edit', 'submit', ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
         }
         if ($num_rows > 0) {
-            $form->add('delete', 'submit', array('label' => 'Remove', 'attr' => array('onclick' => 'return  confirmSubmit()')));
+            $form->add('delete', 'submit', ['label' => 'Remove', 'attr' => ['onclick' => 'return  confirmSubmit()']]);
         }
-        $this->view->display('add_entries.html.twig', array('data' => $data, 'form' => $form->createView()));
+        $this->view->display('add_entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
         unset($query_entries, $query_competitions, $competition_helper, $photo_helper);
     }
 
@@ -859,7 +859,7 @@ final class ShortcodeController extends Controller
      */
     public function shortcodePersonWinners($attr, $content, $tag)
     {
-        $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
+        $attr = shortcode_atts(['id' => 0, 'images' => 6], $attr);
 
         $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
 
@@ -1019,8 +1019,8 @@ final class ShortcodeController extends Controller
             $entity = new EntityFormUploadEntry();
             $entity->setWpGetReferer($ref);
             $entity->setMediumSubset($medium_subset);
-            $form = $this->formFactory->create(new UploadEntryType(), $entity, array('action' => $action, 'attr' => array('id' => 'uploadentry')));
+            $form = $this->formFactory->create(new UploadEntryType(), $entity, ['action' => $action, 'attr' => ['id' => 'uploadentry']]);
         }
-        $this->view->display('upload.html.twig', array('form' => $form->createView()));
+        $this->view->display('upload.html.twig', ['form' => $form->createView()]);
     }
 }

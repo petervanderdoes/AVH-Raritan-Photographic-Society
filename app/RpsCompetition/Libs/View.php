@@ -23,11 +23,11 @@ class View
     /**
      * @var array The options for the Twig environment, see http://www.twig-project.org/book/03-Twig-for-Developers
      */
-    public $environmentOptions = array();
+    public $environmentOptions = [];
     /**
      * @var array The Twig extensions you want to load
      */
-    public $parserExtensions = array();
+    public $parserExtensions = [];
     /**
      * @var DataHandler Data available to the templates
      */
@@ -49,7 +49,7 @@ class View
      */
     public function __construct($template_dir, $cache_dir)
     {
-        $this->loader = new \Twig_Loader_Filesystem(array($template_dir));
+        $this->loader = new \Twig_Loader_Filesystem([$template_dir]);
         if (WP_LOCAL_DEV !== true) {
             $this->environmentOptions['cache'] = $cache_dir;
         }
@@ -171,7 +171,7 @@ class View
                 $extension = is_object($ext) ? $ext : new $ext;
                 $this->environmentInstance->addExtension($extension);
             }
-            $formEngine = new TwigRendererEngine(array('avh_form_div_layout.html.twig'));
+            $formEngine = new TwigRendererEngine(['avh_form_div_layout.html.twig']);
             $formEngine->setEnvironment($this->environmentInstance);
             $this->environmentInstance->addExtension(new FormExtension(new TwigRenderer($formEngine)));
         }

@@ -20,13 +20,13 @@ final class General extends OptionsAbstract
      * @var  string  option name
      */
     public $option_name = 'avh-rps';
-    protected $defaults = array(
+    protected $defaults = [
         'season_start_month_num'  => 9,
         'season_end_month_num'    => 12,
         'monthly_entries_post_id' => 1005,
         'monthly_winners_post_id' => 61,
         'members_page'            => 54
-    );
+    ];
 
     /**
      * Constructor
@@ -37,8 +37,8 @@ final class General extends OptionsAbstract
         parent::__construct();
 
         /* Clear the cache on update/add */
-        add_action('add_option_' . $this->option_name, array('Avh\Utility\Common', 'clearCache'));
-        add_action('update_option_' . $this->option_name, array('Avh\Utility\Common', 'clearCache'));
+        add_action('add_option_' . $this->option_name, ['Avh\Utility\Common', 'clearCache']);
+        add_action('update_option_' . $this->option_name, ['Avh\Utility\Common', 'clearCache']);
     }
 
     /**

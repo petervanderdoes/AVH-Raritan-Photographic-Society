@@ -67,7 +67,7 @@ class WpseoHelper
      */
     public function actionWpseoRegisterExtraReplacements()
     {
-        wpseo_register_var_replacement('%%rpstitle%%', array($this, 'handleWpSeoTitleReplace'));
+        wpseo_register_var_replacement('%%rpstitle%%', [$this, 'handleWpSeoTitleReplace']);
     }
 
     /**
@@ -136,7 +136,7 @@ class WpseoHelper
             // Setup query for sticky posts.
             $sticky = get_option('sticky_posts');
             // Get the query for articles marked for Magazine Excerpts marked per post and in the selected categories.
-            $queries = rps_suffusion_get_mag_section_queries(array('meta_check_field' => 'suf_magazine_excerpt', 'category_prefix' => 'suf_mag_excerpt_categories', 'to_skip' => $sticky));
+            $queries = rps_suffusion_get_mag_section_queries(['meta_check_field' => 'suf_magazine_excerpt', 'category_prefix' => 'suf_mag_excerpt_categories', 'to_skip' => $sticky]);
             foreach ($queries as $query) {
                 $posts = get_posts($query->query);
                 foreach ($posts as $p) {
@@ -173,7 +173,7 @@ class WpseoHelper
             $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
 
-            $new_title_array = array();
+            $new_title_array = [];
             $new_title_array[] = $post->post_title . ' for the theme "' . $competition->Theme . '" on ' . $date_text;
             $title_array = $new_title_array;
         }
@@ -344,7 +344,7 @@ class WpseoHelper
         global $post;
 
         $replacement = null;
-        $title_array = array();
+        $title_array = [];
 
         if (is_string($post->post_title) && $post->post_title !== '') {
             $replacement = stripslashes($post->post_title);
@@ -379,19 +379,19 @@ class WpseoHelper
         $end_date = $date->format('Y-m-d');
         $scored_competitions = $this->query_competitions->getScoredCompetitions($start_date, $end_date);
 
-        $sitemap_data = array();
+        $sitemap_data = [];
         /** @var QueryCompetitions $competition */
         foreach ($scored_competitions as $competition) {
             $competition_date = new \DateTime($competition->Competition_Date);
             $key = $competition_date->format('U');
             $date = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
 
-            $sitemap_data[$key] = array(
+            $sitemap_data[$key] = [
                 'loc' => $url . $competition_date->format('Y-m-d') . '/',
                 'pri' => 0.8,
                 'chf' => 'yearly',
                 'mod' => $date->format('c'),
-            );
+            ];
 
             if ($include_images) {
                 $entries = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
@@ -429,7 +429,7 @@ class WpseoHelper
             $output .= "\t\t<changefreq>" . $data['chf'] . "</changefreq>\n";
             $output .= "\t\t<priority>" . $data['pri'] . "</priority>\n";
 
-            if (isset($data['images']) && (is_array($data['images']) && $data['images'] !== array())) {
+            if (isset($data['images']) && (is_array($data['images']) && $data['images'] !== [])) {
                 foreach ($data['images'] as $img) {
                     if (!isset($img['loc']) || empty($img['loc'])) {
                         continue;

@@ -106,7 +106,7 @@ class QueryMiscellaneous
         ;
 
         $records = $this->rpsdb->get_results($sql, ARRAY_A);
-        $return = array();
+        $return = [];
         foreach ($records as $rec) {
             $user_info = get_userdata($rec['Member_ID']);
             $rec['FirstName'] = $user_info->user_firstname;
@@ -268,7 +268,7 @@ class QueryMiscellaneous
         ;
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
-        $seasons = array();
+        $seasons = [];
         foreach ($result as $key => $value) {
             $seasons[$key] = $value['Season'];
         }
@@ -302,7 +302,7 @@ class QueryMiscellaneous
         ;
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
-        $seasons = array();
+        $seasons = [];
         foreach ($result as $key => $value) {
             $seasons[$key] = $value['Season'];
         }

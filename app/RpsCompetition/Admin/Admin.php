@@ -31,7 +31,7 @@ final class Admin
     private $container;
     private $core;
     private $entries_list;
-    private $hooks = array();
+    private $hooks = [];
     private $message = '';
     private $referer;
     /** @var Request */
@@ -60,13 +60,13 @@ final class Admin
         $this->core = new Core($this->settings);
 
         // Admin menu
-        add_action('admin_menu', array($this, 'actionAdminMenu'));
-        add_action('admin_init', array($this, 'handleActionInit'));
+        add_action('admin_menu', [$this, 'actionAdminMenu']);
+        add_action('admin_init', [$this, 'handleActionInit']);
 
-        add_action('wp_ajax_setscore', array($this, 'handleAjax'));
-        add_filter('user_row_actions', array($this, 'filterRpsUserActionLinks'), 10, 2);
+        add_action('wp_ajax_setscore', [$this, 'handleAjax']);
+        add_filter('user_row_actions', [$this, 'filterRpsUserActionLinks'], 10, 2);
 
-        add_action('user_register', array($this, 'actionAddUserMeta'));
+        add_action('user_register', [$this, 'actionAddUserMeta']);
     }
 
     /**
@@ -92,11 +92,11 @@ final class Admin
      */
     public function actionAdminMenu()
     {
-        wp_register_style('avhrps-admin-css', CommonHelper::getPluginUrl('avh-rps.admin.css', $this->settings->get('css_dir')), array('wp-admin'), Constants::PLUGIN_VERSION, 'screen');
-        wp_register_style('avhrps-jquery-css', CommonHelper::getPluginUrl('smoothness/jquery-ui-1.8.22.custom.css', $this->settings->get('css_dir')), array('wp-admin'), '1.8.22', 'screen');
-        wp_register_script('avhrps-comp-ajax', CommonHelper::getPluginUrl('avh-rps.admin.ajax.js', $this->settings->get('javascript_dir')), array('jquery'), false, true);
+        wp_register_style('avhrps-admin-css', CommonHelper::getPluginUrl('avh-rps.admin.css', $this->settings->get('css_dir')), ['wp-admin'], Constants::PLUGIN_VERSION, 'screen');
+        wp_register_style('avhrps-jquery-css', CommonHelper::getPluginUrl('smoothness/jquery-ui-1.8.22.custom.css', $this->settings->get('css_dir')), ['wp-admin'], '1.8.22', 'screen');
+        wp_register_script('avhrps-comp-ajax', CommonHelper::getPluginUrl('avh-rps.admin.ajax.js', $this->settings->get('javascript_dir')), ['jquery'], false, true);
 
-        add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, array($this, 'menuCompetition'), '', Constants::MENU_POSITION_COMPETITION);
+        add_menu_page('All Competitions', 'Competitions', 'rps_edit_competitions', Constants::MENU_SLUG_COMPETITION, [$this, 'menuCompetition'], '', Constants::MENU_POSITION_COMPETITION);
 
         $this->hooks['avhrps_menu_competition'] = add_submenu_page(
             Constants::MENU_SLUG_COMPETITION,
@@ -104,10 +104,10 @@ final class Admin
             'All Competitions',
             'rps_edit_competitions',
             Constants::MENU_SLUG_COMPETITION,
-            array(
+            [
                 $this,
                 'menuCompetition'
-            )
+            ]
         );
         $this->hooks['avhrps_menu_competition_add'] = add_submenu_page(
             Constants::MENU_SLUG_COMPETITION,
@@ -115,18 +115,18 @@ final class Admin
             'Add Competition',
             'rps_edit_competitions',
             Constants::MENU_SLUG_COMPETITION_ADD,
-            array(
+            [
                 $this,
                 'menuCompetitionAdd'
-            )
+            ]
         );
 
-        add_action('load-' . $this->hooks['avhrps_menu_competition'], array($this, 'actionLoadPagehookCompetition'));
-        add_action('load-' . $this->hooks['avhrps_menu_competition_add'], array($this, 'actionLoadPagehookCompetitionAdd'));
+        add_action('load-' . $this->hooks['avhrps_menu_competition'], [$this, 'actionLoadPagehookCompetition']);
+        add_action('load-' . $this->hooks['avhrps_menu_competition_add'], [$this, 'actionLoadPagehookCompetitionAdd']);
 
-        add_menu_page('All Entries', 'Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, array($this, 'menuEntries'), '', Constants::MENU_POSITION_ENTRIES);
-        $this->hooks['avhrps_menu_entries'] = add_submenu_page(Constants::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, array($this, 'menuEntries'));
-        add_action('load-' . $this->hooks['avhrps_menu_entries'], array($this, 'actionLoadPagehookEntries'));
+        add_menu_page('All Entries', 'Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, [$this, 'menuEntries'], '', Constants::MENU_POSITION_ENTRIES);
+        $this->hooks['avhrps_menu_entries'] = add_submenu_page(Constants::MENU_SLUG_ENTRIES, 'All Entries', 'All Entries', 'rps_edit_entries', Constants::MENU_SLUG_ENTRIES, [$this, 'menuEntries']);
+        add_action('load-' . $this->hooks['avhrps_menu_entries'], [$this, 'actionLoadPagehookEntries']);
     }
 
     /**
@@ -136,10 +136,10 @@ final class Admin
      */
     public function actionInitUserFields()
     {
-        add_action('edit_user_profile', array($this, 'actionUserProfile'));
-        add_action('show_user_profile', array($this, 'actionUserProfile'));
-        add_action('personal_options_update', array($this, 'actionProfileUpdateSave'));
-        add_action('edit_user_profile_update', array($this, 'actionProfileUpdateSave'));
+        add_action('edit_user_profile', [$this, 'actionUserProfile']);
+        add_action('show_user_profile', [$this, 'actionUserProfile']);
+        add_action('personal_options_update', [$this, 'actionProfileUpdateSave']);
+        add_action('edit_user_profile_update', [$this, 'actionProfileUpdateSave']);
     }
 
     /**
@@ -153,7 +153,7 @@ final class Admin
 
         $this->handleRequestCompetition();
 
-        add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
+        add_filter('screen_layout_columns', [$this, 'filterScreenLayoutColumns'], 10, 2);
         // WordPress core Styles and Scripts
         wp_enqueue_script('common');
         wp_enqueue_script('wp-lists');
@@ -177,7 +177,7 @@ final class Admin
     {
         $this->competition_list = new CompetitionListTable($this->settings, $this->rpsdb, $this->request);
 
-        add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
+        add_filter('screen_layout_columns', [$this, 'filterScreenLayoutColumns'], 10, 2);
         // WordPress core Styles and Scripts
         wp_enqueue_script('common');
         wp_enqueue_script('jquery-ui-datepicker');
@@ -198,7 +198,7 @@ final class Admin
         $this->entries_list = $this->competition_list = new EntriesListTable($this->settings, $this->rpsdb, $this->request);
         $this->handleRequestEntries();
 
-        add_filter('screen_layout_columns', array($this, 'filterScreenLayoutColumns'), 10, 2);
+        add_filter('screen_layout_columns', [$this, 'filterScreenLayoutColumns'], 10, 2);
         // WordPress core Styles and Scripts
         wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('common');
@@ -246,19 +246,19 @@ final class Admin
     {
         $userID = $user->ID;
 
-        $classification = array('beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon');
+        $classification = ['beginner' => 'Beginner', 'advanced' => 'Advanced', 'salon' => 'Salon'];
 
         $formBuilder = new FormBuilder(new HtmlBuilder());
 
         echo '<h3 id="rps">Competition Classification</h3>';
         echo $formBuilder->openTable();
 
-        $all_classifications = array(
-            array('label' => 'Classification Digital B&W', 'name' => 'rps_class_bw', 'selected' => get_user_meta($userID, 'rps_class_bw', true)),
-            array('label' => 'Classification Digital Color', 'name' => 'rps_class_color', 'selected' => get_user_meta($userID, 'rps_class_color', true)),
-            array('label' => 'Classification Print B&W', 'name' => 'rps_class_print_bw', 'selected' => get_user_meta($userID, 'rps_class_print_bw', true)),
-            array('label' => 'Classification Print Color', 'name' => 'rps_class_print_color', 'selected' => get_user_meta($userID, 'rps_class_print_color', true)),
-        );
+        $all_classifications = [
+            ['label' => 'Classification Digital B&W', 'name' => 'rps_class_bw', 'selected' => get_user_meta($userID, 'rps_class_bw', true)],
+            ['label' => 'Classification Digital Color', 'name' => 'rps_class_color', 'selected' => get_user_meta($userID, 'rps_class_color', true)],
+            ['label' => 'Classification Print B&W', 'name' => 'rps_class_print_bw', 'selected' => get_user_meta($userID, 'rps_class_print_bw', true)],
+            ['label' => 'Classification Print Color', 'name' => 'rps_class_print_color', 'selected' => get_user_meta($userID, 'rps_class_print_color', true)],
+        ];
 
         foreach ($all_classifications as $data) {
 
@@ -396,20 +396,20 @@ final class Admin
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         if ($this->request->has('scored')) {
-            $data = array();
+            $data = [];
             $response = '';
             $result = null;
             if ($this->request->input('scored') == 'Yes') {
                 $data['ID'] = (int) $this->request->input('id');
                 $data['Scored'] = 'N';
                 $result = $query_competitions->insertCompetition($data);
-                $response = json_encode(array('text' => 'N', 'scored' => 'No', 'scoredtext' => 'Yes'));
+                $response = json_encode(['text' => 'N', 'scored' => 'No', 'scoredtext' => 'Yes']);
             }
             if ($this->request->input('scored') == 'No') {
                 $data['ID'] = (int) $this->request->input('id');
                 $data['Scored'] = 'Y';
                 $result = $query_competitions->insertCompetition($data);
-                $response = json_encode(array('text' => 'Y', 'scored' => 'Yes', 'scoredtext' => 'No'));
+                $response = json_encode(['text' => 'Y', 'scored' => 'Yes', 'scoredtext' => 'No']);
             }
             if (is_wp_error($result)) {
                 echo 'Error updating competition';
@@ -479,26 +479,26 @@ final class Admin
         $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition_add');
 
-        $data = array();
+        $data = [];
 
-        $form_default_options = array(
+        $form_default_options = [
             'date'           => '',
             'theme'          => '',
-            'medium'         => array(
+            'medium'         => [
                 'medium_bwd' => true,
                 'medium_cd'  => true,
                 'medium_bwp' => true,
                 'medium_cp'  => true
-            ),
-            'classification' => array(
+            ],
+            'classification' => [
                 'class_b' => true,
                 'class_a' => true,
                 'class_s' => true
-            ),
+            ],
             'max-entries'    => '2',
             'judges'         => '1',
             'special_event'  => false
-        );
+        ];
 
         $form_options = $form_default_options;
         if ($this->request->has('action')) {
@@ -652,68 +652,68 @@ final class Admin
     {
         $this->displayAdminHeader('Add Competition');
 
-        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, array('method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')));
+        echo $formBuilder->open(admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD, ['method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')]);
         echo $formBuilder->openTable();
         echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
         echo $formBuilder->outputField($formBuilder->text('date', $form_options['date']));
         echo $formBuilder->outputLabel($formBuilder->label('theme', 'Theme'));
-        echo $formBuilder->outputField($formBuilder->text('theme', $form_options['theme'], array('maxlength' => '32')));
+        echo $formBuilder->outputField($formBuilder->text('theme', $form_options['theme'], ['maxlength' => '32']));
 
-        $array_medium = array(
-            'medium_bwd' => array(
+        $array_medium = [
+            'medium_bwd' => [
                 'text'    => 'B&W Digital',
                 'value'   => $form_options['medium']['medium_bwd'],
                 'checked' => $form_options['medium']['medium_bwd']
-            ),
-            'medium_cd'  => array(
+            ],
+            'medium_cd'  => [
                 'text'    => 'Color Digital',
                 'value'   => $form_options['medium']['medium_cd'],
                 'checked' => $form_options['medium']['medium_cd']
-            ),
-            'medium_bwp' => array(
+            ],
+            'medium_bwp' => [
                 'text'    => 'B&W Print',
                 'value'   => $form_options['medium']['medium_bwp'],
                 'checked' => $form_options['medium']['medium_bwp']
-            ),
-            'medium_cp'  => array(
+            ],
+            'medium_cp'  => [
                 'text'    => 'Color Print',
                 'value'   => $form_options['medium']['medium_cp'],
                 'checked' => $form_options['medium']['medium_cp']
-            )
-        );
+            ]
+        ];
 
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->checkboxes('medium', $array_medium);
         unset($array_medium);
 
-        $array_classification = array(
-            'class_b' => array(
+        $array_classification = [
+            'class_b' => [
                 'text'    => 'Beginner',
                 'value'   => $form_options['classification']['class_b'],
                 'checked' => $form_options['classification']['class_b']
-            ),
-            'class_a' => array(
+            ],
+            'class_a' => [
                 'text'    => 'Advanced',
                 'value'   => $form_options['classification']['class_a'],
                 'checked' => $form_options['classification']['class_a']
-            ),
-            'class_s' => array(
+            ],
+            'class_s' => [
                 'text'    => 'Salon',
                 'value'   => $form_options['classification']['class_s'],
                 'checked' => $form_options['classification']['class_s']
-            )
-        );
+            ]
+        ];
 
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
         echo $formBuilder->checkboxes('classification', $array_classification);
         unset($array_classification);
 
-        $array_max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
+        $array_max_entries = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10'];
         echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
         echo $formBuilder->outputField($formBuilder->select('max-entries', $array_max_entries, $form_options['max-entries']));
         unset($array_max_entries);
 
-        $array_judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
+        $array_judges = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
         echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
         echo $formBuilder->outputField($formBuilder->select('judges', $array_judges, $form_options['judges']));
         unset($array_judges);
@@ -722,7 +722,7 @@ final class Admin
         echo $formBuilder->outputField($formBuilder->checkbox('special_event', $form_options['special_event'], $form_options['special_event']));
 
         echo $formBuilder->closeTable();
-        echo $formBuilder->submit('submit', 'Add Competition', array('class' => 'button-primary'));
+        echo $formBuilder->submit('submit', 'Add Competition', ['class' => 'button-primary']);
         echo $formBuilder->hidden('action', 'add');
         echo $formBuilder->fieldNonce(get_current_user_id());
         echo $formBuilder->close();
@@ -749,7 +749,7 @@ final class Admin
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         if (!$this->request->has('competitions')) {
-            $competitionIdsArray = array(intval($this->request->input('competition')));
+            $competitionIdsArray = [intval($this->request->input('competition'))];
         } else {
             $competitionIdsArray = (array) $this->request->input('competitions');
         }
@@ -757,7 +757,7 @@ final class Admin
         $formBuilder = new FormBuilder(new HtmlBuilder());
 
         $this->displayAdminHeader('Delete Competitions');
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
+        echo $formBuilder->open('', ['method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')]);
         wp_nonce_field('delete-competitions');
         echo $this->referer;
 
@@ -767,9 +767,9 @@ final class Admin
         foreach ($competitionIdsArray as $competitionID) {
 
             $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competitionID);
-            $entries = $query_entries->query(array('where' => $sqlWhere, 'count' => true));
+            $entries = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $query_competitions->query(array('where' => $sqlWhere));
+            $competition = $query_competitions->query(['where' => $sqlWhere]);
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
             if ($entries !== "0") {
@@ -796,7 +796,7 @@ final class Admin
         }
         if ($goDelete) {
             echo $formBuilder->hidden('action', 'dodelete');
-            echo $formBuilder->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
+            echo $formBuilder->submit('delete', 'Confirm Deletion', ['class' => 'button-secondary delete']);
         } else {
             echo '<p>There are no valid competitions to delete</p>';
         }
@@ -820,13 +820,13 @@ final class Admin
         $formBuilder->setOptionName('competition-edit');
 
         $updated = false;
-        $formOptions = array();
+        $formOptions = [];
         if ($this->request->has('update')) {
             $updated = $this->updateCompetition();
         }
 
         $wp_http_referer = $this->request->input('wp_http_referer', '');
-        $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
+        $wp_http_referer = remove_query_arg(['update'], stripslashes($wp_http_referer));
 
         $competition = $query_competitions->getCompetitionById($this->request->input('competition'));
 
@@ -849,17 +849,17 @@ final class Admin
             echo '</div>';
         }
 
-        $queryEdit = array('page' => Constants::MENU_SLUG_COMPETITION);
-        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-competitionedit', 'accept-charset' => get_bloginfo('charset')));
+        $queryEdit = ['page' => Constants::MENU_SLUG_COMPETITION];
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), ['method' => 'post', 'id' => 'rps-competitionedit', 'accept-charset' => get_bloginfo('charset')]);
         echo $formBuilder->openTable();
         echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
         echo $formBuilder->outputField($formBuilder->text('date', $formOptions['date']));
         echo $formBuilder->outputLabel($formBuilder->label('theme', 'Theme'));
-        echo $formBuilder->outputField($formBuilder->text('theme', $competition->Theme, array('maxlength' => '32')));
+        echo $formBuilder->outputField($formBuilder->text('theme', $competition->Theme, ['maxlength' => '32']));
         echo $formBuilder->outputLabel($formBuilder->label('close-date', 'Closing Date'));
         echo $formBuilder->outputField($formBuilder->text('close-date', $formOptions['close-date']));
 
-        $time = array();
+        $time = [];
         for ($hour = 0; $hour <= 23; $hour++) {
             $time_val = sprintf("%02d:00:00", $hour);
             $time_text = date("g:i a", strtotime($time_val));
@@ -873,21 +873,21 @@ final class Admin
 
         $selectedMedium = array_search($competition->Medium, $medium_array);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
-        echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, ['autocomplete' => 'off']));
 
         $classification_array = Constants::getClassifications();
 
         $selectedClassification = array_search($competition->Classification, $classification_array);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
-        echo $formBuilder->outputField($formBuilder->select('classification', $classification_array, $selectedClassification, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('classification', $classification_array, $selectedClassification, ['autocomplete' => 'off']));
 
-        $max_entries = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10');
+        $max_entries = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '6' => '6', '7' => '7', '8' => '8', '9' => '9', '10' => '10'];
         echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
-        echo $formBuilder->outputField($formBuilder->select('max-entries', $max_entries, $competition->Max_Entries, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('max-entries', $max_entries, $competition->Max_Entries, ['autocomplete' => 'off']));
 
-        $judges = array('1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5');
+        $judges = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
         echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
-        echo $formBuilder->outputField($formBuilder->select('judges', $judges, $competition->Num_Judges, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('judges', $judges, $competition->Num_Judges, ['autocomplete' => 'off']));
 
         echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
         echo $formBuilder->outputField($formBuilder->checkbox('special_event', ($competition->Special_Event == 'Y' ? true : false), ($competition->Special_Event == 'Y' ? true : false)));
@@ -899,7 +899,7 @@ final class Admin
         echo $formBuilder->outputField($formBuilder->checkbox('scored', ($competition->Scored == 'Y' ? true : false), ($competition->Scored == 'Y' ? true : false)));
 
         echo $formBuilder->closeTable();
-        echo $formBuilder->submit('submit', 'Update Competition', array('class' => 'button-primary'));
+        echo $formBuilder->submit('submit', 'Update Competition', ['class' => 'button-primary']);
         if (!empty($wp_http_referer)) {
             echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
         }
@@ -926,7 +926,7 @@ final class Admin
      */
     private function displayPageCompetitionList()
     {
-        $messages = array();
+        $messages = [];
         if ($this->request->has('update')) {
             switch ($this->request->input('update')) {
                 case 'del':
@@ -962,7 +962,7 @@ final class Admin
 
         $this->competition_list->views();
         $formBuilder = new FormBuilder(new HtmlBuilder());
-        echo $formBuilder->open(null, array('id' => 'rps-competition-form', 'method' => 'get'));
+        echo $formBuilder->open(null, ['id' => 'rps-competition-form', 'method' => 'get']);
         echo $formBuilder->hidden('page', Constants::MENU_SLUG_COMPETITION);
         echo $formBuilder->hidden('_total', $this->competition_list->get_pagination_arg('total_items'));
         echo $formBuilder->hidden('_per_page', $this->competition_list->get_pagination_arg('per_page'));
@@ -1006,7 +1006,7 @@ final class Admin
         }
 
         if (!$this->request->has('competitions')) {
-            $competitionIdsArray = array(intval($this->request->input('competition')));
+            $competitionIdsArray = [intval($this->request->input('competition'))];
         } else {
             $competitionIdsArray = (array) $this->request->input('competitions');
         }
@@ -1014,7 +1014,7 @@ final class Admin
         $formBuilder = new FormBuilder(new HtmlBuilder());
 
         $this->displayAdminHeader($title);
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')));
+        echo $formBuilder->open('', ['method' => 'post', 'id' => 'updatecompetitions', 'name' => 'updatecompetitions', 'accept-charset' => get_bloginfo('charset')]);
         wp_nonce_field($action . '-competitions');
         echo $this->referer;
 
@@ -1022,7 +1022,7 @@ final class Admin
 
         foreach ($competitionIdsArray as $competitionID) {
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
-            $competition = $query_competitions->query(array('where' => $sqlWhere));
+            $competition = $query_competitions->query(['where' => $sqlWhere]);
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
             echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr($competitionID) . "\" />" . sprintf(
@@ -1036,7 +1036,7 @@ final class Admin
         }
 
         echo $formBuilder->hidden('action', 'do' . $action);
-        echo $formBuilder->submit('openclose', 'Confirm', array('class' => 'button-secondary'));
+        echo $formBuilder->submit('openclose', 'Confirm', ['class' => 'button-secondary']);
 
         echo $formBuilder->close();
         $this->displayAdminFooter();
@@ -1054,13 +1054,13 @@ final class Admin
         $formBuilder = new FormBuilder(new HtmlBuilder());
 
         if (!$this->request->has('entries')) {
-            $entryIdsArray = array(intval($this->request->input('entry')));
+            $entryIdsArray = [intval($this->request->input('entry'))];
         } else {
             $entryIdsArray = (array) $this->request->input('entries');
         }
 
         $this->displayAdminHeader('Delete Entries');
-        echo $formBuilder->open('', array('method' => 'post', 'id' => 'updateentries', 'name' => 'updateentries', 'accept-charset' => get_bloginfo('charset')));
+        echo $formBuilder->open('', ['method' => 'post', 'id' => 'updateentries', 'name' => 'updateentries', 'accept-charset' => get_bloginfo('charset')]);
 
         echo '<p>' . _n('You have specified this entry for deletion:', 'You have specified these entries for deletion:', count($entryIdsArray)) . '</p>';
 
@@ -1088,7 +1088,7 @@ final class Admin
         }
         if ($goDelete) {
             echo $formBuilder->hidden('action', 'dodelete');
-            echo $formBuilder->submit('delete', 'Confirm Deletion', array('class' => 'button-secondary delete'));
+            echo $formBuilder->submit('delete', 'Confirm Deletion', ['class' => 'button-secondary delete']);
         } else {
             echo '<p>There are no valid entries to delete</p>';
         }
@@ -1127,7 +1127,7 @@ final class Admin
         }
 
         $wp_http_referer = $this->request->input('wp_http_referer', '');
-        $wp_http_referer = remove_query_arg(array('update'), stripslashes($wp_http_referer));
+        $wp_http_referer = remove_query_arg(['update'], stripslashes($wp_http_referer));
         $entry = $query_entries->getEntryById($this->request->input('entry'));
         $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
 
@@ -1146,8 +1146,8 @@ final class Admin
             echo '</div>';
         }
 
-        $queryEdit = array('page' => Constants::MENU_SLUG_ENTRIES);
-        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), array('method' => 'post', 'id' => 'rps-entryedit', 'accept-charset' => get_bloginfo('charset')));
+        $queryEdit = ['page' => Constants::MENU_SLUG_ENTRIES];
+        echo $formBuilder->open(admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'), ['method' => 'post', 'id' => 'rps-entryedit', 'accept-charset' => get_bloginfo('charset')]);
         echo $formBuilder->openTable();
 
         $user = get_user_by('id', $entry->Member_ID);
@@ -1160,15 +1160,15 @@ final class Admin
         $medium_array = Constants::getMediums();
         $selectedMedium = array_search($competition->Medium, $medium_array);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
-        echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('medium', $medium_array, $selectedMedium, ['autocomplete' => 'off']));
 
         $classification_array = Constants::getClassifications();
         $selectedClassification = array_search($competition->Classification, $classification_array);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
-        echo $formBuilder->outputField($formBuilder->select('classification', $classification_array, $selectedClassification, array('autocomplete' => 'off')));
+        echo $formBuilder->outputField($formBuilder->select('classification', $classification_array, $selectedClassification, ['autocomplete' => 'off']));
 
         echo $formBuilder->closeTable();
-        echo $formBuilder->submit('submit', 'Update Entry', array('class' => 'button-primary'));
+        echo $formBuilder->submit('submit', 'Update Entry', ['class' => 'button-primary']);
         if (!empty($wp_http_referer)) {
             echo $formBuilder->hidden('wp_http_referer', esc_url($wp_http_referer));
         }
@@ -1187,7 +1187,7 @@ final class Admin
      */
     private function displayPageEntriesList()
     {
-        $messages = array();
+        $messages = [];
         if ($this->request->has('update')) {
             switch ($this->request->input('update')) {
                 case 'del':
@@ -1258,7 +1258,7 @@ final class Admin
         $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
 
         $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date, $classification_array[$formOptionsNew['classification']], $medium_array[$formOptionsNew['medium']]);
-        $data = array();
+        $data = [];
         $data['Competition_ID'] = $new_competition->ID;
         $data['ID'] = $id;
         $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
@@ -1286,7 +1286,7 @@ final class Admin
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         if ($this->request->has('wp_http_referer')) {
-            $redirect = remove_query_arg(array('wp_http_referer', 'updated', 'delete_count'), stripslashes($this->request->input('wp_http_referer')));
+            $redirect = remove_query_arg(['wp_http_referer', 'updated', 'delete_count'], stripslashes($this->request->input('wp_http_referer')));
         } else {
             $redirect = admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION;
         }
@@ -1325,7 +1325,7 @@ final class Admin
                     $query_competitions->deleteCompetition($id);
                     ++$deleteCount;
                 }
-                $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
+                $redirect = add_query_arg(['deleteCount' => $deleteCount, 'update' => 'del_many'], $redirect);
                 wp_redirect($redirect);
                 exit();
 
@@ -1339,13 +1339,13 @@ final class Admin
                 $count = 0;
 
                 foreach ((array) $competitionIds as $id) {
-                    $data = array();
+                    $data = [];
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'N';
                     $query_competitions->insertCompetition($data);
                     ++$count;
                 }
-                $redirect = add_query_arg(array('count' => $count, 'update' => 'open_many'), $redirect);
+                $redirect = add_query_arg(['count' => $count, 'update' => 'open_many'], $redirect);
                 wp_redirect($redirect);
                 exit();
 
@@ -1359,20 +1359,20 @@ final class Admin
                 $count = 0;
 
                 foreach ((array) $competitionIds as $id) {
-                    $data = array();
+                    $data = [];
                     $data['ID'] = (int) $id;
                     $data['Closed'] = 'Y';
                     $query_competitions->insertCompetition($data);
                     ++$count;
                 }
-                $redirect = add_query_arg(array('count' => $count, 'update' => 'close_many'), $redirect);
+                $redirect = add_query_arg(['count' => $count, 'update' => 'close_many'], $redirect);
                 wp_redirect($redirect);
                 exit();
 
             case 'setscore':
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
-                    $data = array();
+                    $data = [];
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'Y';
                     $query_competitions->insertCompetition($data);
@@ -1383,7 +1383,7 @@ final class Admin
             case 'Unsetscore':
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
-                    $data = array();
+                    $data = [];
                     $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'N';
                     $query_competitions->insertCompetition($data);
@@ -1393,7 +1393,7 @@ final class Admin
 
             default:
                 if ($this->request->has('_wp_http_referer')) {
-                    wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
+                    wp_redirect(remove_query_arg(['_wp_http_referer', '_wpnonce'], stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
                 $pagenum = $this->competition_list->get_pagenum();
@@ -1417,7 +1417,7 @@ final class Admin
         $query_entries = new QueryEntries($this->rpsdb);
 
         if ($this->request->has('wp_http_referer')) {
-            $redirect = remove_query_arg(array('wp_http_referer', 'updated', 'delete_count'), stripslashes($this->request->input('wp_http_referer')));
+            $redirect = remove_query_arg(['wp_http_referer', 'updated', 'delete_count'], stripslashes($this->request->input('wp_http_referer')));
         } else {
             $redirect = admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_ENTRIES;
         }
@@ -1452,13 +1452,13 @@ final class Admin
                     $query_entries->deleteEntry($id);
                     ++$deleteCount;
                 }
-                $redirect = add_query_arg(array('deleteCount' => $deleteCount, 'update' => 'del_many'), $redirect);
+                $redirect = add_query_arg(['deleteCount' => $deleteCount, 'update' => 'del_many'], $redirect);
                 wp_redirect($redirect);
                 exit();
 
             default:
                 if ($this->request->has('_wp_http_referer')) {
-                    wp_redirect(remove_query_arg(array('_wp_http_referer', '_wpnonce'), stripslashes($this->request->server('REQUEST_URI'))));
+                    wp_redirect(remove_query_arg(['_wp_http_referer', '_wpnonce'], stripslashes($this->request->server('REQUEST_URI'))));
                     exit();
                 }
                 $pagenum = $this->entries_list->get_pagenum();
@@ -1509,8 +1509,8 @@ final class Admin
     private function updateCompetition()
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $formOptionsNew = array();
-        $data = array();
+        $formOptionsNew = [];
+        $data = [];
         $formOptions = $this->request->input('competition-edit');
 
         $formOptionsNew['date'] = $formOptions['date'];
@@ -1567,7 +1567,7 @@ final class Admin
         $selectedMedium = array_search($competition->Medium, $medium_array);
         $selectedClassification = array_search($competition->Classification, $classification_array);
 
-        $formOptionsNew = array();
+        $formOptionsNew = [];
         $formOptionsNew['title'] = empty($formOptions['title']) ? $entry->Title : $formOptions['title'];
         $formOptionsNew['medium'] = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];

@@ -93,9 +93,9 @@ class QueryCompetitions
         $count = $this->rpsdb->get_results("SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed", ARRAY_A);
 
         $total = 0;
-        $status = array('N' => 'open', 'Y' => 'closed');
+        $status = ['N' => 'open', 'Y' => 'closed'];
         $known_types = array_keys($status);
-        $stats = array();
+        $stats = [];
         foreach ((array) $count as $row) {
             // Don't count post-trashed toward totals
             $total += $row['num_competitions'];
@@ -125,7 +125,7 @@ class QueryCompetitions
      */
     public function deleteCompetition($id)
     {
-        $result = $this->rpsdb->delete('competitions', array('ID' => $id));
+        $result = $this->rpsdb->delete('competitions', ['ID' => $id]);
 
         return $result;
     }
@@ -224,7 +224,7 @@ class QueryCompetitions
     public function getCompetitionById($id, $output = OBJECT)
     {
         $where = $this->rpsdb->prepare('ID=%d', $id);
-        $result = $this->query(array('where' => $where, 'number' => 1), $output);
+        $result = $this->query(['where' => $where, 'number' => 1], $output);
 
         return $result;
     }
@@ -242,10 +242,10 @@ class QueryCompetitions
     {
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
 
-        $sql_filter_array = array('1=1');
+        $sql_filter_array = ['1=1'];
 
         if (is_array($filter) && !empty($filter)) {
-            $sql_filter_array = array();
+            $sql_filter_array = [];
             foreach ($filter as $field => $value) {
                 $sql_filter_array[] = $field . ' = "' . $value . '"';
             }
@@ -413,17 +413,17 @@ class QueryCompetitions
      *
      * @return array
      */
-    public function getScoredCompetitions($competition_date_start, $competition_date_end = null, $filter = array(), $output = OBJECT)
+    public function getScoredCompetitions($competition_date_start, $competition_date_end = null, $filter = [], $output = OBJECT)
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
         $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
         $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
 
-        $sql_filter_array = array('1=1');
+        $sql_filter_array = ['1=1'];
 
         if (is_array($filter) && !empty($filter)) {
-            $sql_filter_array = array();
+            $sql_filter_array = [];
             foreach ($filter as $field => $value) {
                 $sql_filter_array[] = $field . ' = "' . $value . '" AND ';
             }
@@ -460,7 +460,7 @@ class QueryCompetitions
         // Are we updating or creating?
         if (!empty($data['ID'])) {
             $competition_ID = (int) $data['ID'];
-            $where = array('ID' => $competition_ID);
+            $where = ['ID' => $competition_ID];
             if (!isset($data['Date_Modified'])) {
                 $data['Date_Modified'] = current_time('mysql');
             }
@@ -470,7 +470,7 @@ class QueryCompetitions
         } else {
             $current_time = current_time('mysql');
             //@formatter:off
-            $default_options = array('Competition_Date' => $current_time,
+            $default_options = ['Competition_Date' => $current_time,
                 'Medium' => '',
                 'Classification' => '',
                 'Theme' => '',
@@ -481,7 +481,7 @@ class QueryCompetitions
                 'Max_Entries' => 2,
                 'Num_Judges' => 1,
                 'Special_Event' => 'N'
-            );
+            ];
             // @formatter:on
             $data = $data + $default_options;
 
@@ -521,7 +521,7 @@ class QueryCompetitions
          * @var string  $order
          * @var boolean $count
          */
-        $defaults = array('join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
+        $defaults = ['join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false];
         $query_vars = array_merge($defaults, $query_vars);
 
         extract($query_vars, EXTR_SKIP);

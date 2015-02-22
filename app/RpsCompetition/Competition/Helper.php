@@ -43,7 +43,7 @@ class Helper
     public function getMedium($competitions)
     {
 
-        $medium = array();
+        $medium = [];
 
         foreach ($competitions as $competition) {
             if (in_array($competition->Medium, $medium)) {

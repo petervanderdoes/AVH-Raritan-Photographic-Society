@@ -30,35 +30,35 @@ class EditTitleType extends AbstractType
         $builder->add(
             'new_title',
             'text',
-            array(
+            [
                 'label'       => 'Title',
                 'constraints' => new Assert\Length(
-                    array(
+                    [
                         'min'        => 2,
                         'max'        => 128,
                         'minMessage' => 'The title must be at least {{ limit }} characters long',
                         'maxMessage' => 'The title can not be longer than {{ limit }} characters',
-                    )
+                    ]
                 ),
-                'attr'        => array(
+                'attr'        => [
                     'maxlength' => '128'
-                )
-            )
+                ]
+            ]
         )
                 ->add(
                     'submit',
                     'submit',
-                    array('label' => 'Submit')
+                    ['label' => 'Submit']
                 )
                 ->add(
                     'cancel',
                     'submit',
-                    array(
+                    [
                         'label' => 'Cancel',
-                        'attr'  => array(
+                        'attr'  => [
                             'formnovalidate' => 'formnovalidate'
-                        )
-                    )
+                        ]
+                    ]
                 )
                 ->add(
                     'id',
@@ -97,9 +97,9 @@ class EditTitleType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(
-            array(
+            [
                 'data_class' => 'RpsCompetition\Entity\Forms\EditTitle',
-            )
+            ]
         )
         ;
     }

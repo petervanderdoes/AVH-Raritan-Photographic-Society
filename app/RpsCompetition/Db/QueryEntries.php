@@ -169,7 +169,7 @@ class QueryEntries
      */
     public function deleteEntry($id)
     {
-        $result = $this->rpsdb->delete('entries', array('ID' => $id));
+        $result = $this->rpsdb->delete('entries', ['ID' => $id]);
 
         return $result;
     }
@@ -247,7 +247,7 @@ class QueryEntries
          * @var string  $order
          * @var boolean $count
          */
-        $defaults = array('join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
+        $defaults = ['join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false];
         $query_vars = wp_parse_args($query_vars, $defaults);
         extract($query_vars, EXTR_SKIP);
 
@@ -298,7 +298,7 @@ class QueryEntries
     {
         if (!empty($data['ID'])) {
             $entry_ID = (int) $data['ID'];
-            $where = array('ID' => $entry_ID);
+            $where = ['ID' => $entry_ID];
             if (!isset($data['Date_Modified'])) {
                 $data['Date_Modified'] = current_time('mysql');
             }

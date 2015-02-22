@@ -45,23 +45,23 @@ class MyEntriesType extends AbstractType
                 $form->add(
                     'select_comp',
                     'choice',
-                    array(
+                    [
                         'multiple' => false,
                         'expanded' => false,
                         'choices'  => $this->entity->getSelectComp(),
-                        'attr'     => array('onchange' => 'submit_form("select_comp")')
-                    )
+                        'attr'     => ['onchange' => 'submit_form("select_comp")']
+                    ]
                 )
                 ;
                 $form->add(
                     'selected_medium',
                     'choice',
-                    array(
+                    [
                         'multiple' => false,
                         'expanded' => false,
                         'choices'  => $this->entity->getSelectedMedium(),
-                        'attr'     => array('onchange' => 'submit_form("select_medium")')
-                    )
+                        'attr'     => ['onchange' => 'submit_form("select_medium")']
+                    ]
                 )
                 ;
             }
@@ -93,9 +93,9 @@ class MyEntriesType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(
-            array(
+            [
                 'data_class' => 'RpsCompetition\Entity\Forms\MyEntries',
-            )
+            ]
         )
         ;
     }

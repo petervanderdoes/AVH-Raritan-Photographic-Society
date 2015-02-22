@@ -52,7 +52,7 @@ class View
         $this->season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
         if (WP_LOCAL_DEV !== true) {
-            $this->twig = new Twig_Environment($loader, array('cache' => $this->settings->get('upload_dir') . '/twig-cache/'));
+            $this->twig = new Twig_Environment($loader, ['cache' => $this->settings->get('upload_dir') . '/twig-cache/']);
         } else {
             $this->twig = new Twig_Environment($loader);
         }
@@ -69,7 +69,7 @@ class View
      */
     public function renderCategoryWinners($data)
     {
-        $data['images'] = array();
+        $data['images'] = [];
         foreach ($data['records'] as $recs) {
             $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
         }
@@ -88,13 +88,13 @@ class View
      */
     public function renderCategoryWinnersFacebookThumbs($entries)
     {
-        $images = array();
+        $images = [];
         foreach ($entries as $entry) {
             $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
         }
         $template = $this->twig->loadTemplate('facebook.html.twig');
 
-        return $template->render(array('images' => $images));
+        return $template->render(['images' => $images]);
     }
 
     /**
@@ -106,8 +106,8 @@ class View
      */
     public function renderGalleryMasonry($attachments)
     {
-        $data = array();
-        $caption_data = array();
+        $data = [];
+        $caption_data = [];
 
         foreach ($attachments as $id => $attachment) {
             $img_url = wp_get_attachment_url($id);
@@ -156,7 +156,7 @@ class View
         $output .= '</script>';
 
         $action = home_url('/' . get_page_uri($post->ID));
-        $output .= $this->form_builder->open($action, array('name' => 'month_season_form'));
+        $output .= $this->form_builder->open($action, ['name' => 'month_season_form']);
         $output .= $this->form_builder->hidden('submit_control');
         $output .= $this->form_builder->hidden('selected_season', $selected_season);
         $output .= $this->form_builder->hidden('selected_date', $selected_date);
@@ -185,13 +185,13 @@ class View
     public function renderMonthlyEntries($data)
     {
         $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($data['months']);
-        $data['images'] = array();
+        $data['images'] = [];
         if (is_array($data['entries'])) {
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
                 $user_info = get_userdata($entry->Member_ID);
-                $caption_data = array('title' => $entry->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname);
+                $caption_data = ['title' => $entry->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname];
                 $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
             }
         }
@@ -212,10 +212,10 @@ class View
      */
     public function renderPersonWinners($data)
     {
-        $data['images'] = array();
+        $data['images'] = [];
         foreach ($data['records'] as $recs) {
             $user_info = get_userdata($recs->Member_ID);
-            $caption_data = array('title' => $recs->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname);
+            $caption_data = ['title' => $recs->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname];
             $data['images'][] = $this->dataPhotoMasonry($recs, $data['thumb_size'], $caption_data);
         }
         unset ($data['records']);
@@ -236,7 +236,7 @@ class View
      */
     public function renderShowcaseCompetitionThumbnails($data)
     {
-        $data['images'] = array();
+        $data['images'] = [];
         foreach ($data['records'] as $recs) {
             $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
         }
@@ -256,7 +256,7 @@ class View
     private function dataMonthAndSeasonSelectionForm($months)
     {
         global $post;
-        $data = array();
+        $data = [];
         $data['action'] = home_url('/' . get_page_uri($post->ID));
         $data['months'] = $months;
         $seasons = $this->season_helper->getSeasons();
@@ -276,7 +276,7 @@ class View
      */
     private function dataPhotoCredit($title, $first_name, $last_name)
     {
-        $data = array();
+        $data = [];
         $data['title'] = $title;
         $data['credit'] = "$first_name $last_name";
 
@@ -294,7 +294,7 @@ class View
     private function dataPhotoGallery($record, $thumb_size)
     {
 
-        $data = array();
+        $data = [];
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
         $last_name = $user_info->user_lastname;
@@ -319,7 +319,7 @@ class View
      */
     private function dataPhotoMasonry($record, $thumb_size, $caption)
     {
-        $data = array();
+        $data = [];
         $data['url_large '] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
@@ -339,7 +339,7 @@ class View
     private function getMonthsDropdown($months, $selected_month)
     {
 
-        $output = $this->form_builder->select('new_month', $months, $selected_month, array('onChange' => 'submit_form("new_month")'));
+        $output = $this->form_builder->select('new_month', $months, $selected_month, ['onChange' => 'submit_form("new_month")']);
 
         return $output;
     }
