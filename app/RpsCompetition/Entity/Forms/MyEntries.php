@@ -50,7 +50,7 @@ class MyEntries
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getMedium()
     {
@@ -58,7 +58,7 @@ class MyEntries
     }
 
     /**
-     * @param array $medium
+     * @param string $medium
      */
     public function setMedium($medium)
     {
