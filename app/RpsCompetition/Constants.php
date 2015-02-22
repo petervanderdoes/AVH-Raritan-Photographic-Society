@@ -58,7 +58,7 @@ final class Constants
      * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
      * @return array
      */
-    static public function getClassifications()
+    public static function getClassifications()
     {
         return [
             'class_b' => 'Beginner',
@@ -89,7 +89,7 @@ final class Constants
      * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
      * @return array
      */
-    static public function getMediums()
+    public static function getMediums()
     {
         return [
             'medium_bwd' => 'B&W Digital',

@@ -22,7 +22,7 @@ class Helper
      *
      * @return array
      */
-    static public function arrayMsort($array, $cols)
+    public static function arrayMsort($array, $cols)
     {
         $row_is_object = false;
         $sort_column_array = [];
@@ -65,7 +65,7 @@ class Helper
      *
      * @param string $path
      */
-    static public function createDirectory($path)
+    public static function createDirectory($path)
     {
         if (!file_exists($path)) { // Create the directory if it is missing
             wp_mkdir_p($path);
@@ -79,7 +79,7 @@ class Helper
      *
      * @return array
      */
-    static public function getDynamicPages()
+    public static function getDynamicPages()
     {
         $options = get_option('avh-rps');
         $pages_array = [$options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true];
@@ -96,7 +96,7 @@ class Helper
      *
      * @return string
      */
-    static public function getPluginUrl($file, $directory)
+    public static function getPluginUrl($file, $directory)
     {
         if (is_dir($directory)) {
             $directory .= '/foo';
@@ -113,7 +113,7 @@ class Helper
      *
      * @return string
      */
-    static public function getUserClassification($userID, $medium)
+    public static function getUserClassification($userID, $medium)
     {
         switch ($medium) {
             case 'B&W Digital':
@@ -142,7 +142,7 @@ class Helper
      *
      * @return boolean true if a paid member, false if non-existing user or non-paid member.`
      */
-    static public function isPaidMember($user_id = null)
+    public static function isPaidMember($user_id = null)
     {
         if (is_numeric($user_id)) {
             $user = get_user_by('id', $user_id);
@@ -165,7 +165,7 @@ class Helper
      *
      * @return bool
      */
-    static public function isValidDate($date, $format = 'Y-m-d H:i:s')
+    public static function isValidDate($date, $format = 'Y-m-d H:i:s')
     {
         $d = \DateTime::createFromFormat($format, $date);
 
