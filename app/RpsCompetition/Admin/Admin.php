@@ -13,6 +13,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
+use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Valitron\Validator;
@@ -39,6 +40,8 @@ final class Admin
     private $rpsdb;
     /** @var  Settings */
     private $settings;
+    /** @var OptionsGeneral */
+    private $options;
     private $status = '';
 
     /**
