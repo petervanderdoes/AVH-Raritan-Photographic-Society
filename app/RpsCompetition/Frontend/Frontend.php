@@ -897,7 +897,7 @@ class Frontend
             $all_entries = explode(',', $this->request->input('allentries'));
             foreach ($all_entries as $entry_id) {
                 $entry = $query_entries->getEntryById($entry_id);
-                if (!is_null($entry)) {
+                if ($entry !== null) {
                     $query_entries->deleteEntry($entry->ID);
                     $photo_helper->deleteEntryFromDisk($entry);
                 }
