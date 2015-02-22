@@ -948,10 +948,10 @@ class Frontend
     private function register_scripts_styles()
     {
         if (WP_LOCAL_DEV !== true) {
-            $rps_competition_css_version = "c9c4aab";
-            $rps_masonry_version = "867ece1";
-            $masonry_version = "37b35d4";
-            $imagesloaded_version = "37b35d4";
+            $rps_competition_css_version = "8cfdecd";
+            $rps_masonry_version = "8cfdecd";
+            $masonry_version = "8cfdecd";
+            $imagesloaded_version = "8cfdecd";
             $version_separator = '-';
         } else {
             $rps_competition_css_version = "";
@@ -997,7 +997,7 @@ class Frontend
         $social_networks_controller = $this->container->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = "f233109";
+            $social_buttons_script_version = "8cfdecd";
             $version_separator = '-';
         } else {
             $social_buttons_script_version = "";
