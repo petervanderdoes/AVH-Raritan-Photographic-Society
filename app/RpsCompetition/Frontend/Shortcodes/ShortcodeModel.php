@@ -8,6 +8,11 @@ use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 
+/**
+ * Class ShortcodeModel
+ *
+ * @package RpsCompetition\Frontend\Shortcodes
+ */
 class ShortcodeModel
 {
     private $photo_helper;

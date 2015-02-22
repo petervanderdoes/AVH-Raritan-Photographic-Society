@@ -156,7 +156,8 @@ class Helper
                     function ($constraint) {
                         $constraint->aspectRatio();
                     }
-                );
+                )
+                ;
             } else {
                 $image->resize(
                     $new_size['width'],
@@ -164,7 +165,8 @@ class Helper
                     function ($constraint) {
                         $constraint->aspectRatio();
                     }
-                );
+                )
+                ;
             }
         } else {
             $image->resize(
@@ -173,7 +175,8 @@ class Helper
                 function ($constraint) {
                     $constraint->aspectRatio();
                 }
-            );
+            )
+            ;
         }
         $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
 
@@ -272,18 +275,19 @@ class Helper
      * @param string $path
      * @param string $old_name
      * @param string $new_name
-     * @param string $ext
      *
      * @return boolean
      */
-    public function renameImageFile($path, $old_name, $new_name, $ext)
+    public function renameImageFile($path, $old_name, $new_name)
     {
         $path = $this->request->server('DOCUMENT_ROOT') . $path;
         // Rename the main image file
-        $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
+        $status = rename($path . '/' . $old_name, $path . '/' . $new_name);
         if ($status) {
+            $parts = pathinfo($old_name);
+            $name = $parts['filename'];
             // Rename any and all thumbnails of this file
-            $this->removeThumbnails($path, $old_name);
+            $this->removeThumbnails($path, $name);
         }
 
         return $status;

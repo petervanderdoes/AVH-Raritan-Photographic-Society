@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Options\General;
 use RpsCompetition\Settings;
+use Twig_Environment;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -14,15 +15,26 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class Controller
+ *
+ * @package RpsCompetition\Libs
+ */
 class Controller
 {
+    /** @var  \Illuminate\Container\Container $container */
     protected $container;
+    /** @var   \RpsCompetition\Options\General $options */
     protected $options;
+    /** @var \Illuminate\Http\Request $request */
     protected $request;
+    /** @var  \RpsCompetition\Db\RpsDb $rpsdb */
     protected $rpsdb;
+    /** @var  \Avh\Network\Session */
     protected $session;
     /** @var  Settings $settings */
     protected $settings;
+    /** @var  Twig_Environment */
     protected $twig;
 
     /**
@@ -74,6 +86,9 @@ class Controller
         $this->rpsdb = $rpsdb;
     }
 
+    /**
+     * @param $session
+     */
     public function setSession($session)
     {
         $this->session = $session;
@@ -88,9 +103,9 @@ class Controller
     }
 
     /**
-     * @param \Twig_Environment $twig
+     * @param Twig_Environment $twig
      */
-    public function setTemplateEngine(\Twig_Environment $twig)
+    public function setTemplateEngine(Twig_Environment $twig)
     {
         $this->twig = $twig;
     }

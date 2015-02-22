@@ -8,7 +8,14 @@ use RpsCompetition\Api\Client;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
+use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
+use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
+use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
+use RpsCompetition\Forms\Type\EditTitleType;
+use RpsCompetition\Forms\Type\MyEntriesType;
+use RpsCompetition\Forms\Type\UploadEntryType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
@@ -31,6 +38,8 @@ class Frontend
     private $container;
     /** @var Core */
     private $core;
+    /** @var \Symfony\Component\Form\FormFactory */
+    private $formFactory;
     /** @var Options */
     private $options;
     /** @var Request */
@@ -41,7 +50,7 @@ class Frontend
     private $session;
     /** @var Settings */
     private $settings;
-    /** @var Rpscompetition\Frontend\View */
+    /** @var \Rpscompetition\Frontend\View */
     private $view;
 
     /**
@@ -62,6 +71,7 @@ class Frontend
         $this->core = $container->make('Core');
         $requests = $container->make('FrontendRequests');
         $this->view = $container->make('FrontendView');
+        $this->formFactory = $container->make('formFactory');
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', array($this, 'actionAfterThemeSetup'), 14);
@@ -105,46 +115,25 @@ class Frontend
         global $wp_query;
         global $post;
 
-        if (WP_LOCAL_DEV !== true) {
-            $rps_masonry_version = "867ece1";
-            $masonry_version = "37b35d4";
-            $imagesloaded_version = "37b35d4";
-            $version_separator = '-';
-        } else {
-            $rps_masonry_version = "";
-            $masonry_version = "";
-            $imagesloaded_version = "";
-            $version_separator = '';
-        }
-
-        $rps_masonry_script = 'rps.masonry' . $version_separator . $rps_masonry_version . '.js';
-        $masonry_script = 'masonry' . $version_separator . $masonry_version . '.js';
-        $imagesloaded_script = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
-
         //todo Make as an option in the admin section.
         $options = get_option('avh-rps');
         $all_masonry_pages = array();
         $all_masonry_pages[$options['monthly_entries_post_id']] = true;
-        $javascript_directory = $this->settings->get('javascript_dir');
-        wp_deregister_script('masonry');
-        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);
-        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), array('masonry'), 'to_remove', true);
-
-        //wp_enqueue_script('rps-masonry');
-        //wp_enqueue_script('rps-imagesloaded');
         if (array_key_exists($wp_query->get_queried_object_id(), $all_masonry_pages)) {
-            wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+            wp_enqueue_script('rps-masonryInit');
         }
 
         if (is_object($post)) {
             if (has_shortcode($post->post_content, 'rps_person_winners')) {
-                wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+                wp_enqueue_script('rps-masonryInit');
             }
 
             if (has_shortcode($post->post_content, 'gallery')) {
-                wp_enqueue_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+                wp_enqueue_script('rps-masonryInit');
             }
         }
+
+        wp_enqueue_style('rps-competition.general.style');
     }
 
     /**
@@ -183,55 +172,63 @@ class Frontend
         global $post;
 
         $query_entries = $this->container->make('QueryEntries');
+        /** @var  QueryCompetitions $query_competitions */
         $query_competitions = $this->container->make('QueryCompetitions');
         $photo_helper = $this->container->make('PhotoHelper');
 
         if (is_object($post) && $post->ID == 75) {
-            $redirect_to = $this->request->input('wp_get_referer');
-            $entry_id = $this->request->input('id');
+            $entity = new EntityFormEditTitle();
 
-            // Just return to the My Images page is the user clicked Cancel
-            $this->isRequestCanceled($redirect_to);
+            $form = $this->formFactory->create(new EditTitleType($entity), $entity, array('attr' => array('id' => 'edittitle')));
+            $form->handleRequest($this->request);
 
-            // makes sure they filled in the title field
-            if (!$this->request->has('new_title')) {
-                $this->settings->set('errmsg', 'You must provide an image title.<br><br>');
-            } else {
-                $server_file_name = $this->request->input('server_file_name');
-                $new_title = trim($this->request->input('new_title'));
-                if (get_magic_quotes_gpc()) {
-                    $server_file_name = stripslashes($this->request->input('server_file_name'));
-                    $new_title = stripslashes(trim($this->request->input('new_title')));
-                }
+            $redirect_to = $entity->getWpGetReferer();
 
-                $competition = $query_competitions->getCompetitionByEntryId($entry_id);
+            // Just return if user clicked Cancel
+            $this->isRequestCanceled($form, 'cancel', $redirect_to);
+
+            if (!$form->isValid()) {
+                $errors = $form->getErrors();
+                $this->settings->set('formerror', $errors);
+
+                return;
+            }
+
+            $server_file_name = $entity->getServerFileName();
+            $new_title = $entity->getNewTitle();
+            if (get_magic_quotes_gpc()) {
+                $server_file_name = stripslashes($server_file_name);
+                $new_title = stripslashes($new_title);
+            }
+
+            if ($entity->getNewTitle() !== $entity->getTitle()) {
+                $competition = $query_competitions->getCompetitionByEntryId($entity->getId());
                 if ($competition == null) {
-                    wp_die("Failed to SELECT competition for entry ID: " . $entry_id);
+                    wp_die("Failed to SELECT competition for entry ID: " . $entity->getId());
                 }
 
                 // Rename the image file on the server file system
                 $path = $photo_helper->getCompetitionPath($competition->Competition_Date, $competition->Classification, $competition->Medium);
                 $old_file_parts = pathinfo($server_file_name);
-                $old_file_name = $old_file_parts['filename'];
+                $old_file_name = $old_file_parts['basename'];
                 $ext = $old_file_parts['extension'];
                 $current_user = wp_get_current_user();
                 $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT') . $server_file_name);
-                $new_file_name = $new_file_name_noext . $ext;
-                if (!$photo_helper->renameImageFile($path, $old_file_name, $new_file_name_noext, $ext)) {
+                $new_file_name = $new_file_name_noext . '.' . $ext;
+                if (!$photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
                     die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
                 }
 
                 // Update the Title and File Name in the database
-                $updated_data = array('ID' => $entry_id, 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
+                $updated_data = array('ID' => $entity->getId(), 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql'));
                 $result = $query_entries->updateEntry($updated_data);
                 if ($result === false) {
                     wp_die("Failed to UPDATE entry record from database");
                 }
-
-                $redirect_to = $this->request->input('wp_get_referer');
-                wp_redirect($redirect_to);
-                exit();
             }
+            $redirect_to = $entity->getWpGetReferer();
+            wp_redirect($redirect_to);
+            exit();
         }
         unset($query_entries, $query_competitions, $photo_helper);
     }
@@ -250,18 +247,23 @@ class Frontend
         $query_competitions = $this->container->make('QueryCompetitions');
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
+            $entity = new EntityFormMyEntries();
+
+            $form = $this->formFactory->create(new MyEntriesType($entity), $entity, array('attr' => array('id' => 'myentries')));
+            $form->handleRequest($this->request);
 
             $page = explode('-', $post->post_name);
             $medium_subset = $page[1];
-            if ($this->request->has('submit_control')) {
+
+            if ($form->has('submit_control')) {
                 // @TODO Nonce check
 
-                $comp_date = $this->request->input('comp_date');
-                $classification = $this->request->input('classification');
-                $medium = $this->request->input('medium');
-                $entry_array = $this->request->input('EntryID', null);
+                $comp_date = $entity->getCompDate();
+                $classification = $entity->getClassification();
+                $medium = $entity->getMedium();
+                $entry_array = $this->request->input('form.entryid', null);
 
-                switch ($this->request->input('submit_control')) {
+                switch ($entity->getSubmitControl()) {
                     case 'add':
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
                             $query = array('m' => $medium_subset);
@@ -291,10 +293,38 @@ class Frontend
                         if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
                             if ($entry_array !== null) {
                                 $this->deleteCompetitionEntries($entry_array);
+                                $redirect = get_permalink($post->ID);
+                                wp_redirect($redirect);
+                                exit();
                             }
                         }
                         break;
+
+                    case 'select_comp':
+                        $competition_date = $entity->getSelectComp();
+                        $medium = $entity->getMedium();
+                        break;
+
+                    case 'select_medium':
+                        $competition_date = $entity->getCompDate();
+                        $medium = $entity->getSelectedMedium();
+                        break;
+                    default:
+                        $competition_date = $entity->getCompDate();
+                        $medium = $entity->getMedium();
+                        break;
                 }
+                $medium_subset_medium = $this->session->get('myentries/subset');
+                $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
+                $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+
+                $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
+                $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+                $this->session->set('myentries/' . $medium_subset_medium . '/classification', $current_competition->Classification);
+                $this->session->save();
+                $redirect = get_permalink($post->ID);
+                wp_redirect($redirect);
+                exit();
             }
         }
         unset($query_competitions);
@@ -317,12 +347,21 @@ class Frontend
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $redirect_to = $this->request->input('wp_get_referer');
+            $entity = new EntityFormUploadEntry();
+            $form = $this->formFactory->create(new UploadEntryType(), $entity, array('attr' => array('id' => 'uploadentry')));
+            $form->handleRequest($this->request);
 
+            $redirect_to = $entity->getWpGetReferer();
             // Just return if user clicked Cancel
-            $this->isRequestCanceled($redirect_to);
+            $this->isRequestCanceled($form, 'cancel', $redirect_to);
 
-            $file = $this->request->file('file_name');
+            if (!$form->isValid()) {
+                $errors = $form->getErrors();
+                $this->settings->set('formerror', $errors);
+
+                return;
+            }
+            $file = $this->request->file('form.file_name');
             if ($file === null) {
                 $this->settings->set('errmsg', 'You did not select a file to upload');
                 unset($query_entries, $query_competitions, $photo_helper);
@@ -342,12 +381,6 @@ class Frontend
             $uploaded_file_info = getimagesize($uploaded_file_name);
             if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
                 $this->settings->set('errmsg', "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit");
-                unset($query_entries, $query_competitions, $photo_helper);
-
-                return;
-            }
-            if (!$this->request->has('title')) {
-                $this->settings->set('errmsg', 'Please enter your image title in the Title field.');
                 unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
@@ -379,9 +412,9 @@ class Frontend
 
             // Prepare the title and client file name for storing in the database
             if (get_magic_quotes_gpc()) {
-                $title = stripslashes(trim($this->request->input('title')));
+                $title = stripslashes(trim($this->request->input('form.title')));
             } else {
-                $title = trim($this->request->input('title'));
+                $title = trim($this->request->input('form.title'));
             }
             $client_file_name = $file->getClientOriginalName();
 
@@ -481,6 +514,8 @@ class Frontend
         $this->setupWpSeoActionsFilters();
         $this->setupUserMeta();
         $this->setupSocialButtons();
+
+        $this->register_scripts_styles();
 
         unset($query_competitions);
     }
@@ -896,14 +931,49 @@ class Frontend
     /**
      * Check if user pressed cancel and if so redirect the user
      *
+     * @param object $form   The Form that was submitted
+     * @param string $cancel The field to check for cancellation
      * @param string $redirect_to
      */
-    private function isRequestCanceled($redirect_to)
+    private function isRequestCanceled($form, $cancel, $redirect_to)
     {
-        if ($this->request->has('cancel')) {
+        if ($form->get($cancel)
+                 ->isClicked()
+        ) {
             wp_redirect($redirect_to);
             exit();
         }
+    }
+
+    private function register_scripts_styles()
+    {
+        if (WP_LOCAL_DEV !== true) {
+            $rps_competition_css_version = "8cfdecd";
+            $rps_masonry_version = "8cfdecd";
+            $masonry_version = "8cfdecd";
+            $imagesloaded_version = "8cfdecd";
+            $version_separator = '-';
+        } else {
+            $rps_competition_css_version = "";
+            $rps_masonry_version = "";
+            $masonry_version = "";
+            $imagesloaded_version = "";
+            $version_separator = '';
+        }
+
+        $rps_masonry_script = 'rps.masonry' . $version_separator . $rps_masonry_version . '.js';
+        $masonry_script = 'masonry' . $version_separator . $masonry_version . '.js';
+        $imagesloaded_script = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
+        $rps_competition_style = 'rps-competition' . $version_separator . $rps_competition_css_version . '.css';
+
+        $javascript_directory = $this->settings->get('javascript_dir');
+        wp_deregister_script('masonry');
+        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), array(), 'to_remove', 1);
+        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), array('masonry'), 'to_remove', true);
+        wp_register_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), array('rps-imagesloaded'), 'to_remove', true);
+
+        wp_register_style('rps-competition.fontawesome.style', 'http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"');
+        wp_register_style('rps-competition.general.style', CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')), array('rps-competition.fontawesome.style'), 'to_remove');
     }
 
     /**
@@ -927,17 +997,14 @@ class Frontend
         $social_networks_controller = $this->container->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = "f233109";
-            $social_buttons_css_version = "c9c4aab";
+            $social_buttons_script_version = "8cfdecd";
             $version_separator = '-';
         } else {
             $social_buttons_script_version = "";
-            $social_buttons_css_version = "";
             $version_separator = '';
         }
         $data = array();
         $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
-        $data['style'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_css_version . '.css';
         $social_networks_controller->initializeSocialNetworks($data);
     }
 

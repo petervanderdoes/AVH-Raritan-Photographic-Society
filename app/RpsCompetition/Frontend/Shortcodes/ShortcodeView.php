@@ -9,6 +9,22 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class ShortcodeView
+ *
+ * @package RpsCompetition\Frontend\Shortcodes
+ */
 final class ShortcodeView extends View
 {
+    /**
+     * Contructor
+     *
+     * @param string $template_dir
+     * @param string $cache_dir
+     */
+    public function __construct($template_dir, $cache_dir)
+    {
+        parent::__construct($template_dir, $cache_dir);
+        $this->addTemplateDir($template_dir . '/forms');
+    }
 }

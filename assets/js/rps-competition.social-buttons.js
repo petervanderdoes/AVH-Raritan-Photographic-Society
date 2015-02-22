@@ -73,10 +73,10 @@ var rpssocial = {
                     js.src = "//platform.twitter.com/widgets.js";
                     fjs.parentNode.insertBefore(js, fjs);
                     return window.twttr || (t = {
-                        _e: [], ready: function (f) {
-                            t._e.push(f)
-                        }
-                    });
+                            _e: [], ready: function (f) {
+                                t._e.push(f)
+                            }
+                        });
                 }(document, "script", "twitter-wjs"));
                 window.twttr.ready(function (twttr) {
                     twttr.events.bind('click', function (event) {
@@ -236,9 +236,9 @@ var rpssocial = {
             href: url
         }, function (response) {
             if (response && !response.error_code) {
-                console.log("OK: "+JSON.stringify(response));
+                console.log("OK: " + JSON.stringify(response));
             } else {
-                console.log("Not OK: "+JSON.stringify(response));
+                console.log("Not OK: " + JSON.stringify(response));
             }
         });
     }

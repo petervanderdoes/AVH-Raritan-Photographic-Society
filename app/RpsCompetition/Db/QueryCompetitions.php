@@ -66,7 +66,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $closed = $this->rpsdb->get_var($sql);
 
         if ($closed == "Y") {
@@ -152,7 +153,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_row($sql, $output);
 
         return $return;
@@ -181,7 +183,8 @@ class QueryCompetitions
                 Competition_Date <= %s",
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
         $result = $this->rpsdb->get_results($sql, $output);
 
         return $result;
@@ -195,7 +198,7 @@ class QueryCompetitions
      *
      * @return QueryCompetitions|array
      */
-    public function getCompetitionByEntryId($entry_id, $output = ARRAY_A)
+    public function getCompetitionByEntryId($entry_id, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare(
             "SELECT c.*
@@ -203,7 +206,8 @@ class QueryCompetitions
             WHERE c.ID =  e.Competition_ID
                 AND e.ID = %s",
             $entry_id
-        );
+        )
+        ;
         $result = $this->rpsdb->get_row($sql, $output);
 
         return $result;
@@ -261,7 +265,8 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $season_start_date,
             $season_end_date
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, $output);
 
         return $return;
@@ -287,7 +292,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -314,7 +320,8 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $date_start,
             $date_end
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
         return $return;
@@ -341,7 +348,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -432,7 +440,8 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, $output);
 
         return $return;
@@ -582,7 +591,8 @@ class QueryCompetitions
                 AND Close_Date < %s",
             $current_time,
             $current_time
-        );
+        )
+        ;
         $result = $this->rpsdb->query($sql);
 
         return $result;

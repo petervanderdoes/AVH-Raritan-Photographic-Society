@@ -69,7 +69,8 @@ class QueryMiscellaneous
                 ORDER BY RAND()",
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql);
 
         return $return;
@@ -101,7 +102,8 @@ class QueryMiscellaneous
             ORDER BY c.Medium DESC, Class_Code, c.Competition_Date',
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
 
         $records = $this->rpsdb->get_results($sql, ARRAY_A);
         $return = array();
@@ -138,7 +140,8 @@ class QueryMiscellaneous
                 ORDER BY RAND()
                 LIMIT %d",
             $limit
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql);
 
         return $return;
@@ -165,7 +168,8 @@ class QueryMiscellaneous
                     e.Score >= 8
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
             $member_id
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql);
 
         return $return;
@@ -198,7 +202,8 @@ class QueryMiscellaneous
                         GROUP BY c.Competition_Date, c.Classification, c.Medium) z",
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -232,7 +237,8 @@ class QueryMiscellaneous
             $competition_date_start,
             $competition_date_end,
             $user_id
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
         return $return;
@@ -258,7 +264,8 @@ class QueryMiscellaneous
             ORDER BY Season ' . $order,
             $season_start_month_num,
             $season_end_month_num
-        );
+        )
+        ;
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
         $seasons = array();
@@ -291,7 +298,8 @@ class QueryMiscellaneous
             ORDER BY Season',
             $season_start_month_num,
             $season_end_month_num
-        );
+        )
+        ;
 
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
         $seasons = array();
@@ -325,7 +333,8 @@ class QueryMiscellaneous
             $date,
             $award,
             $class
-        );
+        )
+        ;
         $results = $this->rpsdb->get_results($sql);
 
         return $results;
@@ -357,7 +366,8 @@ class QueryMiscellaneous
                 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award",
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
         $results = $this->rpsdb->get_results($sql);
 
         return $results;

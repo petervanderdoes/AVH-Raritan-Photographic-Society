@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.4-dev.33
+ * Version: 2.0.4-dev.61
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -13,6 +13,7 @@
 use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Common\Core;
+use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
@@ -30,8 +31,11 @@ use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Settings;
+use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
+use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
+use Symfony\Component\Form\Forms as SymfonyForms;
+use Symfony\Component\Validator\Validation;
 
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
     header('Status: 403 Forbidden');
@@ -147,7 +151,8 @@ class AVH_RPS_Client
             function () {
                 return new Avh\Network\Session(array('name' => 'raritan_' . COOKIEHASH));
             }
-        );
+        )
+        ;
         $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
         $this->container->instance('IlluminateRequest', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
 
@@ -161,53 +166,61 @@ class AVH_RPS_Client
             function ($app) {
                 return new Core($app->make('Settings'));
             }
-        );
+        )
+        ;
         $this->container->bind(
             'FrontendRequests',
             function ($app) {
                 return new Requests($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
             }
-        );
+        )
+        ;
         $this->container->bind(
             'FrontendView',
             function ($app) {
                 return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
             }
-        );
+        )
+        ;
 
         $this->container->bind(
             'PhotoHelper',
             function ($app) {
                 return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
             }
-        );
+        )
+        ;
 
         $this->container->bind(
             'SeasonHelper',
             function ($app) {
                 return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
             }
-        );
+        )
+        ;
 
         $this->container->bind(
             'WpSeoHelper',
             function ($app) {
                 return new WpseoHelper($app->make('Settings'), $app->make('RpsDb'), $app->make('QueryCompetitions'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
             }
-        );
+        )
+        ;
 
         $this->container->bind(
             'CompetitionHelper',
             function ($app) {
                 return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
             }
-        );
+        )
+        ;
 
         $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
 
         $this->registerBindingDb();
         $this->registerBindingShortCodes();
         $this->registerBindingSocialNetworks();
+        $this->registerBindingsForms();
 
         $this->container->bind(
             'Templating',
@@ -220,7 +233,8 @@ class AVH_RPS_Client
                     return new Twig_Environment(new Twig_Loader_Filesystem($template_dir));
                 }
             }
-        );
+        )
+        ;
     }
 
     /**
@@ -234,25 +248,29 @@ class AVH_RPS_Client
             function ($app) {
                 return new QueryEntries($app->make('RpsDb'));
             }
-        );
+        )
+        ;
         $this->container->bind(
             'QueryCompetitions',
             function ($app) {
                 return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
             }
-        );
+        )
+        ;
         $this->container->bind(
             'QueryMiscellaneous',
             function ($app) {
                 return new QueryMiscellaneous($app->make('RpsDb'));
             }
-        );
+        )
+        ;
         $this->container->bind(
             'QueryBanquet',
             function ($app) {
                 return new QueryBanquet($app->make('RpsDb'));
             }
-        );
+        )
+        ;
     }
 
     /**
@@ -266,22 +284,24 @@ class AVH_RPS_Client
             function ($app) {
                 return new ShortcodeController($app);
             }
-        );
+        )
+        ;
 
         $this->container->bind(
             'ShortcodeModel',
             function ($app) {
                 return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'), $app->make('SeasonHelper'));
             }
-        );
+        )
+        ;
 
         $this->container->bind(
             'ShortcodeView',
-            function ($app,$param) {
+            function ($app, $param) {
                 return new ShortcodeView($param['template_dir'], $param['cache_dir']);
             }
-        );
-
+        )
+        ;
     }
 
     /**
@@ -294,20 +314,44 @@ class AVH_RPS_Client
             function ($app) {
                 return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
             }
-        );
+        )
+        ;
         $this->container->bind(
             'SocialNetworksController',
             function ($app) {
                 return new SocialNetworksController($app);
             }
-        );
+        )
+        ;
         $this->container->bind('SocialNetworkModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
         $this->container->bind(
             'SocialNetworksView',
-            function ($app,$param) {
+            function ($app, $param) {
                 return new SocialNetworksView($param['template_dir'], $param['cache_dir']);
             }
-        );
+        )
+        ;
+    }
+
+    /**
+     * Register all the bindings for the Symfony Forms integration.
+     */
+    private function registerBindingsForms()
+    {
+        $this->container->bind(
+            'formFactory',
+            function ($app) {
+                $validator = Validation::createValidator();
+                $formFactory = SymfonyForms::createFormFactoryBuilder()
+                                           ->addExtension(new ValidatorExtension($validator))
+                                           ->addExtension(new HttpFoundationExtension())
+                                           ->getFormFactory()
+                ;
+
+                return $formFactory;
+            }
+        )
+        ;
     }
 }
 

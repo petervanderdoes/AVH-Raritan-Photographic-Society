@@ -10,6 +10,11 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class ShortcodeRouter
+ *
+ * @package RpsCompetition\Frontend\Shortcodes
+ */
 class ShortcodeRouter extends ShortcodesAbstract
 {
     public function initializeShortcodes()

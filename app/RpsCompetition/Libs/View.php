@@ -3,6 +3,9 @@ namespace RpsCompetition\Libs;
 
 use Avh\DataHandler\DataHandler;
 use Avh\DataHandler\NamespacedAttributeBag;
+use Symfony\Bridge\Twig\Extension\FormExtension;
+use Symfony\Bridge\Twig\Form\TwigRenderer;
+use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -10,6 +13,11 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class View
+ *
+ * @package RpsCompetition\Libs
+ */
 class View
 {
     /**
@@ -33,9 +41,15 @@ class View
      */
     private $loader;
 
+    /**
+     * Constructor
+     *
+     * @param string $template_dir
+     * @param string $cache_dir
+     */
     public function __construct($template_dir, $cache_dir)
     {
-        $this->loader = new \Twig_Loader_Filesystem($template_dir);
+        $this->loader = new \Twig_Loader_Filesystem(array($template_dir));
         if (WP_LOCAL_DEV !== true) {
             $this->environmentOptions['cache'] = $cache_dir;
         }
@@ -157,6 +171,9 @@ class View
                 $extension = is_object($ext) ? $ext : new $ext;
                 $this->environmentInstance->addExtension($extension);
             }
+            $formEngine = new TwigRendererEngine(array('avh_form_div_layout.html.twig'));
+            $formEngine->setEnvironment($this->environmentInstance);
+            $this->environmentInstance->addExtension(new FormExtension(new TwigRenderer($formEngine)));
         }
 
         return $this->environmentInstance;
