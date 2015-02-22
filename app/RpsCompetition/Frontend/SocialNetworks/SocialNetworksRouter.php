@@ -17,7 +17,6 @@ if (!class_exists('AVH_RPS_Client')) {
  * @package RpsCompetition\Frontend\SocialNetworks
  */
 final class SocialNetworksRouter
-
 {
     /**
      * @var SocialNetworksController
