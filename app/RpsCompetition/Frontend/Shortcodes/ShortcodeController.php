@@ -809,13 +809,7 @@ final class ShortcodeController extends Controller
             $entry['image']['source'] = $photo_helper->getThumbnailUrl($recs->Server_File_Name, '75');
             $entry['title'] = $recs->Title;
             $entry['client_file_name'] = $recs->Client_File_Name;
-            // Image width and height columns. The height and width values are suppressed if the Client_File_Name is
-            // empty i.e. no image uploaded for a print competition.
-            if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name)) {
-                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
-            } else {
-                $size = [0, 0];
-            }
+            $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
             $entry['size']['x'] = $size[0];
             $entry['size']['y'] = $size[1];
             $data['entries'][] = $entry;
