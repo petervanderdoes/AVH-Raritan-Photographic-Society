@@ -5,7 +5,7 @@ namespace RpsCompetition\Entity\Forms;
 /**
  * Class EditTitle
  *
- * @package RpsCompetition\Entity\Forms
+ * @package RpsCompetition\Entity\Form
  */
 class EditTitle
 {

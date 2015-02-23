@@ -5,7 +5,7 @@ namespace RpsCompetition\Entity\Forms;
 /**
  * Class MyEntries
  *
- * @package RpsCompetition\Entity\Forms
+ * @package RpsCompetition\Entity\Form
  */
 class MyEntries
 {

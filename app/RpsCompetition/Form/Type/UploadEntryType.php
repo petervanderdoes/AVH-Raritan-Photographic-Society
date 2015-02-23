@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: pdoes
- * Date: 2/20/15
- * Time: 1:43 PM
- */
 
-namespace RpsCompetition\Forms\Type;
+namespace RpsCompetition\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class UploadEntryType
  *
- * @package RpsCompetition\Forms\Type
+ * @package RpsCompetition\Form\Type
  */
 class UploadEntryType extends AbstractType
 {

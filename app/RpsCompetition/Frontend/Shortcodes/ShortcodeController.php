@@ -8,9 +8,9 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
-use RpsCompetition\Forms\Type\EditTitleType;
-use RpsCompetition\Forms\Type\MyEntriesType;
-use RpsCompetition\Forms\Type\UploadEntryType;
+use RpsCompetition\Form\Type\EditTitleType;
+use RpsCompetition\Form\Type\MyEntriesType;
+use RpsCompetition\Form\Type\UploadEntryType;
 use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {

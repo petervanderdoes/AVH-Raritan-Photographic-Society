@@ -1,6 +1,6 @@
 <?php
 
-namespace RpsCompetition\Forms\Type;
+namespace RpsCompetition\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class MyEntriesType
  *
- * @package RpsCompetition\Forms\Type
+ * @package RpsCompetition\Form\Type
  */
 class MyEntriesType extends AbstractType
 {
