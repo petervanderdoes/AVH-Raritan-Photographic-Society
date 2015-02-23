@@ -73,6 +73,25 @@ class Helper
     }
 
     /**
+     * Get the thumbnail to display on the My Entries page.
+     *
+     * @param $current_competition
+     *
+     * @return mixed
+     */
+    public static function getCompetitionThumbnail($current_competition)
+    {
+        $image = [];
+        $image['Color Digital'] = '/thumb-comp-digital-color.jpg';
+        $image['Color Prints'] = '/thumb-comp-print-color.jpg';
+        $image['B&W Digital'] = '/thumb-comp-digital-bw.jpg';
+        $image['B&W Prints'] = '/thumb-comp-print-bw.jpg';
+        $img = $image[$current_competition->Medium];
+
+        return $img;
+    }
+
+    /**
      * Get the Dynamic Pages.
      *
      * These are the pages where we implement javascript to get different competitions and seasons within the page.

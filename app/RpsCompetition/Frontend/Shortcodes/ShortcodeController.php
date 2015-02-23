@@ -772,22 +772,9 @@ final class ShortcodeController extends Controller
         $data['classification'] = $current_competition->Classification;
         $data['select_medium']['selected'] = $current_competition->Medium;
         $data['select_competition']['selected'] = $current_competition->Competition_Date;
-        switch ($current_competition->Medium) {
-            case "Color Digital":
-                $img = '/thumb-comp-digital-color.jpg';
-                break;
-            case "Color Prints":
-                $img = '/thumb-comp-print-color.jpg';
-                break;
-            case "B&W Digital":
-                $img = '/thumb-comp-digital-bw.jpg';
-                break;
-            case "B&W Prints":
-                $img = '/thumb-comp-print-bw.jpg';
-                break;
-            default:
-                $img = '';
-        }
+
+        $img = CommonHelper::getCompetitionThumbnail($current_competition);
+
         $data['image_source'] = CommonHelper::getPluginUrl($img, $this->settings->get('images_dir'));
         $data['theme'] = $current_competition->Theme;
 
