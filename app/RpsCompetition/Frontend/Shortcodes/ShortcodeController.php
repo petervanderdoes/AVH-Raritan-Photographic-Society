@@ -559,8 +559,9 @@ final class ShortcodeController extends Controller
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
-     * @todo: MVC
      */
     public function shortcodeEditTitle($attr, $content, $tag)
     {
@@ -600,9 +601,9 @@ final class ShortcodeController extends Controller
         $data = [];
         $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
 
-        $this->view->display('edit_title.html.twig', ['data' => $data, 'form' => $form->createView()]);
-
         unset($query_entries, $photo_helper);
+
+        return $this->view->fetch('edit_title.html.twig', ['data' => $data, 'form' => $form->createView()]);
     }
 
     /**
@@ -713,8 +714,9 @@ final class ShortcodeController extends Controller
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @see Frontend::actionHandleHttpPostRpsMyEntries
-     * @todo: MVC
      */
     public function shortcodeMyEntries($attr, $content, $tag)
     {
@@ -836,14 +838,15 @@ final class ShortcodeController extends Controller
         if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
             $form->add('add', 'submit', ['label' => 'Add', 'attr' => ['onclick' => 'submit_form("add")']]);
         }
-        if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
-            $form->add('edit', 'submit', ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
-        }
         if ($num_rows > 0) {
             $form->add('delete', 'submit', ['label' => 'Remove', 'attr' => ['onclick' => 'return  confirmSubmit()']]);
+            if ($max_entries_per_member_per_comp > 0) {
+                $form->add('edit', 'submit', ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
+            }
         }
-        $this->view->display('add_entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
         unset($query_entries, $query_competitions, $competition_helper, $photo_helper);
+
+        return $this->view->fetch('add_entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
     }
 
     /**
@@ -984,8 +987,9 @@ final class ShortcodeController extends Controller
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
-     * @todo: MVC
      */
     public function shortcodeUploadImage($attr, $content, $tag)
     {
@@ -1022,6 +1026,7 @@ final class ShortcodeController extends Controller
             $entity->setMediumSubset($medium_subset);
             $form = $this->formFactory->create(new UploadEntryType(), $entity, ['action' => $action, 'attr' => ['id' => 'uploadentry']]);
         }
-        $this->view->display('upload.html.twig', ['form' => $form->createView()]);
+
+        return $this->view->fetch('upload.html.twig', ['form' => $form->createView()]);
     }
 }
