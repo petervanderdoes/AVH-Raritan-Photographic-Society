@@ -825,7 +825,6 @@ final class ShortcodeController extends Controller
                 $form->add('edit', 'submit', ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
             }
         }
-        unset($query_entries, $query_competitions, $competition_helper, $photo_helper);
 
         return $this->view->fetch('add_entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
     }
