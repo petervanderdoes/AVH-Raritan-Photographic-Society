@@ -19,6 +19,7 @@ use RpsCompetition\Forms\Type\UploadEntryType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -362,26 +363,16 @@ class Frontend
                 return;
             }
             $file = $this->request->file('form.file_name');
-            if ($file === null) {
-                $this->settings->set('errmsg', 'You did not select a file to upload');
-                unset($query_entries, $query_competitions, $photo_helper);
-
-                return;
-            }
-
-            if (!$file->isValid()) {
-                $this->settings->set('errmsg', $file->getErrorMessage());
-                unset($query_entries, $query_competitions, $photo_helper);
-
-                return;
-            }
 
             // Verify that the uploaded image is a JPEG
             $uploaded_file_name = $file->getRealPath();
             $uploaded_file_info = getimagesize($uploaded_file_name);
             if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
-                $this->settings->set('errmsg', "Submitted file is not a JPEG image.  Please try again.<br>Click the Browse button to select a .jpg image file before clicking Submit");
-                unset($query_entries, $query_competitions, $photo_helper);
+                $form->get('file_name')
+                     ->addError(new FormError('Submitted file is not a JPEG image. Please try again.'))
+                ;
+                $errors = $form->getErrors();
+                $this->settings->set('formerror', $errors);
 
                 return;
             }
@@ -394,7 +385,6 @@ class Frontend
                 $classification = $this->session->get('myentries/' . $subset . '/classification', null);
             } else {
                 $this->settings->set('errmsg', "Upload Form Error<br>The Selected_Competition cookie is not set.");
-                unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
             }
@@ -405,7 +395,6 @@ class Frontend
                 $max_entries = $recs['Max_Entries'];
             } else {
                 $this->settings->set('errmsg', "Upload Form Error<br>Competition $comp_date/$classification/$medium not found in database<br>");
-                unset($query_entries, $query_competitions, $photo_helper);
 
                 return;
             }
