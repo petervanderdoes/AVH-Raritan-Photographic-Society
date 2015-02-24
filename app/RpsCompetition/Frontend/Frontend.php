@@ -429,6 +429,9 @@ class Frontend
             $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
 
             $user = wp_get_current_user();
+            $file = $this->request->file('form.file_name');
+            $uploaded_file_name = $file->getRealPath();
+            $uploaded_file_info = getimagesize($uploaded_file_name);
             $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
             // Need to create the destination folder?
             CommonHelper::createDirectory($full_server_path);
