@@ -72,7 +72,13 @@ final class General extends OptionsAbstract
     }
 
     /**
-     * @inheritdoc
+     *  validate all values within the option
+     *
+     * @param array $dirty
+     * @param array $clean
+     * @param array $old
+     *
+     * @return array
      */
     protected function validateOption($dirty, $clean, $old)
     {
