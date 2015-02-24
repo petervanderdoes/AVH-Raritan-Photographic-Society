@@ -341,7 +341,9 @@ class AVH_RPS_Client
         $this->container->bind(
             'formFactory',
             function ($app) {
-                $validator = Validation::createValidator();
+                $validator_builder = Validation::createValidatorBuilder();
+                $validator_builder->setApiVersion(Validation::API_VERSION_2_5);
+                $validator = $validator_builder->getValidator();
                 $formFactory = SymfonyForms::createFormFactoryBuilder()
                                            ->addExtension(new ValidatorExtension($validator))
                                            ->addExtension(new HttpFoundationExtension())
