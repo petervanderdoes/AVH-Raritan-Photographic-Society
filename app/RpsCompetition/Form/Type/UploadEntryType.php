@@ -2,6 +2,7 @@
 
 namespace RpsCompetition\Form\Type;
 
+use Avh\Validator\Constraints\IsJpeg;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -44,8 +45,9 @@ class UploadEntryType extends AbstractType
                         'label'       => 'File Name (required)',
                         'required'    => false,
                         'constraints' => [
-                            new Assert\Image(['message' => 'The selected file is not an image file.']),
-                            new Assert\NotBlank(['message' => 'An image file needs to be selected for upload.'])
+                            new Assert\File(),
+                            new Assert\NotBlank(['message' => 'An image file needs to be selected for upload.']),
+                            new IsJpeg()
                         ],
                         'attr'        => [
                             'accept' => 'image/*'

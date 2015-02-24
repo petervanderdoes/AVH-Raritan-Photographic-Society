@@ -19,7 +19,6 @@ use RpsCompetition\Form\Type\UploadEntryType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -362,20 +361,6 @@ class Frontend
 
                 return;
             }
-            $file = $this->request->file('form.file_name');
-
-            // Verify that the uploaded image is a JPEG
-            $uploaded_file_name = $file->getRealPath();
-            $uploaded_file_info = getimagesize($uploaded_file_name);
-            if ($uploaded_file_info === false || $uploaded_file_info[2] != IMAGETYPE_JPEG) {
-                $form->get('file_name')
-                     ->addError(new FormError('Submitted file is not a JPEG image. Please try again.'))
-                ;
-                $errors = $form->getErrors();
-                $this->settings->set('formerror', $errors);
-
-                return;
-            }
 
             // Retrieve and parse the selected competition cookie
             if ($this->session->has('myentries')) {
@@ -405,6 +390,8 @@ class Frontend
             } else {
                 $title = trim($this->request->input('form.title'));
             }
+
+            $file = $this->request->file('form.file_name');
             $client_file_name = $file->getClientOriginalName();
 
             // Before we go any further, make sure the title is not a duplicate of
