@@ -975,13 +975,6 @@ final class ShortcodeController extends Controller
     {
         global $post;
 
-        // Error messages
-        if ($this->settings->has('errmsg')) {
-            echo '<div id="errmsg">';
-            echo $this->settings->get('errmsg');
-            echo '</div>';
-        }
-
         $action = home_url('/' . get_page_uri($post->ID));
         $action .= '/?post=1';
         $medium_subset = "Digital";

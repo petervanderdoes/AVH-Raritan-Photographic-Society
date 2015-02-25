@@ -19,6 +19,7 @@ use RpsCompetition\Form\Type\UploadEntryType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -369,7 +370,8 @@ class Frontend
                 $medium = $this->session->get('myentries/' . $subset . '/medium', null);
                 $classification = $this->session->get('myentries/' . $subset . '/classification', null);
             } else {
-                $this->settings->set('errmsg', "Upload Form Error<br>The Selected_Competition cookie is not set.");
+                $error_message = 'Missing "myentries" in session.';
+                $this->setFormError($form, $error_message);
 
                 return;
             }
@@ -379,7 +381,8 @@ class Frontend
                 $comp_id = $recs['ID'];
                 $max_entries = $recs['Max_Entries'];
             } else {
-                $this->settings->set('errmsg', "Upload Form Error<br>Competition $comp_date/$classification/$medium not found in database<br>");
+                $error_message = "Competition $comp_date/$classification/$medium not found in database";
+                $this->setFormError($form, $error_message);
 
                 return;
             }
@@ -398,8 +401,8 @@ class Frontend
             // an entry already submitted to this competition. Duplicate title result in duplicate
             // file names on the server
             if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
-                $this->settings->set('errmsg', "You have already submitted an entry with a title of \"" . $title . "\" in this competition<br>Please submit your entry again with a different title.");
-                unset($query_entries, $query_competitions, $photo_helper);
+                $error_message = "You have already submitted an entry with a title of \"" . $title . "\" in this competition. Please submit your entry again with a different title.";
+                $this->setFormError($form, $error_message, 'title');
 
                 return;
             }
@@ -409,8 +412,8 @@ class Frontend
             // maximum images per competition by having two upload windows open simultaneously.
             $max_per_id = $query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
             if ($max_per_id >= $max_entries) {
-                $this->settings->set('errmsg', "You have already submitted the maximum of $max_entries entries into this competition<br>You must Remove an image before you can submit another");
-                unset($query_entries, $query_competitions, $photo_helper);
+                $error_message = "You have already submitted the maximum of $max_entries entries into this competition. You must Remove an image before you can submit another";
+                $this->setFormError($form, $error_message);
 
                 return;
             }
@@ -418,8 +421,8 @@ class Frontend
             $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
             if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
                 $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
-                $this->settings->set('errmsg', "You have already submitted the maximum of $max_entries_member_date entries for this competition date<br>You must Remove an image before you can submit another");
-                unset($query_entries, $query_competitions, $photo_helper);
+                $error_message = "You have already submitted the maximum of $max_entries_member_date entries for this competition date. You must Remove an image before you can submit another";
+                $this->setFormError($form, $error_message);
 
                 return;
             }
@@ -448,18 +451,18 @@ class Frontend
                 try {
                     $file->move($full_server_path, $dest_name . '.jpg');
                 } catch (FileException $e) {
-                    $this->settings->set('errmsg', $e->getMessage());
-                    unset($query_entries, $query_competitions, $photo_helper);
+                    $this->setFormError($form, $e->getMessage());
 
                     return;
                 }
             }
+
             $server_file_name = $relative_server_path . '/' . $dest_name . '.jpg';
             $data = ['Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name];
             $result = $query_entries->addEntry($data, get_current_user_id());
             if ($result === false) {
-                $this->settings->set('errmsg', "Failed to INSERT entry record into database");
-                unset($query_entries, $query_competitions, $photo_helper);
+                $error_message = 'Failed to INSERT entry record into database';
+                $this->setFormError($form, $error_message);
 
                 return;
             }
@@ -469,7 +472,6 @@ class Frontend
             wp_redirect($redirect_to . '/?' . $query);
             exit();
         }
-        unset($query_entries, $query_competitions, $photo_helper);
     }
 
     /**
@@ -830,6 +832,28 @@ class Frontend
         }
 
         return $title;
+    }
+
+    /**
+     * Set the error for the form.
+     *
+     * @param \Symfony\Component\Form\Form $form
+     * @param string                       $error_message
+     * @param string|null                  $form_field
+     *
+     * @return void
+     */
+    public function setFormError($form, $error_message, $form_field = null)
+    {
+        if ($form_field === null) {
+            $form->addError(new FormError('Error: ' . $error_message));
+        } else {
+            $form->get($form_field)
+                 ->addError(new FormError($error_message))
+            ;
+        }
+        $errors = $form->getErrors();
+        $this->settings->set('formerror', $errors);
     }
 
     /**

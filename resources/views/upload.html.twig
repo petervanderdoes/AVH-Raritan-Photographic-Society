@@ -2,6 +2,7 @@
 <div class="form_frame">
     <h4>Submit Your Image</h4>
 
+    <span class="form_error">{{ form_errors(form) }}</span>
     <div class="form_row">
         <div class="form_col form_field_label">{{ form_label(form.title) }}</div>
         <div class="form_col form_field">{{ form_widget(form.title) }}<br/>
