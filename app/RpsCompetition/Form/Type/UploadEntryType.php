@@ -43,7 +43,6 @@ class UploadEntryType extends AbstractType
                     'file',
                     [
                         'label'       => 'File Name (required)',
-                        'required'    => false,
                         'constraints' => [
                             new Assert\File(),
                             new Assert\NotBlank(['message' => 'An image file needs to be selected for upload.']),
