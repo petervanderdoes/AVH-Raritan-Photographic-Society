@@ -343,6 +343,7 @@ class AVH_RPS_Client
             function ($app) {
                 $validator_builder = Validation::createValidatorBuilder();
                 $validator_builder->setApiVersion(Validation::API_VERSION_2_5);
+                $validator_builder->addMethodMapping('loadValidatorMetadata');
                 $validator = $validator_builder->getValidator();
                 $formFactory = SymfonyForms::createFormFactoryBuilder()
                                            ->addExtension(new ValidatorExtension($validator))
