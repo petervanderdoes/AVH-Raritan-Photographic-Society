@@ -23,6 +23,7 @@ use RpsCompetition\Frontend\Requests;
 use RpsCompetition\Frontend\Shortcodes;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
@@ -278,7 +279,13 @@ class AVH_RPS_Client
      */
     private function registerBindingShortCodes()
     {
-        $this->container->bind('ShortcodeRouter', 'RpsCompetition\Frontend\Shortcodes\ShortcodeRouter');
+        $this->container->bind(
+            'ShortcodeRouter',
+            function ($app) {
+                return new ShortcodeRouter();
+            }
+        )
+        ;;
         $this->container->bind(
             'ShortcodeController',
             function ($app) {
@@ -291,6 +298,30 @@ class AVH_RPS_Client
             'ShortcodeModel',
             function ($app) {
                 return new ShortcodeModel(
+                    $app->make('QueryCompetitions'),
+                    $app->make('QueryEntries'),
+                    $app->make('QueryMiscellaneous'),
+                    $app->make('PhotoHelper'),
+                    $app->make('SeasonHelper'),
+                    $app->make('CompetitionHelper'),
+                    $app->make('Session'),
+                    $app->make('formFactory'),
+                    $app->make('Settings')
+                );
+            }
+        )
+        ;
+        $this->container->bind(
+            'MyEntriesController',
+            function ($app) {
+                return new Shortcodes\MyEntries\MyEntries($app);
+            }
+        )
+        ;
+        $this->container->bind(
+            'MyEntriesModel',
+            function ($app) {
+                return new Shortcodes\MyEntries\MyEntriesModel(
                     $app->make('QueryCompetitions'),
                     $app->make('QueryEntries'),
                     $app->make('QueryMiscellaneous'),

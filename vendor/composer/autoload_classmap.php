@@ -895,6 +895,8 @@ return array(
     'RpsCompetition\\Form\\Type\\UploadEntryType' => $baseDir . '/app/RpsCompetition/Form/Type/UploadEntryType.php',
     'RpsCompetition\\Frontend\\Frontend' => $baseDir . '/app/RpsCompetition/Frontend/Frontend.php',
     'RpsCompetition\\Frontend\\Requests' => $baseDir . '/app/RpsCompetition/Frontend/Requests.php',
+    'RpsCompetition\\Frontend\\Shortcodes\\MyEntries\\MyEntries' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/MyEntries/MyEntries.php',
+    'RpsCompetition\\Frontend\\Shortcodes\\MyEntries\\MyEntriesModel' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/MyEntries/MyEntriesModel.php',
     'RpsCompetition\\Frontend\\Shortcodes\\ShortcodeController' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/ShortcodeController.php',
     'RpsCompetition\\Frontend\\Shortcodes\\ShortcodeModel' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/ShortcodeModel.php',
     'RpsCompetition\\Frontend\\Shortcodes\\ShortcodeRouter' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/ShortcodeRouter.php',

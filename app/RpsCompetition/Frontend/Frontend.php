@@ -988,6 +988,7 @@ class Frontend
         /** @var ShortcodeRouter $shortcode */
         $shortcode = $this->container->make('ShortcodeRouter');
         $shortcode->setShortcodeController($this->container->make('ShortcodeController'));
+        $shortcode->setContainer($this->container);
         $shortcode->initializeShortcodes();
     }
 
