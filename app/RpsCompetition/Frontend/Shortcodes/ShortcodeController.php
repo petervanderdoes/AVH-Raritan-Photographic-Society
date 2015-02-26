@@ -4,12 +4,9 @@ namespace RpsCompetition\Frontend\Shortcodes;
 use Avh\Html\FormBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
-use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
 use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Form\Type\UploadEntryType;
 use RpsCompetition\Libs\Controller;
 
@@ -51,7 +48,13 @@ final class ShortcodeController extends Controller
         $template = [];
         $template[] = $this->settings->get('template_dir');
         $template[] = $this->settings->get('template_dir') . '/social-networks';
-        $this->setTemplateEngine($this->container->make('Templating', ['template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']));
+        $this->setTemplateEngine(
+            $this->container->make(
+                'Templating',
+                ['template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']
+            )
+        )
+        ;
         $this->view = $this->container->make('ShortcodeView');
 
         $this->html = $this->container->make('HtmlBuilder');
@@ -100,7 +103,11 @@ final class ShortcodeController extends Controller
             $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
         }
 
-        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
+        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate(
+            $season_start_date,
+            $season_end_date
+        )
+        ;
         $club_competition_results = CommonHelper::arrayMsort(
             $club_competition_results_unsorted,
             [
@@ -203,7 +210,10 @@ final class ShortcodeController extends Controller
 
                         // Display the members annual average score
                         if ($total_score > 0 && $num_scores > 0) {
-                            echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                            echo "<td align=\"center\" class=\"$row_style\">" . sprintf(
+                                    "%3.1f",
+                                    $total_score / $num_scores
+                                ) . "</td>\n";
                         } else {
                             echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                         }
@@ -309,7 +319,10 @@ final class ShortcodeController extends Controller
 
             // Display the members annual average score
             if ($total_score > 0 && $num_scores > 0) {
-                echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                echo "<td align=\"center\" class=\"$row_style\">" . sprintf(
+                        "%3.1f",
+                        $total_score / $num_scores
+                    ) . "</td>\n";
             } else {
                 echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
             }
@@ -477,7 +490,9 @@ final class ShortcodeController extends Controller
                 echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\">{$medium}</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
 
-                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities(
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities(
+                        $title
+                    ) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities(
                         $title
                     ) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
@@ -491,7 +506,10 @@ final class ShortcodeController extends Controller
                 echo '<input type="submit" name="submit" value="Update">';
                 echo '<input type="submit" name="cancel" value="Cancel">';
             }
-            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(['m', 'id'], wp_get_referer()) . '" />';
+            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(
+                    ['m', 'id'],
+                    wp_get_referer()
+                ) . '" />';
             echo '<input type="hidden" name="allentries" value="', implode(',', $all_entries) . '" />';
             echo '<input type="hidden" name="banquetids" value="' . $banquet_id_string . '" />';
             echo '</form>';
@@ -596,7 +614,12 @@ final class ShortcodeController extends Controller
             $entity->setServerFileName($server_file_name);
             $entity->setM($medium_subset);
             $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
-            $form = $this->formFactory->create(new EditTitleType($entity), $entity, ['action' => $action, 'attr' => ['id' => 'edittitle']]);
+            $form = $this->formFactory->create(
+                new EditTitleType($entity),
+                $entity,
+                ['action' => $action, 'attr' => ['id' => 'edittitle']]
+            )
+            ;
         }
         $data = [];
         $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
@@ -646,7 +669,11 @@ final class ShortcodeController extends Controller
              *
              * @see Frontend::filterWpseoPreAnalysisPostsContent
              */
-            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
+                'didFilterWpseoPreAnalysisPostsContent',
+                false
+            )
+            ;
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $entries = $this->model->getAllEntries($selected_date, $selected_date);
                 $data = $this->model->getFacebookThumbs($entries);
@@ -691,7 +718,11 @@ final class ShortcodeController extends Controller
              *
              * @see Frontend::filterWpseoPreAnalysisPostsContent
              */
-            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
+            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
+                'didFilterWpseoPreAnalysisPostsContent',
+                false
+            )
+            ;
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $entries = $this->model->getWinners($selected_date);
                 $data = $this->model->getFacebookThumbs($entries);
@@ -825,7 +856,9 @@ final class ShortcodeController extends Controller
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities(
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities(
+                        $title
+                    ) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities(
                         $title
                     ) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
@@ -873,7 +906,12 @@ final class ShortcodeController extends Controller
             $entity = new EntityFormUploadEntry();
             $entity->setWpGetReferer($ref);
             $entity->setMediumSubset($medium_subset);
-            $form = $this->formFactory->create(new UploadEntryType(), $entity, ['action' => $action, 'attr' => ['id' => 'uploadentry']]);
+            $form = $this->formFactory->create(
+                new UploadEntryType(),
+                $entity,
+                ['action' => $action, 'attr' => ['id' => 'uploadentry']]
+            )
+            ;
         }
 
         return $this->view->fetch('upload.html.twig', ['form' => $form->createView()]);
