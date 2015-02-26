@@ -294,7 +294,7 @@ class AVH_RPS_Client
         // General Shortcode classes
         $this->container->bind(
             'ShortcodeRouter',
-            function ($app) {
+            function () {
                 return new ShortcodeRouter();
             }
         )
@@ -339,8 +339,6 @@ class AVH_RPS_Client
         $this->container->bind(
             'MyEntriesController',
             function ($app) {
-                $settings = $app->make('Settings');
-
                 return new Shortcodes\MyEntries\MyEntries(
                     $app->make('ShortcodeView'), $app->make('MyEntriesModel')
                 );
