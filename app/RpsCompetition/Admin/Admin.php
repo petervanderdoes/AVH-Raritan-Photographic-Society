@@ -3,8 +3,8 @@ namespace RpsCompetition\Admin;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
-use Illuminate\Container\Container;
 use Illuminate\Http\Request;
+use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\ListTable as CompetitionListTable;
@@ -47,9 +47,9 @@ final class Admin
     /**
      * Constructor
      *
-     * @param Container $container
+     * @param Application $container
      */
-    public function __construct(Container $container)
+    public function __construct(Application $container)
     {
         $this->container = $container;
 

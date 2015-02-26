@@ -2,9 +2,9 @@
 namespace RpsCompetition\Frontend;
 
 use Avh\Network\Session;
-use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
+use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
@@ -35,7 +35,7 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class Frontend
 {
-    /** @var Container */
+    /** @var Application */
     private $container;
     /** @var Core */
     private $core;
@@ -57,9 +57,9 @@ class Frontend
     /**
      * Constructor
      *
-     * @param Container $container
+     * @param Application $container
      */
-    public function __construct(Container $container)
+    public function __construct(Application $container)
     {
         $this->container = $container;
         $this->session = $container->make('Session');

@@ -3,6 +3,7 @@ namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Html\FormBuilder;
 use Illuminate\Container\Container as IlluminateContainer;
+use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
@@ -35,9 +36,9 @@ final class ShortcodeController extends Controller
     /**
      * Constructor
      *
-     * @param IlluminateContainer $container
+     * @param Application $container
      */
-    public function __construct(IlluminateContainer $container)
+    public function __construct(Application $container)
     {
         $this->setContainer($container);
         $this->setSettings($this->container->make('Settings'));

@@ -10,8 +10,8 @@
  * GitHub Branch:     master
  * Copyright 2011-2014 Peter van der Does (email : peter@avirtualhome.com)
  */
-use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
+use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Constants;
@@ -62,7 +62,7 @@ $rps_basename = plugin_basename($plugin);
 class AVH_RPS_Client
 {
     /**
-     * @var Container
+     * @var Application
      */
     private $container;
     /** @var  Settings */
@@ -76,7 +76,7 @@ class AVH_RPS_Client
      */
     public function __construct($dir, $basename)
     {
-        $this->container = new Container();
+        $this->container = new Application();
 
         $this->registerBindings();
         $upload_dir_info = wp_upload_dir();
@@ -334,35 +334,7 @@ class AVH_RPS_Client
             }
         )
         ;
-
-        // My Entries Shortcode
-        $this->container->bind(
-            'MyEntriesController',
-            function ($app) {
-                return new Shortcodes\MyEntries\MyEntries(
-                    $app->make('ShortcodeView'), $app->make('MyEntriesModel')
-                );
-            }
-        )
-        ;
-
-        $this->container->bind(
-            'MyEntriesModel',
-            function ($app) {
-                return new Shortcodes\MyEntries\MyEntriesModel(
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryEntries'),
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('PhotoHelper'),
-                    $app->make('SeasonHelper'),
-                    $app->make('CompetitionHelper'),
-                    $app->make('Session'),
-                    $app->make('formFactory'),
-                    $app->make('Settings')
-                );
-            }
-        )
-        ;
+        //$this->container->register('MyEntriesServiceProvider');
     }
 
     /**

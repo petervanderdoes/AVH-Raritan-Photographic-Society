@@ -3,6 +3,7 @@
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 use Illuminate\Container\Container as IlluminateContainer;
+use RpsCompetition\Application;
 use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -25,9 +26,9 @@ class SocialNetworksController extends Controller
     /**
      * Constructor
      *
-     * @param IlluminateContainer $container
+     * @param Application $container
      */
-    public function __construct(IlluminateContainer $container)
+    public function __construct(Application $container)
     {
         $this->setContainer($container);
         $this->setSettings($this->container->make('Settings'));

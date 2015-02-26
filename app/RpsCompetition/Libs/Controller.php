@@ -4,6 +4,7 @@ namespace RpsCompetition\Libs;
 
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Http\Request;
+use RpsCompetition\Application;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Options\General;
 use RpsCompetition\Settings;
@@ -22,7 +23,7 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class Controller
 {
-    /** @var  \Illuminate\Container\Container $container */
+    /** @var  Application $container */
     protected $container;
     /** @var   \RpsCompetition\Options\General $options */
     protected $options;
@@ -55,9 +56,9 @@ class Controller
     /**
      * Sets the Container associated with this Controller.
      *
-     * @param IlluminateContainer $container
+     * @param Application $container
      */
-    public function setContainer(IlluminateContainer $container)
+    public function setContainer(Application $container)
     {
         $this->container = $container;
     }
