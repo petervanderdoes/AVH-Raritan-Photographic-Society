@@ -90,15 +90,15 @@ class AVH_RPS_Client
         $this->settings->set('images_dir', $dir . '/assets/images/');
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
         if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
-            add_action('plugins_loaded', array($this, 'load'));
+            add_action('plugins_loaded', [$this, 'load']);
         }
     }
 
     public function load()
     {
         if (is_admin()) {
-            add_action('activate_' . $this->settings->get('plugin_basename'), array($this, 'pluginActivation'));
-            add_action('deactivate_' . $this->settings->get('plugin_basename'), array($this, 'pluginDeactivation'));
+            add_action('activate_' . $this->settings->get('plugin_basename'), [$this, 'pluginActivation']);
+            add_action('deactivate_' . $this->settings->get('plugin_basename'), [$this, 'pluginDeactivation']);
 
             new Admin($this->container);
         } else {
@@ -149,12 +149,12 @@ class AVH_RPS_Client
         $this->container->singleton(
             'Session',
             function () {
-                return new Avh\Network\Session(array('name' => 'raritan_' . COOKIEHASH));
+                return new Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
             }
         )
         ;
         $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
-        $this->container->instance('IlluminateRequest', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
+        $this->container->instance('IlluminateRequest', forward_static_call(['Illuminate\Http\Request', 'createFromGlobals']));
 
         /**
          * Setup Classes
@@ -228,7 +228,7 @@ class AVH_RPS_Client
                 $template_dir = $param['template_dir'];
                 $cache_dir = $param['cache_dir'];
                 if (WP_LOCAL_DEV !== true) {
-                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir), array('cache' => $cache_dir));
+                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir), ['cache' => $cache_dir]);
                 } else {
                     return new Twig_Environment(new Twig_Loader_Filesystem($template_dir));
                 }
@@ -290,7 +290,17 @@ class AVH_RPS_Client
         $this->container->bind(
             'ShortcodeModel',
             function ($app) {
-                return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'), $app->make('SeasonHelper'));
+                return new ShortcodeModel(
+                    $app->make('QueryCompetitions'),
+                    $app->make('QueryEntries'),
+                    $app->make('QueryMiscellaneous'),
+                    $app->make('PhotoHelper'),
+                    $app->make('SeasonHelper'),
+                    $app->make('CompetitionHelper'),
+                    $app->make('Session'),
+                    $app->make('formFactory'),
+                    $app->make('Settings')
+                );
             }
         )
         ;
