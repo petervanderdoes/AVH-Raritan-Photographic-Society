@@ -2,6 +2,10 @@
 
 namespace RpsCompetition\Entity\Forms;
 
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
 /**
  * Class UploadEntry
  *
@@ -13,6 +17,14 @@ class UploadEntry
     protected $medium_subset;
     protected $title;
     protected $wp_get_referer;
+
+    /**
+     * @param ClassMetadata $metadata
+     */
+    public static function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        //$metadata->addConstraint(new Assert\Callback('validate'));
+    }
 
     /**
      * @return string
@@ -76,5 +88,15 @@ class UploadEntry
     public function setWpGetReferer($wp_get_referer)
     {
         $this->wp_get_referer = $wp_get_referer;
+    }
+
+    public function validate(ExecutionContextInterface $context)
+    {
+        if ($this->getTitle() == 'p') {
+            $context->buildViolation('This name sounds totally fake!')
+                    ->atPath('title')
+                    ->addViolation()
+            ;
+        }
     }
 }
