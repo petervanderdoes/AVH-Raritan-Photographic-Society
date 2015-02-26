@@ -3,8 +3,8 @@
 namespace RpsCompetition\Entity\Forms;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 /**
  * Class UploadEntry
@@ -23,7 +23,7 @@ class UploadEntry
      */
     public static function loadValidatorMetadata(ClassMetadata $metadata)
     {
-        //$metadata->addConstraint(new Assert\Callback('validate'));
+        $metadata->addConstraint(new Assert\Callback('validate'));
     }
 
     /**
