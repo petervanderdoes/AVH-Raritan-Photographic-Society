@@ -52,7 +52,7 @@ final class ShortcodeController extends Controller
         $template[] = $this->settings->get('template_dir');
         $template[] = $this->settings->get('template_dir') . '/social-networks';
         $this->setTemplateEngine($this->container->make('Templating', ['template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']));
-        $this->view = $this->container->make('ShortcodeView', ['template_dir' => $this->settings->get('template_dir'), 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']);
+        $this->view = $this->container->make('ShortcodeView');
 
         $this->html = $this->container->make('HtmlBuilder');
         $this->formBuilder = new FormBuilder($this->html);

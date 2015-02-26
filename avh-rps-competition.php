@@ -155,7 +155,11 @@ class AVH_RPS_Client
         )
         ;
         $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
-        $this->container->instance('IlluminateRequest', forward_static_call(['Illuminate\Http\Request', 'createFromGlobals']));
+        $this->container->instance(
+            'IlluminateRequest',
+            forward_static_call(['Illuminate\Http\Request', 'createFromGlobals'])
+        )
+        ;
 
         /**
          * Setup Classes
@@ -172,7 +176,9 @@ class AVH_RPS_Client
         $this->container->bind(
             'FrontendRequests',
             function ($app) {
-                return new Requests($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
+                return new Requests(
+                    $app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session')
+                );
             }
         )
         ;
@@ -203,7 +209,13 @@ class AVH_RPS_Client
         $this->container->bind(
             'WpSeoHelper',
             function ($app) {
-                return new WpseoHelper($app->make('Settings'), $app->make('RpsDb'), $app->make('QueryCompetitions'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+                return new WpseoHelper(
+                    $app->make('Settings'),
+                    $app->make('RpsDb'),
+                    $app->make('QueryCompetitions'),
+                    $app->make('QueryMiscellaneous'),
+                    $app->make('PhotoHelper')
+                );
             }
         )
         ;
@@ -279,6 +291,7 @@ class AVH_RPS_Client
      */
     private function registerBindingShortCodes()
     {
+        // General Shortcode classes
         $this->container->bind(
             'ShortcodeRouter',
             function ($app) {
@@ -311,13 +324,30 @@ class AVH_RPS_Client
             }
         )
         ;
+
         $this->container->bind(
-            'MyEntriesController',
+            'ShortcodeView',
             function ($app) {
-                return new Shortcodes\MyEntries\MyEntries($app);
+                $settings = $app->make('Settings');
+
+                return new ShortcodeView($settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/');
             }
         )
         ;
+
+        // My Entries Shortcode
+        $this->container->bind(
+            'MyEntriesController',
+            function ($app) {
+                $settings = $app->make('Settings');
+
+                return new Shortcodes\MyEntries\MyEntries(
+                    $app->make('ShortcodeView'), $app->make('MyEntriesModel')
+                );
+            }
+        )
+        ;
+
         $this->container->bind(
             'MyEntriesModel',
             function ($app) {
@@ -332,14 +362,6 @@ class AVH_RPS_Client
                     $app->make('formFactory'),
                     $app->make('Settings')
                 );
-            }
-        )
-        ;
-
-        $this->container->bind(
-            'ShortcodeView',
-            function ($app, $param) {
-                return new ShortcodeView($param['template_dir'], $param['cache_dir']);
             }
         )
         ;

@@ -2,22 +2,29 @@
 
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
-use Illuminate\Container\Container as IlluminateContainer;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Libs\Controller;
 
 class MyEntries extends Controller
 {
+    /**
+     * @var MyEntriesModel
+     */
+    private $model;
+    /**
+     * @var ShortcodeView
+     */
     private $view;
 
     /**
-     * @param IlluminateContainer $container
+     * @param ShortcodeView  $view
+     * @param MyEntriesModel $model
      */
-    public function __construct(IlluminateContainer $container)
+    public function __construct(ShortcodeView $view, MyEntriesModel $model)
     {
-        $this->setContainer($container);
-        $settings = $container->make('Settings');
-        $this->view = $container->make('ShortcodeView', ['template_dir' => $settings->get('template_dir'), 'cache_dir' => $settings->get('upload_dir') . '/twig-cache/']);
-        $this->model = $container->make('MyEntriesModel');
+
+        $this->view = $view;
+        $this->model = $model;
     }
 
     /**
