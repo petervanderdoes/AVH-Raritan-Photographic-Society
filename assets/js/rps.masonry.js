@@ -1,5 +1,4 @@
 (function ($, window, document) {
-    // The $ is now locally scoped
     $(document).ready(function () {
         var $container = $('.gallery-masonry').masonry({
             itemSelector: '.gallery-item-masonry',
@@ -7,7 +6,6 @@
             isFitWidth: true
         });
         if (typeof getRpsMasonryItems == 'function') {
-            // reveal initial images
             var $items = getRpsMasonryItems();
             $container.masonryImagesReveal($items);
         }
