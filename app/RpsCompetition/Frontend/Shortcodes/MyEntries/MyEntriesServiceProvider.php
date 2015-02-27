@@ -1,23 +1,42 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
+use Illuminate\Support\ServiceProvider;
+
 /**
  * Class MyEntriesServiceProvider
  *
  * @package RpsCompetition\Frontend\Shortcodes\MyEntries
  */
-class MyEntriesServiceProvider
+class MyEntriesServiceProvider extends ServiceProvider
 {
-    private $container;
+    /**
+     * Indicates if loading of the provider is deferred.
+     *
+     * @var bool
+     */
+    protected $defer = true;
 
-    public function __construct($container) {
-        $this->container = $container;
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return [];
     }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
     public function register()
     {
         // My Entries Shortcode
-        $this->container->bind(
-            'MyEntriesController',
+        $this->app->bind(
+            'MyEntries',
             function ($app) {
                 return new MyEntries(
                     $app->make('ShortcodeView'), $app->make('MyEntriesModel')
@@ -26,7 +45,7 @@ class MyEntriesServiceProvider
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'MyEntriesModel',
             function ($app) {
                 return new MyEntriesModel(
