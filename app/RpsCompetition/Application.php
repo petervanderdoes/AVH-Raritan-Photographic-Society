@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: pdoes
- * Date: 2/26/15
- * Time: 2:27 PM
- */
 
 namespace RpsCompetition;
 
