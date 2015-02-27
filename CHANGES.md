@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.5-dev.1
+* Preparation for new development cycle.
+
 #### Version 2.0.4
 * Split the sitemap for entries and winners per year.
 * Send 404 response code for the old entries and winners sitemap.
