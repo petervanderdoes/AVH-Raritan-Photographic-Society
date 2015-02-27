@@ -70,7 +70,13 @@ class Helper
         CommonHelper::createDirectory($thumb_dir);
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->doResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
+            $this->doResizeImage(
+                $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'],
+                $thumb_dir,
+                $thumb_name,
+                $size
+            )
+            ;
         }
     }
 
@@ -108,7 +114,12 @@ class Helper
 
         // Remove thumbnails
         $competition_record = $query_competitions->getCompetitionById($entry->Competition_ID);
-        $competition_path = $this->request->server('DOCUMENT_ROOT') . $this->getCompetitionPath($competition_record->Competition_Date, $competition_record->Classification, $competition_record->Medium);
+        $competition_path = $this->request->server('DOCUMENT_ROOT') . $this->getCompetitionPath(
+                $competition_record->Competition_Date,
+                $competition_record->Classification,
+                $competition_record->Medium
+            )
+        ;
         $file_parts = pathinfo($entry->Server_File_Name);
         $thumbnail_path = $competition_path . "/thumbnails";
 

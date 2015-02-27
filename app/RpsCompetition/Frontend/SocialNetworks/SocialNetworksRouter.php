@@ -30,7 +30,7 @@ final class SocialNetworksRouter
     /**
      * Constructor
      *
-     * @param Settings                 $settings
+     * @param Settings $settings
      * @param SocialNetworksController $controller
      */
     public function __construct(Settings $settings, SocialNetworksController $controller)
@@ -51,7 +51,13 @@ final class SocialNetworksRouter
     {
         $rps_social_buttons_script = $data['script'];
 
-        wp_register_script('rps-competition.social-buttons.script', CommonHelper::getPluginUrl($rps_social_buttons_script, $this->settings->get('javascript_dir')), [], 'to_remove', true);
+        wp_register_script(
+            'rps-competition.social-buttons.script',
+            CommonHelper::getPluginUrl($rps_social_buttons_script, $this->settings->get('javascript_dir')),
+            [],
+            'to_remove',
+            true
+        );
         wp_enqueue_script('rps-competition.social-buttons.script');
 
         add_action('wp_head', [$this->controller, 'actionWpHead']);

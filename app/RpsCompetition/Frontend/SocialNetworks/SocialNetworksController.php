@@ -2,7 +2,6 @@
 
 namespace RpsCompetition\Frontend\SocialNetworks;
 
-use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Application;
 use RpsCompetition\Libs\Controller;
 
@@ -33,10 +32,26 @@ class SocialNetworksController extends Controller
         $this->setContainer($container);
         $this->setSettings($this->container->make('Settings'));
         $this->setOptions($this->container->make('OptionsGeneral'));
-        $this->setTemplateEngine($this->container->make('Templating', ['template_dir' => $this->settings->get('template_dir') . '/social-networks', 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']));
+        $this->setTemplateEngine(
+            $this->container->make(
+                'Templating',
+                [
+                    'template_dir' => $this->settings->get('template_dir') . '/social-networks',
+                    'cache_dir'    => $this->settings->get('upload_dir') . '/twig-cache/'
+                ]
+            )
+        )
+        ;
 
         $this->model = new SocialNetworksModel();
-        $this->view = $this->container->make('SocialNetworksView', ['template_dir' => $this->settings->get('template_dir'), 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']);
+        $this->view = $this->container->make(
+            'SocialNetworksView',
+            [
+                'template_dir' => $this->settings->get('template_dir'),
+                'cache_dir'    => $this->settings->get('upload_dir') . '/twig-cache/'
+            ]
+        )
+        ;
     }
 
     /**

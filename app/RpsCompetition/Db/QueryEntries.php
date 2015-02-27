@@ -247,7 +247,15 @@ class QueryEntries
          * @var string  $order
          * @var boolean $count
          */
-        $defaults = ['join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false];
+        $defaults = [
+            'join'    => '',
+            'where'   => '1=1',
+            'offset'  => '',
+            'number'  => '',
+            'orderby' => 'ID',
+            'order'   => 'ASC',
+            'count'   => false
+        ];
         $query_vars = wp_parse_args($query_vars, $defaults);
         extract($query_vars, EXTR_SKIP);
 
@@ -304,7 +312,11 @@ class QueryEntries
             }
             $data = stripslashes_deep($data);
             if (false === $this->rpsdb->update('entries', $data, $where)) {
-                return new \WP_Error('db_update_error', 'Could not update entry in the database', $this->rpsdb->last_error);
+                return new \WP_Error(
+                    'db_update_error',
+                    'Could not update entry in the database',
+                    $this->rpsdb->last_error
+                );
             }
         }
 

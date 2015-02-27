@@ -94,8 +94,15 @@ class Requests
                 $selected_season = esc_attr($this->request->input('selected_season'));
                 break;
             default:
-                if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date, 'Y-m-d'))) {
-                    $last_scored = $query_competitions->query(['where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1]);
+                if ($query_var_selected_date === false || (!CommonHelper::isValidDate(
+                        $query_var_selected_date,
+                        'Y-m-d'
+                    ))
+                ) {
+                    $last_scored = $query_competitions->query(
+                        ['where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1]
+                    )
+                    ;
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $selected_date = $date_object->format(('Y-m-d'));
                     $redirect = true;
@@ -164,8 +171,20 @@ class Requests
                 $selected_season = esc_attr($this->request->input('selected_season'));
                 break;
             default:
-                if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date, 'Y-m-d'))) {
-                    $last_scored = $query_competitions->query(['where' => 'Scored="Y" AND Special_Event="N"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1]);
+                if ($query_var_selected_date === false || (!CommonHelper::isValidDate(
+                        $query_var_selected_date,
+                        'Y-m-d'
+                    ))
+                ) {
+                    $last_scored = $query_competitions->query(
+                        [
+                            'where' => 'Scored="Y" AND Special_Event="N"',
+                            'orderby' => 'Competition_Date',
+                            'order' => 'DESC',
+                            'number' => 1
+                        ]
+                    )
+                    ;
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $selected_date = $date_object->format(('Y-m-d'));
                     $redirect = true;

@@ -109,10 +109,20 @@ class ListTable extends \WP_List_Table
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
         $nonceDelete = wp_create_nonce('bulk-competitions');
-        $queryDelete = ['page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'delete', '_wpnonce' => $nonceDelete];
+        $queryDelete = [
+            'page'        => Constants::MENU_SLUG_COMPETITION,
+            'competition' => $competition->ID,
+            'action'      => 'delete',
+            '_wpnonce'    => $nonceDelete
+        ];
         $urlDelete = $url . http_build_query($queryDelete, '', '&');
 
-        $queryEdit = ['page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'edit', 'wp_http_referer' => $wp_http_referer];
+        $queryEdit = [
+            'page'            => Constants::MENU_SLUG_COMPETITION,
+            'competition'     => $competition->ID,
+            'action'          => 'edit',
+            'wp_http_referer' => $wp_http_referer
+        ];
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
         // We'll not add these for now, maybe later. There is no real need to open/close a single part of a competition anyway.
@@ -127,7 +137,12 @@ class ListTable extends \WP_List_Table
         // }
 
         $actions = [];
-        $actions['delete'] = $this->html->anchor($urlDelete, 'Delete', ['class' => 'delete', 'title' => 'Delete this competition']);
+        $actions['delete'] = $this->html->anchor(
+            $urlDelete,
+            'Delete',
+            ['class' => 'delete', 'title' => 'Delete this competition']
+        )
+        ;
         $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this competition']);
 
         echo '<div class="row-actions">';
@@ -310,7 +325,16 @@ class ListTable extends \WP_List_Table
      */
     public function get_columns()
     {
-        return ['cb' => '<input type="checkbox" />', 'date' => 'Date', 'theme' => 'Theme', 'classification' => 'Classification', 'medium' => 'Medium', 'status' => 'Closed', 'scored' => 'Scored', 'entries' => 'Entries'];
+        return [
+            'cb'             => '<input type="checkbox" />',
+            'date'           => 'Date',
+            'theme'          => 'Theme',
+            'classification' => 'Classification',
+            'medium'         => 'Medium',
+            'status'         => 'Closed',
+            'scored'         => 'Scored',
+            'entries'        => 'Entries'
+        ];
     }
 
     /**
@@ -347,8 +371,14 @@ class ListTable extends \WP_List_Table
         $status_links = [];
         $stati = [
             'all'    => _nx_noop('All', 'All', 'competitions'),
-            'open'   => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>', 'Open <span class="count">(<span class="open-count">%s</span>)</span>'),
-            'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>', 'Closed <span class="count">(<span class="closed-count">%s</span>)</span>')
+            'open'   => _n_noop(
+                'Open <span class="count">(<span class="open-count">%s</span>)</span>',
+                'Open <span class="count">(<span class="open-count">%s</span>)</span>'
+            ),
+            'closed' => _n_noop(
+                'Closed <span class="count">(<span class="closed-count">%s</span>)</span>',
+                'Closed <span class="count">(<span class="closed-count">%s</span>)</span>'
+            )
         ];
 
         $link = 'admin.php?page=' . Constants::MENU_SLUG_COMPETITION;
@@ -361,7 +391,10 @@ class ListTable extends \WP_List_Table
             }
             $link = add_query_arg('competition_status', $status, $link);
             // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
-            $status_links[$status] = "<a href='$link'$class>" . sprintf(translate_nooped_plural($label, $num_competitions->$status), number_format_i18n($num_competitions->$status)) . '</a>';
+            $status_links[$status] = "<a href='$link'$class>" . sprintf(
+                    translate_nooped_plural($label, $num_competitions->$status),
+                    number_format_i18n($num_competitions->$status)
+                ) . '</a>';
         }
 
         unset($query_competitions);
@@ -414,13 +447,23 @@ class ListTable extends \WP_List_Table
             $start += (int) $this->request->input('offset', 0);
         }
 
-        $args = ['status' => $competition_status, 'search' => $search, 'offset' => $start, 'number' => $number, 'orderby' => $orderby, 'order' => $order];
+        $args = [
+            'status'  => $competition_status,
+            'search'  => $search,
+            'offset'  => $start,
+            'number'  => $number,
+            'orderby' => $orderby,
+            'order'   => $order
+        ];
 
         $competitions = $query_competitions->query($args);
         $this->items = array_slice($competitions, 0, $competitions_per_page);
         $this->extra_items = array_slice($competitions, $competitions_per_page);
 
-        $total_competitions = $query_competitions->query(array_merge($args, ['count' => true, 'offset' => 0, 'number' => 0]));
+        $total_competitions = $query_competitions->query(
+            array_merge($args, ['count' => true, 'offset' => 0, 'number' => 0])
+        )
+        ;
 
         $this->set_pagination_args(['total_items' => $total_competitions, 'per_page' => $competitions_per_page]);
 

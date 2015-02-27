@@ -2,7 +2,6 @@
 
 namespace RpsCompetition\Libs;
 
-use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
 use RpsCompetition\Db\RpsDb;

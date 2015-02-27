@@ -52,7 +52,9 @@ class View
         $this->season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
         if (WP_LOCAL_DEV !== true) {
-            $this->twig = new Twig_Environment($loader, ['cache' => $this->settings->get('upload_dir') . '/twig-cache/']);
+            $this->twig = new Twig_Environment(
+                $loader, ['cache' => $this->settings->get('upload_dir') . '/twig-cache/']
+            );
         } else {
             $this->twig = new Twig_Environment($loader);
         }
@@ -145,8 +147,12 @@ class View
      *
      * @return string
      */
-    public function renderMonthAndSeasonSelectionForm($selected_season, $selected_date, $is_scored_competitions, $months)
-    {
+    public function renderMonthAndSeasonSelectionForm(
+        $selected_season,
+        $selected_date,
+        $is_scored_competitions,
+        $months
+    ) {
         global $post;
         $output = '<script type="text/javascript">';
         $output .= 'function submit_form(control_name) {' . "\n";
@@ -191,7 +197,11 @@ class View
             /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
                 $user_info = get_userdata($entry->Member_ID);
-                $caption_data = ['title' => $entry->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname];
+                $caption_data = [
+                    'title'      => $entry->Title,
+                    'first_name' => $user_info->user_firstname,
+                    'last_name'  => $user_info->user_lastname
+                ];
                 $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
             }
         }
@@ -215,7 +225,11 @@ class View
         $data['images'] = [];
         foreach ($data['records'] as $recs) {
             $user_info = get_userdata($recs->Member_ID);
-            $caption_data = ['title' => $recs->Title, 'first_name' => $user_info->user_firstname, 'last_name' => $user_info->user_lastname];
+            $caption_data = [
+                'title'      => $recs->Title,
+                'first_name' => $user_info->user_firstname,
+                'last_name'  => $user_info->user_lastname
+            ];
             $data['images'][] = $this->dataPhotoMasonry($recs, $data['thumb_size'], $caption_data);
         }
         unset ($data['records']);
@@ -339,7 +353,13 @@ class View
     private function getMonthsDropdown($months, $selected_month)
     {
 
-        $output = $this->form_builder->select('new_month', $months, $selected_month, ['onChange' => 'submit_form("new_month")']);
+        $output = $this->form_builder->select(
+            'new_month',
+            $months,
+            $selected_month,
+            ['onChange' => 'submit_form("new_month")']
+        )
+        ;
 
         return $output;
     }

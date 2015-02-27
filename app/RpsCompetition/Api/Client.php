@@ -275,7 +275,10 @@ class Client
                             try {
                                 $sth->execute();
                             } catch (\PDOException $e) {
-                                $this->doRESTError("Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql");
+                                $this->doRESTError(
+                                    "Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql"
+                                )
+                                ;
                                 die();
                             }
                             if ($sth->rowCount() < 1) {
@@ -298,11 +301,17 @@ class Client
                     throw new \Exception(mysql_error());
                 }
             } catch (\Exception $e) {
-                $this->doRESTError("Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification");
+                $this->doRESTError(
+                    "Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification"
+                )
+                ;
                 die();
             }
             if (mysql_affected_rows() < 1) {
-                $this->doRESTError("No rows updated when setting Scored flag to Y in database for $comp_date / $classification");
+                $this->doRESTError(
+                    "No rows updated when setting Scored flag to Y in database for $comp_date / $classification"
+                )
+                ;
                 die();
             }
         }
@@ -343,7 +352,11 @@ class Client
             $sth_competitions->bindParam(':compdate', $comp_date);
             $sth_competitions->execute();
         } catch (\Exception $e) {
-            $this->doRESTError("Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage());
+            $this->doRESTError(
+                "Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage(
+                )
+            )
+            ;
             die();
         }
         // Create a Competitions node
@@ -417,7 +430,10 @@ class Client
                     $award_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Award'])));
 
                     $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
-                    $url_node->AppendChild($dom->CreateTextNode(utf8_encode(home_url($record_entries['Server_File_Name']))));
+                    $url_node->AppendChild(
+                        $dom->CreateTextNode(utf8_encode(home_url($record_entries['Server_File_Name'])))
+                    )
+                    ;
                 }
             }
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);

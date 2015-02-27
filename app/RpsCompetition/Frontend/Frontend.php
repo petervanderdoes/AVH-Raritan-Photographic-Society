@@ -209,19 +209,33 @@ class Frontend
                 }
 
                 // Rename the image file on the server file system
-                $path = $photo_helper->getCompetitionPath($competition->Competition_Date, $competition->Classification, $competition->Medium);
+                $path = $photo_helper->getCompetitionPath(
+                    $competition->Competition_Date,
+                    $competition->Classification,
+                    $competition->Medium
+                )
+                ;
                 $old_file_parts = pathinfo($server_file_name);
                 $old_file_name = $old_file_parts['basename'];
                 $ext = $old_file_parts['extension'];
                 $current_user = wp_get_current_user();
-                $new_file_name_noext = sanitize_file_name($new_title) . '+' . $current_user->user_login . '+' . filemtime($this->request->server('DOCUMENT_ROOT') . $server_file_name);
+                $new_file_name_noext = sanitize_file_name(
+                        $new_title
+                    ) . '+' . $current_user->user_login . '+' . filemtime(
+                        $this->request->server('DOCUMENT_ROOT') . $server_file_name
+                    );
                 $new_file_name = $new_file_name_noext . '.' . $ext;
                 if (!$photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
                     die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
                 }
 
                 // Update the Title and File Name in the database
-                $updated_data = ['ID' => $entity->getId(), 'Title' => $new_title, 'Server_File_Name' => $path . '/' . $new_file_name, 'Date_Modified' => current_time('mysql')];
+                $updated_data = [
+                    'ID'               => $entity->getId(),
+                    'Title'            => $new_title,
+                    'Server_File_Name' => $path . '/' . $new_file_name,
+                    'Date_Modified'    => current_time('mysql')
+                ];
                 $result = $query_entries->updateEntry($updated_data);
                 if ($result === false) {
                     wp_die("Failed to UPDATE entry record from database");
@@ -317,11 +331,24 @@ class Frontend
                 }
                 $medium_subset_medium = $this->session->get('myentries/subset');
                 $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
-                $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
+                $current_competition = $query_competitions->getCompetitionByDateClassMedium(
+                    $competition_date,
+                    $classification,
+                    $medium
+                )
+                ;
 
-                $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
+                $this->session->set(
+                    'myentries/' . $medium_subset_medium . '/competition_date',
+                    $current_competition->Competition_Date
+                )
+                ;
                 $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
-                $this->session->set('myentries/' . $medium_subset_medium . '/classification', $current_competition->Classification);
+                $this->session->set(
+                    'myentries/' . $medium_subset_medium . '/classification',
+                    $current_competition->Classification
+                )
+                ;
                 $this->session->save();
                 $redirect = get_permalink($post->ID);
                 wp_redirect($redirect);
@@ -458,7 +485,12 @@ class Frontend
             }
 
             $server_file_name = $relative_server_path . '/' . $dest_name . '.jpg';
-            $data = ['Competition_ID' => $comp_id, 'Title' => $title, 'Client_File_Name' => $client_file_name, 'Server_File_Name' => $server_file_name];
+            $data = [
+                'Competition_ID'   => $comp_id,
+                'Title'            => $title,
+                'Client_File_Name' => $client_file_name,
+                'Server_File_Name' => $server_file_name
+            ];
             $result = $query_entries->addEntry($data, get_current_user_id());
             if ($result === false) {
                 $error_message = 'Failed to INSERT entry record into database';
@@ -617,16 +649,44 @@ class Frontend
         }
 
         if (!empty($include)) {
-            $_attachments = get_posts(['include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby]);
+            $_attachments = get_posts(
+                [
+                    'include'        => $include,
+                    'post_status'    => 'inherit',
+                    'post_type'      => 'attachment',
+                    'post_mime_type' => 'image',
+                    'order'          => $order,
+                    'orderby'        => $orderby
+                ]
+            );
 
             $attachments = [];
             foreach ($_attachments as $key => $val) {
                 $attachments[$val->ID] = $_attachments[$key];
             }
         } elseif (!empty($exclude)) {
-            $attachments = get_children(['post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby]);
+            $attachments = get_children(
+                [
+                    'post_parent'    => $id,
+                    'exclude'        => $exclude,
+                    'post_status'    => 'inherit',
+                    'post_type'      => 'attachment',
+                    'post_mime_type' => 'image',
+                    'order'          => $order,
+                    'orderby'        => $orderby
+                ]
+            );
         } else {
-            $attachments = get_children(['post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby]);
+            $attachments = get_children(
+                [
+                    'post_parent'    => $id,
+                    'post_status'    => 'inherit',
+                    'post_type'      => 'attachment',
+                    'post_mime_type' => 'image',
+                    'order'          => $order,
+                    'orderby'        => $orderby
+                ]
+            );
         }
 
         if (empty($attachments)) {
@@ -746,7 +806,9 @@ class Frontend
                 $caption_text .= '<span class="wp-caption-credit">Credit: ' . $photographer_name . '</span>';
             }
             if (!empty($caption_text)) {
-                $output .= "<{$captiontag} class='wp-caption-text gallery-caption'>" . wptexturize($caption_text) . "</{$captiontag}>";
+                $output .= "<{$captiontag} class='wp-caption-text gallery-caption'>" . wptexturize(
+                        $caption_text
+                    ) . "</{$captiontag}>";
             }
 
             $output .= "</div>";
@@ -871,12 +933,20 @@ class Frontend
 
                 $entry_record = $query_entries->getEntryById($id);
                 if ($entry_record == false) {
-                    $this->settings->set('errmsg', sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id));
+                    $this->settings->set(
+                        'errmsg',
+                        sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id)
+                    )
+                    ;
                 } else {
                     // Delete the record from the database
                     $result = $query_entries->deleteEntry($id);
                     if ($result === false) {
-                        $this->settings->set('errmsg', sprintf("<b>Failed to DELETE competition entry %s from database</b><br>"));
+                        $this->settings->set(
+                            'errmsg',
+                            sprintf("<b>Failed to DELETE competition entry %s from database</b><br>")
+                        )
+                        ;
                     } else {
                         // Delete the file from the server file system
                         $photo_helper->deleteEntryFromDisk($entry_record);
@@ -916,14 +986,28 @@ class Frontend
                 $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
                 if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
                     // Move the file to its final location
-                    $path = $photo_helper->getCompetitionPath($banquet_record->Competition_Date, $banquet_record->Classification, $banquet_record->Medium);
+                    $path = $photo_helper->getCompetitionPath(
+                        $banquet_record->Competition_Date,
+                        $banquet_record->Classification,
+                        $banquet_record->Medium
+                    )
+                    ;
                     CommonHelper::createDirectory($path);
                     $file_info = pathinfo($entry->Server_File_Name);
                     $new_file_name = $path . '/' . $file_info['basename'];
-                    $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name, ENT_QUOTES, get_bloginfo('charset'));
+                    $original_filename = html_entity_decode(
+                        $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name,
+                        ENT_QUOTES,
+                        get_bloginfo('charset')
+                    );
                     // Need to create the destination folder?
                     copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
-                    $data = ['Competition_ID' => $banquet_record->ID, 'Title' => $entry->Title, 'Client_File_Name' => $entry->Client_File_Name, 'Server_File_Name' => $new_file_name];
+                    $data = [
+                        'Competition_ID'   => $banquet_record->ID,
+                        'Title'            => $entry->Title,
+                        'Client_File_Name' => $entry->Client_File_Name,
+                        'Server_File_Name' => $new_file_name
+                    ];
                     $query_entries->addEntry($data, get_current_user_id());
                 }
             }
@@ -971,12 +1055,38 @@ class Frontend
 
         $javascript_directory = $this->settings->get('javascript_dir');
         wp_deregister_script('masonry');
-        wp_register_script('masonry', CommonHelper::getPluginUrl($masonry_script, $javascript_directory), [], 'to_remove', 1);
-        wp_register_script('rps-imagesloaded', CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory), ['masonry'], 'to_remove', true);
-        wp_register_script('rps-masonryInit', CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory), ['rps-imagesloaded'], 'to_remove', true);
+        wp_register_script(
+            'masonry',
+            CommonHelper::getPluginUrl($masonry_script, $javascript_directory),
+            [],
+            'to_remove',
+            1
+        );
+        wp_register_script(
+            'rps-imagesloaded',
+            CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory),
+            ['masonry'],
+            'to_remove',
+            true
+        );
+        wp_register_script(
+            'rps-masonryInit',
+            CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory),
+            ['rps-imagesloaded'],
+            'to_remove',
+            true
+        );
 
-        wp_register_style('rps-competition.fontawesome.style', 'http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"');
-        wp_register_style('rps-competition.general.style', CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')), ['rps-competition.fontawesome.style'], 'to_remove');
+        wp_register_style(
+            'rps-competition.fontawesome.style',
+            'http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"'
+        );
+        wp_register_style(
+            'rps-competition.general.style',
+            CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')),
+            ['rps-competition.fontawesome.style'],
+            'to_remove'
+        );
     }
 
     /**

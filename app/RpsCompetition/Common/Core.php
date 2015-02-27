@@ -108,13 +108,21 @@ class Core
         $url = get_permalink($options['monthly_entries_post_id']);
         if ($url !== false) {
             $url = substr(parse_url($url, PHP_URL_PATH), 1);
-            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]', 'top');
+            add_rewrite_rule(
+                $url . '?([^/]*)',
+                'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]',
+                'top'
+            );
         }
 
         $url = get_permalink($options['monthly_winners_post_id']);
         if ($url !== false) {
             $url = substr(parse_url($url, PHP_URL_PATH), 1);
-            add_rewrite_rule($url . '?([^/]*)', 'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]', 'top');
+            add_rewrite_rule(
+                $url . '?([^/]*)',
+                'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]',
+                'top'
+            );
         }
 
         flush_rewrite_rules();

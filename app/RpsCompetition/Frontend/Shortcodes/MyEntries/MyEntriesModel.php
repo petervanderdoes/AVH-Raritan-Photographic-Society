@@ -27,15 +27,15 @@ class MyEntriesModel
     private $settings;
 
     /**
-     * @param QueryCompetitions $query_competitions
-     * @param QueryEntries $query_entries
+     * @param QueryCompetitions  $query_competitions
+     * @param QueryEntries       $query_entries
      * @param QueryMiscellaneous $query_miscellaneous
-     * @param PhotoHelper $photo_helper
-     * @param SeasonHelper $season_helper
-     * @param CompetitionHelper $competition_helper
-     * @param Session $session
-     * @param FormFactory $formFactory
-     * @param Settings $settings
+     * @param PhotoHelper        $photo_helper
+     * @param SeasonHelper       $season_helper
+     * @param CompetitionHelper  $competition_helper
+     * @param Session            $session
+     * @param FormFactory        $formFactory
+     * @param Settings           $settings
      */
     public function __construct(
         QueryCompetitions $query_competitions,
