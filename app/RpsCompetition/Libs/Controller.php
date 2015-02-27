@@ -2,11 +2,12 @@
 
 namespace RpsCompetition\Libs;
 
-use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Http\Request;
+use RpsCompetition\Application;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Options\General;
 use RpsCompetition\Settings;
+use Twig_Environment;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -14,14 +15,26 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
-class Container
+/**
+ * Class Controller
+ *
+ * @package RpsCompetition\Libs
+ */
+class Controller
 {
+    /** @var  Application $container */
     protected $container;
+    /** @var   \RpsCompetition\Options\General $options */
     protected $options;
+    /** @var \Illuminate\Http\Request $request */
     protected $request;
+    /** @var  \RpsCompetition\Db\RpsDb $rpsdb */
     protected $rpsdb;
+    /** @var  \Avh\Network\Session */
     protected $session;
+    /** @var  Settings $settings */
     protected $settings;
+    /** @var  Twig_Environment */
     protected $twig;
 
     /**
@@ -32,7 +45,7 @@ class Container
      *
      * @return string Rendered output
      */
-    public function render($view, array $data = array())
+    public function render($view, array $data = [])
     {
         $template = $this->twig->loadTemplate($view);
 
@@ -42,9 +55,9 @@ class Container
     /**
      * Sets the Container associated with this Controller.
      *
-     * @param IlluminateContainer $container
+     * @param Application $container
      */
-    public function setContainer(IlluminateContainer $container)
+    public function setContainer(Application $container)
     {
         $this->container = $container;
     }
@@ -57,6 +70,9 @@ class Container
         $this->options = $options;
     }
 
+    /**
+     * @param Request $request
+     */
     public function setRequest(Request $request)
     {
         $this->request = $request;
@@ -70,6 +86,9 @@ class Container
         $this->rpsdb = $rpsdb;
     }
 
+    /**
+     * @param $session
+     */
     public function setSession($session)
     {
         $this->session = $session;
@@ -84,9 +103,9 @@ class Container
     }
 
     /**
-     * @param \Twig_Environment $twig
+     * @param Twig_Environment $twig
      */
-    public function setTemplateEngine(\Twig_Environment $twig)
+    public function setTemplateEngine(Twig_Environment $twig)
     {
         $this->twig = $twig;
     }

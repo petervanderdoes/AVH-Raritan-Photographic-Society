@@ -1,5 +1,4 @@
 var RPS;
-
 (function ($) {
     RPS = {
         scored: function () {
@@ -24,12 +23,10 @@ var RPS;
                                 response.scored);
                             $(this).find(".adm-scored").text(
                                 response.scoredtext);
-
                         }
                     });
                 });
         }
     };
-
     $(document).ready(RPS.scored);
 })(jQuery);

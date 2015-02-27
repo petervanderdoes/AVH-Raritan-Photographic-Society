@@ -48,7 +48,7 @@ class Helper
      */
     public function createCommonThumbnails($entry)
     {
-        $standard_size = array('75', '150w', '800', 'fb_thumb');
+        $standard_size = ['75', '150w', '800', 'fb_thumb'];
 
         foreach ($standard_size as $size) {
             $this->createThumbnail($entry->Server_File_Name, $size);
@@ -70,7 +70,13 @@ class Helper
         CommonHelper::createDirectory($thumb_dir);
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
-            $this->doResizeImage($this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'], $thumb_dir, $thumb_name, $size);
+            $this->doResizeImage(
+                $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/' . $file_parts['basename'],
+                $thumb_dir,
+                $thumb_name,
+                $size
+            )
+            ;
         }
     }
 
@@ -85,7 +91,7 @@ class Helper
      */
     public function dataPhotoCredit($title, $first_name, $last_name)
     {
-        $data = array();
+        $data = [];
         $data['title'] = $title;
         $data['credit'] = "$first_name $last_name";
 
@@ -108,7 +114,12 @@ class Helper
 
         // Remove thumbnails
         $competition_record = $query_competitions->getCompetitionById($entry->Competition_ID);
-        $competition_path = $this->request->server('DOCUMENT_ROOT') . $this->getCompetitionPath($competition_record->Competition_Date, $competition_record->Classification, $competition_record->Medium);
+        $competition_path = $this->request->server('DOCUMENT_ROOT') . $this->getCompetitionPath(
+                $competition_record->Competition_Date,
+                $competition_record->Classification,
+                $competition_record->Medium
+            )
+        ;
         $file_parts = pathinfo($entry->Server_File_Name);
         $thumbnail_path = $competition_path . "/thumbnails";
 
@@ -156,7 +167,8 @@ class Helper
                     function ($constraint) {
                         $constraint->aspectRatio();
                     }
-                );
+                )
+                ;
             } else {
                 $image->resize(
                     $new_size['width'],
@@ -164,7 +176,8 @@ class Helper
                     function ($constraint) {
                         $constraint->aspectRatio();
                     }
-                );
+                )
+                ;
             }
         } else {
             $image->resize(
@@ -173,7 +186,8 @@ class Helper
                 function ($constraint) {
                     $constraint->aspectRatio();
                 }
-            );
+            )
+            ;
         }
         $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
 
@@ -217,7 +231,7 @@ class Helper
         }
         $data = getimagesize($thumb_dir . '/' . $thumb_name);
 
-        return array('width' => $data[0], 'height' => $data[1]);
+        return ['width' => $data[0], 'height' => $data[1]];
     }
 
     /**
@@ -272,18 +286,19 @@ class Helper
      * @param string $path
      * @param string $old_name
      * @param string $new_name
-     * @param string $ext
      *
      * @return boolean
      */
-    public function renameImageFile($path, $old_name, $new_name, $ext)
+    public function renameImageFile($path, $old_name, $new_name)
     {
         $path = $this->request->server('DOCUMENT_ROOT') . $path;
         // Rename the main image file
-        $status = rename($path . '/' . $old_name . $ext, $path . '/' . $new_name . $ext);
+        $status = rename($path . '/' . $old_name, $path . '/' . $new_name);
         if ($status) {
+            $parts = pathinfo($old_name);
+            $name = $parts['filename'];
             // Rename any and all thumbnails of this file
-            $this->removeThumbnails($path, $old_name);
+            $this->removeThumbnails($path, $name);
         }
 
         return $status;

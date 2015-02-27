@@ -1,5 +1,11 @@
 ## Changelog
 
+#### Version 2.0.4
+* Split the sitemap for entries and winners per year.
+* Send 404 response code for the old entries and winners sitemap.
+* Use Symfony2 Forms
+* Fix Fancybox popup
+
 #### Version 2.0.3
 * Add images to the sitemap.
 * Enhance the entry in the sitemap of the front page.
@@ -18,14 +24,14 @@
 * Sitemap failure
 
 #### Version 1.5.0
-* Improve the page "Monthly Entries"
+* Improve the page "Monthly Entries".
 
 #### Version 1.4.12
 * Ajax call fails.
 
 #### Version 1.4.11
 * Fix upload entry problem.
-* Extend ability to edit entries in admin.
+* Extend ability to edit entries in admin.  
   Have the ability to not only rename a entry but also change the classification and/or medium.
 
 #### Version 1.4.10
@@ -33,7 +39,7 @@
 * Fix checkbox problem.
 * Fix bulk delete.
 * Fix unneeded competitions when adding
-* Fix for mixed classifications.
+* Fix for mixed classifications.  
   When a user is has a different class for B&W compared to Color the classification is wrong.
 
 #### Version 1.4.9
@@ -63,7 +69,7 @@
 * Fixed license
 
 #### Version 1.3.4
-* Update Shortcodes that display photos.
+* Update Shortcodes that display photos.  
   They now show as gallery.
 * Fix double dash in thumbail URL at times.
 
@@ -81,7 +87,7 @@
 * Preparation for new development cycle.
 
 #### Version 1.3.0
-* Remove AVH Framework from plugin.
+* Remove AVH Framework from plugin.  
   AVH Framework has been created as a seperate plugin.
 * Bugfix: New users don't see any competitions.
 
@@ -98,4 +104,4 @@
 * When a member has two different classifications the submission form is wrong.
 
 #### Version 1.0.0
-* Initial version
+* Initial version.

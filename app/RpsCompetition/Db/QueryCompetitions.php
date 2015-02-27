@@ -66,7 +66,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $closed = $this->rpsdb->get_var($sql);
 
         if ($closed == "Y") {
@@ -89,12 +90,16 @@ class QueryCompetitions
      */
     public function countCompetitions()
     {
-        $count = $this->rpsdb->get_results("SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed", ARRAY_A);
+        $count = $this->rpsdb->get_results(
+            "SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed",
+            ARRAY_A
+        )
+        ;
 
         $total = 0;
-        $status = array('N' => 'open', 'Y' => 'closed');
+        $status = ['N' => 'open', 'Y' => 'closed'];
         $known_types = array_keys($status);
-        $stats = array();
+        $stats = [];
         foreach ((array) $count as $row) {
             // Don't count post-trashed toward totals
             $total += $row['num_competitions'];
@@ -124,7 +129,7 @@ class QueryCompetitions
      */
     public function deleteCompetition($id)
     {
-        $result = $this->rpsdb->delete('competitions', array('ID' => $id));
+        $result = $this->rpsdb->delete('competitions', ['ID' => $id]);
 
         return $result;
     }
@@ -152,7 +157,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_row($sql, $output);
 
         return $return;
@@ -181,7 +187,8 @@ class QueryCompetitions
                 Competition_Date <= %s",
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
         $result = $this->rpsdb->get_results($sql, $output);
 
         return $result;
@@ -195,7 +202,7 @@ class QueryCompetitions
      *
      * @return QueryCompetitions|array
      */
-    public function getCompetitionByEntryId($entry_id, $output = ARRAY_A)
+    public function getCompetitionByEntryId($entry_id, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare(
             "SELECT c.*
@@ -203,7 +210,8 @@ class QueryCompetitions
             WHERE c.ID =  e.Competition_ID
                 AND e.ID = %s",
             $entry_id
-        );
+        )
+        ;
         $result = $this->rpsdb->get_row($sql, $output);
 
         return $result;
@@ -220,7 +228,7 @@ class QueryCompetitions
     public function getCompetitionById($id, $output = OBJECT)
     {
         $where = $this->rpsdb->prepare('ID=%d', $id);
-        $result = $this->query(array('where' => $where, 'number' => 1), $output);
+        $result = $this->query(['where' => $where, 'number' => 1], $output);
 
         return $result;
     }
@@ -238,10 +246,10 @@ class QueryCompetitions
     {
         $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
 
-        $sql_filter_array = array('1=1');
+        $sql_filter_array = ['1=1'];
 
         if (is_array($filter) && !empty($filter)) {
-            $sql_filter_array = array();
+            $sql_filter_array = [];
             foreach ($filter as $field => $value) {
                 $sql_filter_array[] = $field . ' = "' . $value . '"';
             }
@@ -261,7 +269,8 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $season_start_date,
             $season_end_date
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, $output);
 
         return $return;
@@ -287,7 +296,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -314,7 +324,8 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $date_start,
             $date_end
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
         return $return;
@@ -341,7 +352,8 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -405,17 +417,21 @@ class QueryCompetitions
      *
      * @return array
      */
-    public function getScoredCompetitions($competition_date_start, $competition_date_end = null, $filter = array(), $output = OBJECT)
-    {
+    public function getScoredCompetitions(
+        $competition_date_start,
+        $competition_date_end = null,
+        $filter = [],
+        $output = OBJECT
+    ) {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
         $competition_date_start = $this->rpsdb->getMysqldate($competition_date_start);
         $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
 
-        $sql_filter_array = array('1=1');
+        $sql_filter_array = ['1=1'];
 
         if (is_array($filter) && !empty($filter)) {
-            $sql_filter_array = array();
+            $sql_filter_array = [];
             foreach ($filter as $field => $value) {
                 $sql_filter_array[] = $field . ' = "' . $value . '" AND ';
             }
@@ -432,7 +448,8 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $competition_date_start,
             $competition_date_end
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, $output);
 
         return $return;
@@ -451,17 +468,21 @@ class QueryCompetitions
         // Are we updating or creating?
         if (!empty($data['ID'])) {
             $competition_ID = (int) $data['ID'];
-            $where = array('ID' => $competition_ID);
+            $where = ['ID' => $competition_ID];
             if (!isset($data['Date_Modified'])) {
                 $data['Date_Modified'] = current_time('mysql');
             }
             if (false === $this->rpsdb->update('competitions', stripslashes_deep($data), $where)) {
-                return new \WP_Error('db_update_error', 'Could not update competition into the database', $this->rpsdb->last_error);
+                return new \WP_Error(
+                    'db_update_error',
+                    'Could not update competition into the database',
+                    $this->rpsdb->last_error
+                );
             }
         } else {
             $current_time = current_time('mysql');
             //@formatter:off
-            $default_options = array('Competition_Date' => $current_time,
+            $default_options = ['Competition_Date' => $current_time,
                 'Medium' => '',
                 'Classification' => '',
                 'Theme' => '',
@@ -472,17 +493,24 @@ class QueryCompetitions
                 'Max_Entries' => 2,
                 'Num_Judges' => 1,
                 'Special_Event' => 'N'
-            );
+            ];
             // @formatter:on
             $data = $data + $default_options;
 
             if (!isset($data['Close_Date'])) {
                 $data['Close_Date'] = strtotime('-2 day', strtotime($data['Competition_Date']));
                 $date_array = getdate($data['Close_Date']);
-                $data['Close_Date'] = date('Y-m-d H:i:s', mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year']));
+                $data['Close_Date'] = date(
+                    'Y-m-d H:i:s',
+                    mktime(21, 00, 00, $date_array['mon'], $date_array['mday'], $date_array['year'])
+                );
             }
             if (false === $this->rpsdb->insert('competitions', stripslashes_deep($data))) {
-                return new \WP_Error('db_insert_error', __('Could not insert competition into the database'), $this->rpsdb->last_error);
+                return new \WP_Error(
+                    'db_insert_error',
+                    __('Could not insert competition into the database'),
+                    $this->rpsdb->last_error
+                );
             }
             $competition_ID = (int) $this->rpsdb->insert_id;
         }
@@ -512,7 +540,15 @@ class QueryCompetitions
          * @var string  $order
          * @var boolean $count
          */
-        $defaults = array('join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
+        $defaults = [
+            'join'    => '',
+            'where'   => '1=1',
+            'offset'  => '',
+            'number'  => '',
+            'orderby' => 'ID',
+            'order'   => 'ASC',
+            'count'   => false
+        ];
         $query_vars = array_merge($defaults, $query_vars);
 
         extract($query_vars, EXTR_SKIP);
@@ -582,7 +618,8 @@ class QueryCompetitions
                 AND Close_Date < %s",
             $current_time,
             $current_time
-        );
+        )
+        ;
         $result = $this->rpsdb->query($sql);
 
         return $result;

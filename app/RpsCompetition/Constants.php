@@ -37,19 +37,19 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '2.0.3';
+    const PLUGIN_VERSION = '2.0.4';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
-    private static $image_sizes = array (
-        '75' => array('width'=>75,'height'=>75),
-        '150' => array('width'=>150,'height'=>150),
-        '150w' => array('width'=>150,'height'=>null),
-        '200' => array('width'=>200,'height'=>200),
-        '250' => array('width'=>250,'height'=>250),
-        '800' => array('width'=>800,'height'=>800),
-        'fb_thumb' => array('width'=>1200,'height'=>628),
-        'FULL' => array('width'=>1024,'height'=>768),
-    );
+    private static $image_sizes = [
+        '75' => ['width'=>75,'height'=>75],
+        '150' => ['width'=>150,'height'=>150],
+        '150w' => ['width'=>150,'height'=>null],
+        '200' => ['width'=>200,'height'=>200],
+        '250' => ['width'=>250,'height'=>250],
+        '800' => ['width'=>800,'height'=>800],
+        'fb_thumb' => ['width'=>1200,'height'=>628],
+        'FULL' => ['width'=>1024,'height'=>768],
+    ];
     // @formatter:on
 
     /**
@@ -58,13 +58,13 @@ final class Constants
      * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
      * @return array
      */
-    static public function getClassifications()
+    public static function getClassifications()
     {
-        return array(
+        return [
             'class_b' => 'Beginner',
             'class_a' => 'Advanced',
             'class_s' => 'Salon'
-        );
+        ];
     }
 
     /**
@@ -89,13 +89,13 @@ final class Constants
      * @TODO: This is needed because of the old program, someday it needs to be cleaned up.
      * @return array
      */
-    static public function getMediums()
+    public static function getMediums()
     {
-        return array(
+        return [
             'medium_bwd' => 'B&W Digital',
             'medium_cd'  => 'Color Digital',
             'medium_bwp' => 'B&W Prints',
             'medium_cp'  => 'Color Prints'
-        );
+        ];
     }
 }

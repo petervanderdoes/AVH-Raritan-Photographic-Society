@@ -46,7 +46,8 @@ class QueryBanquet
             $season_start_date,
             $season_end_date,
             '%banquet%'
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
         return $return;

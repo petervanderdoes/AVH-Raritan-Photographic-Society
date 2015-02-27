@@ -1,0 +1,18 @@
+{{ form_start(form) }}
+<div class="form_frame">
+    <h4>Submit Your Image</h4>
+
+    <span class="form_error">{{ form_errors(form) }}</span>
+    <div class="form_row">
+        <div class="form_col form_field_label">{{ form_label(form.title) }}</div>
+        <div class="form_col form_field">{{ form_widget(form.title) }}<br/>
+            <span class="form_error">{{ form_errors(form.title) }}</span></div>
+    </div>
+    <div class="form_row">
+        <div class="form_col form_field_label">{{ form_label(form.file_name) }}</div>
+        <div class="form_col form_field">{{ form_widget(form.file_name) }}<br/>
+            <span class="form_error">{{ form_errors(form.file_name) }}</span></div>
+    </div>
+    <div class="form_buttons_row">{{ form_widget(form.submit) }}{{ form_widget(form.cancel) }}</div>
+</div>
+{{ form_end(form) }}

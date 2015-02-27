@@ -3,16 +3,17 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.3
+ * Version: 2.0.4
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
  * GitHub Branch:     master
  * Copyright 2011-2014 Peter van der Does (email : peter@avirtualhome.com)
  */
-use Illuminate\Container\Container;
 use RpsCompetition\Admin\Admin;
+use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
+use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
@@ -22,12 +23,20 @@ use RpsCompetition\Frontend\Requests;
 use RpsCompetition\Frontend\Shortcodes;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
+use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
+use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
 use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
+use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
+use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
+use Symfony\Component\Form\Forms as SymfonyForms;
+use Symfony\Component\Validator\Validation;
 
 if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
     header('Status: 403 Forbidden');
@@ -53,7 +62,7 @@ $rps_basename = plugin_basename($plugin);
 class AVH_RPS_Client
 {
     /**
-     * @var Container
+     * @var Application
      */
     private $container;
     /** @var  Settings */
@@ -67,9 +76,9 @@ class AVH_RPS_Client
      */
     public function __construct($dir, $basename)
     {
-        $this->container = new Container();
+        $this->container = new Application();
 
-        $this->setupContainer();
+        $this->registerBindings();
         $upload_dir_info = wp_upload_dir();
         $this->settings = $this->container->make('Settings');
         $this->settings->set('plugin_dir', $dir);
@@ -82,15 +91,15 @@ class AVH_RPS_Client
         $this->settings->set('images_dir', $dir . '/assets/images/');
         $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
         if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
-            add_action('plugins_loaded', array($this, 'load'));
+            add_action('plugins_loaded', [$this, 'load']);
         }
     }
 
     public function load()
     {
         if (is_admin()) {
-            add_action('activate_' . $this->settings->get('plugin_basename'), array($this, 'pluginActivation'));
-            add_action('deactivate_' . $this->settings->get('plugin_basename'), array($this, 'pluginDeactivation'));
+            add_action('activate_' . $this->settings->get('plugin_basename'), [$this, 'pluginActivation']);
+            add_action('deactivate_' . $this->settings->get('plugin_basename'), [$this, 'pluginDeactivation']);
 
             new Admin($this->container);
         } else {
@@ -122,7 +131,7 @@ class AVH_RPS_Client
         flush_rewrite_rules();
     }
 
-    public function setupContainer()
+    public function registerBindings()
     {
 
         /**
@@ -141,11 +150,16 @@ class AVH_RPS_Client
         $this->container->singleton(
             'Session',
             function () {
-                return new Avh\Network\Session(array('name' => 'raritan_' . COOKIEHASH));
+                return new Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
             }
-        );
+        )
+        ;
         $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
-        $this->container->instance('IlluminateRequest', forward_static_call(array('Illuminate\Http\Request', 'createFromGlobals')));
+        $this->container->instance(
+            'IlluminateRequest',
+            forward_static_call(['Illuminate\Http\Request', 'createFromGlobals'])
+        )
+        ;
 
         /**
          * Setup Classes
@@ -157,93 +171,223 @@ class AVH_RPS_Client
             function ($app) {
                 return new Core($app->make('Settings'));
             }
-        );
+        )
+        ;
         $this->container->bind(
             'FrontendRequests',
             function ($app) {
-                return new Requests($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session'));
+                return new Requests(
+                    $app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session')
+                );
             }
-        );
+        )
+        ;
         $this->container->bind(
             'FrontendView',
             function ($app) {
                 return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
             }
-        );
-        $this->container->bind(
-            'QueryEntries',
-            function ($app) {
-                return new QueryEntries($app->make('RpsDb'));
-            }
-        );
-        $this->container->bind(
-            'QueryCompetitions',
-            function ($app) {
-                return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
-            }
-        );
-        $this->container->bind(
-            'QueryMiscellaneous',
-            function ($app) {
-                return new QueryMiscellaneous($app->make('RpsDb'));
-            }
-        );
+        )
+        ;
+
         $this->container->bind(
             'PhotoHelper',
             function ($app) {
                 return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
             }
-        );
+        )
+        ;
 
         $this->container->bind(
             'SeasonHelper',
             function ($app) {
                 return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
             }
-        );
-
-        $this->container->bind('ShortcodeRouter', 'RpsCompetition\Frontend\Shortcodes\ShortcodeRouter');
-        $this->container->bind(
-            'ShortcodeController',
-            function ($app) {
-                return new ShortcodeController($app);
-            }
-        );
+        )
+        ;
 
         $this->container->bind(
-            'ShortcodeModel',
+            'WpSeoHelper',
             function ($app) {
-                return new ShortcodeModel($app->make('QueryCompetitions'), $app->make('QueryEntries'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'), $app->make('SeasonHelper'));
+                return new WpseoHelper(
+                    $app->make('Settings'),
+                    $app->make('RpsDb'),
+                    $app->make('QueryCompetitions'),
+                    $app->make('QueryMiscellaneous'),
+                    $app->make('PhotoHelper')
+                );
             }
-        );
+        )
+        ;
+
+        $this->container->bind(
+            'CompetitionHelper',
+            function ($app) {
+                return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
+            }
+        )
+        ;
+
+        $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
+
+        $this->registerBindingDb();
+        $this->registerBindingShortCodes();
+        $this->registerBindingSocialNetworks();
+        $this->registerBindingsForms();
+
         $this->container->bind(
             'Templating',
             function ($app, $param) {
                 $template_dir = $param['template_dir'];
                 $cache_dir = $param['cache_dir'];
                 if (WP_LOCAL_DEV !== true) {
-                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir), array('cache' => $cache_dir));
+                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir), ['cache' => $cache_dir]);
                 } else {
                     return new Twig_Environment(new Twig_Loader_Filesystem($template_dir));
                 }
             }
-        );
+        )
+        ;
+    }
+
+    /**
+     * Register all the binding for the Database classes
+     *
+     */
+    private function registerBindingDb()
+    {
+        $this->container->bind(
+            'QueryEntries',
+            function ($app) {
+                return new QueryEntries($app->make('RpsDb'));
+            }
+        )
+        ;
+        $this->container->bind(
+            'QueryCompetitions',
+            function ($app) {
+                return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
+            }
+        )
+        ;
+        $this->container->bind(
+            'QueryMiscellaneous',
+            function ($app) {
+                return new QueryMiscellaneous($app->make('RpsDb'));
+            }
+        )
+        ;
+        $this->container->bind(
+            'QueryBanquet',
+            function ($app) {
+                return new QueryBanquet($app->make('RpsDb'));
+            }
+        )
+        ;
+    }
+
+    /**
+     * Register all the bindings for the Shortcode classes
+     */
+    private function registerBindingShortCodes()
+    {
+        // General Shortcode classes
+        $this->container->bind(
+            'ShortcodeRouter',
+            function () {
+                return new ShortcodeRouter();
+            }
+        )
+        ;;
+        $this->container->bind(
+            'ShortcodeController',
+            function ($app) {
+                return new ShortcodeController($app);
+            }
+        )
+        ;
 
         $this->container->bind(
-            'SocialNetworks',
+            'ShortcodeModel',
+            function ($app) {
+                return new ShortcodeModel(
+                    $app->make('QueryCompetitions'),
+                    $app->make('QueryEntries'),
+                    $app->make('QueryMiscellaneous'),
+                    $app->make('PhotoHelper'),
+                    $app->make('SeasonHelper'),
+                    $app->make('CompetitionHelper'),
+                    $app->make('Session'),
+                    $app->make('formFactory'),
+                    $app->make('Settings')
+                );
+            }
+        )
+        ;
+
+        $this->container->bind(
+            'ShortcodeView',
+            function ($app) {
+                $settings = $app->make('Settings');
+
+                return new ShortcodeView($settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/');
+            }
+        )
+        ;
+        //$this->container->register('MyEntriesServiceProvider');
+    }
+
+    /**
+     * Register all the binding for the SocialNetworks clasess
+     */
+    private function registerBindingSocialNetworks()
+    {
+        $this->container->bind(
+            'SocialNetworksRouter',
+            function ($app) {
+                return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
+            }
+        )
+        ;
+        $this->container->bind(
+            'SocialNetworksController',
             function ($app) {
                 return new SocialNetworksController($app);
             }
-        );
-
+        )
+        ;
+        $this->container->bind('SocialNetworkModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
         $this->container->bind(
-            'WpSeoHelper',
-            function ($app) {
-                return new WpseoHelper($app->make('Settings'), $app->make('RpsDb'), $app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+            'SocialNetworksView',
+            function ($app, $param) {
+                return new SocialNetworksView($param['template_dir'], $param['cache_dir']);
             }
-        );
+        )
+        ;
+    }
 
-        $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
+    /**
+     * Register all the bindings for the Symfony Forms integration.
+     */
+    private function registerBindingsForms()
+    {
+        $this->container->bind(
+            'formFactory',
+            function ($app) {
+                $validator_builder = Validation::createValidatorBuilder();
+                $validator_builder->setApiVersion(Validation::API_VERSION_2_5);
+                $validator_builder->addMethodMapping('loadValidatorMetadata');
+                $validator = $validator_builder->getValidator();
+                $formFactory = SymfonyForms::createFormFactoryBuilder()
+                                           ->addExtension(new ValidatorExtension($validator))
+                                           ->addExtension(new HttpFoundationExtension())
+                                           ->getFormFactory()
+                ;
+
+                return $formFactory;
+            }
+        )
+        ;
     }
 }
 

@@ -1,5 +1,4 @@
 (function ($, window, document) {
-    // The $ is now locally scoped
     $(document).ready(function () {
         var $container = $('.gallery-masonry').masonry({
             itemSelector: '.gallery-item-masonry',
@@ -7,14 +6,11 @@
             isFitWidth: true
         });
         if (typeof getRpsMasonryItems == 'function') {
-            // reveal initial images
             var $items = getRpsMasonryItems();
             $container.masonryImagesReveal($items);
         }
     });
-
 }(window.jQuery, window, document));
-
 jQuery.fn.masonryImagesReveal = function ($items) {
     var msnry = this.data('masonry');
     var itemSelector = msnry.options.itemSelector;
@@ -32,6 +28,5 @@ jQuery.fn.masonryImagesReveal = function ($items) {
         // masonry does its thing
         msnry.appended($item);
     });
-
     return this;
 };

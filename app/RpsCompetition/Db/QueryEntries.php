@@ -73,7 +73,8 @@ class QueryEntries
             $id,
             $user_id,
             $title
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
         if ($return > 0) {
             $return = true;
@@ -102,7 +103,8 @@ class QueryEntries
                     e.Member_ID = %s",
             $date,
             $user_id
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -124,7 +126,8 @@ class QueryEntries
                 AND Member_ID = %s",
             $id,
             $user_id
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -150,7 +153,8 @@ class QueryEntries
                 AND competitions.Competition_Date = %s ",
             $user_id,
             $competition_date
-        );
+        )
+        ;
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -165,7 +169,7 @@ class QueryEntries
      */
     public function deleteEntry($id)
     {
-        $result = $this->rpsdb->delete('entries', array('ID' => $id));
+        $result = $this->rpsdb->delete('entries', ['ID' => $id]);
 
         return $result;
     }
@@ -196,7 +200,8 @@ class QueryEntries
             $competition_date,
             $classification,
             $medium
-        );
+        )
+        ;
         $return = $this->rpsdb->get_results($sql);
 
         return $return;
@@ -217,7 +222,8 @@ class QueryEntries
             FROM entries
             WHERE ID = %s",
             $id
-        );
+        )
+        ;
 
         return $this->rpsdb->get_row($sql, $output);
     }
@@ -241,7 +247,15 @@ class QueryEntries
          * @var string  $order
          * @var boolean $count
          */
-        $defaults = array('join' => '', 'where' => '1=1', 'offset' => '', 'number' => '', 'orderby' => 'ID', 'order' => 'ASC', 'count' => false);
+        $defaults = [
+            'join'    => '',
+            'where'   => '1=1',
+            'offset'  => '',
+            'number'  => '',
+            'orderby' => 'ID',
+            'order'   => 'ASC',
+            'count'   => false
+        ];
         $query_vars = wp_parse_args($query_vars, $defaults);
         extract($query_vars, EXTR_SKIP);
 
@@ -292,13 +306,17 @@ class QueryEntries
     {
         if (!empty($data['ID'])) {
             $entry_ID = (int) $data['ID'];
-            $where = array('ID' => $entry_ID);
+            $where = ['ID' => $entry_ID];
             if (!isset($data['Date_Modified'])) {
                 $data['Date_Modified'] = current_time('mysql');
             }
             $data = stripslashes_deep($data);
             if (false === $this->rpsdb->update('entries', $data, $where)) {
-                return new \WP_Error('db_update_error', 'Could not update entry in the database', $this->rpsdb->last_error);
+                return new \WP_Error(
+                    'db_update_error',
+                    'Could not update entry in the database',
+                    $this->rpsdb->last_error
+                );
             }
         }
 

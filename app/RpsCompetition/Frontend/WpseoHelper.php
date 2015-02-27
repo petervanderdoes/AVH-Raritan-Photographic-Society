@@ -3,6 +3,7 @@ namespace RpsCompetition\Frontend;
 
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
@@ -21,9 +22,25 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class WpseoHelper
 {
+    /**
+     * @var PhotoHelper
+     */
     private $photo_helper;
+    /**
+     * @var QueryCompetitions
+     */
+    private $query_competitions;
+    /**
+     * @var QueryMiscellaneous
+     */
     private $query_miscellaneous;
+    /**
+     * @var RpsDb
+     */
     private $rpsdb;
+    /**
+     * @var Settings
+     */
     private $settings;
 
     /**
@@ -31,13 +48,21 @@ class WpseoHelper
      *
      * @param Settings           $settings
      * @param RpsDb              $rpsdb
+     * @param QueryCompetitions  $query_competitions
      * @param QueryMiscellaneous $query_miscellaneous
      * @param PhotoHelper        $photo_helper
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, QueryMiscellaneous $query_miscellaneous, PhotoHelper $photo_helper)
-    {
+    public function __construct(
+        Settings $settings,
+        RpsDb $rpsdb,
+        QueryCompetitions $query_competitions,
+        QueryMiscellaneous $query_miscellaneous,
+        PhotoHelper $photo_helper
+    ) {
+
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
+        $this->query_competitions = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
         $this->photo_helper = $photo_helper;
     }
@@ -47,7 +72,7 @@ class WpseoHelper
      */
     public function actionWpseoRegisterExtraReplacements()
     {
-        wpseo_register_var_replacement('%%rpstitle%%', array($this, 'handleWpSeoTitleReplace'));
+        wpseo_register_var_replacement('%%rpstitle%%', [$this, 'handleWpSeoTitleReplace']);
     }
 
     /**
@@ -116,7 +141,13 @@ class WpseoHelper
             // Setup query for sticky posts.
             $sticky = get_option('sticky_posts');
             // Get the query for articles marked for Magazine Excerpts marked per post and in the selected categories.
-            $queries = rps_suffusion_get_mag_section_queries(array('meta_check_field' => 'suf_magazine_excerpt', 'category_prefix' => 'suf_mag_excerpt_categories', 'to_skip' => $sticky));
+            $queries = rps_suffusion_get_mag_section_queries(
+                [
+                    'meta_check_field' => 'suf_magazine_excerpt',
+                    'category_prefix'  => 'suf_mag_excerpt_categories',
+                    'to_skip'          => $sticky
+                ]
+            );
             foreach ($queries as $query) {
                 $posts = get_posts($query->query);
                 foreach ($posts as $p) {
@@ -142,16 +173,18 @@ class WpseoHelper
     {
         global $post;
 
+        if (!is_object($post)) {
+            return $title_array;
+        }
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
             $selected_date = get_query_var('selected_date');
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
-            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
 
-            $new_title_array = array();
+            $new_title_array = [];
             $new_title_array[] = $post->post_title . ' for the theme "' . $competition->Theme . '" on ' . $date_text;
             $title_array = $new_title_array;
         }
@@ -172,20 +205,20 @@ class WpseoHelper
     {
         global $post;
 
+        if (!is_object($post)) {
+            return $meta_description;
+        }
         $options = get_option('avh-rps');
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
 
-            $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-            $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-
             $selected_date = get_query_var('selected_date');
-            $competitions = $query_competitions->getCompetitionByDates($selected_date);
+            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
             $theme = ucfirst($competition->Theme);
             $date = new \DateTime($selected_date);
             $date_text = $date->format('F j, Y');
-            $entries_amount = $query_miscellaneous->countAllEntries($selected_date);
+            $entries_amount = $this->query_miscellaneous->countAllEntries($selected_date);
 
             if ($post->ID == $options['monthly_entries_post_id']) {
                 $meta_description = 'The ' . $entries_amount . ' entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
@@ -268,9 +301,7 @@ class WpseoHelper
      */
     public function filterWpseoSitemapIndex()
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-
-        $all_competitions = $query_competitions->getScoredCompetitions('1970-01-01', '2200-01-01');
+        $all_competitions = $this->query_competitions->getScoredCompetitions('1970-01-01', '2200-01-01');
         $years = [];
         $old_year = 0;
         $old_mod_date = 0;
@@ -278,7 +309,9 @@ class WpseoHelper
             $date = new \DateTime($competition->Competition_Date);
             $year = $date->format('Y');
 
-            $date_modified = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
+            $date_modified = new \DateTime(
+                $competition->Date_Modified, new \DateTimeZone(get_option('timezone_string'))
+            );
             $mod_date = $date_modified->format('U');
             $last_modified_date = $date_modified->format('c');
 
@@ -293,21 +326,25 @@ class WpseoHelper
             $years[$year] = $last_modified_date;
         }
 
-        $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Date_Modified', 'order' => 'DESC', 'number' => 1));
-        $date = new \DateTime($last_scored->Date_Modified);
-
         $sitemap = '';
 
         foreach ($years as $year => $lastmod) {
             $sitemap .= '<sitemap>' . "\n";
-            $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-entries') . '-sitemap' . $year . '.xml</loc>' . "\n";
+            $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url(
+                    'competition-entries'
+                ) . '-sitemap' . $year . '.xml</loc>' . "\n";
             $sitemap .= '<lastmod>' . htmlspecialchars($lastmod) . '</lastmod>' . "\n";
             $sitemap .= '</sitemap>' . "\n";
         }
-        $sitemap .= '<sitemap>' . "\n";
-        $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url('competition-winners') . '-sitemap.xml</loc>' . "\n";
-        $sitemap .= '<lastmod>' . htmlspecialchars($date->format('c')) . '</lastmod>' . "\n";
-        $sitemap .= '</sitemap>' . "\n";
+
+        foreach ($years as $year => $lastmod) {
+            $sitemap .= '<sitemap>' . "\n";
+            $sitemap .= '<loc>' . wpseo_xml_sitemaps_base_url(
+                    'competition-winners'
+                ) . '-sitemap' . $year . '.xml</loc>' . "\n";
+            $sitemap .= '<lastmod>' . htmlspecialchars($lastmod) . '</lastmod>' . "\n";
+            $sitemap .= '</sitemap>' . "\n";
+        }
 
         return $sitemap;
     }
@@ -324,7 +361,7 @@ class WpseoHelper
         global $post;
 
         $replacement = null;
-        $title_array = array();
+        $title_array = [];
 
         if (is_string($post->post_title) && $post->post_title !== '') {
             $replacement = stripslashes($post->post_title);
@@ -347,61 +384,48 @@ class WpseoHelper
         $n = get_query_var('sitemap_n');
         if (is_scalar($n) && intval($n) > 0) {
             $n = intval($n);
+        } else {
+            header("HTTP/1.1 404 Not Found");
+            exit();
         }
-        $data = [];
+
         $date = new \DateTime();
         $date->setDate($n, 1, 1);
         $start_date = $date->format('Y-m-d');
         $date->setDate($n, 12, 31);
         $end_date = $date->format('Y-m-d');
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $scored_competitions = $query_competitions->getScoredCompetitions($start_date, $end_date);
+        $scored_competitions = $this->query_competitions->getScoredCompetitions($start_date, $end_date);
 
-        $old_mod_date = 0;
-        $old_key = 0;
-        $sitemap_data = array();
-        $location = '';
-        $last_modified_date = '';
+        $sitemap_data = [];
         /** @var QueryCompetitions $competition */
         foreach ($scored_competitions as $competition) {
             $competition_date = new \DateTime($competition->Competition_Date);
             $key = $competition_date->format('U');
             $date = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
-            $mod_date = $date->format('U');
 
-            if ($key != $old_key) {
-                $old_mod_date = 0;
-                $location = $url . $competition_date->format('Y-m-d') . '/';
-            }
-            if ($mod_date > $old_mod_date) {
-                $old_mod_date = $mod_date;
-                $last_modified_date = $date->format('c');
-            }
-
-            $sitemap_data[$key] = array(
-                'loc' => $location,
+            $sitemap_data[$key] = [
+                'loc' => $url . $competition_date->format('Y-m-d') . '/',
                 'pri' => 0.8,
                 'chf' => 'yearly',
-                'mod' => $last_modified_date,
-            );
+                'mod' => $date->format('c'),
+            ];
 
             if ($include_images) {
                 $entries = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
-                $data['images'] = array();
+                $data_images = [];
                 if (is_array($entries)) {
-                    // Iterate through all the award winners and display each thumbnail in a grid
-                    /** @var QueryEntries $entry */
+                    /** @var QueryEntries $record */
+                    $image_data = [];
                     foreach ($entries as $record) {
                         $user_info = get_userdata($record->Member_ID);
-                        $title = $record->Title;
-                        $last_name = $user_info->user_lastname;
-                        $first_name = $user_info->user_firstname;
-                        $data['images'][]['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-                        $data['images'][]['title'] = $title;
-                        $data['images'][]['caption'] = $title . ' Credit: ' . $first_name . ' ' . $last_name;
+
+                        $image_data['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+                        $image_data['title'] = $record->Title;
+                        $image_data['caption'] = $record->Title . ' Credit: ' . $user_info->user_firstname . ' ' . $user_info->user_lastname;
+                        $data_images[] = $image_data;
                     }
                 }
-                $sitemap_data[$key]['images'] = $data['images'];
+                $sitemap_data[$key]['images'] = $data_images;
             }
         }
         $this->outputWpseoSitemap($sitemap_data);
@@ -422,19 +446,19 @@ class WpseoHelper
             $output .= "\t\t<changefreq>" . $data['chf'] . "</changefreq>\n";
             $output .= "\t\t<priority>" . $data['pri'] . "</priority>\n";
 
-            if (isset($data['images']) && (is_array($data['images']) && $data['images'] !== array())) {
+            if (isset($data['images']) && (is_array($data['images']) && $data['images'] !== [])) {
                 foreach ($data['images'] as $img) {
                     if (!isset($img['loc']) || empty($img['loc'])) {
                         continue;
                     }
                     $output .= "\t\t<image:image>\n";
                     $output .= "\t\t\t<image:loc>" . esc_html($img['loc']) . "</image:loc>\n";
-                    if (isset($img['title']) && !empty($img['title'])) {
-                        $output .= "\t\t\t<image:title><![CDATA[" . _wp_specialchars(html_entity_decode($img['title'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "]]></image:title>\n";
-                    }
-                    if (isset($img['caption']) && !empty($img['caption'])) {
-                        $output .= "\t\t\t<image:caption><![CDATA[" . _wp_specialchars(html_entity_decode($img['caption'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))) . "]]></image:caption>\n";
-                    }
+                    $output .= "\t\t\t<image:title>" . _wp_specialchars(
+                            html_entity_decode($img['title'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))
+                        ) . "</image:title>\n";
+                    $output .= "\t\t\t<image:caption>" . _wp_specialchars(
+                            html_entity_decode($img['caption'], ENT_QUOTES, esc_attr(get_bloginfo('charset')))
+                        ) . "</image:caption>\n";
                     $output .= "\t\t</image:image>\n";
                 }
             }
@@ -452,8 +476,12 @@ class WpseoHelper
         header('X-Robots-Tag: noindex,follow', true);
         header('Content-Type: text/xml');
         echo '<?xml version="1.0" encoding="' . esc_attr(get_bloginfo('charset')) . '"?>';
-        echo '<?xml-stylesheet type="text/xsl" href="' . preg_replace('/(^http[s]?:)/', '', esc_url(home_url('main-sitemap.xsl'))) . '"?>' . "\n";
+        echo '<?xml-stylesheet type="text/xsl" href="' . preg_replace(
+                '/(^http[s]?:)/',
+                '',
+                esc_url(home_url('main-sitemap.xsl'))
+            ) . '"?>' . "\n";
         echo $sitemap;
         echo "\n" . '<!-- XML Sitemap generated by AVH Raritan Photographic Society -->';
     }
-} 
+}

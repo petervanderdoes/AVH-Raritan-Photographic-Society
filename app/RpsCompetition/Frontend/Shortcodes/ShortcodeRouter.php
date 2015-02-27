@@ -10,6 +10,11 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
+/**
+ * Class ShortcodeRouter
+ *
+ * @package RpsCompetition\Frontend\Shortcodes
+ */
 class ShortcodeRouter extends ShortcodesAbstract
 {
     public function initializeShortcodes()
@@ -19,11 +24,11 @@ class ShortcodeRouter extends ShortcodesAbstract
         $this->register('rps_scores_current_user', 'shortcodeScoresCurrentUser');
         $this->register('rps_banquet_current_user', 'shortcodeBanquetCurrentUser');
         $this->register('rps_all_scores', 'shortcodeAllScores');
-        $this->register('rps_my_entries', 'shortcodeMyEntries');
+        $this->register('rps_my_entries', 'shortcodeMyEntries', 'MyEntries');
         $this->register('rps_edit_title', 'shortcodeEditTitle');
         $this->register('rps_upload_image', 'shortcodeUploadImage');
         $this->register('rps_email', 'shortcodeEmail');
         $this->register('rps_person_winners', 'shortcodePersonWinners');
         $this->register('rps_monthly_entries', 'shortcodeMonthlyEntries');
     }
-} 
+}

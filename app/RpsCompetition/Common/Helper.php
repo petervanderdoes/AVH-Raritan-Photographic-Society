@@ -22,14 +22,14 @@ class Helper
      *
      * @return array
      */
-    static public function arrayMsort($array, $cols)
+    public static function arrayMsort($array, $cols)
     {
         $row_is_object = false;
-        $sort_column_array = array();
+        $sort_column_array = [];
 
         // Create multiple arrays using the array $cols. These arrays hold the values of each field that we want to sort on.
         foreach ($cols as $col => $order) {
-            $sort_column_array[$col] = array();
+            $sort_column_array[$col] = [];
             foreach ($array as $key => $row) {
                 if (is_object($row)) {
                     $row = (array) $row;
@@ -39,7 +39,7 @@ class Helper
             }
         }
 
-        $params = array();
+        $params = [];
         foreach ($cols as $col => $order) {
             $params[] = &$sort_column_array[$col];
             foreach ($order as $order_element) {
@@ -65,11 +65,30 @@ class Helper
      *
      * @param string $path
      */
-    static public function createDirectory($path)
+    public static function createDirectory($path)
     {
-        if (!is_dir($path)) {
-            mkdir($path, 0755);
+        if (!file_exists($path)) { // Create the directory if it is missing
+            wp_mkdir_p($path);
         }
+    }
+
+    /**
+     * Get the thumbnail to display on the My Entries page.
+     *
+     * @param $current_competition
+     *
+     * @return mixed
+     */
+    public static function getCompetitionThumbnail($current_competition)
+    {
+        $image = [];
+        $image['Color Digital'] = '/thumb-comp-digital-color.jpg';
+        $image['Color Prints'] = '/thumb-comp-print-color.jpg';
+        $image['B&W Digital'] = '/thumb-comp-digital-bw.jpg';
+        $image['B&W Prints'] = '/thumb-comp-print-bw.jpg';
+        $img = $image[$current_competition->Medium];
+
+        return $img;
     }
 
     /**
@@ -79,10 +98,10 @@ class Helper
      *
      * @return array
      */
-    static public function getDynamicPages()
+    public static function getDynamicPages()
     {
         $options = get_option('avh-rps');
-        $pages_array = array($options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true);
+        $pages_array = [$options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true];
 
         return $pages_array;
     }
@@ -96,7 +115,7 @@ class Helper
      *
      * @return string
      */
-    static public function getPluginUrl($file, $directory)
+    public static function getPluginUrl($file, $directory)
     {
         if (is_dir($directory)) {
             $directory .= '/foo';
@@ -113,7 +132,7 @@ class Helper
      *
      * @return string
      */
-    static public function getUserClassification($userID, $medium)
+    public static function getUserClassification($userID, $medium)
     {
         switch ($medium) {
             case 'B&W Digital':
@@ -142,7 +161,7 @@ class Helper
      *
      * @return boolean true if a paid member, false if non-existing user or non-paid member.`
      */
-    static public function isPaidMember($user_id = null)
+    public static function isPaidMember($user_id = null)
     {
         if (is_numeric($user_id)) {
             $user = get_user_by('id', $user_id);
@@ -165,7 +184,7 @@ class Helper
      *
      * @return bool
      */
-    static public function isValidDate($date, $format = 'Y-m-d H:i:s')
+    public static function isValidDate($date, $format = 'Y-m-d H:i:s')
     {
         $d = \DateTime::createFromFormat($format, $date);
 

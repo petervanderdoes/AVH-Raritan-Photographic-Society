@@ -2,16 +2,13 @@
 namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Html\FormBuilder;
-use Illuminate\Container\Container as IlluminateContainer;
+use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
-use RpsCompetition\Db\QueryBanquet;
-use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Libs\Container;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
+use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
+use RpsCompetition\Form\Type\EditTitleType;
+use RpsCompetition\Form\Type\UploadEntryType;
+use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -24,29 +21,41 @@ if (!class_exists('AVH_RPS_Client')) {
  *
  * @package RpsCompetition\Frontend\Shortcodes
  */
-final class ShortcodeController extends Container
+final class ShortcodeController extends Controller
 {
     private $formBuilder;
+    /** @var  \Symfony\Component\Form\FormFactory */
+    private $formFactory;
     private $html;
     /** @var  ShortcodeModel */
     private $model;
+    /** @var  ShortcodeView */
+    private $view;
 
     /**
      * Constructor
      *
-     * @param IlluminateContainer $container
+     * @param Application $container
      */
-    public function __construct(IlluminateContainer $container)
+    public function __construct(Application $container)
     {
         $this->setContainer($container);
         $this->setSettings($this->container->make('Settings'));
         $this->setRpsdb($this->container->make('RpsDb'));
         $this->setRequest($this->container->make('IlluminateRequest'));
         $this->setSession($this->container->make('Session'));
+        $this->formFactory = $this->container->make('formFactory');
         $template = [];
         $template[] = $this->settings->get('template_dir');
         $template[] = $this->settings->get('template_dir') . '/social-networks';
-        $this->setTemplateEngine($this->container->make('Templating', array('template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/')));
+        $this->setTemplateEngine(
+            $this->container->make(
+                'Templating',
+                ['template_dir' => $template, 'cache_dir' => $this->settings->get('upload_dir') . '/twig-cache/']
+            )
+        )
+        ;
+        $this->view = $this->container->make('ShortcodeView');
 
         $this->html = $this->container->make('HtmlBuilder');
         $this->formBuilder = new FormBuilder($this->html);
@@ -67,13 +76,13 @@ final class ShortcodeController extends Container
     {
         global $post;
 
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_competitions = $this->container->make('QueryCompetitions');
+        $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+        $season_helper = $this->container->make('SeasonHelper');
         $seasons = $season_helper->getSeasons();
         $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
 
-        $award_map = array('1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H');
+        $award_map = ['1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H'];
 
         list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
 
@@ -82,9 +91,9 @@ final class ShortcodeController extends Container
         // Also remember the max entries per member for each competition and the number
         // of judges for each competition.
         $total_max_entries = 0;
-        $comp_dates = array();
-        $comp_max_entries = array();
-        $comp_num_judges = array();
+        $comp_dates = [];
+        $comp_max_entries = [];
+        $comp_num_judges = [];
         foreach ($competition_dates as $key => $recs) {
             $date_parts = explode(" ", $recs['Competition_Date']);
             list (, $comp_month, $comp_day) = explode("-", $date_parts[0]);
@@ -94,17 +103,22 @@ final class ShortcodeController extends Container
             $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
         }
 
-        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate($season_start_date, $season_end_date);
+        $club_competition_results_unsorted = $query_miscellaneous->getCompetitionResultByDate(
+            $season_start_date,
+            $season_end_date
+        )
+        ;
         $club_competition_results = CommonHelper::arrayMsort(
             $club_competition_results_unsorted,
-            array(
-                'Medium'           => array(SORT_DESC),
-                'Class_Code'       => array(SORT_ASC),
-                'LastName'         => array(SORT_ASC),
-                'FirstName'        => array(SORT_ASC),
-                'Competition_Date' => array(SORT_ASC)
-            )
-        );
+            [
+                'Medium'           => [SORT_DESC],
+                'Class_Code'       => [SORT_ASC],
+                'LastName'         => [SORT_ASC],
+                'FirstName'        => [SORT_ASC],
+                'Competition_Date' => [SORT_ASC]
+            ]
+        )
+        ;
         // Bail out if no entries found
         if (empty($club_competition_results)) {
             echo 'No entries submitted';
@@ -133,10 +147,10 @@ final class ShortcodeController extends Container
             // Initialize the 2D array to hold the members scores for each month
             // Each row represents a competition month and each column holds the scores
             // of the submitted images for that month
-            $member_scores = array();
+            $member_scores = [];
             $comp_dates_keys = array_keys($comp_dates);
             foreach ($comp_dates_keys as $key) {
-                $member_scores[$key] = array();
+                $member_scores[$key] = [];
             }
             $total_score = 0;
             $num_scores = 0;
@@ -196,7 +210,10 @@ final class ShortcodeController extends Container
 
                         // Display the members annual average score
                         if ($total_score > 0 && $num_scores > 0) {
-                            echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                            echo "<td align=\"center\" class=\"$row_style\">" . sprintf(
+                                    "%3.1f",
+                                    $total_score / $num_scores
+                                ) . "</td>\n";
                         } else {
                             echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
                         }
@@ -252,9 +269,9 @@ final class ShortcodeController extends Container
 
                     // Reset the score array to be ready to start accumulating the scores for this
                     // new member we just started.
-                    $member_scores = array();
+                    $member_scores = [];
                     foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
-                        $member_scores[$comp_dates_key] = array();
+                        $member_scores[$comp_dates_key] = [];
                     }
                     $total_score = 0;
                     $num_scores = 0;
@@ -302,7 +319,10 @@ final class ShortcodeController extends Container
 
             // Display the members annual average score
             if ($total_score > 0 && $num_scores > 0) {
-                echo "<td align=\"center\" class=\"$row_style\">" . sprintf("%3.1f", $total_score / $num_scores) . "</td>\n";
+                echo "<td align=\"center\" class=\"$row_style\">" . sprintf(
+                        "%3.1f",
+                        $total_score / $num_scores
+                    ) . "</td>\n";
             } else {
                 echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
             }
@@ -328,10 +348,10 @@ final class ShortcodeController extends Container
     {
         global $post;
 
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_banquet = new QueryBanquet($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+        $query_entries = $this->container->make('QueryEntries');
+        $query_banquet = $this->container->make('QueryBanquet');
+        $season_helper = $this->container->make('SeasonHelper');
         $seasons = $season_helper->getSeasons();
         $selected_season = end($seasons);
 
@@ -343,9 +363,9 @@ final class ShortcodeController extends Container
         $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $season_start_date, $season_end_date);
         $banquet_id = $query_banquet->getBanquets($season_start_date, $season_end_date);
         $banquet_id_string = '0';
-        $banquet_id_array = array();
+        $banquet_id_array = [];
         $disabled = '';
-        $banquet_entries = array();
+        $banquet_entries = [];
         if (is_array($banquet_id) && !empty($banquet_id)) {
             foreach ($banquet_id as $record) {
                 $banquet_id_array[] = $record['ID'];
@@ -356,13 +376,13 @@ final class ShortcodeController extends Container
 
             $banquet_id_string = implode(',', $banquet_id_array);
             $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . get_current_user_id() . '"';
-            $banquet_entries = $query_entries->query(array('where' => $where));
+            $banquet_entries = $query_entries->query(['where' => $where]);
         }
 
         if (!is_array($banquet_entries)) {
-            $banquet_entries = array();
+            $banquet_entries = [];
         }
-        $all_entries = array();
+        $all_entries = [];
         foreach ($banquet_entries as $banquet_entry) {
             $all_entries[] = $banquet_entry->ID;
         }
@@ -470,7 +490,9 @@ final class ShortcodeController extends Container
                 echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\">{$medium}</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
 
-                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities(
+                echo "<td align=\"left\" valign=\"top\" class=\"{$row_style}\"><a href=\"$image_url\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities(
+                        $title
+                    ) . " / {$comp_date} / {$medium}{$score_award}\">" . htmlentities(
                         $title
                     ) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
@@ -484,7 +506,10 @@ final class ShortcodeController extends Container
                 echo '<input type="submit" name="submit" value="Update">';
                 echo '<input type="submit" name="cancel" value="Cancel">';
             }
-            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
+            echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(
+                    ['m', 'id'],
+                    wp_get_referer()
+                ) . '" />';
             echo '<input type="hidden" name="allentries" value="', implode(',', $all_entries) . '" />';
             echo '<input type="hidden" name="banquetids" value="' . $banquet_id_string . '" />';
             echo '</form>';
@@ -510,6 +535,8 @@ final class ShortcodeController extends Container
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_category_winners
      *
      */
@@ -518,6 +545,7 @@ final class ShortcodeController extends Container
         $class = 'Beginner';
         $award = '1';
         $date = '';
+        $output = '';
         extract($attr, EXTR_OVERWRITE);
 
         $entries = $this->model->getWinner($class, $award, $date);
@@ -532,15 +560,14 @@ final class ShortcodeController extends Container
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $data = $this->model->getFacebookThumbs($entries);
-                echo $this->twig->render('facebook.html.twig', $data);
-
-                return;
+                $output = $this->view->fetch('facebook.html.twig', $data);
+            } else {
+                $data = $this->model->getCategoryWinners($class, $entries, '250');
+                $output = $this->view->fetch('category-winners.html.twig', $data);
             }
-
-            $data = $this->model->getCategoryWinners($class, $entries, '250');
-            echo $this->twig->render('category-winners.html.twig', $data);
         }
-        unset($query_miscellaneous, $photo_helper);
+
+        return $output;
     }
 
     /**
@@ -550,61 +577,56 @@ final class ShortcodeController extends Container
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
-     * @todo: MVC
      */
     public function shortcodeEditTitle($attr, $content, $tag)
     {
         global $post;
-        $query_entries = new QueryEntries($this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $query_entries = $this->container->make('QueryEntries');
+        $photo_helper = $this->container->make('PhotoHelper');
 
-        $medium_subset = "Digital";
-        $medium_param = "?m=digital";
-        if ($this->request->input('m') == "prints") {
-            $medium_subset = "Prints";
-            $medium_param = "?m=prints";
+        if ($this->settings->has('formerror')) {
+            /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
+            $error_obj = $this->settings->get('formerror');
+            $form = $error_obj->getForm();
+            $server_file_name = $form->get('server_file_name')
+                                     ->getData()
+            ;
+        } else {
+            $entity = new EntityFormEditTitle();
+            $medium_subset = "Digital";
+            if ($this->request->input('m') == "prints") {
+                $medium_subset = "Prints";
+            }
+            $entry_id = $this->request->input('id');
+
+            $recs = $query_entries->getEntryById($entry_id);
+            $title = $recs->Title;
+            $server_file_name = $recs->Server_File_Name;
+
+            $action = add_query_arg(['id' => $entry_id, 'm' => strtolower($medium_subset)], get_permalink($post->ID));
+            $entity->setId($entry_id);
+
+            $entity->setNewTitle($title);
+            $entity->setTitle($title);
+            $entity->setServerFileName($server_file_name);
+            $entity->setM($medium_subset);
+            $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
+            $form = $this->formFactory->create(
+                new EditTitleType($entity),
+                $entity,
+                ['action' => $action, 'attr' => ['id' => 'edittitle']]
+            )
+            ;
         }
-        $entry_id = $this->request->input('id');
+        $data = [];
+        $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
 
-        $recs = $query_entries->getEntryById($entry_id);
-        // Legacy need. Previously titles would be stores with added slashes.
-        $title = $recs->Title;
-        $server_file_name = $recs->Server_File_Name;
-
-        if ($this->settings->has('errmsg')) {
-            echo '<div id="errmsg">';
-            echo $this->settings->get('errmsg');
-            echo '</div>';
-        }
-        $action = home_url('/' . get_page_uri($post->ID));
-        echo '<form action="' . $action . $medium_param . '" method="post">';
-
-        echo '<table class="form_frame" width="80%">';
-        echo '<tr><th class="form_frame_header" colspan=2>Update Image Title</th></tr>';
-        echo '<tr><td align="center">';
-        echo '<table>';
-        echo '<tr><td align="center" colspan="2">';
-
-        echo "<img src=\"" . $photo_helper->getThumbnailUrl($recs->Server_File_Name, '200') . "\" />\n";
-        echo '</td></tr>';
-        echo '<tr><td align="center" class="form_field_label">Title:</td><td class="form_field">';
-        echo '<input style="width:300px" type="text" name="new_title" maxlength="128" value="' . esc_attr($title) . '">';
-        echo '</td></tr>';
-        echo '<tr><td style="padding-top:20px" align="center" colspan="2">';
-        echo '<input type="submit" name="submit" value="Update">';
-        echo '<input type="submit" name="cancel" value="Cancel">';
-        echo '<input type="hidden" name="id" value="' . esc_attr($entry_id) . '" />';
-        echo '<input type="hidden" name="title" value="' . esc_attr($title) . '" />';
-        echo '<input type="hidden" name="server_file_name" value="' . esc_attr($server_file_name) . '" />';
-        echo '<input type="hidden" name="m" value="' . esc_attr(strtolower($medium_subset)) . '" />';
-        echo '<input type="hidden" name="wp_get_referer" value="' . remove_query_arg(array('m', 'id'), wp_get_referer()) . '" />';
-        echo '</td></tr>';
-        echo '</table>';
-        echo '</td></tr>';
-        echo '</table>';
-        echo '</form>';
         unset($query_entries, $photo_helper);
+
+        return $this->view->fetch('edit_title.html.twig', ['data' => $data, 'form' => $form->createView()]);
     }
 
     /**
@@ -615,10 +637,12 @@ final class ShortcodeController extends Container
      *                        - HTML Attributes
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
+     *
+     * @return string
      */
     public function shortcodeEmail($attr, $content, $tag)
     {
-        echo $this->html->mailto($attr['email'], $content, $attr);
+        return $this->html->mailto($attr['email'], $content, $attr);
     }
 
     /**
@@ -630,32 +654,40 @@ final class ShortcodeController extends Container
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_monthly_entries
      */
     public function shortcodeMonthlyEntries($attr, $content, $tag)
     {
+        $output = '';
         $selected_date = $this->session->get('monthly_entries_selected_date');
-        $selected_season = $this->session->get('monthly_entries_selected_season');
 
-        $scored_competitions = $this->model->getScoredCompetitions($selected_season);
+        if ($this->model->isScoredCompetition($selected_date)) {
+            /**
+             * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+             *
+             * @see Frontend::filterWpseoPreAnalysisPostsContent
+             */
+            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
+                'didFilterWpseoPreAnalysisPostsContent',
+                false
+            )
+            ;
+            if (!$didFilterWpseoPreAnalysisPostsContent) {
+                $entries = $this->model->getAllEntries($selected_date, $selected_date);
+                $data = $this->model->getFacebookThumbs($entries);
+                $output = $this->view->fetch('facebook.html.twig', $data);
+            } else {
+                $selected_season = $this->session->get('monthly_entries_selected_season');
+                $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
-        /**
-         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
-         *
-         * @see Frontend::filterWpseoPreAnalysisPostsContent
-         */
-        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $entries = $this->model->getAllEntries($selected_date, $selected_date);
-            $data = $this->model->getFacebookThumbs($entries);
-            echo $this->twig->render('facebook.html.twig', $data);
-
-            return;
+                $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
+                $output = $this->view->fetch('monthly-entries.html.twig', $data);
+            }
         }
 
-        $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
-
-        echo $this->twig->render('monthly-entries.html.twig', $data);
+        return $output;
     }
 
     /**
@@ -667,295 +699,41 @@ final class ShortcodeController extends Container
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_monthly_winners
      */
     public function shortcodeMonthlyWinners($attr, $content, $tag)
     {
 
+        $output = '';
         $selected_date = $this->session->get('monthly_winners_selected_date');
         $selected_season = $this->session->get('monthly_winners_selected_season');
 
         $scored_competitions = $this->model->getScoredCompetitions($selected_season);
 
-        /**
-         * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
-         *
-         * @see Frontend::filterWpseoPreAnalysisPostsContent
-         */
-        $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
-        if (!$didFilterWpseoPreAnalysisPostsContent && is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $entries = $this->model->getWinners($selected_date);
-            $data = $this->model->getFacebookThumbs($entries);
-            echo $this->twig->render('facebook.html.twig', $data);
-
-            return;
-        }
-
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
-            echo $this->render('monthly-winners.html.twig', $data);
-        }
-    }
-
-    /**
-     * Display the entries of the current user.
-     * This page shows the current entries for a competition of the current user.
-     *
-     * @param array  $attr    The shortcode argument list. Allowed arguments:
-     *                        - medium
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
-     * @see Frontend::actionHandleHttpPostRpsMyEntries
-     * @todo: MVC
-     */
-    public function shortcodeMyEntries($attr, $content, $tag)
-    {
-        global $post;
-
-        $attr = shortcode_atts(array('medium' => 'digital'), $attr);
-
-        $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $competition_helper = new CompetitionHelper($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-
-        $medium_subset_medium = $attr['medium'];
-
-        $open_competitions = $query_competitions->getOpenCompetitions(get_current_user_id(), $medium_subset_medium);
-        $open_competitions = CommonHelper::arrayMsort($open_competitions, array('Competition_Date' => array(SORT_ASC), 'Medium' => array(SORT_ASC)));
-
-        if (empty($open_competitions)) {
-            $this->settings->set('errmsg', 'There are no competitions available to enter');
-            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
-
-            return;
-        }
-
-        if ($this->request->isMethod('POST')) {
-            switch ($this->request->input('submit_control')) {
-
-                case 'select_comp':
-                    $competition_date = $this->request->input('select_comp');
-                    $medium = $this->request->input('medium');
-                    break;
-
-                case 'select_medium':
-                    $competition_date = $this->request->input('comp_date');
-                    $medium = $this->request->input('selected_medium');
-                    break;
-                default:
-                    $competition_date = $this->request->input('comp_date');
-                    $medium = $this->request->input('medium');
-                    break;
-            }
-        } else {
-            $current_competition = reset($open_competitions);
-            $competition_date = $this->session->get('myentries/' . $medium_subset_medium . '/competition_date', mysql2date('Y-m-d', $current_competition->Competition_Date));
-            $medium = $this->session->get('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
-        }
-        $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
-        $current_competition = $query_competitions->getCompetitionByDateClassMedium($competition_date, $classification, $medium);
-
-        $this->session->set('myentries/subset', $medium_subset_medium);
-        $this->session->set('myentries/' . $medium_subset_medium . '/competition_date', $current_competition->Competition_Date);
-        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
-        $this->session->set('myentries/' . $medium_subset_medium . '/classification', $current_competition->Classification);
-        $this->session->save();
-
-        if ($this->settings->has('errmsg')) {
-            echo '<div id="errmsg">' . esc_html($this->settings->get('errmsg')) . '</div>';
-        }
-
-        echo '<script language="javascript">' . "\n";
-        echo '	function confirmSubmit() {' . "\n";
-        echo '		var agree=confirm("You are about to delete one or more entries.  Are you sure?");' . "\n";
-        echo '		if (agree) {' . "\n";
-        echo '			submit_form(\'delete\');' . "\n";
-        echo '			return true ;' . "\n";
-        echo '		} else {' . "\n";
-        echo '			return false ;' . "\n";
-        echo '		}' . "\n";
-        echo ' }' . "\n";
-        echo 'function submit_form(control_name) {' . "\n";
-        echo '	document.MyEntries.submit_control.value = control_name;' . "\n";
-        echo '	document.MyEntries.submit();' . "\n";
-        echo '}' . "\n";
-        echo '</script>' . "\n";
-
-        // Start the form
-        $action = home_url('/' . get_page_uri($post->ID));
-        echo '<form name="MyEntries" action=' . $action . ' method="post">' . "\n";
-        echo '<input type="hidden" name="submit_control">' . "\n";
-        echo '<input type="hidden" name="comp_date" value="' . $current_competition->Competition_Date . '">' . "\n";
-        echo '<input type="hidden" name="medium" value="' . $current_competition->Medium . '">' . "\n";
-        echo '<input type="hidden" name="classification" value="' . $current_competition->Classification . '">' . "\n";
-        echo '<input type="hidden" name="_wpnonce" value="' . wp_create_nonce('avh-rps-myentries') . '" />' . "\n";
-        echo '<table class="form_frame" width="90%">' . "\n";
-
-        // Form Heading
-        echo "<tr><th colspan=\"6\" align=\"center\" class=\"form_frame_header\">My Entries for " . $current_competition->Medium . " on " . mysql2date('Y-m-d', $current_competition->Competition_Date) . "</th></tr>\n";
-        echo "<tr><td align=\"center\" colspan=\"6\">\n";
-        echo "<table width=\"100%\">\n";
-        echo '<tr>';
-        echo '<td width="25%">';
-        // echo '<span class="rps-comp-medium">' . $this->settings->medium . '</span>';
-        switch ($current_competition->Medium) {
-            case "Color Digital":
-                $img = '/thumb-comp-digital-color.jpg';
-                break;
-            case "Color Prints":
-                $img = '/thumb-comp-print-color.jpg';
-                break;
-            case "B&W Digital":
-                $img = '/thumb-comp-digital-bw.jpg';
-                break;
-            case "B&W Prints":
-                $img = '/thumb-comp-print-bw.jpg';
-                break;
-            default:
-                $img = '';
-        }
-
-        echo '<img src="' . CommonHelper::getPluginUrl($img, $this->settings->get('images_dir')) . '">';
-        echo '</td>';
-        echo "<td width=\"75%\">\n";
-        echo "<table width=\"100%\">\n";
-
-        // The competition date dropdown list
-        echo "<tr>\n";
-        echo "<td width=\"33%\" align=\"right\"><b>Competition Date:&nbsp;&nbsp;</b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">\n";
-
-        $previous_date = '';
-        $open_competitions_options = array();
-        foreach ($open_competitions as $open_competition) {
-            if ($previous_date == $open_competition->Competition_Date) {
-                continue;
-            }
-            $previous_date = $open_competition->Competition_Date;
-            $open_competitions_options[$open_competition->Competition_Date] = strftime('%d-%b-%Y', strtotime($open_competition->Competition_Date)) . " " . $open_competition->Theme;
-        }
-        echo $this->formBuilder->select('select_comp', $open_competitions_options, $current_competition->Competition_Date, array('onchange' => 'submit_form(\'select_comp\')'));
-        echo "</td></tr>\n";
-
-        // Competition medium dropdown list
-        echo "<tr>\n<td width=\"33%\" align=\"right\"><b>Competition:&nbsp;&nbsp;</b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">\n";
-        echo $this->formBuilder->select('selected_medium', $competition_helper->getMedium($open_competitions), $current_competition->Medium, array('onchange' => 'submit_form(\'select_medium\')'));
-        echo "</td></tr>\n";
-
-        // Display the Classification and Theme for the selected competition
-        echo "<tr><td width=\"33%\" align=\"right\"><b>Classification:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">" . $current_competition->Classification . "</td></tr>\n";
-        echo "<tr><td width=\"33%\" align=\"right\"><b>Theme:&nbsp;&nbsp;<b></td>\n";
-        echo "<td width=\"64%\" align=\"left\">$current_competition->Theme</td></tr>\n";
-
-        echo "</table>\n";
-        echo "</td></tr></table>\n";
-
-        // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
-        $close_date = $query_competitions->getCompetitionCloseDate($current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
-        if ($close_date !== null) {
-            $close_epoch = strtotime($close_date);
-            $time_to_close = $close_epoch - current_time('timestamp');
-            if ($time_to_close >= 0 && $time_to_close <= 604800) {
-                echo "<tr><td colspan=\"6\" align=\"center\" style=\"color:red\"><b>Note:</b> This competition will close on " . mysql2date("F j, Y", $close_date) . " at " . mysql2date('h:i a', $close_date) . "</td></tr>\n";
-            }
-        }
-
-        // Display the column headers for the competition entries
-        echo '<tr>';
-        echo '<th class="form_frame_header" width="5%">&nbsp;</th>';
-        echo '<th class="form_frame_header" width="10%">Image</th>';
-        echo '<th class="form_frame_header" width="40%">Title</th>';
-        echo '<th class="form_frame_header" width="25%">File Name</th>';
-        echo '<th class="form_frame_header" width="10%">Width</th>';
-        echo '<th class="form_frame_header" width="10%">Height</th>';
-        echo '</tr>';
-
-        // Retrieve the maximum number of entries per member for this competition
-        $max_entries_per_member_per_comp = $query_competitions->getCompetitionMaxEntries($current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
-
-        // Retrieve the total number of entries submitted by this member for this competition date
-        $total_entries_submitted = $query_entries->countEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date);
-
-        $entries = $query_entries->getEntriesSubmittedByMember(get_current_user_id(), $current_competition->Competition_Date, $current_competition->Classification, $current_competition->Medium);
-        // Build the rows of submitted images
-        $num_rows = 0;
-        /** @var QueryEntries $recs */
-        foreach ($entries as $recs) {
-            $competition = $query_competitions->getCompetitionById($recs->Competition_ID);
-            $num_rows += 1;
-            $row_style = $num_rows % 2 == 1 ? "odd_row" : "even_row";
-
-            // Checkbox column
-            echo '<tr class="' . $row_style . '"><td align="center" width="5%"><input type="checkbox" name="EntryID[]" value="' . $recs->ID . '">' . "\n";
-
-            // Thumbnail column
-            $image_url = home_url($recs->Server_File_Name);
-            echo "<td align=\"center\" width=\"10%\">\n";
-            echo '<a href="' . $image_url . '" rel="' . $current_competition->Competition_Date . '" title="' . $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium . '">' . "\n";
-            echo "<img src=\"" . $photo_helper->getThumbnailUrl($recs->Server_File_Name, '75') . "\" />\n";
-            echo "</a></td>\n";
-
-            // Title column
-            echo '<td align="left" width="40%">';
-            echo htmlentities($recs->Title) . "</td>\n";
-
-            // File Name
-            echo '<td align="left" width="25%">' . $recs->Client_File_Name . "</td>\n";
-
-            // Image width and height columns. The height and width values are suppressed if the Client_File_Name is
-            // empty i.e. no image uploaded for a print competition.
-            if (file_exists($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name)) {
-                $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
+            /**
+             * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
+             *
+             * @see Frontend::filterWpseoPreAnalysisPostsContent
+             */
+            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
+                'didFilterWpseoPreAnalysisPostsContent',
+                false
+            )
+            ;
+            if (!$didFilterWpseoPreAnalysisPostsContent) {
+                $entries = $this->model->getWinners($selected_date);
+                $data = $this->model->getFacebookThumbs($entries);
+                $output = $this->view->fetch('facebook.html.twig', $data);
             } else {
-                $size = array(0, 0);
-            }
-            if ($recs->Client_File_Name > "") {
-                echo '<td align="center" style="text-align:center" width="10%">' . $size[0] . "</td>\n";
-                echo '<td align="center" width="10%">' . $size[1] . "</td>\n";
-            } else {
-                echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
-                echo "<td align=\"center\" width=\"10%\">&nbsp;</td>\n";
+                $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
+                $output = $this->view->fetch('monthly-winners.html.twig', $data);
             }
         }
 
-        // Add some instructional bullet points above the buttons
-        echo '<tr><td align="left" style="padding-top: 5px;" colspan="6">';
-        echo '<ul style="margin: 0 0 0 15px;padding:0">';
-        if ($num_rows > 0) {
-            echo "<li>Click the thumbnail or title to view the full size image</li>\n";
-        }
-        echo "<ul></td></tr>\n";
-
-        if ($this->request->has('resized') && ('1' == $this->request->input('resized'))) {
-            echo "<tr><td align=\"left\" colspan=\"6\" class=\"warning_cell\">";
-            echo "<ul><li><b>Note</b>: The web site automatically resized your image to match the digital projector.\n";
-            echo "</li></ul>\n";
-        }
-
-        // Buttons at the bottom of the list of submitted images
-        echo "<tr><td align=\"center\" style=\"padding-top: 10px; text-align:center\" colspan=\"6\">\n";
-        echo '<span>';
-        // Don't show the Add button if the max number of images per member reached
-        if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get('club_max_entries_per_member_per_date')) {
-            echo $this->formBuilder->input('submit[add]', 'Add', array('type' => 'submit', 'onclick' => 'submit_form(\'add\')')) . "&nbsp;";
-        }
-        if ($num_rows > 0 && $max_entries_per_member_per_comp > 0) {
-            echo $this->formBuilder->input('submit[edit_title]', 'Change Title', array('type' => 'submit', 'onclick' => 'submit_form(\'add\')')) . "&nbsp;";
-            //echo "<input type=\"submit\" name=\"submit[edit_title]\" value=\"Change Title\"  onclick=\"submit_form('edit')\">" . "&nbsp;\n";
-        }
-        if ($num_rows > 0) {
-            echo $this->formBuilder->input('submit[delete]', 'Remove', array('type' => 'submit', 'onclick' => 'return  confirmSubmit()'));
-            //echo '<input type="submit" name="submit[delete]" value="Remove" onclick="return  confirmSubmit()"></td></tr>' . "\n";
-        }
-        echo '</span></td></tr>';
-        // All done, close out the table and the form
-        echo "</table>\n</form>\n<br />\n";
-
-        unset($query_entries, $query_competitions, $competition_helper, $photo_helper);
+        return $output;
     }
 
     /**
@@ -966,14 +744,17 @@ final class ShortcodeController extends Container
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @internal Shortcode: rps_person_winners
      */
     public function shortcodePersonWinners($attr, $content, $tag)
     {
-        $attr = shortcode_atts(array('id' => 0, 'images' => 6), $attr);
+        $attr = shortcode_atts(['id' => 0, 'images' => 6], $attr);
 
         $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
-        echo $this->twig->render('person-winners.html.twig', $data);
+
+        return $this->view->fetch('person-winners.html.twig', $data);
     }
 
     /**
@@ -990,8 +771,8 @@ final class ShortcodeController extends Container
     public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
         global $post;
-        $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+        $season_helper = $this->container->make('SeasonHelper');
 
         $seasons = $season_helper->getSeasons();
         $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
@@ -1075,7 +856,9 @@ final class ShortcodeController extends Container
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
                 echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities($title) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities(
+                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities(
+                        $title
+                    ) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities(
                         $title
                     ) . "</a></td>\n";
                 echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
@@ -1093,57 +876,44 @@ final class ShortcodeController extends Container
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
+     * @return string
+     *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
-     * @todo: MVC
      */
     public function shortcodeUploadImage($attr, $content, $tag)
     {
         global $post;
 
-        // Error messages
-        if ($this->settings->has('errmsg')) {
-            echo '<div id="errmsg">';
-            echo $this->settings->get('errmsg');
-            echo '</div>';
-        }
-
         $action = home_url('/' . get_page_uri($post->ID));
-        echo $this->formBuilder->open($action . '/?post=1', array('enctype' => 'multipart/form-data'));
-
+        $action .= '/?post=1';
+        $medium_subset = "Digital";
         if ($this->request->has('m')) {
-            $medium_subset = "Digital";
             if ($this->request->input('m') == "prints") {
                 $medium_subset = "Prints";
             }
-            echo $this->formBuilder->hidden('medium_subset', $medium_subset);
         }
         if ($this->request->has('wp_get_referer')) {
             $ref = $this->request->input('wp_get_referer');
         } else {
             $ref = wp_get_referer();
         }
-        echo $this->formBuilder->hidden('wp_get_referer', remove_query_arg(array('m'), $ref));
-        echo '<table class="form_frame" width="80%">';
-        echo '<tr><th class="form_frame_header" colspan=2>';
-        echo 'Submit Your Image';
-        echo '</th></tr>';
-        echo '<tr><td align="center">';
-        echo '<table>';
-        echo '<tr><td class="form_field_label"><span style="color:red"><sup>*</sup> </span>Title <i>(required)</i>:</td>';
-        echo '<td class="form_field">';
-        echo '<input style="width:300px" type="text" name="title" maxlength="128">';
-        echo '</td></tr>';
-        echo '<tr><td class="form_field_label"><span style="color:red"><sup>*</sup> </span>File Name <i>(required)</i>:</td>';
-        echo '<td class="form_field">';
-        echo '<input style="width:300px" type="file" name="file_name" maxlength="128">';
-        echo '</td></tr>';
-        echo '<tr><td align="center" style="padding-top:20px" colspan="2">';
-        echo '<input type="submit" name="submit" value="Submit">';
-        echo '<input type="submit" name="cancel" value="Cancel">';
-        echo '</td></tr>';
-        echo '</table>';
-        echo '</td></tr>';
-        echo '</table>';
-        echo $this->formBuilder->close();
+
+        if ($this->settings->has('formerror')) {
+            /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
+            $error_obj = $this->settings->get('formerror');
+            $form = $error_obj->getForm();
+        } else {
+            $entity = new EntityFormUploadEntry();
+            $entity->setWpGetReferer($ref);
+            $entity->setMediumSubset($medium_subset);
+            $form = $this->formFactory->create(
+                new UploadEntryType(),
+                $entity,
+                ['action' => $action, 'attr' => ['id' => 'uploadentry']]
+            )
+            ;
+        }
+
+        return $this->view->fetch('upload.html.twig', ['form' => $form->createView()]);
     }
 }

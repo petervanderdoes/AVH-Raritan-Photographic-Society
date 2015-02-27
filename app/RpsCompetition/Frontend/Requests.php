@@ -94,8 +94,15 @@ class Requests
                 $selected_season = esc_attr($this->request->input('selected_season'));
                 break;
             default:
-                if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date, 'Y-m-d'))) {
-                    $last_scored = $query_competitions->query(array('where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+                if ($query_var_selected_date === false || (!CommonHelper::isValidDate(
+                        $query_var_selected_date,
+                        'Y-m-d'
+                    ))
+                ) {
+                    $last_scored = $query_competitions->query(
+                        ['where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1]
+                    )
+                    ;
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $selected_date = $date_object->format(('Y-m-d'));
                     $redirect = true;
@@ -108,7 +115,7 @@ class Requests
 
         if (!$season_helper->isValidSeason($selected_season)) {
             $selected_season = $season_helper->getSeasonId(date('r'));
-            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, array('Scored' => 'Y'));
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
             $competition = end($competitions);
             $date_object = new \DateTime($competition->Competition_Date);
@@ -116,7 +123,7 @@ class Requests
         }
 
         if (!$competition_helper->isScoredCompetitionDate($selected_date)) {
-            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, array('Scored' => 'Y'));
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
             $competition = end($competitions);
             $date_object = new \DateTime($competition->Competition_Date);
@@ -164,8 +171,20 @@ class Requests
                 $selected_season = esc_attr($this->request->input('selected_season'));
                 break;
             default:
-                if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date, 'Y-m-d'))) {
-                    $last_scored = $query_competitions->query(array('where' => 'Scored="Y" AND Special_Event="N"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1));
+                if ($query_var_selected_date === false || (!CommonHelper::isValidDate(
+                        $query_var_selected_date,
+                        'Y-m-d'
+                    ))
+                ) {
+                    $last_scored = $query_competitions->query(
+                        [
+                            'where' => 'Scored="Y" AND Special_Event="N"',
+                            'orderby' => 'Competition_Date',
+                            'order' => 'DESC',
+                            'number' => 1
+                        ]
+                    )
+                    ;
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $selected_date = $date_object->format(('Y-m-d'));
                     $redirect = true;
@@ -178,7 +197,7 @@ class Requests
 
         if (!$season_helper->isValidSeason($selected_season)) {
             $selected_season = $season_helper->getSeasonId(date('r'));
-            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, array('Scored' => 'Y'));
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
             $competition = end($competitions);
             $date_object = new \DateTime($competition->Competition_Date);
@@ -186,7 +205,7 @@ class Requests
         }
 
         if (!$competition_helper->isScoredCompetitionDate($selected_date)) {
-            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, array('Scored' => 'Y'));
+            $competitions = $query_competitions->getCompetitionBySeasonId($selected_season, ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
             $competition = end($competitions);
             $date_object = new \DateTime($competition->Competition_Date);
@@ -206,4 +225,4 @@ class Requests
         $this->session->set('monthly_winners_selected_season', $selected_season);
         $this->session->save();
     }
-} 
+}

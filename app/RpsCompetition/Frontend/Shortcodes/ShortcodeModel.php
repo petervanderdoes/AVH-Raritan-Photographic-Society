@@ -2,19 +2,39 @@
 
 namespace RpsCompetition\Frontend\Shortcodes;
 
+use Avh\Network\Session;
+use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Settings;
+use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class ShortcodeModel
+ *
+ * @package RpsCompetition\Frontend\Shortcodes
+ */
 class ShortcodeModel
 {
+    private $competition_helper;
+    /** @var  FormFactory */
+    private $formFactory;
     private $photo_helper;
     private $query_competitions;
     private $query_entries;
     private $query_miscellaneous;
     private $season_helper;
+    /**
+     * @var Session
+     */
+    private $session;
+    /**
+     * @var Settings
+     */
+    private $settings;
 
     /**
      * Constructor
@@ -24,14 +44,30 @@ class ShortcodeModel
      * @param QueryMiscellaneous $query_miscellaneous
      * @param PhotoHelper        $photo_helper
      * @param SeasonHelper       $season_helper
+     * @param CompetitionHelper  $competition_helper
+     * @param Session            $session
+     * @param FormFactory        $formFactory
      */
-    public function __construct(QueryCompetitions $query_competitions, QueryEntries $query_entries, QueryMiscellaneous $query_miscellaneous, PhotoHelper $photo_helper, SeasonHelper $season_helper)
-    {
+    public function __construct(
+        QueryCompetitions $query_competitions,
+        QueryEntries $query_entries,
+        QueryMiscellaneous $query_miscellaneous,
+        PhotoHelper $photo_helper,
+        SeasonHelper $season_helper,
+        CompetitionHelper $competition_helper,
+        Session $session,
+        FormFactory $formFactory,
+        Settings $settings
+    ) {
         $this->query_competitions = $query_competitions;
         $this->query_entries = $query_entries;
         $this->query_miscellaneous = $query_miscellaneous;
         $this->photo_helper = $photo_helper;
         $this->season_helper = $season_helper;
+        $this->competition_helper = $competition_helper;
+        $this->session = $session;
+        $this->formFactory = $formFactory;
+        $this->settings = $settings;
     }
 
     /**
@@ -43,7 +79,7 @@ class ShortcodeModel
      */
     public function getAwardsData($max_num_awards)
     {
-        $data = array();
+        $data = [];
         for ($i = 0; $i < $max_num_awards; $i++) {
             switch ($i) {
                 case 0:
@@ -74,11 +110,11 @@ class ShortcodeModel
      */
     public function getCategoryWinners($class, $entries, $thumb_size)
     {
-        $data = array();
+        $data = [];
         $data['class'] = $class;
         $data['records'] = $entries;
         $data['thumb_size'] = $thumb_size;
-        $data['images'] = array();
+        $data['images'] = [];
         foreach ($data['records'] as $recs) {
             $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
         }
@@ -95,12 +131,12 @@ class ShortcodeModel
      */
     public function getFacebookThumbs($entries)
     {
-        $images = array();
+        $images = [];
         foreach ($entries as $entry) {
             $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
         }
 
-        return array('images' => $images);
+        return ['images' => $images];
     }
 
     /**
@@ -114,7 +150,7 @@ class ShortcodeModel
      */
     public function getMonthlyEntries($selected_season, $selected_date, $scored_competitions)
     {
-        $data = array();
+        $data = [];
         $data['selected_season'] = $selected_season;
         $data['selected_date'] = $selected_date;
         $data['is_scored_competitions'] = false;
@@ -138,7 +174,7 @@ class ShortcodeModel
             $data['is_scored_competitions'] = true;
         }
 
-        $data['images'] = array();
+        $data['images'] = [];
         if (is_array($data['entries'])) {
             // Iterate through all the award winners and display each thumbnail in a grid
             /** @var QueryEntries $entry */
@@ -164,7 +200,7 @@ class ShortcodeModel
 
         $max_num_awards = $this->query_miscellaneous->getMaxAwards($selected_date);
 
-        $data = array();
+        $data = [];
         $data['selected_season'] = $selected_season;
         $data['selected_date'] = $selected_date;
         $data['is_scored_competitions'] = false;
@@ -221,9 +257,9 @@ class ShortcodeModel
     {
         $entries = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
         $entries_id = array_rand($entries, $amount_of_images);
-        $data = array();
+        $data = [];
         $data['thumb_size'] = '150w';
-        $data['records'] = array();
+        $data['records'] = [];
         foreach ($entries_id as $key) {
             $data['entries'][] = $entries[$key];
         }
@@ -260,7 +296,7 @@ class ShortcodeModel
     public function getWinner($class, $award, $date)
     {
         $competition_date = date('Y-m-d H:i:s', strtotime($date));
-        $award_map = array('1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM');
+        $award_map = ['1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM'];
 
         return $this->query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
     }
@@ -291,6 +327,20 @@ class ShortcodeModel
     }
 
     /**
+     * Check if the given date has scored competitions.
+     *
+     * @param $competition_date
+     *
+     * @return bool
+     */
+    public function isScoredCompetition($competition_date)
+    {
+        $return = $this->query_competitions->getScoredCompetitions($competition_date);
+
+        return (is_array($return) && !empty($return));
+    }
+
+    /**
      * Collect needed data to render the Month and Season select form
      *
      * @param array $months
@@ -300,7 +350,7 @@ class ShortcodeModel
     private function dataMonthAndSeasonSelectionForm($months)
     {
         global $post;
-        $data = array();
+        $data = [];
         $data['action'] = home_url('/' . get_page_uri($post->ID));
         $data['months'] = $months;
         $seasons = $this->season_helper->getSeasons();
@@ -320,13 +370,13 @@ class ShortcodeModel
     private function dataPhotoGallery($record, $thumb_size)
     {
 
-        $data = array();
+        $data = [];
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
         $data['award'] = $record->Award;
-        $data['url_large '] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
@@ -345,16 +395,17 @@ class ShortcodeModel
      */
     private function dataPhotoMasonry($record, $thumb_size)
     {
-        $data = array();
+        $data = [];
         $user_info = get_userdata($record->Member_ID);
         $title = $record->Title;
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
-        $data['url_large '] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->photo_helper->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
-} 
+}
