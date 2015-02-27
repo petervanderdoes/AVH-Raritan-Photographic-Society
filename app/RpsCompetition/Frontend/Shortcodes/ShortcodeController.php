@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Html\FormBuilder;
-use Illuminate\Container\Container as IlluminateContainer;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
