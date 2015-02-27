@@ -8,26 +8,20 @@
 
 namespace RpsCompetition;
 
+use Avh\Contracts\Foundation\Application as ApplicationContract;
 use Avh\Support\ProviderRepository;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\Filesystem\Filesystem;
 
 class Application extends Container implements ApplicationContract
 {
     /**
-     * The Laravel framework version.
+     * The Plugin Version
      *
      * @var string
      */
-    const VERSION = '5.1-dev';
-    /**
-     * The base path for the Laravel installation.
-     *
-     * @var string
-     */
-    protected $basePath;
+    const VERSION = '';
     /**
      * Indicates if the application has "booted".
      *
@@ -101,52 +95,6 @@ class Application extends Container implements ApplicationContract
     }
 
     /**
-     * Boot the application's service providers.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        // TODO: Implement boot() method.
-    }
-
-    /**
-     * Register a new "booted" listener.
-     *
-     * @param  mixed $callback
-     *
-     * @return void
-     */
-    public function booted($callback)
-    {
-        // TODO: Implement booted() method.
-    }
-
-    /**
-     * Register a new boot listener.
-     *
-     * @param  mixed $callback
-     *
-     * @return void
-     */
-    public function booting($callback)
-    {
-        // TODO: Implement booting() method.
-    }
-
-    /**
-     * Get or check the current application environment.
-     *
-     * @param  mixed
-     *
-     * @return string
-     */
-    public function environment()
-    {
-        // TODO: Implement environment() method.
-    }
-
-    /**
      * Get the service providers that have been loaded.
      *
      * @return array
@@ -185,16 +133,6 @@ class Application extends Container implements ApplicationContract
     public function isDeferredService($service)
     {
         return isset($this->deferredServices[$service]);
-    }
-
-    /**
-     * Determine if the application is currently down for maintenance.
-     *
-     * @return bool
-     */
-    public function isDownForMaintenance()
-    {
-        // TODO: Implement isDownForMaintenance() method.
     }
 
     /**
@@ -338,15 +276,6 @@ class Application extends Container implements ApplicationContract
         }
 
         $this->register($instance = new $provider($this));
-
-        if (!$this->booted) {
-            $this->booting(
-                function () use ($instance) {
-                    $this->bootProvider($instance);
-                }
-            )
-            ;
-        }
     }
 
     /**
