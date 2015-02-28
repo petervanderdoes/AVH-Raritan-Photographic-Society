@@ -14,14 +14,17 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
+use Illuminate\Http\Request as IlluminateRequest;
 
 class MyEntriesModel
 {
     private $competition_helper;
+    private $formFactory;
     private $photo_helper;
     private $query_competitions;
     private $query_entries;
     private $query_miscellaneous;
+    private $request;
     private $season_helper;
     private $session;
     private $settings;
@@ -36,6 +39,7 @@ class MyEntriesModel
      * @param Session            $session
      * @param FormFactory        $formFactory
      * @param Settings           $settings
+     * @param IlluminateRequest  $request
      */
     public function __construct(
         QueryCompetitions $query_competitions,
@@ -46,7 +50,8 @@ class MyEntriesModel
         CompetitionHelper $competition_helper,
         Session $session,
         FormFactory $formFactory,
-        Settings $settings
+        Settings $settings,
+        IlluminateRequest $request
     ) {
         $this->query_competitions = $query_competitions;
         $this->query_entries = $query_entries;
@@ -57,6 +62,7 @@ class MyEntriesModel
         $this->session = $session;
         $this->formFactory = $formFactory;
         $this->settings = $settings;
+        $this->request = $request;
     }
 
     /**

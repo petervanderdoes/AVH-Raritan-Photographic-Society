@@ -57,7 +57,8 @@ class MyEntriesServiceProvider extends ServiceProvider
                     $app->make('CompetitionHelper'),
                     $app->make('Session'),
                     $app->make('formFactory'),
-                    $app->make('Settings')
+                    $app->make('Settings'),
+                    $app->make('IlluminateRequest')
                 );
             }
         )

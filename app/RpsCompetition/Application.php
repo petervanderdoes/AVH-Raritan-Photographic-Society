@@ -201,7 +201,8 @@ class Application extends Container implements ApplicationContract
      */
     public function register($provider, $options = [], $force = false)
     {
-        if ($registered = $this->getProvider($provider) && !$force) {
+        $registered = $this->getProvider($provider);
+        if ($registered !== null && !$force) {
             return $registered;
         }
 
@@ -255,8 +256,8 @@ class Application extends Container implements ApplicationContract
     /**
      * Register a deferred provider and service.
      *
-     * @param  string $provider
-     * @param  string $service
+     * @param  string      $provider
+     * @param  string|null $service
      *
      * @return void
      */
@@ -303,7 +304,7 @@ class Application extends Container implements ApplicationContract
      */
     public function version()
     {
-        // TODO: Implement version() method.
+        return '';
     }
 
     /**
