@@ -47,6 +47,7 @@ class ShortcodeModel
      * @param CompetitionHelper  $competition_helper
      * @param Session            $session
      * @param FormFactory        $formFactory
+     * @param Settings           $settings
      */
     public function __construct(
         QueryCompetitions $query_competitions,
@@ -304,30 +305,6 @@ class ShortcodeModel
         $last_name = $user_info->user_lastname;
         $first_name = $user_info->user_firstname;
         $data['award'] = $record->Award;
-        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
-        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->photo_helper->dataPhotoCredit($title, $first_name, $last_name);
-
-        return $data;
-    }
-
-    /**
-     * Collect needed data to render a photo in masonry style.
-     *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
-     *
-     * @return array<string,string|array>
-     */
-    private function dataPhotoMasonry($record, $thumb_size)
-    {
-        $data = [];
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
         $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);

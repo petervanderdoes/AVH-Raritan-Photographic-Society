@@ -23,6 +23,7 @@ class MonthlyEntries
      *
      * @param ShortcodeView       $view
      * @param MonthlyEntriesModel $model
+     * @param Settings            $settings
      */
     public function __construct(ShortcodeView $view, MonthlyEntriesModel $model, Settings $settings)
     {

@@ -5,6 +5,13 @@ namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Libs\Controller;
 
+/**
+ * Class MyEntries
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
+ */
 class MyEntries extends Controller
 {
     /**
@@ -46,6 +53,7 @@ class MyEntries extends Controller
         $attr = shortcode_atts(['medium' => 'digital'], $attr);
         $model_data = $this->model->getMyEntries($attr['medium']);
         $data = $model_data['data'];
+        /** @var \Symfony\Component\Form\Form $form */
         $form = $model_data['form'];
 
         return $this->view->fetch('add_entries.html.twig', ['data' => $data, 'form' => $form->createView()]);

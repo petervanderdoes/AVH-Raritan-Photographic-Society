@@ -16,6 +16,13 @@ use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class MyEntriesModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
+ */
 class MyEntriesModel
 {
     private $competition_helper;

@@ -2,6 +2,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\PersonWinners;
 
 use Illuminate\Support\ServiceProvider;
+use RpsCompetition\Application;
 
 /**
  * Class PersonWinnersServiceProvider
@@ -37,7 +38,7 @@ class PersonWinnersServiceProvider extends ServiceProvider
         // My Entries Shortcode
         $this->app->bind(
             'PersonWinners',
-            function ($app) {
+            function (Application $app) {
                 return new PersonWinners(
                     $app->make('ShortcodeView'), $app->make('PersonWinnersModel')
                 );
@@ -47,7 +48,7 @@ class PersonWinnersServiceProvider extends ServiceProvider
 
         $this->app->bind(
             'PersonWinnersModel',
-            function ($app) {
+            function (Application $app) {
                 return new PersonWinnersModel(
                     $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
                 );

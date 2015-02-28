@@ -4,9 +4,7 @@ namespace RpsCompetition\Frontend\Shortcodes;
 use Avh\Html\FormBuilder;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
-use RpsCompetition\Form\Type\EditTitleType;
 use RpsCompetition\Form\Type\UploadEntryType;
 use RpsCompetition\Libs\Controller;
 
@@ -585,8 +583,6 @@ final class ShortcodeController extends Controller
     {
         return $this->html->mailto($attr['email'], $content, $attr);
     }
-
-
 
     /**
      * Display all winners for the month.

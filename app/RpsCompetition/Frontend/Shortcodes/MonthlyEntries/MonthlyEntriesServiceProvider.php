@@ -2,6 +2,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\MonthlyEntries;
 
 use Illuminate\Support\ServiceProvider;
+use RpsCompetition\Application;
 
 /**
  * Class MonthlyEntriesServiceProvider
@@ -39,7 +40,7 @@ class MonthlyEntriesServiceProvider extends ServiceProvider
         // My Entries Shortcode
         $this->app->bind(
             'MonthlyEntries',
-            function ($app) {
+            function (Application $app) {
                 return new MonthlyEntries(
                     $app->make('ShortcodeView'), $app->make('MonthlyEntriesModel'), $app->make('Settings')
                 );
@@ -49,7 +50,7 @@ class MonthlyEntriesServiceProvider extends ServiceProvider
 
         $this->app->bind(
             'MonthlyEntriesModel',
-            function ($app) {
+            function (Application $app) {
                 return new MonthlyEntriesModel(
                     $app->make('Session'),
                     $app->make('QueryCompetitions'),

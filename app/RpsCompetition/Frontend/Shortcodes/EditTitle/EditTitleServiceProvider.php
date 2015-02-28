@@ -2,6 +2,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\EditTitle;
 
 use Illuminate\Support\ServiceProvider;
+use RpsCompetition\Application;
 
 /**
  * Class EditTitleServiceProvider
@@ -39,7 +40,7 @@ class EditTitleServiceProvider extends ServiceProvider
         // My Entries Shortcode
         $this->app->bind(
             'EditTitle',
-            function ($app) {
+            function (Application $app) {
                 return new EditTitle(
                     $app->make('ShortcodeView'), $app->make('EditTitleModel'), $app->make('Settings')
                 );
@@ -49,7 +50,7 @@ class EditTitleServiceProvider extends ServiceProvider
 
         $this->app->bind(
             'EditTitleModel',
-            function ($app) {
+            function (Application $app) {
                 return new EditTitleModel(
                     $app->make('QueryEntries'),
                     $app->make('PhotoHelper'),
