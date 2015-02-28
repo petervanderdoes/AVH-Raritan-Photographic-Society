@@ -24,7 +24,7 @@ class MyEntriesServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return [];
+        return ['MyEntries'];
     }
 
     /**
