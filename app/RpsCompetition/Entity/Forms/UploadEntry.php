@@ -90,6 +90,9 @@ class UploadEntry
         $this->wp_get_referer = $wp_get_referer;
     }
 
+    /**
+     * @param ExecutionContextInterface $context
+     */
     public function validate(ExecutionContextInterface $context)
     {
         if ($this->getTitle() == 'p') {

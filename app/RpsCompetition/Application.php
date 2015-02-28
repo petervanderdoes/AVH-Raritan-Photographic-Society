@@ -8,6 +8,13 @@ use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 
+/**
+ * Class Application
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition
+ */
 class Application extends Container implements ApplicationContract
 {
     /**
@@ -77,6 +84,10 @@ class Application extends Container implements ApplicationContract
      */
     protected $terminatingCallbacks = [];
 
+    /**
+     * Constructor
+     *
+     */
     public function __construct()
     {
         $this->registerBaseBindings();
