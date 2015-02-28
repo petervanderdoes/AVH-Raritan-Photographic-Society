@@ -3,6 +3,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\EditTitle;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
+use RpsCompetition\Libs\Controller;
 use RpsCompetition\Settings;
 
 /**
@@ -12,7 +13,7 @@ use RpsCompetition\Settings;
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\EditTitle
  */
-class EditTitle
+class EditTitle extends Controller
 {
     private $model;
     private $settings;
