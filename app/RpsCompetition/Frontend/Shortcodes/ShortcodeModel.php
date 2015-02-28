@@ -246,31 +246,6 @@ class ShortcodeModel
     }
 
     /**
-     * Get given amount of random images for the given user.
-     *
-     * @param integer $user_id
-     * @param integer $amount_of_images
-     *
-     * @return array
-     */
-    public function getPersonWinners($user_id, $amount_of_images)
-    {
-        $entries = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
-        $entries_id = array_rand($entries, $amount_of_images);
-        $data = [];
-        $data['thumb_size'] = '150w';
-        $data['records'] = [];
-        foreach ($entries_id as $key) {
-            $data['entries'][] = $entries[$key];
-        }
-        foreach ($data['entries'] as $entry) {
-            $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size']);
-        }
-
-        return $data;
-    }
-
-    /**
      * Get the scored competitions for the given season
      *
      * @param string $season

@@ -737,27 +737,6 @@ final class ShortcodeController extends Controller
     }
 
     /**
-     * Display the eights and higher for a given member ID.
-     *
-     * @param array  $attr    The shortcode argument list. Allowed arguments:
-     *                        - id => The member ID
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
-     * @return string
-     *
-     * @internal Shortcode: rps_person_winners
-     */
-    public function shortcodePersonWinners($attr, $content, $tag)
-    {
-        $attr = shortcode_atts(['id' => 0, 'images' => 6], $attr);
-
-        $data = $this->model->getPersonWinners($attr['id'], $attr['images']);
-
-        return $this->view->fetch('person-winners.html.twig', $data);
-    }
-
-    /**
      * Displays the scores of the current user.
      * By default the scores of the latest season is shown.
      * A drop down with a season list is shown for the user to select.

@@ -83,7 +83,10 @@ class Application extends Container implements ApplicationContract
         $items = [];
         $this->instance('config', $config = new Repository($items));
 
-        $this->config['app.providers'] = ['\RpsCompetition\Frontend\Shortcodes\MyEntries\MyEntriesServiceProvider'];
+        $this->config['app.providers'] = [
+            '\RpsCompetition\Frontend\Shortcodes\MyEntries\MyEntriesServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\PersonWinners\PersonWinnersServiceProvider'
+        ];
         $this->registerCoreContainerAliases();
         $this->registerConfiguredProviders();
     }
