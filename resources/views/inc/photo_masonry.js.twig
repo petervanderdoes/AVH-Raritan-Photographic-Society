@@ -1,13 +1,12 @@
-<figure class="gallery-item-masonry masonry-150"> \
-    <div class="gallery-item-content"> \
-        <div class="gallery-item-content-images"> \
-            <a href="{{ image.url_large }}" rel="gallery-0" title="{{ image.title|escape }}"> \
-                <img src="{{ image.url_thumb }}" width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}"> \
-            </a> \
-        </div>
-        \
-        <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title|trim|escape }}<br><span class="wp-caption-credit">Credit: {{ image.caption.credit|trim|escape }}</span></figcaption>
-        \
-    </div>
-    \
+<figure class="gallery-item-masonry masonry-150">\
+    <div class="gallery-item-content">\
+        <div class="gallery-item-content-images">\
+            <a href="{{ image.url_large }}" rel="gallery-0" title="{{ image.title|escape }}">\
+                <img src="{{ image.url_thumb }}" width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}">\
+            </a>\
+        </div>\
+        <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title|trim|escape }}<br>\
+            <span class="wp-caption-credit">Credit: {{ image.caption.credit|trim|escape }}</span>\
+        </figcaption>\
+    </div>\
 </figure>
