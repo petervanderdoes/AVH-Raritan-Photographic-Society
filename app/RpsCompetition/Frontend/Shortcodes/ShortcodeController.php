@@ -586,50 +586,7 @@ final class ShortcodeController extends Controller
         return $this->html->mailto($attr['email'], $content, $attr);
     }
 
-    /**
-     * Show all entries for a month.
-     * The default is to show the entries for the latest closed competition.
-     * A dropdown selection to choose different months and/or season is also displayed.
-     *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
-     * @return string
-     *
-     * @internal Shortcode: rps_monthly_entries
-     */
-    public function shortcodeMonthlyEntries($attr, $content, $tag)
-    {
-        $output = '';
-        $selected_date = $this->session->get('monthly_entries_selected_date');
 
-        if ($this->model->isScoredCompetition($selected_date)) {
-            /**
-             * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
-             *
-             * @see Frontend::filterWpseoPreAnalysisPostsContent
-             */
-            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
-                'didFilterWpseoPreAnalysisPostsContent',
-                false
-            )
-            ;
-            if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $entries = $this->model->getAllEntries($selected_date, $selected_date);
-                $data = $this->model->getFacebookThumbs($entries);
-                $output = $this->view->fetch('facebook.html.twig', $data);
-            } else {
-                $selected_season = $this->session->get('monthly_entries_selected_season');
-                $scored_competitions = $this->model->getScoredCompetitions($selected_season);
-
-                $data = $this->model->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
-                $output = $this->view->fetch('monthly-entries.html.twig', $data);
-            }
-        }
-
-        return $output;
-    }
 
     /**
      * Display all winners for the month.

@@ -140,53 +140,6 @@ class ShortcodeModel
     }
 
     /**
-     * Get the monthly entries
-     *
-     * @param string $selected_season
-     * @param string $selected_date
-     * @param array  $scored_competitions
-     *
-     * @return array
-     */
-    public function getMonthlyEntries($selected_season, $selected_date, $scored_competitions)
-    {
-        $data = [];
-        $data['selected_season'] = $selected_season;
-        $data['selected_date'] = $selected_date;
-        $data['is_scored_competitions'] = false;
-        $data['thumb_size'] = '150w';
-
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            $months = [];
-            $themes = [];
-            foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
-                $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
-                $themes[$key] = $competition->Theme;
-            }
-            $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
-            $date = new \DateTime($selected_date);
-            $data['date_text'] = $date->format('F j, Y');
-            $data['theme_name'] = $themes[$selected_date];
-            $data['entries'] = $this->query_miscellaneous->getAllEntries($selected_date, $selected_date);
-            $data['count_entries'] = count($data['entries']);
-            $data['is_scored_competitions'] = true;
-        }
-
-        $data['images'] = [];
-        if (is_array($data['entries'])) {
-            // Iterate through all the award winners and display each thumbnail in a grid
-            /** @var QueryEntries $entry */
-            foreach ($data['entries'] as $entry) {
-                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size']);
-            }
-        }
-
-        return $data;
-    }
-
-    /**
      * Get the monthly winners
      *
      * @param string $selected_season

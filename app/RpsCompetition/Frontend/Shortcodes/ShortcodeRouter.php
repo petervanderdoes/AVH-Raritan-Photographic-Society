@@ -29,6 +29,6 @@ class ShortcodeRouter extends ShortcodesAbstract
         $this->register('rps_upload_image', 'shortcodeUploadImage');
         $this->register('rps_email', 'shortcodeEmail');
         $this->register('rps_person_winners', 'shortcodePersonWinners', 'PersonWinners');
-        $this->register('rps_monthly_entries', 'shortcodeMonthlyEntries');
+        $this->register('rps_monthly_entries', 'shortcodeMonthlyEntries', 'MonthlyEntries');
     }
 }
