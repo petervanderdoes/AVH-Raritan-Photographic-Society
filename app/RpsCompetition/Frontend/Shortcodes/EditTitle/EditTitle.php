@@ -24,6 +24,7 @@ class EditTitle extends Controller
      *
      * @param ShortcodeView  $view
      * @param EditTitleModel $model
+     * @param Settings       $settings
      */
     public function __construct(ShortcodeView $view, EditTitleModel $model, Settings $settings)
     {
