@@ -571,65 +571,6 @@ final class ShortcodeController extends Controller
     }
 
     /**
-     * Display the form to edit the title of the selected entry
-     *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
-     * @return string
-     *
-     * @see Frontend::actionHandleHttpPostRpsEditTitle
-     */
-    public function shortcodeEditTitle($attr, $content, $tag)
-    {
-        global $post;
-        $query_entries = $this->container->make('QueryEntries');
-        $photo_helper = $this->container->make('PhotoHelper');
-
-        if ($this->settings->has('formerror')) {
-            /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
-            $error_obj = $this->settings->get('formerror');
-            $form = $error_obj->getForm();
-            $server_file_name = $form->get('server_file_name')
-                                     ->getData()
-            ;
-        } else {
-            $entity = new EntityFormEditTitle();
-            $medium_subset = "Digital";
-            if ($this->request->input('m') == "prints") {
-                $medium_subset = "Prints";
-            }
-            $entry_id = $this->request->input('id');
-
-            $recs = $query_entries->getEntryById($entry_id);
-            $title = $recs->Title;
-            $server_file_name = $recs->Server_File_Name;
-
-            $action = add_query_arg(['id' => $entry_id, 'm' => strtolower($medium_subset)], get_permalink($post->ID));
-            $entity->setId($entry_id);
-
-            $entity->setNewTitle($title);
-            $entity->setTitle($title);
-            $entity->setServerFileName($server_file_name);
-            $entity->setM($medium_subset);
-            $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
-            $form = $this->formFactory->create(
-                new EditTitleType($entity),
-                $entity,
-                ['action' => $action, 'attr' => ['id' => 'edittitle']]
-            )
-            ;
-        }
-        $data = [];
-        $data['image']['source'] = $photo_helper->getThumbnailUrl($server_file_name, '200');
-
-        unset($query_entries, $photo_helper);
-
-        return $this->view->fetch('edit_title.html.twig', ['data' => $data, 'form' => $form->createView()]);
-    }
-
-    /**
      * Display an obfuscated email link.
      *
      * @param array  $attr    The shortcode argument list. Allowed arguments:
