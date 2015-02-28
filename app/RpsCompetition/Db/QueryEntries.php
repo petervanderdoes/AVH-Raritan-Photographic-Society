@@ -313,9 +313,7 @@ class QueryEntries
             $data = stripslashes_deep($data);
             if (false === $this->rpsdb->update('entries', $data, $where)) {
                 return new \WP_Error(
-                    'db_update_error',
-                    'Could not update entry in the database',
-                    $this->rpsdb->last_error
+                    'db_update_error', 'Could not update entry in the database', $this->rpsdb->last_error
                 );
             }
         }

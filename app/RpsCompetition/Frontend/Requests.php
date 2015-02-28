@@ -178,10 +178,10 @@ class Requests
                 ) {
                     $last_scored = $query_competitions->query(
                         [
-                            'where' => 'Scored="Y" AND Special_Event="N"',
+                            'where'   => 'Scored="Y" AND Special_Event="N"',
                             'orderby' => 'Competition_Date',
-                            'order' => 'DESC',
-                            'number' => 1
+                            'order'   => 'DESC',
+                            'number'  => 1
                         ]
                     )
                     ;

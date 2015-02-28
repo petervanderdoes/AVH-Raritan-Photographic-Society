@@ -30,7 +30,7 @@ final class SocialNetworksRouter
     /**
      * Constructor
      *
-     * @param Settings $settings
+     * @param Settings                 $settings
      * @param SocialNetworksController $controller
      */
     public function __construct(Settings $settings, SocialNetworksController $controller)

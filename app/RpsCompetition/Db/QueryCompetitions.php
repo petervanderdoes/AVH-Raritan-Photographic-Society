@@ -474,9 +474,7 @@ class QueryCompetitions
             }
             if (false === $this->rpsdb->update('competitions', stripslashes_deep($data), $where)) {
                 return new \WP_Error(
-                    'db_update_error',
-                    'Could not update competition into the database',
-                    $this->rpsdb->last_error
+                    'db_update_error', 'Could not update competition into the database', $this->rpsdb->last_error
                 );
             }
         } else {
@@ -507,9 +505,7 @@ class QueryCompetitions
             }
             if (false === $this->rpsdb->insert('competitions', stripslashes_deep($data))) {
                 return new \WP_Error(
-                    'db_insert_error',
-                    __('Could not insert competition into the database'),
-                    $this->rpsdb->last_error
+                    'db_insert_error', __('Could not insert competition into the database'), $this->rpsdb->last_error
                 );
             }
             $competition_ID = (int) $this->rpsdb->insert_id;

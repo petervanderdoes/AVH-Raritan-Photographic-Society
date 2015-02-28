@@ -3,6 +3,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use Avh\Network\Session;
+use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
@@ -14,7 +15,6 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
-use Illuminate\Http\Request as IlluminateRequest;
 
 class MyEntriesModel
 {

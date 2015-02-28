@@ -38,7 +38,7 @@ class Helper
     /**
      * Get the season in a dropdown menu
      *
-     * @param string $selected_season
+     * @param string  $selected_season
      * @param boolean $echo
      *
      * @return string|null

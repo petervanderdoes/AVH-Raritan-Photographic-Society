@@ -61,10 +61,11 @@ class SocialNetworksModel
      */
     public function getSocialButtons(array $networks, $icons = [])
     {
-        $default_icons = ['facebook'   => 'facebook-square',
-                          'twitter'    => 'twitter',
-                          'googleplus' => 'google-plus',
-                          'email'      => 'envelope-o'
+        $default_icons = [
+            'facebook'   => 'facebook-square',
+            'twitter'    => 'twitter',
+            'googleplus' => 'google-plus',
+            'email'      => 'envelope-o'
         ];
         $data = [];
 

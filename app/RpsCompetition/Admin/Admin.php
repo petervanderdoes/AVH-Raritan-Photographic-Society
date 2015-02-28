@@ -237,9 +237,7 @@ final class Admin
     public function actionLoadPagehookEntries()
     {
         $this->entries_list = $this->competition_list = new EntriesListTable(
-            $this->settings,
-            $this->rpsdb,
-            $this->request
+            $this->settings, $this->rpsdb, $this->request
         );
         $this->handleRequestEntries();
 
