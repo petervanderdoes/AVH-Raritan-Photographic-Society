@@ -95,8 +95,6 @@ class EditTitleModel
         $medium_subset = "Digital";
         if ($this->request->input('m') == "prints") {
             $medium_subset = "Prints";
-
-            return $medium_subset;
         }
 
         return $medium_subset;
