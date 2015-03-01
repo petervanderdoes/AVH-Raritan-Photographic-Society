@@ -263,7 +263,8 @@ class Frontend
 
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
             $entity = new EntityFormMyEntries();
-
+            $entity->setSelectComp($this->request->input('form.select_comp'));
+            $entity->setSelectedMedium($this->request->input('form.selected_medium'));
             $form = $this->formFactory->create(new MyEntriesType($entity), $entity, ['attr' => ['id' => 'myentries']]);
             $form->handleRequest($this->request);
 
@@ -271,11 +272,9 @@ class Frontend
             $medium_subset = $page[1];
 
             if ($form->has('submit_control')) {
-                // @TODO Nonce check
-
-                $comp_date = $entity->getCompDate();
+                $comp_date = $entity->getSelectComp();
                 $classification = $entity->getClassification();
-                $medium = $entity->getMedium();
+                $medium = $entity->getSelectedMedium();
                 $entry_array = $this->request->input('form.entryid', null);
 
                 switch ($entity->getSubmitControl()) {
@@ -315,18 +314,9 @@ class Frontend
                         }
                         break;
 
-                    case 'select_comp':
-                        $competition_date = $entity->getSelectComp();
-                        $medium = $entity->getMedium();
-                        break;
-
-                    case 'select_medium':
-                        $competition_date = $entity->getCompDate();
-                        $medium = $entity->getSelectedMedium();
-                        break;
                     default:
-                        $competition_date = $entity->getCompDate();
-                        $medium = $entity->getMedium();
+                        $competition_date = $entity->getSelectComp();
+                        $medium = $entity->getSelectedMedium();
                         break;
                 }
                 $medium_subset_medium = $this->session->get('myentries/subset');

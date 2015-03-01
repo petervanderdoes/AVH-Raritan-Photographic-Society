@@ -140,10 +140,10 @@ class MyEntriesModel
         $action = home_url('/' . get_page_uri($post->ID));
         $entity = new EntityFormMyEntries();
         $entity->setWpnonce(wp_create_nonce('avh-rps-myentries'));
-        $entity->setSelectComp($open_competitions_options);
-        $entity->setSelectedMedium($this->competition_helper->getMedium($open_competitions));
-        $entity->setCompDate($current_competition->Competition_Date);
-        $entity->setMedium($current_competition->Medium);
+        $entity->setSelectComp($current_competition->Competition_Date);
+        $entity->setSelectedMedium($current_competition->Medium);
+        $entity->setSelectedCompChoices($open_competitions_options);
+        $entity->setSelectedMediumChoices($this->competition_helper->getMedium($open_competitions));
         $entity->setClassification($current_competition->Classification);
         $form = $this->formFactory->create(
             new MyEntriesType($entity),
@@ -156,8 +156,6 @@ class MyEntriesModel
         $data['competition_date'] = $current_competition->Competition_Date;
         $data['medium'] = $current_competition->Medium;
         $data['classification'] = $current_competition->Classification;
-        $data['select_medium']['selected'] = $current_competition->Medium;
-        $data['select_competition']['selected'] = $current_competition->Competition_Date;
 
         $img = CommonHelper::getCompetitionThumbnail($current_competition);
 
