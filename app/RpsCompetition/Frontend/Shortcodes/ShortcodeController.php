@@ -585,52 +585,6 @@ final class ShortcodeController extends Controller
     }
 
     /**
-     * Display all winners for the month.
-     * All winners of the month are shown, which defaults to the latest month.
-     * A dropdown selection to choose different months and/or season is also displayed.
-     *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
-     * @return string
-     *
-     * @internal Shortcode: rps_monthly_winners
-     */
-    public function shortcodeMonthlyWinners($attr, $content, $tag)
-    {
-
-        $output = '';
-        $selected_date = $this->session->get('monthly_winners_selected_date');
-        $selected_season = $this->session->get('monthly_winners_selected_season');
-
-        $scored_competitions = $this->model->getScoredCompetitions($selected_season);
-
-        if (is_array($scored_competitions) && (!empty($scored_competitions))) {
-            /**
-             * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
-             *
-             * @see Frontend::filterWpseoPreAnalysisPostsContent
-             */
-            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
-                'didFilterWpseoPreAnalysisPostsContent',
-                false
-            )
-            ;
-            if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $entries = $this->model->getWinners($selected_date);
-                $data = $this->model->getFacebookThumbs($entries);
-                $output = $this->view->fetch('facebook.html.twig', $data);
-            } else {
-                $data = $this->model->getMonthlyWinners($selected_season, $selected_date, $scored_competitions);
-                $output = $this->view->fetch('monthly-winners.html.twig', $data);
-            }
-        }
-
-        return $output;
-    }
-
-    /**
      * Displays the scores of the current user.
      * By default the scores of the latest season is shown.
      * A drop down with a season list is shown for the user to select.

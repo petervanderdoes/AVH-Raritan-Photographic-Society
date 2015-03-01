@@ -219,6 +219,32 @@ class Helper
     }
 
     /**
+     * Collect needed data to render a photo in masonry style.
+     *
+     * @param QueryEntries $record
+     * @param string       $thumb_size
+     *
+     * @return array<string,string|array>
+     */
+    public function dataPhotoGallery($record, $thumb_size)
+    {
+
+        $data = [];
+        $user_info = get_userdata($record->Member_ID);
+        $title = $record->Title;
+        $last_name = $user_info->user_lastname;
+        $first_name = $user_info->user_firstname;
+        $data['award'] = $record->Award;
+        $data['url_large'] = $this->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+
+        return $data;
+    }
+
+    /**
      * Get the path to the competition
      * Returns the path to the competition where we store the photo entries.
      *
