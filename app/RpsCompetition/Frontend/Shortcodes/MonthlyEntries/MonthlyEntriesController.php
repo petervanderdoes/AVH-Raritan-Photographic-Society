@@ -6,13 +6,13 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Settings;
 
 /**
- * Class MonthlyEntries
+ * Class MonthlyEntriesController
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\MonthlyEntries
  */
-class MonthlyEntries
+class MonthlyEntriesController
 {
     private $model;
     private $settings;

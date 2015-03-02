@@ -27,7 +27,7 @@ class MonthlyEntriesServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['MonthlyEntries'];
+        return ['MonthlyEntriesController'];
     }
 
     /**
@@ -39,9 +39,9 @@ class MonthlyEntriesServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind(
-            'MonthlyEntries',
+            'MonthlyEntriesController',
             function (Application $app) {
-                return new MonthlyEntries(
+                return new MonthlyEntriesController(
                     $app->make('ShortcodeView'), $app->make('MonthlyEntriesModel'), $app->make('Settings')
                 );
             }
