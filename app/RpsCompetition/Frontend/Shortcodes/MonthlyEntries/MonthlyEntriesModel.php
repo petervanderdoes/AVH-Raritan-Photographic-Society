@@ -155,7 +155,7 @@ class MonthlyEntriesModel
     public function getMonthlyEntriesData($selected_date)
     {
         $selected_season = $this->session->get('monthly_entries_selected_season');
-        $scored_competitions = $this->getScoredCompetitions($selected_season, $selected_date, $selected_season);
+        $scored_competitions = $this->getScoredCompetitions($selected_season);
         $data = $this->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
 
         return $data;
