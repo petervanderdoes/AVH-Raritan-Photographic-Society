@@ -7,11 +7,11 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 /**
- * Class UploadEntry
+ * Class UploadImage
  *
  * @package RpsCompetition\Entity
  */
-class UploadEntry
+class UploadImage
 {
     protected $file_name;
     protected $medium_subset;

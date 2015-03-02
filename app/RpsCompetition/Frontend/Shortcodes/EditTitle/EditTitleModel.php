@@ -92,10 +92,8 @@ class EditTitleModel
      */
     public function getMediumSubset()
     {
-        $medium_subset = "Digital";
-        if ($this->request->input('m') == "prints") {
-            $medium_subset = "Prints";
-        }
+        $medium_subset = $this->request->input('m', 'digital');
+        $medium_subset = ucfirst($medium_subset);
 
         return $medium_subset;
     }
@@ -106,18 +104,17 @@ class EditTitleModel
      * @param integer $entry_id
      * @param string  $title
      * @param string  $server_file_name
-     * @param integer $post_id
      *
      * @return \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface
      */
 
-    public function getNewForm($entry_id, $title, $server_file_name, $post_id)
+    public function getNewForm($entry_id, $title, $server_file_name)
     {
-
+        global $post;
         $entity = new EntityFormEditTitle();
         $medium_subset = $this->getMediumSubset();
 
-        $action = add_query_arg(['id' => $entry_id, 'm' => strtolower($medium_subset)], get_permalink($post_id));
+        $action = add_query_arg(['id' => $entry_id, 'm' => strtolower($medium_subset)], get_permalink($post->ID));
         $entity->setId($entry_id);
 
         $entity->setNewTitle($title);

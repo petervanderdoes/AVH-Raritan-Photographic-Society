@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\EditTitle;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
@@ -46,7 +45,6 @@ class EditTitle extends Controller
      */
     public function shortcodeEditTitle($attr, $content, $tag)
     {
-        global $post;
 
         if ($this->settings->has('formerror')) {
             $form = $this->model->getSubmittedForm();

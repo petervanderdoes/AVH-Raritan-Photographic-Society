@@ -12,10 +12,10 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
-use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
+use RpsCompetition\Entity\Forms\UploadImage as UploadImageEntity;
 use RpsCompetition\Form\Type\EditTitleType;
 use RpsCompetition\Form\Type\MyEntriesType;
-use RpsCompetition\Form\Type\UploadEntryType;
+use RpsCompetition\Form\Type\UploadImageType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
@@ -365,8 +365,8 @@ class Frontend
 
         if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
 
-            $entity = new EntityFormUploadEntry();
-            $form = $this->formFactory->create(new UploadEntryType(), $entity, ['attr' => ['id' => 'uploadentry']]);
+            $entity = new UploadImageEntity();
+            $form = $this->formFactory->create(new UploadImageType(), $entity, ['attr' => ['id' => 'uploadentry']]);
             $form->handleRequest($this->request);
 
             $redirect_to = $entity->getWpGetReferer();

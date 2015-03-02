@@ -4,8 +4,6 @@ namespace RpsCompetition\Frontend\Shortcodes;
 use Avh\Html\FormBuilder;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
-use RpsCompetition\Form\Type\UploadEntryType;
 use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -694,53 +692,5 @@ final class ShortcodeController extends Controller
             echo "</table>";
         }
         unset($query_miscellaneous, $season_helper);
-    }
-
-    /**
-     * Displays the form to upload a new entry.
-     *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
-     * @return string
-     *
-     * @see Frontend::actionHandleHttpPostRpsUploadEntry
-     */
-    public function shortcodeUploadImage($attr, $content, $tag)
-    {
-        global $post;
-
-        $action = home_url('/' . get_page_uri($post->ID));
-        $action .= '/?post=1';
-        $medium_subset = "Digital";
-        if ($this->request->has('m')) {
-            if ($this->request->input('m') == "prints") {
-                $medium_subset = "Prints";
-            }
-        }
-        if ($this->request->has('wp_get_referer')) {
-            $ref = $this->request->input('wp_get_referer');
-        } else {
-            $ref = wp_get_referer();
-        }
-
-        if ($this->settings->has('formerror')) {
-            /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
-            $error_obj = $this->settings->get('formerror');
-            $form = $error_obj->getForm();
-        } else {
-            $entity = new EntityFormUploadEntry();
-            $entity->setWpGetReferer($ref);
-            $entity->setMediumSubset($medium_subset);
-            $form = $this->formFactory->create(
-                new UploadEntryType(),
-                $entity,
-                ['action' => $action, 'attr' => ['id' => 'uploadentry']]
-            )
-            ;
-        }
-
-        return $this->view->fetch('upload.html.twig', ['form' => $form->createView()]);
     }
 }
