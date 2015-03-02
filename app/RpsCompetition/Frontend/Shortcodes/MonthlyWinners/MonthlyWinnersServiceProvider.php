@@ -27,7 +27,7 @@ class MonthlyWinnersServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['MonthlyWinners'];
+        return ['MonthlyWinnersController'];
     }
 
     /**
@@ -38,9 +38,9 @@ class MonthlyWinnersServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(
-            'MonthlyWinners',
+            'MonthlyWinnersController',
             function (Application $app) {
-                return new MonthlyWinners(
+                return new MonthlyWinnersController(
                     $app->make('ShortcodeView'), $app->make('MonthlyWinnersModel'), $app->make('Settings')
                 );
             }

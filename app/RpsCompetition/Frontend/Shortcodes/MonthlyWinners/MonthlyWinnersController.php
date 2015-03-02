@@ -5,7 +5,7 @@ namespace RpsCompetition\Frontend\Shortcodes\MonthlyWinners;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Settings;
 
-class MonthlyWinners
+class MonthlyWinnersController
 {
     private $model;
     private $settings;
