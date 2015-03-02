@@ -1,7 +1,8 @@
 ## Changelog
 
 #### Version 2.0.5-dev.1
-* Preparation for new development cycle.
+* Replace intervention/image library with imagine/imagine.
+* Add ability to keep aspect ratio to imagine/imagine library.
 
 #### Version 2.0.4
 * Split the sitemap for entries and winners per year.
