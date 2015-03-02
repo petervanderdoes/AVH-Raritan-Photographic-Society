@@ -69,8 +69,8 @@ class MonthlyEntriesModel
     /**
      * Get the data to display the Facebook thumbs
      *
-     * @param $selected_start_date
-     * @param $selected_end_date
+     * @param string $selected_start_date
+     * @param string $selected_end_date
      *
      * @return array
      */
@@ -188,7 +188,7 @@ class MonthlyEntriesModel
     /**
      * Check if the given date has scored competitions.
      *
-     * @param $competition_date
+     * @param string $competition_date
      *
      * @return bool
      */
