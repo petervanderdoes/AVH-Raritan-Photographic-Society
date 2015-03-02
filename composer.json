@@ -23,8 +23,8 @@
     }
   },
   "require": {
-    "intervention/image": "~2.0",
     "phpmd/phpmd": "2.0.0",
-    "phpunit/phpunit": "~4.1"
+    "phpunit/phpunit": "~4.1",
+    "imagine/imagine": "0.6.*"
   }
 }
