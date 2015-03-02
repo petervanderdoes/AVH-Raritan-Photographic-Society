@@ -91,4 +91,6 @@ interface BoxInterface
      * @return BoxInterface
      */
     public function heighten($height);
+
+    public function setRatio($original_width, $original_height);
 }

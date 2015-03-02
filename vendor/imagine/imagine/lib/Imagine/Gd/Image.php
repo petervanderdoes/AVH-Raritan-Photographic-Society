@@ -48,6 +48,18 @@ final class Image extends AbstractImage
      */
     private $palette;
 
+    private $keep_aspect_ratio = false;
+
+    /**
+     * @param boolean $keep_aspect_ratio
+     */
+    public function keepAspectRatio($keep_aspect_ratio = true)
+    {
+        $this->keep_aspect_ratio = $keep_aspect_ratio;
+
+        return $this;
+    }
+
     /**
      * Constructs a new Image instance
      *
@@ -166,6 +178,9 @@ final class Image extends AbstractImage
             throw new InvalidArgumentException('Unsupported filter type, GD only supports ImageInterface::FILTER_UNDEFINED filter');
         }
 
+        if ($this->keep_aspect_ratio) {
+            $size->setRatio($this->getSize()->getWidth(),$this->getSize()->getHeight());
+        }
         $width  = $size->getWidth();
         $height = $size->getHeight();
 
@@ -213,7 +228,7 @@ final class Image extends AbstractImage
      *
      * @return ImageInterface
      */
-    final public function save($path = null, array $options = array())
+    final public function save($path = null, array $options = [])
     {
         $path = null === $path ? (isset($this->metadata['filepath']) ? $this->metadata['filepath'] : $path) : $path;
 
@@ -240,7 +255,7 @@ final class Image extends AbstractImage
      *
      * @return ImageInterface
      */
-    public function show($format, array $options = array())
+    public function show($format, array $options = [])
     {
         header('Content-type: '.$this->getMimeType($format));
 
@@ -252,7 +267,7 @@ final class Image extends AbstractImage
     /**
      * {@inheritdoc}
      */
-    public function get($format, array $options = array())
+    public function get($format, array $options = [])
     {
         ob_start();
         $this->saveOrOutput($format, $options);
@@ -427,7 +442,7 @@ final class Image extends AbstractImage
     public function histogram()
     {
         $size   = $this->getSize();
-        $colors = array();
+        $colors = [];
 
         for ($x = 0, $width = $size->getWidth(); $x < $width; $x++) {
             for ($y = 0, $height = $size->getHeight(); $y < $height; $y++) {
@@ -450,7 +465,7 @@ final class Image extends AbstractImage
         $index = imagecolorat($this->resource, $point->getX(), $point->getY());
         $info  = imagecolorsforindex($this->resource, $index);
 
-        return $this->palette->color(array($info['red'], $info['green'], $info['blue']), max(min(100 - (int) round($info['alpha'] / 127 * 100), 100), 0));
+        return $this->palette->color([$info['red'], $info['green'], $info['blue']], max(min(100 - (int) round($info['alpha'] / 127 * 100), 100), 0));
     }
 
     /**
@@ -470,12 +485,12 @@ final class Image extends AbstractImage
      **/
     public function interlace($scheme)
     {
-        static $supportedInterlaceSchemes = array(
+        static $supportedInterlaceSchemes = [
             ImageInterface::INTERLACE_NONE      => 0,
             ImageInterface::INTERLACE_LINE      => 1,
             ImageInterface::INTERLACE_PLANE     => 1,
             ImageInterface::INTERLACE_PARTITION => 1,
-        );
+        ];
 
         if (!array_key_exists($scheme, $supportedInterlaceSchemes)) {
             throw new InvalidArgumentException('Unsupported interlace type');
@@ -537,7 +552,7 @@ final class Image extends AbstractImage
         }
 
         $save = 'image'.$format;
-        $args = array(&$this->resource, $filename);
+        $args = [&$this->resource, $filename];
 
         // Preserve BC until version 1.0
         if (isset($options['quality']) && !isset($options['png_compression_level'])) {
@@ -678,7 +693,7 @@ final class Image extends AbstractImage
      */
     private function supported($format = null)
     {
-        $formats = array('gif', 'jpeg', 'png', 'wbmp', 'xbm');
+        $formats = ['gif', 'jpeg', 'png', 'wbmp', 'xbm'];
 
         if (null === $format) {
             return $formats;
@@ -722,13 +737,13 @@ final class Image extends AbstractImage
             throw new RuntimeException('Invalid format');
         }
 
-        static $mimeTypes = array(
+        static $mimeTypes = [
             'jpeg' => 'image/jpeg',
             'gif'  => 'image/gif',
             'png'  => 'image/png',
             'wbmp' => 'image/vnd.wap.wbmp',
             'xbm'  => 'image/xbm',
-        );
+        ];
 
         return $mimeTypes[$format];
     }

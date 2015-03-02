@@ -62,6 +62,20 @@ final class Box implements BoxInterface
         return $this->height;
     }
 
+    public function setRatio($original_width, $original_height) {
+        $width = $this->width;
+        // First, calculate the height.
+        $height = intval($width / $original_width * $original_height);
+
+        // If the height is too large, set it to the maximum height and calculate the width.
+        if ($height > $this->height) {
+
+            $height = $this->height;
+            $width = intval($height / $original_height * $original_width);
+        }
+        $this->width = $width;
+        $this->height = $height;
+    }
     /**
      * {@inheritdoc}
      */
