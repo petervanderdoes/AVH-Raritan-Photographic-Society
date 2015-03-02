@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.5-dev.1
+#### Version 2.0.5-dev.38
 * Replace intervention/image library with imagine/imagine.
 * Add ability to keep aspect ratio to imagine/imagine library.
 
