@@ -243,7 +243,7 @@ class Application extends Container implements ApplicationContract
     public function registerConfiguredProviders()
     {
         $upload_dir_info = wp_upload_dir();
-        $manifestPath = $upload_dir_info['basedir'] . '/avh-rps' . '/framework/services.json';
+        $manifestPath = $upload_dir_info['basedir'] . '/avh-rps/framework/services.json';
 
         (new ProviderRepository($this, new Filesystem(), $manifestPath))->load($this->config['app.providers']);
     }
