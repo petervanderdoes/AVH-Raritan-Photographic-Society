@@ -6,11 +6,11 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Libs\Controller;
 
 /**
- * Class PersonWinners
+ * Class PersonWinnersController
  *
  * @package RpsCompetition\Frontend\Shortcodes\PersonWinners
  */
-class PersonWinners extends Controller
+class PersonWinnersController extends Controller
 {
     private $model;
     private $view;

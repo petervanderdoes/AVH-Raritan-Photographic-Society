@@ -25,7 +25,7 @@ class PersonWinnersServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['PersonWinners'];
+        return ['PersonWinnersController'];
     }
 
     /**
@@ -37,9 +37,9 @@ class PersonWinnersServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind(
-            'PersonWinners',
+            'PersonWinnersController',
             function (Application $app) {
-                return new PersonWinners(
+                return new PersonWinnersController(
                     $app->make('ShortcodeView'), $app->make('PersonWinnersModel')
                 );
             }
