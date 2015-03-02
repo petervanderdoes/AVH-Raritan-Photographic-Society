@@ -2,6 +2,8 @@
 namespace RpsCompetition\Photo;
 
 use Illuminate\Http\Request;
+use Imagine\Gd\Imagine;
+use Imagine\Image\Box;
 use Intervention\Image\ImageManagerStatic as Image;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
@@ -182,40 +184,23 @@ class Helper
         if (file_exists($thumb_path . '/' . $thumb_name)) {
             return true;
         }
-        /** @var \Intervention\Image\Image $image */
-        $image = Image::make($image_name);
+
+        $imagine = new Imagine();
+        $image = $imagine->open($image_name);
+
+        /** @var Box $original_size */
+        $original_size = $image->getSize();
         $new_size = Constants::getImageSize($size);
+
         if ($new_size['height'] == null) {
-            if ($image->getHeight() <= $image->getWidth()) {
-                $image->resize(
-                    $new_size['width'],
-                    $new_size['width'],
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    }
-                )
-                ;
-            } else {
-                $image->resize(
-                    $new_size['width'],
-                    null,
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    }
-                )
-                ;
-            }
+            $box = $image->getSize()->widen($new_size['width']);
+            $image->resize($box);
         } else {
-            $image->resize(
-                $new_size['width'],
-                $new_size['height'],
-                function ($constraint) {
-                    $constraint->aspectRatio();
-                }
-            )
+            $box = new Box($new_size['width'], $new_size['height']);
+            $image->keepAspectRatio()->resize($box);
             ;
         }
-        $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
+        $image->save($thumb_path . '/' . $thumb_name, array('jpeg_quality' =>Constants::IMAGE_QUALITY));
 
         return true;
     }
