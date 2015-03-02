@@ -27,7 +27,7 @@ class EditTitleServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['EditTitle'];
+        return ['EditTitleController'];
     }
 
     /**
@@ -39,9 +39,9 @@ class EditTitleServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind(
-            'EditTitle',
+            'EditTitleController',
             function (Application $app) {
-                return new EditTitle(
+                return new EditTitleController(
                     $app->make('ShortcodeView'), $app->make('EditTitleModel'), $app->make('Settings')
                 );
             }

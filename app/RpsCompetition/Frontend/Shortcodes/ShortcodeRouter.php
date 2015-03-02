@@ -25,7 +25,7 @@ class ShortcodeRouter extends ShortcodesAbstract
         $this->register('rps_banquet_current_user', 'shortcodeBanquetCurrentUser');
         $this->register('rps_all_scores', 'shortcodeAllScores');
         $this->register('rps_my_entries', 'shortcodeMyEntries', 'MyEntries');
-        $this->register('rps_edit_title', 'shortcodeEditTitle', 'EditTitle');
+        $this->register('rps_edit_title', 'shortcodeEditTitle', 'EditTitleController');
         $this->register('rps_upload_image', 'shortcodeUploadImage', 'UploadImageController');
         $this->register('rps_email', 'shortcodeEmail');
         $this->register('rps_person_winners', 'shortcodePersonWinners', 'PersonWinners');

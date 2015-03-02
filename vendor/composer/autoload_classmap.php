@@ -896,7 +896,7 @@ return array(
     'RpsCompetition\\Form\\Type\\UploadImageType' => $baseDir . '/app/RpsCompetition/Form/Type/UploadImageType.php',
     'RpsCompetition\\Frontend\\Frontend' => $baseDir . '/app/RpsCompetition/Frontend/Frontend.php',
     'RpsCompetition\\Frontend\\Requests' => $baseDir . '/app/RpsCompetition/Frontend/Requests.php',
-    'RpsCompetition\\Frontend\\Shortcodes\\EditTitle\\EditTitle' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/EditTitle/EditTitle.php',
+    'RpsCompetition\\Frontend\\Shortcodes\\EditTitle\\EditTitleController' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/EditTitle/EditTitleController.php',
     'RpsCompetition\\Frontend\\Shortcodes\\EditTitle\\EditTitleModel' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/EditTitle/EditTitleModel.php',
     'RpsCompetition\\Frontend\\Shortcodes\\EditTitle\\EditTitleServiceProvider' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/EditTitle/EditTitleServiceProvider.php',
     'RpsCompetition\\Frontend\\Shortcodes\\MonthlyEntries\\MonthlyEntries' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/MonthlyEntries/MonthlyEntries.php',

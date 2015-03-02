@@ -6,16 +6,15 @@ use RpsCompetition\Libs\Controller;
 use RpsCompetition\Settings;
 
 /**
- * Class EditTitle
+ * Class EditTitleController
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\EditTitle
  */
-class EditTitle extends Controller
+class EditTitleController extends Controller
 {
     private $model;
-    private $settings;
     private $view;
 
     /**
