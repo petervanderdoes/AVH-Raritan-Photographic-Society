@@ -6,13 +6,13 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Libs\Controller;
 
 /**
- * Class MyEntries
+ * Class MyEntriesController
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
  */
-class MyEntries extends Controller
+class MyEntriesController extends Controller
 {
     /**
      * @var MyEntriesModel

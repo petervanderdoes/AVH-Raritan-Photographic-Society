@@ -25,7 +25,7 @@ class MyEntriesServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['MyEntries'];
+        return ['MyEntriesController'];
     }
 
     /**
@@ -37,9 +37,9 @@ class MyEntriesServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind(
-            'MyEntries',
+            'MyEntriesController',
             function (Application $app) {
-                return new MyEntries(
+                return new MyEntriesController(
                     $app->make('ShortcodeView'), $app->make('MyEntriesModel')
                 );
             }
