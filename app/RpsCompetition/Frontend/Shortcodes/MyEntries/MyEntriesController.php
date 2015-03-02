@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
@@ -14,13 +13,7 @@ use RpsCompetition\Libs\Controller;
  */
 class MyEntriesController extends Controller
 {
-    /**
-     * @var MyEntriesModel
-     */
     private $model;
-    /**
-     * @var ShortcodeView
-     */
     private $view;
 
     /**

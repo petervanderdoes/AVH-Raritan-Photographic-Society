@@ -12,7 +12,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Core
  *
- * @package RpsCompetition\Common
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Common
  */
 class Core
 {

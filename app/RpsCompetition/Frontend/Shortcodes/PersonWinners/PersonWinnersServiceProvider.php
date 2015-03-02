@@ -7,7 +7,9 @@ use RpsCompetition\Application;
 /**
  * Class PersonWinnersServiceProvider
  *
- * @package RpsCompetition\Frontend\Shortcodes\PersonWinners
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\PersonWinners
  */
 class PersonWinnersServiceProvider extends ServiceProvider
 {

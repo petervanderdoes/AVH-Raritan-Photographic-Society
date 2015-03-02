@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 use RpsCompetition\Application;
@@ -14,7 +13,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class SocialNetworksController
  *
- * @package RpsCompetition\Frontend\SocialNetworks
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\SocialNetworks
  */
 class SocialNetworksController extends Controller
 {

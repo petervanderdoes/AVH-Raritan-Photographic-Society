@@ -24,9 +24,17 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
-/* @var $formBuilder FormBuilder */
+/**
+ * Class Admin
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Admin
+ */
 final class Admin
 {
+    /* @var $formBuilder FormBuilder */
+
     private $competition_list;
     private $container;
     private $core;

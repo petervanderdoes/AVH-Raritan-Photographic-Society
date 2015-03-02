@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\PersonWinners;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
@@ -8,7 +7,9 @@ use RpsCompetition\Libs\Controller;
 /**
  * Class PersonWinnersController
  *
- * @package RpsCompetition\Frontend\Shortcodes\PersonWinners
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\PersonWinners
  */
 class PersonWinnersController extends Controller
 {

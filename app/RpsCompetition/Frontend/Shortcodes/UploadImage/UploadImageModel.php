@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\UploadImage;
 
 use Illuminate\Http\Request as IlluminateRequest;
@@ -8,6 +7,13 @@ use RpsCompetition\Form\Type\UploadImageType;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class UploadImageModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\UploadImage
+ */
 class UploadImageModel
 {
     /**
@@ -44,6 +50,11 @@ class UploadImageModel
         return $medium_subset;
     }
 
+    /**
+     * Get a new form.
+     *
+     * @return \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface
+     */
     public function getNewForm()
     {
         global $post;

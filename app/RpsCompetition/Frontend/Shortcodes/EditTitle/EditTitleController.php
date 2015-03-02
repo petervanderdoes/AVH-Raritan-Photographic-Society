@@ -54,7 +54,7 @@ class EditTitleController extends Controller
             $entry_id = $this->model->getEntryId();
             $entry = $this->model->getEntry($entry_id);
             $server_file_name = $entry->Server_File_Name;
-            $form = $this->model->getNewForm($entry_id, $entry->Title, $entry->Server_File_Name, $post->ID);
+            $form = $this->model->getNewForm($entry_id, $entry->Title, $entry->Server_File_Name);
         }
         $data = $this->model->getData($server_file_name);
 

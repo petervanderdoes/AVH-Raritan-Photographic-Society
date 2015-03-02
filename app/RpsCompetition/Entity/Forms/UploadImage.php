@@ -9,7 +9,9 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 /**
  * Class UploadImage
  *
- * @package RpsCompetition\Entity
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Entity\Forms
  */
 class UploadImage
 {

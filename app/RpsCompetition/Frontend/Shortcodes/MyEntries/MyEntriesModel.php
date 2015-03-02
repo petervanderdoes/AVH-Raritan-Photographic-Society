@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use Avh\Network\Session;

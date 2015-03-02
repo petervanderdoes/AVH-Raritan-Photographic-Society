@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\MonthlyWinners;
 
 use Avh\Network\Session;
@@ -8,6 +7,13 @@ use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 
+/**
+ * Class MonthlyWinnersModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\MonthlyWinners
+ */
 class MonthlyWinnersModel
 {
     private $photo_helper;
@@ -105,9 +111,9 @@ class MonthlyWinnersModel
      *
      * @param string $selected_season
      * @param string $selected_date
-     * @param array  $scored_competitions
      *
      * @return array
+     *
      */
     public function getMonthlyWinners($selected_season, $selected_date)
     {
@@ -184,6 +190,11 @@ class MonthlyWinnersModel
         return $this->session->get('monthly_winners_selected_date');
     }
 
+    /**
+     * Get the selected season from the session.
+     *
+     * @return string
+     */
     public function getSelectedSeason()
     {
         return $this->session->get('monthly_winners_selected_season');

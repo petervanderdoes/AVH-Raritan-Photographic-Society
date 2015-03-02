@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Network\Session;
@@ -15,7 +14,9 @@ use Symfony\Component\Form\FormFactory;
 /**
  * Class ShortcodeModel
  *
- * @package RpsCompetition\Frontend\Shortcodes
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes
  */
 class ShortcodeModel
 {

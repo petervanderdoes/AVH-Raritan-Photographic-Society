@@ -16,7 +16,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Helper
  *
- * @package RpsCompetition\Season
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Season
  */
 class Helper
 {

@@ -58,6 +58,9 @@ $rps_basename = plugin_basename($plugin);
 
 /**
  * Class AVH_RPS_Client
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
  */
 class AVH_RPS_Client
 {

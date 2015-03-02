@@ -7,7 +7,9 @@ use Illuminate\Support\ServiceProvider;
 /**
  * Class MyEntriesServiceProvider
  *
- * @package RpsCompetition\Frontend\Shortcodes\MyEntries
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
  */
 class MyEntriesServiceProvider extends ServiceProvider
 {

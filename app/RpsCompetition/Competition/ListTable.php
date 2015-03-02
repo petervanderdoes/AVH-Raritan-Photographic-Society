@@ -18,7 +18,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class ListTable
  *
- * @package RpsCompetition\Competition
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Competition
  */
 class ListTable extends \WP_List_Table
 {

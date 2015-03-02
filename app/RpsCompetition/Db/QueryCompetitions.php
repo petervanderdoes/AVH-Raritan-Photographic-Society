@@ -13,7 +13,6 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class QueryCompetitions
  *
- * @package RpsCompetition\Db
  * @property  integer     ID
  * @property  string      Competition_Date
  * @property  string      Medium
@@ -27,6 +26,10 @@ if (!class_exists('AVH_RPS_Client')) {
  * @property  integer     Max_Entries
  * @property  integer     Num_Judges
  * @property  string      Special_Event
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Db
  */
 class QueryCompetitions
 {

@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\MonthlyEntries;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;

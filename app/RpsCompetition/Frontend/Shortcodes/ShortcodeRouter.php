@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Utility\ShortcodesAbstract;
@@ -13,7 +12,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class ShortcodeRouter
  *
- * @package RpsCompetition\Frontend\Shortcodes
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes
  */
 class ShortcodeRouter extends ShortcodesAbstract
 {

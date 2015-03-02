@@ -10,7 +10,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class QueryMiscellaneous
  *
- * @package RpsCompetition\Db
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Db
  */
 class QueryMiscellaneous
 {

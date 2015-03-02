@@ -10,7 +10,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Constants
  *
- * @package RpsCompetition
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition
  */
 final class Constants
 {

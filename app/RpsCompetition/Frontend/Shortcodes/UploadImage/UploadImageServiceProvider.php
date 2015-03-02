@@ -1,10 +1,16 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\UploadImage;
 
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Application;
 
+/**
+ * Class UploadImageServiceProvider
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\UploadImage
+ */
 class UploadImageServiceProvider extends ServiceProvider
 {
     /**

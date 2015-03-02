@@ -1,10 +1,16 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\MonthlyWinners;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Settings;
 
+/**
+ * Class MonthlyWinnersController
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\MonthlyWinners
+ */
 class MonthlyWinnersController
 {
     private $model;
