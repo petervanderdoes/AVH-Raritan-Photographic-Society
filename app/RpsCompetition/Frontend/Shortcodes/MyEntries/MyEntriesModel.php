@@ -2,6 +2,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use Avh\Network\Session;
+use Carbon\Carbon;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
@@ -169,9 +170,9 @@ class MyEntriesModel
         )
         ;
         if ($close_date !== null) {
-            $close_epoch = strtotime($close_date);
-            $time_to_close = $close_epoch - current_time('timestamp');
-            if ($time_to_close >= 0 && $time_to_close <= 604800) {
+            // We give a warning 7 days in advance that a competition will close.
+            $close_competition_warning_date = Carbon::instance(new \DateTime($close_date, new \DateTimeZone('America/New_York')))->subDays(7);
+            if (Carbon::now('America/New_York')->gte($close_competition_warning_date)) {
                 $data['close'] = $close_date;
             }
         }
