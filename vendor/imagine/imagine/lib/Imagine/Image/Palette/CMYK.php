@@ -11,18 +11,18 @@
 
 namespace Imagine\Image\Palette;
 
+use Imagine\Exception\InvalidArgumentException;
+use Imagine\Exception\RuntimeException;
 use Imagine\Image\Palette\Color\CMYK as CMYKColor;
 use Imagine\Image\Palette\Color\ColorInterface;
-use Imagine\Exception\RuntimeException;
-use Imagine\Exception\InvalidArgumentException;
 use Imagine\Image\Profile;
 use Imagine\Image\ProfileInterface;
 
 class CMYK implements PaletteInterface
 {
+    private static $colors = [];
     private $parser;
     private $profile;
-    private static $colors = array();
 
     public function __construct()
     {
@@ -32,30 +32,21 @@ class CMYK implements PaletteInterface
     /**
      * {@inheritdoc}
      */
-    public function name()
+    public function blend(ColorInterface $color1, ColorInterface $color2, $amount)
     {
-        return PaletteInterface::PALETTE_CMYK;
-    }
+        if (!$color1 instanceof CMYKColor || !$color2 instanceof CMYKColor) {
+            throw new RuntimeException('CMYK palette can only blend CMYK colors');
+        }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function pixelDefinition()
-    {
-        return array(
-            ColorInterface::COLOR_CYAN,
-            ColorInterface::COLOR_MAGENTA,
-            ColorInterface::COLOR_YELLOW,
-            ColorInterface::COLOR_KEYLINE,
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function supportsAlpha()
-    {
-        return false;
+        return $this->color(
+            [
+                min(100, $color1->getCyan() + $color2->getCyan() * $amount),
+                min(100, $color1->getMagenta() + $color2->getMagenta() * $amount),
+                min(100, $color1->getYellow() + $color2->getYellow() * $amount),
+                min(100, $color1->getKeyline() + $color2->getKeyline() * $amount),
+            ]
+        )
+            ;
     }
 
     /**
@@ -80,28 +71,22 @@ class CMYK implements PaletteInterface
     /**
      * {@inheritdoc}
      */
-    public function blend(ColorInterface $color1, ColorInterface $color2, $amount)
+    public function name()
     {
-        if (!$color1 instanceof CMYKColor || ! $color2 instanceof CMYKColor) {
-            throw new RuntimeException('CMYK palette can only blend CMYK colors');
-        }
-
-        return $this->color(array(
-            min(100, $color1->getCyan() + $color2->getCyan() * $amount),
-            min(100, $color1->getMagenta() + $color2->getMagenta() * $amount),
-            min(100, $color1->getYellow() + $color2->getYellow() * $amount),
-            min(100, $color1->getKeyline() + $color2->getKeyline() * $amount),
-        ));
+        return PaletteInterface::PALETTE_CMYK;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function useProfile(ProfileInterface $profile)
+    public function pixelDefinition()
     {
-        $this->profile = $profile;
-
-        return $this;
+        return [
+            ColorInterface::COLOR_CYAN,
+            ColorInterface::COLOR_MAGENTA,
+            ColorInterface::COLOR_YELLOW,
+            ColorInterface::COLOR_KEYLINE,
+        ];
     }
 
     /**
@@ -114,5 +99,23 @@ class CMYK implements PaletteInterface
         }
 
         return $this->profile;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsAlpha()
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function useProfile(ProfileInterface $profile)
+    {
+        $this->profile = $profile;
+
+        return $this;
     }
 }

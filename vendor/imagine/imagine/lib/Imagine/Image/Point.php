@@ -22,7 +22,6 @@ final class Point implements PointInterface
      * @var integer
      */
     private $x;
-
     /**
      * @var integer
      */
@@ -39,11 +38,21 @@ final class Point implements PointInterface
     public function __construct($x, $y)
     {
         if ($x < 0 || $y < 0) {
-            throw new InvalidArgumentException(sprintf('A coordinate cannot be positioned outside of a bounding box (x: %s, y: %s given)', $x, $y));
+            throw new InvalidArgumentException(
+                sprintf('A coordinate cannot be positioned outside of a bounding box (x: %s, y: %s given)', $x, $y)
+            );
         }
 
         $this->x = $x;
         $this->y = $y;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString()
+    {
+        return sprintf('(%d, %d)', $this->x, $this->y);
     }
 
     /**
@@ -76,13 +85,5 @@ final class Point implements PointInterface
     public function move($amount)
     {
         return new Point($this->x + $amount, $this->y + $amount);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return sprintf('(%d, %d)', $this->x, $this->y);
     }
 }

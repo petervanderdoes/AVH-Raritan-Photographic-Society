@@ -65,6 +65,8 @@ class Autorotate implements FilterInterface
             return $this->color;
         }
 
-        return $image->palette()->color($this->color);
+        return $image->palette()
+                     ->color($this->color)
+            ;
     }
 }

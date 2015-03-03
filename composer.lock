@@ -4,20 +4,20 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "cb6098ab9e20db1b65a020a5298ecc6c",
+    "hash": "95e73a01ce025b8f621ef36b93de9c3a",
     "packages": [
         {
             "name": "imagine/imagine",
-            "version": "0.6.2",
+            "version": "dev-develop",
             "source": {
                 "type": "git",
-                "url": "https://github.com/avalanche123/Imagine.git",
-                "reference": "83ca8babede0e54f935ec09d55a726bf4b0a3f7c"
+                "url": "https://github.com/petervanderdoes/imagine.git",
+                "reference": "c77061991d5615e25df5f62cb2acc9c69bb4006d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/avalanche123/Imagine/zipball/83ca8babede0e54f935ec09d55a726bf4b0a3f7c",
-                "reference": "83ca8babede0e54f935ec09d55a726bf4b0a3f7c",
+                "url": "https://api.github.com/repos/petervanderdoes/imagine/zipball/c77061991d5615e25df5f62cb2acc9c69bb4006d",
+                "reference": "c77061991d5615e25df5f62cb2acc9c69bb4006d",
                 "shasum": ""
             },
             "require": {
@@ -42,7 +42,6 @@
                     "Imagine": "lib/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -61,13 +60,19 @@
                 "image manipulation",
                 "image processing"
             ],
-            "time": "2014-11-11 11:36:02"
+            "support": {
+                "source": "https://github.com/petervanderdoes/imagine/tree/develop",
+                "issues": "https://github.com/petervanderdoes/imagine/issues"
+            },
+            "time": "2015-03-03 02:52:06"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "imagine/imagine": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

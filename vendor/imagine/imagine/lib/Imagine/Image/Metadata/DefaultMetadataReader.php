@@ -19,17 +19,17 @@ class DefaultMetadataReader extends AbstractMetadataReader
     /**
      * {@inheritdoc}
      */
-    protected function extractFromFile($file)
+    protected function extractFromData($data)
     {
-        return array();
+        return [];
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function extractFromData($data)
+    protected function extractFromFile($file)
     {
-        return array();
+        return [];
     }
 
     /**
@@ -37,6 +37,6 @@ class DefaultMetadataReader extends AbstractMetadataReader
      */
     protected function extractFromStream($resource)
     {
-        return array();
+        return [];
     }
 }

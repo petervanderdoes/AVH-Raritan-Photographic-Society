@@ -19,19 +19,17 @@ use Imagine\Image\Palette\Color\ColorInterface;
 abstract class AbstractFont implements FontInterface
 {
     /**
+     * @var ColorInterface
+     */
+    protected $color;
+    /**
      * @var string
      */
     protected $file;
-
     /**
      * @var integer
      */
     protected $size;
-
-    /**
-     * @var ColorInterface
-     */
-    protected $color;
 
     /**
      * Constructs a font with specified $file, $size and $color
@@ -44,9 +42,17 @@ abstract class AbstractFont implements FontInterface
      */
     public function __construct($file, $size, ColorInterface $color)
     {
-        $this->file  = $file;
-        $this->size  = $size;
+        $this->file = $file;
+        $this->size = $size;
         $this->color = $color;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function getColor()
+    {
+        return $this->color;
     }
 
     /**
@@ -63,13 +69,5 @@ abstract class AbstractFont implements FontInterface
     final public function getSize()
     {
         return $this->size;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public function getColor()
-    {
-        return $this->color;
     }
 }

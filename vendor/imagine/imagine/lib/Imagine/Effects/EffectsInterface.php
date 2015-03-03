@@ -20,32 +20,15 @@ use Imagine\Image\Palette\Color\ColorInterface;
 interface EffectsInterface
 {
     /**
-     * Apply gamma correction
+     * Blur the image
      *
-     * @param  float            $correction
-     * @return EffectsInterface
-     *
-     * @throws RuntimeException
-     */
-    public function gamma($correction);
-
-    /**
-     * Invert the colors of the image
+     * @param float|int $sigma
      *
      * @return EffectsInterface
      *
      * @throws RuntimeException
      */
-    public function negative();
-
-    /**
-     * Grayscale the image
-     *
-     * @return EffectsInterface
-     *
-     * @throws RuntimeException
-     */
-    public function grayscale();
+    public function blur($sigma);
 
     /**
      * Colorize the image
@@ -59,6 +42,35 @@ interface EffectsInterface
     public function colorize(ColorInterface $color);
 
     /**
+     * Apply gamma correction
+     *
+     * @param  float $correction
+     *
+     * @return EffectsInterface
+     *
+     * @throws RuntimeException
+     */
+    public function gamma($correction);
+
+    /**
+     * Grayscale the image
+     *
+     * @return EffectsInterface
+     *
+     * @throws RuntimeException
+     */
+    public function grayscale();
+
+    /**
+     * Invert the colors of the image
+     *
+     * @return EffectsInterface
+     *
+     * @throws RuntimeException
+     */
+    public function negative();
+
+    /**
      * Sharpens the image
      *
      * @return EffectsInterface
@@ -66,15 +78,4 @@ interface EffectsInterface
      * @throws RuntimeException
      */
     public function sharpen();
-
-    /**
-     * Blur the image
-     *
-     * @param float|int $sigma
-     *
-     * @return EffectsInterface
-     *
-     * @throws RuntimeException
-     */
-    public function blur($sigma);
 }

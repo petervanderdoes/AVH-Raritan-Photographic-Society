@@ -17,6 +17,24 @@ namespace Imagine\Image;
 interface BoxInterface
 {
     /**
+     * Returns a string representation of the current box
+     *
+     * @return string
+     */
+    public function __toString();
+
+    /**
+     * Checks whether current box can fit given box at a given start position,
+     * start position defaults to top left corner xy(0,0)
+     *
+     * @param BoxInterface   $box
+     * @param PointInterface $start
+     *
+     * @return Boolean
+     */
+    public function contains(BoxInterface $box, PointInterface $start = null);
+
+    /**
      * Gets current image height
      *
      * @return integer
@@ -31,13 +49,13 @@ interface BoxInterface
     public function getWidth();
 
     /**
-     * Creates new BoxInterface instance with ratios applied to both sides
+     * Resizes box to given height, constraining proportions and returns the new box
      *
-     * @param float $ratio
+     * @param integer $height
      *
      * @return BoxInterface
      */
-    public function scale($ratio);
+    public function heighten($height);
 
     /**
      * Creates new BoxInterface, adding given size to both sides
@@ -49,15 +67,22 @@ interface BoxInterface
     public function increase($size);
 
     /**
-     * Checks whether current box can fit given box at a given start position,
-     * start position defaults to top left corner xy(0,0)
+     * Creates new BoxInterface instance with ratios applied to both sides
      *
-     * @param BoxInterface   $box
-     * @param PointInterface $start
+     * @param float $ratio
      *
-     * @return Boolean
+     * @return BoxInterface
      */
-    public function contains(BoxInterface $box, PointInterface $start = null);
+    public function scale($ratio);
+
+    /**
+     * Reset the the size given earlier to keep the aspect ratio.
+     *
+     * @param integer $original_width
+     * @param integer $original_height
+     *
+     */
+    public function setRatio($original_width, $original_height);
 
     /**
      * Gets current box square, useful for getting total number of pixels in a
@@ -68,13 +93,6 @@ interface BoxInterface
     public function square();
 
     /**
-     * Returns a string representation of the current box
-     *
-     * @return string
-     */
-    public function __toString();
-
-    /**
      * Resizes box to given width, constraining proportions and returns the new box
      *
      * @param integer $width
@@ -82,15 +100,4 @@ interface BoxInterface
      * @return BoxInterface
      */
     public function widen($width);
-
-    /**
-     * Resizes box to given height, constraining proportions and returns the new box
-     *
-     * @param integer $height
-     *
-     * @return BoxInterface
-     */
-    public function heighten($height);
-
-    public function setRatio($original_width, $original_height);
 }

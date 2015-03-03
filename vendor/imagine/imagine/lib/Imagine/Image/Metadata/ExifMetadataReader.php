@@ -29,20 +29,20 @@ class ExifMetadataReader extends AbstractMetadataReader
     /**
      * {@inheritdoc}
      */
-    protected function extractFromFile($file)
+    protected function extractFromData($data)
     {
-        if (false === $data = @file_get_contents($file)) {
-            throw new InvalidArgumentException(sprintf('File %s is not readable.', $file));
-        }
-
         return $this->doReadData($data);
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function extractFromData($data)
+    protected function extractFromFile($file)
     {
+        if (false === $data = @file_get_contents($file)) {
+            throw new InvalidArgumentException(sprintf('File %s is not readable.', $file));
+        }
+
         return $this->doReadData($data);
     }
 
@@ -82,18 +82,18 @@ class ExifMetadataReader extends AbstractMetadataReader
     private function extract($path)
     {
         if (false === $exifData = @exif_read_data($path, null, true, false)) {
-            return array();
+            return [];
         }
 
-        $metadata = array();
-        $sources = array('EXIF' => 'exif', 'IFD0' => 'ifd0');
+        $metadata = [];
+        $sources = ['EXIF' => 'exif', 'IFD0' => 'ifd0'];
 
         foreach ($sources as $name => $prefix) {
             if (!isset($exifData[$name])) {
                 continue;
             }
             foreach ($exifData[$name] as $prop => $value) {
-                $metadata[$prefix.'.'.$prop] = $value;
+                $metadata[$prefix . '.' . $prop] = $value;
             }
         }
 

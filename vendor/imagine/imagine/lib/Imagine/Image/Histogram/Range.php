@@ -21,12 +21,11 @@ final class Range
     /**
      * @var integer
      */
-    private $start;
-
+    private $end;
     /**
      * @var integer
      */
-    private $end;
+    private $start;
 
     /**
      * @param integer $start
@@ -37,11 +36,13 @@ final class Range
     public function __construct($start, $end)
     {
         if ($end <= $start) {
-            throw new OutOfBoundsException(sprintf('Range end cannot be bigger than start, %d %d given accordingly', $this->start, $this->end));
+            throw new OutOfBoundsException(
+                sprintf('Range end cannot be bigger than start, %d %d given accordingly', $this->start, $this->end)
+            );
         }
 
         $this->start = $start;
-        $this->end   = $end;
+        $this->end = $end;
     }
 
     /**

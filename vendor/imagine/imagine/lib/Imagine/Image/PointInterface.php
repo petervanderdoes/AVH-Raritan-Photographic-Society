@@ -17,6 +17,13 @@ namespace Imagine\Image;
 interface PointInterface
 {
     /**
+     * Gets a string representation for the current point
+     *
+     * @return string
+     */
+    public function __toString();
+
+    /**
      * Gets points x coordinate
      *
      * @return integer
@@ -42,15 +49,9 @@ interface PointInterface
     /**
      * Returns another point, moved by a given amount from current coordinates
      *
-     * @param  integer        $amount
+     * @param  integer $amount
+     *
      * @return ImageInterface
      */
     public function move($amount);
-
-    /**
-     * Gets a string representation for the current point
-     *
-     * @return string
-     */
-    public function __toString();
 }

@@ -43,7 +43,7 @@ final class Font extends AbstractFont
      */
     public function box($string, $angle = 0)
     {
-        $text  = new \GmagickDraw();
+        $text = new \GmagickDraw();
 
         $text->setfont($this->file);
         /**

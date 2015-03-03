@@ -11,8 +11,8 @@
 
 namespace Imagine\Filter\Basic;
 
-use Imagine\Image\ImageInterface;
 use Imagine\Filter\FilterInterface;
+use Imagine\Image\ImageInterface;
 
 /**
  * A show filter
@@ -23,7 +23,6 @@ class Show implements FilterInterface
      * @var string
      */
     private $format;
-
     /**
      * @var array
      */
@@ -35,9 +34,9 @@ class Show implements FilterInterface
      * @param string $format
      * @param array  $options
      */
-    public function __construct($format, array $options = array())
+    public function __construct($format, array $options = [])
     {
-        $this->format  = $format;
+        $this->format = $format;
         $this->options = $options;
     }
 

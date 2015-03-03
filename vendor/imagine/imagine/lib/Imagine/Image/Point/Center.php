@@ -38,6 +38,14 @@ final class Center implements PointInterface
     /**
      * {@inheritdoc}
      */
+    public function __toString()
+    {
+        return sprintf('(%d, %d)', $this->getX(), $this->getY());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getX()
     {
         return ceil($this->box->getWidth() / 2);
@@ -65,13 +73,5 @@ final class Center implements PointInterface
     public function move($amount)
     {
         return new OriginalPoint($this->getX() + $amount, $this->getY() + $amount);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return sprintf('(%d, %d)', $this->getX(), $this->getY());
     }
 }

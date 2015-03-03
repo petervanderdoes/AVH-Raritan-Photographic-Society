@@ -22,7 +22,13 @@
       "Twig": ""
     }
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/petervanderdoes/imagine"
+    }
+  ],
   "require": {
-    "imagine/imagine": "0.6.*"
+    "imagine/imagine": "dev-develop"
   }
 }

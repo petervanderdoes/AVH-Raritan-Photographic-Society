@@ -11,28 +11,26 @@
 
 namespace Imagine\Image\Palette;
 
-use Imagine\Image\Palette\Color\RGB as RGBColor;
-use Imagine\Image\Palette\Color\ColorInterface;
-use Imagine\Image\ProfileInterface;
-use Imagine\Image\Profile;
 use Imagine\Exception\RuntimeException;
+use Imagine\Image\Palette\Color\ColorInterface;
+use Imagine\Image\Palette\Color\RGB as RGBColor;
+use Imagine\Image\Profile;
+use Imagine\Image\ProfileInterface;
 
 class RGB implements PaletteInterface
 {
     /**
+     * @var array
+     */
+    protected static $colors = [];
+    /**
      * @var ColorParser
      */
     private $parser;
-
     /**
      * @var ProfileInterface
      */
     private $profile;
-
-    /**
-     * @var array
-     */
-    protected static $colors = array();
 
     public function __construct()
     {
@@ -42,51 +40,41 @@ class RGB implements PaletteInterface
     /**
      * {@inheritdoc}
      */
-    public function name()
+    public function blend(ColorInterface $color1, ColorInterface $color2, $amount)
     {
-        return PaletteInterface::PALETTE_RGB;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function pixelDefinition()
-    {
-        return array(
-            ColorInterface::COLOR_RED,
-            ColorInterface::COLOR_GREEN,
-            ColorInterface::COLOR_BLUE,
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function supportsAlpha()
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function useProfile(ProfileInterface $profile)
-    {
-        $this->profile = $profile;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function profile()
-    {
-        if (!$this->profile) {
-            $this->profile = Profile::fromPath(__DIR__ . '/../../resources/color.org/sRGB_IEC61966-2-1_black_scaled.icc');
+        if (!$color1 instanceof RGBColor || !$color2 instanceof RGBColor) {
+            throw new RuntimeException('RGB palette can only blend RGB colors');
         }
 
-        return $this->profile;
+        return $this->color(
+            [
+                (int) min(
+                    255,
+                    min($color1->getRed(), $color2->getRed()) + round(
+                        abs($color2->getRed() - $color1->getRed()) * $amount
+                    )
+                ),
+                (int) min(
+                    255,
+                    min($color1->getGreen(), $color2->getGreen()) + round(
+                        abs($color2->getGreen() - $color1->getGreen()) * $amount
+                    )
+                ),
+                (int) min(
+                    255,
+                    min($color1->getBlue(), $color2->getBlue()) + round(
+                        abs($color2->getBlue() - $color1->getBlue()) * $amount
+                    )
+                ),
+            ],
+            (int) min(
+                100,
+                min($color1->getAlpha(), $color2->getAlpha()) + round(
+                    abs($color2->getAlpha() - $color1->getAlpha()) * $amount
+                )
+            )
+        )
+            ;
     }
 
     /**
@@ -111,19 +99,53 @@ class RGB implements PaletteInterface
     /**
      * {@inheritdoc}
      */
-    public function blend(ColorInterface $color1, ColorInterface $color2, $amount)
+    public function name()
     {
-        if (!$color1 instanceof RGBColor || ! $color2 instanceof RGBColor) {
-            throw new RuntimeException('RGB palette can only blend RGB colors');
+        return PaletteInterface::PALETTE_RGB;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function pixelDefinition()
+    {
+        return [
+            ColorInterface::COLOR_RED,
+            ColorInterface::COLOR_GREEN,
+            ColorInterface::COLOR_BLUE,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function profile()
+    {
+        if (!$this->profile) {
+            $this->profile = Profile::fromPath(
+                __DIR__ . '/../../resources/color.org/sRGB_IEC61966-2-1_black_scaled.icc'
+            )
+            ;
         }
 
-        return $this->color(
-            array(
-                (int) min(255, min($color1->getRed(), $color2->getRed()) + round(abs($color2->getRed() - $color1->getRed()) * $amount)),
-                (int) min(255, min($color1->getGreen(), $color2->getGreen()) + round(abs($color2->getGreen() - $color1->getGreen()) * $amount)),
-                (int) min(255, min($color1->getBlue(), $color2->getBlue()) + round(abs($color2->getBlue() - $color1->getBlue()) * $amount)),
-            ),
-            (int) min(100, min($color1->getAlpha(), $color2->getAlpha()) + round(abs($color2->getAlpha() - $color1->getAlpha()) * $amount))
-        );
+        return $this->profile;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsAlpha()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function useProfile(ProfileInterface $profile)
+    {
+        $this->profile = $profile;
+
+        return $this;
     }
 }

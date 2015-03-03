@@ -25,22 +25,6 @@ class Profile implements ProfileInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function name()
-    {
-        return $this->name;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function data()
-    {
-        return $this->data;
-    }
-
-    /**
      * Creates a profile from a path to a file
      *
      * @param String $path
@@ -56,5 +40,21 @@ class Profile implements ProfileInterface
         }
 
         return new static(basename($path), file_get_contents($path));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function data()
+    {
+        return $this->data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function name()
+    {
+        return $this->name;
     }
 }

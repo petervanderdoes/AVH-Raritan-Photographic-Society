@@ -1,5 +1,8 @@
 # CHANGELOG
 
+### 0.6.x (2015-xx-xx)
+  * Add option to keep aspect ratio when resizing.
+
 ### 0.6.2 (2014-11-11)
   * Stripping image containing an invalid ICC profile fails
   * MetadataBag now implements \Countable

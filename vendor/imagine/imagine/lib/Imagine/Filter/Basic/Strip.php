@@ -11,8 +11,8 @@
 
 namespace Imagine\Filter\Basic;
 
-use Imagine\Image\ImageInterface;
 use Imagine\Filter\FilterInterface;
+use Imagine\Image\ImageInterface;
 
 /**
  * A strip filter

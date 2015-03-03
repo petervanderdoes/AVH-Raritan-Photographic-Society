@@ -11,18 +11,18 @@
 
 namespace Imagine\Gd;
 
-use Imagine\Image\AbstractLayers;
+use Imagine\Exception\NotSupportedException;
 use Imagine\Exception\RuntimeException;
+use Imagine\Image\AbstractLayers;
 use Imagine\Image\Metadata\MetadataBag;
 use Imagine\Image\Palette\PaletteInterface;
-use Imagine\Exception\NotSupportedException;
 
 class Layers extends AbstractLayers
 {
     private $image;
     private $offset;
-    private $resource;
     private $palette;
+    private $resource;
 
     public function __construct(Image $image, PaletteInterface $palette, $resource)
     {
@@ -39,8 +39,9 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
-    public function merge()
+    public function animate($format, $delay, $loops)
     {
+        return $this;
     }
 
     /**
@@ -53,9 +54,9 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
-    public function animate($format, $delay, $loops)
+    public function count()
     {
-        return $this;
+        return 1;
     }
 
     /**
@@ -77,33 +78,16 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    public function merge()
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function next()
     {
         ++$this->offset;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->offset = 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid()
-    {
-        return $this->offset < 1;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        return 1;
     }
 
     /**
@@ -140,5 +124,21 @@ class Layers extends AbstractLayers
     public function offsetUnset($offset)
     {
         throw new NotSupportedException('GD does not support layer unset');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rewind()
+    {
+        $this->offset = 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function valid()
+    {
+        return $this->offset < 1;
     }
 }

@@ -17,14 +17,13 @@ namespace Imagine\Image\Histogram;
 final class Bucket implements \Countable
 {
     /**
-     * @var Range
-     */
-    private $range;
-
-    /**
      * @var integer
      */
     private $count;
+    /**
+     * @var Range
+     */
+    private $range;
 
     /**
      * @param Range   $range

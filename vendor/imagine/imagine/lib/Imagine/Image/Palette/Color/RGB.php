@@ -11,42 +11,118 @@
 
 namespace Imagine\Image\Palette\Color;
 
-use Imagine\Image\Palette\RGB as RGBPalette;
 use Imagine\Exception\InvalidArgumentException;
+use Imagine\Image\Palette\RGB as RGBPalette;
 
 final class RGB implements ColorInterface
 {
     /**
      * @var integer
      */
-    private $r;
-
-    /**
-     * @var integer
-     */
-    private $g;
-
+    private $alpha;
     /**
      * @var integer
      */
     private $b;
-
     /**
      * @var integer
      */
-    private $alpha;
-
+    private $g;
     /**
      *
      * @var RGBPalette
      */
     private $palette;
+    /**
+     * @var integer
+     */
+    private $r;
 
     public function __construct(RGBPalette $palette, array $color, $alpha)
     {
         $this->palette = $palette;
         $this->setColor($color);
         $this->setAlpha($alpha);
+    }
+
+    /**
+     * Returns hex representation of the color
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return sprintf('#%02x%02x%02x', $this->r, $this->g, $this->b);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function darken($shade)
+    {
+        return $this->palette->color(
+            [
+                max(0, $this->r - $shade),
+                max(0, $this->g - $shade),
+                max(0, $this->b - $shade),
+            ],
+            $this->alpha
+        )
+            ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function dissolve($alpha)
+    {
+        return $this->palette->color([$this->r, $this->g, $this->b], $this->alpha + $alpha);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAlpha()
+    {
+        return $this->alpha;
+    }
+
+    /**
+     * Returns BLUE value of the color
+     *
+     * @return integer
+     */
+    public function getBlue()
+    {
+        return $this->b;
+    }
+
+    /**
+     * Returns GREEN value of the color
+     *
+     * @return integer
+     */
+    public function getGreen()
+    {
+        return $this->g;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPalette()
+    {
+        return $this->palette;
+    }
+
+    /**
+     * Returns RED value of the color
+     *
+     * @return integer
+     */
+    public function getRed()
+    {
+        return $this->r;
     }
 
     /**
@@ -67,95 +143,13 @@ final class RGB implements ColorInterface
     }
 
     /**
-     * Returns RED value of the color
-     *
-     * @return integer
-     */
-    public function getRed()
-    {
-        return $this->r;
-    }
-
-    /**
-     * Returns GREEN value of the color
-     *
-     * @return integer
-     */
-    public function getGreen()
-    {
-        return $this->g;
-    }
-
-    /**
-     * Returns BLUE value of the color
-     *
-     * @return integer
-     */
-    public function getBlue()
-    {
-        return $this->b;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPalette()
-    {
-        return $this->palette;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAlpha()
-    {
-        return $this->alpha;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function dissolve($alpha)
-    {
-        return $this->palette->color(array($this->r, $this->g, $this->b), $this->alpha + $alpha);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function lighten($shade)
-    {
-        return $this->palette->color(
-            array(
-                min(255, $this->r + $shade),
-                min(255, $this->g + $shade),
-                min(255, $this->b + $shade),
-            ), $this->alpha
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function darken($shade)
-    {
-        return $this->palette->color(
-            array(
-                max(0, $this->r - $shade),
-                max(0, $this->g - $shade),
-                max(0, $this->b - $shade),
-            ), $this->alpha
-        );
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function grayscale()
     {
         $gray = min(255, round(0.299 * $this->getRed() + 0.114 * $this->getBlue() + 0.587 * $this->getGreen()));
 
-        return $this->palette->color(array($gray, $gray, $gray), $this->alpha);
+        return $this->palette->color([$gray, $gray, $gray], $this->alpha);
     }
 
     /**
@@ -167,13 +161,19 @@ final class RGB implements ColorInterface
     }
 
     /**
-     * Returns hex representation of the color
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function __toString()
+    public function lighten($shade)
     {
-        return sprintf('#%02x%02x%02x', $this->r, $this->g, $this->b);
+        return $this->palette->color(
+            [
+                min(255, $this->r + $shade),
+                min(255, $this->g + $shade),
+                min(255, $this->b + $shade),
+            ],
+            $this->alpha
+        )
+            ;
     }
 
     /**
@@ -206,7 +206,9 @@ final class RGB implements ColorInterface
     private function setColor(array $color)
     {
         if (count($color) !== 3) {
-            throw new InvalidArgumentException('Color argument must look like array(R, G, B), where R, G, B are the integer values between 0 and 255 for red, green and blue color indexes accordingly');
+            throw new InvalidArgumentException(
+                'Color argument must look like array(R, G, B), where R, G, B are the integer values between 0 and 255 for red, green and blue color indexes accordingly'
+            );
         }
 
         list($this->r, $this->g, $this->b) = array_values($color);

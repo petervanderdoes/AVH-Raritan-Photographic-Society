@@ -26,14 +26,13 @@ use Imagine\Image\PointInterface;
 final class Drawer implements DrawerInterface
 {
     /**
-     * @var resource
-     */
-    private $resource;
-
-    /**
      * @var array
      */
     private $info;
+    /**
+     * @var resource
+     */
+    private $resource;
 
     /**
      * Constructs Drawer with a given gd image resource
@@ -57,7 +56,17 @@ final class Drawer implements DrawerInterface
             throw new RuntimeException('Draw arc operation failed');
         }
 
-        if (false === imagearc($this->resource, $center->getX(), $center->getY(), $size->getWidth(), $size->getHeight(), $start, $end, $this->getColor($color))) {
+        if (false === imagearc(
+                $this->resource,
+                $center->getX(),
+                $center->getY(),
+                $size->getWidth(),
+                $size->getHeight(),
+                $start,
+                $end,
+                $this->getColor($color)
+            )
+        ) {
             imagealphablending($this->resource, false);
             throw new RuntimeException('Draw arc operation failed');
         }
@@ -74,8 +83,15 @@ final class Drawer implements DrawerInterface
      *
      * {@inheritdoc}
      */
-    public function chord(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $fill = false, $thickness = 1)
-    {
+    public function chord(
+        PointInterface $center,
+        BoxInterface $size,
+        $start,
+        $end,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    ) {
         imagesetthickness($this->resource, max(1, (int) $thickness));
 
         if ($fill) {
@@ -88,88 +104,18 @@ final class Drawer implements DrawerInterface
             throw new RuntimeException('Draw chord operation failed');
         }
 
-        if (false === imagefilledarc($this->resource, $center->getX(), $center->getY(), $size->getWidth(), $size->getHeight(), $start, $end, $this->getColor($color), $style)) {
-            imagealphablending($this->resource, false);
-            throw new RuntimeException('Draw chord operation failed');
-        }
-
-        if (false === imagealphablending($this->resource, false)) {
-            throw new RuntimeException('Draw chord operation failed');
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function ellipse(PointInterface $center, BoxInterface $size, ColorInterface $color, $fill = false, $thickness = 1)
-    {
-        imagesetthickness($this->resource, max(1, (int) $thickness));
-
-        if ($fill) {
-            $callback = 'imagefilledellipse';
-        } else {
-            $callback = 'imageellipse';
-        }
-
-        if (false === imagealphablending($this->resource, true)) {
-            throw new RuntimeException('Draw ellipse operation failed');
-        }
-
-        if (false === $callback($this->resource, $center->getX(), $center->getY(), $size->getWidth(), $size->getHeight(), $this->getColor($color))) {
-            imagealphablending($this->resource, false);
-            throw new RuntimeException('Draw ellipse operation failed');
-        }
-
-        if (false === imagealphablending($this->resource, false)) {
-            throw new RuntimeException('Draw ellipse operation failed');
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function line(PointInterface $start, PointInterface $end, ColorInterface $color, $thickness = 1)
-    {
-        imagesetthickness($this->resource, max(1, (int) $thickness));
-
-        if (false === imagealphablending($this->resource, true)) {
-            throw new RuntimeException('Draw line operation failed');
-        }
-
-        if (false === imageline($this->resource, $start->getX(), $start->getY(), $end->getX(), $end->getY(), $this->getColor($color))) {
-            imagealphablending($this->resource, false);
-            throw new RuntimeException('Draw line operation failed');
-        }
-
-        if (false === imagealphablending($this->resource, false)) {
-            throw new RuntimeException('Draw line operation failed');
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function pieSlice(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $fill = false, $thickness = 1)
-    {
-        imagesetthickness($this->resource, max(1, (int) $thickness));
-
-        if ($fill) {
-            $style = IMG_ARC_EDGED;
-        } else {
-            $style = IMG_ARC_EDGED | IMG_ARC_NOFILL;
-        }
-
-        if (false === imagealphablending($this->resource, true)) {
-            throw new RuntimeException('Draw chord operation failed');
-        }
-
-        if (false === imagefilledarc($this->resource, $center->getX(), $center->getY(), $size->getWidth(), $size->getHeight(), $start, $end, $this->getColor($color), $style)) {
+        if (false === imagefilledarc(
+                $this->resource,
+                $center->getX(),
+                $center->getY(),
+                $size->getWidth(),
+                $size->getHeight(),
+                $start,
+                $end,
+                $this->getColor($color),
+                $style
+            )
+        ) {
             imagealphablending($this->resource, false);
             throw new RuntimeException('Draw chord operation failed');
         }
@@ -205,17 +151,145 @@ final class Drawer implements DrawerInterface
     /**
      * {@inheritdoc}
      */
+    public function ellipse(
+        PointInterface $center,
+        BoxInterface $size,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    ) {
+        imagesetthickness($this->resource, max(1, (int) $thickness));
+
+        if ($fill) {
+            $callback = 'imagefilledellipse';
+        } else {
+            $callback = 'imageellipse';
+        }
+
+        if (false === imagealphablending($this->resource, true)) {
+            throw new RuntimeException('Draw ellipse operation failed');
+        }
+
+        if (false === $callback(
+                $this->resource,
+                $center->getX(),
+                $center->getY(),
+                $size->getWidth(),
+                $size->getHeight(),
+                $this->getColor($color)
+            )
+        ) {
+            imagealphablending($this->resource, false);
+            throw new RuntimeException('Draw ellipse operation failed');
+        }
+
+        if (false === imagealphablending($this->resource, false)) {
+            throw new RuntimeException('Draw ellipse operation failed');
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function line(PointInterface $start, PointInterface $end, ColorInterface $color, $thickness = 1)
+    {
+        imagesetthickness($this->resource, max(1, (int) $thickness));
+
+        if (false === imagealphablending($this->resource, true)) {
+            throw new RuntimeException('Draw line operation failed');
+        }
+
+        if (false === imageline(
+                $this->resource,
+                $start->getX(),
+                $start->getY(),
+                $end->getX(),
+                $end->getY(),
+                $this->getColor($color)
+            )
+        ) {
+            imagealphablending($this->resource, false);
+            throw new RuntimeException('Draw line operation failed');
+        }
+
+        if (false === imagealphablending($this->resource, false)) {
+            throw new RuntimeException('Draw line operation failed');
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function pieSlice(
+        PointInterface $center,
+        BoxInterface $size,
+        $start,
+        $end,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    ) {
+        imagesetthickness($this->resource, max(1, (int) $thickness));
+
+        if ($fill) {
+            $style = IMG_ARC_EDGED;
+        } else {
+            $style = IMG_ARC_EDGED | IMG_ARC_NOFILL;
+        }
+
+        if (false === imagealphablending($this->resource, true)) {
+            throw new RuntimeException('Draw chord operation failed');
+        }
+
+        if (false === imagefilledarc(
+                $this->resource,
+                $center->getX(),
+                $center->getY(),
+                $size->getWidth(),
+                $size->getHeight(),
+                $start,
+                $end,
+                $this->getColor($color),
+                $style
+            )
+        ) {
+            imagealphablending($this->resource, false);
+            throw new RuntimeException('Draw chord operation failed');
+        }
+
+        if (false === imagealphablending($this->resource, false)) {
+            throw new RuntimeException('Draw chord operation failed');
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function polygon(array $coordinates, ColorInterface $color, $fill = false, $thickness = 1)
     {
         imagesetthickness($this->resource, max(1, (int) $thickness));
 
         if (count($coordinates) < 3) {
-            throw new InvalidArgumentException(sprintf('A polygon must consist of at least 3 points, %d given', count($coordinates)));
+            throw new InvalidArgumentException(
+                sprintf('A polygon must consist of at least 3 points, %d given', count($coordinates))
+            );
         }
 
-        $points = call_user_func_array('array_merge', array_map(function (PointInterface $p) {
-            return array($p->getX(), $p->getY());
-        }, $coordinates));
+        $points = call_user_func_array(
+            'array_merge',
+            array_map(
+                function (PointInterface $p) {
+                    return [$p->getX(), $p->getY()];
+                },
+                $coordinates
+            )
+        );
 
         if ($fill) {
             $callback = 'imagefilledpolygon';
@@ -248,11 +322,11 @@ final class Drawer implements DrawerInterface
             throw new RuntimeException('GD is not compiled with FreeType support');
         }
 
-        $angle    = -1 * $angle;
+        $angle = -1 * $angle;
         $fontsize = $font->getSize();
         $fontfile = $font->getFile();
-        $x        = $position->getX();
-        $y        = $position->getY() + $fontsize;
+        $x = $position->getX();
+        $y = $position->getY() + $fontsize;
 
         if ($width !== null) {
             $string = $this->wrapText($string, $font, $angle, $width);
@@ -262,7 +336,17 @@ final class Drawer implements DrawerInterface
             throw new RuntimeException('Font mask operation failed');
         }
 
-        if (false === imagefttext($this->resource, $fontsize, $angle, $x, $y, $this->getColor($font->getColor()), $fontfile, $string)) {
+        if (false === imagefttext(
+                $this->resource,
+                $fontsize,
+                $angle,
+                $x,
+                $y,
+                $this->getColor($font->getColor()),
+                $fontfile,
+                $string
+            )
+        ) {
             imagealphablending($this->resource, false);
             throw new RuntimeException('Font mask operation failed');
         }
@@ -292,9 +376,23 @@ final class Drawer implements DrawerInterface
             throw new InvalidArgumentException('GD driver only supports RGB colors');
         }
 
-        $gdColor = imagecolorallocatealpha($this->resource, $color->getRed(), $color->getGreen(), $color->getBlue(), (100 - $color->getAlpha()) * 127 / 100);
+        $gdColor = imagecolorallocatealpha(
+            $this->resource,
+            $color->getRed(),
+            $color->getGreen(),
+            $color->getBlue(),
+            (100 - $color->getAlpha()) * 127 / 100
+        );
         if (false === $gdColor) {
-            throw new RuntimeException(sprintf('Unable to allocate color "RGB(%s, %s, %s)" with transparency of %d percent', $color->getRed(), $color->getGreen(), $color->getBlue(), $color->getAlpha()));
+            throw new RuntimeException(
+                sprintf(
+                    'Unable to allocate color "RGB(%s, %s, %s)" with transparency of %d percent',
+                    $color->getRed(),
+                    $color->getGreen(),
+                    $color->getBlue(),
+                    $color->getAlpha()
+                )
+            );
         }
 
         return $gdColor;

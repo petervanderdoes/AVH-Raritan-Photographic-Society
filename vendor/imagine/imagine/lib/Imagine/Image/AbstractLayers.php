@@ -26,11 +26,17 @@ abstract class AbstractLayers implements LayersInterface
     /**
      * {@inheritdoc}
      */
-    public function set($offset, ImageInterface $image)
+    public function get($offset)
     {
-        $this[$offset] = $image;
+        return $this[$offset];
+    }
 
-        return $this;
+    /**
+     * {@inheritdoc}
+     */
+    public function has($offset)
+    {
+        return isset($this[$offset]);
     }
 
     /**
@@ -46,16 +52,10 @@ abstract class AbstractLayers implements LayersInterface
     /**
      * {@inheritdoc}
      */
-    public function get($offset)
+    public function set($offset, ImageInterface $image)
     {
-        return $this[$offset];
-    }
+        $this[$offset] = $image;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function has($offset)
-    {
-        return isset($this[$offset]);
+        return $this;
     }
 }

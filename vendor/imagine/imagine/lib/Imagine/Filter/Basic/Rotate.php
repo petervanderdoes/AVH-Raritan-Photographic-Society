@@ -11,9 +11,9 @@
 
 namespace Imagine\Filter\Basic;
 
+use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\Palette\Color\ColorInterface;
-use Imagine\Filter\FilterInterface;
 
 /**
  * A rotate filter
@@ -24,7 +24,6 @@ class Rotate implements FilterInterface
      * @var integer
      */
     private $angle;
-
     /**
      * @var ColorInterface
      */
@@ -38,7 +37,7 @@ class Rotate implements FilterInterface
      */
     public function __construct($angle, ColorInterface $background = null)
     {
-        $this->angle      = $angle;
+        $this->angle = $angle;
         $this->background = $background;
     }
 

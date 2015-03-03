@@ -44,14 +44,14 @@ final class Drawer implements DrawerInterface
      */
     public function arc(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $thickness = 1)
     {
-        $x      = $center->getX();
-        $y      = $center->getY();
-        $width  = $size->getWidth();
+        $x = $center->getX();
+        $y = $center->getY();
+        $width = $size->getWidth();
         $height = $size->getHeight();
 
         try {
             $pixel = $this->getColor($color);
-            $arc   = new \GmagickDraw();
+            $arc = new \GmagickDraw();
 
             $arc->setstrokecolor($pixel);
             $arc->setstrokewidth(max(1, (int) $thickness));
@@ -63,7 +63,8 @@ final class Drawer implements DrawerInterface
                 $y + $height / 2,
                 $start,
                 $end
-            );
+            )
+            ;
 
             $this->gmagick->drawImage($arc);
 
@@ -80,11 +81,18 @@ final class Drawer implements DrawerInterface
     /**
      * {@inheritdoc}
      */
-    public function chord(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $fill = false, $thickness = 1)
-    {
-        $x      = $center->getX();
-        $y      = $center->getY();
-        $width  = $size->getWidth();
+    public function chord(
+        PointInterface $center,
+        BoxInterface $size,
+        $start,
+        $end,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    ) {
+        $x = $center->getX();
+        $y = $center->getY();
+        $width = $size->getWidth();
         $height = $size->getHeight();
 
         try {
@@ -124,112 +132,6 @@ final class Drawer implements DrawerInterface
     /**
      * {@inheritdoc}
      */
-    public function ellipse(PointInterface $center, BoxInterface $size, ColorInterface $color, $fill = false, $thickness = 1)
-    {
-        $width  = $size->getWidth();
-        $height = $size->getHeight();
-
-        try {
-            $pixel   = $this->getColor($color);
-            $ellipse = new \GmagickDraw();
-
-            $ellipse->setstrokecolor($pixel);
-            $ellipse->setstrokewidth(max(1, (int) $thickness));
-
-            if ($fill) {
-                $ellipse->setfillcolor($pixel);
-            } else {
-                $ellipse->setfillcolor('transparent');
-            }
-
-            $ellipse->ellipse(
-                $center->getX(),
-                $center->getY(),
-                $width / 2,
-                $height / 2,
-                0, 360
-            );
-
-            $this->gmagick->drawImage($ellipse);
-
-            $pixel = null;
-
-            $ellipse = null;
-        } catch (\GmagickException $e) {
-            throw new RuntimeException('Draw ellipse operation failed', $e->getCode(), $e);
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function line(PointInterface $start, PointInterface $end, ColorInterface $color, $thickness = 1)
-    {
-        try {
-            $pixel = $this->getColor($color);
-            $line  = new \GmagickDraw();
-
-            $line->setstrokecolor($pixel);
-            $line->setstrokewidth(max(1, (int) $thickness));
-            $line->setfillcolor($pixel);
-            $line->line(
-                $start->getX(),
-                $start->getY(),
-                $end->getX(),
-                $end->getY()
-            );
-
-            $this->gmagick->drawImage($line);
-
-            $pixel = null;
-
-            $line = null;
-        } catch (\GmagickException $e) {
-            throw new RuntimeException('Draw line operation failed', $e->getCode(), $e);
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function pieSlice(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $fill = false, $thickness = 1)
-    {
-        $width  = $size->getWidth();
-        $height = $size->getHeight();
-
-        $x1 = round($center->getX() + $width / 2 * cos(deg2rad($start)));
-        $y1 = round($center->getY() + $height / 2 * sin(deg2rad($start)));
-        $x2 = round($center->getX() + $width / 2 * cos(deg2rad($end)));
-        $y2 = round($center->getY() + $height / 2 * sin(deg2rad($end)));
-
-        if ($fill) {
-            $this->chord($center, $size, $start, $end, $color, true, $thickness);
-            $this->polygon(
-                array(
-                    $center,
-                    new Point($x1, $y1),
-                    new Point($x2, $y2),
-                ),
-                $color,
-                true,
-                $thickness
-            );
-        } else {
-            $this->arc($center, $size, $start, $end, $color, $thickness);
-            $this->line($center, new Point($x1, $y1), $color, $thickness);
-            $this->line($center, new Point($x2, $y2), $color, $thickness);
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function dot(PointInterface $position, ColorInterface $color)
     {
         $x = $position->getX();
@@ -256,18 +158,145 @@ final class Drawer implements DrawerInterface
     /**
      * {@inheritdoc}
      */
+    public function ellipse(
+        PointInterface $center,
+        BoxInterface $size,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    ) {
+        $width = $size->getWidth();
+        $height = $size->getHeight();
+
+        try {
+            $pixel = $this->getColor($color);
+            $ellipse = new \GmagickDraw();
+
+            $ellipse->setstrokecolor($pixel);
+            $ellipse->setstrokewidth(max(1, (int) $thickness));
+
+            if ($fill) {
+                $ellipse->setfillcolor($pixel);
+            } else {
+                $ellipse->setfillcolor('transparent');
+            }
+
+            $ellipse->ellipse(
+                $center->getX(),
+                $center->getY(),
+                $width / 2,
+                $height / 2,
+                0,
+                360
+            )
+            ;
+
+            $this->gmagick->drawImage($ellipse);
+
+            $pixel = null;
+
+            $ellipse = null;
+        } catch (\GmagickException $e) {
+            throw new RuntimeException('Draw ellipse operation failed', $e->getCode(), $e);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function line(PointInterface $start, PointInterface $end, ColorInterface $color, $thickness = 1)
+    {
+        try {
+            $pixel = $this->getColor($color);
+            $line = new \GmagickDraw();
+
+            $line->setstrokecolor($pixel);
+            $line->setstrokewidth(max(1, (int) $thickness));
+            $line->setfillcolor($pixel);
+            $line->line(
+                $start->getX(),
+                $start->getY(),
+                $end->getX(),
+                $end->getY()
+            )
+            ;
+
+            $this->gmagick->drawImage($line);
+
+            $pixel = null;
+
+            $line = null;
+        } catch (\GmagickException $e) {
+            throw new RuntimeException('Draw line operation failed', $e->getCode(), $e);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function pieSlice(
+        PointInterface $center,
+        BoxInterface $size,
+        $start,
+        $end,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    ) {
+        $width = $size->getWidth();
+        $height = $size->getHeight();
+
+        $x1 = round($center->getX() + $width / 2 * cos(deg2rad($start)));
+        $y1 = round($center->getY() + $height / 2 * sin(deg2rad($start)));
+        $x2 = round($center->getX() + $width / 2 * cos(deg2rad($end)));
+        $y2 = round($center->getY() + $height / 2 * sin(deg2rad($end)));
+
+        if ($fill) {
+            $this->chord($center, $size, $start, $end, $color, true, $thickness);
+            $this->polygon(
+                [
+                    $center,
+                    new Point($x1, $y1),
+                    new Point($x2, $y2),
+                ],
+                $color,
+                true,
+                $thickness
+            )
+            ;
+        } else {
+            $this->arc($center, $size, $start, $end, $color, $thickness);
+            $this->line($center, new Point($x1, $y1), $color, $thickness);
+            $this->line($center, new Point($x2, $y2), $color, $thickness);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function polygon(array $coordinates, ColorInterface $color, $fill = false, $thickness = 1)
     {
         if (count($coordinates) < 3) {
-            throw new InvalidArgumentException(sprintf('Polygon must consist of at least 3 coordinates, %d given', count($coordinates)));
+            throw new InvalidArgumentException(
+                sprintf('Polygon must consist of at least 3 coordinates, %d given', count($coordinates))
+            );
         }
 
-        $points = array_map(function (PointInterface $p) {
-            return array('x' => $p->getX(), 'y' => $p->getY());
-        }, $coordinates);
+        $points = array_map(
+            function (PointInterface $p) {
+                return ['x' => $p->getX(), 'y' => $p->getY()];
+            },
+            $coordinates
+        );
 
         try {
-            $pixel   = $this->getColor($color);
+            $pixel = $this->getColor($color);
             $polygon = new \GmagickDraw();
 
             $polygon->setstrokecolor($pixel);
@@ -298,7 +327,7 @@ final class Drawer implements DrawerInterface
     {
         try {
             $pixel = $this->getColor($font->getColor());
-            $text  = new \GmagickDraw();
+            $text = new \GmagickDraw();
 
             $text->setfont($font->getFile());
             /**
@@ -310,9 +339,9 @@ final class Drawer implements DrawerInterface
             $text->setfillcolor($pixel);
 
             $info = $this->gmagick->queryfontmetrics($text, $string);
-            $rad  = deg2rad($angle);
-            $cos  = cos($rad);
-            $sin  = sin($rad);
+            $rad = deg2rad($angle);
+            $cos = cos($rad);
+            $sin = sin($rad);
 
             $x1 = round(0 * $cos - 0 * $sin);
             $x2 = round($info['textWidth'] * $cos - $info['textHeight'] * $sin);
@@ -323,10 +352,19 @@ final class Drawer implements DrawerInterface
             $ydiff = 0 - min($y1, $y2);
 
             if ($width !== null) {
-                throw new NotSupportedException('Gmagick doesn\'t support queryfontmetrics function for multiline text', 1);
+                throw new NotSupportedException(
+                    'Gmagick doesn\'t support queryfontmetrics function for multiline text', 1
+                );
             }
 
-            $this->gmagick->annotateimage($text, $position->getX() + $x1 + $xdiff, $position->getY() + $y2 + $ydiff, $angle, $string);
+            $this->gmagick->annotateimage(
+                $text,
+                $position->getX() + $x1 + $xdiff,
+                $position->getY() + $y2 + $ydiff,
+                $angle,
+                $string
+            )
+            ;
 
             unset($pixel, $text);
         } catch (\GmagickException $e) {

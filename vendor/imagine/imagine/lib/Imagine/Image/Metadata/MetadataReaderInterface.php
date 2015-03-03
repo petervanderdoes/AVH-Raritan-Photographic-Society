@@ -16,6 +16,15 @@ use Imagine\Exception\InvalidArgumentException;
 interface MetadataReaderInterface
 {
     /**
+     * Reads metadata from a binary string.
+     *
+     * @param $data The binary string to read.
+     *
+     * @return MetadataBag
+     */
+    public function readData($data);
+
+    /**
      * Reads metadata from a file.
      *
      * @param $file The path to the file where to read metadata.
@@ -25,15 +34,6 @@ interface MetadataReaderInterface
      * @return MetadataBag
      */
     public function readFile($file);
-
-    /**
-     * Reads metadata from a binary string.
-     *
-     * @param $data The binary string to read.
-     *
-     * @return MetadataBag
-     */
-    public function readData($data);
 
     /**
      * Reads metadata from a stream.

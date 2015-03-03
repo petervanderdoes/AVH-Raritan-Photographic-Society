@@ -11,11 +11,11 @@
 
 namespace Imagine\Draw;
 
+use Imagine\Exception\RuntimeException;
 use Imagine\Image\AbstractFont;
 use Imagine\Image\BoxInterface;
 use Imagine\Image\Palette\Color\ColorInterface;
 use Imagine\Image\PointInterface;
-use Imagine\Exception\RuntimeException;
 
 /**
  * Interface for the drawer
@@ -37,7 +37,14 @@ interface DrawerInterface
      *
      * @return DrawerInterface
      */
-    public function arc(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $thickness = 1);
+    public function arc(
+        PointInterface $center,
+        BoxInterface $size,
+        $start,
+        $end,
+        ColorInterface $color,
+        $thickness = 1
+    );
 
     /**
      * Same as arc, but also connects end points with a straight line
@@ -54,7 +61,28 @@ interface DrawerInterface
      *
      * @return DrawerInterface
      */
-    public function chord(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $fill = false, $thickness = 1);
+    public function chord(
+        PointInterface $center,
+        BoxInterface $size,
+        $start,
+        $end,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    );
+
+    /**
+     * Places a one pixel point at specific coordinates and fills it with
+     * specified color
+     *
+     * @param PointInterface $position
+     * @param ColorInterface $color
+     *
+     * @throws RuntimeException
+     *
+     * @return DrawerInterface
+     */
+    public function dot(PointInterface $position, ColorInterface $color);
 
     /**
      * Draws and ellipse with center at the given x, y coordinates, and given
@@ -70,7 +98,13 @@ interface DrawerInterface
      *
      * @return DrawerInterface
      */
-    public function ellipse(PointInterface $center, BoxInterface $size, ColorInterface $color, $fill = false, $thickness = 1);
+    public function ellipse(
+        PointInterface $center,
+        BoxInterface $size,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    );
 
     /**
      * Draws a line from start(x, y) to end(x, y) coordinates
@@ -99,20 +133,15 @@ interface DrawerInterface
      *
      * @return DrawerInterface
      */
-    public function pieSlice(PointInterface $center, BoxInterface $size, $start, $end, ColorInterface $color, $fill = false, $thickness = 1);
-
-    /**
-     * Places a one pixel point at specific coordinates and fills it with
-     * specified color
-     *
-     * @param PointInterface $position
-     * @param ColorInterface $color
-     *
-     * @throws RuntimeException
-     *
-     * @return DrawerInterface
-     */
-    public function dot(PointInterface $position, ColorInterface $color);
+    public function pieSlice(
+        PointInterface $center,
+        BoxInterface $size,
+        $start,
+        $end,
+        ColorInterface $color,
+        $fill = false,
+        $thickness = 1
+    );
 
     /**
      * Draws a polygon using array of x, y coordinates. Must contain at least

@@ -19,7 +19,7 @@ class MetadataBag implements \ArrayAccess, \IteratorAggregate, \Countable
     /** @var array */
     private $data;
 
-    public function __construct(array $data = array())
+    public function __construct(array $data = [])
     {
         $this->data = $data;
     }
@@ -51,6 +51,14 @@ class MetadataBag implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
+    public function offsetGet($offset)
+    {
+        return array_key_exists($offset, $this->data) ? $this->data[$offset] : null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function offsetSet($offset, $value)
     {
         $this->data[$offset] = $value;
@@ -62,14 +70,6 @@ class MetadataBag implements \ArrayAccess, \IteratorAggregate, \Countable
     public function offsetUnset($offset)
     {
         unset($this->data[$offset]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetGet($offset)
-    {
-        return array_key_exists($offset, $this->data) ? $this->data[$offset] : null;
     }
 
     /**

@@ -16,8 +16,8 @@ use Imagine\Filter\Basic\ApplyMask;
 use Imagine\Filter\Basic\Copy;
 use Imagine\Filter\Basic\Crop;
 use Imagine\Filter\Basic\Fill;
-use Imagine\Filter\Basic\FlipVertically;
 use Imagine\Filter\Basic\FlipHorizontally;
+use Imagine\Filter\Basic\FlipVertically;
 use Imagine\Filter\Basic\Paste;
 use Imagine\Filter\Basic\Resize;
 use Imagine\Filter\Basic\Rotate;
@@ -25,12 +25,12 @@ use Imagine\Filter\Basic\Save;
 use Imagine\Filter\Basic\Show;
 use Imagine\Filter\Basic\Strip;
 use Imagine\Filter\Basic\Thumbnail;
+use Imagine\Image\BoxInterface;
+use Imagine\Image\Fill\FillInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
-use Imagine\Image\BoxInterface;
-use Imagine\Image\Palette\Color\ColorInterface;
-use Imagine\Image\Fill\FillInterface;
 use Imagine\Image\ManipulatorInterface;
+use Imagine\Image\Palette\Color\ColorInterface;
 use Imagine\Image\PointInterface;
 
 /**
@@ -41,19 +41,17 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     /**
      * @var array
      */
-    private $filters = array();
-
-    /**
-     * @var array
-     */
-    private $sorted;
-
+    private $filters = [];
     /**
      * An ImagineInterface instance.
      *
      * @var ImagineInterface
      */
     private $imagine;
+    /**
+     * @var array
+     */
+    private $sorted;
 
     /**
      * Class constructor.
@@ -63,6 +61,35 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     public function __construct(ImagineInterface $imagine = null)
     {
         $this->imagine = $imagine;
+    }
+
+    /**
+     * Registers a given FilterInterface in an internal array of filters for
+     * later application to an instance of ImageInterface
+     *
+     * @param  FilterInterface $filter
+     * @param  int             $priority
+     *
+     * @return Transformation
+     */
+    public function add(FilterInterface $filter, $priority = 0)
+    {
+        $this->filters[$priority][] = $filter;
+        $this->sorted = null;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function apply(ImageInterface $image)
+    {
+        return array_reduce(
+            $this->getFilters(),
+            [$this, 'applyFilter'],
+            $image
+        );
     }
 
     /**
@@ -79,7 +106,12 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     {
         if ($filter instanceof ImagineAware) {
             if ($this->imagine === null) {
-                throw new InvalidArgumentException(sprintf('In order to use %s pass an Imagine\Image\ImagineInterface instance to Transformation constructor', get_class($filter)));
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'In order to use %s pass an Imagine\Image\ImagineInterface instance to Transformation constructor',
+                        get_class($filter)
+                    )
+                );
             }
             $filter->setImagine($this->imagine);
         }
@@ -88,30 +120,11 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     }
 
     /**
-     * Returns a list of filters sorted by their priority. Filters with same priority will be returned in the order they were added.
-     *
-     * @return array
-     */
-    public function getFilters()
-    {
-        if (null === $this->sorted) {
-            ksort($this->filters);
-            $this->sorted = call_user_func_array('array_merge', $this->filters);
-        }
-
-        return $this->sorted;
-    }
-
-    /**
      * {@inheritdoc}
      */
-    public function apply(ImageInterface $image)
+    public function applyMask(ImageInterface $mask)
     {
-        return array_reduce(
-            $this->getFilters(),
-            array($this, 'applyFilter'),
-            $image
-        );
+        return $this->add(new ApplyMask($mask));
     }
 
     /**
@@ -133,6 +146,14 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     /**
      * {@inheritdoc}
      */
+    public function fill(FillInterface $fill)
+    {
+        return $this->add(new Fill($fill));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function flipHorizontally()
     {
         return $this->add(new FlipHorizontally());
@@ -147,11 +168,18 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Returns a list of filters sorted by their priority. Filters with same priority will be returned in the order they were added.
+     *
+     * @return array
      */
-    public function strip()
+    public function getFilters()
     {
-        return $this->add(new Strip());
+        if (null === $this->sorted) {
+            ksort($this->filters);
+            $this->sorted = call_user_func_array('array_merge', $this->filters);
+        }
+
+        return $this->sorted;
     }
 
     /**
@@ -160,22 +188,6 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     public function paste(ImageInterface $image, PointInterface $start)
     {
         return $this->add(new Paste($image, $start));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function applyMask(ImageInterface $mask)
-    {
-        return $this->add(new ApplyMask($mask));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fill(FillInterface $fill)
-    {
-        return $this->add(new Fill($fill));
     }
 
     /**
@@ -197,7 +209,7 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     /**
      * {@inheritdoc}
      */
-    public function save($path = null, array $options = array())
+    public function save($path = null, array $options = [])
     {
         return $this->add(new Save($path, $options));
     }
@@ -205,7 +217,7 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     /**
      * {@inheritdoc}
      */
-    public function show($format, array $options = array())
+    public function show($format, array $options = [])
     {
         return $this->add(new Show($format, $options));
     }
@@ -213,24 +225,19 @@ final class Transformation implements FilterInterface, ManipulatorInterface
     /**
      * {@inheritdoc}
      */
-    public function thumbnail(BoxInterface $size, $mode = ImageInterface::THUMBNAIL_INSET, $filter = ImageInterface::FILTER_UNDEFINED)
+    public function strip()
     {
-        return $this->add(new Thumbnail($size, $mode, $filter));
+        return $this->add(new Strip());
     }
 
     /**
-     * Registers a given FilterInterface in an internal array of filters for
-     * later application to an instance of ImageInterface
-     *
-     * @param  FilterInterface $filter
-     * @param  int             $priority
-     * @return Transformation
+     * {@inheritdoc}
      */
-    public function add(FilterInterface $filter, $priority = 0)
-    {
-        $this->filters[$priority][] = $filter;
-        $this->sorted = null;
-
-        return $this;
+    public function thumbnail(
+        BoxInterface $size,
+        $mode = ImageInterface::THUMBNAIL_INSET,
+        $filter = ImageInterface::FILTER_UNDEFINED
+    ) {
+        return $this->add(new Thumbnail($size, $mode, $filter));
     }
 }

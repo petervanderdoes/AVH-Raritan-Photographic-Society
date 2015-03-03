@@ -11,9 +11,9 @@
 
 namespace Imagine\Image;
 
-use Imagine\Image\Palette\Color\ColorInterface;
 use Imagine\Exception\InvalidArgumentException;
 use Imagine\Exception\RuntimeException;
+use Imagine\Image\Palette\Color\ColorInterface;
 
 /**
  * The imagine interface
@@ -36,15 +36,17 @@ interface ImagineInterface
     public function create(BoxInterface $size, ColorInterface $color = null);
 
     /**
-     * Opens an existing image from $path
+     * Constructs a font with specified $file, $size and $color
      *
-     * @param string $path
+     * The font size is to be specified in points (e.g. 10pt means 10)
      *
-     * @throws RuntimeException
+     * @param string         $file
+     * @param integer        $size
+     * @param ColorInterface $color
      *
-     * @return ImageInterface
+     * @return FontInterface
      */
-    public function open($path);
+    public function font($file, $size, ColorInterface $color);
 
     /**
      * Loads an image from a binary $string
@@ -59,6 +61,17 @@ interface ImagineInterface
     public function load($string);
 
     /**
+     * Opens an existing image from $path
+     *
+     * @param string $path
+     *
+     * @throws RuntimeException
+     *
+     * @return ImageInterface
+     */
+    public function open($path);
+
+    /**
      * Loads an image from a resource $resource
      *
      * @param resource $resource
@@ -68,17 +81,4 @@ interface ImagineInterface
      * @return ImageInterface
      */
     public function read($resource);
-
-    /**
-     * Constructs a font with specified $file, $size and $color
-     *
-     * The font size is to be specified in points (e.g. 10pt means 10)
-     *
-     * @param string         $file
-     * @param integer        $size
-     * @param ColorInterface $color
-     *
-     * @return FontInterface
-     */
-    public function font($file, $size, ColorInterface $color);
 }
