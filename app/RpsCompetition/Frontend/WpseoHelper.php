@@ -135,7 +135,7 @@ class WpseoHelper
      */
     public function filterSitemapEntry($data, $type, $current_post)
     {
-        if ($current_post->ID == get_option('page_on_front')) {
+        if ($type === 'post' && $current_post->ID == get_option('page_on_front')) {
             $data['pri'] = 1;
             $data['chf'] = 'daily';
 
