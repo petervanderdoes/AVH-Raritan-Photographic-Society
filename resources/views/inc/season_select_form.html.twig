@@ -1,0 +1,21 @@
+<span class="season-form">
+    Select season<script type="text/javascript">function submit_form(control_name) {
+            document.season_form.submit_control.value = control_name;
+            document.season_form.submit();
+        }
+    </script>
+    <form action="{{ data.season_form.action }}" method="POST" name="season_form" accept-charset="UTF-8">
+        <input name="submit_control" type="hidden">
+        <input name="selected_season" value="{{ data.selected_season }}" type="hidden">
+        <select name="new_season" onchange="submit_form('new_season')">
+            {% for value,text in data.season_form.seasons %}
+                {% if value == data.selected_season %}
+                    <option value="{{ value }}" selected="selected">{{ text }}</option>
+                {% else %}
+                    <option value="{{ value }}">{{ text }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </form>
+    <p></p>
+</span>

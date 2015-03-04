@@ -7,6 +7,13 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class BanquetCurrentUserType extends AbstractType
 {
+    private $entity;
+
+    public function __construct($entity)
+    {
+        $this->entity = $entity;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -15,6 +22,21 @@ class BanquetCurrentUserType extends AbstractType
         $builder->add('allentries', 'hidden')
                 ->add('banquetids', 'hidden')
                 ->add('wp_get_referer', 'hidden')
+                ->add(
+                    'update',
+                    'submit',
+                    ['label' => 'Update']
+                )
+                ->add(
+                    'cancel',
+                    'submit',
+                    [
+                        'label' => 'Cancel',
+                        'attr'  => [
+                            'formnovalidate' => 'formnovalidate'
+                        ]
+                    ]
+                )
         ;
     }
 

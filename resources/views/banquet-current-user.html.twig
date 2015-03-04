@@ -4,8 +4,7 @@
     }
 </script>
 
-My banquet entries for
-{% include 'inc/month_and_season_select_form.html.twig' %}
+{% include 'inc/season_select_form.html.twig' %}
 
 <p>Select up to 5 entries</p>
 {{ form_start(form) }}
@@ -21,7 +20,7 @@ My banquet entries for
         <th width="3%"></th>
     </tr>
 
-    {% if not set data.scores %}
+    {% if data.scores is not defined %}
         <tr>
             <td colspan="6">No eligible banquet entries</td>
         </tr>
@@ -43,19 +42,18 @@ My banquet entries for
                 <td valign="top" align="center" width="8%">{{ entry.award }}</td>
                 <td align="center" valign="middle" class="$row_style" width="3%">
             </tr>
+            {% set counter = counter + 1 %}
         {% endfor %}
-        {% if form.open is defined %}
-            <tr>
-                <td colspan="6" class="form_buttons_row">
-                    {% if form.update is defined %}
-                        {{ form_widget(form.update) }}
-                    {% endif %}
-                    {% if form.cancle is defined %}
-                        {{ form_widget(form.cancel) }}
-                    {% endif %}
-                </td>
-            </tr>
-        {% endif %}
+        <tr>
+            <td colspan="6" class="form_buttons_row">
+                {% if form.update is defined %}
+                    {{ form_widget(form.update) }}
+                {% endif %}
+                {% if form.cancel is defined %}
+                    {{ form_widget(form.cancel) }}
+                {% endif %}
+            </td>
+        </tr>
     {% endif %}
 </table>
 {{ form_widget(form.wp_get_referer) }}
@@ -71,4 +69,3 @@ My banquet entries for
         }
     });
 </script>
-';
