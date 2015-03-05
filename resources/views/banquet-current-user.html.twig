@@ -1,0 +1,76 @@
+<script type="text/javascript">function submit_form(control_name) {
+        document.form.submit();
+    }
+</script>
+
+{{ form_start(form) }}
+Select season: <span class="season-form">
+{{ form_widget(form.seasons) }}
+</span>
+
+<p>Select up to 5 entries</p>
+<table class="banquet form_frame" width="99%">
+    <tr>
+        <th>Banquet Entry</th>
+        <th width="12%">Date</th>
+        <th>Theme</th>
+        <th>Competition</th>
+        <th>Title</th>
+        <th width="8%">Score</th>
+        <th width="8%">Award</th>
+        <th width="3%"></th>
+    </tr>
+
+    {% if data.scores is not defined %}
+        <tr>
+            <td colspan="6">No eligible banquet entries</td>
+        </tr>
+    {% else %}
+        {% set counter = 0 %}
+        {% for entry in data.entries %}
+            <tr class="{{ cycle(['even', 'odd'], loop.index0) }}">
+                <td align="center" valign="middle" class="" width="3%">
+                    <input id="form_entryid_{{ counter }}" type="checkbox" value="{{ entry.entry_id }}"{% if entry.checked is defined %} checked="checked"{% endif %}{% if data.disabled is defined %} disabled="disabled"{% endif %} name="form[entry_id][]">
+                </td>
+                <td align="left" valign="top" width="12%">{{ entry.date }}</td>
+                <td align="left" valign="top">{{ entry.theme }}</td>
+                <td align="left" valign="top">{{ entry.medium }}</td>
+
+                <td align="left" valign="top">
+                    <a href="{{ entry.image_url }}" rel="lightbox[{{ entry.comp_date }}]" title="{{ entry.title|escape }} / {{ entry.comp_date }} / {{ entry.medium }} {{ entry.score_award }}">{{ entry.title|escape }}</a>
+                </td>
+                <td valign="top" align="center" width="8%">{{ entry.score }}</td>
+                <td valign="top" align="center" width="8%">{{ entry.award }}</td>
+                <td align="center" valign="middle" width="3%">
+            </tr>
+            {% set counter = counter + 1 %}
+        {% endfor %}
+        <tr>
+            <td colspan="6" class="form_buttons_row">
+                {% if form.update is defined %}
+                    {{ form_widget(form.update) }}
+                {% endif %}
+                {% if form.cancel is defined %}
+                    {{ form_widget(form.cancel) }}
+                {% endif %}
+                {% if form.reset is defined %}
+                    {{ form_widget(form.reset) }}
+                {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+</table>
+{{ form_widget(form.wp_get_referer) }}
+{{ form_widget(form.allentries) }}
+{{ form_widget(form.banquetids) }}
+{{ form_widget(form.submit_control) }}
+    
+{{ form_end(form) }}
+<script type="text/javascript">
+    jQuery('.banquet :checkbox').change(function () {
+        var cs = jQuery(this).closest('.banquet').find(':checkbox:checked');
+        if (cs.length > 5) {
+            this.checked = false;
+        }
+    });
+</script>
