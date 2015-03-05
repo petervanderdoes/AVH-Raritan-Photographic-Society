@@ -22,6 +22,13 @@ class BanquetCurrentUserType extends AbstractType
         $builder->add('allentries', 'hidden')
                 ->add('banquetids', 'hidden')
                 ->add('wp_get_referer', 'hidden')
+                ->add('seasons','choice',
+                    [
+                        'multiple' => false,
+                        'expanded' => false,
+                        'choices'  => $this->entity->getSeasonsChoices(),
+                        'attr'     => ['onchange' => 'submit_form("select_season")']
+                    ])
                 ->add(
                     'update',
                     'submit',
@@ -37,16 +44,16 @@ class BanquetCurrentUserType extends AbstractType
                         ]
                     ]
                 )
-            ->add(
-                'reset',
-                'reset',
-                [
-                    'label' => 'Reset',
-                    'attr'  => [
-                        'formnovalidate' => 'formnovalidate'
+                ->add(
+                    'reset',
+                    'reset',
+                    [
+                        'label' => 'Reset',
+                        'attr'  => [
+                            'formnovalidate' => 'formnovalidate'
+                        ]
                     ]
-                ]
-            )
+                )
         ;
     }
 

@@ -6,6 +6,8 @@ class BanquetCurrentUser
 {
     protected $allentries;
     protected $banquetids;
+    protected $season_choices = [];
+    protected $seasons;
     protected $wp_get_referer;
 
     /**
@@ -38,6 +40,43 @@ class BanquetCurrentUser
     public function setBanquetids($banquetids)
     {
         $this->banquetids = $banquetids;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSeasonChoices()
+    {
+        return $this->season_choices;
+    }
+
+    /**
+     * @param array $season_choices
+     */
+    public function setSeasonChoices($season_choices)
+    {
+        $this->season_choices = $season_choices;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSeasons()
+    {
+        return $this->seasons;
+    }
+
+    /**
+     * @param mixed $seasons
+     */
+    public function setSeasons($seasons)
+    {
+        $this->seasons = $seasons;
+    }
+
+    public function getSeasonsChoices()
+    {
+        return $this->season_choices;
     }
 
     /**

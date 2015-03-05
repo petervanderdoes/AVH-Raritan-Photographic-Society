@@ -67,7 +67,8 @@ class BanquetCurrentUserServiceProvider extends ServiceProvider
                     $app->make('QueryMiscellaneous'),
                     $app->make('QueryBanquet'),
                     $app->make('QueryEntries'),
-                    $app->make('IlluminateRequest')
+                    $app->make('IlluminateRequest'),
+                    $app->make('Session')
                 );
             }
         )

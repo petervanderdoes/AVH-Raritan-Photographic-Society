@@ -169,7 +169,7 @@ class Frontend
             if ($form->get('update')
                      ->isClicked()
             ) {
-                $this->handleSubmitBanquetEntries();
+                $this->handleSubmitBanquetEntries($entity);
             }
         }
     }
@@ -963,29 +963,29 @@ class Frontend
 
     /**
      * Handles the required functions for when a user submits their Banquet Entries
+     *
+     * @param BanquetCurrentUserEntity $entity
      */
-    private function handleSubmitBanquetEntries()
+    private function handleSubmitBanquetEntries(BanquetCurrentUserEntity $entity)
     {
         $query_entries = $this->container->make('QueryEntries');
         $query_competitions = $this->container->make('QueryCompetitions');
         $photo_helper = $this->container->make('PhotoHelper');
 
-        if ($this->request->has('allentries')) {
-            $all_entries = json_decode(base64_decode($this->request->input('allentries')));
-            foreach ($all_entries as $entry_id) {
-                $entry = $query_entries->getEntryById($entry_id);
-                if ($entry !== null) {
-                    $query_entries->deleteEntry($entry->ID);
-                    $photo_helper->deleteEntryFromDisk($entry);
-                }
+        $all_entries = json_decode(base64_decode($entity->getAllentries()));
+        foreach ($all_entries as $entry_id) {
+            $entry = $query_entries->getEntryById($entry_id);
+            if ($entry !== null) {
+                $query_entries->deleteEntry($entry->ID);
+                $photo_helper->deleteEntryFromDisk($entry);
             }
         }
 
-        $entries = (array) $this->request->input('entry_id', []);
+        $entries = (array) $this->request->input('form.entry_id', []);
         foreach ($entries as $entry_id) {
             $entry = $query_entries->getEntryById($entry_id);
             $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
-            $banquet_ids = json_decode(base64_decode($this->request->input('banquetids')));
+            $banquet_ids = json_decode(base64_decode($entity->getBanquetids()));
             foreach ($banquet_ids as $banquet_id) {
                 $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
                 if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {

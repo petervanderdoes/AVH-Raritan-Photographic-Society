@@ -8,6 +8,7 @@
 
 namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
 
+use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryEntries;
@@ -40,14 +41,28 @@ class BanquetCurrentUserModel
      */
     private $requests;
     private $season_helper;
+    /**
+     * @var Session
+     */
+    private $session;
 
+    /**
+     * @param FormFactory        $formFactory
+     * @param SeasonHelper       $season_helper
+     * @param QueryMiscellaneous $query_miscellaneous
+     * @param QueryBanquet       $query_banquet
+     * @param QueryEntries       $query_entries
+     * @param IlluminateRequest  $requests
+     * @param Session            $session
+     */
     public function __construct(
         FormFactory $formFactory,
         SeasonHelper $season_helper,
         QueryMiscellaneous $query_miscellaneous,
         QueryBanquet $query_banquet,
         QueryEntries $query_entries,
-        IlluminateRequest $requests
+        IlluminateRequest $requests,
+        Session $session
     ) {
 
         $this->season_helper = $season_helper;
@@ -56,39 +71,18 @@ class BanquetCurrentUserModel
         $this->query_entries = $query_entries;
         $this->formFactory = $formFactory;
         $this->requests = $requests;
-    }
-
-    /**
-     * Collect needed data to render the Month and Season select form
-     *
-     * @param array $months
-     *
-     * @return array
-     */
-    public function dataMonthAndSeasonSelectionForm($months)
-    {
-        global $post;
-        $data = [];
-        $data['action'] = home_url('/' . get_page_uri($post->ID));
-        $data['months'] = $months;
-        $seasons = $this->season_helper->getSeasons();
-        $data['seasons'] = array_combine($seasons, $seasons);
-
-        return $data;
+        $this->session = $session;
     }
 
     public function getEntries()
     {
 
         $data = [];
-        $data['season_form'] = $this->dataMonthAndSeasonSelectionForm([]);
-        $data['selected_season'] = $this->requests->input('new_season', end($data['season_form']['seasons']));
-        if ($this->requests) {
-            list ($season_start_date, $season_end_date) = $this->season_helper->getSeasonStartEnd(
-                $data['selected_season']
-            )
-            ;
-        }
+        $seasons = $this->season_helper->getSeasons();
+        $data['seasons'] = array_combine($seasons, $seasons);
+        $selected_season = $this->requests->input('form.seasons', end($data['seasons']));
+        $data['selected_season'] = $selected_season;
+        list ($season_start_date, $season_end_date) = $this->season_helper->getSeasonStartEnd($data['selected_season']);
         $scores = $this->query_miscellaneous->getScoresUser(
             get_current_user_id(),
             $season_start_date,
@@ -104,11 +98,14 @@ class BanquetCurrentUserModel
             foreach ($banquet_id as $record) {
                 $banquet_id_array[] = $record['ID'];
                 if ($record['Closed'] == 'Y') {
-                    $data['disabled'] = true;
+                    //$data['disabled'] = true;
                 }
             }
 
-            $where = 'Competition_ID in (' . implode(',', $banquet_id_array) . ') AND Member_ID = "' . $current_user_id . '"';
+            $where = 'Competition_ID in (' . implode(
+                    ',',
+                    $banquet_id_array
+                ) . ') AND Member_ID = "' . $current_user_id . '"';
             $banquet_entries = $this->query_entries->query(['where' => $where]);
         }
 
@@ -192,6 +189,8 @@ class BanquetCurrentUserModel
         $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
         $entity->setAllentries(base64_encode(json_encode($all_entries)));
         $entity->setBanquetids(base64_encode(json_encode($banquet_id_array)));
+        $entity->setSeasonChoices($data['seasons']);
+        $entity->setSeasons($selected_season);
         $form = $this->formFactory->create(
             new BanquetCurrentUserType($entity),
             $entity,
