@@ -29,18 +29,18 @@
         {% for entry in data.entries %}
             <tr class="{{ cycle(['even', 'odd'], loop.index0) }}">
                 <td align="center" valign="middle" class="" width="3%">
-                    <input id="form_entryid_{{ counter }}" type="checkbox" value="{{ entry.id }}" name="form[entryid][]" checked disabled>
+                    <input id="form_entryid_{{ counter }}" type="checkbox" value="{{ entry.entry_id }}"{% if entry.checked is defined %} checked="checked"{% endif %}{% if data.disabled is defined %} disabled="disabled"{% endif %} name="form[entryid][]">
                 </td>
                 <td align="left" valign="top" width="12%">{{ entry.date }}</td>
                 <td align="left" valign="top">{{ entry.theme }}</td>
                 <td align="left" valign="top">{{ entry.medium }}</td>
 
                 <td align="left" valign="top">
-                    <a href=\"{{ entry.image_url }}" rel="lightbox[{{ entry.comp_date }}]" title="{{ entry.title|escape }} / {{ entry.comp_date }} / {{ entry.medium }} {{ entry.score_award }}">{{ entry.title|escape }}</a>
+                    <a href="{{ entry.image_url }}" rel="lightbox[{{ entry.comp_date }}]" title="{{ entry.title|escape }} / {{ entry.comp_date }} / {{ entry.medium }} {{ entry.score_award }}">{{ entry.title|escape }}</a>
                 </td>
                 <td valign="top" align="center" width="8%">{{ entry.score }}</td>
                 <td valign="top" align="center" width="8%">{{ entry.award }}</td>
-                <td align="center" valign="middle" class="$row_style" width="3%">
+                <td align="center" valign="middle" width="3%">
             </tr>
             {% set counter = counter + 1 %}
         {% endfor %}
@@ -51,6 +51,9 @@
                 {% endif %}
                 {% if form.cancel is defined %}
                     {{ form_widget(form.cancel) }}
+                {% endif %}
+                {% if form.reset is defined %}
+                    {{ form_widget(form.reset) }}
                 {% endif %}
             </td>
         </tr>

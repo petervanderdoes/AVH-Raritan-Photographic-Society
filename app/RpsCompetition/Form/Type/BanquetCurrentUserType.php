@@ -37,6 +37,16 @@ class BanquetCurrentUserType extends AbstractType
                         ]
                     ]
                 )
+            ->add(
+                'reset',
+                'reset',
+                [
+                    'label' => 'Reset',
+                    'attr'  => [
+                        'formnovalidate' => 'formnovalidate'
+                    ]
+                ]
+            )
         ;
     }
 
