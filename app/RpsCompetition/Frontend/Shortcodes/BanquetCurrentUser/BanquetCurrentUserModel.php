@@ -82,7 +82,7 @@ class BanquetCurrentUserModel
 
         $data = [];
         $data['season_form'] = $this->dataMonthAndSeasonSelectionForm([]);
-        $data['selected_season'] = $this->requests->input('new_seasonen', end($data['season_form']['seasons']));
+        $data['selected_season'] = $this->requests->input('new_season', end($data['season_form']['seasons']));
         if ($this->requests) {
             list ($season_start_date, $season_end_date) = $this->season_helper->getSeasonStartEnd(
                 $data['selected_season']
@@ -98,20 +98,17 @@ class BanquetCurrentUserModel
 
         $current_user_id = get_current_user_id();
         $banquet_id = $this->query_banquet->getBanquets($season_start_date, $season_end_date);
-        $banquet_id_string = '0';
         $banquet_id_array = [];
-        $disabled = '';
         $banquet_entries = [];
         if (is_array($banquet_id) && !empty($banquet_id)) {
             foreach ($banquet_id as $record) {
                 $banquet_id_array[] = $record['ID'];
                 if ($record['Closed'] == 'Y') {
-                    $disabled = 'disabled="1"';
+                    $data['disabled'] = true;
                 }
             }
 
-            $banquet_id_string = implode(',', $banquet_id_array);
-            $where = 'Competition_ID in (' . $banquet_id_string . ') AND Member_ID = "' . $current_user_id . '"';
+            $where = 'Competition_ID in (' . implode(',', $banquet_id_array) . ') AND Member_ID = "' . $current_user_id . '"';
             $banquet_entries = $this->query_entries->query(['where' => $where]);
         }
 
@@ -140,8 +137,9 @@ class BanquetCurrentUserModel
 
                 $date_parts = explode(" ", $recs['Competition_Date']);
                 $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
-                $entr['comp_date'] = $date_parts[0];
-                $entry['$medium'] = $recs['Medium'];
+                $entry['date'] = $date_parts[0];
+                $entry['comp_date'] = $date_parts[0];
+                $entry['medium'] = $recs['Medium'];
                 $entry['theme'] = $recs['Theme'];
                 $entry['title'] = $recs['Title'];
                 $entry['score'] = $recs['Score'];
@@ -153,8 +151,8 @@ class BanquetCurrentUserModel
 
                 $entry['image_url'] = home_url($recs['Server_File_Name']);
 
-                if ($prev_date == $date_parts[0]) {
-                    $date_parts[0] = '';
+                if ($prev_date == $entry['date']) {
+                    $entry['date'] = '';
                     $entry['theme'] = '';
                 } else {
                     $prev_date = $date_parts[0];
@@ -166,26 +164,25 @@ class BanquetCurrentUserModel
                 }
                 $entry['score_award'] = '';
                 if ($entry['score'] > '') {
-                    $entry['score_award'] = ' / {$entry[\'score\']}pts';
+                    $entry['score_award'] = ' / ' . $entry['score'] . 'pts';
                 }
                 if ($entry['award'] > '') {
-                    $entry['score_award'] .= ' / $entry[\'award\']';
+                    $entry['score_award'] .= ' / ' . $entry['award'];
                 }
 
                 foreach ($banquet_entries as $banquet_entry) {
 
                     if (!empty($banquet_entry) && $banquet_entry->Title == $entry['title']) {
-                        $entry['checked'] = 'checked="checked"';
+                        $entry['checked'] = true;
                         break;
                     }
                 }
 
                 $entry['entry_id'] = $recs['Entry_ID'];
+                $data['entries'][] = $entry;
             }
             if (empty($disabled)) {
             }
-
-            $data[] = $entry;
         }
 
         // Start the form
@@ -193,8 +190,8 @@ class BanquetCurrentUserModel
         $action = home_url('/' . get_page_uri($post->ID));
         $entity = new BanquetCurrentUserEntity();
         $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
-        $entity->setAllentries(implode($all_entries));
-        $entity->setBanquetids(implode($banquet_entries));
+        $entity->setAllentries(base64_encode(json_encode($all_entries)));
+        $entity->setBanquetids(base64_encode(json_encode($banquet_id_array)));
         $form = $this->formFactory->create(
             new BanquetCurrentUserType($entity),
             $entity,
