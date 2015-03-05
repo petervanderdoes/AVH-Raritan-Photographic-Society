@@ -10,9 +10,11 @@ use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Entity\Forms\UploadImage as UploadImageEntity;
+use RpsCompetition\Form\Type\BanquetCurrentUserType;
 use RpsCompetition\Form\Type\EditTitleType;
 use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Form\Type\UploadImageType;
@@ -151,12 +153,22 @@ class Frontend
         global $post;
 
         if (is_object($post) && $post->post_title == 'Banquet Entries') {
-            $redirect_to = $this->request->input('wp_get_referer');
 
-            // Just return if user clicked Cancel
-            $this->isRequestCanceled($redirect_to);
+            $entity = new BanquetCurrentUserEntity();
+            $form = $this->formFactory->create(
+                new BanquetCurrentUserType($entity),
+                $entity,
+                ['attr' => ['id' => 'banquetentries']]
+            )
+            ;
+            $form->handleRequest($this->request);
 
-            if ($this->request->has('submit')) {
+            $redirect_to = $entity->getWpGetReferer();
+            $this->isRequestCanceled($form, 'cancel', $redirect_to);
+
+            if ($form->get('update')
+                     ->isClicked()
+            ) {
                 $this->handleSubmitBanquetEntries();
             }
         }
@@ -959,7 +971,7 @@ class Frontend
         $photo_helper = $this->container->make('PhotoHelper');
 
         if ($this->request->has('allentries')) {
-            $all_entries = explode(',', $this->request->input('allentries'));
+            $all_entries = json_decode(base64_decode($this->request->input('allentries')));
             foreach ($all_entries as $entry_id) {
                 $entry = $query_entries->getEntryById($entry_id);
                 if ($entry !== null) {
@@ -973,7 +985,7 @@ class Frontend
         foreach ($entries as $entry_id) {
             $entry = $query_entries->getEntryById($entry_id);
             $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
-            $banquet_ids = explode(',', $this->request->input('banquetids'));
+            $banquet_ids = json_decode(base64_decode($this->request->input('banquetids')));
             foreach ($banquet_ids as $banquet_id) {
                 $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
                 if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
@@ -1010,9 +1022,9 @@ class Frontend
     /**
      * Check if user pressed cancel and if so redirect the user
      *
-     * @param object $form   The Form that was submitted
-     * @param string $cancel The field to check for cancellation
-     * @param string $redirect_to
+     * @param \Symfony\Component\Form\Form $form   The Form that was submitted
+     * @param string                       $cancel The field to check for cancellation
+     * @param string                       $redirect_to
      */
     private function isRequestCanceled($form, $cancel, $redirect_to)
     {
