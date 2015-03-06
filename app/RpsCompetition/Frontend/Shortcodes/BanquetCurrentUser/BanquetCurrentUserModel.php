@@ -18,6 +18,13 @@ use RpsCompetition\Form\Type\BanquetCurrentUserType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class BanquetCurrentUserModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
+ */
 class BanquetCurrentUserModel
 {
     private $banquet_entries;
@@ -32,6 +39,8 @@ class BanquetCurrentUserModel
     private $session;
 
     /**
+     * Constructor
+     *
      * @param FormFactory        $formFactory
      * @param SeasonHelper       $season_helper
      * @param QueryMiscellaneous $query_miscellaneous
@@ -61,7 +70,12 @@ class BanquetCurrentUserModel
         $this->formDisabled = false;
     }
 
-    public function getEntries()
+    /**
+     * Get all data used in the template
+     *
+     * @return array
+     */
+    public function getAllData()
     {
 
         $data = [];
@@ -139,6 +153,8 @@ class BanquetCurrentUserModel
     }
 
     /**
+     * Get the data used in the template
+     *
      * @param array  $season_options
      * @param string $selected_season
      * @param array  $scores
@@ -215,9 +231,11 @@ class BanquetCurrentUserModel
     }
 
     /**
+     * Set up the banquet information used in the method.
+     *
      * @param string $season
      *
-     * @return array
+     * @return void
      */
     public function setupBanquetInformation($season)
     {
