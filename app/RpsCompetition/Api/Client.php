@@ -212,7 +212,7 @@ class Client
     /**
      * Open database
      *
-     * @return RpsPdo
+     * @return RpsPdo|null
      */
     private function getDatabaseHandle()
     {
@@ -233,7 +233,7 @@ class Client
      * @param RpsPdo $db Database handle.
      * @param string $file_name
      *
-     * @return string
+     * @return string|null
      */
     private function handleUploadScoresFile($db, $file_name)
     {

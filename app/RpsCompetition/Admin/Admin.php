@@ -1847,6 +1847,7 @@ final class Admin
         $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
         $entry = $query_entries->getEntryById($id);
+        /** @var QueryCompetitions $competition */
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
         $medium_array = Constants::getMediums();
