@@ -188,8 +188,6 @@ class Helper
         $imagine = new Imagine();
         $image = $imagine->open($image_name);
 
-        /** @var Box $original_size */
-        $original_size = $image->getSize();
         $new_size = Constants::getImageSize($size);
 
         if ($new_size['height'] == null) {
