@@ -285,7 +285,7 @@ class Application extends Container implements ApplicationContract
         // Once the provider that provides the deferred service has been registered we
         // will remove it from our local list of the deferred services with related
         // providers so that this container does not try to resolve it out again.
-        if ($service) {
+        if ($service !== null) {
             unset($this->deferredServices[$service]);
         }
 
