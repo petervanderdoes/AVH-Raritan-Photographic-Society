@@ -117,6 +117,7 @@ class View
             $img_url = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
+                /** @var QueryEntries $entry */
                 $entry = new \stdClass;
                 $img_relative_path = substr($img_url, strlen($home_url));
                 $entry->Server_File_Name = $img_relative_path;
