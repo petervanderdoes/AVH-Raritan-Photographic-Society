@@ -429,10 +429,12 @@ class ListTable extends \WP_List_Table
             $sql_query = ['where' => $where];
 
             $competitions = $query_competitions->query($sql_query);
+            if (!is_array($competitions)) {
+                throw new \RuntimeException('$competitions must be an array.');
+            }
 
             $competition_ids = [0];
             foreach ($competitions as $competition) {
-
                 $competition_ids[] = $competition->ID;
             }
             $where = 'Competition_ID IN (' . implode(',', $competition_ids) . ')';
