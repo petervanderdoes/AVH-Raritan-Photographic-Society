@@ -38,7 +38,7 @@ class MyEntries
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getSelectComp()
     {
@@ -46,7 +46,7 @@ class MyEntries
     }
 
     /**
-     * @param array $select_comp
+     * @param string $select_comp
      */
     public function setSelectComp($select_comp)
     {
@@ -62,7 +62,7 @@ class MyEntries
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getSelectedMedium()
     {
@@ -70,7 +70,7 @@ class MyEntries
     }
 
     /**
-     * @param array $selected_medium
+     * @param string $selected_medium
      */
     public function setSelectedMedium($selected_medium)
     {
