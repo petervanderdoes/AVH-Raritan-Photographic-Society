@@ -255,6 +255,7 @@ class BanquetCurrentUserModel
                     ',',
                     $this->banquet_id_array
                 ) . ') AND Member_ID = "' . get_current_user_id() . '"';
+            /** @var array banquet_entries */
             $this->banquet_entries = $this->query_entries->query(['where' => $where]);
         }
 
