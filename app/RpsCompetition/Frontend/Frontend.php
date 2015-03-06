@@ -286,14 +286,14 @@ class Frontend
             $medium_subset = $page[1];
 
             if ($form->has('submit_control')) {
-                $comp_date = $entity->getSelectComp();
+                $competition_date = $entity->getSelectComp();
                 $classification = $entity->getClassification();
                 $medium = $entity->getSelectedMedium();
                 $entry_array = $this->request->input('form.entryid', null);
 
                 switch ($entity->getSubmitControl()) {
                     case 'add':
-                        if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
+                        if (!$query_competitions->checkCompetitionClosed($competition_date, $classification, $medium)) {
                             $query = ['m' => $medium_subset];
                             $query = build_query($query);
                             $loc = '/member/upload-image/?' . $query;
@@ -303,7 +303,7 @@ class Frontend
                         break;
 
                     case 'edit':
-                        if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
+                        if (!$query_competitions->checkCompetitionClosed($competition_date, $classification, $medium)) {
                             if (is_array($entry_array)) {
                                 foreach ($entry_array as $id) {
                                     // @TODO Add Nonce
@@ -318,7 +318,7 @@ class Frontend
                         break;
 
                     case 'delete':
-                        if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
+                        if (!$query_competitions->checkCompetitionClosed($competition_date, $classification, $medium)) {
                             if ($entry_array !== null) {
                                 $this->deleteCompetitionEntries($entry_array);
                                 $redirect = get_permalink($post->ID);
@@ -326,11 +326,6 @@ class Frontend
                                 exit();
                             }
                         }
-                        break;
-
-                    default:
-                        $competition_date = $entity->getSelectComp();
-                        $medium = $entity->getSelectedMedium();
                         break;
                 }
                 $medium_subset_medium = $this->session->get('myentries/subset');
