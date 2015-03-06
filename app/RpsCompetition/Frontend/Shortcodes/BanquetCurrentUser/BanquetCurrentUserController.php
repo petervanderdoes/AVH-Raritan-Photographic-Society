@@ -35,7 +35,7 @@ class BanquetCurrentUserController extends Controller
     public function shortcodeBanquetCurrentUser($attr, $content, $tag)
     {
         $attr = shortcode_atts(['medium' => 'digital'], $attr);
-        $model_data = $this->model->getEntries($attr['medium']);
+        $model_data = $this->model->getEntries();
         $data = $model_data['data'];
         $form = $model_data['form'];
 
