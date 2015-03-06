@@ -5,6 +5,13 @@ namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Libs\Controller;
 
+/**
+ * Class BanquetCurrentUserController
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
+ */
 class BanquetCurrentUserController extends Controller
 {
     private $model;
@@ -34,9 +41,9 @@ class BanquetCurrentUserController extends Controller
      */
     public function shortcodeBanquetCurrentUser($attr, $content, $tag)
     {
-        $attr = shortcode_atts(['medium' => 'digital'], $attr);
-        $model_data = $this->model->getEntries();
+        $model_data = $this->model->getAllData();
         $data = $model_data['data'];
+        /** @var \Symfony\Component\Form\Form $form */
         $form = $model_data['form'];
 
         return $this->view->fetch('banquet-current-user.html.twig', ['data' => $data, 'form' => $form->createView()]);
