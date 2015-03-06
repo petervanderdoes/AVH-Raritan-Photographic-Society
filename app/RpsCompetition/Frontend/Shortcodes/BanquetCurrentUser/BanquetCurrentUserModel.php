@@ -183,7 +183,7 @@ class BanquetCurrentUserModel
             $date_parts = explode(' ', $recs['Competition_Date']);
             $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
             $entry['date'] = $date_parts[0];
-            $entry['comp_date'] = $date_parts[0];
+            $entry['competition_date'] = $date_parts[0];
             $entry['medium'] = $recs['Medium'];
             $entry['theme'] = $recs['Theme'];
             $entry['title'] = $recs['Title'];
