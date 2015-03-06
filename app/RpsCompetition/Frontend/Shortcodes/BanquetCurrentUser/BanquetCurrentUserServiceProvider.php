@@ -43,7 +43,7 @@ class BanquetCurrentUserServiceProvider extends ServiceProvider
             'BanquetCurrentUserController',
             function (Application $app) {
                 return new BanquetCurrentUserController(
-                    $app->make('ShortcodeView'), $app->make('BanquetCurrentUserModel'), $app->make('Settings')
+                    $app->make('ShortcodeView'), $app->make('BanquetCurrentUserModel')
                 );
             }
         )
