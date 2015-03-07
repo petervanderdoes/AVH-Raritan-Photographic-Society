@@ -63,12 +63,12 @@ class QueryMiscellaneous
         $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
 
         $sql = $this->rpsdb->prepare(
-            "SELECT e.*
+            'SELECT e.*
             FROM competitions c, entries e
                 WHERE c.ID = e.Competition_ID and
                     c.Competition_Date >= %s AND
                     c.Competition_Date <= %s
-                ORDER BY RAND()",
+                ORDER BY RAND()',
             $competition_date_start,
             $competition_date_end
         )
@@ -255,7 +255,7 @@ class QueryMiscellaneous
      *
      * @return array
      */
-    public function getSeasonList($order = "ASC", $season_start_month_num, $season_end_month_num)
+    public function getSeasonList($order = 'ASC', $season_start_month_num, $season_end_month_num)
     {
         $sql = $this->rpsdb->prepare(
             'SELECT if(month(Competition_Date) >= %s and month(Competition_Date) <= %s,
@@ -324,14 +324,14 @@ class QueryMiscellaneous
     public function getWinner($date, $award, $class)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT c.Competition_Date, c.Classification,
+            'SELECT c.Competition_Date, c.Classification,
                 c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
             FROM competitions c, entries e
                 WHERE c.ID = e.Competition_ID and
                     c.Competition_Date = %s AND
                     e.Award =%s AND
                     c.Classification = %s
-                ORDER BY c.Medium",
+                ORDER BY c.Medium',
             $date,
             $award,
             $class
@@ -355,17 +355,17 @@ class QueryMiscellaneous
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
         $sql = $this->rpsdb->prepare(
-            "SELECT c.ID, c.Competition_Date, c.Classification,
-                if(c.Classification = 'Beginner',1,
-                if(c.Classification = 'Advanced',2,
-                if(c.Classification = 'Salon',3,0))) as \"Class_Code\",
+            'SELECT c.ID, c.Competition_Date, c.Classification,
+                if(c.Classification = "Beginner",1,
+                if(c.Classification = "Advanced",2,
+                if(c.Classification = "Salon",3,0))) as "Class_Code",
                 c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
             FROM competitions c, entries e
                 WHERE c.ID = e.Competition_ID and
                     c.Competition_Date >= %s AND
                     c.Competition_Date <= %s AND
-                    e.Award <> ''
-                ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award",
+                    e.Award <> ""
+                ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award',
             $competition_date_start,
             $competition_date_end
         )

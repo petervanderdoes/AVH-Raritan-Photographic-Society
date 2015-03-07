@@ -303,7 +303,7 @@ class View
     {
         $data = [];
         $data['title'] = $title;
-        $data['credit'] = "$first_name $last_name";
+        $data['credit'] = $first_name . ' ' . $last_name;
 
         return $data;
     }

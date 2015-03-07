@@ -184,10 +184,10 @@ class QueryCompetitions
         $competition_date_end = $this->rpsdb->getMysqldate($competition_date_end);
 
         $sql = $this->rpsdb->prepare(
-            "SELECT *
+            'SELECT *
             FROM competitions
             WHERE Competition_Date >= %s AND
-                Competition_Date <= %s",
+                Competition_Date <= %s',
             $competition_date_start,
             $competition_date_end
         )

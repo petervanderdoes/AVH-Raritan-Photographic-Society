@@ -201,7 +201,7 @@ class BanquetCurrentUserModel
             $entry['award'] = $recs['Award'];
             if ($date_parts[0] != $prev_date) {
                 $comp_count += 1;
-                $prev_medium = "";
+                $prev_medium = '';
             }
 
             $entry['image_url'] = home_url($recs['Server_File_Name']);

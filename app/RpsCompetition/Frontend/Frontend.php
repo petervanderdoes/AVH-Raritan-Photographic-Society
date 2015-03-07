@@ -219,7 +219,7 @@ class Frontend
             if ($entity->getNewTitle() !== $entity->getTitle()) {
                 $competition = $query_competitions->getCompetitionByEntryId($entity->getId());
                 if ($competition == null) {
-                    wp_die("Failed to SELECT competition for entry ID: " . $entity->getId());
+                    wp_die('Failed to SELECT competition for entry ID: ' . $entity->getId());
                 }
 
                 // Rename the image file on the server file system
@@ -252,7 +252,7 @@ class Frontend
                 ];
                 $result = $query_entries->updateEntry($updated_data);
                 if ($result === false) {
-                    wp_die("Failed to UPDATE entry record from database");
+                    wp_die('Failed to UPDATE entry record from database');
                 }
             }
             $redirect_to = $entity->getWpGetReferer();
@@ -407,7 +407,7 @@ class Frontend
                 $comp_id = $recs['ID'];
                 $max_entries = $recs['Max_Entries'];
             } else {
-                $error_message = "Competition $comp_date/$classification/$medium not found in database";
+                $error_message = 'Competition ' . $comp_date . '/' . $classification . '/' . $medium . ' not found in database';
                 $this->setFormError($form, $error_message);
 
                 return;
@@ -427,7 +427,7 @@ class Frontend
             // an entry already submitted to this competition. Duplicate title result in duplicate
             // file names on the server
             if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
-                $error_message = "You have already submitted an entry with a title of \"" . $title . "\" in this competition. Please submit your entry again with a different title.";
+                $error_message = 'You have already submitted an entry with a title of "' . $title . '" in this competition. Please submit your entry again with a different title.';
                 $this->setFormError($form, $error_message, 'title');
 
                 return;
@@ -438,7 +438,7 @@ class Frontend
             // maximum images per competition by having two upload windows open simultaneously.
             $max_per_id = $query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
             if ($max_per_id >= $max_entries) {
-                $error_message = "You have already submitted the maximum of $max_entries entries into this competition. You must Remove an image before you can submit another";
+                $error_message = 'You have already submitted the maximum of ' . $max_entries . ' entries into this competition. You must Remove an image before you can submit another';
                 $this->setFormError($form, $error_message);
 
                 return;
@@ -447,7 +447,7 @@ class Frontend
             $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
             if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
                 $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
-                $error_message = "You have already submitted the maximum of $max_entries_member_date entries for this competition date. You must Remove an image before you can submit another";
+                $error_message = 'You have already submitted the maximum of ' . $max_entries_member_date . ' entries for this competition date. You must Remove an image before you can submit another';
                 $this->setFormError($form, $error_message);
 
                 return;
@@ -747,14 +747,14 @@ class Frontend
 
         $columns = intval($columns);
 
-        $selector = "gallery-{$instance}";
+        $selector = 'gallery-' . $instance;
 
         $gallery_style = '';
 
         $layout = strtolower($layout);
 
         $size_class = sanitize_html_class($size);
-        $gallery_div = "<div id='$selector' class='gallery galleryid-{$id} gallery-columns-{$columns} gallery-size-{$size_class}'>";
+        $gallery_div = '<div id="' . $selector . '" class="gallery galleryid-' . $id . ' gallery-columns-' . $columns . ' gallery-size-' . $size_class . '">';
 
         /**
          * Filter the default gallery shortcode CSS styles.
@@ -788,9 +788,9 @@ class Frontend
                 $orientation = ($image_meta['height'] > $image_meta['width']) ? 'portrait' : 'landscape';
             }
 
-            $output .= "<{$itemtag} class='gallery-item'>";
-            $output .= "<div class='gallery-item-content'>";
-            $output .= "<{$icontag} class='gallery-icon {$orientation}'>$image_output</{$icontag}>";
+            $output .= '<' . $itemtag . ' class="gallery-item">';
+            $output .= '<div class="gallery-item-content">';
+            $output .= '<' . $icontag . ' class="gallery-icon ' . $orientation . '" > ' . $image_output . '</' . $icontag . ' >';
 
             $caption_text = '';
             if ($captiontag && trim($attachment->post_excerpt)) {
@@ -805,13 +805,13 @@ class Frontend
                 $caption_text .= '<span class="wp-caption-credit">Credit: ' . $photographer_name . '</span>';
             }
             if (!empty($caption_text)) {
-                $output .= "<{$captiontag} class='wp-caption-text gallery-caption'>" . wptexturize(
+                $output .= '<' . $captiontag . ' class="wp-caption-text gallery-caption">' . wptexturize(
                         $caption_text
-                    ) . "</{$captiontag}>";
+                    ) . '</' . $captiontag . '>';
             }
 
-            $output .= "</div>";
-            $output .= "</{$itemtag}>";
+            $output .= '</div>';
+            $output .= '</' . $itemtag . '>';
 
             if ($columns > 0 && ++$i % $columns == 0) {
                 $output .= '</div>';
@@ -821,8 +821,7 @@ class Frontend
         if ($columns > 0 && $i % $columns !== 0) {
             $output .= '</div>';
         }
-        $output .= "
-		</div>\n";
+        $output .= '</div>' . "\n";
 
         return $output;
     }
@@ -934,7 +933,7 @@ class Frontend
                 if ($entry_record == false) {
                     $this->settings->set(
                         'errmsg',
-                        sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id)
+                        sprintf('<b>Failed to SELECT competition entry with ID %s from database</b><br>', $id)
                     )
                     ;
                 } else {
@@ -943,7 +942,7 @@ class Frontend
                     if ($result === false) {
                         $this->settings->set(
                             'errmsg',
-                            sprintf("<b>Failed to DELETE competition entry %s from database</b><br>")
+                            sprintf('<b>Failed to DELETE competition entry %s from database</b><br>')
                         )
                         ;
                     } else {
@@ -1034,16 +1033,16 @@ class Frontend
     private function register_scripts_styles()
     {
         if (WP_LOCAL_DEV !== true) {
-            $rps_competition_css_version = "abb1385";
-            $rps_masonry_version = "abb1385";
-            $masonry_version = "8cfdecd";
-            $imagesloaded_version = "8cfdecd";
+            $rps_competition_css_version = 'abb1385';
+            $rps_masonry_version = 'abb1385';
+            $masonry_version = '8cfdecd';
+            $imagesloaded_version = '8cfdecd';
             $version_separator = '-';
         } else {
-            $rps_competition_css_version = "";
-            $rps_masonry_version = "";
-            $masonry_version = "";
-            $imagesloaded_version = "";
+            $rps_competition_css_version = '';
+            $rps_masonry_version = '';
+            $masonry_version = '';
+            $imagesloaded_version = '';
             $version_separator = '';
         }
 
@@ -1110,10 +1109,10 @@ class Frontend
         $social_networks_controller = $this->container->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = "8cfdecd";
+            $social_buttons_script_version = '8cfdecd';
             $version_separator = '-';
         } else {
-            $social_buttons_script_version = "";
+            $social_buttons_script_version = '';
             $version_separator = '';
         }
         $data = [];
@@ -1129,10 +1128,10 @@ class Frontend
         $user_id = get_current_user_id();
         $user_meta = get_user_meta($user_id, 'rps_class_bw', true);
         if (empty($user_meta)) {
-            update_user_meta($user_id, "rps_class_bw", 'beginner');
-            update_user_meta($user_id, "rps_class_color", 'beginner');
-            update_user_meta($user_id, "rps_class_print_bw", 'beginner');
-            update_user_meta($user_id, "rps_class_print_color", 'beginner');
+            update_user_meta($user_id, 'rps_class_bw', 'beginner');
+            update_user_meta($user_id, 'rps_class_color', 'beginner');
+            update_user_meta($user_id, 'rps_class_print_bw', 'beginner');
+            update_user_meta($user_id, 'rps_class_print_color', 'beginner');
         }
     }
 

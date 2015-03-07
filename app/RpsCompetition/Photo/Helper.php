@@ -99,7 +99,7 @@ class Helper
     {
         $data = [];
         $data['title'] = $title;
-        $data['credit'] = "$first_name $last_name";
+        $data['credit'] = $first_name . ' ' . $last_name;
 
         return $data;
     }
@@ -177,12 +177,12 @@ class Helper
             )
         ;
         $file_parts = pathinfo($entry->Server_File_Name);
-        $thumbnail_path = $competition_path . "/thumbnails";
+        $thumbnail_path = $competition_path . '/thumbnails';
 
         if (is_dir($thumbnail_path)) {
             $thumb_base_name = $thumbnail_path . '/' . $file_parts['filename'];
             // Get all the matching thumbnail files
-            $thumbnails = glob("$thumb_base_name*");
+            $thumbnails = glob($thumb_base_name . '*');
             // Iterate through the list of matching thumbnails and delete each one
             if (is_array($thumbnails) && count($thumbnails) > 0) {
                 foreach ($thumbnails as $thumb) {
@@ -306,10 +306,10 @@ class Helper
      */
     public function removeThumbnails($path, $name)
     {
-        if (is_dir($path . "/thumbnails")) {
-            $thumb_base_name = $path . "/thumbnails/" . $name;
+        if (is_dir($path . '/thumbnails')) {
+            $thumb_base_name = $path . '/thumbnails/' . $name;
             // Get all the matching thumbnail files
-            $thumbnails = glob("$thumb_base_name*");
+            $thumbnails = glob($thumb_base_name . '*');
             // Iterate through the list of matching thumbnails and rename each one
             if (is_array($thumbnails) && count($thumbnails) > 0) {
                 foreach ($thumbnails as $thumb) {

@@ -114,7 +114,7 @@ class MyEntriesModel
             $open_competitions_options[$open_competition->Competition_Date] = strftime(
                     '%d-%b-%Y',
                     strtotime($open_competition->Competition_Date)
-                ) . " " . $open_competition->Theme;
+                ) . ' ' . $open_competition->Theme;
         }
 
         $current_competition = reset($open_competitions);
@@ -220,7 +220,7 @@ class MyEntriesModel
         /** @var QueryEntries $recs */
         foreach ($entries as $recs) {
             $competition = $this->query_competitions->getCompetitionById($recs->Competition_ID);
-            $num_rows += 1;
+            $num_rows ++;
 
             $entry = [];
             $entry['id'] = $recs->ID;

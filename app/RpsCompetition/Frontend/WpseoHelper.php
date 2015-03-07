@@ -377,7 +377,7 @@ class WpseoHelper
         if (is_scalar($n) && intval($n) > 0) {
             $n = intval($n);
         } else {
-            header("HTTP/1.1 404 Not Found");
+            header('HTTP/1.1 404 Not Found');
             exit();
         }
 

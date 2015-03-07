@@ -97,7 +97,7 @@ class ListTable extends \WP_List_Table
 
     public function column_cb($entry)
     {
-        echo "<input type='checkbox' name='entries[]' value='$entry->ID' />";
+        echo '<input type="checkbox" name="entries[]" value="' . $entry->ID . '" />';
     }
 
     /**
@@ -157,7 +157,7 @@ class ListTable extends \WP_List_Table
             }
             echo $season_text;
         } else {
-            echo "Unknown Season";
+            echo 'Unknown Season';
         }
         unset($query_competitions);
     }
@@ -202,7 +202,7 @@ class ListTable extends \WP_List_Table
         echo '<div class="row-actions">';
         $sep = '';
         foreach ($actions as $action => $link) {
-            echo "<span class='set_$action'>$sep$link</span>";
+            echo '<span class="set_' . $action . '">' . $sep . $link . '</span>';
             $sep = ' | ';
         }
         echo '</div>';
@@ -475,6 +475,6 @@ class ListTable extends \WP_List_Table
         $entry = $a_entry;
         echo '<tr id="entry-' . $entry->ID . '">';
         $this->single_row_columns($entry);
-        echo "</tr>";
+        echo '</tr>';
     }
 }

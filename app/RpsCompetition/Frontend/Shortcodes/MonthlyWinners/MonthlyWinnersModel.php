@@ -62,16 +62,16 @@ class MonthlyWinnersModel
         for ($i = 0; $i < $max_num_awards; $i++) {
             switch ($i) {
                 case 0:
-                    $data[] = "1st";
+                    $data[] = '1st';
                     break;
                 case 1:
-                    $data[] = "2nd";
+                    $data[] = '2nd';
                     break;
                 case 2:
-                    $data[] = "3rd";
+                    $data[] = '3rd';
                     break;
                 default:
-                    $data[] = "HM";
+                    $data[] = 'HM';
             }
         }
 
@@ -152,7 +152,7 @@ class MonthlyWinnersModel
             $data['awards'] = $this->getAwardsData($max_num_awards);
             $award_winners = $this->query_miscellaneous->getWinners($selected_date);
             $row = 0;
-            $prev_comp = "";
+            $prev_comp = '';
             foreach ($award_winners as $competition) {
                 $comp = $competition->ID;
                 // If we're at the end of a row, finish off the row and get ready for the next one

@@ -478,7 +478,7 @@ class ListTable extends \WP_List_Table
     public function single_row($a_competition)
     {
         $competition = $a_competition;
-        $status = ($competition->Closed == "Y" ? '' : 'closed');
+        $status = ($competition->Closed == 'Y' ? '' : 'closed');
         echo '<tr id="competition-' . $competition->ID . '" class="' . $status . '">';
         $this->single_row_columns($competition);
         echo '</tr>';

@@ -367,7 +367,7 @@ class Client
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ($record_competitions !== false) {
             $comp_id = $record_competitions['ID'];
-            $date_parts = explode(" ", $record_competitions['Competition_Date']);
+            $date_parts = explode(' ', $record_competitions['Competition_Date']);
             $date = $date_parts[0];
             $theme = $record_competitions['Theme'];
             $medium = $record_competitions['Medium'];

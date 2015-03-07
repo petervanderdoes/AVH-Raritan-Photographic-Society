@@ -96,9 +96,9 @@ final class ShortcodeController extends Controller
         $comp_max_entries = [];
         $comp_num_judges = [];
         foreach ($competition_dates as $key => $recs) {
-            $date_parts = explode(" ", $recs['Competition_Date']);
-            list (, $comp_month, $comp_day) = explode("-", $date_parts[0]);
-            $comp_dates[$date_parts[0]] = sprintf("%d/%d", $comp_month, $comp_day);
+            $date_parts = explode(' ', $recs['Competition_Date']);
+            list (, $comp_month, $comp_day) = explode('-', $date_parts[0]);
+            $comp_dates[$date_parts[0]] = sprintf('%d/%d', $comp_month, $comp_day);
             $comp_max_entries[$date_parts[0]] = $recs['Max_Entries'];
             $total_max_entries += $recs['Max_Entries'];
             $comp_num_judges[$date_parts[0]] = $recs['Num_Judges'];
@@ -174,7 +174,7 @@ final class ShortcodeController extends Controller
                 // Grab a new record from the database
                 $medium = $recs['Medium'];
                 $classification = $recs['Classification'];
-                $date_parts = explode(" ", $recs['Competition_Date']);
+                $date_parts = explode(' ', $recs['Competition_Date']);
                 $this_date = $date_parts[0];
                 $member = $recs['Username'];
                 $last_name = $recs['LastName'];
@@ -186,39 +186,39 @@ final class ShortcodeController extends Controller
                 // Is this the beginning of the next member's scores?
                 if ($member != $prev_member || $classification != $prev_class || $medium != $prev_medium) {
                     $row_count += 1;
-                    $row_style = $row_count % 2 == 1 ? "odd_row" : "even_row";
+                    $row_style = $row_count % 2 == 1 ? 'odd_row' : 'even_row';
 
                     // Don't do anything yet if this is the very first member, otherwise, output all
                     // the accumulated scored for the member we just passed.
-                    if ($prev_member != "") {
+                    if ($prev_member != '') {
                         // Display the members name and classification
-                        echo "<tr>";
-                        echo "<td align=\"left\" class=\"$row_style\">" . $prev_fname . " " . $prev_lname . "</td>\n";
-                        echo "<td align=\"center\" class=\"$row_style\">" . substr($prev_class, 0, 1) . "</td>\n";
+                        echo '<tr>';
+                        echo '<td align="left" class="' . $row_style . '">' . $prev_fname . ' ' . $prev_lname . '</td>';
+                        echo '<td align="center" class="' . $row_style . '">' . substr($prev_class, 0, 1) . '</td>';
 
                         // Iterate through all the accumulated scores for this member
                         foreach ($member_scores as $score_key => $score_array) {
                             // Print the scores for the submitted entries for this month
                             $total_score_array = count($score_array);
                             for ($i = 0; $i < $total_score_array; $i++) {
-                                echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
+                                echo '<td align="center" class="' . $row_style . '">$score_array[$i]</td>';
                             }
                             // Pad the unused entries for this member for this month
                             for ($i = 0; $i < $comp_max_entries[$score_key] - $total_score_array; $i++) {
-                                echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
+                                echo '<td align="center" class="' . $row_style . '">&nbsp;</td>';
                             }
                         }
 
                         // Display the members annual average score
                         if ($total_score > 0 && $num_scores > 0) {
-                            echo "<td align=\"center\" class=\"$row_style\">" . sprintf(
-                                    "%3.1f",
+                            echo '<td align="center" class="' . $row_style . '">' . sprintf(
+                                    '%3.1f',
                                     $total_score / $num_scores
-                                ) . "</td>\n";
+                                ) . '</td>';
                         } else {
-                            echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
+                            echo '<td align="center" class="' . $row_style . '">&nbsp;</td>';
                         }
-                        echo "</tr>";
+                        echo '</tr>';
                     }
 
                     // Now that we've just output the scores for the previous member, are we at the
@@ -226,21 +226,21 @@ final class ShortcodeController extends Controller
                     // If so, draw a horizonal line to mark the beginning of a new classification
                     if ($classification != $prev_class && $medium == $prev_medium) {
                         // echo "<tr class=\"horizontal_separator\">";
-                        echo "<tr>";
-                        echo "<td colspan=\"" . ($total_max_entries + 3) . "\" class=\"horizontal_separator\"></td>";
-                        echo "</tr>\n";
+                        echo '<tr>';
+                        echo '<td colspan="' . ($total_max_entries + 3) . '" class="horizontal_separator"></td>';
+                        echo '</tr>';
                     }
 
                     // Are we at the beginning of a new medium?
                     // If so, output a new set of column headings
                     if ($medium != $prev_medium) {
                         // Draw a horizontal line to end the previous medium
-                        if ($prev_medium != "") {
-                            echo "<tr class=\"horizontal_separator\">";
+                        if ($prev_medium != '') {
+                            echo '<tr class="horizontal_separator">';
                             // echo "<td colspan=\"" . (count($comp_dates) * 2 + 3) .
                             // "\" class=\"horizontal_separator\"></td>";
-                            echo "<td colspan=\"" . ($total_max_entries + 3) . "\" class=\"horizontal_separator\"></td>";
-                            echo "</tr>\n";
+                            echo '<td colspan="' . ($total_max_entries + 3) . '" class="horizontal_separator"></td>';
+                            echo '</tr>';
                         }
 
                         // Display the category title
@@ -249,23 +249,23 @@ final class ShortcodeController extends Controller
                         echo '</td></tr>' . "\n";
 
                         // Display the first row column headers
-                        echo "<tr>\n<th class=\"form_frame_header\" colspan=\"2\">&nbsp;</th>\n";
+                        echo '<tr><th class="form_frame_header" colspan="2">&nbsp;</th>';
                         foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
-                            echo "<th class=\"form_frame_header\" colspan=\"" . $comp_max_entries[$comp_dates_key] . "\">$comp_dates_date</th>\n";
+                            echo '<th class="form_frame_header" colspan="' . $comp_max_entries[$comp_dates_key] . '">' . $comp_dates_date . '</th>';
                         }
-                        echo "<th class=\"form_frame_header\">&nbsp;</th>\n";
-                        echo "</tr>\n";
+                        echo '<th class="form_frame_header">&nbsp;</th>';
+                        echo '</tr>';
                         // Display the second row column headers
-                        echo "<tr>\n";
-                        echo "<th class=\"form_frame_header\">Member</th>\n";
-                        echo "<th class=\"form_frame_header\">Cl.</th>\n";
+                        echo '<tr>';
+                        echo '<th class="form_frame_header">Member</th>';
+                        echo '<th class="form_frame_header">Cl.</th>';
                         foreach ($comp_dates as $comp_dates_key => $comp_dates_date) {
                             for ($i = 1; $i <= $comp_max_entries[$comp_dates_key]; $i++) {
-                                echo "<th class=\"form_frame_header\">$i</th>\n";
+                                echo '<th class="form_frame_header">' . $i . '</th>';
                             }
                         }
-                        echo "<th class=\"form_frame_header\">Avg</th>\n";
-                        echo "</tr>\n";
+                        echo '<th class="form_frame_header">Avg</th>';
+                        echo '</tr>';
                     }
 
                     // Reset the score array to be ready to start accumulating the scores for this
@@ -291,8 +291,8 @@ final class ShortcodeController extends Controller
                     }
                 }
                 // Apply the award as a superscript to the score
-                if ($award != "") {
-                    $score = "&nbsp;&nbsp;" . $score . "<SUP>&nbsp;$award_map[$award]</SUP>";
+                if ($award != '') {
+                    $score = '&nbsp;&nbsp;' . $score . '<SUP>&nbsp;' . $award_map[$award] . '</SUP>';
                 }
                 // Store the score in the appropriate array
                 $member_scores[$this_date][] = $score;
@@ -300,37 +300,37 @@ final class ShortcodeController extends Controller
 
             // Output the last remaining row of the table that hasn't been displayed yet
             $row_count += 1;
-            $row_style = $row_count % 2 == 1 ? "odd_row" : "even_row";
+            $row_style = $row_count % 2 == 1 ? 'odd_row' : 'even_row';
             // Display the members name and classification
-            echo "<tr>";
-            echo "<td align=\"left\" class=\"$row_style\">" . $first_name . " " . $last_name . "</td>\n";
-            echo "<td align=\"center\" class=\"$row_style\">" . substr($classification, 0, 1) . "</td>\n";
+            echo '<tr>';
+            echo '<td align="left" class="' . $row_style . '">' . $first_name . ' ' . $last_name . '</td>';
+            echo '<td align="center" class="' . $row_style . '">' . substr($classification, 0, 1) . '</td>';
             // Iterate through all the accumulated scores for this member
             foreach ($member_scores as $key => $score_array) {
                 // Print the scores for the submitted entries for this month
                 $total_score_array = count($score_array);
                 for ($i = 0; $i < $total_score_array; $i++) {
-                    echo "<td align=\"center\" class=\"$row_style\">$score_array[$i]</td>\n";
+                    echo '<td align="center" class="' . $row_style . '">' . $score_array[$i] . '</td>';
                 }
                 // Pad the unused entries for this member for this month
                 for ($i = 0; $i < $comp_max_entries[$key] - $total_score_array; $i++) {
-                    echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
+                    echo '<td align="center" class="' . $row_style . '">&nbsp;</td>';
                 }
             }
 
             // Display the members annual average score
             if ($total_score > 0 && $num_scores > 0) {
-                echo "<td align=\"center\" class=\"$row_style\">" . sprintf(
-                        "%3.1f",
+                echo '<td align="center" class="' . $row_style . '">' . sprintf(
+                        '%3.1f',
                         $total_score / $num_scores
-                    ) . "</td>\n";
+                    ) . '</td>';
             } else {
-                echo "<td align=\"center\" class=\"$row_style\">&nbsp;</td>\n";
+                echo '<td align="center" class="' . $row_style . '">&nbsp;</td>';
             }
-            echo "</tr>";
+            echo '</tr>';
 
             // We're all done
-            echo "</table>";
+            echo '</table>';
         }
         unset($query_competitions, $query_miscellaneous, $season_helper);
     }
@@ -424,13 +424,13 @@ final class ShortcodeController extends Controller
         $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '" />';
         // Drop down list for season
         $form .= $season_helper->getSeasonDropdown($selected_season);
-        $form .= "</form>";
+        $form .= '</form>';
         echo '<script type="text/javascript">' . "\n";
         echo 'function submit_form() {' . "\n";
         echo '	document.my_scores_form.submit();' . "\n";
         echo '}' . "\n";
         echo '</script>' . "\n";
-        echo "My scores for ";
+        echo 'My scores for ';
         echo $form;
         echo '<table class="form_frame" width="99%">';
         echo '<tr>';
@@ -444,14 +444,14 @@ final class ShortcodeController extends Controller
 
         // Bail out if not entries found
         if (empty($scores)) {
-            echo "<tr><td colspan=\"6\">No entries submitted</td></tr>\n";
-            echo "</table>\n";
+            echo '<tr><td colspan="6">No entries submitted</td></tr>';
+            echo '</table>';
         } else {
 
             // Build the list of submitted images
             $comp_count = 0;
-            $prev_date = "";
-            $prev_medium = "";
+            $prev_date = '';
+            $prev_medium = '';
             $row_style = 'odd_row';
             foreach ($scores as $recs) {
                 $date_parts = explode(" ", $recs['Competition_Date']);
@@ -464,46 +464,46 @@ final class ShortcodeController extends Controller
                 $award = $recs['Award'];
                 if ($date_parts[0] != $prev_date) {
                     $comp_count += 1;
-                    $row_style = $comp_count % 2 == 1 ? "odd_row" : "even_row";
+                    $row_style = $comp_count % 2 == 1 ? 'odd_row' : 'even_row';
                     $prev_medium = "";
                 }
 
                 $image_url = home_url($recs['Server_File_Name']);
 
                 if ($prev_date == $date_parts[0]) {
-                    $date_parts[0] = "";
-                    $theme = "";
+                    $date_parts[0] = '';
+                    $theme = '';
                 } else {
                     $prev_date = $date_parts[0];
                 }
                 if ($prev_medium == $medium) {
                     // $medium = "";
-                    $theme = "";
+                    $theme = '';
                 } else {
                     $prev_medium = $medium;
                 }
-                $score_award = "";
-                if ($score > "") {
-                    $score_award = " / {$score}pts";
+                $score_award = '';
+                if ($score > '') {
+                    $score_award = ' / ' . $score . 'pts';
                 }
-                if ($award > "") {
-                    $score_award .= " / $award";
+                if ($award > '') {
+                    $score_award .= ' / ' . $award;
                 }
 
-                echo "<tr>";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\" width=\"12%\">" . $date_parts[0] . "</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$theme</td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\">$medium</td>\n";
+                echo '<tr>';
+                echo '<td align="left" valign="top" class="' . $row_style . '" width="12%">' . $date_parts[0] . '</td>';
+                echo '<td align="left" valign="top" class="' . $row_style . '">' . $theme . '</td>';
+                echo '<td align="left" valign="top" class="' . $row_style . '">' . $medium . '</td>\n';
                 // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"{$image_url}\" rel=\"lightbox[{$comp_date}]\" title=\"" . htmlentities(
+                echo '<td align="left" valign="top" class="' . $row_style . '"><a href="' . $image_url . '" rel="lightbox[' . $comp_date . ']" title="' . htmlentities(
                         $title
-                    ) . " / {$comp_date} / $medium{$score_award}\">" . htmlentities(
+                    ) . ' / ' . $comp_date . ' / ' . $medium . $score_award . '">' . htmlentities(
                         $title
-                    ) . "</a></td>\n";
-                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$score</td>\n";
-                echo "<td class=\"$row_style\" valign=\"top\" align=\"center\" width=\"8%\">$award</td></tr>\n";
+                    ) . '</a></td>';
+                echo '<td class="' . $row_style . '" valign="top" align="center" width="8%">' . $score . '</td>';
+                echo '<td class="' . $row_style . '" valign="top" align="center" width="8%">' . $award . '</td></tr>\n';
             }
-            echo "</table>";
+            echo '</table>';
         }
         unset($query_miscellaneous, $season_helper);
     }

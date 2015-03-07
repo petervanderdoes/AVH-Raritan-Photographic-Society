@@ -87,16 +87,16 @@ class ShortcodeModel
         for ($i = 0; $i < $max_num_awards; $i++) {
             switch ($i) {
                 case 0:
-                    $data[] = "1st";
+                    $data[] = '1st';
                     break;
                 case 1:
-                    $data[] = "2nd";
+                    $data[] = '2nd';
                     break;
                 case 2:
-                    $data[] = "3rd";
+                    $data[] = '3rd';
                     break;
                 default:
-                    $data[] = "HM";
+                    $data[] = 'HM';
             }
         }
 
