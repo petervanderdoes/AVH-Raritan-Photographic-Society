@@ -5,10 +5,22 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
+/**
+ * Class BanquetCurrentUserType
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Form\Type
+ */
 class BanquetCurrentUserType extends AbstractType
 {
     private $entity;
 
+    /**
+     * Constructor
+     *
+     * @param $entity
+     */
     public function __construct($entity)
     {
         $this->entity = $entity;

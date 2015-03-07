@@ -2,6 +2,13 @@
 
 namespace RpsCompetition\Entity\Forms;
 
+/**
+ * Class BanquetCurrentUser
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Entity\Forms
+ */
 class BanquetCurrentUser
 {
     protected $allentries;
@@ -59,7 +66,7 @@ class BanquetCurrentUser
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getSeasons()
     {
@@ -67,20 +74,23 @@ class BanquetCurrentUser
     }
 
     /**
-     * @param mixed $seasons
+     * @param atring $seasons
      */
     public function setSeasons($seasons)
     {
         $this->seasons = $seasons;
     }
 
+    /**
+     * @return array
+     */
     public function getSeasonsChoices()
     {
         return $this->season_choices;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getWpGetReferer()
     {
@@ -88,7 +98,7 @@ class BanquetCurrentUser
     }
 
     /**
-     * @param mixed $wp_get_referer
+     * @param string $wp_get_referer
      */
     public function setWpGetReferer($wp_get_referer)
     {
