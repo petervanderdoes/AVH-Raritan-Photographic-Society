@@ -6,7 +6,7 @@ filter:
 checks:
     php:
         code_rating: true
-        duplication: true
+        duplication: false
         variable_existence: true
         useless_calls: true
         use_statement_alias_conflict: true
