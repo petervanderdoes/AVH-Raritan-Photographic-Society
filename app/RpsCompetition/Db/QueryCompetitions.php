@@ -61,11 +61,11 @@ class QueryCompetitions
     public function checkCompetitionClosed($competition_date, $classification, $medium)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT Closed
+            'SELECT Closed
             FROM competitions
             WHERE Competition_Date = DATE(%s)
                 AND Classification = %s
-                AND Medium = %s",
+                AND Medium = %s',
             $competition_date,
             $classification,
             $medium
@@ -73,7 +73,7 @@ class QueryCompetitions
         ;
         $closed = $this->rpsdb->get_var($sql);
 
-        if ($closed == "Y") {
+        if ($closed == 'Y') {
             $return = true;
         } else {
             $return = false;
@@ -94,7 +94,7 @@ class QueryCompetitions
     public function countCompetitions()
     {
         $count = $this->rpsdb->get_results(
-            "SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed",
+            'SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed',
             ARRAY_A
         )
         ;
@@ -152,11 +152,11 @@ class QueryCompetitions
         $competition_date = $this->rpsdb->getMysqldate($competition_date);
 
         $sql = $this->rpsdb->prepare(
-            "SELECT *
+            'SELECT *
             FROM competitions
             WHERE Competition_Date = %s
                 AND Classification = %s
-                AND Medium = %s",
+                AND Medium = %s',
             $competition_date,
             $classification,
             $medium
@@ -208,10 +208,10 @@ class QueryCompetitions
     public function getCompetitionByEntryId($entry_id, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT c.*
+            'SELECT c.*
             FROM competitions c, entries e
             WHERE c.ID =  e.Competition_ID
-                AND e.ID = %s",
+                AND e.ID = %s',
             $entry_id
         )
         ;
@@ -291,11 +291,11 @@ class QueryCompetitions
     public function getCompetitionCloseDate($competition_date, $classification, $medium)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT Close_Date
+            ' "SELECT Close_Date
             FROM competitions
             WHERE Competition_Date = DATE(%s)
                 AND Classification = %s
-                AND Medium = %s",
+                AND Medium = %s"',
             $competition_date,
             $classification,
             $medium
@@ -348,10 +348,10 @@ class QueryCompetitions
         $competition_date = $this->rpsdb->getMysqldate($competition_date);
 
         $sql = $this->rpsdb->prepare(
-            "SELECT Max_Entries FROM competitions
+            'SELECT Max_Entries FROM competitions
                 WHERE Competition_Date = %s AND
                 Classification = %s AND
-                Medium = %s",
+                Medium = %s',
             $competition_date,
             $classification,
             $medium
@@ -376,7 +376,7 @@ class QueryCompetitions
 
         // Select the list of open competitions that match this member's classification(s)
         if ($subset) {
-            $and_medium_subset = " AND c.Medium like %s";
+            $and_medium_subset = ' AND c.Medium like %s';
         } else {
             $and_medium_subset = '';
         }
@@ -394,7 +394,7 @@ class QueryCompetitions
             WHERE c.Classification IN  (%s)
                 AND c.Closed = 'N'";
         $sql_pre_prepare .= $and_medium_subset;
-        $sql_pre_prepare .= " GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium";
+        $sql_pre_prepare .= ' GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium';
 
         $subset_detail = 'color ' . $subset;
         $sql = $this->rpsdb->prepare($sql_pre_prepare, $class2, '%' . $subset_detail . '%');
@@ -589,7 +589,15 @@ class QueryCompetitions
             $fields = '*, if(Classification = "Beginner",0, if(Classification = "Advanced",1,2)) as "Class_Code"';
         }
 
-        $query = "SELECT $fields FROM competitions $join WHERE $where ORDER BY $orderby $order $limits";
+        $query = sprintf(
+            'SELECT %s FROM competitions %s WHERE %s ORDER BY %s %s %s',
+            $fields,
+            $join,
+            $where,
+            $orderby,
+            $order,
+            $limits
+        );
 
         if ($count) {
             return $this->rpsdb->get_var($query);
