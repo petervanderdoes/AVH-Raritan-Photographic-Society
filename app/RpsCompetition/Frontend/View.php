@@ -3,7 +3,7 @@ namespace RpsCompetition\Frontend;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
@@ -27,23 +27,31 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class View
 {
+    /** @var FormBuilder */
     private $form_builder;
+    /** @var HtmlBuilder */
     private $html_builder;
+    /** @var PhotoHelper */
     private $photo_helper;
+    /** @var IlluminateRequest */
     private $request;
+    /** @var RpsDb */
     private $rpsdb;
+    /** @var SeasonHelper */
     private $season_helper;
+    /** @var Settings */
     private $settings;
+    /** @var Twig_Environment */
     private $twig;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
-     * @param Request  $request
+     * @param Settings          $settings
+     * @param RpsDb             $rpsdb
+     * @param IlluminateRequest $request
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, IlluminateRequest $request)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;

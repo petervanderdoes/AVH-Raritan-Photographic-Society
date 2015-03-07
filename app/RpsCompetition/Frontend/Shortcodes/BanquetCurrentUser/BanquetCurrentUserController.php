@@ -14,7 +14,9 @@ use RpsCompetition\Libs\Controller;
  */
 class BanquetCurrentUserController extends Controller
 {
+    /** @var BanquetCurrentUserModel */
     private $model;
+    /** @var ShortcodeView */
     private $view;
 
     /**
@@ -47,6 +49,5 @@ class BanquetCurrentUserController extends Controller
         $form = $model_data['form'];
 
         return $this->view->fetch('banquet-current-user.html.twig', ['data' => $data, 'form' => $form->createView()]);
-
     }
 }

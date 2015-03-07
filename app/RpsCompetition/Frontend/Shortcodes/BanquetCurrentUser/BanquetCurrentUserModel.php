@@ -27,21 +27,31 @@ use Symfony\Component\Form\FormFactory;
  */
 class BanquetCurrentUserModel
 {
+    /** @var array */
     private $banquet_entries;
+    /** @var array */
     private $banquet_id_array;
-    private $formDisabled;
-    private $formFactory;
+    /** @var bool */
+    private $form_disabled;
+    /** @var FormFactory */
+    private $form_factory;
+    /** @var QueryBanquet */
     private $query_banquet;
+    /** @var QueryEntries */
     private $query_entries;
+    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
+    /** @var IlluminateRequest */
     private $requests;
+    /** @var SeasonHelper */
     private $season_helper;
+    /** @var Session */
     private $session;
 
     /**
      * Constructor
      *
-     * @param FormFactory        $formFactory
+     * @param FormFactory        $form_factory
      * @param SeasonHelper       $season_helper
      * @param QueryMiscellaneous $query_miscellaneous
      * @param QueryBanquet       $query_banquet
@@ -50,7 +60,7 @@ class BanquetCurrentUserModel
      * @param Session            $session
      */
     public function __construct(
-        FormFactory $formFactory,
+        FormFactory $form_factory,
         SeasonHelper $season_helper,
         QueryMiscellaneous $query_miscellaneous,
         QueryBanquet $query_banquet,
@@ -63,11 +73,11 @@ class BanquetCurrentUserModel
         $this->query_miscellaneous = $query_miscellaneous;
         $this->query_banquet = $query_banquet;
         $this->query_entries = $query_entries;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
         $this->requests = $requests;
         $this->session = $session;
 
-        $this->formDisabled = false;
+        $this->form_disabled = false;
     }
 
     /**
@@ -105,7 +115,7 @@ class BanquetCurrentUserModel
         $entity->setBanquetids(base64_encode(json_encode($this->banquet_id_array)));
         $entity->setSeasonChoices($season_options);
         $entity->setSeasons($selected_season);
-        $form = $this->formFactory->create(
+        $form = $this->form_factory->create(
             new BanquetCurrentUserType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'banquetentries']]
@@ -164,7 +174,7 @@ class BanquetCurrentUserModel
     public function getTemplateData($season_options, $selected_season, $scores)
     {
         $data = [];
-        $data['disabled'] = $this->formDisabled;
+        $data['disabled'] = $this->form_disabled;
         $data['seasons'] = $season_options;
         $data['selected_season'] = $selected_season;
         $data['scores'] = true;
@@ -247,7 +257,7 @@ class BanquetCurrentUserModel
             foreach ($banquet_id as $record) {
                 $this->banquet_id_array[] = $record['ID'];
                 if ($record['Closed'] == 'Y') {
-                    $this->formDisabled = true;
+                    $this->form_disabled = true;
                 }
             }
 
@@ -255,7 +265,6 @@ class BanquetCurrentUserModel
                     ',',
                     $this->banquet_id_array
                 ) . ') AND Member_ID = "' . get_current_user_id() . '"';
-            /** @var array banquet_entries */
             $this->banquet_entries = $this->query_entries->query(['where' => $where]);
         }
 

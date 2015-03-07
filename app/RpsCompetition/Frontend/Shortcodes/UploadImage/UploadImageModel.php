@@ -16,25 +16,25 @@ use Symfony\Component\Form\FormFactory;
  */
 class UploadImageModel
 {
-    /**
-     * @var FormFactory
-     */
-    private $formFactory;
+    /** @var FormFactory */
+    private $form_factory;
+    /** @var IlluminateRequest */
     private $request;
+    /** @var Settings */
     private $settings;
 
     /**
      * Constructor
      *
-     * @param FormFactory       $formFactory
+     * @param FormFactory       $form_factory
      * @param Settings          $settings
      * @param IlluminateRequest $request
      */
-    public function __construct(FormFactory $formFactory, Settings $settings, IlluminateRequest $request)
+    public function __construct(FormFactory $form_factory, Settings $settings, IlluminateRequest $request)
     {
         $this->settings = $settings;
         $this->request = $request;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
     }
 
     /**
@@ -67,7 +67,7 @@ class UploadImageModel
         $entity = new UploadImageEntity();
         $entity->setWpGetReferer($ref);
         $entity->setMediumSubset($medium_subset);
-        $form = $this->formFactory->create(
+        $form = $this->form_factory->create(
             new UploadImageType(),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'uploadentry']]

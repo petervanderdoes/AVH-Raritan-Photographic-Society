@@ -19,10 +19,15 @@ use Symfony\Component\Form\FormFactory;
  */
 class EditTitleModel
 {
-    private $formFactory;
+    /** @var FormFactory */
+    private $form_factory;
+    /** @var PhotoHelper */
     private $photo_helper;
+    /** @var QueryEntries */
     private $query_entries;
+    /** @var IlluminateRequest */
     private $request;
+    /** @var Settings */
     private $settings;
 
     /**
@@ -30,20 +35,20 @@ class EditTitleModel
      *
      * @param QueryEntries      $query_entries
      * @param PhotoHelper       $photo_helper
-     * @param FormFactory       $formFactory
+     * @param FormFactory       $form_factory
      * @param Settings          $settings
      * @param IlluminateRequest $request
      */
     public function __construct(
         QueryEntries $query_entries,
         PhotoHelper $photo_helper,
-        FormFactory $formFactory,
+        FormFactory $form_factory,
         Settings $settings,
         IlluminateRequest $request
     ) {
         $this->query_entries = $query_entries;
         $this->photo_helper = $photo_helper;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
         $this->settings = $settings;
         $this->request = $request;
     }
@@ -122,7 +127,7 @@ class EditTitleModel
         $entity->setServerFileName($server_file_name);
         $entity->setM($medium_subset);
         $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
-        $form = $this->formFactory->create(
+        $form = $this->form_factory->create(
             new EditTitleType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'edittitle']]

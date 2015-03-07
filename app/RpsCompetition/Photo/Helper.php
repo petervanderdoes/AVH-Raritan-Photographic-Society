@@ -1,10 +1,9 @@
 <?php
 namespace RpsCompetition\Photo;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as IlluminateRequest;
 use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
-use Intervention\Image\ImageManagerStatic as Image;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
@@ -27,18 +26,21 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class Helper
 {
+    /** @var IlluminateRequest */
     private $request;
+    /** @var RpsDb */
     private $rpsdb;
+    /** @var Settings */
     private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param Request  $request
-     * @param RpsDb    $rpsdb
+     * @param Settings          $settings
+     * @param IlluminateRequest $request
+     * @param RpsDb             $rpsdb
      */
-    public function __construct(Settings $settings, Request $request, RpsDb $rpsdb)
+    public function __construct(Settings $settings, IlluminateRequest $request, RpsDb $rpsdb)
     {
         $this->settings = $settings;
         $this->request = $request;
@@ -85,6 +87,50 @@ class Helper
     }
 
     /**
+     * Collect needed data to render the photo credit
+     *
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return array
+     */
+    public function dataPhotoCredit($title, $first_name, $last_name)
+    {
+        $data = [];
+        $data['title'] = $title;
+        $data['credit'] = "$first_name $last_name";
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render a photo in masonry style.
+     *
+     * @param QueryEntries $record
+     * @param string       $thumb_size
+     *
+     * @return array<string,string|array>
+     */
+    public function dataPhotoGallery($record, $thumb_size)
+    {
+
+        $data = [];
+        $user_info = get_userdata($record->Member_ID);
+        $title = $record->Title;
+        $last_name = $user_info->user_lastname;
+        $first_name = $user_info->user_firstname;
+        $data['award'] = $record->Award;
+        $data['url_large'] = $this->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+
+        return $data;
+    }
+
+    /**
      * Collect needed data to render a photo in masonry style.
      *
      * @param QueryEntries $record
@@ -104,24 +150,6 @@ class Helper
         $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
         $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
         $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
-
-        return $data;
-    }
-
-    /**
-     * Collect needed data to render the photo credit
-     *
-     * @param string $title
-     * @param string $first_name
-     * @param string $last_name
-     *
-     * @return array
-     */
-    public function dataPhotoCredit($title, $first_name, $last_name)
-    {
-        $data = [];
-        $data['title'] = $title;
-        $data['credit'] = "$first_name $last_name";
 
         return $data;
     }
@@ -191,42 +219,19 @@ class Helper
         $new_size = Constants::getImageSize($size);
 
         if ($new_size['height'] == null) {
-            $box = $image->getSize()->widen($new_size['width']);
+            $box = $image->getSize()
+                         ->widen($new_size['width'])
+            ;
             $image->resize($box);
         } else {
             $box = new Box($new_size['width'], $new_size['height']);
-            $image->keepAspectRatio()->resize($box);
-            ;
+            $image->keepAspectRatio()
+                  ->resize($box)
+            ;;
         }
-        $image->save($thumb_path . '/' . $thumb_name, array('jpeg_quality' =>Constants::IMAGE_QUALITY));
+        $image->save($thumb_path . '/' . $thumb_name, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
 
         return true;
-    }
-
-    /**
-     * Collect needed data to render a photo in masonry style.
-     *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
-     *
-     * @return array<string,string|array>
-     */
-    public function dataPhotoGallery($record, $thumb_size)
-    {
-
-        $data = [];
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
-        $data['award'] = $record->Award;
-        $data['url_large'] = $this->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
-        $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
-
-        return $data;
     }
 
     /**

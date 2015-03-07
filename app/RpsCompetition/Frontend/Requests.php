@@ -2,7 +2,7 @@
 namespace RpsCompetition\Frontend;
 
 use Avh\Network\Session;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
@@ -25,20 +25,24 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class Requests
 {
+    /** @var IlluminateRequest */
     private $request;
+    /** @var RpsDb */
     private $rpsdb;
+    /** @var Session */
     private $session;
+    /** @var Settings */
     private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
-     * @param Request  $request
-     * @param Session  $session
+     * @param Settings          $settings
+     * @param RpsDb             $rpsdb
+     * @param IlluminateRequest $request
+     * @param Session           $session
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request, Session $session)
+    public function __construct(Settings $settings, RpsDb $rpsdb, IlluminateRequest $request, Session $session)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;

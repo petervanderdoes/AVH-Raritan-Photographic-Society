@@ -20,21 +20,23 @@ use Symfony\Component\Form\FormFactory;
  */
 class ShortcodeModel
 {
+    /** @var CompetitionHelper */
     private $competition_helper;
-    /** @var  FormFactory */
-    private $formFactory;
+    /** @var FormFactory */
+    private $form_factory;
+    /** @var PhotoHelper */
     private $photo_helper;
+    /** @var QueryCompetitions */
     private $query_competitions;
+    /** @var QueryEntries */
     private $query_entries;
+    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
+    /** @var SeasonHelper */
     private $season_helper;
-    /**
-     * @var Session
-     */
+    /** @var Session */
     private $session;
-    /**
-     * @var Settings
-     */
+    /** @var Settings */
     private $settings;
 
     /**
@@ -47,7 +49,7 @@ class ShortcodeModel
      * @param SeasonHelper       $season_helper
      * @param CompetitionHelper  $competition_helper
      * @param Session            $session
-     * @param FormFactory        $formFactory
+     * @param FormFactory        $form_factory
      * @param Settings           $settings
      */
     public function __construct(
@@ -58,7 +60,7 @@ class ShortcodeModel
         SeasonHelper $season_helper,
         CompetitionHelper $competition_helper,
         Session $session,
-        FormFactory $formFactory,
+        FormFactory $form_factory,
         Settings $settings
     ) {
         $this->query_competitions = $query_competitions;
@@ -68,7 +70,7 @@ class ShortcodeModel
         $this->season_helper = $season_helper;
         $this->competition_helper = $competition_helper;
         $this->session = $session;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
         $this->settings = $settings;
     }
 

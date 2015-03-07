@@ -22,7 +22,9 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class Helper
 {
+    /** @var RpsDb */
     private $rpsdb;
+    /** @var Settings */
     private $settings;
 
     /**

@@ -13,7 +13,9 @@ use RpsCompetition\Libs\Controller;
  */
 class MyEntriesController extends Controller
 {
+    /** @var MyEntriesModel */
     private $model;
+    /** @var ShortcodeView */
     private $view;
 
     /**

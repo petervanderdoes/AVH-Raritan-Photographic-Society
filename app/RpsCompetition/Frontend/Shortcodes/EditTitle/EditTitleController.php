@@ -14,7 +14,9 @@ use RpsCompetition\Settings;
  */
 class EditTitleController extends Controller
 {
+    /** @var EditTitleModel */
     private $model;
+    /** @var ShortcodeView */
     private $view;
 
     /**

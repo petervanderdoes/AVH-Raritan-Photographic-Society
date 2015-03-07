@@ -14,7 +14,9 @@ use RpsCompetition\Settings;
  */
 class UploadImageController extends Controller
 {
+    /** @var UploadImageModel */
     private $model;
+    /** @var ShortcodeView */
     private $view;
 
     /**

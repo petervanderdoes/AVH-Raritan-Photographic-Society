@@ -19,13 +19,9 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 final class SocialNetworksRouter
 {
-    /**
-     * @var SocialNetworksController
-     */
+    /** @var SocialNetworksController */
     private $controller;
-    /**
-     * @var Settings
-     */
+    /** @var Settings */
     private $settings;
 
     /**

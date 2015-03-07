@@ -2,6 +2,7 @@
 namespace RpsCompetition\Frontend\Shortcodes;
 
 use Avh\Html\FormBuilder;
+use Avh\Html\HtmlBuilder;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Libs\Controller;
@@ -21,13 +22,15 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 final class ShortcodeController extends Controller
 {
-    private $formBuilder;
-    /** @var  \Symfony\Component\Form\FormFactory */
-    private $formFactory;
+    /** @var FormBuilder */
+    private $form_builder;
+    /** @var \Symfony\Component\Form\FormFactory */
+    private $form_factory;
+    /** @var HtmlBuilder */
     private $html;
-    /** @var  ShortcodeModel */
+    /** @var ShortcodeModel */
     private $model;
-    /** @var  ShortcodeView */
+    /** @var ShortcodeView */
     private $view;
 
     /**
@@ -42,7 +45,7 @@ final class ShortcodeController extends Controller
         $this->setRpsdb($this->container->make('RpsDb'));
         $this->setRequest($this->container->make('IlluminateRequest'));
         $this->setSession($this->container->make('Session'));
-        $this->formFactory = $this->container->make('formFactory');
+        $this->form_factory = $this->container->make('formFactory');
         $template = [];
         $template[] = $this->settings->get('template_dir');
         $template[] = $this->settings->get('template_dir') . '/social-networks';
@@ -56,7 +59,7 @@ final class ShortcodeController extends Controller
         $this->view = $this->container->make('ShortcodeView');
 
         $this->html = $this->container->make('HtmlBuilder');
-        $this->formBuilder = new FormBuilder($this->html);
+        $this->form_builder = new FormBuilder($this->html);
 
         $this->model = $this->container->make('ShortcodeModel');
     }
@@ -331,8 +334,6 @@ final class ShortcodeController extends Controller
         }
         unset($query_competitions, $query_miscellaneous, $season_helper);
     }
-
-
 
     /**
      * Display the given awards for the given classification on a given date.

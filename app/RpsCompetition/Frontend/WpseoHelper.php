@@ -24,25 +24,15 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class WpseoHelper
 {
-    /**
-     * @var PhotoHelper
-     */
+    /** @var PhotoHelper */
     private $photo_helper;
-    /**
-     * @var QueryCompetitions
-     */
+    /** @var QueryCompetitions */
     private $query_competitions;
-    /**
-     * @var QueryMiscellaneous
-     */
+    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
-    /**
-     * @var RpsDb
-     */
+    /** @var RpsDb */
     private $rpsdb;
-    /**
-     * @var Settings
-     */
+    /** @var Settings */
     private $settings;
 
     /**

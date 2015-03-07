@@ -23,9 +23,9 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class Controller
 {
-    /** @var  Application $container */
+    /** @var Application $container */
     protected $container;
-    /** @var   \RpsCompetition\Options\General $options */
+    /** @var  \RpsCompetition\Options\General $options */
     protected $options;
     /** @var \Illuminate\Http\Request $request */
     protected $request;

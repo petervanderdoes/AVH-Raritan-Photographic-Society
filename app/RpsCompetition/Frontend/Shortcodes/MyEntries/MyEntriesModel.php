@@ -25,28 +25,38 @@ use Symfony\Component\Form\FormFactory;
  */
 class MyEntriesModel
 {
+    /** @var CompetitionHelper */
     private $competition_helper;
-    private $formFactory;
+    /** @var FormFactory */
+    private $form_factory;
+    /** @var PhotoHelper */
     private $photo_helper;
+    /** @var QueryCompetitions */
     private $query_competitions;
+    /** @var QueryEntries */
     private $query_entries;
+    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
+    /** @var IlluminateRequest */
     private $request;
+    /** @var SeasonHelper */
     private $season_helper;
+    /** @var Session */
     private $session;
+    /** @var Settings */
     private $settings;
 
     /**
-     * @param QueryCompetitions  $query_competitions
-     * @param QueryEntries       $query_entries
+     * @param QueryCompetitions $query_competitions
+     * @param QueryEntries $query_entries
      * @param QueryMiscellaneous $query_miscellaneous
-     * @param PhotoHelper        $photo_helper
-     * @param SeasonHelper       $season_helper
-     * @param CompetitionHelper  $competition_helper
-     * @param Session            $session
-     * @param FormFactory        $formFactory
-     * @param Settings           $settings
-     * @param IlluminateRequest  $request
+     * @param PhotoHelper $photo_helper
+     * @param SeasonHelper $season_helper
+     * @param CompetitionHelper $competition_helper
+     * @param Session $session
+     * @param FormFactory $form_factory
+     * @param Settings $settings
+     * @param IlluminateRequest $request
      */
     public function __construct(
         QueryCompetitions $query_competitions,
@@ -56,7 +66,7 @@ class MyEntriesModel
         SeasonHelper $season_helper,
         CompetitionHelper $competition_helper,
         Session $session,
-        FormFactory $formFactory,
+        FormFactory $form_factory,
         Settings $settings,
         IlluminateRequest $request
     ) {
@@ -67,7 +77,7 @@ class MyEntriesModel
         $this->season_helper = $season_helper;
         $this->competition_helper = $competition_helper;
         $this->session = $session;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
         $this->settings = $settings;
         $this->request = $request;
     }
@@ -145,7 +155,7 @@ class MyEntriesModel
         $entity->setSelectedCompChoices($open_competitions_options);
         $entity->setSelectedMediumChoices($this->competition_helper->getMedium($open_competitions));
         $entity->setClassification($current_competition->Classification);
-        $form = $this->formFactory->create(
+        $form = $this->form_factory->create(
             new MyEntriesType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'myentries']]
@@ -171,8 +181,14 @@ class MyEntriesModel
         ;
         if ($close_date !== null) {
             // We give a warning 7 days in advance that a competition will close.
-            $close_competition_warning_date = Carbon::instance(new \DateTime($close_date, new \DateTimeZone('America/New_York')))->subDays(7);
-            if (Carbon::now('America/New_York')->gte($close_competition_warning_date)) {
+            $close_competition_warning_date = Carbon::instance(
+                new \DateTime($close_date, new \DateTimeZone('America/New_York'))
+            )
+                                                    ->subDays(7)
+            ;
+            if (Carbon::now('America/New_York')
+                      ->gte($close_competition_warning_date)
+            ) {
                 $data['close'] = $close_date;
             }
         }

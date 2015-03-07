@@ -13,7 +13,9 @@ use RpsCompetition\Libs\Controller;
  */
 class PersonWinnersController extends Controller
 {
+    /** @var PersonWinnersModel */
     private $model;
+    /** @var ShortcodeView */
     private $view;
 
     /**

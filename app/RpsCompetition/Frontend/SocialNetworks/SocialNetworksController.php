@@ -19,6 +19,7 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class SocialNetworksController extends Controller
 {
+    /** @var SocialNetworksModel */
     protected $model;
     /** @var  SocialNetworksView */
     private $view;
