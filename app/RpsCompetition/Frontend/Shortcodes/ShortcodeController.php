@@ -185,7 +185,7 @@ final class ShortcodeController extends Controller
 
                 // Is this the beginning of the next member's scores?
                 if ($member != $prev_member || $classification != $prev_class || $medium != $prev_medium) {
-                    $row_count += 1;
+                    $row_count++;
                     $row_style = $row_count % 2 == 1 ? 'odd_row' : 'even_row';
 
                     // Don't do anything yet if this is the very first member, otherwise, output all
@@ -287,7 +287,7 @@ final class ShortcodeController extends Controller
                     }
                     if ($special_event == 'N') {
                         $total_score += $score;
-                        $num_scores += 1;
+                        $num_scores++;
                     }
                 }
                 // Apply the award as a superscript to the score
@@ -299,7 +299,7 @@ final class ShortcodeController extends Controller
             }
 
             // Output the last remaining row of the table that hasn't been displayed yet
-            $row_count += 1;
+            $row_count ++;
             $row_style = $row_count % 2 == 1 ? 'odd_row' : 'even_row';
             // Display the members name and classification
             echo '<tr>';
@@ -454,7 +454,7 @@ final class ShortcodeController extends Controller
             $prev_medium = '';
             $row_style = 'odd_row';
             foreach ($scores as $recs) {
-                $date_parts = explode(" ", $recs['Competition_Date']);
+                $date_parts = explode(' ', $recs['Competition_Date']);
                 $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
                 $comp_date = $date_parts[0];
                 $medium = $recs['Medium'];
@@ -463,9 +463,9 @@ final class ShortcodeController extends Controller
                 $score = $recs['Score'];
                 $award = $recs['Award'];
                 if ($date_parts[0] != $prev_date) {
-                    $comp_count += 1;
+                    $comp_count++;
                     $row_style = $comp_count % 2 == 1 ? 'odd_row' : 'even_row';
-                    $prev_medium = "";
+                    $prev_medium = '';
                 }
 
                 $image_url = home_url($recs['Server_File_Name']);

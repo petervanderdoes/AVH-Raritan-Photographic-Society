@@ -200,7 +200,7 @@ class BanquetCurrentUserModel
             $entry['score'] = $recs['Score'];
             $entry['award'] = $recs['Award'];
             if ($date_parts[0] != $prev_date) {
-                $comp_count += 1;
+                $comp_count++;
                 $prev_medium = '';
             }
 
