@@ -74,7 +74,7 @@ class BanquetCurrentUser
     }
 
     /**
-     * @param atring $seasons
+     * @param string $seasons
      */
     public function setSeasons($seasons)
     {
