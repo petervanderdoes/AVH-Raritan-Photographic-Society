@@ -256,7 +256,7 @@ class Application extends Container implements ApplicationContract
      */
     public function registerCoreContainerAliases()
     {
-        $aliases = [
+        $core_aliases = [
             'app'    => [
                 'Illuminate\Foundation\Application',
                 'Illuminate\Contracts\Container\Container',
@@ -265,7 +265,7 @@ class Application extends Container implements ApplicationContract
             'config' => ['Illuminate\Config\Repository', 'Illuminate\Contracts\Config\Repository'],
         ];
 
-        foreach ($aliases as $key => $aliases) {
+        foreach ($core_aliases as $key => $aliases) {
             foreach ((array) $aliases as $alias) {
                 $this->alias($key, $alias);
             }
