@@ -47,16 +47,16 @@ class MyEntriesModel
     private $settings;
 
     /**
-     * @param QueryCompetitions $query_competitions
-     * @param QueryEntries $query_entries
+     * @param QueryCompetitions  $query_competitions
+     * @param QueryEntries       $query_entries
      * @param QueryMiscellaneous $query_miscellaneous
-     * @param PhotoHelper $photo_helper
-     * @param SeasonHelper $season_helper
-     * @param CompetitionHelper $competition_helper
-     * @param Session $session
-     * @param FormFactory $form_factory
-     * @param Settings $settings
-     * @param IlluminateRequest $request
+     * @param PhotoHelper        $photo_helper
+     * @param SeasonHelper       $season_helper
+     * @param CompetitionHelper  $competition_helper
+     * @param Session            $session
+     * @param FormFactory        $form_factory
+     * @param Settings           $settings
+     * @param IlluminateRequest  $request
      */
     public function __construct(
         QueryCompetitions $query_competitions,
@@ -132,19 +132,7 @@ class MyEntriesModel
         )
         ;
 
-        $this->session->set('myentries/subset', $medium_subset_medium);
-        $this->session->set(
-            'myentries/' . $medium_subset_medium . '/competition_date',
-            $current_competition->Competition_Date
-        )
-        ;
-        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
-        $this->session->set(
-            'myentries/' . $medium_subset_medium . '/classification',
-            $current_competition->Classification
-        )
-        ;
-        $this->session->save();
+        $this->saveSession($medium_subset_medium, $current_competition);
 
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
@@ -220,7 +208,7 @@ class MyEntriesModel
         /** @var QueryEntries $recs */
         foreach ($entries as $recs) {
             $competition = $this->query_competitions->getCompetitionById($recs->Competition_ID);
-            $num_rows ++;
+            $num_rows++;
 
             $entry = [];
             $entry['id'] = $recs->ID;
@@ -254,5 +242,26 @@ class MyEntriesModel
         $return ['form'] = $form;
 
         return $return;
+    }
+
+    /**
+     * @param $medium_subset_medium
+     * @param $current_competition
+     */
+    private function saveSession($medium_subset_medium, $current_competition)
+    {
+        $this->session->set('myentries/subset', $medium_subset_medium);
+        $this->session->set(
+            'myentries/' . $medium_subset_medium . '/competition_date',
+            $current_competition->Competition_Date
+        )
+        ;
+        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+        $this->session->set(
+            'myentries/' . $medium_subset_medium . '/classification',
+            $current_competition->Classification
+        )
+        ;
+        $this->session->save();
     }
 }
