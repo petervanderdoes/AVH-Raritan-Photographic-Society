@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Form\Type;
 
+use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -14,14 +15,13 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
  */
 class BanquetCurrentUserType extends AbstractType
 {
+    /** @var BanquetCurrentUserEntity */
     private $entity;
 
     /**
-     * Constructor
-     *
-     * @param $entity
+     * @param BanquetCurrentUserEntity $entity
      */
-    public function __construct($entity)
+    public function __construct(BanquetCurrentUserEntity $entity)
     {
         $this->entity = $entity;
     }
@@ -34,13 +34,16 @@ class BanquetCurrentUserType extends AbstractType
         $builder->add('allentries', 'hidden')
                 ->add('banquetids', 'hidden')
                 ->add('wp_get_referer', 'hidden')
-                ->add('seasons','choice',
+                ->add(
+                    'seasons',
+                    'choice',
                     [
                         'multiple' => false,
                         'expanded' => false,
                         'choices'  => $this->entity->getSeasonsChoices(),
                         'attr'     => ['onchange' => 'submit_form("select_season")']
-                    ])
+                    ]
+                )
                 ->add(
                     'update',
                     'submit',
