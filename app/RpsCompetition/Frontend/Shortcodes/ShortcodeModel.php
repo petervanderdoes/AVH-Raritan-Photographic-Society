@@ -104,29 +104,6 @@ class ShortcodeModel
     }
 
     /**
-     * Collect needed data to render the Category Winners
-     *
-     * @param string $class
-     * @param array  $entries
-     * @param string $thumb_size
-     *
-     * @return array
-     */
-    public function getCategoryWinners($class, $entries, $thumb_size)
-    {
-        $data = [];
-        $data['class'] = $class;
-        $data['records'] = $entries;
-        $data['thumb_size'] = $thumb_size;
-        $data['images'] = [];
-        foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
-        }
-
-        return $data;
-    }
-
-    /**
      * Get the Facebook thumbs for the Category Winners Page.
      *
      * @param array $entries

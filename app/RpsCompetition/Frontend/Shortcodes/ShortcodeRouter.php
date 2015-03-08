@@ -20,7 +20,7 @@ class ShortcodeRouter extends ShortcodesAbstract
 {
     public function initializeShortcodes()
     {
-        $this->register('rps_category_winners', 'shortcodeCategoryWinners');
+        $this->register('rps_category_winners', 'shortcodeCategoryWinners', 'CategoryWinnersController');
         $this->register('rps_monthly_winners', 'shortcodeMonthlyWinners', 'MonthlyWinnersController');
         $this->register('rps_scores_current_user', 'shortcodeScoresCurrentUser', 'ScoresCurrentUserController');
         $this->register('rps_banquet_current_user', 'shortcodeBanquetCurrentUser', 'BanquetCurrentUserController');
