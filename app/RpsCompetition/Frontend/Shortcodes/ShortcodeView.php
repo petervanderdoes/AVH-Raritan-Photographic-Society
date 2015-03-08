@@ -28,5 +28,6 @@ final class ShortcodeView extends View
     {
         parent::__construct($template_dir, $cache_dir);
         $this->addTemplateDir($template_dir . '/forms');
+        $this->addTemplateDir($template_dir . '/shortcodes');
     }
 }
