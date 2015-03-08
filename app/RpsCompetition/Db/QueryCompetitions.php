@@ -291,11 +291,11 @@ class QueryCompetitions
     public function getCompetitionCloseDate($competition_date, $classification, $medium)
     {
         $sql = $this->rpsdb->prepare(
-            ' "SELECT Close_Date
+            'SELECT Close_Date
             FROM competitions
             WHERE Competition_Date = DATE(%s)
                 AND Classification = %s
-                AND Medium = %s"',
+                AND Medium = %s',
             $competition_date,
             $classification,
             $medium
@@ -389,10 +389,10 @@ class QueryCompetitions
             $class2 = get_user_meta($user_id, 'rps_class_print_color', true);
         }
         // Select the list of open competitions that match this member's classification(s)
-        $sql_pre_prepare = "SELECT *
+        $sql_pre_prepare = 'SELECT *
             FROM competitions c
             WHERE c.Classification IN  (%s)
-                AND c.Closed = 'N'";
+                AND c.Closed = "N"';
         $sql_pre_prepare .= $and_medium_subset;
         $sql_pre_prepare .= ' GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium';
 
@@ -619,10 +619,10 @@ class QueryCompetitions
     {
         $current_time = current_time('mysql');
         $sql = $this->rpsdb->prepare(
-            "UPDATE competitions
-            SET Closed='Y',  Date_Modified = %s
-            WHERE Closed='N'
-                AND Close_Date < %s",
+            'UPDATE competitions
+            SET Closed="Y",  Date_Modified = %s
+            WHERE Closed="N"
+                AND Close_Date < %s',
             $current_time,
             $current_time
         )
