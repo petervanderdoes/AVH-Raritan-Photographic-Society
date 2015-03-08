@@ -299,7 +299,7 @@ final class ShortcodeController extends Controller
             }
 
             // Output the last remaining row of the table that hasn't been displayed yet
-            $row_count ++;
+            $row_count++;
             $row_style = $row_count % 2 == 1 ? 'odd_row' : 'even_row';
             // Display the members name and classification
             echo '<tr>';
@@ -394,117 +394,5 @@ final class ShortcodeController extends Controller
     public function shortcodeEmail($attr, $content, $tag)
     {
         return $this->html->mailto($attr['email'], $content, $attr);
-    }
-
-    /**
-     * Displays the scores of the current user.
-     * By default the scores of the latest season is shown.
-     * A drop down with a season list is shown for the user to select.
-     *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
-     * @todo: MVC
-     */
-    public function shortcodeScoresCurrentUser($attr, $content, $tag)
-    {
-        global $post;
-        $query_miscellaneous = $this->container->make('QueryMiscellaneous');
-        $season_helper = $this->container->make('SeasonHelper');
-
-        $seasons = $season_helper->getSeasons();
-        $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
-        list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($selected_season);
-
-        // Start building the form
-        $action = home_url('/' . get_page_uri($post->ID));
-        $form = '';
-        $form .= '<form name="my_scores_form" method="post" action="' . $action . '">';
-        $form .= '<input type="hidden" name="selected_season" value="' . $selected_season . '" />';
-        // Drop down list for season
-        $form .= $season_helper->getSeasonDropdown($selected_season);
-        $form .= '</form>';
-        echo '<script type="text/javascript">' . "\n";
-        echo 'function submit_form() {' . "\n";
-        echo '	document.my_scores_form.submit();' . "\n";
-        echo '}' . "\n";
-        echo '</script>' . "\n";
-        echo 'My scores for ';
-        echo $form;
-        echo '<table class="form_frame" width="99%">';
-        echo '<tr>';
-        echo '<th class="form_frame_header" width="12%">Date</th>';
-        echo '<th class="form_frame_header">Theme</th>';
-        echo '<th class="form_frame_header">Competition</th>';
-        echo '<th class="form_frame_header">Title</th>';
-        echo '<th class="form_frame_header" width="8%">Score</th>';
-        echo '<th class="form_frame_header" width="8%">Award</th></tr>';
-        $scores = $query_miscellaneous->getScoresUser(get_current_user_id(), $season_start_date, $season_end_date);
-
-        // Bail out if not entries found
-        if (empty($scores)) {
-            echo '<tr><td colspan="6">No entries submitted</td></tr>';
-            echo '</table>';
-        } else {
-
-            // Build the list of submitted images
-            $comp_count = 0;
-            $prev_date = '';
-            $prev_medium = '';
-            $row_style = 'odd_row';
-            foreach ($scores as $recs) {
-                $date_parts = explode(' ', $recs['Competition_Date']);
-                $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
-                $comp_date = $date_parts[0];
-                $medium = $recs['Medium'];
-                $theme = $recs['Theme'];
-                $title = $recs['Title'];
-                $score = $recs['Score'];
-                $award = $recs['Award'];
-                if ($date_parts[0] != $prev_date) {
-                    $comp_count++;
-                    $row_style = $comp_count % 2 == 1 ? 'odd_row' : 'even_row';
-                    $prev_medium = '';
-                }
-
-                $image_url = home_url($recs['Server_File_Name']);
-
-                if ($prev_date == $date_parts[0]) {
-                    $date_parts[0] = '';
-                    $theme = '';
-                } else {
-                    $prev_date = $date_parts[0];
-                }
-                if ($prev_medium == $medium) {
-                    // $medium = "";
-                    $theme = '';
-                } else {
-                    $prev_medium = $medium;
-                }
-                $score_award = '';
-                if ($score > '') {
-                    $score_award = ' / ' . $score . 'pts';
-                }
-                if ($award > '') {
-                    $score_award .= ' / ' . $award;
-                }
-
-                echo '<tr>';
-                echo '<td align="left" valign="top" class="' . $row_style . '" width="12%">' . $date_parts[0] . '</td>';
-                echo '<td align="left" valign="top" class="' . $row_style . '">' . $theme . '</td>';
-                echo '<td align="left" valign="top" class="' . $row_style . '">' . $medium . '</td>\n';
-                // echo "<td align=\"left\" valign=\"top\" class=\"$row_style\"><a href=\"$image_url\" target=\"_blank\">$title</a></td>\n";
-                echo '<td align="left" valign="top" class="' . $row_style . '"><a href="' . $image_url . '" rel="lightbox[' . $comp_date . ']" title="' . htmlentities(
-                        $title
-                    ) . ' / ' . $comp_date . ' / ' . $medium . $score_award . '">' . htmlentities(
-                        $title
-                    ) . '</a></td>';
-                echo '<td class="' . $row_style . '" valign="top" align="center" width="8%">' . $score . '</td>';
-                echo '<td class="' . $row_style . '" valign="top" align="center" width="8%">' . $award . '</td></tr>\n';
-            }
-            echo '</table>';
-        }
-        unset($query_miscellaneous, $season_helper);
     }
 }
