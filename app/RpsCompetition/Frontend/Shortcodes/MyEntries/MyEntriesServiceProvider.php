@@ -1,8 +1,8 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
-use RpsCompetition\Application;
 use Illuminate\Support\ServiceProvider;
+use RpsCompetition\Application;
 
 /**
  * Class MyEntriesServiceProvider
