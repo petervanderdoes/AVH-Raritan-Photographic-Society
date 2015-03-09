@@ -53,7 +53,7 @@ class AllScoresModel
         $this->request = $request;
         $this->form_factory = $form_factory;
     }
-    
+
     /**
      * Collect all the data neccesary for the shortcode
      *
@@ -63,6 +63,84 @@ class AllScoresModel
     {
         $season_options = $this->getSeasonsOptions();
         $selected_season = $this->request->input('form.seasons', end($season_options));
+
+        $template_data = $this->getTemplateData($selected_season);
+        $form = $this->getFormData($season_options, $selected_season);
+        $return = [];
+        $return['data'] = $template_data;
+        $return['form'] = $form;
+
+        return $return;
+    }
+
+    /**
+     * Get the Seasons to be used in a select
+     *
+     * @return array
+     */
+    public function getSeasonsOptions()
+    {
+        $seasons = $this->season_helper->getSeasons();
+
+        return array_combine($seasons, $seasons);
+    }
+
+    /**
+     * Create an empty score array.
+     *
+     * This array is used per Medium/User so all competitions are populated.
+     *
+     * @param array $competition_dates
+     *
+     * @return array
+     */
+    private function getDefaultScoreArray($competition_dates)
+    {
+        foreach ($competition_dates as $competition) {
+            $key = $competition['Competition_Date'];
+            for ($entries = 0; $entries < $competition['Max_Entries']; $entries++) {
+                $score[$key][] = ['score' => '', 'award' => ''];
+            }
+        }
+
+        return $score;
+    }
+
+    /**
+     * Get the form to be used in the template.
+     *
+     * @param array  $season_options
+     * @param string $selected_season
+     *
+     * @return \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface
+     */
+    private function getFormData($season_options, $selected_season)
+    {
+        // Start the form
+        global $post;
+        $action = home_url('/' . get_page_uri($post->ID));
+        $entity = new AllScoresEntity();
+        $entity->setSeasonChoices($season_options);
+        $entity->setSeasons($selected_season);
+        $form = $this->form_factory->create(
+            new AllScoresType($entity),
+            $entity,
+            ['action' => $action, 'attr' => ['id' => 'allscores']]
+        )
+        ;
+
+        return $form;
+    }
+
+    /**
+     * Get the data for the template.
+     *
+     * @param string $selected_season
+     *
+     * @return array
+     */
+    private function getTemplateData($selected_season)
+    {
 
         $award_map = ['1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H'];
         $classification_map = ['0' => 'B', '1' => 'A', '2' => 'S'];
@@ -106,6 +184,8 @@ class AllScoresModel
         $scored_entries = 0;
         $scores = [];
         $total_score = 0;
+        $default_score_array = $this->getDefaultScoreArray($competition_dates);
+
         foreach ($club_competition_results as $result) {
 
             $medium_key = $medium_map[$result['Medium']];
@@ -115,12 +195,7 @@ class AllScoresModel
                 $scored_entries = 0;
                 $total_score = 0;
                 $new_entries = 0;
-                foreach ($competition_dates as $competition) {
-                    $key = $competition['Competition_Date'];
-                    for ($entries = 0; $entries < $competition['Max_Entries']; $entries++) {
-                        $scores[$medium_key][$result['Member_ID']][$key][] = ['score' => ' ', 'award' => ''];
-                    }
-                }
+                $scores[$medium_key][$result['Member_ID']] = $default_score_array;
             }
 
             $award = avh_get_array_value($award_map, $result['Award']);
@@ -159,34 +234,6 @@ class AllScoresModel
             $medium_array[$medium_key]['title'] = $result['Medium'];
         }
 
-        // Start the form
-        global $post;
-        $action = home_url('/' . get_page_uri($post->ID));
-        $entity = new AllScoresEntity();
-        $entity->setSeasonChoices($season_options);
-        $entity->setSeasons($selected_season);
-        $form = $this->form_factory->create(
-            new AllScoresType($entity),
-            $entity,
-            ['action' => $action, 'attr' => ['id' => 'allscores']]
-        )
-        ;
-        $return = [];
-        $return['data'] = ['entries' => $medium_array, 'heading' => $heading];
-        $return['form'] = $form;
-
-        return $return;
-    }
-
-    /**
-     * Get the Seasons to be used in a select
-     *
-     * @return array
-     */
-    public function getSeasonsOptions()
-    {
-        $seasons = $this->season_helper->getSeasons();
-
-        return array_combine($seasons, $seasons);
+        return ['entries' => $medium_array, 'heading' => $heading];
     }
 }
