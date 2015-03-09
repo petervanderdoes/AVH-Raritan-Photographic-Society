@@ -105,12 +105,15 @@ class AllScoresModel
             ]
         )
         ;
-        $previous_member = '';
+        $average_score =0;
+        $medium_array = [];
+        $new_entries = 0;
         $previous_date = '';
         $previous_medium = '';
+        $previous_member = '';
         $scored_entries = 0;
-        $total_score = 0;
         $scores = [];
+        $total_score = 0;
         foreach ($club_competition_results as $result) {
 
             $medium_key = $medium_map[$result['Medium']];
