@@ -37,7 +37,6 @@ class AllScoresController
      */
     public function shortcodeAllScores()
     {
-        $output = '';
         $model_data = $this->model->getAllData();
 
         $data = $model_data['data'];
