@@ -30,6 +30,8 @@ matrix:
       env: WP_VERSION=4.1
     - php: "5.6"
       env: WP_VERSION=4.1
+    - php: "7"
+      env: WP_VERSION=4.1
 
 
 # Clones WordPress and configures our testing environment.
@@ -57,10 +59,10 @@ before_script:
 # Comment out the echo as this interferes with Sessions.
     - sed -i '61 s/^/\/\/ /' tests/phpunit/includes/bootstrap.php
     - sed -i '33 s/^/\/\/ /' tests/phpunit/includes/install.php
+# Setup database credentials
     - echo "define( 'RPS_DB_NAME', 'rps_tests' );" >> wp-tests-config.php
     - echo "define( 'RPS_DB_USER', 'travis' );" >> wp-tests-config.php
     - echo "define( 'RPS_DB_PASSWORD', '' );" >> wp-tests-config.php
-
     - cd "/tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG"
-
+    - mkdir -p /tmp/wordpress/src/wp-content/uploads/avh-rps/framework/
 script: phpunit
