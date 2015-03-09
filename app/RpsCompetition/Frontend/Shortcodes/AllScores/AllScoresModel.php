@@ -96,6 +96,7 @@ class AllScoresModel
      */
     private function getDefaultScoreArray($competition_dates)
     {
+        $score = [];
         foreach ($competition_dates as $competition) {
             $key = $competition['Competition_Date'];
             for ($entries = 0; $entries < $competition['Max_Entries']; $entries++) {
