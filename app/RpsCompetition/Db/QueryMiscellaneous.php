@@ -100,7 +100,8 @@ class QueryMiscellaneous
             WHERE c.ID = e.Competition_ID AND
                 Competition_Date >= %s AND
                 Competition_Date < %s AND
-                Special_Event = "N"
+                Special_Event = "N" AND
+                c.Scored = "Y"
             ORDER BY c.Medium DESC, Class_Code, c.Competition_Date',
             $competition_date_start,
             $competition_date_end

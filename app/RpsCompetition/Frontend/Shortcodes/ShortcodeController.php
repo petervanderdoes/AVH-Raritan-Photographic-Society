@@ -73,7 +73,7 @@ final class ShortcodeController extends Controller
      *
      * @todo: MVC
      */
-    public function shortcodeAllScores($attr, $content, $tag)
+    public function shortcodeAllScores2($attr, $content, $tag)
     {
         global $post;
 
@@ -201,7 +201,7 @@ final class ShortcodeController extends Controller
                             // Print the scores for the submitted entries for this month
                             $total_score_array = count($score_array);
                             for ($i = 0; $i < $total_score_array; $i++) {
-                                echo '<td align="center" class="' . $row_style . '">$score_array[$i]</td>';
+                                echo '<td align="center" class="' . $row_style . '">'.$score_array[$i].'</td>';
                             }
                             // Pad the unused entries for this member for this month
                             for ($i = 0; $i < $comp_max_entries[$score_key] - $total_score_array; $i++) {

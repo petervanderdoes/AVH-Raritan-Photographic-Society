@@ -1,0 +1,44 @@
+<?php
+
+namespace RpsCompetition\Frontend\Shortcodes\AllScores;
+
+use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
+
+/**
+ * Class AllScoresController
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\AllScores
+ */
+class AllScoresController
+{
+    /** @var  AllScoresModel */
+    private $model;
+    /** @var  ShortcodeView */
+    private $view;
+
+    /**
+     * Constructor
+     *
+     * @param ShortcodeView  $view
+     * @param AllScoresModel $model
+     */
+    public function __construct(ShortcodeView $view, AllScoresModel $model)
+    {
+
+        $this->view = $view;
+        $this->model = $model;
+    }
+
+    public function shortcodeAllScores()
+    {
+        $output = '';
+        $model_data = $this->model->getAllData();
+
+        $data = $model_data['data'];
+        $output = $this->view->fetch('all-scores.html.twig', ['data' => $data]);
+
+        return $output;
+    }
+}
