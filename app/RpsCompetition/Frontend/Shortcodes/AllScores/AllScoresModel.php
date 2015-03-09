@@ -53,7 +53,7 @@ class AllScoresModel
         $this->request = $request;
         $this->form_factory = $form_factory;
     }
-
+    
     /**
      * Collect all the data neccesary for the shortcode
      *
@@ -71,21 +71,12 @@ class AllScoresModel
         list ($season_start_date, $season_end_date) = $this->season_helper->getSeasonStartEnd($selected_season);
 
         $competition_dates = $this->query_competitions->getCompetitionDates($season_start_date, $season_end_date);
-        // Build an array of competition dates in "MM/DD" format for column titles.
-        // Also remember the max entries per member for each competition and the number
-        // of judges for each competition.
-        $total_max_entries = 0;
-        $comp_dates = [];
-        $comp_max_entries = [];
-        $comp_num_judges = [];
+
         $heading = [];
-        foreach ($competition_dates as $key => $recs) {
+        foreach ($competition_dates as $key => &$recs) {
             $date = new \DateTime($recs['Competition_Date']);
             $date_key = $date->format('Y-m-d');
-            $comp_dates[$date_key] = $date->format('m/d');
-            $comp_max_entries[$date_key] = $recs['Max_Entries'];
-            $total_max_entries += $recs['Max_Entries'];
-            $comp_num_judges[$date_key] = $recs['Num_Judges'];
+            $recs['Competition_Date'] = $date_key;
             $heading[$date_key] = ['date' => $date->format('m/d'), 'entries' => $recs['Max_Entries']];
         }
 
@@ -105,7 +96,8 @@ class AllScoresModel
             ]
         )
         ;
-        $average_score =0;
+        unset($club_competition_results_unsorted);
+        $average_score = 0;
         $medium_array = [];
         $new_entries = 0;
         $previous_date = '';
@@ -123,18 +115,15 @@ class AllScoresModel
                 $scored_entries = 0;
                 $total_score = 0;
                 $new_entries = 0;
-                foreach ($comp_dates as $key => $value) {
-                    for ($entries = 0; $entries < $comp_max_entries[$key]; $entries++) {
+                foreach ($competition_dates as $competition) {
+                    $key = $competition['Competition_Date'];
+                    for ($entries = 0; $entries < $competition['Max_Entries']; $entries++) {
                         $scores[$medium_key][$result['Member_ID']][$key][] = ['score' => ' ', 'award' => ''];
                     }
                 }
             }
 
-            if (!array_key_exists($result['Award'], $award_map)) {
-                $award = '';
-            } else {
-                $award = $award_map[$result['Award']];
-            }
+            $award = avh_get_array_value($award_map, $result['Award']);
 
             $date = new \DateTime($result['Competition_Date']);
             $competition_date_key = $date->format('Y-m-d');
@@ -147,6 +136,13 @@ class AllScoresModel
                 'score' => $result['Score'],
                 'award' => $award
             ];
+
+            /**
+             * Calculate the average score for the user for the medium.
+             *
+             * This works without an array because the array we're walking through is sorted.
+             *
+             */
             if ($result['Score'] !== null) {
                 $scored_entries++;
                 $total_score += $result['Score'];
