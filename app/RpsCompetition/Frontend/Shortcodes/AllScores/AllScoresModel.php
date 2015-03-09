@@ -151,7 +151,7 @@ class AllScoresModel
         $competition_dates = $this->query_competitions->getCompetitionDates($season_start_date, $season_end_date);
 
         $heading = [];
-        foreach ($competition_dates as $key => &$recs) {
+        foreach ($competition_dates as &$recs) {
             $date = new \DateTime($recs['Competition_Date']);
             $date_key = $date->format('Y-m-d');
             $recs['Competition_Date'] = $date_key;
