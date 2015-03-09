@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\AllScores;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
@@ -31,6 +30,11 @@ class AllScoresController
         $this->model = $model;
     }
 
+    /**
+     * Return all scores.
+     *
+     * @return string
+     */
     public function shortcodeAllScores()
     {
         $output = '';

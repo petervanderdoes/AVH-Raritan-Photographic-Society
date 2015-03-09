@@ -10,24 +10,18 @@ use RpsCompetition\Season\Helper as SeasonHelper;
 
 class AllScoresModel
 {
-    /**
-     * @var QueryCompetitions
-     */
+    /** @var QueryCompetitions */
     private $query_competitions;
-    /**
-     * @var QueryMiscellaneous
-     */
+    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
-    /**
-     * @var IlluminateRequest
-     */
+    /** @var IlluminateRequest */
     private $request;
-    /**
-     * @var SeasonHelper
-     */
+    /** @var SeasonHelper */
     private $season_helper;
 
     /**
+     * Constructor
+     *
      * @param QueryCompetitions  $query_competitions
      * @param QueryMiscellaneous $query_miscellaneous
      * @param SeasonHelper       $season_helper
@@ -45,6 +39,11 @@ class AllScoresModel
         $this->request = $request;
     }
 
+    /**
+     * Collect all the data neccesary for the shortcode
+     * 
+     * @return array
+     */
     public function getAllData()
     {
         $seasons = $this->season_helper->getSeasons();
