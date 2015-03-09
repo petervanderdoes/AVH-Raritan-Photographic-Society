@@ -121,7 +121,7 @@ class AllScoresModel
                 $total_score = 0;
                 $new_entries = 0;
                 foreach ($comp_dates as $key => $value) {
-                    for ($entries = 1; $entries <= $comp_max_entries[$key]; $entries++) {
+                    for ($entries = 0; $entries < $comp_max_entries[$key]; $entries++) {
                         $scores[$medium_key][$result['Member_ID']][$key][] = ['score' => ' ', 'award' => ''];
                     }
                 }
@@ -172,7 +172,7 @@ class AllScoresModel
             ['action' => $action, 'attr' => ['id' => 'allscores']]
         )
         ;
-        $return=[];
+        $return = [];
         $return['data'] = ['entries' => $medium_array, 'heading' => $heading];
         $return['form'] = $form;
 
