@@ -41,7 +41,8 @@ class AllScoresController
         $model_data = $this->model->getAllData();
 
         $data = $model_data['data'];
-        $output = $this->view->fetch('all-scores.html.twig', ['data' => $data]);
+        $form = $model_data['form'];
+        $output = $this->view->fetch('all-scores.html.twig', ['data' => $data, 'form' => $form->createView()]);
 
         return $output;
     }

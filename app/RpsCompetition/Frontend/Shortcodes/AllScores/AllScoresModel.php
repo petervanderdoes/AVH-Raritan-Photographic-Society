@@ -6,10 +6,22 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Entity\Forms\AllScores as AllScoresEntity;
+use RpsCompetition\Form\Type\AllScoresType;
 use RpsCompetition\Season\Helper as SeasonHelper;
+use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class AllScoresModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\AllScores
+ */
 class AllScoresModel
 {
+    /** @var FormFactory */
+    private $form_factory;
     /** @var QueryCompetitions */
     private $query_competitions;
     /** @var QueryMiscellaneous */
@@ -26,28 +38,31 @@ class AllScoresModel
      * @param QueryMiscellaneous $query_miscellaneous
      * @param SeasonHelper       $season_helper
      * @param IlluminateRequest  $request
+     * @param FormFactory        $form_factory
      */
     public function __construct(
         QueryCompetitions $query_competitions,
         QueryMiscellaneous $query_miscellaneous,
         SeasonHelper $season_helper,
-        IlluminateRequest $request
+        IlluminateRequest $request,
+        FormFactory $form_factory
     ) {
         $this->query_competitions = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
         $this->season_helper = $season_helper;
         $this->request = $request;
+        $this->form_factory = $form_factory;
     }
 
     /**
      * Collect all the data neccesary for the shortcode
-     * 
+     *
      * @return array
      */
     public function getAllData()
     {
-        $seasons = $this->season_helper->getSeasons();
-        $selected_season = esc_attr($this->request->input('new_season', end($seasons)));
+        $season_options = $this->getSeasonsOptions();
+        $selected_season = $this->request->input('form.seasons', end($season_options));
 
         $award_map = ['1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H'];
         $classification_map = ['0' => 'B', '1' => 'A', '2' => 'S'];
@@ -145,6 +160,34 @@ class AllScoresModel
             $medium_array[$medium_key]['title'] = $result['Medium'];
         }
 
-        return ['data' => ['entries' => $medium_array, 'heading' => $heading]];
+        // Start the form
+        global $post;
+        $action = home_url('/' . get_page_uri($post->ID));
+        $entity = new AllScoresEntity();
+        $entity->setSeasonChoices($season_options);
+        $entity->setSeasons($selected_season);
+        $form = $this->form_factory->create(
+            new AllScoresType($entity),
+            $entity,
+            ['action' => $action, 'attr' => ['id' => 'allscores']]
+        )
+        ;
+        $return=[];
+        $return['data'] = ['entries' => $medium_array, 'heading' => $heading];
+        $return['form'] = $form;
+
+        return $return;
+    }
+
+    /**
+     * Get the Seasons to be used in a select
+     *
+     * @return array
+     */
+    public function getSeasonsOptions()
+    {
+        $seasons = $this->season_helper->getSeasons();
+
+        return array_combine($seasons, $seasons);
     }
 }

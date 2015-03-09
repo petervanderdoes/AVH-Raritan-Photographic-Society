@@ -1,3 +1,13 @@
+<script type="text/javascript">function submit_form(control_name) {
+        document.form.submit();
+    }
+</script>
+
+{{ form_start(form) }}
+Select season: <span class="season-form">
+{{ form_widget(form.seasons) }}
+</span>
+{{ form_end(form) }}
 <div class="fix">
     <h4>{{ data.entries.cp.title }}</h4>
     <table>
@@ -50,7 +60,7 @@
             <th class="form_frame_header">Cl.</th>
             {% for data in data.heading %}
                 {% for i in 1..data.entries %}
-                    <th  style="width: 2rem" class="form_frame_header">{{ i }}</th>
+                    <th style="width: 2rem" class="form_frame_header">{{ i }}</th>
                 {% endfor %}
             {% endfor %}
             <th class="form_frame_header">Avg</th>
@@ -87,7 +97,7 @@
             <th class="form_frame_header">Cl.</th>
             {% for data in data.heading %}
                 {% for i in 1..data.entries %}
-                    <th  style="width: 2rem" class="form_frame_header">{{ i }}</th>
+                    <th style="width: 2rem" class="form_frame_header">{{ i }}</th>
                 {% endfor %}
             {% endfor %}
             <th class="form_frame_header">Avg</th>
@@ -124,7 +134,7 @@
             <th class="form_frame_header">Cl.</th>
             {% for data in data.heading %}
                 {% for i in 1..data.entries %}
-                    <th  style="width: 2rem" class="form_frame_header">{{ i }}</th>
+                    <th style="width: 2rem" class="form_frame_header">{{ i }}</th>
                 {% endfor %}
             {% endfor %}
             <th class="form_frame_header">Avg</th>

@@ -48,7 +48,8 @@ class AllScoresServiceProvider extends ServiceProvider
                     $app->make('QueryCompetitions'),
                     $app->make('QueryMiscellaneous'),
                     $app->make('SeasonHelper'),
-                    $app->make('IlluminateRequest')
+                    $app->make('IlluminateRequest'),
+                    $app->make('formFactory')
                 );
             }
         )
