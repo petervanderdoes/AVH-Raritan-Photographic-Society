@@ -33,13 +33,10 @@ class View
     private $html_builder;
     /** @var PhotoHelper */
     private $photo_helper;
-    /** @var IlluminateRequest */
     private $request;
-    /** @var RpsDb */
     private $rpsdb;
     /** @var SeasonHelper */
     private $season_helper;
-    /** @var Settings */
     private $settings;
     /** @var Twig_Environment */
     private $twig;

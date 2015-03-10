@@ -14,11 +14,8 @@ use RpsCompetition\Settings;
  */
 class CategoryWinnersController
 {
-    /** @var CategoryWinnersModel */
     private $model;
-    /** @var Settings */
     private $settings;
-    /** @var ShortcodeView */
     private $view;
 
     /**

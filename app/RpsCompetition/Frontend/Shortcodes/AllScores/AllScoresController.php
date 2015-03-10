@@ -12,9 +12,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  */
 class AllScoresController
 {
-    /** @var  AllScoresModel */
     private $model;
-    /** @var  ShortcodeView */
     private $view;
 
     /**

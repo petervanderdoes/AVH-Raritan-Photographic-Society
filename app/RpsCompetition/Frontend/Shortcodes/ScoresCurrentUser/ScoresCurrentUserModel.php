@@ -18,13 +18,9 @@ use Symfony\Component\Form\FormFactory;
  */
 class ScoresCurrentUserModel
 {
-    /** @var FormFactory */
     private $form_factory;
-    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
-    /** @var IlluminateRequest */
     private $requests;
-    /** @var SeasonHelper */
     private $season_helper;
 
     /**

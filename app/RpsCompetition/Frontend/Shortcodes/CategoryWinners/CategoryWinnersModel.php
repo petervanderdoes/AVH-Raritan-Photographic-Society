@@ -14,9 +14,7 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
  */
 class CategoryWinnersModel
 {
-    /** @var PhotoHelper */
     private $photo_helper;
-    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
 
     /**

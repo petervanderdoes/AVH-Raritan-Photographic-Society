@@ -13,9 +13,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  */
 class BanquetCurrentUserController
 {
-    /** @var BanquetCurrentUserModel */
     private $model;
-    /** @var ShortcodeView */
     private $view;
 
     /**

@@ -20,15 +20,10 @@ use Symfony\Component\Form\FormFactory;
  */
 class AllScoresModel
 {
-    /** @var FormFactory */
     private $form_factory;
-    /** @var QueryCompetitions */
     private $query_competitions;
-    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
-    /** @var IlluminateRequest */
     private $request;
-    /** @var SeasonHelper */
     private $season_helper;
 
     /**

@@ -12,9 +12,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  */
 class PersonWinnersController
 {
-    /** @var PersonWinnersModel */
     private $model;
-    /** @var ShortcodeView */
     private $view;
 
     /**

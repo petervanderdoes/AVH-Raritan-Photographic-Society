@@ -16,15 +16,10 @@ use RpsCompetition\Season\Helper as SeasonHelper;
  */
 class MonthlyWinnersModel
 {
-    /** @var PhotoHelper */
     private $photo_helper;
-    /** @var QueryCompetitions */
     private $query_competitions;
-    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
-    /** @var SeasonHelper */
     private $season_helper;
-    /** @var Session */
     private $session;
 
     /**

@@ -13,11 +13,8 @@ use RpsCompetition\Settings;
  */
 class MonthlyEntriesController
 {
-    /** @var MonthlyEntriesModel */
     private $model;
-    /** @var Settings */
     private $settings;
-    /** @var ShortcodeView */
     private $view;
 
     /**

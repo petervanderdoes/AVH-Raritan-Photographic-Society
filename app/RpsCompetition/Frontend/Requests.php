@@ -25,13 +25,9 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 class Requests
 {
-    /** @var IlluminateRequest */
     private $request;
-    /** @var RpsDb */
     private $rpsdb;
-    /** @var Session */
     private $session;
-    /** @var Settings */
     private $settings;
 
     /**

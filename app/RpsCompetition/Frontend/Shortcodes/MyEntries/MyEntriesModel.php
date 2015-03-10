@@ -25,25 +25,15 @@ use Symfony\Component\Form\FormFactory;
  */
 class MyEntriesModel
 {
-    /** @var CompetitionHelper */
     private $competition_helper;
-    /** @var FormFactory */
     private $form_factory;
-    /** @var PhotoHelper */
     private $photo_helper;
-    /** @var QueryCompetitions */
     private $query_competitions;
-    /** @var QueryEntries */
     private $query_entries;
-    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
-    /** @var IlluminateRequest */
     private $request;
-    /** @var SeasonHelper */
     private $season_helper;
-    /** @var Session */
     private $session;
-    /** @var Settings */
     private $settings;
 
     /**

@@ -33,19 +33,12 @@ class BanquetCurrentUserModel
     private $banquet_id_array;
     /** @var bool */
     private $form_disabled;
-    /** @var FormFactory */
     private $form_factory;
-    /** @var QueryBanquet */
     private $query_banquet;
-    /** @var QueryEntries */
     private $query_entries;
-    /** @var QueryMiscellaneous */
     private $query_miscellaneous;
-    /** @var IlluminateRequest */
     private $requests;
-    /** @var SeasonHelper */
     private $season_helper;
-    /** @var Session */
     private $session;
 
     /**

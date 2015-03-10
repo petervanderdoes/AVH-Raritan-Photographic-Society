@@ -19,15 +19,10 @@ use Symfony\Component\Form\FormFactory;
  */
 class EditTitleModel
 {
-    /** @var FormFactory */
     private $form_factory;
-    /** @var PhotoHelper */
     private $photo_helper;
-    /** @var QueryEntries */
     private $query_entries;
-    /** @var IlluminateRequest */
     private $request;
-    /** @var Settings */
     private $settings;
 
     /**

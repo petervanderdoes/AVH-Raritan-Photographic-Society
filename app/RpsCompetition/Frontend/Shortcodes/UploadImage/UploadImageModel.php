@@ -16,11 +16,8 @@ use Symfony\Component\Form\FormFactory;
  */
 class UploadImageModel
 {
-    /** @var FormFactory */
     private $form_factory;
-    /** @var IlluminateRequest */
     private $request;
-    /** @var Settings */
     private $settings;
 
     /**
