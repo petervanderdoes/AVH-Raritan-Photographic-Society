@@ -311,24 +311,6 @@ class AVH_RPS_Client
         ;
 
         $this->container->bind(
-            'ShortcodeModel',
-            function ($app) {
-                return new ShortcodeModel(
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryEntries'),
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('PhotoHelper'),
-                    $app->make('SeasonHelper'),
-                    $app->make('CompetitionHelper'),
-                    $app->make('Session'),
-                    $app->make('formFactory'),
-                    $app->make('Settings')
-                );
-            }
-        )
-        ;
-
-        $this->container->bind(
             'ShortcodeView',
             function ($app) {
                 $settings = $app->make('Settings');
