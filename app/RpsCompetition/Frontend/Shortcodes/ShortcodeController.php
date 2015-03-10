@@ -17,7 +17,7 @@ if (!class_exists('AVH_RPS_Client')) {
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes
  */
-final class ShortcodeController extends Controller
+final class ShortcodeController
 {
     /** @var \Avh\Html\HtmlBuilder */
     private $html;

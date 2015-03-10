@@ -301,7 +301,7 @@ class AVH_RPS_Client
                 return new ShortcodeRouter();
             }
         )
-        ;;
+        ;
         $this->container->bind(
             'ShortcodeController',
             function ($app) {
@@ -314,12 +314,10 @@ class AVH_RPS_Client
             'ShortcodeView',
             function ($app) {
                 $settings = $app->make('Settings');
-
                 return new ShortcodeView($settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/');
             }
         )
         ;
-        //$this->container->register('MyEntriesServiceProvider');
     }
 
     /**
