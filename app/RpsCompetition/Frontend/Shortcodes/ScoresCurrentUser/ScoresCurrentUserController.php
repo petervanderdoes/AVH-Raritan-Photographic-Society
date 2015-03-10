@@ -3,7 +3,6 @@
 namespace RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Libs\Controller;
 
 /**
  * Class ScoresCurrentUserController
@@ -12,7 +11,7 @@ use RpsCompetition\Libs\Controller;
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser
  */
-class ScoresCurrentUserController extends Controller
+class ScoresCurrentUserController
 {
     /** @var ScoresCurrentUserModel */
     private $model;

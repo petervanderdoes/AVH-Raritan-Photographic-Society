@@ -3,7 +3,6 @@
 namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Libs\Controller;
 
 /**
  * Class BanquetCurrentUserController
@@ -12,7 +11,7 @@ use RpsCompetition\Libs\Controller;
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
  */
-class BanquetCurrentUserController extends Controller
+class BanquetCurrentUserController
 {
     /** @var BanquetCurrentUserModel */
     private $model;

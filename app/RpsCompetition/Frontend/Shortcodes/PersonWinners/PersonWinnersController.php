@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend\Shortcodes\PersonWinners;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Libs\Controller;
 
 /**
  * Class PersonWinnersController
@@ -11,7 +10,7 @@ use RpsCompetition\Libs\Controller;
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\PersonWinners
  */
-class PersonWinnersController extends Controller
+class PersonWinnersController
 {
     /** @var PersonWinnersModel */
     private $model;
@@ -21,7 +20,7 @@ class PersonWinnersController extends Controller
     /**
      * Constructor
      *
-     * @param ShortcodeView  $view
+     * @param ShortcodeView      $view
      * @param PersonWinnersModel $model
      */
     public function __construct(ShortcodeView $view, PersonWinnersModel $model)

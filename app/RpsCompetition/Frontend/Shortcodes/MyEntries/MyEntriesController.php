@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Libs\Controller;
 
 /**
  * Class MyEntriesController
@@ -11,7 +10,7 @@ use RpsCompetition\Libs\Controller;
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
  */
-class MyEntriesController extends Controller
+class MyEntriesController
 {
     /** @var MyEntriesModel */
     private $model;

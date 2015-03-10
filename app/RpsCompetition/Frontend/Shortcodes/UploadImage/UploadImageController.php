@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend\Shortcodes\UploadImage;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Libs\Controller;
 use RpsCompetition\Settings;
 
 /**
@@ -12,7 +11,7 @@ use RpsCompetition\Settings;
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\UploadImage
  */
-class UploadImageController extends Controller
+class UploadImageController
 {
     /** @var UploadImageModel */
     private $model;

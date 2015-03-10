@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 use RpsCompetition\Application;
-use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -17,10 +16,14 @@ if (!class_exists('AVH_RPS_Client')) {
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\SocialNetworks
  */
-class SocialNetworksController extends Controller
+class SocialNetworksController
 {
     /** @var SocialNetworksModel */
     protected $model;
+    private $container;
+    private $options;
+    private $settings;
+    private $twig;
     /** @var  SocialNetworksView */
     private $view;
 
@@ -31,21 +34,11 @@ class SocialNetworksController extends Controller
      */
     public function __construct(Application $container)
     {
-        $this->setContainer($container);
-        $this->setSettings($this->container->make('Settings'));
-        $this->setOptions($this->container->make('OptionsGeneral'));
-        $this->setTemplateEngine(
-            $this->container->make(
-                'Templating',
-                [
-                    'template_dir' => $this->settings->get('template_dir') . '/social-networks',
-                    'cache_dir'    => $this->settings->get('upload_dir') . '/twig-cache/'
-                ]
-            )
-        )
-        ;
+        $this->container = $container;
+        $this->settings = $this->container->make('Settings');
+        $this->options = $this->container->make('OptionsGeneral');
 
-        $this->model = new SocialNetworksModel();
+        $this->model = $this->container->make('SocialNetworksModel');
         $this->view = $this->container->make(
             'SocialNetworksView',
             [

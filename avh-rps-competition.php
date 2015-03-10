@@ -339,7 +339,7 @@ class AVH_RPS_Client
             }
         )
         ;
-        $this->container->bind('SocialNetworkModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
+        $this->container->bind('SocialNetworksModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
         $this->container->bind(
             'SocialNetworksView',
             function ($app, $param) {
