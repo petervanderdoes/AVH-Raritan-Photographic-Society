@@ -19,6 +19,9 @@ if (!class_exists('AVH_RPS_Client')) {
  */
 final class ShortcodeController extends Controller
 {
+    /** @var \Avh\Html\HtmlBuilder */
+    private $html;
+
     /**
      * Constructor
      *
