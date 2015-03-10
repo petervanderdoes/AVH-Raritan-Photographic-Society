@@ -5,6 +5,13 @@ namespace RpsCompetition\Frontend\Shortcodes\AllScores;
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Application;
 
+/**
+ * Class AllScoresServiceProvider
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\AllScores
+ */
 class AllScoresServiceProvider extends ServiceProvider
 {
     /**

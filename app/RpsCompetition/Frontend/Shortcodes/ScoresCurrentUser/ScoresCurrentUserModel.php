@@ -9,6 +9,13 @@ use RpsCompetition\Form\Type\ScoresCurrentUserType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class ScoresCurrentUserModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser
+ */
 class ScoresCurrentUserModel
 {
     /** @var FormFactory */
