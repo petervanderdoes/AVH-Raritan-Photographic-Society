@@ -15,6 +15,8 @@ class EditTitleController
 {
     /** @var EditTitleModel */
     private $model;
+    /** @var Settings */
+    private $settings;
     /** @var ShortcodeView */
     private $view;
 

@@ -15,6 +15,7 @@ class UploadImageController
 {
     /** @var UploadImageModel */
     private $model;
+    private $settings;
     /** @var ShortcodeView */
     private $view;
 

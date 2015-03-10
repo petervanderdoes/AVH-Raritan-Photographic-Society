@@ -23,7 +23,6 @@ class SocialNetworksController
     private $container;
     private $options;
     private $settings;
-    private $twig;
     /** @var  SocialNetworksView */
     private $view;
 
@@ -39,14 +38,7 @@ class SocialNetworksController
         $this->options = $this->container->make('OptionsGeneral');
 
         $this->model = $this->container->make('SocialNetworksModel');
-        $this->view = $this->container->make(
-            'SocialNetworksView',
-            [
-                'template_dir' => $this->settings->get('template_dir'),
-                'cache_dir'    => $this->settings->get('upload_dir') . '/twig-cache/'
-            ]
-        )
-        ;
+        $this->view = $this->container->make('SocialNetworksView');
     }
 
     /**

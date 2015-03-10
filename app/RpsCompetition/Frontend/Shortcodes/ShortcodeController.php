@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend\Shortcodes;
 
 use RpsCompetition\Application;
-use RpsCompetition\Libs\Controller;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
