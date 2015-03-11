@@ -18,7 +18,7 @@ class BanquetCurrentUser
     protected $wp_get_referer;
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getAllentries()
     {
@@ -26,7 +26,7 @@ class BanquetCurrentUser
     }
 
     /**
-     * @param mixed $allentries
+     * @param string $allentries
      */
     public function setAllentries($allentries)
     {
@@ -34,7 +34,7 @@ class BanquetCurrentUser
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getBanquetids()
     {
@@ -42,7 +42,7 @@ class BanquetCurrentUser
     }
 
     /**
-     * @param mixed $banquetids
+     * @param string $banquetids
      */
     public function setBanquetids($banquetids)
     {

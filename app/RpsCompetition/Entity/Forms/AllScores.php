@@ -11,11 +11,8 @@ namespace RpsCompetition\Entity\Forms;
  */
 class AllScores
 {
-    protected $allentries;
-    protected $banquetids;
     protected $season_choices = [];
     protected $seasons;
-    protected $wp_get_referer;
 
     /**
      * @return array

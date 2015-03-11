@@ -28,21 +28,10 @@ class ListTable extends \WP_List_Table
 {
     public $messages;
     public $screen;
-    /**
-     * @var HtmlBuilder
-     */
+    /** @var HtmlBuilder */
     private $html;
-    /**
-     * @var Request
-     */
     private $request;
-    /**
-     * @var RpsDb
-     */
     private $rpsdb;
-    /**
-     * @var Settings
-     */
     private $settings;
 
     /**

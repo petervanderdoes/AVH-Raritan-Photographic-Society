@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class MyEntriesType extends AbstractType
 {
-    /** @var MyEntriesEntity  */
+    /** @var MyEntriesEntity */
     private $entity;
 
     /**

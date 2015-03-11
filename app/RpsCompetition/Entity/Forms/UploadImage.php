@@ -37,7 +37,7 @@ class UploadImage
     }
 
     /**
-     * @param mixed $file_name
+     * @param string $file_name
      */
     public function setFileName($file_name)
     {
@@ -61,7 +61,7 @@ class UploadImage
     }
 
     /**
-     * @return string mixed
+     * @return string
      */
     public function getTitle()
     {

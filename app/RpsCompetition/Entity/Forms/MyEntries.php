@@ -18,9 +18,9 @@ class MyEntries
     protected $select_comp;
     protected $selected_medium;
     protected $submit_control;
-
     private $selected_comp_choices = [];
     private $selected_medium_choices = [];
+
     /**
      * @return string
      */
@@ -62,6 +62,14 @@ class MyEntries
     }
 
     /**
+     * @param array $selected_comp_choices
+     */
+    public function setSelectedCompChoices($selected_comp_choices)
+    {
+        $this->selected_comp_choices = $selected_comp_choices;
+    }
+
+    /**
      * @return string
      */
     public function getSelectedMedium()
@@ -83,6 +91,14 @@ class MyEntries
     public function getSelectedMediumChoices()
     {
         return $this->selected_medium_choices;
+    }
+
+    /**
+     * @param array $selected_medium_choices
+     */
+    public function setSelectedMediumChoices($selected_medium_choices)
+    {
+        $this->selected_medium_choices = $selected_medium_choices;
     }
 
     /**
@@ -115,21 +131,5 @@ class MyEntries
     public function setWpnonce($wpnonce)
     {
         $this->_wpnonce = $wpnonce;
-    }
-
-    /**
-     * @param array $selected_comp_choices
-     */
-    public function setSelectedCompChoices($selected_comp_choices)
-    {
-        $this->selected_comp_choices = $selected_comp_choices;
-    }
-
-    /**
-     * @param array $selected_medium_choices
-     */
-    public function setSelectedMediumChoices($selected_medium_choices)
-    {
-        $this->selected_medium_choices = $selected_medium_choices;
     }
 }
