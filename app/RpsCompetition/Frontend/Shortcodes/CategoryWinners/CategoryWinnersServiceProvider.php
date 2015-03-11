@@ -52,8 +52,7 @@ class CategoryWinnersServiceProvider extends ServiceProvider
             'CategoryWinnersModel',
             function (Application $app) {
                 return new CategoryWinnersModel(
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('PhotoHelper')
+                    $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
                 );
             }
         )
