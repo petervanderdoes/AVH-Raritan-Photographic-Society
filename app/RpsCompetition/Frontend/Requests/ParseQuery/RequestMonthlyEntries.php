@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend\Requests\ParseQuery;
 
 use Avh\Network\Session;
 use Illuminate\Http\Request;
+use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Season\Helper as SeasonHelper;

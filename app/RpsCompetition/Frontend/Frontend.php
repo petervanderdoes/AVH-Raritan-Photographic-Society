@@ -1087,6 +1087,7 @@ class Frontend
      */
     private function setupRequestHandling()
     {
+        /** @var \RpsCompetition\Frontend\Requests\RequestController $requests_controller */
         $requests_controller = $this->container->make('RequestController');
         add_action('parse_query', [$requests_controller, 'handleParseQuery']);
 

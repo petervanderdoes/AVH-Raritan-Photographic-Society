@@ -47,7 +47,6 @@ class ParseQueryServiceProvider extends ServiceProvider
                     $app->make('CompetitionHelper'),
                     $app->make('IlluminateRequest'),
                     $app->make('Session')
-
                 );
             }
         )
