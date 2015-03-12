@@ -74,21 +74,16 @@ class Frontend
         $this->request = $container->make('IlluminateRequest');
         $this->options = $container->make('OptionsGeneral');
         $this->core = $container->make('Core');
-        $requests = $container->make('FrontendRequests');
+
         $this->view = $container->make('FrontendView');
         $this->formFactory = $container->make('formFactory');
+
+        $this->setupRequestHandling();
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
         add_action('init', [$this, 'actionInit'], 11);
-        add_action('parse_query', [$requests, 'actionHandleRequests']);
 
-        if ($this->request->isMethod('POST')) {
-            add_action('wp', [$this, 'actionHandleHttpPostRpsMyEntries']);
-            add_action('wp', [$this, 'actionHandleHttpPostRpsEditTitle']);
-            add_action('wp', [$this, 'actionHandleHttpPostRpsUploadEntry']);
-            add_action('wp', [$this, 'actionHandleHttpPostRpsBanquetEntries']);
-        }
         add_action('template_redirect', [$this, 'actionTemplateRedirectRpsWindowsClient']);
         add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
 
@@ -1085,6 +1080,19 @@ class Frontend
             ['rps-competition.fontawesome.style'],
             'to_remove'
         );
+    }
+
+    /**
+     * Setup the action to be handles by the Request Controller
+     */
+    private function setupRequestHandling()
+    {
+        $requests_controller = $this->container->make('RequestController');
+        add_action('parse_query', [$requests_controller, 'handleParseQuery']);
+
+        if ($this->request->isMethod('POST')) {
+            add_action('wp', [$requests_controller, 'handleWp']);
+        }
     }
 
     /**
