@@ -49,7 +49,7 @@ final class Transformation implements FilterInterface, ManipulatorInterface
      */
     private $imagine;
     /**
-     * @var array
+     * @var array|null
      */
     private $sorted;
 

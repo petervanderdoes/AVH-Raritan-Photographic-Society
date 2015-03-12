@@ -26,7 +26,7 @@ use Imagine\Image\PointInterface;
 final class Drawer implements DrawerInterface
 {
     /**
-     * @var Imagick
+     * @var \Imagick
      */
     private $imagick;
 
@@ -408,7 +408,7 @@ final class Drawer implements DrawerInterface
      *
      * @param ColorInterface $color
      *
-     * @return string
+     * @return \ImagickPixel
      */
     private function getColor(ColorInterface $color)
     {
@@ -422,6 +422,13 @@ final class Drawer implements DrawerInterface
      * Internal
      *
      * Fits a string into box with given width
+     *
+     * @param string       $string
+     * @param \ImagickDraw $text
+     * @param float        $angle
+     * @param integer      $width
+     *
+     * @return string
      */
     private function wrapText($string, $text, $angle, $width)
     {

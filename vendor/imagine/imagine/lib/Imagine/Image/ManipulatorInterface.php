@@ -95,7 +95,7 @@ interface ManipulatorInterface
      * @param ImageInterface $image
      * @param PointInterface $start
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      * @throws OutOfBoundsException
      * @throws RuntimeException
      *

@@ -6,12 +6,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/petervanderdoes/imagine.git",
-            "reference": "c77061991d5615e25df5f62cb2acc9c69bb4006d"
+            "reference": "18cb1cc1200b3dd1d9f9cd6c3d977af4808f7b09"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/petervanderdoes/imagine/zipball/c77061991d5615e25df5f62cb2acc9c69bb4006d",
-            "reference": "c77061991d5615e25df5f62cb2acc9c69bb4006d",
+            "url": "https://api.github.com/repos/petervanderdoes/imagine/zipball/18cb1cc1200b3dd1d9f9cd6c3d977af4808f7b09",
+            "reference": "18cb1cc1200b3dd1d9f9cd6c3d977af4808f7b09",
             "shasum": ""
         },
         "require": {
@@ -25,7 +25,7 @@
             "ext-gmagick": "to use the Gmagick implementation",
             "ext-imagick": "to use the Imagick implementation"
         },
-        "time": "2015-03-03 02:52:06",
+        "time": "2015-03-03 19:35:38",
         "type": "library",
         "extra": {
             "branch-alias": {

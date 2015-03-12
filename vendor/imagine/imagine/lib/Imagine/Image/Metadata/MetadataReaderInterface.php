@@ -18,7 +18,7 @@ interface MetadataReaderInterface
     /**
      * Reads metadata from a binary string.
      *
-     * @param $data The binary string to read.
+     * @param string $data The binary string to read.
      *
      * @return MetadataBag
      */
@@ -27,7 +27,7 @@ interface MetadataReaderInterface
     /**
      * Reads metadata from a file.
      *
-     * @param $file The path to the file where to read metadata.
+     * @param string $file The path to the file where to read metadata.
      *
      * @throws InvalidArgumentException In case the file does not exist.
      *
@@ -38,7 +38,7 @@ interface MetadataReaderInterface
     /**
      * Reads metadata from a stream.
      *
-     * @param $resource The stream to read.
+     * @param resource $resource The stream to read.
      *
      * @throws InvalidArgumentException In case the resource is not valid.
      *
