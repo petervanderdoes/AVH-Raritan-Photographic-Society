@@ -1,25 +1,24 @@
 <?php
-
-namespace RpsCompetition\Frontend\Shortcodes\AllScores;
+namespace RpsCompetition\Frontend\Requests\ParseQuery;
 
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Application;
 
 /**
- * Class AllScoresServiceProvider
+ * Class ParseQueryServiceProvider
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Frontend\Shortcodes\AllScores
+ * @package   RpsCompetition\Frontend\Shortcodes\ParseQuery
  */
-class AllScoresServiceProvider extends ServiceProvider
+class ParseQueryServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
      *
      * @var bool
      */
-    protected $defer = false;
+    protected $defer = true;
 
     /**
      * Get the services provided by the provider.
@@ -28,7 +27,7 @@ class AllScoresServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['AllScoresController'];
+        return ['RequestMonthlyEntries'];
     }
 
     /**
@@ -38,25 +37,17 @@ class AllScoresServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(
-            'AllScoresController',
-            function (Application $app) {
-                return new AllScoresController(
-                    $app->make('ShortcodeView'), $app->make('AllScoresModel')
-                );
-            }
-        )
-        ;
 
         $this->app->bind(
-            'AllScoresModel',
+            'RequestMonthlyEntries',
             function (Application $app) {
-                return new AllScoresModel(
+                return new RequestMonthlyEntries(
                     $app->make('QueryCompetitions'),
-                    $app->make('QueryMiscellaneous'),
                     $app->make('SeasonHelper'),
+                    $app->make('CompetitionHelper'),
                     $app->make('IlluminateRequest'),
-                    $app->make('formFactory')
+                    $app->make('Session')
+
                 );
             }
         )

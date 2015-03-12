@@ -30,14 +30,16 @@ class RequestController
      * @param $wp_query
      *
      * @internal Hook: parse_query
-     * @see      FrontEnd::setupRequestsHandler
+     * @see      FrontEnd::setupRequestHandling
      */
     public function handleParseQuery($wp_query)
     {
         $options = get_option('avh-rps');
         if (isset($wp_query->query['page_id'])) {
             if ($wp_query->query['page_id'] == $options['monthly_entries_post_id']) {
-                $this->handleRequestMonthlyEntries();
+                /** @var \RpsCompetition\Frontend\Requests\ParseQuery\RequestMonthlyEntries $request */
+                $request = $this->app->make('RequestMonthlyEntries');
+                $request->handleRequestMonthlyEntries();
             }
             if ($wp_query->query['page_id'] == $options['monthly_winners_post_id']) {
                 $this->handleRequestMonthlyWinners();
@@ -49,7 +51,7 @@ class RequestController
      * Handle HTTP Requests
      *
      * @internal Hooks: wp
-     * @see      FrontEnd::setupRequestsHandler
+     * @see      FrontEnd::setupRequestHandling
      */
     public function handleWp()
     {
