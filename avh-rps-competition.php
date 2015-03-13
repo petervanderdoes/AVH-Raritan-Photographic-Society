@@ -19,7 +19,6 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Frontend;
-use RpsCompetition\Frontend\Requests;
 use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
@@ -172,15 +171,6 @@ class AVH_RPS_Client
             'Core',
             function (Application $app) {
                 return new Core($app->make('Settings'));
-            }
-        )
-        ;
-        $this->container->bind(
-            'FrontendRequests',
-            function (Application $app) {
-                return new Requests(
-                    $app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session')
-                );
             }
         )
         ;
