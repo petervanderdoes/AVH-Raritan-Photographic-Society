@@ -124,6 +124,7 @@ return array(
     'RpsCompetition\\Frontend\\Requests' => $baseDir . '/app/RpsCompetition/Frontend/Requests.php',
     'RpsCompetition\\Frontend\\Requests\\ParseQuery\\ParseQueryServiceProvider' => $baseDir . '/app/RpsCompetition/Frontend/Requests/ParseQuery/ParseQueryServiceProvider.php',
     'RpsCompetition\\Frontend\\Requests\\ParseQuery\\RequestMonthlyEntries' => $baseDir . '/app/RpsCompetition/Frontend/Requests/ParseQuery/RequestMonthlyEntries.php',
+    'RpsCompetition\\Frontend\\Requests\\ParseQuery\\RequestMonthlyWinners' => $baseDir . '/app/RpsCompetition/Frontend/Requests/ParseQuery/RequestMonthlyWinners.php',
     'RpsCompetition\\Frontend\\Requests\\RequestController' => $baseDir . '/app/RpsCompetition/Frontend/Requests/RequestController.php',
     'RpsCompetition\\Frontend\\Shortcodes\\AllScores\\AllScoresController' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/AllScores/AllScoresController.php',
     'RpsCompetition\\Frontend\\Shortcodes\\AllScores\\AllScoresModel' => $baseDir . '/app/RpsCompetition/Frontend/Shortcodes/AllScores/AllScoresModel.php',

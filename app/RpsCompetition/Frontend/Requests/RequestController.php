@@ -42,7 +42,9 @@ class RequestController
                 $request->handleRequestMonthlyEntries();
             }
             if ($wp_query->query['page_id'] == $options['monthly_winners_post_id']) {
-                $this->handleRequestMonthlyWinners();
+                /** @var \RpsCompetition\Frontend\Requests\ParseQuery\RequestMonthlyWinners $request */
+                $request = $this->app->make('RequestMonthlyWinners');
+                $request->handleRequestMonthlyWinners();
             }
         }
     }

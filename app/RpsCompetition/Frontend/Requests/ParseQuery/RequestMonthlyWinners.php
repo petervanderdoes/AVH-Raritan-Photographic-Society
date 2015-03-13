@@ -9,7 +9,14 @@ use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Season\Helper as SeasonHelper;
 
-class RequestMonthlyEntries
+/**
+ * Class RequestMonthlyWinners
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Requests\ParseQuery
+ */
+class RequestMonthlyWinners
 {
     private $competition_helper;
     private $query_competitions;
@@ -42,11 +49,10 @@ class RequestMonthlyEntries
     }
 
     /**
-     * Handle HTTP requests for Monthly Entries before the page is displayed.
+     * Handle HTTP requests for Monthly Winners before the page is displayed.
      */
-    public function handleRequestMonthlyEntries()
+    public function handleRequestMonthlyWinners()
     {
-
         $redirect = false;
         $status = 303;
         $query_var_selected_date = get_query_var('selected_date', false);
@@ -71,7 +77,12 @@ class RequestMonthlyEntries
                     ))
                 ) {
                     $last_scored = $this->query_competitions->query(
-                        ['where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1]
+                        [
+                            'where'   => 'Scored="Y" AND Special_Event="N"',
+                            'orderby' => 'Competition_Date',
+                            'order'   => 'DESC',
+                            'number'  => 1
+                        ]
                     )
                     ;
                     $date_object = new \DateTime($last_scored->Competition_Date);
@@ -106,12 +117,12 @@ class RequestMonthlyEntries
         }
 
         if ($redirect) {
-            wp_redirect('/events/monthly-entries/' . $selected_date . '/', $status);
+            wp_redirect('/events/monthly-winners/' . $selected_date . '/', $status);
             exit();
         }
 
-        $this->session->set('monthly_entries_selected_date', $selected_date);
-        $this->session->set('monthly_entries_selected_season', $selected_season);
+        $this->session->set('monthly_winners_selected_date', $selected_date);
+        $this->session->set('monthly_winners_selected_season', $selected_season);
         $this->session->save();
     }
 }

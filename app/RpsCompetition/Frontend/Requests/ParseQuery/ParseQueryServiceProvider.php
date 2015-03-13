@@ -27,7 +27,7 @@ class ParseQueryServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['RequestMonthlyEntries'];
+        return ['RequestMonthlyEntries', 'RequestMonthlyWinners'];
     }
 
     /**
@@ -42,6 +42,19 @@ class ParseQueryServiceProvider extends ServiceProvider
             'RequestMonthlyEntries',
             function (Application $app) {
                 return new RequestMonthlyEntries(
+                    $app->make('QueryCompetitions'),
+                    $app->make('SeasonHelper'),
+                    $app->make('CompetitionHelper'),
+                    $app->make('IlluminateRequest'),
+                    $app->make('Session')
+                );
+            }
+        )
+        ;
+        $this->app->bind(
+            'RequestMonthlyWinners',
+            function (Application $app) {
+                return new RequestMonthlyWinners(
                     $app->make('QueryCompetitions'),
                     $app->make('SeasonHelper'),
                     $app->make('CompetitionHelper'),
