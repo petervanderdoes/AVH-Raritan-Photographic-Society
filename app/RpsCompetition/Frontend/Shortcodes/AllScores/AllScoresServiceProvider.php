@@ -19,7 +19,7 @@ class AllScoresServiceProvider extends ServiceProvider
      *
      * @var bool
      */
-    protected $defer = false;
+    protected $defer = true;
 
     /**
      * Get the services provided by the provider.
