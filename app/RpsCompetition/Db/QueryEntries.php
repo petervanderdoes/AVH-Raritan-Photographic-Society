@@ -232,6 +232,16 @@ class QueryEntries
     }
 
     /**
+     * Get the ID of the last inserted record.
+     *
+     * @return int
+     */
+    public function getInsertId()
+    {
+        return $this->rpsdb->insert_id;
+    }
+
+    /**
      * General query method
      *
      * @param array  $query_vars
