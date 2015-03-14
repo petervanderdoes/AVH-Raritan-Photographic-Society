@@ -56,6 +56,7 @@ class RequestUploadImageServiceProvider extends ServiceProvider
                     $app->make('\RpsCompetition\Entity\Forms\UploadImage'),
                     $app->make('Session'),
                     $app->make('IlluminateRequest'),
+                    $app->make('Settings'),
                     $app->make('QueryCompetitions'),
                     $app->make('QueryEntries'),
                     $app->make('PhotoHelper')

@@ -9,6 +9,13 @@ use RpsCompetition\Form\Type\UploadImageType;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class RequestUploadImage
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Requests\UploadImage
+ */
 class RequestUploadImage
 {
     private $entity;
@@ -53,7 +60,8 @@ class RequestUploadImage
     public function handleUploadImage()
     {
 
-        $form = $this->formFactory->create(
+        /** @var \Symfony\Component\Form\Form $form */
+        $form = $this->form_factory->create(
             $this->upload_image_type,
             $this->entity,
             ['attr' => ['id' => 'uploadentry']]

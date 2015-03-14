@@ -10,7 +10,9 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Forms\UploadImage as EntityUploadImage;
 use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Settings;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
  * Class RequestUploadImageModel
@@ -21,21 +23,23 @@ use Symfony\Component\Form\FormError;
  */
 class RequestUploadImageModel
 {
-
+    private $entity;
     /** @var \Symfony\Component\Form\Form $form */
     private $form;
-    private $entity;
     private $photo_helper;
     private $query_competitions;
     private $query_entries;
     private $request;
     private $session;
+    private $settings;
 
     /**
      * Constructor
      *
+     * @param EntityUploadImage $entity
      * @param Session           $session
      * @param Request           $request
+     * @param Settings          $settings
      * @param QueryCompetitions $query_competitions
      * @param QueryEntries      $query_entries
      * @param PhotoHelper       $photo_helper
@@ -44,6 +48,7 @@ class RequestUploadImageModel
         EntityUploadImage $entity,
         Session $session,
         Request $request,
+        Settings $settings,
         QueryCompetitions $query_competitions,
         QueryEntries $query_entries,
         PhotoHelper $photo_helper
@@ -55,6 +60,7 @@ class RequestUploadImageModel
         $this->query_entries = $query_entries;
         $this->photo_helper = $photo_helper;
         $this->entity = $entity;
+        $this->settings = $settings;
     }
 
     /**
@@ -157,8 +163,8 @@ class RequestUploadImageModel
 
         $server_file_name = $relative_server_path . '/' . $dest_name . '.jpg';
         $data = [
-            'Competition_ID'   => $comp_id,
-            'Title'            => $title,
+            'Competition_ID' => $comp_id,
+            'Title' => $title,
             'Client_File_Name' => $client_file_name,
             'Server_File_Name' => $server_file_name
         ];
@@ -170,7 +176,10 @@ class RequestUploadImageModel
             return false;
         }
 
-        $this->photo_helper->createCommonThumbnails($this->query_entries->getEntryById($this->rpsdb->insert_id));
+        $this->photo_helper->createCommonThumbnails(
+            $this->query_entries->getEntryById($this->query_entries->getInsertId())
+        )
+        ;
 
         return true;
     }
