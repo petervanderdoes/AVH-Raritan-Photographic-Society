@@ -49,7 +49,19 @@ class RequestEditTitleServiceProvider extends ServiceProvider
             }
         )
         ;
-        $this->app->bind('\RpsCompetition\Frontend\Requests\EditTitle\RequestMyTitleModel');
+        $this->app->bind(
+            '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel',
+            function (Application $app) {
+                return new RequestEditTitleModel(
+                    $app->make('\RpsCompetition\Entity\Forms\EditTitle'),
+                    $app->make('QueryCompetitions'),
+                    $app->make('QueryEntries'),
+                    $app->make('PhotoHelper'),
+                    $app->make('IlluminateRequest')
+                );
+            }
+        )
+        ;
         $this->app->bind(
             'RequestEditTitle',
             function (Application $app) {
@@ -57,12 +69,8 @@ class RequestEditTitleServiceProvider extends ServiceProvider
                     $app->make('\RpsCompetition\Entity\Forms\EditTitle'),
                     $app->make('\RpsCompetition\Form\Type\EditTitleType'),
                     $app->make('\RpsCompetition\Frontend\Requests\EditTitle\RequestMyTitleModel'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryEntries'),
-                    $app->make('PhotoHelper'),
                     $app->make('IlluminateRequest'),
                     $app->make('formFactory'),
-                    $app->make('Session'),
                     $app->make('Settings')
                 );
             }

@@ -39,35 +39,24 @@ class RequestEditTitle
      * @param EntityFormEditTitle $entity
      * @param EditTitleType       $edit_title_type
      * @param RequestMyTitleModel $model
-     * @param QueryCompetitions   $query_competitions
-     * @param QueryEntries        $query_entries
-     * @param PhotoHelper         $photo_helper
      * @param IlluminateRequest   $request
      * @param FormFactory         $form_factory
-     * @param Session             $session
      * @param Settings            $settings
+     *
      */
     public function __construct(
         EntityFormEditTitle $entity,
         EditTitleType $edit_title_type,
         RequestMyTitleModel $model,
-        QueryCompetitions $query_competitions,
-        QueryEntries $query_entries,
-        PhotoHelper $photo_helper,
         IlluminateRequest $request,
         FormFactory $form_factory,
-        Session $session,
         Settings $settings
     ) {
 
-        $this->query_competitions = $query_competitions;
         $this->entity = $entity;
         $this->edit_title_type = $edit_title_type;
         $this->request = $request;
         $this->form_factory = $form_factory;
-        $this->session = $session;
-        $this->query_entries = $query_entries;
-        $this->photo_helper = $photo_helper;
         $this->settings = $settings;
         $this->model = $model;
     }
@@ -85,10 +74,9 @@ class RequestEditTitle
         global $post;
 
         if (is_object($post) && $post->ID == 75) {
-            $entity = new EntityFormEditTitle();
 
             $form = $this->form_factory->create(
-                new EditTitleType($entity),
+                $this->edit_title_type,
                 $this->entity,
                 ['attr' => ['id' => 'edittitle']]
             )
@@ -111,48 +99,11 @@ class RequestEditTitle
             $new_title = $this->entity->getNewTitle();
 
             if ($this->entity->getNewTitle() !== $this->entity->getTitle()) {
-                $competition = $this->query_competitions->getCompetitionByEntryId($entity->getId());
-                if ($competition == null) {
-                    wp_die('Failed to SELECT competition for entry ID: ' . $entity->getId());
-                }
-
-                // Rename the image file on the server file system
-                $path = $this->photo_helper->getCompetitionPath(
-                    $competition->Competition_Date,
-                    $competition->Classification,
-                    $competition->Medium
-                )
-                ;
-                $old_file_parts = pathinfo($server_file_name);
-                $old_file_name = $old_file_parts['basename'];
-                $ext = $old_file_parts['extension'];
-                $current_user = wp_get_current_user();
-                $new_file_name_noext = sanitize_file_name(
-                        $new_title
-                    ) . '+' . $current_user->user_login . '+' . filemtime(
-                        $this->request->server('DOCUMENT_ROOT') . $server_file_name
-                    );
-                $new_file_name = $new_file_name_noext . '.' . $ext;
-                if (!$this->photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
-                    die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
-                }
-
-                // Update the Title and File Name in the database
-                $updated_data = [
-                    'ID'               => $entity->getId(),
-                    'Title'            => $new_title,
-                    'Server_File_Name' => $path . '/' . $new_file_name,
-                    'Date_Modified'    => current_time('mysql')
-                ];
-                $result = $this->query_entries->updateEntry($updated_data);
-                if ($result === false) {
-                    wp_die('Failed to UPDATE entry record from database');
-                }
+                $this->model->updateTitle($server_file_name, $new_title);
             }
             $redirect_to = $this->entity->getWpGetReferer();
             wp_redirect($redirect_to);
             exit();
         }
     }
-
 }
