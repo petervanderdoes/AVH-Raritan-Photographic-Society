@@ -7,6 +7,13 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 
+/**
+ * Class RequestMyEntriesModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Requests\MyEntries
+ */
 class RequestMyEntriesModel {
     private $photo_helper;
     private $query_entries;

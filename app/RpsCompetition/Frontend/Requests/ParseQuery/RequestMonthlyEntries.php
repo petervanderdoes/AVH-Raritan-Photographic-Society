@@ -9,6 +9,13 @@ use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Season\Helper as SeasonHelper;
 
+/**
+ * Class RequestMonthlyEntries
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Requests\ParseQuery
+ */
 class RequestMonthlyEntries
 {
     private $competition_helper;
