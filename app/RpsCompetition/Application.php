@@ -108,6 +108,7 @@ class Application extends Container implements ApplicationContract
             '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryServiceProvider',
             '\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesServiceProvider',
             '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleServiceProvider',
+            '\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageServiceProvider',
         ];
         $this->registerCoreContainerAliases();
         $this->registerConfiguredProviders();
