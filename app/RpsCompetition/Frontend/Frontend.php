@@ -729,45 +729,6 @@ class Frontend
     }
 
     /**
-     * Delete competition entries
-     *
-     * @param array $entries Array of entries ID to delete.
-     */
-    private function deleteCompetitionEntries($entries)
-    {
-        $query_entries = $this->container->make('QueryEntries');
-        $photo_helper = $this->container->make('PhotoHelper');
-
-        if (is_array($entries)) {
-            foreach ($entries as $id) {
-
-                $entry_record = $query_entries->getEntryById($id);
-                if ($entry_record == false) {
-                    $this->settings->set(
-                        'errmsg',
-                        sprintf('<b>Failed to SELECT competition entry with ID %s from database</b><br>', $id)
-                    )
-                    ;
-                } else {
-                    // Delete the record from the database
-                    $result = $query_entries->deleteEntry($id);
-                    if ($result === false) {
-                        $this->settings->set(
-                            'errmsg',
-                            sprintf('<b>Failed to DELETE competition entry %s from database</b><br>')
-                        )
-                        ;
-                    } else {
-                        // Delete the file from the server file system
-                        $photo_helper->deleteEntryFromDisk($entry_record);
-                    }
-                }
-            }
-        }
-        unset($query_entries, $photo_helper);
-    }
-
-    /**
      * Handles the required functions for when a user submits their Banquet Entries
      *
      * @param BanquetCurrentUserEntity $entity

@@ -49,16 +49,19 @@ class RequestMyEntriesServiceProvider extends ServiceProvider
             }
         )
         ;
+        $this->app->bind('\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesModel');
         $this->app->bind(
             'RequestMyEntries',
             function (Application $app) {
                 return new RequestMyEntries(
                     $app->make('\RpsCompetition\Entity\Forms\MyEntries'),
                     $app->make('\RpsCompetition\Form\Type\MyEntriesType'),
+                    $app->make('\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesModel'),
                     $app->make('QueryCompetitions'),
                     $app->make('IlluminateRequest'),
                     $app->make('formFactory'),
-                    $app->make('Session')
+                    $app->make('Session'),
+                    $app->make('Settings')
                 );
             }
         )

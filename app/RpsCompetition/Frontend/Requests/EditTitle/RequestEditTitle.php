@@ -4,11 +4,13 @@ namespace RpsCompetition\Frontend\Requests\EditTitle;
 
 use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
+use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
 use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
 
 /**
@@ -28,7 +30,21 @@ class RequestEditTitle
     private $query_entries;
     private $request;
     private $session;
+    private $settings;
 
+    /**
+     * Constructor
+     *
+     * @param EntityFormEditTitle $entity
+     * @param EditTitleType       $EditTitleType
+     * @param QueryCompetitions   $query_competitions
+     * @param QueryEntries        $query_entries
+     * @param PhotoHelper         $photo_helper
+     * @param IlluminateRequest   $request
+     * @param FormFactory         $formFactory
+     * @param Session             $session
+     * @param Settings            $settings
+     */
     public function __construct(
         EntityFormEditTitle $entity,
         EditTitleType $EditTitleType,
@@ -37,7 +53,8 @@ class RequestEditTitle
         PhotoHelper $photo_helper,
         IlluminateRequest $request,
         FormFactory $formFactory,
-        Session $session
+        Session $session,
+        Settings $settings
     ) {
 
         $this->query_competitions = $query_competitions;
@@ -48,6 +65,7 @@ class RequestEditTitle
         $this->session = $session;
         $this->query_entries = $query_entries;
         $this->photo_helper = $photo_helper;
+        $this->settings = $settings;
     }
 
     /**
@@ -76,7 +94,7 @@ class RequestEditTitle
             $redirect_to = $this->entity->getWpGetReferer();
 
             // Just return if user clicked Cancel
-            $this->isRequestCanceled($form, 'cancel', $redirect_to);
+            CommonHelper::isRequestCanceled($form, 'cancel', $redirect_to);
 
             if (!$form->isValid()) {
                 $errors = $form->getErrors();

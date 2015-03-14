@@ -21,6 +21,7 @@ class RequestMyEntries
 {
     private $entity;
     private $formFactory;
+    private $model;
     private $myEntriesType;
     private $query_competitions;
     private $request;
@@ -29,16 +30,18 @@ class RequestMyEntries
     /**
      * Constructor
      *
-     * @param EntityFormMyEntries $entity
-     * @param MyEntriesType       $myEntriesType
-     * @param QueryCompetitions   $query_competitions
-     * @param IlluminateRequest   $request
-     * @param FormFactory         $formFactory
-     * @param Session             $session
+     * @param EntityFormMyEntries   $entity
+     * @param MyEntriesType         $myEntriesType
+     * @param RequestMyEntriesModel $model
+     * @param QueryCompetitions     $query_competitions
+     * @param IlluminateRequest     $request
+     * @param FormFactory           $formFactory
+     * @param Session               $session
      */
     public function __construct(
         EntityFormMyEntries $entity,
         MyEntriesType $myEntriesType,
+    RequestMyEntriesModel $model,
         QueryCompetitions $query_competitions,
         IlluminateRequest $request,
         FormFactory $formFactory,
@@ -51,6 +54,7 @@ class RequestMyEntries
         $this->request = $request;
         $this->formFactory = $formFactory;
         $this->session = $session;
+        $this->model = $model;
     }
 
     /**
@@ -124,7 +128,7 @@ class RequestMyEntries
                         )
                         ) {
                             if ($entry_array !== null) {
-                                $this->deleteCompetitionEntries($entry_array);
+                                $this->model->deleteCompetitionEntries($entry_array);
                                 $redirect = get_permalink($post->ID);
                                 wp_redirect($redirect);
                                 exit();
