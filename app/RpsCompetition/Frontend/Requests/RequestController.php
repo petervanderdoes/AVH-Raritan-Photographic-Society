@@ -77,7 +77,9 @@ class RequestController
             }
 
             if ($post->ID == 89) {
-                $this->handlePostUploadEntry();
+                /** @var \RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImage $request */
+                $request = $this->app->make('RequestUploadImage');
+                $request->handleUploadImage();
             }
         }
     }
