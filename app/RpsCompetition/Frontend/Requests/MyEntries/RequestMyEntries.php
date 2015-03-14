@@ -20,9 +20,9 @@ use Symfony\Component\Form\FormFactory;
 class RequestMyEntries
 {
     private $entity;
-    private $formFactory;
+    private $form_factory;
     private $model;
-    private $myEntriesType;
+    private $my_entries_type;
     private $query_competitions;
     private $request;
     private $session;
@@ -31,28 +31,28 @@ class RequestMyEntries
      * Constructor
      *
      * @param EntityFormMyEntries   $entity
-     * @param MyEntriesType         $myEntriesType
+     * @param MyEntriesType         $my_entries_type
      * @param RequestMyEntriesModel $model
      * @param QueryCompetitions     $query_competitions
      * @param IlluminateRequest     $request
-     * @param FormFactory           $formFactory
+     * @param FormFactory           $form_factory
      * @param Session               $session
      */
     public function __construct(
         EntityFormMyEntries $entity,
-        MyEntriesType $myEntriesType,
-    RequestMyEntriesModel $model,
+        MyEntriesType $my_entries_type,
+        RequestMyEntriesModel $model,
         QueryCompetitions $query_competitions,
         IlluminateRequest $request,
-        FormFactory $formFactory,
+        FormFactory $form_factory,
         Session $session
     ) {
 
         $this->query_competitions = $query_competitions;
         $this->entity = $entity;
-        $this->myEntriesType = $myEntriesType;
+        $this->my_entries_type = $my_entries_type;
         $this->request = $request;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
         $this->session = $session;
         $this->model = $model;
     }
@@ -72,7 +72,7 @@ class RequestMyEntries
         if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
             $this->entity->setSelectComp($this->request->input('form.select_comp'));
             $this->entity->setSelectedMedium($this->request->input('form.selected_medium'));
-            $form = $this->formFactory->create($this->myEntriesType, $this->entity, ['attr' => ['id' => 'myentries']]);
+            $form = $this->form_factory->create($this->my_entries_type, $this->entity, ['attr' => ['id' => 'myentries']]);
             $form->handleRequest($this->request);
 
             $page = explode('-', $post->post_name);
