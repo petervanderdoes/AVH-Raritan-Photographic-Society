@@ -61,7 +61,9 @@ class RequestController
 
         if (is_object($post)) {
             if ($post->ID == 56 || $post->ID == 58) {
-                $this->handlePostRpsMyEntries();
+                /** @var \RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntries $request */
+                $request = $this->app->make('RequestMyEntries');
+                $request-> handleHttpPostRpsMyEntries();
             }
 
             if ($post->post_title == 'Banquet Entries') {
