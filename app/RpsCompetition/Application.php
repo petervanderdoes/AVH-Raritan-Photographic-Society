@@ -95,20 +95,20 @@ class Application extends Container implements ApplicationContract
         $this->instance('config', $config = new Repository($items));
 
         $this->config['app.providers'] = [
+            '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleServiceProvider',
+            '\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesServiceProvider',
+            '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryServiceProvider',
+            '\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\AllScores\AllScoresServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser\BanquetCurrentUserServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\CategoryWinners\CategoryWinnersServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\EditTitle\EditTitleServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\MonthlyEntries\MonthlyEntriesServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\MonthlyWinners\MonthlyWinnersServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\MyEntries\MyEntriesServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\PersonWinners\PersonWinnersServiceProvider',
-            '\RpsCompetition\Frontend\Shortcodes\UploadImage\UploadImageServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser\ScoresCurrentUserServiceProvider',
-            '\RpsCompetition\Frontend\Shortcodes\CategoryWinners\CategoryWinnersServiceProvider',
-            '\RpsCompetition\Frontend\Shortcodes\AllScores\AllScoresServiceProvider',
-            '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryServiceProvider',
-            '\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesServiceProvider',
-            '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleServiceProvider',
-            '\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\UploadImage\UploadImageServiceProvider',
         ];
         $this->registerCoreContainerAliases();
         $this->registerConfiguredProviders();
