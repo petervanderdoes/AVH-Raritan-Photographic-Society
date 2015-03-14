@@ -5,14 +5,18 @@ namespace RpsCompetition\Frontend\Requests\EditTitle;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\MyEntries as EntityMyEntries;
+use RpsCompetition\Entity\Forms\EditTitle as EntityEditTitle;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 
+/**
+ * Class RequestEditTitleModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Requests\EditTitle
+ */
 class RequestEditTitleModel
 {
-    /**
-     * @var EntityMyEntries
-     */
     private $entity;
     private $photo_helper;
     private $query_competitions;
@@ -20,14 +24,14 @@ class RequestEditTitleModel
     private $request;
 
     /**
-     * @param EntityMyEntries   $entity
+     * @param EntityEditTitle   $entity
      * @param QueryCompetitions $query_competitions
      * @param QueryEntries      $query_entries
      * @param PhotoHelper       $photo_helper
      * @param IlluminateRequest $request
      */
     public function __construct(
-        EntityMyEntries $entity,
+        EntityEditTitle $entity,
         QueryCompetitions $query_competitions,
         QueryEntries $query_entries,
         PhotoHelper $photo_helper,

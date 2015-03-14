@@ -68,7 +68,7 @@ class RequestEditTitleServiceProvider extends ServiceProvider
                 return new RequestEditTitle(
                     $app->make('\RpsCompetition\Entity\Forms\EditTitle'),
                     $app->make('\RpsCompetition\Form\Type\EditTitleType'),
-                    $app->make('\RpsCompetition\Frontend\Requests\EditTitle\RequestMyTitleModel'),
+                    $app->make('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel'),
                     $app->make('IlluminateRequest'),
                     $app->make('formFactory'),
                     $app->make('Settings')

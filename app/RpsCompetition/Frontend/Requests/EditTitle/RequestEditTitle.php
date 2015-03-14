@@ -2,14 +2,10 @@
 
 namespace RpsCompetition\Frontend\Requests\EditTitle;
 
-use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
 
@@ -26,11 +22,7 @@ class RequestEditTitle
     private $entity;
     private $form_factory;
     private $model;
-    private $photo_helper;
-    private $query_competitions;
-    private $query_entries;
     private $request;
-    private $session;
     private $settings;
 
     /**
@@ -38,7 +30,7 @@ class RequestEditTitle
      *
      * @param EntityFormEditTitle $entity
      * @param EditTitleType       $edit_title_type
-     * @param RequestMyTitleModel $model
+     * @param RequestEditTitleModel $model
      * @param IlluminateRequest   $request
      * @param FormFactory         $form_factory
      * @param Settings            $settings
@@ -47,7 +39,7 @@ class RequestEditTitle
     public function __construct(
         EntityFormEditTitle $entity,
         EditTitleType $edit_title_type,
-        RequestMyTitleModel $model,
+        RequestEditTitleModel $model,
         IlluminateRequest $request,
         FormFactory $form_factory,
         Settings $settings
