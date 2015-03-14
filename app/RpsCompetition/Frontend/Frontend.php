@@ -8,15 +8,10 @@ use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
-use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
-use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Entity\Forms\UploadImage as UploadImageEntity;
 use RpsCompetition\Form\Type\BanquetCurrentUserType;
-use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Form\Type\UploadImageType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
@@ -226,11 +221,7 @@ class Frontend
             }
 
             // Prepare the title and client file name for storing in the database
-            if (get_magic_quotes_gpc()) {
-                $title = stripslashes(trim($this->request->input('form.title')));
-            } else {
-                $title = trim($this->request->input('form.title'));
-            }
+            $title = trim($this->request->input('form.title'));
 
             $file = $this->request->file('form.file_name');
             $client_file_name = $file->getClientOriginalName();

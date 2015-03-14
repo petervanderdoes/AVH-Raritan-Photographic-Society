@@ -22,9 +22,10 @@ use Symfony\Component\Form\FormFactory;
  */
 class RequestEditTitle
 {
-    private $EditTitleType;
+    private $edit_title_type;
     private $entity;
-    private $formFactory;
+    private $form_factory;
+    private $model;
     private $photo_helper;
     private $query_competitions;
     private $query_entries;
@@ -36,36 +37,39 @@ class RequestEditTitle
      * Constructor
      *
      * @param EntityFormEditTitle $entity
-     * @param EditTitleType       $EditTitleType
+     * @param EditTitleType       $edit_title_type
+     * @param RequestMyTitleModel $model
      * @param QueryCompetitions   $query_competitions
      * @param QueryEntries        $query_entries
      * @param PhotoHelper         $photo_helper
      * @param IlluminateRequest   $request
-     * @param FormFactory         $formFactory
+     * @param FormFactory         $form_factory
      * @param Session             $session
      * @param Settings            $settings
      */
     public function __construct(
         EntityFormEditTitle $entity,
-        EditTitleType $EditTitleType,
+        EditTitleType $edit_title_type,
+        RequestMyTitleModel $model,
         QueryCompetitions $query_competitions,
         QueryEntries $query_entries,
         PhotoHelper $photo_helper,
         IlluminateRequest $request,
-        FormFactory $formFactory,
+        FormFactory $form_factory,
         Session $session,
         Settings $settings
     ) {
 
         $this->query_competitions = $query_competitions;
         $this->entity = $entity;
-        $this->EditTitleType = $EditTitleType;
+        $this->edit_title_type = $edit_title_type;
         $this->request = $request;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
         $this->session = $session;
         $this->query_entries = $query_entries;
         $this->photo_helper = $photo_helper;
         $this->settings = $settings;
+        $this->model = $model;
     }
 
     /**
@@ -83,7 +87,7 @@ class RequestEditTitle
         if (is_object($post) && $post->ID == 75) {
             $entity = new EntityFormEditTitle();
 
-            $form = $this->formFactory->create(
+            $form = $this->form_factory->create(
                 new EditTitleType($entity),
                 $this->entity,
                 ['attr' => ['id' => 'edittitle']]
@@ -105,10 +109,6 @@ class RequestEditTitle
 
             $server_file_name = $this->entity->getServerFileName();
             $new_title = $this->entity->getNewTitle();
-            if (get_magic_quotes_gpc()) {
-                $server_file_name = stripslashes($server_file_name);
-                $new_title = stripslashes($new_title);
-            }
 
             if ($this->entity->getNewTitle() !== $this->entity->getTitle()) {
                 $competition = $this->query_competitions->getCompetitionByEntryId($entity->getId());
