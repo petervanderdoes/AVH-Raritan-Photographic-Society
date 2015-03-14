@@ -76,7 +76,7 @@ class RequestEditTitle
      * @see      Shortcodes::shortcodeEditTitle
      * @internal Hook: suffusion_before_post
      */
-    public function actionHandleHttpPostRpsEditTitle()
+    public function handleRequestEditTitle()
     {
         global $post;
 

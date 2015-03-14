@@ -63,7 +63,7 @@ class RequestController
             if ($post->ID == 56 || $post->ID == 58) {
                 /** @var \RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntries $request */
                 $request = $this->app->make('RequestMyEntries');
-                $request-> handleHttpPostRpsMyEntries();
+                $request->handleRequestMyEntries();
             }
 
             if ($post->post_title == 'Banquet Entries') {
@@ -71,7 +71,9 @@ class RequestController
             }
 
             if ($post->ID == 75) {
-                $this->handlePostEditTitle();
+                /** @var \RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitle $request */
+                $request = $this->app->make('RequestEditTitle');
+                $request->handleRequestEditTitle();
             }
 
             if ($post->ID == 89) {

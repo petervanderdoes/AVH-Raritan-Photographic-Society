@@ -65,7 +65,7 @@ class RequestMyEntries
      * @see      Shortcodes::shortcodeMyEntries
      * @internal Hook: suffusion_before_post
      */
-    public function handleHttpPostRpsMyEntries()
+    public function handleRequestMyEntries()
     {
         global $post;
 
