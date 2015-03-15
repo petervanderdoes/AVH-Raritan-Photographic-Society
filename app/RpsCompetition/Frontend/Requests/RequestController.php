@@ -14,14 +14,18 @@ use RpsCompetition\Application;
 class RequestController
 {
     private $app;
+    /** @var array */
+    private $options;
 
     /**
      * Constructor
      *
      * @param Application $app
      */
-    public function __construct(Application $app) {
+    public function __construct(Application $app)
+    {
         $this->app = $app;
+        $this->options = get_option('avh-rps');
     }
 
     /**
@@ -34,14 +38,13 @@ class RequestController
      */
     public function handleParseQuery($wp_query)
     {
-        $options = get_option('avh-rps');
         if (isset($wp_query->query['page_id'])) {
-            if ($wp_query->query['page_id'] == $options['monthly_entries_post_id']) {
+            if ($wp_query->query['page_id'] == $this->options['monthly_entries_post_id']) {
                 /** @var \RpsCompetition\Frontend\Requests\ParseQuery\RequestMonthlyEntries $request */
                 $request = $this->app->make('RequestMonthlyEntries');
                 $request->handleRequestMonthlyEntries();
             }
-            if ($wp_query->query['page_id'] == $options['monthly_winners_post_id']) {
+            if ($wp_query->query['page_id'] == $this->options['monthly_winners_post_id']) {
                 /** @var \RpsCompetition\Frontend\Requests\ParseQuery\RequestMonthlyWinners $request */
                 $request = $this->app->make('RequestMonthlyWinners');
                 $request->handleRequestMonthlyWinners();
@@ -60,25 +63,25 @@ class RequestController
         global $post;
 
         if (is_object($post)) {
-            if ($post->ID == 56 || $post->ID == 58) {
+            if ($post->ID == $this->options['my_digital_entries'] || $post->ID == $this->options['my_print_entries']) {
                 /** @var \RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntries $request */
                 $request = $this->app->make('RequestMyEntries');
                 $request->handleRequestMyEntries();
             }
 
-            if ($post->post_title == 'Banquet Entries') {
+            if ($post->ID == $this->options['banquet_entries']) {
                 /** @var \RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntries $request */
                 $request = $this->app->make('RequestBanquetEntries');
                 $request->handleBanquetEntries();
             }
 
-            if ($post->ID == 75) {
+            if ($post->ID == $this->options['edit_title']) {
                 /** @var \RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitle $request */
                 $request = $this->app->make('RequestEditTitle');
                 $request->handleRequestEditTitle();
             }
 
-            if ($post->ID == 89) {
+            if ($post->ID == $this->options['upload_image']) {
                 /** @var \RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImage $request */
                 $request = $this->app->make('RequestUploadImage');
                 $request->handleUploadImage();
