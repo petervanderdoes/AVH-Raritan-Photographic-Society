@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.6-dev.1
+* Preparation for new development cycle.
+
 #### Version 2.0.5
 * Replace intervention/image library with imagine/imagine from my own Github account.
 * The Sitemap filter for the frontpage only has to run when the sitemap is of the type post.
