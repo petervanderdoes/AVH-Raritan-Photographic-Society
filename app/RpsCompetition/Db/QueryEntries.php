@@ -10,7 +10,6 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class QueryEntries
  *
- * @package RpsCompetition\Db
  * @property integer ID
  * @property integer Competition_ID
  * @property integer Member_ID
@@ -21,6 +20,10 @@ if (!class_exists('AVH_RPS_Client')) {
  * @property string  Date_Modified
  * @property float   Score
  * @property string  Award
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Db
  */
 class QueryEntries
 {
@@ -65,11 +68,11 @@ class QueryEntries
     public function checkDuplicateTitle($id, $title, $user_id)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT ID
+            'SELECT ID
             FROM entries
             WHERE Competition_ID = %s
                 AND Member_ID = %s
-                AND Title = %s",
+                AND Title = %s',
             $id,
             $user_id,
             $title
@@ -96,11 +99,11 @@ class QueryEntries
     public function countEntriesByCompetitionDate($date, $user_id)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT count(e.ID) as Total_Entries_Submitted
+            'SELECT count(e.ID) as Total_Entries_Submitted
                     FROM entries e, competitions c
                     WHERE e.Competition_ID = c.ID AND
                     c.Competition_Date = DATE(%s) AND
-                    e.Member_ID = %s",
+                    e.Member_ID = %s',
             $date,
             $user_id
         )
@@ -121,9 +124,9 @@ class QueryEntries
     public function countEntriesByCompetitionId($id, $user_id)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT count(ID) FROM entries
+            'SELECT count(ID) FROM entries
             WHERE Competition_ID = %s
-                AND Member_ID = %s",
+                AND Member_ID = %s',
             $id,
             $user_id
         )
@@ -146,11 +149,11 @@ class QueryEntries
         $competition_date = $this->rpsdb->getMysqldate($competition_date);
 
         $sql = $this->rpsdb->prepare(
-            "SELECT COUNT(entries.ID) as Total_Submitted
+            'SELECT COUNT(entries.ID) as Total_Submitted
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND	entries.Member_ID=%s
-                AND competitions.Competition_Date = %s ",
+                AND competitions.Competition_Date = %s ',
             $user_id,
             $competition_date
         )
@@ -189,13 +192,13 @@ class QueryEntries
         $competition_date = $this->rpsdb->getMysqldate($competition_date);
 
         $sql = $this->rpsdb->prepare(
-            "SELECT entries.*
+            'SELECT entries.*
             FROM competitions, entries
             WHERE competitions.ID = entries.Competition_ID
                 AND entries.Member_ID = %s
                 AND competitions.Competition_Date = %s
                 AND competitions.Classification = %s
-                AND competitions.Medium = %s",
+                AND competitions.Medium = %s',
             $user_id,
             $competition_date,
             $classification,
@@ -218,14 +221,24 @@ class QueryEntries
     public function getEntryById($id, $output = OBJECT)
     {
         $sql = $this->rpsdb->prepare(
-            "SELECT *
+            'SELECT *
             FROM entries
-            WHERE ID = %s",
+            WHERE ID = %s',
             $id
         )
         ;
 
         return $this->rpsdb->get_row($sql, $output);
+    }
+
+    /**
+     * Get the ID of the last inserted record.
+     *
+     * @return int
+     */
+    public function getInsertId()
+    {
+        return $this->rpsdb->insert_id;
     }
 
     /**
@@ -281,7 +294,15 @@ class QueryEntries
             $fields = '*';
         }
 
-        $query = "SELECT $fields FROM entries $join WHERE $where ORDER BY $orderby $order $limits";
+        $query = sprintf(
+            'SELECT %s FROM entries %s WHERE %s ORDER BY %s %s %s',
+            $fields,
+            $join,
+            $where,
+            $orderby,
+            $order,
+            $limits
+        );
 
         if ($count) {
             return $this->rpsdb->get_var($query);
@@ -313,9 +334,7 @@ class QueryEntries
             $data = stripslashes_deep($data);
             if (false === $this->rpsdb->update('entries', $data, $where)) {
                 return new \WP_Error(
-                    'db_update_error',
-                    'Could not update entry in the database',
-                    $this->rpsdb->last_error
+                    'db_update_error', 'Could not update entry in the database', $this->rpsdb->last_error
                 );
             }
         }

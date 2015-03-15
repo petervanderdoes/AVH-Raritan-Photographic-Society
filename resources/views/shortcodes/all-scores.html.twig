@@ -1,0 +1,149 @@
+<script type="text/javascript">function submit_form(control_name) {
+        document.form.submit();
+    }
+</script>
+
+{{ form_start(form) }}
+Select season: <span class="season-form">
+{{ form_widget(form.seasons) }}
+</span>
+{{ form_end(form) }}
+<h4>{{ data.entries.cp.title }}</h4>
+<table>
+    <tbody>
+    <tr>
+        <th colspan="2">&nbsp;</th>
+        {% for data in data.heading %}
+            <th colspan="{{ data.entries }}">{{ data.date }}</th>
+        {% endfor %}
+        <th>&nbsp;</th>
+    </tr>
+    <tr>
+        <th>Member</th>
+        <th>Cl.</th>
+        {% for data in data.heading %}
+            {% for i in 1..data.entries %}
+                <th class="form_frame_header entry_nr">{{ i }}</th>
+            {% endfor %}
+        {% endfor %}
+        <th>Avg</th>
+    </tr>
+    {% for entry in data.entries.cp.users %}
+        <tr>
+            <td align="left">{{ entry.name }}</td>
+            <td align="center">{{ entry.classification }}</td>
+            {% for dates in entry.scores %}
+                {% for score in dates %}
+                    <td align="center">{{ score.score }}<sup>{{ score.award }}</sup></td>
+                {% endfor %}
+            {% endfor %}
+            <td align="center">{{ entry.average_score|number_format(2, '.', ',') }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h4>{{ data.entries.bp.title }}</h4>
+<table>
+    <tbody>
+    <tr>
+        <th colspan="2">&nbsp;</th>
+        {% for data in data.heading %}
+            <th colspan="{{ data.entries }}">{{ data.date }}</th>
+        {% endfor %}
+        <th>&nbsp;</th>
+    </tr>
+    <tr>
+        <th>Member</th>
+        <th>Cl.</th>
+        {% for data in data.heading %}
+            {% for i in 1..data.entries %}
+                <th class="form_frame_header entry_nr">{{ i }}</th>
+            {% endfor %}
+        {% endfor %}
+        <th>Avg</th>
+    </tr>
+    {% for entry in data.entries.bp.users %}
+        <tr>
+            <td align="left">{{ entry.name }}</td>
+            <td align="center">{{ entry.classification }}</td>
+            {% for dates in entry.scores %}
+                {% for score in dates %}
+                    <td align="center">{{ score.score }}<sup>{{ score.award }}</sup></td>
+                {% endfor %}
+            {% endfor %}
+            <td align="center">{{ entry.average_score|number_format(2, '.', ',') }}</td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h4>{{ data.entries.cd.title }}</h4>
+<table>
+    <tbody>
+    <tr>
+        <th colspan="2">&nbsp;</th>
+        {% for data in data.heading %}
+            <th colspan="{{ data.entries }}">{{ data.date }}</th>
+        {% endfor %}
+        <th>&nbsp;</th>
+    </tr>
+    <tr>
+        <th>Member</th>
+        <th>Cl.</th>
+        {% for data in data.heading %}
+            {% for i in 1..data.entries %}
+                <th class="form_frame_header entry_nr">{{ i }}</th>
+            {% endfor %}
+        {% endfor %}
+        <th>Avg</th>
+    </tr>
+    {% for entry in data.entries.cd.users %}
+        <tr>
+            <td align="left">{{ entry.name }}</td>
+            <td align="center">{{ entry.classification }}</td>
+            {% for dates in entry.scores %}
+                {% for score in dates %}
+                    <td align="center">{{ score.score }}<sup>{{ score.award }}</sup></td>
+                {% endfor %}
+            {% endfor %}
+            <td align="center">{{ entry.average_score|number_format(2, '.', ',') }}</td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h4>{{ data.entries.bd.title }}</h4>
+<table>
+    <tbody>
+    <tr>
+        <th colspan="2">&nbsp;</th>
+        {% for data in data.heading %}
+            <th colspan="{{ data.entries }}">{{ data.date }}</th>
+        {% endfor %}
+        <th>&nbsp;</th>
+    </tr>
+    <tr>
+        <th>Member</th>
+        <th>Cl.</th>
+        {% for data in data.heading %}
+            {% for i in 1..data.entries %}
+                <th class="form_frame_header entry_nr">{{ i }}</th>
+            {% endfor %}
+        {% endfor %}
+        <th>Avg</th>
+    </tr>
+    {% for entry in data.entries.bd.users %}
+        <tr>
+            <td align="left">{{ entry.name }}</td>
+            <td align="center">{{ entry.classification }}</td>
+            {% for scores in entry.scores %}
+                {% for score in scores %}
+                    <td align="center">{{ score.score }}<sup>{{ score.award }}</sup></td>
+                {% endfor %}
+            {% endfor %}
+            <td align="center">{{ entry.average_score|number_format(2, '.', ',') }}</td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

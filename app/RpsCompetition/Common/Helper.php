@@ -10,7 +10,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Helper
  *
- * @package RpsCompetition\Common
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Common
  */
 class Helper
 {
@@ -174,6 +176,23 @@ class Helper
         }
 
         return in_array('s2member_level4', (array) $user->roles);
+    }
+
+    /**
+     * Check if user pressed cancel and if so redirect the user
+     *
+     * @param \Symfony\Component\Form\Form $form   The Form that was submitted
+     * @param string                       $cancel The field to check for cancellation
+     * @param string                       $redirect_to
+     */
+    public static function isRequestCanceled($form, $cancel, $redirect_to)
+    {
+        if ($form->get($cancel)
+                 ->isClicked()
+        ) {
+            wp_redirect($redirect_to);
+            exit();
+        }
     }
 
     /**

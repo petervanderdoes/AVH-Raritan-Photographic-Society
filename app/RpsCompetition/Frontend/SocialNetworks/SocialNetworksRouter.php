@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 use RpsCompetition\Common\Helper as CommonHelper;
@@ -14,23 +13,21 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class SocialNetworksRouter
  *
- * @package RpsCompetition\Frontend\SocialNetworks
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\SocialNetworks
  */
 final class SocialNetworksRouter
 {
-    /**
-     * @var SocialNetworksController
-     */
+    /** @var SocialNetworksController */
     private $controller;
-    /**
-     * @var Settings
-     */
+    /** @var Settings */
     private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
+     * @param Settings                 $settings
      * @param SocialNetworksController $controller
      */
     public function __construct(Settings $settings, SocialNetworksController $controller)

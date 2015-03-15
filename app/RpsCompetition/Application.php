@@ -8,6 +8,13 @@ use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 
+/**
+ * Class Application
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition
+ */
 class Application extends Container implements ApplicationContract
 {
     /**
@@ -77,13 +84,33 @@ class Application extends Container implements ApplicationContract
      */
     protected $terminatingCallbacks = [];
 
+    /**
+     * Constructor
+     *
+     */
     public function __construct()
     {
         $this->registerBaseBindings();
         $items = [];
         $this->instance('config', $config = new Repository($items));
 
-        $this->config['app.providers'] = ['\RpsCompetition\Frontend\Shortcodes\MyEntries\MyEntriesServiceProvider'];
+        $this->config['app.providers'] = [
+            '\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesServiceProvider',
+            '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleServiceProvider',
+            '\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesServiceProvider',
+            '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryServiceProvider',
+            '\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\AllScores\AllScoresServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser\BanquetCurrentUserServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\CategoryWinners\CategoryWinnersServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\EditTitle\EditTitleServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\MonthlyEntries\MonthlyEntriesServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\MonthlyWinners\MonthlyWinnersServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\MyEntries\MyEntriesServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\PersonWinners\PersonWinnersServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser\ScoresCurrentUserServiceProvider',
+            '\RpsCompetition\Frontend\Shortcodes\UploadImage\UploadImageServiceProvider',
+        ];
         $this->registerCoreContainerAliases();
         $this->registerConfiguredProviders();
     }
@@ -201,7 +228,8 @@ class Application extends Container implements ApplicationContract
      */
     public function register($provider, $options = [], $force = false)
     {
-        if ($registered = $this->getProvider($provider) && !$force) {
+        $registered = $this->getProvider($provider);
+        if ($registered !== null && !$force) {
             return $registered;
         }
 
@@ -224,7 +252,7 @@ class Application extends Container implements ApplicationContract
     public function registerConfiguredProviders()
     {
         $upload_dir_info = wp_upload_dir();
-        $manifestPath = $upload_dir_info['basedir'] . '/avh-rps' . '/framework/services.json';
+        $manifestPath = $upload_dir_info['basedir'] . '/avh-rps/framework/services.json';
 
         (new ProviderRepository($this, new Filesystem(), $manifestPath))->load($this->config['app.providers']);
     }
@@ -236,7 +264,7 @@ class Application extends Container implements ApplicationContract
      */
     public function registerCoreContainerAliases()
     {
-        $aliases = [
+        $core_aliases = [
             'app'    => [
                 'Illuminate\Foundation\Application',
                 'Illuminate\Contracts\Container\Container',
@@ -245,7 +273,7 @@ class Application extends Container implements ApplicationContract
             'config' => ['Illuminate\Config\Repository', 'Illuminate\Contracts\Config\Repository'],
         ];
 
-        foreach ($aliases as $key => $aliases) {
+        foreach ($core_aliases as $key => $aliases) {
             foreach ((array) $aliases as $alias) {
                 $this->alias($key, $alias);
             }
@@ -255,8 +283,8 @@ class Application extends Container implements ApplicationContract
     /**
      * Register a deferred provider and service.
      *
-     * @param  string $provider
-     * @param  string $service
+     * @param  string      $provider
+     * @param  string|null $service
      *
      * @return void
      */
@@ -265,7 +293,7 @@ class Application extends Container implements ApplicationContract
         // Once the provider that provides the deferred service has been registered we
         // will remove it from our local list of the deferred services with related
         // providers so that this container does not try to resolve it out again.
-        if ($service) {
+        if ($service !== null) {
             unset($this->deferredServices[$service]);
         }
 
@@ -303,7 +331,7 @@ class Application extends Container implements ApplicationContract
      */
     public function version()
     {
-        // TODO: Implement version() method.
+        return '';
     }
 
     /**

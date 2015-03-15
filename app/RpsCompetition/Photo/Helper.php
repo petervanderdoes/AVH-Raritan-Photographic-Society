@@ -1,8 +1,9 @@
 <?php
 namespace RpsCompetition\Photo;
 
-use Illuminate\Http\Request;
-use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Http\Request as IlluminateRequest;
+use Imagine\Gd\Imagine;
+use Imagine\Image\Box;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
@@ -19,22 +20,27 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Helper
  *
- * @package RpsCompetition\Photo
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Photo
  */
 class Helper
 {
+    /** @var IlluminateRequest */
     private $request;
+    /** @var RpsDb */
     private $rpsdb;
+    /** @var Settings */
     private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param Request  $request
-     * @param RpsDb    $rpsdb
+     * @param Settings          $settings
+     * @param IlluminateRequest $request
+     * @param RpsDb             $rpsdb
      */
-    public function __construct(Settings $settings, Request $request, RpsDb $rpsdb)
+    public function __construct(Settings $settings, IlluminateRequest $request, RpsDb $rpsdb)
     {
         $this->settings = $settings;
         $this->request = $request;
@@ -93,7 +99,57 @@ class Helper
     {
         $data = [];
         $data['title'] = $title;
-        $data['credit'] = "$first_name $last_name";
+        $data['credit'] = $first_name . ' ' . $last_name;
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render a photo in masonry style.
+     *
+     * @param QueryEntries $record
+     * @param string       $thumb_size
+     *
+     * @return array<string,string|array>
+     */
+    public function dataPhotoGallery($record, $thumb_size)
+    {
+
+        $data = [];
+        $user_info = get_userdata($record->Member_ID);
+        $title = $record->Title;
+        $last_name = $user_info->user_lastname;
+        $first_name = $user_info->user_firstname;
+        $data['award'] = $record->Award;
+        $data['url_large'] = $this->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render a photo in masonry style.
+     *
+     * @param QueryEntries $record
+     * @param string       $thumb_size
+     *
+     * @return array
+     */
+    public function dataPhotoMasonry($record, $thumb_size)
+    {
+        $data = [];
+        $user_info = get_userdata($record->Member_ID);
+        $title = $record->Title;
+        $last_name = $user_info->user_lastname;
+        $first_name = $user_info->user_firstname;
+        $data['url_large'] = $this->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
+        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
@@ -121,12 +177,12 @@ class Helper
             )
         ;
         $file_parts = pathinfo($entry->Server_File_Name);
-        $thumbnail_path = $competition_path . "/thumbnails";
+        $thumbnail_path = $competition_path . '/thumbnails';
 
         if (is_dir($thumbnail_path)) {
             $thumb_base_name = $thumbnail_path . '/' . $file_parts['filename'];
             // Get all the matching thumbnail files
-            $thumbnails = glob("$thumb_base_name*");
+            $thumbnails = glob($thumb_base_name . '*');
             // Iterate through the list of matching thumbnails and delete each one
             if (is_array($thumbnails) && count($thumbnails) > 0) {
                 foreach ($thumbnails as $thumb) {
@@ -156,40 +212,24 @@ class Helper
         if (file_exists($thumb_path . '/' . $thumb_name)) {
             return true;
         }
-        /** @var \Intervention\Image\Image $image */
-        $image = Image::make($image_name);
+
+        $imagine = new Imagine();
+        $image = $imagine->open($image_name);
+
         $new_size = Constants::getImageSize($size);
+
         if ($new_size['height'] == null) {
-            if ($image->getHeight() <= $image->getWidth()) {
-                $image->resize(
-                    $new_size['width'],
-                    $new_size['width'],
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    }
-                )
-                ;
-            } else {
-                $image->resize(
-                    $new_size['width'],
-                    null,
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                    }
-                )
-                ;
-            }
-        } else {
-            $image->resize(
-                $new_size['width'],
-                $new_size['height'],
-                function ($constraint) {
-                    $constraint->aspectRatio();
-                }
-            )
+            $box = $image->getSize()
+                         ->widen($new_size['width'])
             ;
+            $image->resize($box);
+        } else {
+            $box = new Box($new_size['width'], $new_size['height']);
+            $image->keepAspectRatio()
+                  ->resize($box)
+            ;;
         }
-        $image->save($thumb_path . '/' . $thumb_name, Constants::IMAGE_QUALITY);
+        $image->save($thumb_path . '/' . $thumb_name, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
 
         return true;
     }
@@ -266,10 +306,10 @@ class Helper
      */
     public function removeThumbnails($path, $name)
     {
-        if (is_dir($path . "/thumbnails")) {
-            $thumb_base_name = $path . "/thumbnails/" . $name;
+        if (is_dir($path . '/thumbnails')) {
+            $thumb_base_name = $path . '/thumbnails/' . $name;
             // Get all the matching thumbnail files
-            $thumbnails = glob("$thumb_base_name*");
+            $thumbnails = glob($thumb_base_name . '*');
             // Iterate through the list of matching thumbnails and rename each one
             if (is_array($thumbnails) && count($thumbnails) > 0) {
                 foreach ($thumbnails as $thumb) {

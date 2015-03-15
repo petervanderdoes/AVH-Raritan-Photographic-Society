@@ -12,7 +12,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class General
  *
- * @package RpsCompetition\Options
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Options
  */
 final class General extends OptionsAbstract
 {
@@ -25,7 +27,12 @@ final class General extends OptionsAbstract
         'season_end_month_num'    => 12,
         'monthly_entries_post_id' => 1005,
         'monthly_winners_post_id' => 61,
-        'members_page'            => 54
+        'members_page'            => 54,
+        'my_digital_entries'      => 56,
+        'my_print_entries'        => 58,
+        'banquet_entries'         => 984,
+        'edit_title'              => 75,
+        'upload_image'            => 89
     ];
 
     /**

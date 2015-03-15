@@ -7,20 +7,10 @@ use RpsCompetition\Api\Client;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Constants;
-use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
-use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
-use RpsCompetition\Entity\Forms\UploadEntry as EntityFormUploadEntry;
-use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Form\Type\MyEntriesType;
-use RpsCompetition\Form\Type\UploadEntryType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -31,7 +21,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Frontend
  *
- * @package RpsCompetition\Frontend
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend
  */
 class Frontend
 {
@@ -70,21 +62,16 @@ class Frontend
         $this->request = $container->make('IlluminateRequest');
         $this->options = $container->make('OptionsGeneral');
         $this->core = $container->make('Core');
-        $requests = $container->make('FrontendRequests');
+
         $this->view = $container->make('FrontendView');
         $this->formFactory = $container->make('formFactory');
+
+        $this->setupRequestHandling();
 
         // The actions are in order as how WordPress executes them
         add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
         add_action('init', [$this, 'actionInit'], 11);
-        add_action('parse_query', [$requests, 'actionHandleRequests']);
 
-        if ($this->request->isMethod('POST')) {
-            add_action('wp', [$this, 'actionHandleHttpPostRpsMyEntries']);
-            add_action('wp', [$this, 'actionHandleHttpPostRpsEditTitle']);
-            add_action('wp', [$this, 'actionHandleHttpPostRpsUploadEntry']);
-            add_action('wp', [$this, 'actionHandleHttpPostRpsBanquetEntries']);
-        }
         add_action('template_redirect', [$this, 'actionTemplateRedirectRpsWindowsClient']);
         add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
 
@@ -135,375 +122,6 @@ class Frontend
         }
 
         wp_enqueue_style('rps-competition.general.style');
-    }
-
-    /**
-     * Handle POST request for the Banquet Entries.
-     * This method handles the POST request generated on the page for Banquet Entries
-     * The action is called from the theme!
-     *
-     * @internal Hook: suffusion_before_post
-     */
-    public function actionHandleHttpPostRpsBanquetEntries()
-    {
-        global $post;
-
-        if (is_object($post) && $post->post_title == 'Banquet Entries') {
-            $redirect_to = $this->request->input('wp_get_referer');
-
-            // Just return if user clicked Cancel
-            $this->isRequestCanceled($redirect_to);
-
-            if ($this->request->has('submit')) {
-                $this->handleSubmitBanquetEntries();
-            }
-        }
-    }
-
-    /**
-     * Handle POST request for the editing the title of a photo.
-     * This method handles the POST request generated on the page Edit Title
-     * The action is called from the theme!
-     *
-     * @see      Shortcodes::shortcodeEditTitle
-     * @internal Hook: suffusion_before_post
-     */
-    public function actionHandleHttpPostRpsEditTitle()
-    {
-        global $post;
-
-        $query_entries = $this->container->make('QueryEntries');
-        /** @var  QueryCompetitions $query_competitions */
-        $query_competitions = $this->container->make('QueryCompetitions');
-        $photo_helper = $this->container->make('PhotoHelper');
-
-        if (is_object($post) && $post->ID == 75) {
-            $entity = new EntityFormEditTitle();
-
-            $form = $this->formFactory->create(new EditTitleType($entity), $entity, ['attr' => ['id' => 'edittitle']]);
-            $form->handleRequest($this->request);
-
-            $redirect_to = $entity->getWpGetReferer();
-
-            // Just return if user clicked Cancel
-            $this->isRequestCanceled($form, 'cancel', $redirect_to);
-
-            if (!$form->isValid()) {
-                $errors = $form->getErrors();
-                $this->settings->set('formerror', $errors);
-
-                return;
-            }
-
-            $server_file_name = $entity->getServerFileName();
-            $new_title = $entity->getNewTitle();
-            if (get_magic_quotes_gpc()) {
-                $server_file_name = stripslashes($server_file_name);
-                $new_title = stripslashes($new_title);
-            }
-
-            if ($entity->getNewTitle() !== $entity->getTitle()) {
-                $competition = $query_competitions->getCompetitionByEntryId($entity->getId());
-                if ($competition == null) {
-                    wp_die("Failed to SELECT competition for entry ID: " . $entity->getId());
-                }
-
-                // Rename the image file on the server file system
-                $path = $photo_helper->getCompetitionPath(
-                    $competition->Competition_Date,
-                    $competition->Classification,
-                    $competition->Medium
-                )
-                ;
-                $old_file_parts = pathinfo($server_file_name);
-                $old_file_name = $old_file_parts['basename'];
-                $ext = $old_file_parts['extension'];
-                $current_user = wp_get_current_user();
-                $new_file_name_noext = sanitize_file_name(
-                        $new_title
-                    ) . '+' . $current_user->user_login . '+' . filemtime(
-                        $this->request->server('DOCUMENT_ROOT') . $server_file_name
-                    );
-                $new_file_name = $new_file_name_noext . '.' . $ext;
-                if (!$photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
-                    die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
-                }
-
-                // Update the Title and File Name in the database
-                $updated_data = [
-                    'ID'               => $entity->getId(),
-                    'Title'            => $new_title,
-                    'Server_File_Name' => $path . '/' . $new_file_name,
-                    'Date_Modified'    => current_time('mysql')
-                ];
-                $result = $query_entries->updateEntry($updated_data);
-                if ($result === false) {
-                    wp_die("Failed to UPDATE entry record from database");
-                }
-            }
-            $redirect_to = $entity->getWpGetReferer();
-            wp_redirect($redirect_to);
-            exit();
-        }
-        unset($query_entries, $query_competitions, $photo_helper);
-    }
-
-    /**
-     * Handle POST request for editing the entries of a user.
-     * This method handles the POST request generated on the page for editing entries
-     * The action is called from the theme!
-     *
-     * @see      Shortcodes::shortcodeMyEntries
-     * @internal Hook: suffusion_before_post
-     */
-    public function actionHandleHttpPostRpsMyEntries()
-    {
-        global $post;
-        $query_competitions = $this->container->make('QueryCompetitions');
-
-        if (is_object($post) && ($post->ID == 56 || $post->ID == 58)) {
-            $entity = new EntityFormMyEntries();
-
-            $form = $this->formFactory->create(new MyEntriesType($entity), $entity, ['attr' => ['id' => 'myentries']]);
-            $form->handleRequest($this->request);
-
-            $page = explode('-', $post->post_name);
-            $medium_subset = $page[1];
-
-            if ($form->has('submit_control')) {
-                // @TODO Nonce check
-
-                $comp_date = $entity->getCompDate();
-                $classification = $entity->getClassification();
-                $medium = $entity->getMedium();
-                $entry_array = $this->request->input('form.entryid', null);
-
-                switch ($entity->getSubmitControl()) {
-                    case 'add':
-                        if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
-                            $query = ['m' => $medium_subset];
-                            $query = build_query($query);
-                            $loc = '/member/upload-image/?' . $query;
-                            wp_redirect($loc);
-                            exit();
-                        }
-                        break;
-
-                    case 'edit':
-                        if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
-                            if (is_array($entry_array)) {
-                                foreach ($entry_array as $id) {
-                                    // @TODO Add Nonce
-                                    $query = ['id' => $id, 'm' => $medium_subset];
-                                    $query = build_query($query);
-                                    $loc = '/member/edit-title/?' . $query;
-                                    wp_redirect($loc);
-                                    exit();
-                                }
-                            }
-                        }
-                        break;
-
-                    case 'delete':
-                        if (!$query_competitions->checkCompetitionClosed($comp_date, $classification, $medium)) {
-                            if ($entry_array !== null) {
-                                $this->deleteCompetitionEntries($entry_array);
-                                $redirect = get_permalink($post->ID);
-                                wp_redirect($redirect);
-                                exit();
-                            }
-                        }
-                        break;
-
-                    case 'select_comp':
-                        $competition_date = $entity->getSelectComp();
-                        $medium = $entity->getMedium();
-                        break;
-
-                    case 'select_medium':
-                        $competition_date = $entity->getCompDate();
-                        $medium = $entity->getSelectedMedium();
-                        break;
-                    default:
-                        $competition_date = $entity->getCompDate();
-                        $medium = $entity->getMedium();
-                        break;
-                }
-                $medium_subset_medium = $this->session->get('myentries/subset');
-                $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
-                $current_competition = $query_competitions->getCompetitionByDateClassMedium(
-                    $competition_date,
-                    $classification,
-                    $medium
-                )
-                ;
-
-                $this->session->set(
-                    'myentries/' . $medium_subset_medium . '/competition_date',
-                    $current_competition->Competition_Date
-                )
-                ;
-                $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
-                $this->session->set(
-                    'myentries/' . $medium_subset_medium . '/classification',
-                    $current_competition->Classification
-                )
-                ;
-                $this->session->save();
-                $redirect = get_permalink($post->ID);
-                wp_redirect($redirect);
-                exit();
-            }
-        }
-        unset($query_competitions);
-    }
-
-    /**
-     * Handle POST request for uploading a photo.
-     * This method handles the POST request generated when uploading a photo
-     * The action is called from the theme!
-     *
-     * @see      Shortcodes::shortcodeUploadImage
-     * @internal Hook: suffusion_before_post
-     */
-    public function actionHandleHttpPostRpsUploadEntry()
-    {
-        global $post;
-        $query_entries = $this->container->make('QueryEntries');
-        $query_competitions = $this->container->make('QueryCompetitions');
-        $photo_helper = $this->container->make('PhotoHelper');
-
-        if (is_object($post) && $post->ID == 89 && $this->request->isMethod('post')) {
-
-            $entity = new EntityFormUploadEntry();
-            $form = $this->formFactory->create(new UploadEntryType(), $entity, ['attr' => ['id' => 'uploadentry']]);
-            $form->handleRequest($this->request);
-
-            $redirect_to = $entity->getWpGetReferer();
-            // Just return if user clicked Cancel
-            $this->isRequestCanceled($form, 'cancel', $redirect_to);
-
-            if (!$form->isValid()) {
-                $errors = $form->getErrors();
-                $this->settings->set('formerror', $errors);
-
-                return;
-            }
-
-            // Retrieve and parse the selected competition cookie
-            if ($this->session->has('myentries')) {
-                $subset = $this->session->get('myentries/subset', null);
-                $comp_date = $this->session->get('myentries/' . $subset . '/competition_date', null);
-                $medium = $this->session->get('myentries/' . $subset . '/medium', null);
-                $classification = $this->session->get('myentries/' . $subset . '/classification', null);
-            } else {
-                $error_message = 'Missing "myentries" in session.';
-                $this->setFormError($form, $error_message);
-
-                return;
-            }
-
-            $recs = $query_competitions->getCompetitionByDateClassMedium($comp_date, $classification, $medium, ARRAY_A);
-            if ($recs) {
-                $comp_id = $recs['ID'];
-                $max_entries = $recs['Max_Entries'];
-            } else {
-                $error_message = "Competition $comp_date/$classification/$medium not found in database";
-                $this->setFormError($form, $error_message);
-
-                return;
-            }
-
-            // Prepare the title and client file name for storing in the database
-            if (get_magic_quotes_gpc()) {
-                $title = stripslashes(trim($this->request->input('form.title')));
-            } else {
-                $title = trim($this->request->input('form.title'));
-            }
-
-            $file = $this->request->file('form.file_name');
-            $client_file_name = $file->getClientOriginalName();
-
-            // Before we go any further, make sure the title is not a duplicate of
-            // an entry already submitted to this competition. Duplicate title result in duplicate
-            // file names on the server
-            if ($query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
-                $error_message = "You have already submitted an entry with a title of \"" . $title . "\" in this competition. Please submit your entry again with a different title.";
-                $this->setFormError($form, $error_message, 'title');
-
-                return;
-            }
-
-            // Do a final check that the user hasn't exceeded the maximum images per competition.
-            // If we don't check this at the last minute it may be possible to exceed the
-            // maximum images per competition by having two upload windows open simultaneously.
-            $max_per_id = $query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
-            if ($max_per_id >= $max_entries) {
-                $error_message = "You have already submitted the maximum of $max_entries entries into this competition. You must Remove an image before you can submit another";
-                $this->setFormError($form, $error_message);
-
-                return;
-            }
-
-            $max_per_date = $query_entries->countEntriesByCompetitionDate($comp_date, get_current_user_id());
-            if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
-                $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
-                $error_message = "You have already submitted the maximum of $max_entries_member_date entries for this competition date. You must Remove an image before you can submit another";
-                $this->setFormError($form, $error_message);
-
-                return;
-            }
-
-            // Move the file to its final location
-            $relative_server_path = $photo_helper->getCompetitionPath($comp_date, $classification, $medium);
-            $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
-
-            $user = wp_get_current_user();
-            $file = $this->request->file('form.file_name');
-            $uploaded_file_name = $file->getRealPath();
-            $uploaded_file_info = getimagesize($uploaded_file_name);
-            $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
-            // Need to create the destination folder?
-            CommonHelper::createDirectory($full_server_path);
-
-            // If the .jpg file is too big resize it
-            if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
-
-                // Resize the image and deposit it in the destination directory
-                $photo_helper->doResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
-                $resized = 1;
-            } else {
-                // The uploaded image does not need to be resized so just move it to the destination directory
-                $resized = 0;
-                try {
-                    $file->move($full_server_path, $dest_name . '.jpg');
-                } catch (FileException $e) {
-                    $this->setFormError($form, $e->getMessage());
-
-                    return;
-                }
-            }
-
-            $server_file_name = $relative_server_path . '/' . $dest_name . '.jpg';
-            $data = [
-                'Competition_ID'   => $comp_id,
-                'Title'            => $title,
-                'Client_File_Name' => $client_file_name,
-                'Server_File_Name' => $server_file_name
-            ];
-            $result = $query_entries->addEntry($data, get_current_user_id());
-            if ($result === false) {
-                $error_message = 'Failed to INSERT entry record into database';
-                $this->setFormError($form, $error_message);
-
-                return;
-            }
-
-            $photo_helper->createCommonThumbnails($query_entries->getEntryById($this->rpsdb->insert_id));
-            $query = build_query(['resized' => $resized]);
-            wp_redirect($redirect_to . '/?' . $query);
-            exit();
-        }
     }
 
     /**
@@ -748,14 +366,14 @@ class Frontend
 
         $columns = intval($columns);
 
-        $selector = "gallery-{$instance}";
+        $selector = 'gallery-' . $instance;
 
         $gallery_style = '';
 
         $layout = strtolower($layout);
 
         $size_class = sanitize_html_class($size);
-        $gallery_div = "<div id='$selector' class='gallery galleryid-{$id} gallery-columns-{$columns} gallery-size-{$size_class}'>";
+        $gallery_div = '<div id="' . $selector . '" class="gallery galleryid-' . $id . ' gallery-columns-' . $columns . ' gallery-size-' . $size_class . '">';
 
         /**
          * Filter the default gallery shortcode CSS styles.
@@ -789,9 +407,9 @@ class Frontend
                 $orientation = ($image_meta['height'] > $image_meta['width']) ? 'portrait' : 'landscape';
             }
 
-            $output .= "<{$itemtag} class='gallery-item'>";
-            $output .= "<div class='gallery-item-content'>";
-            $output .= "<{$icontag} class='gallery-icon {$orientation}'>$image_output</{$icontag}>";
+            $output .= '<' . $itemtag . ' class="gallery-item">';
+            $output .= '<div class="gallery-item-content">';
+            $output .= '<' . $icontag . ' class="gallery-icon ' . $orientation . '" > ' . $image_output . '</' . $icontag . ' >';
 
             $caption_text = '';
             if ($captiontag && trim($attachment->post_excerpt)) {
@@ -806,13 +424,13 @@ class Frontend
                 $caption_text .= '<span class="wp-caption-credit">Credit: ' . $photographer_name . '</span>';
             }
             if (!empty($caption_text)) {
-                $output .= "<{$captiontag} class='wp-caption-text gallery-caption'>" . wptexturize(
+                $output .= '<' . $captiontag . ' class="wp-caption-text gallery-caption">' . wptexturize(
                         $caption_text
-                    ) . "</{$captiontag}>";
+                    ) . '</' . $captiontag . '>';
             }
 
-            $output .= "</div>";
-            $output .= "</{$itemtag}>";
+            $output .= '</div>';
+            $output .= '</' . $itemtag . '>';
 
             if ($columns > 0 && ++$i % $columns == 0) {
                 $output .= '</div>';
@@ -822,8 +440,7 @@ class Frontend
         if ($columns > 0 && $i % $columns !== 0) {
             $output .= '</div>';
         }
-        $output .= "
-		</div>\n";
+        $output .= '</div>' . "\n";
 
         return $output;
     }
@@ -896,155 +513,19 @@ class Frontend
         return $title;
     }
 
-    /**
-     * Set the error for the form.
-     *
-     * @param \Symfony\Component\Form\Form $form
-     * @param string                       $error_message
-     * @param string|null                  $form_field
-     *
-     * @return void
-     */
-    public function setFormError($form, $error_message, $form_field = null)
-    {
-        if ($form_field === null) {
-            $form->addError(new FormError('Error: ' . $error_message));
-        } else {
-            $form->get($form_field)
-                 ->addError(new FormError($error_message))
-            ;
-        }
-        $errors = $form->getErrors();
-        $this->settings->set('formerror', $errors);
-    }
-
-    /**
-     * Delete competition entries
-     *
-     * @param array $entries Array of entries ID to delete.
-     */
-    private function deleteCompetitionEntries($entries)
-    {
-        $query_entries = $this->container->make('QueryEntries');
-        $photo_helper = $this->container->make('PhotoHelper');
-
-        if (is_array($entries)) {
-            foreach ($entries as $id) {
-
-                $entry_record = $query_entries->getEntryById($id);
-                if ($entry_record == false) {
-                    $this->settings->set(
-                        'errmsg',
-                        sprintf("<b>Failed to SELECT competition entry with ID %s from database</b><br>", $id)
-                    )
-                    ;
-                } else {
-                    // Delete the record from the database
-                    $result = $query_entries->deleteEntry($id);
-                    if ($result === false) {
-                        $this->settings->set(
-                            'errmsg',
-                            sprintf("<b>Failed to DELETE competition entry %s from database</b><br>")
-                        )
-                        ;
-                    } else {
-                        // Delete the file from the server file system
-                        $photo_helper->deleteEntryFromDisk($entry_record);
-                    }
-                }
-            }
-        }
-        unset($query_entries, $photo_helper);
-    }
-
-    /**
-     * Handles the required functions for when a user submits their Banquet Entries
-     */
-    private function handleSubmitBanquetEntries()
-    {
-        $query_entries = $this->container->make('QueryEntries');
-        $query_competitions = $this->container->make('QueryCompetitions');
-        $photo_helper = $this->container->make('PhotoHelper');
-
-        if ($this->request->has('allentries')) {
-            $all_entries = explode(',', $this->request->input('allentries'));
-            foreach ($all_entries as $entry_id) {
-                $entry = $query_entries->getEntryById($entry_id);
-                if ($entry !== null) {
-                    $query_entries->deleteEntry($entry->ID);
-                    $photo_helper->deleteEntryFromDisk($entry);
-                }
-            }
-        }
-
-        $entries = (array) $this->request->input('entry_id', []);
-        foreach ($entries as $entry_id) {
-            $entry = $query_entries->getEntryById($entry_id);
-            $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
-            $banquet_ids = explode(',', $this->request->input('banquetids'));
-            foreach ($banquet_ids as $banquet_id) {
-                $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
-                if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
-                    // Move the file to its final location
-                    $path = $photo_helper->getCompetitionPath(
-                        $banquet_record->Competition_Date,
-                        $banquet_record->Classification,
-                        $banquet_record->Medium
-                    )
-                    ;
-                    CommonHelper::createDirectory($path);
-                    $file_info = pathinfo($entry->Server_File_Name);
-                    $new_file_name = $path . '/' . $file_info['basename'];
-                    $original_filename = html_entity_decode(
-                        $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name,
-                        ENT_QUOTES,
-                        get_bloginfo('charset')
-                    );
-                    // Need to create the destination folder?
-                    copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
-                    $data = [
-                        'Competition_ID'   => $banquet_record->ID,
-                        'Title'            => $entry->Title,
-                        'Client_File_Name' => $entry->Client_File_Name,
-                        'Server_File_Name' => $new_file_name
-                    ];
-                    $query_entries->addEntry($data, get_current_user_id());
-                }
-            }
-        }
-        unset($query_entries, $query_competitions, $photo_helper);
-    }
-
-    /**
-     * Check if user pressed cancel and if so redirect the user
-     *
-     * @param object $form   The Form that was submitted
-     * @param string $cancel The field to check for cancellation
-     * @param string $redirect_to
-     */
-    private function isRequestCanceled($form, $cancel, $redirect_to)
-    {
-        if ($form->get($cancel)
-                 ->isClicked()
-        ) {
-            wp_redirect($redirect_to);
-            exit();
-        }
-    }
-
     private function register_scripts_styles()
     {
         if (WP_LOCAL_DEV !== true) {
-            $rps_competition_css_version = "abb1385";
-            $rps_masonry_version = "abb1385";
-            $masonry_version = "8cfdecd";
-            $imagesloaded_version = "8cfdecd";
+            $rps_competition_css_version = 'abb1385';
+            $rps_masonry_version = 'abb1385';
+            $masonry_version = '8cfdecd';
+            $imagesloaded_version = '8cfdecd';
             $version_separator = '-';
         } else {
-            $rps_competition_css_version = "";
-            $rps_masonry_version = "";
-            $masonry_version = "";
-            $imagesloaded_version = "";
+            $rps_competition_css_version = '';
+            $rps_masonry_version = '';
+            $masonry_version = '';
+            $imagesloaded_version = '';
             $version_separator = '';
         }
 
@@ -1090,6 +571,20 @@ class Frontend
     }
 
     /**
+     * Setup the action to be handles by the Request Controller
+     */
+    private function setupRequestHandling()
+    {
+        /** @var \RpsCompetition\Frontend\Requests\RequestController $requests_controller */
+        $requests_controller = $this->container->make('RequestController');
+        add_action('parse_query', [$requests_controller, 'handleParseQuery']);
+
+        if ($this->request->isMethod('POST')) {
+            add_action('wp', [$requests_controller, 'handleWp']);
+        }
+    }
+
+    /**
      * Setup shortcodes.
      * Setup all the need shortcodes.
      */
@@ -1111,10 +606,10 @@ class Frontend
         $social_networks_controller = $this->container->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = "8cfdecd";
+            $social_buttons_script_version = '8cfdecd';
             $version_separator = '-';
         } else {
-            $social_buttons_script_version = "";
+            $social_buttons_script_version = '';
             $version_separator = '';
         }
         $data = [];
@@ -1130,10 +625,10 @@ class Frontend
         $user_id = get_current_user_id();
         $user_meta = get_user_meta($user_id, 'rps_class_bw', true);
         if (empty($user_meta)) {
-            update_user_meta($user_id, "rps_class_bw", 'beginner');
-            update_user_meta($user_id, "rps_class_color", 'beginner');
-            update_user_meta($user_id, "rps_class_print_bw", 'beginner');
-            update_user_meta($user_id, "rps_class_print_color", 'beginner');
+            update_user_meta($user_id, 'rps_class_bw', 'beginner');
+            update_user_meta($user_id, 'rps_class_color', 'beginner');
+            update_user_meta($user_id, 'rps_class_print_bw', 'beginner');
+            update_user_meta($user_id, 'rps_class_print_color', 'beginner');
         }
     }
 

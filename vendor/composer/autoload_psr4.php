@@ -7,5 +7,4 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'RpsCompetition\\' => array($baseDir . '/app/RpsCompetition'),
-    'Intervention\\Image\\' => array($vendorDir . '/intervention/image/src/Intervention/Image'),
 );

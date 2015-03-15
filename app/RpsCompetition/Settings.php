@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition;
 
 use Avh\DataHandler\DataHandler;
@@ -13,7 +12,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Settings
  *
- * @package RpsCompetition
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition
  */
 class Settings extends DataHandler
 {

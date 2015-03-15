@@ -1,0 +1,41 @@
+<script type="text/javascript">
+    function submit_form() {
+        document.form.submit();
+    }
+</script>
+
+{{ form_start(form) }}
+Select season: <span class="season-form">
+{{ form_widget(form.seasons) }}
+</span>
+
+
+<table class="form_frame" width="99%">
+    <tr>
+        <th class="form_frame_header" width="12%">Date</th>
+        <th class="form_frame_header">Theme</th>
+        <th class="form_frame_header">Competition</th>
+        <th class="form_frame_header">Title</th>
+        <th class="form_frame_header" width="8%">Score</th>
+        <th class="form_frame_header" width="8%">Award</th>
+    </tr>
+
+    {% if data.scores is not defined %}
+        <tr>
+            <td colspan="6">No entries submitted</td>
+        </tr>
+    {% else %}
+        {% for entry in data.entries %}
+            <tr class="{{ cycle(['even', 'odd'], loop.index0) }}">
+                <td width="12%">{{ entry.competition_date }}</td>
+                <td>{{ entry.theme }}</td>
+                <td>{{ entry.medium }}</td>
+                <td><a href="{{ entry.image_url }}" rel="lightbox[{{ entry.competition_date }}]" title="{{ entry.href_title|escape }}">{{ entry.title|escape }}</a></td>
+                <td align="center" width="8%">{{ entry.score }}</td>
+                <td align="center" width="8%">{{ entry.award }}</td>
+            </tr>
+        {% endfor %}
+    {% endif %}
+</table>
+
+{{ form_end(form) }}

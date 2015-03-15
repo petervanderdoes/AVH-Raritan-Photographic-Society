@@ -17,7 +17,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Client
  *
- * @package RpsCompetition\Api
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Api
  */
 class Client
 {
@@ -57,7 +59,7 @@ class Client
 
             // Move the file to its final location
             $path = $request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
-            $dest_name = "scores_" . $comp_date . ".xml";
+            $dest_name = 'scores_' . $comp_date . '.xml';
             $file_name = $path . '/' . $dest_name;
             try {
                 $file->move($path, $dest_name);
@@ -72,7 +74,7 @@ class Client
             unlink($file_name);
 
             // Return success to the client
-            $warning = "  <info>Scores successfully uploaded</info>\n" . $warning;
+            $warning = '  <info>Scores successfully uploaded</info>' . "\n" . $warning;
             $this->doRESTSuccess($warning);
         }
         die();
@@ -107,17 +109,17 @@ class Client
         $db = $this->getDatabaseHandle();
 
         try {
-            $select = "SELECT DISTINCT(Competition_Date) FROM competitions ";
+            $select = 'SELECT DISTINCT(Competition_Date) FROM competitions ';
             if ($request->has('closed') || $request->has('scored')) {
-                $where = "WHERE";
+                $where = 'WHERE';
                 if ($request->has('closed')) {
-                    $where .= " Closed=:closed";
+                    $where .= ' Closed=:closed';
                 }
                 if ($request->has('scored')) {
-                    $where .= " AND Scored=:scored";
+                    $where .= ' AND Scored=:scored';
                 }
             } else {
-                $where = "WHERE Competition_Date >= CURDATE()";
+                $where = 'WHERE Competition_Date >= CURDATE()';
             }
 
             $sth = $db->prepare($select . $where);
@@ -131,7 +133,7 @@ class Client
             }
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->doRESTError("Failed to SELECT list of competitions from database - " . $e->getMessage());
+            $this->doRESTError('Failed to SELECT list of competitions from database - ' . $e->getMessage());
             die($e->getMessage());
         }
 
@@ -139,13 +141,13 @@ class Client
         $dom->formatOutput = true;
         $root = $dom->createElement('rsp');
         $dom->appendChild($root);
-        $stat = $dom->createAttribute("stat");
+        $stat = $dom->createAttribute('stat');
         $root->appendChild($stat);
-        $value = $dom->CreateTextNode("ok");
+        $value = $dom->CreateTextNode('ok');
         $stat->appendChild($value);
         $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         while ($recs != false) {
-            $date_parts = explode(" ", $recs['Competition_Date']);
+            $date_parts = explode(' ', $recs['Competition_Date']);
             $comp_date = $root->appendChild($dom->createElement('Competition_Date'));
             $comp_date->appendChild($dom->createTextNode($date_parts[0]));
             $recs = $sth->fetch(\PDO::FETCH_ASSOC);
@@ -194,7 +196,7 @@ class Client
         echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
         echo '<rsp stat="' . $status . '">' . "\n";
         echo '	' . $message . "\n";
-        echo "</rsp>\n";
+        echo '</rsp>' . "\n";
     }
 
     /**
@@ -204,13 +206,13 @@ class Client
      */
     private function doRESTSuccess($message)
     {
-        $this->doRESTResponse("ok", $message);
+        $this->doRESTResponse('ok', $message);
     }
 
     /**
      * Open database
      *
-     * @return RpsPdo
+     * @return RpsPdo|null
      */
     private function getDatabaseHandle()
     {
@@ -218,7 +220,7 @@ class Client
             $db = new RpsPdo();
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
-            $this->doRESTError("Failed to obtain database handle " . $e->getMessage());
+            $this->doRESTError('Failed to obtain database handle ' . $e->getMessage());
             die($e->getMessage());
         }
 
@@ -231,7 +233,7 @@ class Client
      * @param RpsPdo $db Database handle.
      * @param string $file_name
      *
-     * @return string
+     * @return string|null
      */
     private function handleUploadScoresFile($db, $file_name)
     {
@@ -242,17 +244,17 @@ class Client
 
         $xml = simplexml_load_file($file_name);
         if (!$xml) {
-            $this->doRESTError("Failed to open scores XML file");
+            $this->doRESTError('Failed to open scores XML file');
             die();
         }
         try {
-            $sql = "UPDATE `entries` SET `Score` = :score, `Date_Modified` = NOW(), `Award` = :award WHERE `ID` = :entryid";
+            $sql = 'UPDATE `entries` SET `Score` = :score, `Date_Modified` = NOW(), `Award` = :award WHERE `ID` = :entryid';
             $sth = $db->prepare($sql);
             $sth->bindParam(':score', $score, PDO::PARAM_STR);
             $sth->bindParam(':award', $award, PDO::PARAM_STR);
             $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
         } catch (\PDOException $e) {
-            $this->doRESTError("Error - " . $e->getMessage() . " - $sql");
+            $this->doRESTError('Error - ' . $e->getMessage() . ' - ' . $sql);
             die();
         }
 
@@ -270,46 +272,46 @@ class Client
                     $score = html_entity_decode($entry->{'Score'});
                     $award = html_entity_decode($entry->{'Award'});
 
-                    if ($entry_id != "") {
-                        if ($score != "") {
+                    if ($entry_id != '') {
+                        if ($score != '') {
                             try {
                                 $sth->execute();
                             } catch (\PDOException $e) {
                                 $this->doRESTError(
-                                    "Failed to UPDATE scores in database - " . $e->getMessage() . " - $sql"
+                                    'Failed to UPDATE scores in database - ' . $e->getMessage() . ' - ' . $sql
                                 )
                                 ;
                                 die();
                             }
                             if ($sth->rowCount() < 1) {
-                                $warning .= "  <info>" . (string) $comp_date . ", $first_name $last_name, $title -- Row failed to update</info>\n";
+                                $warning .= '  <info>' . (string) $comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title . ' -- Row failed to update</info>' . "\n";
                             }
                         }
                     } else {
-                        $warning .= "  <info>" . (string) $comp_date . ", $first_name $last_name, $title -- ID is Null -- skipped</info>\n";
+                        $warning .= '  <info>' . (string) $comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title . ' -- ID is Null -- skipped</info>' . "\n";
                     }
                 }
             }
 
             // Mark this competition as scored
             try {
-                $sql = "UPDATE competitions SET Scored='Y', Date_Modified=NOW()
-                        WHERE Competition_Date='$comp_date' AND
-                        Classification='$classification' AND
-                        Medium = '$medium'";
+                $sql = 'UPDATE competitions SET Scored=\'Y\', Date_Modified=NOW()
+                        WHERE Competition_Date=\'' . $comp_date . '\' AND
+                        Classification=\'' . $classification . '\' AND
+                        Medium = \'' . $medium . '\'';
                 if (!$rs = mysql_query($sql)) {
                     throw new \Exception(mysql_error());
                 }
             } catch (\Exception $e) {
                 $this->doRESTError(
-                    "Failed to execute UPDATE to set Scored flag to Y in database for $comp_date / $classification"
+                    'Failed to execute UPDATE to set Scored flag to Y in database for ' . $comp_date . ' / ' . $classification
                 )
                 ;
                 die();
             }
             if (mysql_affected_rows() < 1) {
                 $this->doRESTError(
-                    "No rows updated when setting Scored flag to Y in database for $comp_date / $classification"
+                    'No rows updated when setting Scored flag to Y in database for ' . $comp_date . ' / ' . $classification
                 )
                 ;
                 die();
@@ -341,19 +343,19 @@ class Client
 
         $medium_clause = '';
         if (!(empty($requested_medium))) {
-            $medium_clause = ($requested_medium == "prints") ? " AND Medium like '%Prints' " : " AND Medium like '%Digital' ";
+            $medium_clause = ($requested_medium == 'prints') ? ' AND Medium like \'%Prints\' ' : ' AND Medium like \'%Digital\' ';
         }
-        $sql = "SELECT ID, Competition_Date, Theme, Medium, Classification
+        $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification
         FROM competitions
-        WHERE Competition_Date = DATE(:compdate) AND Closed = 'Y' $medium_clause
-        ORDER BY Medium, Classification";
+        WHERE Competition_Date = DATE(:compdate) AND Closed = \'Y\' ' . $medium_clause . '
+        ORDER BY Medium, Classification';
         try {
             $sth_competitions = $db->prepare($sql);
             $sth_competitions->bindParam(':compdate', $comp_date);
             $sth_competitions->execute();
         } catch (\Exception $e) {
             $this->doRESTError(
-                "Failed to SELECT competition records with date = " . $comp_date . " from database - " . $e->getMessage(
+                'Failed to SELECT competition records with date = ' . $comp_date . ' from database - ' . $e->getMessage(
                 )
             )
             ;
@@ -365,7 +367,7 @@ class Client
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ($record_competitions !== false) {
             $comp_id = $record_competitions['ID'];
-            $date_parts = explode(" ", $record_competitions['Competition_Date']);
+            $date_parts = explode(' ', $record_competitions['Competition_Date']);
             $date = $date_parts[0];
             $theme = $record_competitions['Theme'];
             $medium = $record_competitions['Medium'];
@@ -387,16 +389,16 @@ class Client
 
             // Get all the entries for this competition
             try {
-                $sql = "SELECT entries.ID, entries.Title, entries.Member_ID,
+                $sql = 'SELECT entries.ID, entries.Title, entries.Member_ID,
             entries.Server_File_Name, entries.Score, entries.Award
             FROM entries
                 WHERE entries.Competition_ID = :comp_id
-                        ORDER BY entries.Member_ID, entries.Title";
+                        ORDER BY entries.Member_ID, entries.Title';
                 $sth_entries = $db->prepare($sql);
                 $sth_entries->bindParam(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
                 $sth_entries->execute();
             } catch (\Exception $e) {
-                $this->doRESTError("Failed to SELECT competition entries from database - " . $e->getMessage());
+                $this->doRESTError('Failed to SELECT competition entries from database - ' . $e->getMessage());
                 die();
             }
             $all_records_entries = $sth_entries->fetchAll();

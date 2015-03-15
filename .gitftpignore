@@ -1,8 +1,4 @@
-phpunit.xml
-composer.json
-composer.lock
-.travis.yml
-.gitignore
-CHANGES.md
-AUTHORS
-tests/*
+sass
+tests
+.sass-cache
+.settings

@@ -16,11 +16,15 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Helper
  *
- * @package RpsCompetition\Season
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Season
  */
 class Helper
 {
+    /** @var RpsDb */
     private $rpsdb;
+    /** @var Settings */
     private $settings;
 
     /**
@@ -38,7 +42,7 @@ class Helper
     /**
      * Get the season in a dropdown menu
      *
-     * @param string $selected_season
+     * @param string  $selected_season
      * @param boolean $echo
      *
      * @return string|null

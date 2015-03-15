@@ -5,7 +5,9 @@ namespace RpsCompetition\Entity\Forms;
 /**
  * Class MyEntries
  *
- * @package RpsCompetition\Entity\Form
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Entity\Forms
  */
 class MyEntries
 {
@@ -13,9 +15,11 @@ class MyEntries
     protected $classification;
     protected $comp_date;
     protected $medium;
-    protected $select_comp = [];
-    protected $selected_medium = [];
+    protected $select_comp;
+    protected $selected_medium;
     protected $submit_control;
+    private $selected_comp_choices = [];
+    private $selected_medium_choices = [];
 
     /**
      * @return string
@@ -36,45 +40,13 @@ class MyEntries
     /**
      * @return string
      */
-    public function getCompDate()
-    {
-        return $this->comp_date;
-    }
-
-    /**
-     * @param string $comp_date
-     */
-    public function setCompDate($comp_date)
-    {
-        $this->comp_date = $comp_date;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMedium()
-    {
-        return $this->medium;
-    }
-
-    /**
-     * @param string $medium
-     */
-    public function setMedium($medium)
-    {
-        $this->medium = $medium;
-    }
-
-    /**
-     * @return array
-     */
     public function getSelectComp()
     {
         return $this->select_comp;
     }
 
     /**
-     * @param array $select_comp
+     * @param string $select_comp
      */
     public function setSelectComp($select_comp)
     {
@@ -84,17 +56,49 @@ class MyEntries
     /**
      * @return array
      */
+    public function getSelectedCompChoices()
+    {
+        return $this->selected_comp_choices;
+    }
+
+    /**
+     * @param array $selected_comp_choices
+     */
+    public function setSelectedCompChoices($selected_comp_choices)
+    {
+        $this->selected_comp_choices = $selected_comp_choices;
+    }
+
+    /**
+     * @return string
+     */
     public function getSelectedMedium()
     {
         return $this->selected_medium;
     }
 
     /**
-     * @param array $selected_medium
+     * @param string $selected_medium
      */
     public function setSelectedMedium($selected_medium)
     {
         $this->selected_medium = $selected_medium;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelectedMediumChoices()
+    {
+        return $this->selected_medium_choices;
+    }
+
+    /**
+     * @param array $selected_medium_choices
+     */
+    public function setSelectedMediumChoices($selected_medium_choices)
+    {
+        $this->selected_medium_choices = $selected_medium_choices;
     }
 
     /**

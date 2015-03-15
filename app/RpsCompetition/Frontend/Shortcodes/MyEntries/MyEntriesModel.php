@@ -1,8 +1,9 @@
 <?php
-
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use Avh\Network\Session;
+use Carbon\Carbon;
+use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
@@ -15,13 +16,22 @@ use RpsCompetition\Season\Helper as SeasonHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
 
+/**
+ * Class MyEntriesModel
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
+ */
 class MyEntriesModel
 {
     private $competition_helper;
+    private $form_factory;
     private $photo_helper;
     private $query_competitions;
     private $query_entries;
     private $query_miscellaneous;
+    private $request;
     private $season_helper;
     private $session;
     private $settings;
@@ -34,8 +44,9 @@ class MyEntriesModel
      * @param SeasonHelper       $season_helper
      * @param CompetitionHelper  $competition_helper
      * @param Session            $session
-     * @param FormFactory        $formFactory
+     * @param FormFactory        $form_factory
      * @param Settings           $settings
+     * @param IlluminateRequest  $request
      */
     public function __construct(
         QueryCompetitions $query_competitions,
@@ -45,8 +56,9 @@ class MyEntriesModel
         SeasonHelper $season_helper,
         CompetitionHelper $competition_helper,
         Session $session,
-        FormFactory $formFactory,
-        Settings $settings
+        FormFactory $form_factory,
+        Settings $settings,
+        IlluminateRequest $request
     ) {
         $this->query_competitions = $query_competitions;
         $this->query_entries = $query_entries;
@@ -55,8 +67,9 @@ class MyEntriesModel
         $this->season_helper = $season_helper;
         $this->competition_helper = $competition_helper;
         $this->session = $session;
-        $this->formFactory = $formFactory;
+        $this->form_factory = $form_factory;
         $this->settings = $settings;
+        $this->request = $request;
     }
 
     /**
@@ -91,7 +104,7 @@ class MyEntriesModel
             $open_competitions_options[$open_competition->Competition_Date] = strftime(
                     '%d-%b-%Y',
                     strtotime($open_competition->Competition_Date)
-                ) . " " . $open_competition->Theme;
+                ) . ' ' . $open_competition->Theme;
         }
 
         $current_competition = reset($open_competitions);
@@ -109,30 +122,18 @@ class MyEntriesModel
         )
         ;
 
-        $this->session->set('myentries/subset', $medium_subset_medium);
-        $this->session->set(
-            'myentries/' . $medium_subset_medium . '/competition_date',
-            $current_competition->Competition_Date
-        )
-        ;
-        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
-        $this->session->set(
-            'myentries/' . $medium_subset_medium . '/classification',
-            $current_competition->Classification
-        )
-        ;
-        $this->session->save();
+        $this->saveSession($medium_subset_medium, $current_competition);
 
         // Start the form
         $action = home_url('/' . get_page_uri($post->ID));
         $entity = new EntityFormMyEntries();
         $entity->setWpnonce(wp_create_nonce('avh-rps-myentries'));
-        $entity->setSelectComp($open_competitions_options);
-        $entity->setSelectedMedium($this->competition_helper->getMedium($open_competitions));
-        $entity->setCompDate($current_competition->Competition_Date);
-        $entity->setMedium($current_competition->Medium);
+        $entity->setSelectComp($current_competition->Competition_Date);
+        $entity->setSelectedMedium($current_competition->Medium);
+        $entity->setSelectedCompChoices($open_competitions_options);
+        $entity->setSelectedMediumChoices($this->competition_helper->getMedium($open_competitions));
         $entity->setClassification($current_competition->Classification);
-        $form = $this->formFactory->create(
+        $form = $this->form_factory->create(
             new MyEntriesType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'myentries']]
@@ -143,8 +144,6 @@ class MyEntriesModel
         $data['competition_date'] = $current_competition->Competition_Date;
         $data['medium'] = $current_competition->Medium;
         $data['classification'] = $current_competition->Classification;
-        $data['select_medium']['selected'] = $current_competition->Medium;
-        $data['select_competition']['selected'] = $current_competition->Competition_Date;
 
         $img = CommonHelper::getCompetitionThumbnail($current_competition);
 
@@ -159,9 +158,15 @@ class MyEntriesModel
         )
         ;
         if ($close_date !== null) {
-            $close_epoch = strtotime($close_date);
-            $time_to_close = $close_epoch - current_time('timestamp');
-            if ($time_to_close >= 0 && $time_to_close <= 604800) {
+            // We give a warning 7 days in advance that a competition will close.
+            $close_competition_warning_date = Carbon::instance(
+                new \DateTime($close_date, new \DateTimeZone('America/New_York'))
+            )
+                                                    ->subDays(7)
+            ;
+            if (Carbon::now('America/New_York')
+                      ->gte($close_competition_warning_date)
+            ) {
                 $data['close'] = $close_date;
             }
         }
@@ -193,7 +198,7 @@ class MyEntriesModel
         /** @var QueryEntries $recs */
         foreach ($entries as $recs) {
             $competition = $this->query_competitions->getCompetitionById($recs->Competition_ID);
-            $num_rows += 1;
+            $num_rows++;
 
             $entry = [];
             $entry['id'] = $recs->ID;
@@ -227,5 +232,26 @@ class MyEntriesModel
         $return ['form'] = $form;
 
         return $return;
+    }
+
+    /**
+     * @param $medium_subset_medium
+     * @param $current_competition
+     */
+    private function saveSession($medium_subset_medium, $current_competition)
+    {
+        $this->session->set('myentries/subset', $medium_subset_medium);
+        $this->session->set(
+            'myentries/' . $medium_subset_medium . '/competition_date',
+            $current_competition->Competition_Date
+        )
+        ;
+        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+        $this->session->set(
+            'myentries/' . $medium_subset_medium . '/classification',
+            $current_competition->Classification
+        )
+        ;
+        $this->session->save();
     }
 }

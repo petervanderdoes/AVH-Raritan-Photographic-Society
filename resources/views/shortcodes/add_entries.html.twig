@@ -1,0 +1,99 @@
+<script language="javascript">
+    function confirmSubmit() {
+        var agree = confirm("You are about to delete one or more entries.  Are you sure?");
+        if (agree) {
+            submit_form('delete');
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function submit_form(control_name) {
+        document.getElementById('form_submit_control').value = control_name;
+        document.forms[0].submit();
+    }
+</script>
+{{ form_start(form) }}
+<table width="90%" class="form_frame">
+    <tbody>
+    <tr>
+        <th align="center" class="form_frame_header" colspan="6">My Entries for {{ data.medium|escape }} on {{ data.competition_date|date('F j, Y') }}</th>
+    </tr>
+    <tr>
+        <td align="center" colspan="6">
+            <table width="100%">
+                <tbody>
+                <tr>
+                    <td width="25%"><img src="{{ data.image_source }}"></td>
+                    <td width="75%">
+                        <table width="100%">
+                            <tbody>
+                            <tr>
+                                <td align="right" width="33%"><b>Competition Date:&nbsp;&nbsp;</b></td>
+                                <td align="left" width="64%">{{ form_widget(form.select_comp) }}</td>
+                            </tr>
+                            <tr>
+                                <td align="right" width="33%"><b>Competition:&nbsp;&nbsp;</b></td>
+                                <td align="left" width="64%">{{ form_widget(form.selected_medium) }}</td>
+                            </tr>
+                            <tr>
+                                <td align="right" width="33%"><b>Classification:&nbsp;&nbsp;<b></b></b></td>
+                                <td align="left" width="64%">{{ data.classification }}</td>
+                            </tr>
+                            <tr>
+                                <td align="right" width="33%"><b>Theme:&nbsp;&nbsp;<b></b></b></td>
+                                <td align="left" width="64%">{{ data.theme }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    {% if data.close is defined %}
+        <tr>
+            <td class="message" colspan="6"><b>Note:</b> This competition will close on {{ data.close|date('F j, Y') }} at {{ data.close|date('h:i a') }}</td>
+        </tr>
+    {% endif %}
+    <tr>
+        <th width="5%" class="form_frame_header">&nbsp;</th>
+        <th width="10%" class="form_frame_header">Image</th>
+        <th width="40%" class="form_frame_header">Title</th>
+        <th width="25%" class="form_frame_header">File Name</th>
+        <th width="10%" class="form_frame_header">Width</th>
+        <th width="10%" class="form_frame_header">Height</th>
+    </tr>
+    {% set counter = 0 %}
+    {% for entry in data.entries %}
+        <tr>
+            <td align="center" width="5%"><input id="form_entryid_{{ counter }}" type="checkbox" value="{{ entry.id }}" name="form[entryid][]">
+            </td>
+            <td align="center" width="10%">
+                <a title="{{ entry.title|escape }}" rel="1" href="{{ entry.image.url }}">
+                    <img src="{{ entry.image.source }}">
+                </a></td>
+            <td align="left" width="40%">{{ entry.title|escape }}</td>
+            <td align="left" width="25%">{{ entry.client_file_name }}</td>
+            <td align="center" width="10%" style="text-align:center">{{ entry.size.x }}</td>
+            <td align="center" width="10%">{{ entry.size.y }}</td>
+        </tr>
+        {% set counter = counter + 1 %}
+    {% endfor %}
+    <tr>
+        <td colspan="6" class="form_buttons_row">
+            {% if form.add is defined %}
+                {{ form_widget(form.add) }}
+            {% endif %}
+            {% if form.edit is defined %}
+                {{ form_widget(form.edit) }}
+            {% endif %}
+            {% if form.delete is defined %}
+                {{ form_widget(form.delete) }}
+            {% endif %}
+        </td>
+    </tr>
+    </tbody>
+</table>
+{{ form_end(form) }}

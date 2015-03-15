@@ -2,25 +2,30 @@
 
 namespace RpsCompetition\Form\Type;
 
+use RpsCompetition\Entity\Forms\MyEntries as MyEntriesEntity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class MyEntriesType
  *
- * @package RpsCompetition\Form\Type
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Form\Type
  */
 class MyEntriesType extends AbstractType
 {
+    /** @var MyEntriesEntity */
+    private $entity;
+
     /**
-     * @param $entity
+     * Constructor
      *
+     * @param MyEntriesEntity $entity
      */
-    public function __construct($entity)
+    public function __construct(MyEntriesEntity $entity)
     {
         $this->entity = $entity;
     }
@@ -31,51 +36,28 @@ class MyEntriesType extends AbstractType
     public function buildform(FormBuilderInterface $builder, array $options)
     {
         $builder->add('submit_control', 'hidden')
-                ->add('comp_date', 'hidden')
-                ->add('medium', 'hidden')
                 ->add('classification', 'hidden')
                 ->add('_wpnonce', 'hidden')
-        ;
-
-        $builder->addEventListener(
-            FormEvents::PRE_SET_DATA,
-            function (FormEvent $event) {
-                $form = $event->getForm();
-
-                $form->add(
+                ->add(
                     'select_comp',
                     'choice',
                     [
                         'multiple' => false,
                         'expanded' => false,
-                        'choices'  => $this->entity->getSelectComp(),
+                        'choices'  => $this->entity->getSelectedCompChoices(),
                         'attr'     => ['onchange' => 'submit_form("select_comp")']
                     ]
                 )
-                ;
-                $form->add(
+                ->add(
                     'selected_medium',
                     'choice',
                     [
                         'multiple' => false,
                         'expanded' => false,
-                        'choices'  => $this->entity->getSelectedMedium(),
+                        'choices'  => $this->entity->getSelectedMediumChoices(),
                         'attr'     => ['onchange' => 'submit_form("select_medium")']
                     ]
                 )
-                ;
-            }
-        )
-        ;
-        $builder->addEventListener(
-            FormEvents::PRE_SUBMIT,
-            function (FormEvent $event) {
-                $form = $event->getForm();
-
-                $form->add('select_comp');
-                $form->add('selected_medium');
-            }
-        )
         ;
     }
 

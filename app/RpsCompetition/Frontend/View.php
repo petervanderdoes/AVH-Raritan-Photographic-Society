@@ -3,7 +3,7 @@ namespace RpsCompetition\Frontend;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
@@ -21,27 +21,34 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class View
  *
- * @package RpsCompetition\Frontend
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend
  */
 class View
 {
+    /** @var FormBuilder */
     private $form_builder;
+    /** @var HtmlBuilder */
     private $html_builder;
+    /** @var PhotoHelper */
     private $photo_helper;
     private $request;
     private $rpsdb;
+    /** @var SeasonHelper */
     private $season_helper;
     private $settings;
+    /** @var Twig_Environment */
     private $twig;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
-     * @param Request  $request
+     * @param Settings          $settings
+     * @param RpsDb             $rpsdb
+     * @param IlluminateRequest $request
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, IlluminateRequest $request)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
@@ -115,6 +122,7 @@ class View
             $img_url = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
+                /** @var QueryEntries $entry */
                 $entry = new \stdClass;
                 $img_relative_path = substr($img_url, strlen($home_url));
                 $entry->Server_File_Name = $img_relative_path;
@@ -292,7 +300,7 @@ class View
     {
         $data = [];
         $data['title'] = $title;
-        $data['credit'] = "$first_name $last_name";
+        $data['credit'] = $first_name . ' ' . $last_name;
 
         return $data;
     }

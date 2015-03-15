@@ -1,5 +1,4 @@
 <?php
-
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 if (!class_exists('AVH_RPS_Client')) {
@@ -11,7 +10,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class SocialNetworksModel
  *
- * @package RpsCompetition\Frontend\SocialNetworks
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\SocialNetworks
  */
 class SocialNetworksModel
 {
@@ -61,10 +62,11 @@ class SocialNetworksModel
      */
     public function getSocialButtons(array $networks, $icons = [])
     {
-        $default_icons = ['facebook'   => 'facebook-square',
-                          'twitter'    => 'twitter',
-                          'googleplus' => 'google-plus',
-                          'email'      => 'envelope-o'
+        $default_icons = [
+            'facebook'   => 'facebook-square',
+            'twitter'    => 'twitter',
+            'googleplus' => 'google-plus',
+            'email'      => 'envelope-o'
         ];
         $data = [];
 

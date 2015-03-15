@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -19,10 +19,8 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Frontend;
-use RpsCompetition\Frontend\Requests;
-use RpsCompetition\Frontend\Shortcodes;
+use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
-use RpsCompetition\Frontend\Shortcodes\ShortcodeModel;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
@@ -58,6 +56,9 @@ $rps_basename = plugin_basename($plugin);
 
 /**
  * Class AVH_RPS_Client
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
  */
 class AVH_RPS_Client
 {
@@ -168,23 +169,23 @@ class AVH_RPS_Client
 
         $this->container->bind(
             'Core',
-            function ($app) {
+            function (Application $app) {
                 return new Core($app->make('Settings'));
             }
         )
         ;
+
         $this->container->bind(
-            'FrontendRequests',
-            function ($app) {
-                return new Requests(
-                    $app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session')
-                );
+            'RequestController',
+            function (Application $app) {
+                return new RequestController($app);
             }
         )
         ;
+
         $this->container->bind(
             'FrontendView',
-            function ($app) {
+            function (Application $app) {
                 return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
             }
         )
@@ -192,7 +193,7 @@ class AVH_RPS_Client
 
         $this->container->bind(
             'PhotoHelper',
-            function ($app) {
+            function (Application $app) {
                 return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
             }
         )
@@ -200,7 +201,7 @@ class AVH_RPS_Client
 
         $this->container->bind(
             'SeasonHelper',
-            function ($app) {
+            function (Application $app) {
                 return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
             }
         )
@@ -208,7 +209,7 @@ class AVH_RPS_Client
 
         $this->container->bind(
             'WpSeoHelper',
-            function ($app) {
+            function (Application $app) {
                 return new WpseoHelper(
                     $app->make('Settings'),
                     $app->make('RpsDb'),
@@ -222,7 +223,7 @@ class AVH_RPS_Client
 
         $this->container->bind(
             'CompetitionHelper',
-            function ($app) {
+            function (Application $app) {
                 return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
             }
         )
@@ -234,20 +235,6 @@ class AVH_RPS_Client
         $this->registerBindingShortCodes();
         $this->registerBindingSocialNetworks();
         $this->registerBindingsForms();
-
-        $this->container->bind(
-            'Templating',
-            function ($app, $param) {
-                $template_dir = $param['template_dir'];
-                $cache_dir = $param['cache_dir'];
-                if (WP_LOCAL_DEV !== true) {
-                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir), ['cache' => $cache_dir]);
-                } else {
-                    return new Twig_Environment(new Twig_Loader_Filesystem($template_dir));
-                }
-            }
-        )
-        ;
     }
 
     /**
@@ -258,28 +245,28 @@ class AVH_RPS_Client
     {
         $this->container->bind(
             'QueryEntries',
-            function ($app) {
+            function (Application $app) {
                 return new QueryEntries($app->make('RpsDb'));
             }
         )
         ;
         $this->container->bind(
             'QueryCompetitions',
-            function ($app) {
+            function (Application $app) {
                 return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
             }
         )
         ;
         $this->container->bind(
             'QueryMiscellaneous',
-            function ($app) {
+            function (Application $app) {
                 return new QueryMiscellaneous($app->make('RpsDb'));
             }
         )
         ;
         $this->container->bind(
             'QueryBanquet',
-            function ($app) {
+            function (Application $app) {
                 return new QueryBanquet($app->make('RpsDb'));
             }
         )
@@ -298,43 +285,24 @@ class AVH_RPS_Client
                 return new ShortcodeRouter();
             }
         )
-        ;;
+        ;
         $this->container->bind(
             'ShortcodeController',
-            function ($app) {
+            function (Application $app) {
                 return new ShortcodeController($app);
             }
         )
         ;
 
         $this->container->bind(
-            'ShortcodeModel',
-            function ($app) {
-                return new ShortcodeModel(
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryEntries'),
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('PhotoHelper'),
-                    $app->make('SeasonHelper'),
-                    $app->make('CompetitionHelper'),
-                    $app->make('Session'),
-                    $app->make('formFactory'),
-                    $app->make('Settings')
-                );
-            }
-        )
-        ;
-
-        $this->container->bind(
             'ShortcodeView',
-            function ($app) {
+            function (Application $app) {
                 $settings = $app->make('Settings');
 
                 return new ShortcodeView($settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/');
             }
         )
         ;
-        //$this->container->register('MyEntriesServiceProvider');
     }
 
     /**
@@ -344,23 +312,27 @@ class AVH_RPS_Client
     {
         $this->container->bind(
             'SocialNetworksRouter',
-            function ($app) {
+            function (Application $app) {
                 return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
             }
         )
         ;
         $this->container->bind(
             'SocialNetworksController',
-            function ($app) {
+            function (Application $app) {
                 return new SocialNetworksController($app);
             }
         )
         ;
-        $this->container->bind('SocialNetworkModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
+        $this->container->bind('SocialNetworksModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
         $this->container->bind(
             'SocialNetworksView',
-            function ($app, $param) {
-                return new SocialNetworksView($param['template_dir'], $param['cache_dir']);
+            function (Application $app) {
+                $settings = $app->make('Settings');
+
+                return new SocialNetworksView(
+                    $settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/'
+                );
             }
         )
         ;
@@ -373,7 +345,7 @@ class AVH_RPS_Client
     {
         $this->container->bind(
             'formFactory',
-            function ($app) {
+            function (Application $app) {
                 $validator_builder = Validation::createValidatorBuilder();
                 $validator_builder->setApiVersion(Validation::API_VERSION_2_5);
                 $validator_builder->addMethodMapping('loadValidatorMetadata');

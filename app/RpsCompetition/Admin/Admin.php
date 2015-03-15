@@ -24,15 +24,25 @@ if (!class_exists('AVH_RPS_Client')) {
     exit();
 }
 
-/* @var $formBuilder FormBuilder */
+/**
+ * Class Admin
+ *
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Admin
+ */
 final class Admin
 {
+    /* @var $formBuilder FormBuilder */
+
     private $competition_list;
     private $container;
     private $core;
     private $entries_list;
     private $hooks = [];
     private $message = '';
+    /** @var OptionsGeneral */
+    private $options;
     private $referer;
     /** @var Request */
     private $request;
@@ -40,8 +50,6 @@ final class Admin
     private $rpsdb;
     /** @var  Settings */
     private $settings;
-    /** @var OptionsGeneral */
-    private $options;
     private $status = '';
 
     /**
@@ -78,10 +86,10 @@ final class Admin
      */
     public function actionAddUserMeta($userID)
     {
-        update_user_meta($userID, "rps_class_bw", 'beginner');
-        update_user_meta($userID, "rps_class_color", 'beginner');
-        update_user_meta($userID, "rps_class_print_bw", 'beginner');
-        update_user_meta($userID, "rps_class_print_color", 'beginner');
+        update_user_meta($userID, 'rps_class_bw', 'beginner');
+        update_user_meta($userID, 'rps_class_color', 'beginner');
+        update_user_meta($userID, 'rps_class_print_bw', 'beginner');
+        update_user_meta($userID, 'rps_class_print_color', 'beginner');
     }
 
     /**
@@ -237,9 +245,7 @@ final class Admin
     public function actionLoadPagehookEntries()
     {
         $this->entries_list = $this->competition_list = new EntriesListTable(
-            $this->settings,
-            $this->rpsdb,
-            $this->request
+            $this->settings, $this->rpsdb, $this->request
         );
         $this->handleRequestEntries();
 
@@ -281,10 +287,10 @@ final class Admin
         )
         ;
 
-        update_user_meta($userID, "rps_class_bw", $rps_class_bw);
-        update_user_meta($userID, "rps_class_color", $rps_class_color);
-        update_user_meta($userID, "rps_class_print_bw", $rps_class_print_bw);
-        update_user_meta($userID, "rps_class_print_color", $rps_class_print_color);
+        update_user_meta($userID, 'rps_class_bw', $rps_class_bw);
+        update_user_meta($userID, 'rps_class_color', $rps_class_color);
+        update_user_meta($userID, 'rps_class_print_bw', $rps_class_print_bw);
+        update_user_meta($userID, 'rps_class_print_color', $rps_class_print_color);
     }
 
     /**
@@ -382,8 +388,8 @@ final class Admin
      */
     public function filterRpsUserActionLinks($actions, $user)
     {
-        $link = admin_url() . "?page=avh-rps-entries&user_id=" . $user->ID;
-        $actions['entries'] = "<a href='$link'>Entries</a>";
+        $link = admin_url() . '?page=avh-rps-entries&user_id=' . $user->ID;
+        $actions['entries'] = '<a href="' . $link . '">Entries</a>';
 
         return $actions;
     }
@@ -707,7 +713,7 @@ final class Admin
         if (is_array($this->message)) {
             foreach ($this->message as $messages) {
                 foreach ($messages as $msg) {
-                    $message .= $msg . "<br>";
+                    $message .= $msg . '<br>';
                 }
             }
         } else {
@@ -833,7 +839,7 @@ final class Admin
         echo 'jQuery(function($) {' . "\n";
         echo '	$( "#date" ).datepicker();' . "\n";
         echo '});', "\n";
-        echo "</script>";
+        echo '</script>';
         $this->displayAdminFooter();
     }
 
@@ -887,8 +893,8 @@ final class Admin
             $competition = $query_competitions->query(['where' => $sqlWhere]);
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
-            if ($entries !== "0") {
-                echo "<li>" . sprintf(
+            if ($entries !== '0') {
+                echo '<li>' . sprintf(
                         __(
                             'ID #%1s: %2s - %3s - %4s -%5s <strong>This competition will not be deleted. It still has %6s entries.</strong>'
                         ),
@@ -900,16 +906,16 @@ final class Admin
                         $entries
                     ) . "</li>\n";
             } else {
-                echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr(
+                echo '<li><input type="hidden" name="competitions[]" value="' . esc_attr(
                         $competitionID
-                    ) . "\" />" . sprintf(
+                    ) . '" />' . sprintf(
                         __('ID #%1s: %2s - %3s - %4s - %5s'),
                         $competitionID,
                         mysql2date(get_option('date_format'), $competition->Competition_Date),
                         $competition->Theme,
                         $competition->Classification,
                         $competition->Medium
-                    ) . "</li>\n";
+                    ) . '</li>' . "\n";
                 $goDelete++;
             }
         }
@@ -984,8 +990,8 @@ final class Admin
 
         $time = [];
         for ($hour = 0; $hour <= 23; $hour++) {
-            $time_val = sprintf("%02d:00:00", $hour);
-            $time_text = date("g:i a", strtotime($time_val));
+            $time_val = sprintf('%02d:00:00', $hour);
+            $time_text = date('g:i a', strtotime($time_val));
             $time[$time_val] = $time_text;
         }
         // echo $formBuilder->select('Closing Time', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
@@ -1086,7 +1092,7 @@ final class Admin
         echo '	$( "#date" ).datepicker();' . "\n";
         echo '	$( "#close-date" ).datepicker();' . "\n";
         echo '});', "\n";
-        echo "</script>";
+        echo '</script>';
 
         $this->displayAdminFooter();
 
@@ -1224,16 +1230,16 @@ final class Admin
             $competition = $query_competitions->query(['where' => $sqlWhere]);
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
-            echo "<li><input type=\"hidden\" name=\"competitions[]\" value=\"" . esc_attr(
+            echo '<li><input type="hidden" name="competitions[]" value="' . esc_attr(
                     $competitionID
-                ) . "\" />" . sprintf(
+                ) . '" />' . sprintf(
                     __('ID #%1s: %2s - %3s - %4s - %5s'),
                     $competitionID,
                     mysql2date(get_option('date_format'), $competition->Competition_Date),
                     $competition->Theme,
                     $competition->Classification,
                     $competition->Medium
-                ) . "</li>\n";
+                ) . '</li>' . "\n";
         }
 
         echo $formBuilder->hidden('action', 'do' . $action);
@@ -1285,7 +1291,7 @@ final class Admin
             if ($entry !== null) {
                 $user = get_user_by('id', $entry->Member_ID);
                 $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
-                echo "<li>";
+                echo '<li>';
                 echo $formBuilder->hidden('entries[]', $entryID);
                 printf(
                     __('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'),
@@ -1296,7 +1302,7 @@ final class Admin
                     $competition->Theme,
                     mysql2date(get_option('date_format'), $competition->Competition_Date)
                 );
-                echo "</li>\n";
+                echo '</li>' . "\n";
                 $goDelete++;
             }
         }
@@ -1370,7 +1376,7 @@ final class Admin
 
         $user = get_user_by('id', $entry->Member_ID);
         echo '<h3>Photographer: ' . $user->first_name . ' ' . $user->last_name . "</h3>\n";
-        echo "<img src=\"" . $photo_helper->getThumbnailUrl($entry->Server_File_Name, '200') . "\" />\n";
+        echo '<img src="' . $photo_helper->getThumbnailUrl($entry->Server_File_Name, '200') . '" />' . "\n";
 
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));
         echo $formBuilder->outputField($formBuilder->text('title', $entry->Title));
@@ -1757,7 +1763,7 @@ final class Admin
         echo '<p class="footer_avhfdas">';
         printf(
             '&copy; Copyright 2012-%s <a href="http://blog.avirtualhome.com/" title="My Thoughts">Peter van der Does</a> | AVH RPS Competition version %s',
-            date("Y"),
+            date('Y'),
             Constants::PLUGIN_VERSION
         );
         echo '</p>';
@@ -1776,13 +1782,13 @@ final class Admin
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
         echo '   buttonImage: "' . CommonHelper::getPluginUrl(
-                "calendar.png",
+                'calendar.png',
                 $this->settings->get('images_dir')
             ) . '", ' . "\n";
         echo '   showOn: "both"' . "\n";
         echo ' });' . "\n";
         echo '});', "\n";
-        echo "</script>";
+        echo '</script>';
     }
 
     /**
@@ -1841,6 +1847,7 @@ final class Admin
         $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
         $entry = $query_entries->getEntryById($id);
+        /** @var QueryCompetitions $competition */
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
         $medium_array = Constants::getMediums();

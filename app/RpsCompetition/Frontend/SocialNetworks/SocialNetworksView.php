@@ -12,7 +12,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class SocialNetworksView
  *
- * @package RpsCompetition\Frontend\SocialNetworks
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\SocialNetworks
  */
 final class SocialNetworksView extends View
 {

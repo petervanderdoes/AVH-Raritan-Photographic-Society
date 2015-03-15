@@ -12,7 +12,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class RpsPdo
  *
- * @package RpsCompetition\Db
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Db
  */
 class RpsPdo extends \PDO
 {
@@ -33,7 +35,7 @@ class RpsPdo extends \PDO
         $this->database = RPS_DB_NAME;
         $this->user = RPS_DB_USER;
         $this->pass = RPS_DB_PASSWORD;
-        $dns = $this->engine . ':dbname=' . $this->database . ";host=" . $this->host;
+        $dns = $this->engine . ':dbname=' . $this->database . ';host=' . $this->host;
         parent::__construct($dns, $this->user, $this->pass);
     }
 }

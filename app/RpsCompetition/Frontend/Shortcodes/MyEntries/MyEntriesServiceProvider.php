@@ -2,11 +2,14 @@
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use Illuminate\Support\ServiceProvider;
+use RpsCompetition\Application;
 
 /**
  * Class MyEntriesServiceProvider
  *
- * @package RpsCompetition\Frontend\Shortcodes\MyEntries
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
  */
 class MyEntriesServiceProvider extends ServiceProvider
 {
@@ -24,7 +27,7 @@ class MyEntriesServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return [];
+        return ['MyEntriesController'];
     }
 
     /**
@@ -36,9 +39,9 @@ class MyEntriesServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind(
-            'MyEntries',
-            function ($app) {
-                return new MyEntries(
+            'MyEntriesController',
+            function (Application $app) {
+                return new MyEntriesController(
                     $app->make('ShortcodeView'), $app->make('MyEntriesModel')
                 );
             }
@@ -47,7 +50,7 @@ class MyEntriesServiceProvider extends ServiceProvider
 
         $this->app->bind(
             'MyEntriesModel',
-            function ($app) {
+            function (Application $app) {
                 return new MyEntriesModel(
                     $app->make('QueryCompetitions'),
                     $app->make('QueryEntries'),
@@ -57,7 +60,8 @@ class MyEntriesServiceProvider extends ServiceProvider
                     $app->make('CompetitionHelper'),
                     $app->make('Session'),
                     $app->make('formFactory'),
-                    $app->make('Settings')
+                    $app->make('Settings'),
+                    $app->make('IlluminateRequest')
                 );
             }
         )

@@ -10,7 +10,9 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class Constants
  *
- * @package RpsCompetition
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition
  */
 final class Constants
 {
@@ -37,7 +39,7 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '2.0.4';
+    const PLUGIN_VERSION = '2.0.5';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
     private static $image_sizes = [

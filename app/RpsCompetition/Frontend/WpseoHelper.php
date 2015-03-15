@@ -18,29 +18,16 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class WpseoHelper
  *
- * @package RpsCompetition\Frontend
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Frontend
  */
 class WpseoHelper
 {
-    /**
-     * @var PhotoHelper
-     */
     private $photo_helper;
-    /**
-     * @var QueryCompetitions
-     */
     private $query_competitions;
-    /**
-     * @var QueryMiscellaneous
-     */
     private $query_miscellaneous;
-    /**
-     * @var RpsDb
-     */
     private $rpsdb;
-    /**
-     * @var Settings
-     */
     private $settings;
 
     /**
@@ -133,7 +120,7 @@ class WpseoHelper
      */
     public function filterSitemapEntry($data, $type, $current_post)
     {
-        if ($current_post->ID == get_option('page_on_front')) {
+        if ($type === 'post' && $current_post->ID == get_option('page_on_front')) {
             $data['pri'] = 1;
             $data['chf'] = 'daily';
 
@@ -385,7 +372,7 @@ class WpseoHelper
         if (is_scalar($n) && intval($n) > 0) {
             $n = intval($n);
         } else {
-            header("HTTP/1.1 404 Not Found");
+            header('HTTP/1.1 404 Not Found');
             exit();
         }
 

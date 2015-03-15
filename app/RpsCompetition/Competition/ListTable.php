@@ -18,27 +18,18 @@ if (!class_exists('AVH_RPS_Client')) {
 /**
  * Class ListTable
  *
- * @package RpsCompetition\Competition
+ * @author    Peter van der Does
+ * @copyright Copyright (c) 2015, AVH Software
+ * @package   RpsCompetition\Competition
  */
 class ListTable extends \WP_List_Table
 {
     public $messages;
     public $screen;
-    /**
-     * @var HtmlBuilder
-     */
+    /** @var HtmlBuilder */
     private $html;
-    /**
-     * @var Request
-     */
     private $request;
-    /**
-     * @var RpsDb
-     */
     private $rpsdb;
-    /**
-     * @var Settings
-     */
     private $settings;
 
     /**
@@ -84,7 +75,7 @@ class ListTable extends \WP_List_Table
      */
     public function column_cb($competition)
     {
-        echo "<input type='checkbox' name='competitions[]' value='$competition->ID' />";
+        echo '<input type="checkbox" name="competitions[]" value="' . $competition->ID . '" />';
     }
 
     /**
@@ -148,7 +139,7 @@ class ListTable extends \WP_List_Table
         echo '<div class="row-actions">';
         $sep = '';
         foreach ($actions as $action => $link) {
-            echo "<span class='set_$action'>$sep$link</span>";
+            echo '<span class="set_' . $action . '">' . $sep . $link . '</span>';
             $sep = ' | ';
         }
         echo '</div>';
@@ -211,7 +202,7 @@ class ListTable extends \WP_List_Table
         echo '<div class="row-actions">';
         $sep = '';
         foreach ($actions as $action => $link) {
-            echo "<span class='set_$action'>$sep$link</span>";
+            echo '<span class="set_' . $action . '">' . $sep . $link . '</span>';
             $sep = ' | ';
         }
         echo '</div>';
@@ -255,7 +246,7 @@ class ListTable extends \WP_List_Table
     {
         //extract($this->_args);
 
-        wp_nonce_field("fetch-list-" . get_class($this), '_ajax_fetch_list_nonce', false);
+        wp_nonce_field('fetch-list-' . get_class($this), '_ajax_fetch_list_nonce', false);
 
         $this->display_tablenav('top');
 
@@ -391,7 +382,7 @@ class ListTable extends \WP_List_Table
             }
             $link = add_query_arg('competition_status', $status, $link);
             // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
-            $status_links[$status] = "<a href='$link'$class>" . sprintf(
+            $status_links[$status] = '<a href="' . $link . '"' . $class . '>' . sprintf(
                     translate_nooped_plural($label, $num_competitions->$status),
                     number_format_i18n($num_competitions->$status)
                 ) . '</a>';
@@ -476,9 +467,9 @@ class ListTable extends \WP_List_Table
     public function single_row($a_competition)
     {
         $competition = $a_competition;
-        $status = ($competition->Closed == "Y" ? '' : 'closed');
+        $status = ($competition->Closed == 'Y' ? '' : 'closed');
         echo '<tr id="competition-' . $competition->ID . '" class="' . $status . '">';
         $this->single_row_columns($competition);
-        echo "</tr>";
+        echo '</tr>';
     }
 }
