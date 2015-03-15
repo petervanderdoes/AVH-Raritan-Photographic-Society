@@ -67,7 +67,9 @@ class RequestController
             }
 
             if ($post->post_title == 'Banquet Entries') {
-                $this->handlePostRpsBanquetEntries();
+                /** @var \RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntries $request */
+                $request = $this->app->make('RequestBanquetEntries');
+                $request->handleBanquetEntries();
             }
 
             if ($post->ID == 75) {

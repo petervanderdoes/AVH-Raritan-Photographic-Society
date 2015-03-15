@@ -95,6 +95,7 @@ class Application extends Container implements ApplicationContract
         $this->instance('config', $config = new Repository($items));
 
         $this->config['app.providers'] = [
+            '\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesServiceProvider',
             '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleServiceProvider',
             '\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesServiceProvider',
             '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryServiceProvider',

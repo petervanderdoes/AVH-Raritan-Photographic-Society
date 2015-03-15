@@ -131,38 +131,7 @@ class Frontend
         wp_enqueue_style('rps-competition.general.style');
     }
 
-    /**
-     * Handle POST request for the Banquet Entries.
-     * This method handles the POST request generated on the page for Banquet Entries
-     * The action is called from the theme!
-     *
-     * @internal Hook: suffusion_before_post
-     */
-    public function actionHandleHttpPostRpsBanquetEntries()
-    {
-        global $post;
 
-        if (is_object($post) && $post->post_title == 'Banquet Entries') {
-
-            $entity = new BanquetCurrentUserEntity();
-            $form = $this->formFactory->create(
-                new BanquetCurrentUserType($entity),
-                $entity,
-                ['attr' => ['id' => 'banquetentries']]
-            )
-            ;
-            $form->handleRequest($this->request);
-
-            $redirect_to = $entity->getWpGetReferer();
-            $this->isRequestCanceled($form, 'cancel', $redirect_to);
-
-            if ($form->get('update')
-                     ->isClicked()
-            ) {
-                $this->handleSubmitBanquetEntries($entity);
-            }
-        }
-    }
 
 
 
@@ -553,64 +522,6 @@ class Frontend
         }
 
         return $title;
-    }
-
-    /**
-     * Handles the required functions for when a user submits their Banquet Entries
-     *
-     * @param BanquetCurrentUserEntity $entity
-     */
-    private function handleSubmitBanquetEntries(BanquetCurrentUserEntity $entity)
-    {
-        $query_entries = $this->container->make('QueryEntries');
-        $query_competitions = $this->container->make('QueryCompetitions');
-        $photo_helper = $this->container->make('PhotoHelper');
-
-        $all_entries = json_decode(base64_decode($entity->getAllentries()));
-        foreach ($all_entries as $entry_id) {
-            $entry = $query_entries->getEntryById($entry_id);
-            if ($entry !== null) {
-                $query_entries->deleteEntry($entry->ID);
-                $photo_helper->deleteEntryFromDisk($entry);
-            }
-        }
-
-        $entries = (array) $this->request->input('form.entry_id', []);
-        foreach ($entries as $entry_id) {
-            $entry = $query_entries->getEntryById($entry_id);
-            $competition = $query_competitions->getCompetitionByID($entry->Competition_ID);
-            $banquet_ids = json_decode(base64_decode($entity->getBanquetids()));
-            foreach ($banquet_ids as $banquet_id) {
-                $banquet_record = $query_competitions->getCompetitionByID($banquet_id);
-                if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
-                    // Move the file to its final location
-                    $path = $photo_helper->getCompetitionPath(
-                        $banquet_record->Competition_Date,
-                        $banquet_record->Classification,
-                        $banquet_record->Medium
-                    )
-                    ;
-                    CommonHelper::createDirectory($path);
-                    $file_info = pathinfo($entry->Server_File_Name);
-                    $new_file_name = $path . '/' . $file_info['basename'];
-                    $original_filename = html_entity_decode(
-                        $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name,
-                        ENT_QUOTES,
-                        get_bloginfo('charset')
-                    );
-                    // Need to create the destination folder?
-                    copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
-                    $data = [
-                        'Competition_ID'   => $banquet_record->ID,
-                        'Title'            => $entry->Title,
-                        'Client_File_Name' => $entry->Client_File_Name,
-                        'Server_File_Name' => $new_file_name
-                    ];
-                    $query_entries->addEntry($data, get_current_user_id());
-                }
-            }
-        }
-        unset($query_entries, $query_competitions, $photo_helper);
     }
 
     /**
