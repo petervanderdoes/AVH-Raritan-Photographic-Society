@@ -60,8 +60,7 @@ class RequestMyEntriesServiceProvider extends ServiceProvider
                     $app->make('QueryCompetitions'),
                     $app->make('IlluminateRequest'),
                     $app->make('formFactory'),
-                    $app->make('Session'),
-                    $app->make('Settings')
+                    $app->make('Session')
                 );
             }
         )
