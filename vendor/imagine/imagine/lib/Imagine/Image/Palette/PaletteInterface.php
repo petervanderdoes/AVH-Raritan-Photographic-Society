@@ -39,8 +39,7 @@ interface PaletteInterface
      *
      * @return ColorInterface
      *
-     * @throws InvalidArgumentException In case you pass an alpha value to a
-     *                                  Palette that does not support alpha
+     * @throws \InvalidArgumentException In case you pass an alpha value to a Palette that does not support alpha
      */
     public function color($color, $alpha = null);
 

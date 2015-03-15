@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.5-dev.53
+ * Version: 2.0.5-dev.138
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -19,7 +19,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Frontend;
-use RpsCompetition\Frontend\Requests;
+use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
@@ -174,15 +174,15 @@ class AVH_RPS_Client
             }
         )
         ;
+
         $this->container->bind(
-            'FrontendRequests',
+            'RequestController',
             function (Application $app) {
-                return new Requests(
-                    $app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'), $app->make('Session')
-                );
+                return new RequestController($app);
             }
         )
         ;
+
         $this->container->bind(
             'FrontendView',
             function (Application $app) {

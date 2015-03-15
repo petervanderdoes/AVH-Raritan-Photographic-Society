@@ -126,9 +126,7 @@ final class Image extends AbstractImage
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return ImageInterface
+     * @return Image
      */
     final public function copy()
     {
@@ -275,7 +273,7 @@ final class Image extends AbstractImage
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getColorAt(PointInterface $point)
     {
@@ -603,7 +601,7 @@ final class Image extends AbstractImage
      * Generates a GD image
      *
      * @param BoxInterface $size
-     * @param              string the operation initiating the creation
+     * @param string       $operation the operation initiating the creation
      *
      * @return resource
      *
@@ -828,7 +826,7 @@ final class Image extends AbstractImage
      *
      * @param string $format
      *
-     * @return Boolean
+     * @return array|bool
      */
     private function supported($format = null)
     {

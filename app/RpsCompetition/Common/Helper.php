@@ -179,6 +179,23 @@ class Helper
     }
 
     /**
+     * Check if user pressed cancel and if so redirect the user
+     *
+     * @param \Symfony\Component\Form\Form $form   The Form that was submitted
+     * @param string                       $cancel The field to check for cancellation
+     * @param string                       $redirect_to
+     */
+    public static function isRequestCanceled($form, $cancel, $redirect_to)
+    {
+        if ($form->get($cancel)
+                 ->isClicked()
+        ) {
+            wp_redirect($redirect_to);
+            exit();
+        }
+    }
+
+    /**
      * Check if the given date in the given format is valid.
      *
      * @param  string $date

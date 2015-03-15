@@ -365,7 +365,7 @@ final class Drawer implements DrawerInterface
      *
      * @param ColorInterface $color
      *
-     * @return resource
+     * @return int
      *
      * @throws RuntimeException
      * @throws InvalidArgumentException
@@ -411,6 +411,13 @@ final class Drawer implements DrawerInterface
      * Internal
      *
      * Fits a string into box with given width
+     *
+     * @param string       $string
+     * @param AbstractFont $font
+     * @param float        $angle
+     * @param integer      $width
+     *
+     * @return string
      */
     private function wrapText($string, AbstractFont $font, $angle, $width)
     {
