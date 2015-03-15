@@ -7,17 +7,10 @@ use RpsCompetition\Api\Client;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
-use RpsCompetition\Entity\Forms\UploadImage as UploadImageEntity;
-use RpsCompetition\Form\Type\BanquetCurrentUserType;
-use RpsCompetition\Form\Type\UploadImageType;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
 use RpsCompetition\Settings;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 if (!class_exists('AVH_RPS_Client')) {
     header('Status: 403 Forbidden');
@@ -130,10 +123,6 @@ class Frontend
 
         wp_enqueue_style('rps-competition.general.style');
     }
-
-
-
-
 
     /**
      * Setup all that is needed to run the plugin.
@@ -522,23 +511,6 @@ class Frontend
         }
 
         return $title;
-    }
-
-    /**
-     * Check if user pressed cancel and if so redirect the user
-     *
-     * @param \Symfony\Component\Form\Form $form   The Form that was submitted
-     * @param string                       $cancel The field to check for cancellation
-     * @param string                       $redirect_to
-     */
-    private function isRequestCanceled($form, $cancel, $redirect_to)
-    {
-        if ($form->get($cancel)
-                 ->isClicked()
-        ) {
-            wp_redirect($redirect_to);
-            exit();
-        }
     }
 
     private function register_scripts_styles()
