@@ -66,7 +66,7 @@ class RequestUploadImageModel
     /**
      * @return bool
      */
-    public function all()
+    public function handleUploadImage()
     {
         // Retrieve and parse the selected competition cookie
         if ($this->session->has('myentries')) {
