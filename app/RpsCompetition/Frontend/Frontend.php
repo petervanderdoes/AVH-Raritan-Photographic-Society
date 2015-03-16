@@ -383,9 +383,9 @@ class Frontend
          *
          */
         $output = apply_filters('gallery_style', $gallery_style . $gallery_div);
-        $i = 0;
+        $counter = 0;
         foreach ($attachments as $id => $attachment) {
-            if ($i % $columns == 0) {
+            if ($counter % $columns == 0) {
                 if ($layout == 'row-equal') {
                     $output .= '<div class="gallery-row gallery-row-equal">';
                 } else {
@@ -432,12 +432,12 @@ class Frontend
             $output .= '</div>';
             $output .= '</' . $itemtag . '>';
 
-            if ($columns > 0 && ++$i % $columns == 0) {
+            if ($columns > 0 && ++$counter % $columns == 0) {
                 $output .= '</div>';
             }
         }
 
-        if ($columns > 0 && $i % $columns !== 0) {
+        if ($columns > 0 && $counter % $columns !== 0) {
             $output .= '</div>';
         }
         $output .= '</div>' . "\n";
