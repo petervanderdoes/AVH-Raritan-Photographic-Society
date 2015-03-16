@@ -32,7 +32,7 @@ Select season: <span class="season-form">
         {% for entry in data.entries %}
             <tr class="{{ cycle(['even', 'odd'], loop.index0) }}">
                 <td align="center" valign="middle" class="" width="3%">
-                    <input id="form_entryid_{{ counter }}" type="checkbox" value="{{ entry.entry_id }}"{% if entry.checked is defined %} checked="checked"{% endif %}{% if data.disabled %} disabled="disabled"{% endif %} name="form[entry_id][]">
+                    <input id="form_entryid_{{ counter }}" type="checkbox" value="{{ entry.entry_id }}"{% if entry.checked %} checked="checked"{% endif %}{% if data.disabled %} disabled="disabled"{% endif %} name="form[entry_id][]">
                 </td>
                 <td align="left" valign="top" width="12%">{{ entry.date }}</td>
                 <td align="left" valign="top">{{ entry.theme }}</td>

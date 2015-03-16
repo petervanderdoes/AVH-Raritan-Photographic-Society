@@ -172,63 +172,7 @@ class BanquetCurrentUserModel
         $data['selected_season'] = $selected_season;
         $data['scores'] = true;
 
-        // Build the list of submitted images
-        $comp_count = 0;
-        $prev_date = '';
-        $prev_medium = '';
-
-        foreach ($scores as $recs) {
-            $entry = [];
-            if (empty($recs['Award'])) {
-                continue;
-            }
-
-            $date_parts = explode(' ', $recs['Competition_Date']);
-            $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
-            $entry['date'] = $date_parts[0];
-            $entry['competition_date'] = $date_parts[0];
-            $entry['medium'] = $recs['Medium'];
-            $entry['theme'] = $recs['Theme'];
-            $entry['title'] = $recs['Title'];
-            $entry['score'] = $recs['Score'];
-            $entry['award'] = $recs['Award'];
-            if ($date_parts[0] != $prev_date) {
-                $comp_count++;
-                $prev_medium = '';
-            }
-
-            $entry['image_url'] = home_url($recs['Server_File_Name']);
-
-            if ($prev_date == $entry['date']) {
-                $entry['date'] = '';
-                $entry['theme'] = '';
-            } else {
-                $prev_date = $date_parts[0];
-            }
-            if ($prev_medium == $entry['medium']) {
-                $entry['theme'] = '';
-            } else {
-                $prev_medium = $entry['medium'];
-            }
-            $entry['score_award'] = '';
-            if ($entry['score'] > '') {
-                $entry['score_award'] = ' / ' . $entry['score'] . 'pts';
-            }
-            if ($entry['award'] > '') {
-                $entry['score_award'] .= ' / ' . $entry['award'];
-            }
-
-            foreach ($this->banquet_entries as $banquet_entry) {
-
-                if (!empty($banquet_entry) && $banquet_entry->Title == $entry['title']) {
-                    $entry['checked'] = true;
-                    break;
-                }
-            }
-
-            $entry['entry_id'] = $recs['Entry_ID'];
-            $data['entries'][] = $entry;
-        }
+        $data = $this->getEntriesData($scores, $data);
 
         return $data;
     }
@@ -266,5 +210,91 @@ class BanquetCurrentUserModel
         }
 
         return;
+    }
+
+    /**
+     * Get the data of the entries.
+     *
+     * @param array $scores
+     *
+     * @return array
+     */
+    private function getEntriesData($scores)
+    {
+        // Build the list of submitted images
+        $data = [];
+        $comp_count = 0;
+        $prev_date = '';
+        $prev_medium = '';
+
+        foreach ($scores as $record) {
+            $entry = [];
+            if (empty($record['Award'])) {
+                continue;
+            }
+
+            $date_parts = explode(' ', $record['Competition_Date']);
+            $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
+            $entry['date'] = $date_parts[0];
+            $entry['competition_date'] = $date_parts[0];
+            $entry['medium'] = $record['Medium'];
+            $entry['theme'] = $record['Theme'];
+            $entry['title'] = $record['Title'];
+            $entry['score'] = $record['Score'];
+            $entry['award'] = $record['Award'];
+            if ($date_parts[0] != $prev_date) {
+                $comp_count++;
+                $prev_medium = '';
+            }
+
+            $entry['image_url'] = home_url($record['Server_File_Name']);
+
+            if ($prev_date == $entry['date']) {
+                $entry['date'] = '';
+                $entry['theme'] = '';
+            } else {
+                $prev_date = $date_parts[0];
+            }
+            if ($prev_medium == $entry['medium']) {
+                $entry['theme'] = '';
+            } else {
+                $prev_medium = $entry['medium'];
+            }
+            $entry['score_award'] = '';
+            if ($entry['score'] > '') {
+                $entry['score_award'] = ' / ' . $entry['score'] . 'pts';
+            }
+            if ($entry['award'] > '') {
+                $entry['score_award'] .= ' / ' . $entry['award'];
+            }
+
+            $entry['checked'] = $this->isEntryChecked($entry);
+
+            $entry['entry_id'] = $record['Entry_ID'];
+            $data['entries'][] = $entry;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Check if the entry is a checked banquet entry already
+     *
+     * @param array $entry
+     *
+     * @return bool
+     */
+    private function isEntryChecked($entry)
+    {
+        $return = false;
+        foreach ($this->banquet_entries as $banquet_entry) {
+
+            if (!empty($banquet_entry) && $banquet_entry->Title == $entry['title']) {
+                $return = true;
+                break;
+            }
+        }
+
+        return $return;
     }
 }
