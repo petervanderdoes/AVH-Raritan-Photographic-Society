@@ -172,7 +172,7 @@ class BanquetCurrentUserModel
         $data['selected_season'] = $selected_season;
         $data['scores'] = true;
 
-        $data = $this->getEntriesData($scores);
+        $data['entries'] = $this->getEntriesData($scores);
 
         return $data;
     }
@@ -274,7 +274,7 @@ class BanquetCurrentUserModel
             $data['entries'][] = $entry;
         }
 
-        return $data;
+        return $data['entries'];
     }
 
     /**
