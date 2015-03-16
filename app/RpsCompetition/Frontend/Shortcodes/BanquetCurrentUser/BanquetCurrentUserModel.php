@@ -271,10 +271,10 @@ class BanquetCurrentUserModel
             $entry['checked'] = $this->isEntryChecked($entry);
 
             $entry['entry_id'] = $record['Entry_ID'];
-            $data['entries'][] = $entry;
+            $data[] = $entry;
         }
 
-        return $data['entries'];
+        return $data;
     }
 
     /**
