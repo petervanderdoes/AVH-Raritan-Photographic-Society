@@ -368,18 +368,18 @@ class WpseoHelper
      */
     private function buildWpseoSitemap($url, $include_images = false)
     {
-        $n = get_query_var('sitemap_n');
-        if (is_scalar($n) && intval($n) > 0) {
-            $n = intval($n);
+        $sitemap_n = get_query_var('sitemap_n');
+        if (is_scalar($sitemap_n) && intval($sitemap_n) > 0) {
+            $sitemap_n = intval($sitemap_n);
         } else {
             header('HTTP/1.1 404 Not Found');
             exit();
         }
 
         $date = new \DateTime();
-        $date->setDate($n, 1, 1);
+        $date->setDate($sitemap_n, 1, 1);
         $start_date = $date->format('Y-m-d');
-        $date->setDate($n, 12, 31);
+        $date->setDate($sitemap_n, 12, 31);
         $end_date = $date->format('Y-m-d');
         $scored_competitions = $this->query_competitions->getScoredCompetitions($start_date, $end_date);
 
