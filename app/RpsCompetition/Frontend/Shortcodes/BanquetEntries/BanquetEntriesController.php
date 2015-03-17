@@ -45,6 +45,6 @@ class BanquetEntriesController
         /** @var \Symfony\Component\Form\Form $form */
         $form = $model_data['form'];
 
-        return $this->view->fetch('banquet-current-user.html.twig', ['data' => $data, 'form' => $form->createView()]);
+        return $this->view->fetch('banquet-entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
     }
 }
