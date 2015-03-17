@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.7-dev.1
+#### Version 2.0.7-rc.1
 * Fix Banquet Entries
 
 #### Version 2.0.5
