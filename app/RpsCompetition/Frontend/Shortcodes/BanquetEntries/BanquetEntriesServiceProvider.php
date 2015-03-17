@@ -1,5 +1,5 @@
 <?php
-namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
+namespace RpsCompetition\Frontend\Shortcodes\BanquetEntries;
 
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Application;

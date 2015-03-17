@@ -5,7 +5,7 @@ namespace RpsCompetition\Frontend\Requests\BanquetEntries;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\BanquetEntries as EntityBanquetCurrentUser;
+use RpsCompetition\Entity\Forms\BanquetEntries as EntityBanquetEntries;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Common\Helper as CommonHelper;
 
@@ -28,7 +28,7 @@ class RequestBanquetEntriesModel
     private $request;
 
     /**
-     * @param EntityBanquetCurrentUser $entity
+     * @param EntityBanquetEntries $entity
      * @param IlluminateRequest        $request
      * @param QueryEntries             $query_entries
      * @param QueryCompetitions        $query_competitions
@@ -36,7 +36,7 @@ class RequestBanquetEntriesModel
      *
      */
     public function __construct(
-        EntityBanquetCurrentUser $entity,
+        EntityBanquetEntries $entity,
         IlluminateRequest $request,
         QueryEntries $query_entries,
         QueryCompetitions $query_competitions,

@@ -1,6 +1,6 @@
 <?php
 
-namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
+namespace RpsCompetition\Frontend\Shortcodes\BanquetEntries;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 
@@ -38,7 +38,7 @@ class BanquetEntriesController
      *
      * @return string
      */
-    public function shortcodeBanquetCurrentUser($attr, $content, $tag)
+    public function shortcodeBanquetEntries($attr, $content, $tag)
     {
         $model_data = $this->model->getAllData();
         $data = $model_data['data'];

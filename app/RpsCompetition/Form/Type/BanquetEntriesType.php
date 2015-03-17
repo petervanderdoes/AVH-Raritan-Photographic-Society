@@ -7,21 +7,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
- * Class BanquetCurrentUserType
+ * Class BanquetEntriesType
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Form\Type
  */
-class BanquetCurrentUserType extends AbstractType
+class BanquetEntriesType extends AbstractType
 {
-    /** @var BanquetCurrentUserEntity */
+    /** @var BanquetEntriesEntity */
     private $entity;
 
     /**
-     * @param BanquetCurrentUserEntity $entity
+     * @param BanquetEntriesEntity $entity
      */
-    public function __construct(BanquetCurrentUserEntity $entity)
+    public function __construct(BanquetEntriesEntity $entity)
     {
         $this->entity = $entity;
     }
@@ -87,7 +87,7 @@ class BanquetCurrentUserType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\BanquetCurrentUser',
+                'data_class' => 'RpsCompetition\Entity\Forms\BanquetEntries',
             ]
         )
         ;
