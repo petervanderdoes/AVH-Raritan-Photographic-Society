@@ -1,10 +1,7 @@
 ## Changelog
 
 #### Version 2.0.7-dev.1
-* Preparation for new development cycle.
-
-#### Version 2.0.6
-* Preparation for new development cycle.
+* Fix Banquet Entries
 
 #### Version 2.0.5
 * Replace intervention/image library with imagine/imagine from my own Github account.
