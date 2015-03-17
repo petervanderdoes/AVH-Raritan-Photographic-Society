@@ -7,6 +7,7 @@ use Avh\Support\ProviderRepository;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
+use RpsCompetition\Common\Helper as CommonHelper;
 
 /**
  * Class Application
@@ -252,7 +253,9 @@ class Application extends Container implements ApplicationContract
     public function registerConfiguredProviders()
     {
         $upload_dir_info = wp_upload_dir();
-        $manifestPath = $upload_dir_info['basedir'] . '/avh-rps/framework/services.json';
+        $manifestPath_directory = $upload_dir_info['basedir'] . '/avh-rps/framework';
+        CommonHelper::createDirectory($manifestPath_directory);
+        $manifestPath = $manifestPath_directory .'/services.json';
 
         (new ProviderRepository($this, new Filesystem(), $manifestPath))->load($this->config['app.providers']);
     }
