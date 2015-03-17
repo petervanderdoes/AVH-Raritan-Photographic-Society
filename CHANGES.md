@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.8-dev.1
+* Preparation for new development cycle.
+
 #### Version 2.0.7
 * Fix Banquet Entries
 
