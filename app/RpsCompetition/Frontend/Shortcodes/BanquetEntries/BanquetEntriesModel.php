@@ -7,7 +7,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\BanquetEntries as BanquetEntriesEntity;
+use RpsCompetition\Entity\Forms\BanquetEntries as EntityFormBanquetEntries;
 use RpsCompetition\Form\Type\BanquetEntriesType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;
@@ -100,7 +100,7 @@ class BanquetEntriesModel
         // Start the form
         global $post;
         $action = home_url('/' . get_page_uri($post->ID));
-        $entity = new BanquetEntriesEntity();
+        $entity = new EntityFormBanquetEntries();
         $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
         $entity->setAllentries(base64_encode(json_encode($all_entries)));
         $entity->setBanquetids(base64_encode(json_encode($this->banquet_id_array)));

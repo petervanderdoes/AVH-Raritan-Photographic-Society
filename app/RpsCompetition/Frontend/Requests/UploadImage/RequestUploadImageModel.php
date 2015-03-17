@@ -8,7 +8,7 @@ use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\UploadImage as EntityUploadImage;
+use RpsCompetition\Entity\Forms\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormError;
@@ -44,16 +44,16 @@ class RequestUploadImageModel
     /**
      * Constructor
      *
-     * @param EntityUploadImage $entity
-     * @param Session           $session
-     * @param Request           $request
-     * @param Settings          $settings
-     * @param QueryCompetitions $query_competitions
-     * @param QueryEntries      $query_entries
-     * @param PhotoHelper       $photo_helper
+     * @param EntityFormUploadImage $entity
+     * @param Session               $session
+     * @param Request               $request
+     * @param Settings              $settings
+     * @param QueryCompetitions     $query_competitions
+     * @param QueryEntries          $query_entries
+     * @param PhotoHelper           $photo_helper
      */
     public function __construct(
-        EntityUploadImage $entity,
+        EntityFormUploadImage $entity,
         Session $session,
         Request $request,
         Settings $settings,

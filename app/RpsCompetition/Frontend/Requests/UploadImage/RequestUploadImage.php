@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Requests\UploadImage;
 
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\UploadImage;
+use RpsCompetition\Entity\Forms\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Form\Type\UploadImageType;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
@@ -26,7 +26,7 @@ class RequestUploadImage
     private $upload_image_type;
 
     /**
-     * @param UploadImage             $entity
+     * @param EntityFormUploadImage   $entity
      * @param UploadImageType         $upload_image_type
      * @param RequestUploadImageModel $model
      * @param IlluminateRequest       $request
@@ -34,7 +34,7 @@ class RequestUploadImage
      * @param Settings                $settings
      */
     public function __construct(
-        UploadImage $entity,
+        EntityFormUploadImage $entity,
         UploadImageType $upload_image_type,
         RequestUploadImageModel $model,
         IlluminateRequest $request,

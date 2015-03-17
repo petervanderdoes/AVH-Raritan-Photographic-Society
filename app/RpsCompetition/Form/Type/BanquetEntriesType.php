@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\BanquetEntries as BanquetEntriesEntity;
+use RpsCompetition\Entity\Forms\BanquetEntries as EntityFormBanquetEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -15,13 +15,13 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
  */
 class BanquetEntriesType extends AbstractType
 {
-    /** @var BanquetEntriesEntity */
+    /** @var EntityFormBanquetEntries */
     private $entity;
 
     /**
-     * @param BanquetEntriesEntity $entity
+     * @param EntityFormBanquetEntries $entity
      */
-    public function __construct(BanquetEntriesEntity $entity)
+    public function __construct(EntityFormBanquetEntries $entity)
     {
         $this->entity = $entity;
     }

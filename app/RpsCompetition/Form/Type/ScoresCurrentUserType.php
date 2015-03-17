@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\ScoresCurrentUser as ScoresCurrentUserEntity;
+use RpsCompetition\Entity\Forms\ScoresCurrentUser as EntityFormScoresCurrentUser;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -15,13 +15,13 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
  */
 class ScoresCurrentUserType extends AbstractType
 {
-    /** @var ScoresCurrentUserEntity */
+    /** @var EntityFormScoresCurrentUser */
     private $entity;
 
     /**
-     * @param ScoresCurrentUserEntity $entity
+     * @param EntityFormScoresCurrentUser $entity
      */
-    public function __construct(ScoresCurrentUserEntity $entity)
+    public function __construct(EntityFormScoresCurrentUser $entity)
     {
         $this->entity = $entity;
     }

@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Requests\BanquetEntries;
 
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\BanquetEntries as BanquetEntriesEntity;
+use RpsCompetition\Entity\Forms\BanquetEntries as EntityFormBanquetEntries;
 use RpsCompetition\Form\Type\BanquetEntriesType;
 use Symfony\Component\Form\FormFactory;
 
@@ -33,18 +33,18 @@ class RequestBanquetEntries
     private $request;
 
     /**
-     * @param BanquetEntriesEntity   $entity
-     * @param BanquetEntriesType     $banquet_current_user_type
+     * @param EntityFormBanquetEntries   $entity
+     * @param BanquetEntriesType         $banquet_current_user_type
      * @param RequestBanquetEntriesModel $model
      * @param IlluminateRequest          $request
      * @param FormFactory                $form_factory
      */
     public function __construct(
-        BanquetEntriesEntity $entity,
+        EntityFormBanquetEntries $entity,
         BanquetEntriesType $banquet_current_user_type,
         RequestBanquetEntriesModel $model,
         IlluminateRequest $request,
-    FormFactory $form_factory
+        FormFactory $form_factory
     ) {
 
         $this->entity = $entity;
