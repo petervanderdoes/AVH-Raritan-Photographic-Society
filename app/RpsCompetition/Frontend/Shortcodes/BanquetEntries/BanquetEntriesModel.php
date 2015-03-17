@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: pdoes
- * Date: 3/4/15
- * Time: 1:04 PM
- */
 
 namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
 
