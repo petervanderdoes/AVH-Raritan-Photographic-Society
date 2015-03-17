@@ -76,8 +76,10 @@ class RequestUploadImageModel
      *
      * @return bool
      */
-    public function handleUploadImage()
+    public function handleUploadImage($form)
     {
+        $this->form = $form;
+
         if (!$this->getMyEntriesSession()) {
             return false;
         }
@@ -157,16 +159,6 @@ class RequestUploadImageModel
         }
 
         return true;
-    }
-
-    /**
-     * Set the form
-     *
-     * @param mixed $form
-     */
-    public function setForm($form)
-    {
-        $this->form = $form;
     }
 
     /**

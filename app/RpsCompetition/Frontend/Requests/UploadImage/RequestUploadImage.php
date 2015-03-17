@@ -80,7 +80,7 @@ class RequestUploadImage
             return;
         }
 
-        $success = $this->model->handleUploadImage();
+        $success = $this->model->handleUploadImage($form);
         if ($success === true) {
             wp_redirect($redirect_to);
             exit();
