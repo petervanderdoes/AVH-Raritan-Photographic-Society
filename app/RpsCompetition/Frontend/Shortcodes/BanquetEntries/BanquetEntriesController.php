@@ -1,26 +1,26 @@
 <?php
 
-namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
+namespace RpsCompetition\Frontend\Shortcodes\BanquetEntries;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 
 /**
- * Class BanquetCurrentUserController
+ * Class BanquetEntriesController
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
+ * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
  */
-class BanquetCurrentUserController
+class BanquetEntriesController
 {
     private $model;
     private $view;
 
     /**
      * @param ShortcodeView           $view
-     * @param BanquetCurrentUserModel $model
+     * @param BanquetEntriesModel $model
      */
-    public function __construct(ShortcodeView $view, BanquetCurrentUserModel $model)
+    public function __construct(ShortcodeView $view, BanquetEntriesModel $model)
     {
 
         $this->view = $view;
@@ -38,13 +38,13 @@ class BanquetCurrentUserController
      *
      * @return string
      */
-    public function shortcodeBanquetCurrentUser($attr, $content, $tag)
+    public function shortcodeBanquetEntries($attr, $content, $tag)
     {
         $model_data = $this->model->getAllData();
         $data = $model_data['data'];
         /** @var \Symfony\Component\Form\Form $form */
         $form = $model_data['form'];
 
-        return $this->view->fetch('banquet-current-user.html.twig', ['data' => $data, 'form' => $form->createView()]);
+        return $this->view->fetch('banquet-entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
     }
 }

@@ -3,13 +3,13 @@
 namespace RpsCompetition\Entity\Forms;
 
 /**
- * Class BanquetCurrentUser
+ * Class BanquetEntries
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Entity\Forms
  */
-class BanquetCurrentUser
+class BanquetEntries
 {
     protected $allentries;
     protected $banquetids;

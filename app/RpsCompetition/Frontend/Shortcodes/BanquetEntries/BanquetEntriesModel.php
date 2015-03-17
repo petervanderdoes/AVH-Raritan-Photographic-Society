@@ -1,31 +1,25 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: pdoes
- * Date: 3/4/15
- * Time: 1:04 PM
- */
 
-namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
+namespace RpsCompetition\Frontend\Shortcodes\BanquetEntries;
 
 use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
-use RpsCompetition\Form\Type\BanquetCurrentUserType;
+use RpsCompetition\Entity\Forms\BanquetEntries as BanquetEntriesEntity;
+use RpsCompetition\Form\Type\BanquetEntriesType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
- * Class BanquetCurrentUserModel
+ * Class BanquetEntriesModel
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
+ * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
  */
-class BanquetCurrentUserModel
+class BanquetEntriesModel
 {
     /** @var array */
     private $banquet_entries;
@@ -102,14 +96,14 @@ class BanquetCurrentUserModel
         // Start the form
         global $post;
         $action = home_url('/' . get_page_uri($post->ID));
-        $entity = new BanquetCurrentUserEntity();
+        $entity = new BanquetEntriesEntity();
         $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
         $entity->setAllentries(base64_encode(json_encode($all_entries)));
         $entity->setBanquetids(base64_encode(json_encode($this->banquet_id_array)));
         $entity->setSeasonChoices($season_options);
         $entity->setSeasons($selected_season);
         $form = $this->form_factory->create(
-            new BanquetCurrentUserType($entity),
+            new BanquetEntriesType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'banquetentries']]
         )

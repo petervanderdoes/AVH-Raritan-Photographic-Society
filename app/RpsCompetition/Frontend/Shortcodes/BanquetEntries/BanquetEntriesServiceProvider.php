@@ -1,18 +1,18 @@
 <?php
-namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
+namespace RpsCompetition\Frontend\Shortcodes\BanquetEntries;
 
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Application;
 use RpsCompetition\Db\QueryBanquet;
 
 /**
- * Class BanquetCurrentUserServiceProvider
+ * Class BanquetEntriesServiceProvider
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
+ * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
  */
-class BanquetCurrentUserServiceProvider extends ServiceProvider
+class BanquetEntriesServiceProvider extends ServiceProvider
 {
     /**
      * Indicates if loading of the provider is deferred.
@@ -28,7 +28,7 @@ class BanquetCurrentUserServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['BanquetCurrentUserController'];
+        return ['BanquetEntriesController'];
     }
 
     /**
@@ -40,10 +40,10 @@ class BanquetCurrentUserServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind(
-            'BanquetCurrentUserController',
+            'BanquetEntriesController',
             function (Application $app) {
-                return new BanquetCurrentUserController(
-                    $app->make('ShortcodeView'), $app->make('BanquetCurrentUserModel')
+                return new BanquetEntriesController(
+                    $app->make('ShortcodeView'), $app->make('BanquetEntriesModel')
                 );
             }
         )
@@ -59,9 +59,9 @@ class BanquetCurrentUserServiceProvider extends ServiceProvider
         )
         ;
         $this->app->bind(
-            'BanquetCurrentUserModel',
+            'BanquetEntriesModel',
             function (Application $app) {
-                return new BanquetCurrentUserModel(
+                return new BanquetEntriesModel(
                     $app->make('formFactory'),
                     $app->make('SeasonHelper'),
                     $app->make('QueryMiscellaneous'),

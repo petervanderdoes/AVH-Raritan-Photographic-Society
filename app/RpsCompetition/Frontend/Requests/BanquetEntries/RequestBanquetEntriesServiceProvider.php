@@ -3,7 +3,7 @@ namespace RpsCompetition\Frontend\Requests\BanquetEntries;
 
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Application;
-use RpsCompetition\Form\Type\BanquetCurrentUserType as BanquetEntriesType;
+use RpsCompetition\Form\Type\BanquetEntriesType as BanquetEntriesType;
 
 /**
  * Class RequestBanquetEntriesServiceProvider

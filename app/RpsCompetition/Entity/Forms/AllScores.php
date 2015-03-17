@@ -3,7 +3,7 @@
 namespace RpsCompetition\Entity\Forms;
 
 /**
- * Class BanquetCurrentUser
+ * Class AllScores
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
