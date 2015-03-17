@@ -259,9 +259,9 @@ class Client
         }
 
         foreach ($xml->{'Competition'} as $comp) {
-            $comp_date = $comp->{'Date'};
-            $classification = $comp->{'Classification'};
-            $medium = $comp->{'Medium'};
+            $comp_date = (string) $comp->{'Date'};
+            $classification = (string) $comp->{'Classification'};
+            $medium = (string) $comp->{'Medium'};
 
             foreach ($comp->{'Entries'} as $entries) {
                 foreach ($entries->{'Entry'} as $entry) {
