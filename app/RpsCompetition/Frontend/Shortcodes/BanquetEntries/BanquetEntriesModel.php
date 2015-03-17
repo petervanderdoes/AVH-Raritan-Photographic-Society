@@ -89,8 +89,12 @@ class BanquetEntriesModel
         }
 
         // Start building the form
-        if (!empty($scores)) {
-            $data = $this->getTemplateData($season_options, $selected_season, $scores);
+        if ($this->banquet_id_array == []) {
+            $data['no_banquet'] = true;
+        } else {
+            if (!empty($scores)) {
+                $data = $this->getTemplateData($season_options, $selected_season, $scores);
+            }
         }
 
         // Start the form
