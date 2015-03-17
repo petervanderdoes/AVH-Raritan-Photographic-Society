@@ -5,7 +5,7 @@ namespace RpsCompetition\Frontend\Requests\BanquetEntries;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\BanquetCurrentUser as EntityBanquetCurrentUser;
+use RpsCompetition\Entity\Forms\BanquetEntries as EntityBanquetCurrentUser;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Common\Helper as CommonHelper;
 

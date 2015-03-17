@@ -5,22 +5,22 @@ namespace RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 
 /**
- * Class BanquetCurrentUserController
+ * Class BanquetEntriesController
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
+ * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
  */
-class BanquetCurrentUserController
+class BanquetEntriesController
 {
     private $model;
     private $view;
 
     /**
      * @param ShortcodeView           $view
-     * @param BanquetCurrentUserModel $model
+     * @param BanquetEntriesModel $model
      */
-    public function __construct(ShortcodeView $view, BanquetCurrentUserModel $model)
+    public function __construct(ShortcodeView $view, BanquetEntriesModel $model)
     {
 
         $this->view = $view;

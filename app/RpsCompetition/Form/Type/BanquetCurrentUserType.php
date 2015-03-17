@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
+use RpsCompetition\Entity\Forms\BanquetEntries as BanquetEntriesEntity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;

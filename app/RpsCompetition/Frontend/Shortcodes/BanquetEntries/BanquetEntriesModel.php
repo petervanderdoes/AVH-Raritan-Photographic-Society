@@ -13,19 +13,19 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
+use RpsCompetition\Entity\Forms\BanquetEntries as BanquetCurrentUserEntity;
 use RpsCompetition\Form\Type\BanquetCurrentUserType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
- * Class BanquetCurrentUserModel
+ * Class BanquetEntriesModel
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Frontend\Shortcodes\BanquetCurrentUser
+ * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
  */
-class BanquetCurrentUserModel
+class BanquetEntriesModel
 {
     /** @var array */
     private $banquet_entries;

@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Requests\BanquetEntries;
 
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\BanquetCurrentUser as BanquetCurrentUserEntity;
+use RpsCompetition\Entity\Forms\BanquetEntries as BanquetCurrentUserEntity;
 use RpsCompetition\Form\Type\BanquetCurrentUserType;
 use Symfony\Component\Form\FormFactory;
 
