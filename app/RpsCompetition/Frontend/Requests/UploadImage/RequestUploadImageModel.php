@@ -8,7 +8,7 @@ use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\UploadImage as EntityFormUploadImage;
+use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormError;

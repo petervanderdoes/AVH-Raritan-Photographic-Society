@@ -5,7 +5,7 @@ namespace RpsCompetition\Frontend\Requests\EditTitle;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
+use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 
 /**

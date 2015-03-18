@@ -39,11 +39,11 @@ class RequestUploadImageServiceProvider extends ServiceProvider
     public function register()
     {
 
-        $this->app->singleton('\RpsCompetition\Entity\Forms\UploadImage');
+        $this->app->singleton('\RpsCompetition\Entity\Form\UploadImage');
         $this->app->bind(
             '\RpsCompetition\Form\Type\UploadImageType',
             function (Application $app) {
-                $entity = $app->make('\RpsCompetition\Entity\Forms\UploadImage');
+                $entity = $app->make('\RpsCompetition\Entity\Form\UploadImage');
 
                 return new UploadImageType($entity);
             }
@@ -53,7 +53,7 @@ class RequestUploadImageServiceProvider extends ServiceProvider
             '\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageModel',
             function (Application $app) {
                 return new RequestUploadImageModel(
-                    $app->make('\RpsCompetition\Entity\Forms\UploadImage'),
+                    $app->make('\RpsCompetition\Entity\Form\UploadImage'),
                     $app->make('Session'),
                     $app->make('IlluminateRequest'),
                     $app->make('Settings'),
@@ -69,7 +69,7 @@ class RequestUploadImageServiceProvider extends ServiceProvider
             'RequestUploadImage',
             function (Application $app) {
                 return new RequestUploadImage(
-                    $app->make('\RpsCompetition\Entity\Forms\UploadImage'),
+                    $app->make('\RpsCompetition\Entity\Form\UploadImage'),
                     $app->make('\RpsCompetition\Form\Type\UploadImageType'),
                     $app->make('\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageModel'),
                     $app->make('IlluminateRequest'),

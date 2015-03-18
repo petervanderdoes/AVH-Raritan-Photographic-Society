@@ -6,7 +6,7 @@ use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
+use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
 use Symfony\Component\Form\FormFactory;
 

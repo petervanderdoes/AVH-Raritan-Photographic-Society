@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\ScoresCurrentUser as EntityFormScoresCurrentUser;
+use RpsCompetition\Entity\Form\ScoresCurrentUser as EntityFormScoresCurrentUser;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -59,7 +59,7 @@ class ScoresCurrentUserType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\ScoresCurrentUser',
+                'data_class' => 'RpsCompetition\Entity\Form\ScoresCurrentUser',
             ]
         )
         ;

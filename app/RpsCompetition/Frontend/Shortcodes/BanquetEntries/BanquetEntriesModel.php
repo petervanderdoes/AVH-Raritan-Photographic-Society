@@ -7,7 +7,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\BanquetEntries as EntityFormBanquetEntries;
+use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
 use RpsCompetition\Form\Type\BanquetEntriesType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;

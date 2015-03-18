@@ -1,19 +1,18 @@
 <?php
 
-namespace RpsCompetition\Entity\Forms;
+namespace RpsCompetition\Entity\Form;
 
 /**
- * Class ScoresCurrentUser
+ * Class AllScores
  *
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Entity\Forms
  */
-class ScoresCurrentUser
+class AllScores
 {
     protected $season_choices = [];
     protected $seasons;
-    protected $submit_control;
 
     /**
      * @return array

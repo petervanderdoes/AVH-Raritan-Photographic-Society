@@ -9,7 +9,7 @@ use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
+use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;

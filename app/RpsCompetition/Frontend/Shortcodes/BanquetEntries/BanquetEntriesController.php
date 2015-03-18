@@ -17,7 +17,7 @@ class BanquetEntriesController
     private $view;
 
     /**
-     * @param ShortcodeView           $view
+     * @param ShortcodeView       $view
      * @param BanquetEntriesModel $model
      */
     public function __construct(ShortcodeView $view, BanquetEntriesModel $model)

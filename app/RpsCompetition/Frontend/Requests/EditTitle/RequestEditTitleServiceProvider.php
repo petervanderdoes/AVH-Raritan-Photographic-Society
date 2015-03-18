@@ -39,11 +39,11 @@ class RequestEditTitleServiceProvider extends ServiceProvider
     public function register()
     {
 
-        $this->app->singleton('\RpsCompetition\Entity\Forms\EditTitle');
+        $this->app->singleton('\RpsCompetition\Entity\Form\EditTitle');
         $this->app->bind(
             '\RpsCompetition\Form\Type\EditTitleType',
             function (Application $app) {
-                $entity = $app->make('\RpsCompetition\Entity\Forms\EditTitle');
+                $entity = $app->make('\RpsCompetition\Entity\Form\EditTitle');
 
                 return new EditTitleType($entity);
             }
@@ -53,7 +53,7 @@ class RequestEditTitleServiceProvider extends ServiceProvider
             '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel',
             function (Application $app) {
                 return new RequestEditTitleModel(
-                    $app->make('\RpsCompetition\Entity\Forms\EditTitle'),
+                    $app->make('\RpsCompetition\Entity\Form\EditTitle'),
                     $app->make('QueryCompetitions'),
                     $app->make('QueryEntries'),
                     $app->make('PhotoHelper'),
@@ -66,7 +66,7 @@ class RequestEditTitleServiceProvider extends ServiceProvider
             'RequestEditTitle',
             function (Application $app) {
                 return new RequestEditTitle(
-                    $app->make('\RpsCompetition\Entity\Forms\EditTitle'),
+                    $app->make('\RpsCompetition\Entity\Form\EditTitle'),
                     $app->make('\RpsCompetition\Form\Type\EditTitleType'),
                     $app->make('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel'),
                     $app->make('IlluminateRequest'),

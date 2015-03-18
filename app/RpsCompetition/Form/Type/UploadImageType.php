@@ -94,7 +94,7 @@ class UploadImageType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\UploadImage',
+                'data_class' => 'RpsCompetition\Entity\Form\UploadImage',
             ]
         )
         ;

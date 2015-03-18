@@ -1,6 +1,6 @@
 <?php
 
-namespace RpsCompetition\Entity\Forms;
+namespace RpsCompetition\Entity\Form;
 
 /**
  * Class MyEntries

@@ -100,7 +100,7 @@ class EditTitleType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\EditTitle',
+                'data_class' => 'RpsCompetition\Entity\Form\EditTitle',
             ]
         )
         ;

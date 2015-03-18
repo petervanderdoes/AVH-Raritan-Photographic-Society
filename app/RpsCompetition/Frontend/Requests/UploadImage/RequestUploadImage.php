@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Requests\UploadImage;
 
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\UploadImage as EntityFormUploadImage;
+use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Form\Type\UploadImageType;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;

@@ -1,6 +1,6 @@
 <?php
 
-namespace RpsCompetition\Entity\Forms;
+namespace RpsCompetition\Entity\Form;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;

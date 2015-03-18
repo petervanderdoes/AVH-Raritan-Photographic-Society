@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
+use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -76,7 +76,7 @@ class MyEntriesType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\MyEntries',
+                'data_class' => 'RpsCompetition\Entity\Form\MyEntries',
             ]
         )
         ;

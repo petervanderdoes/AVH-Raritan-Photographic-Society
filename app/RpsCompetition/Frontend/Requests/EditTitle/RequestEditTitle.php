@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Requests\EditTitle;
 
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
+use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
 use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;

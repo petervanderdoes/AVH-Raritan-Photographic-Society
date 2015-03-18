@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\BanquetEntries as EntityFormBanquetEntries;
+use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -87,7 +87,7 @@ class BanquetEntriesType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\BanquetEntries',
+                'data_class' => 'RpsCompetition\Entity\Form\BanquetEntries',
             ]
         )
         ;

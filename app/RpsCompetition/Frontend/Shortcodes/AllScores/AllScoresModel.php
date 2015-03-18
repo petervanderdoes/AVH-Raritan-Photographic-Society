@@ -6,7 +6,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\AllScores as EntityFormAllScores;
+use RpsCompetition\Entity\Form\AllScores as EntityFormAllScores;
 use RpsCompetition\Form\Type\AllScoresType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;

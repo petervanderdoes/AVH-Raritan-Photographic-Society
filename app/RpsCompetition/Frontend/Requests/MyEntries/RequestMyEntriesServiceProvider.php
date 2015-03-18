@@ -39,11 +39,11 @@ class RequestMyEntriesServiceProvider extends ServiceProvider
     public function register()
     {
 
-        $this->app->singleton('\RpsCompetition\Entity\Forms\MyEntries');
+        $this->app->singleton('\RpsCompetition\Entity\Form\MyEntries');
         $this->app->bind(
             '\RpsCompetition\Form\Type\MyEntriesType',
             function (Application $app) {
-                $entity = $app->make('\RpsCompetition\Entity\Forms\MyEntries');
+                $entity = $app->make('\RpsCompetition\Entity\Form\MyEntries');
 
                 return new MyEntriesType($entity);
             }
@@ -54,7 +54,7 @@ class RequestMyEntriesServiceProvider extends ServiceProvider
             'RequestMyEntries',
             function (Application $app) {
                 return new RequestMyEntries(
-                    $app->make('\RpsCompetition\Entity\Forms\MyEntries'),
+                    $app->make('\RpsCompetition\Entity\Form\MyEntries'),
                     $app->make('\RpsCompetition\Form\Type\MyEntriesType'),
                     $app->make('\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesModel'),
                     $app->make('QueryCompetitions'),

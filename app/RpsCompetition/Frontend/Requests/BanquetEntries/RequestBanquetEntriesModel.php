@@ -6,7 +6,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\BanquetEntries as EntityFormBanquetEntries;
+use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 
 /**

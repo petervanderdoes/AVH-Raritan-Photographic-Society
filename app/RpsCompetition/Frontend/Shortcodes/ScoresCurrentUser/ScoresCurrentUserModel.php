@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser;
 
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\ScoresCurrentUser as EntityFormScoresCurrentUser;
+use RpsCompetition\Entity\Form\ScoresCurrentUser as EntityFormScoresCurrentUser;
 use RpsCompetition\Form\Type\ScoresCurrentUserType;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\FormFactory;
