@@ -27,6 +27,8 @@ class MyEntriesModel
 {
     private $competition_helper;
     private $form_factory;
+    /** @var  integer */
+    private $num_rows;
     private $photo_helper;
     private $query_competitions;
     private $query_entries;
@@ -84,29 +86,89 @@ class MyEntriesModel
 
         global $post;
 
-        $open_competitions = $this->query_competitions->getOpenCompetitions(
-            get_current_user_id(),
-            $medium_subset_medium
-        )
-        ;
-        $open_competitions = CommonHelper::arrayMsort(
-            $open_competitions,
-            ['Competition_Date' => [SORT_ASC], 'Medium' => [SORT_ASC]]
-        )
-        ;
-        $previous_date = '';
-        $open_competitions_options = [];
-        foreach ($open_competitions as $open_competition) {
-            if ($previous_date == $open_competition->Competition_Date) {
-                continue;
-            }
-            $previous_date = $open_competition->Competition_Date;
-            $open_competitions_options[$open_competition->Competition_Date] = strftime(
-                    '%d-%b-%Y',
-                    strtotime($open_competition->Competition_Date)
-                ) . ' ' . $open_competition->Theme;
-        }
+        $open_competitions = $this->getOpenCompetitions($medium_subset_medium);
 
+        $open_competitions_options = $this->getOpenCompetitionsOptions($open_competitions);
+
+        $current_competition = $this->getCurrentCompetition($medium_subset_medium, $open_competitions);
+
+        $this->saveSession($medium_subset_medium, $current_competition);
+
+        $data = $this->getTemplateData($current_competition);
+
+        $action = home_url('/' . get_page_uri($post->ID));
+        $entity = new EntityFormMyEntries();
+        $entity->setWpnonce(wp_create_nonce('avh-rps-myentries'));
+        $entity->setSelectComp($current_competition->Competition_Date);
+        $entity->setSelectedMedium($current_competition->Medium);
+        $entity->setSelectedCompChoices($open_competitions_options);
+        $entity->setSelectedMediumChoices($this->competition_helper->getMedium($open_competitions));
+        $entity->setClassification($current_competition->Classification);
+        /** @var \Symfony\Component\Form\Form $form */
+        $form = $this->form_factory->create(
+            new MyEntriesType($entity),
+            $entity,
+            ['action' => $action, 'attr' => ['id' => 'myentries']]
+        )
+        ;
+
+        $this->addFormButtons($current_competition, $form);
+
+        $return = [];
+        $return['data'] = $data;
+        $return['form'] = $form;
+
+        return $return;
+    }
+
+    /**
+     * Add the Add/Edit/Delete buttons when needed.
+     *
+     * @param array|mixed|QueryCompetitions $current_competition
+     * @param \Symfony\Component\Form\Form  $form
+     */
+    private function addFormButtons($current_competition, $form)
+    {
+        // Retrieve the maximum number of entries per member for this competition
+        $max_entries_per_member_per_comp = $this->query_competitions->getCompetitionMaxEntries(
+            $current_competition->Competition_Date,
+            $current_competition->Classification,
+            $current_competition->Medium
+        )
+        ;
+
+        // Retrieve the total number of entries submitted by this member for this competition date
+        $total_entries_submitted = $this->query_entries->countEntriesSubmittedByMember(
+            get_current_user_id(),
+            $current_competition->Competition_Date
+        )
+        ;
+
+        // Don't show the Add button if the max number of images per member reached
+        if ($this->num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get(
+                'club_max_entries_per_member_per_date'
+            )
+        ) {
+            $form->add('add', 'submit', ['label' => 'Add', 'attr' => ['onclick' => 'submit_form("add")']]);
+        }
+        if ($this->num_rows > 0) {
+            $form->add('delete', 'submit', ['label' => 'Remove', 'attr' => ['onclick' => 'return  confirmSubmit()']]);
+            if ($max_entries_per_member_per_comp > 0) {
+                $form->add('edit', 'submit', ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
+            }
+        }
+    }
+
+    /**
+     * Get the Current Competition we are working with.
+     *
+     * @param string $medium_subset_medium
+     * @param array  $open_competitions
+     *
+     * @return array|mixed|QueryCompetitions
+     */
+    private function getCurrentCompetition($medium_subset_medium, $open_competitions)
+    {
         $current_competition = reset($open_competitions);
         $competition_date = $this->session->get(
             'myentries/' . $medium_subset_medium . '/competition_date',
@@ -122,24 +184,107 @@ class MyEntriesModel
         )
         ;
 
-        $this->saveSession($medium_subset_medium, $current_competition);
+        return $current_competition;
+    }
 
-        // Start the form
-        $action = home_url('/' . get_page_uri($post->ID));
-        $entity = new EntityFormMyEntries();
-        $entity->setWpnonce(wp_create_nonce('avh-rps-myentries'));
-        $entity->setSelectComp($current_competition->Competition_Date);
-        $entity->setSelectedMedium($current_competition->Medium);
-        $entity->setSelectedCompChoices($open_competitions_options);
-        $entity->setSelectedMediumChoices($this->competition_helper->getMedium($open_competitions));
-        $entity->setClassification($current_competition->Classification);
-        $form = $this->form_factory->create(
-            new MyEntriesType($entity),
-            $entity,
-            ['action' => $action, 'attr' => ['id' => 'myentries']]
+    /**
+     * Get the template data for all the entries of the given competition.
+     *
+     * @param array|mixed|QueryCompetitions $current_competition
+     *
+     * @return array
+     */
+    private function getEntries($current_competition)
+    {
+        $data = [];
+        $entries = $this->query_entries->getEntriesSubmittedByMember(
+            get_current_user_id(),
+            $current_competition->Competition_Date,
+            $current_competition->Classification,
+            $current_competition->Medium
+        )
+        ;
+        // Build the rows of submitted images
+        $this->num_rows = 0;
+        /** @var QueryEntries $recs */
+        foreach ($entries as $recs) {
+            $competition = $this->query_competitions->getCompetitionById($recs->Competition_ID);
+            $this->num_rows++;
+
+            $entry = [];
+            $entry['id'] = $recs->ID;
+            $entry['image']['url'] = home_url($recs->Server_File_Name);
+            $entry['image']['title'] = $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium;
+            $entry['image']['source'] = $this->photo_helper->getThumbnailUrl($recs->Server_File_Name, '75');
+            $entry['title'] = $recs->Title;
+            $entry['client_file_name'] = $recs->Client_File_Name;
+            $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
+            $entry['size']['x'] = $size[0];
+            $entry['size']['y'] = $size[1];
+            $data[] = $entry;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get all the open competitions for the given subset
+     *
+     * @param string $medium_subset_medium
+     *
+     * @return array|QueryCompetitions
+     */
+    private function getOpenCompetitions($medium_subset_medium)
+    {
+        $open_competitions = $this->query_competitions->getOpenCompetitions(
+            get_current_user_id(),
+            $medium_subset_medium
+        )
+        ;
+        $open_competitions = CommonHelper::arrayMsort(
+            $open_competitions,
+            ['Competition_Date' => [SORT_ASC], 'Medium' => [SORT_ASC]]
         )
         ;
 
+        return $open_competitions;
+    }
+
+    /**
+     * Get the options for the open competitions.
+     * The open competitions array has every competition, for the options we only need the date of the competitions.
+     *
+     * @param array $open_competitions
+     *
+     * @return array
+     */
+    private function getOpenCompetitionsOptions($open_competitions)
+    {
+        $open_competitions_options = [];
+        $previous_date = '';
+        foreach ($open_competitions as $open_competition) {
+            if ($previous_date == $open_competition->Competition_Date) {
+                continue;
+            }
+            $previous_date = $open_competition->Competition_Date;
+            $open_competitions_options[$open_competition->Competition_Date] = strftime(
+                    '%d-%b-%Y',
+                    strtotime($open_competition->Competition_Date)
+                ) . ' ' . $open_competition->Theme;
+        }
+
+        return $open_competitions_options;
+    }
+
+    /**
+     * Get all teh data need to fill the template.
+     *
+     * @param array|mixed|QueryCompetitions $current_competition
+     *
+     * @return array
+     */
+    private function getTemplateData($current_competition)
+    {
         $data = [];
         $data['competition_date'] = $current_competition->Competition_Date;
         $data['medium'] = $current_competition->Medium;
@@ -171,72 +316,17 @@ class MyEntriesModel
             }
         }
 
-        // Retrieve the maximum number of entries per member for this competition
-        $max_entries_per_member_per_comp = $this->query_competitions->getCompetitionMaxEntries(
-            $current_competition->Competition_Date,
-            $current_competition->Classification,
-            $current_competition->Medium
-        )
-        ;
+        $data['entries'] = $this->getEntries($current_competition);
 
-        // Retrieve the total number of entries submitted by this member for this competition date
-        $total_entries_submitted = $this->query_entries->countEntriesSubmittedByMember(
-            get_current_user_id(),
-            $current_competition->Competition_Date
-        )
-        ;
-
-        $entries = $this->query_entries->getEntriesSubmittedByMember(
-            get_current_user_id(),
-            $current_competition->Competition_Date,
-            $current_competition->Classification,
-            $current_competition->Medium
-        )
-        ;
-        // Build the rows of submitted images
-        $num_rows = 0;
-        /** @var QueryEntries $recs */
-        foreach ($entries as $recs) {
-            $competition = $this->query_competitions->getCompetitionById($recs->Competition_ID);
-            $num_rows++;
-
-            $entry = [];
-            $entry['id'] = $recs->ID;
-            $entry['image']['url'] = home_url($recs->Server_File_Name);
-            $entry['image']['title'] = $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium;
-            $entry['image']['source'] = $this->photo_helper->getThumbnailUrl($recs->Server_File_Name, '75');
-            $entry['title'] = $recs->Title;
-            $entry['client_file_name'] = $recs->Client_File_Name;
-            $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
-            $entry['size']['x'] = $size[0];
-            $entry['size']['y'] = $size[1];
-            $data['entries'][] = $entry;
-        }
-
-        // Don't show the Add button if the max number of images per member reached
-        if ($num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get(
-                'club_max_entries_per_member_per_date'
-            )
-        ) {
-            $form->add('add', 'submit', ['label' => 'Add', 'attr' => ['onclick' => 'submit_form("add")']]);
-        }
-        if ($num_rows > 0) {
-            $form->add('delete', 'submit', ['label' => 'Remove', 'attr' => ['onclick' => 'return  confirmSubmit()']]);
-            if ($max_entries_per_member_per_comp > 0) {
-                $form->add('edit', 'submit', ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
-            }
-        }
-
-        $return = [];
-        $return['data'] = $data;
-        $return ['form'] = $form;
-
-        return $return;
+        return $data;
     }
 
     /**
-     * @param $medium_subset_medium
-     * @param $current_competition
+     * Save the session.
+     * We store the Competition Date, Medium and Classification in a session.
+     *
+     * @param string                        $medium_subset_medium
+     * @param array|mixed|QueryCompetitions $current_competition
      */
     private function saveSession($medium_subset_medium, $current_competition)
     {
