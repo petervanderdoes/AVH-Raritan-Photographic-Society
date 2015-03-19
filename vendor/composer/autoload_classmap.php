@@ -96,7 +96,6 @@ return array(
     'RpsCompetition\\Admin\\Initialize' => $baseDir . '/app/RpsCompetition/Admin/Initialize.php',
     'RpsCompetition\\Api\\Client' => $baseDir . '/app/RpsCompetition/Api/Client.php',
     'RpsCompetition\\Application' => $baseDir . '/app/RpsCompetition/Application.php',
-    'RpsCompetition\\Common\\Core' => $baseDir . '/app/RpsCompetition/Common/Core.php',
     'RpsCompetition\\Common\\Helper' => $baseDir . '/app/RpsCompetition/Common/Helper.php',
     'RpsCompetition\\Competition\\Helper' => $baseDir . '/app/RpsCompetition/Competition/Helper.php',
     'RpsCompetition\\Competition\\ListTable' => $baseDir . '/app/RpsCompetition/Competition/ListTable.php',

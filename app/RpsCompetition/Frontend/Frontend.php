@@ -5,7 +5,6 @@ use Avh\Network\Session;
 use Illuminate\Http\Request;
 use RpsCompetition\Api\Client;
 use RpsCompetition\Application;
-use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
@@ -21,10 +20,7 @@ use RpsCompetition\Settings;
  */
 class Frontend
 {
-    /** @var Application */
     private $container;
-    /** @var Core */
-    private $core;
     /** @var \Symfony\Component\Form\FormFactory */
     private $formFactory;
     /** @var Options */
@@ -55,7 +51,6 @@ class Frontend
         $this->rpsdb = $container->make('RpsDb');
         $this->request = $container->make('IlluminateRequest');
         $this->options = $container->make('OptionsGeneral');
-        $this->core = $container->make('Core');
 
         $this->view = $container->make('FrontendView');
         $this->formFactory = $container->make('formFactory');

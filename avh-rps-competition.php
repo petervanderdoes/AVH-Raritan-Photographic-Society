@@ -12,7 +12,6 @@
  */
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Application;
-use RpsCompetition\Common\Core;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
@@ -77,24 +76,27 @@ class AVH_RPS_Client
         $this->container = new Application();
 
         $this->registerBindings();
-        $upload_dir_info = wp_upload_dir();
+
         $this->settings = $this->container->make('Settings');
         $this->settings->set('plugin_dir', $dir);
         $this->settings->set('plugin_file', $basename);
-        $this->settings->set('template_dir', $dir . '/resources/views');
-        $this->settings->set('plugin_basename', $basename);
-        $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
-        $this->settings->set('javascript_dir', $dir . '/assets/js/');
-        $this->settings->set('css_dir', $dir . '/assets/css/');
-        $this->settings->set('images_dir', $dir . '/assets/images/');
-        $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
+
         if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
             add_action('plugins_loaded', [$this, 'load']);
         }
     }
 
+    public function actionInit()
+    {
+        $this->setupRewriteRules();
+        add_image_size('150w', 150, 9999);
+    }
+
     public function load()
     {
+        $this->setSettings();
+        add_action('init', [$this, 'actionInit'], 10);
+
         if (is_admin()) {
             add_action('activate_' . $this->settings->get('plugin_basename'), [$this, 'pluginActivation']);
             add_action('deactivate_' . $this->settings->get('plugin_basename'), [$this, 'pluginDeactivation']);
@@ -163,14 +165,6 @@ class AVH_RPS_Client
          * Setup Classes
          *
          */
-
-        $this->container->bind(
-            'Core',
-            function (Application $app) {
-                return new Core($app->make('Settings'));
-            }
-        )
-        ;
 
         $this->container->bind(
             'RequestController',
@@ -320,6 +314,60 @@ class AVH_RPS_Client
             }
         )
         ;
+    }
+
+    /**
+     * Set the required settings to be used throughout the plugin
+     */
+    private function setSettings()
+    {
+
+        $dir = $this->settings->get('plugin_dir');
+        $basename = $this->settings->get('plugin_file');
+        $upload_dir_info = wp_upload_dir();
+
+        $this->settings->set('template_dir', $dir . '/resources/views');
+        $this->settings->set('plugin_basename', $basename);
+        $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
+        $this->settings->set('javascript_dir', $dir . '/assets/js/');
+        $this->settings->set('css_dir', $dir . '/assets/css/');
+        $this->settings->set('images_dir', $dir . '/assets/images/');
+        $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
+        $this->settings->set('club_max_entries_per_member_per_date', 4);
+        $this->settings->set('club_max_banquet_entries_per_member', 5);
+        $this->settings->set('digital_chair_email', 'digitalchair@raritanphoto.com');
+
+        $this->settings->set('siteurl', get_option('siteurl'));
+    }
+
+    /**
+     * Setup Rewrite rules
+     *
+     */
+    private function setupRewriteRules()
+    {
+        $options = get_option('avh-rps');
+        $url = get_permalink($options['monthly_entries_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule(
+                $url . '?([^/]*)',
+                'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]',
+                'top'
+            );
+        }
+
+        $url = get_permalink($options['monthly_winners_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule(
+                $url . '?([^/]*)',
+                'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]',
+                'top'
+            );
+        }
+
+        flush_rewrite_rules();
     }
 }
 

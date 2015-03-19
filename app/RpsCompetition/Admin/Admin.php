@@ -5,7 +5,6 @@ use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
-use RpsCompetition\Common\Core;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\ListTable as CompetitionListTable;
 use RpsCompetition\Constants;
@@ -31,7 +30,6 @@ final class Admin
 
     private $competition_list;
     private $container;
-    private $core;
     private $entries_list;
     private $hooks = [];
     private $message = '';
@@ -59,7 +57,6 @@ final class Admin
         $this->rpsdb = $container->make('RpsDb');
         $this->request = $container->make('IlluminateRequest');
         $this->options = $container->make('OptionsGeneral');
-        $this->core = new Core($this->settings);
 
         // Admin menu
         add_action('admin_menu', [$this, 'actionAdminMenu']);
