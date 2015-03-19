@@ -58,16 +58,7 @@ class Frontend
         $this->setupRequestHandling();
 
         // The actions are in order as how WordPress executes them
-        add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
-        add_action('init', [$this, 'actionInit'], 11);
-
-        add_action('template_redirect', [$this, 'actionTemplateRedirectRpsWindowsClient']);
-        add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
-
-        add_filter('query_vars', [$this, 'filterQueryVars']);
-        add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 2);
-        add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
-        add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
+        $this->setupActionsFilters();
     }
 
     /**
@@ -557,6 +548,20 @@ class Frontend
             ['rps-competition.fontawesome.style'],
             'to_remove'
         );
+    }
+
+    private function setupActionsFilters()
+    {
+        add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
+        add_action('init', [$this, 'actionInit'], 11);
+
+        add_action('template_redirect', [$this, 'actionTemplateRedirectRpsWindowsClient']);
+        add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
+
+        add_filter('query_vars', [$this, 'filterQueryVars']);
+        add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 2);
+        add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
+        add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
     }
 
     /**
