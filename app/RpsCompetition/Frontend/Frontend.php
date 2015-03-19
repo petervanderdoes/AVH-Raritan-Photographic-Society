@@ -61,6 +61,10 @@ class Frontend
         $this->setupActionsFilters();
     }
 
+    public function __destruct() {
+        $this->session->save();
+    }
+
     /**
      * Implement actions.
      * This method is called by the action after_setup_theme and is used to setup:

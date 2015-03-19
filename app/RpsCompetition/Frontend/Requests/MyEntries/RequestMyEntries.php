@@ -155,7 +155,6 @@ class RequestMyEntries
                 $current_competition->Classification
             )
             ;
-            $this->session->save();
             $redirect = get_permalink($post->ID);
             wp_redirect($redirect);
             exit();

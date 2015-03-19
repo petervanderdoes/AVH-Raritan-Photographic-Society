@@ -342,6 +342,5 @@ class MyEntriesModel
             $current_competition->Classification
         )
         ;
-        $this->session->save();
     }
 }

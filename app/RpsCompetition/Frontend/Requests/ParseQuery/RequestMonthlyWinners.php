@@ -116,6 +116,5 @@ class RequestMonthlyWinners
 
         $this->session->set('monthly_winners_selected_date', $this->pq_helper->getSelectedDate());
         $this->session->set('monthly_winners_selected_season', $this->pq_helper->getSelectedSeason());
-        $this->session->save();
     }
 }
