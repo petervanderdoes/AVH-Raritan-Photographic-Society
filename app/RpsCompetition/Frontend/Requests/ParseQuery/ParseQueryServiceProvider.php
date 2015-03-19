@@ -65,6 +65,7 @@ class ParseQueryServiceProvider extends ServiceProvider
             'RequestMonthlyWinners',
             function (Application $app) {
                 return new RequestMonthlyWinners(
+                    $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
                     $app->make('QueryCompetitions'),
                     $app->make('SeasonHelper'),
                     $app->make('CompetitionHelper'),
