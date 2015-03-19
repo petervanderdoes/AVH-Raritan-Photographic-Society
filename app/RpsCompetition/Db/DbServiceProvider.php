@@ -38,7 +38,7 @@ class DbServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->container->singleton('RpsDb', 'RpsCompetition\Db\RpsDb');
+        $this->app->singleton('RpsDb', 'RpsCompetition\Db\RpsDb');
 
         $this->app->bind(
             'QueryEntries',
