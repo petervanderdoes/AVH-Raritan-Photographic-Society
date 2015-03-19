@@ -39,29 +39,6 @@ class CategoryWinnersModel
      *
      * @return array
      */
-    public function getAllData($class, $entries, $thumb_size)
-    {
-        $data = [];
-        $data['class'] = $class;
-        $data['records'] = $entries;
-        $data['thumb_size'] = $thumb_size;
-        $data['images'] = [];
-        foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->photo_helper->dataPhotoGallery($recs, $data['thumb_size']);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Collect needed data to render the Category Winners
-     *
-     * @param string $class
-     * @param array  $entries
-     * @param string $thumb_size
-     *
-     * @return array
-     */
     public function getCategoryWinners($class, $entries, $thumb_size)
     {
         $data = [];
