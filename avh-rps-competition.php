@@ -26,7 +26,6 @@ use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
-use RpsCompetition\Settings;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\Forms as SymfonyForms;
@@ -62,7 +61,7 @@ class AVH_RPS_Client
      * @var Application
      */
     private $app;
-    /** @var  Settings */
+    /** @var \Illuminate\Config\Repository */
     private $settings;
 
     /**
@@ -144,7 +143,13 @@ class AVH_RPS_Client
          * Setup Singleton classes
          *
          */
-        $this->app->singleton('Settings', 'RpsCompetition\Settings');
+        $this->app->singleton(
+            'Settings',
+            function () {
+                return new \Illuminate\Config\Repository();
+            }
+        )
+        ;
 
         $this->app->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
         $this->app->singleton(
