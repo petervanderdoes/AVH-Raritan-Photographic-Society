@@ -130,6 +130,7 @@ return array(
     'RpsCompetition\\Frontend\\Requests\\MyEntries\\RequestMyEntries' => $baseDir . '/app/RpsCompetition/Frontend/Requests/MyEntries/RequestMyEntries.php',
     'RpsCompetition\\Frontend\\Requests\\MyEntries\\RequestMyEntriesModel' => $baseDir . '/app/RpsCompetition/Frontend/Requests/MyEntries/RequestMyEntriesModel.php',
     'RpsCompetition\\Frontend\\Requests\\MyEntries\\RequestMyEntriesServiceProvider' => $baseDir . '/app/RpsCompetition/Frontend/Requests/MyEntries/RequestMyEntriesServiceProvider.php',
+    'RpsCompetition\\Frontend\\Requests\\ParseQuery\\ParseQueryHelper' => $baseDir . '/app/RpsCompetition/Frontend/Requests/ParseQuery/ParseQueryHelper.php',
     'RpsCompetition\\Frontend\\Requests\\ParseQuery\\ParseQueryServiceProvider' => $baseDir . '/app/RpsCompetition/Frontend/Requests/ParseQuery/ParseQueryServiceProvider.php',
     'RpsCompetition\\Frontend\\Requests\\ParseQuery\\RequestMonthlyEntries' => $baseDir . '/app/RpsCompetition/Frontend/Requests/ParseQuery/RequestMonthlyEntries.php',
     'RpsCompetition\\Frontend\\Requests\\ParseQuery\\RequestMonthlyWinners' => $baseDir . '/app/RpsCompetition/Frontend/Requests/ParseQuery/RequestMonthlyWinners.php',

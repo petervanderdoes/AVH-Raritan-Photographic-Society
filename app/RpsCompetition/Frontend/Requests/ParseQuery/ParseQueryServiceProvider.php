@@ -39,9 +39,19 @@ class ParseQueryServiceProvider extends ServiceProvider
     {
 
         $this->app->bind(
+            '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper',
+            function (Application $app) {
+                return new ParseQueryHelper(
+                    $app->make('QueryCompetitions'), $app->make('SeasonHelper'), $app->make('CompetitionHelper')
+                );
+            }
+        )
+        ;
+        $this->app->bind(
             'RequestMonthlyEntries',
             function (Application $app) {
                 return new RequestMonthlyEntries(
+                    $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
                     $app->make('QueryCompetitions'),
                     $app->make('SeasonHelper'),
                     $app->make('CompetitionHelper'),
