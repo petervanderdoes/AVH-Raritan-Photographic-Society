@@ -15,9 +15,6 @@ use RpsCompetition\Application;
 use RpsCompetition\Common\Core;
 use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
@@ -146,7 +143,7 @@ class AVH_RPS_Client
          *
          */
         $this->container->singleton('Settings', 'RpsCompetition\Settings');
-        $this->container->singleton('RpsDb', 'RpsCompetition\Db\RpsDb');
+
         $this->container->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
         $this->container->singleton(
             'Session',
@@ -231,46 +228,9 @@ class AVH_RPS_Client
 
         $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
 
-        $this->registerBindingDb();
         $this->registerBindingShortCodes();
         $this->registerBindingSocialNetworks();
         $this->registerBindingsForms();
-    }
-
-    /**
-     * Register all the binding for the Database classes
-     *
-     */
-    private function registerBindingDb()
-    {
-        $this->container->bind(
-            'QueryEntries',
-            function (Application $app) {
-                return new QueryEntries($app->make('RpsDb'));
-            }
-        )
-        ;
-        $this->container->bind(
-            'QueryCompetitions',
-            function (Application $app) {
-                return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
-            }
-        )
-        ;
-        $this->container->bind(
-            'QueryMiscellaneous',
-            function (Application $app) {
-                return new QueryMiscellaneous($app->make('RpsDb'));
-            }
-        )
-        ;
-        $this->container->bind(
-            'QueryBanquet',
-            function (Application $app) {
-                return new QueryBanquet($app->make('RpsDb'));
-            }
-        )
-        ;
     }
 
     /**

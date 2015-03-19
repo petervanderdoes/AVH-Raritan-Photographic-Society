@@ -101,6 +101,7 @@ return array(
     'RpsCompetition\\Competition\\Helper' => $baseDir . '/app/RpsCompetition/Competition/Helper.php',
     'RpsCompetition\\Competition\\ListTable' => $baseDir . '/app/RpsCompetition/Competition/ListTable.php',
     'RpsCompetition\\Constants' => $baseDir . '/app/RpsCompetition/Constants.php',
+    'RpsCompetition\\Db\\DbServiceProvider' => $baseDir . '/app/RpsCompetition/Db/DbServiceProvider.php',
     'RpsCompetition\\Db\\QueryBanquet' => $baseDir . '/app/RpsCompetition/Db/QueryBanquet.php',
     'RpsCompetition\\Db\\QueryCompetitions' => $baseDir . '/app/RpsCompetition/Db/QueryCompetitions.php',
     'RpsCompetition\\Db\\QueryEntries' => $baseDir . '/app/RpsCompetition/Db/QueryEntries.php',

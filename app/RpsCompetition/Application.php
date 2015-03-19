@@ -111,6 +111,7 @@ class Application extends Container implements ApplicationContract
             '\RpsCompetition\Frontend\Shortcodes\PersonWinners\PersonWinnersServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser\ScoresCurrentUserServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\UploadImage\UploadImageServiceProvider',
+            '\RpsCompetition\Db\DbServiceProvider',
         ];
         $this->registerCoreContainerAliases();
         $this->registerConfiguredProviders();
