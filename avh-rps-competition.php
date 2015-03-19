@@ -134,12 +134,6 @@ class AVH_RPS_Client
     {
 
         /**
-         * Setup Interfaces
-         *
-         */
-        $this->app->bind('Avh\DataHandler\AttributeBagInterface', 'Avh\DataHandler\NamespacedAttributeBag');
-
-        /**
          * Setup Singleton classes
          *
          */
