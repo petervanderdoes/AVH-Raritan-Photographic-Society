@@ -9,7 +9,7 @@ use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Options\General as Options;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class Frontend

@@ -6,7 +6,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Form\Type\UploadImageType;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 use Symfony\Component\Form\FormFactory;
 
 /**

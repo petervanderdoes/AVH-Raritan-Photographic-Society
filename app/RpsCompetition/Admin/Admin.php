@@ -14,7 +14,7 @@ use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 use Valitron\Validator;
 
 /**

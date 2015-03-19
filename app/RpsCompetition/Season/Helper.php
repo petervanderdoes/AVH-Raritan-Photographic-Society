@@ -5,7 +5,7 @@ use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class Helper

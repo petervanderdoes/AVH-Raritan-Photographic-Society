@@ -2,7 +2,7 @@
 namespace RpsCompetition\Frontend\SocialNetworks;
 
 use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class SocialNetworksRouter

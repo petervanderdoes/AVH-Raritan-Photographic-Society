@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Requests\MyEntries;
 
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class RequestMyEntriesModel

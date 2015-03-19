@@ -3,7 +3,7 @@ namespace RpsCompetition\Competition;
 
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class Helper

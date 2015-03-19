@@ -2,7 +2,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\MonthlyWinners;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class MonthlyWinnersController

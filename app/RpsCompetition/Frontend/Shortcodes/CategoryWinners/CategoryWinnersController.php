@@ -3,7 +3,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\CategoryWinners;
 
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class CategoryWinnersController

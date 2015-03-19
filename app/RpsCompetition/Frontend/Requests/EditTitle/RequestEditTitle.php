@@ -6,7 +6,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 use Symfony\Component\Form\FormFactory;
 
 /**

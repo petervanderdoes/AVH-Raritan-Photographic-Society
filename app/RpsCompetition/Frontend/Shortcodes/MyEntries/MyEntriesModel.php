@@ -13,7 +13,7 @@ use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 use Symfony\Component\Form\FormFactory;
 
 /**

@@ -2,7 +2,7 @@
 namespace RpsCompetition\Db;
 
 use RpsCompetition\Season\Helper as SeasonHelper;
-use RpsCompetition\Settings;
+use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class QueryCompetitions
