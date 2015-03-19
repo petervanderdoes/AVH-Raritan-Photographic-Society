@@ -171,11 +171,11 @@ class MyEntriesModel
     {
         $current_competition = reset($open_competitions);
         $competition_date = $this->session->get(
-            'myentries/' . $medium_subset_medium . '/competition_date',
+            'myentries.' . $medium_subset_medium . '.competition_date',
             mysql2date('Y-m-d', $current_competition->Competition_Date)
         )
         ;
-        $medium = $this->session->get('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+        $medium = $this->session->get('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $this->query_competitions->getCompetitionByDateClassMedium(
             $competition_date,
@@ -330,15 +330,15 @@ class MyEntriesModel
      */
     private function saveSession($medium_subset_medium, $current_competition)
     {
-        $this->session->set('myentries/subset', $medium_subset_medium);
+        $this->session->set('myentries.subset', $medium_subset_medium);
         $this->session->set(
-            'myentries/' . $medium_subset_medium . '/competition_date',
+            'myentries.' . $medium_subset_medium . '.competition_date',
             $current_competition->Competition_Date
         )
         ;
-        $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+        $this->session->set('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
         $this->session->set(
-            'myentries/' . $medium_subset_medium . '/classification',
+            'myentries.' . $medium_subset_medium . '.classification',
             $current_competition->Classification
         )
         ;

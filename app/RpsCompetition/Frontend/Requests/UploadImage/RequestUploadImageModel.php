@@ -223,10 +223,10 @@ class RequestUploadImageModel
     {
         $return = true;
         if ($this->session->has('myentries')) {
-            $subset = $this->session->get('myentries/subset', null);
-            $this->comp_date = $this->session->get('myentries/' . $subset . '/competition_date', null);
-            $this->medium = $this->session->get('myentries/' . $subset . '/medium', null);
-            $this->classification = $this->session->get('myentries/' . $subset . '/classification', null);
+            $subset = $this->session->get('myentries.subset', null);
+            $this->comp_date = $this->session->get('myentries.' . $subset . '.competition_date', null);
+            $this->medium = $this->session->get('myentries.' . $subset . '.medium', null);
+            $this->classification = $this->session->get('myentries.' . $subset . '.classification', null);
         } else {
             $error_message = 'Missing "myentries" in session.';
             $this->setFormError($this->form, $error_message);

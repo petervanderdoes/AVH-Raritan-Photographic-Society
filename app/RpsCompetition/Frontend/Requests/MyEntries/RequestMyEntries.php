@@ -135,7 +135,7 @@ class RequestMyEntries
                     }
                     break;
             }
-            $medium_subset_medium = $this->session->get('myentries/subset');
+            $medium_subset_medium = $this->session->get('myentries.subset');
             $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
             $current_competition = $this->query_competitions->getCompetitionByDateClassMedium(
                 $competition_date,
@@ -145,13 +145,13 @@ class RequestMyEntries
             ;
 
             $this->session->set(
-                'myentries/' . $medium_subset_medium . '/competition_date',
+                'myentries.' . $medium_subset_medium . '.competition_date',
                 $current_competition->Competition_Date
             )
             ;
-            $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+            $this->session->set('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
             $this->session->set(
-                'myentries/' . $medium_subset_medium . '/classification',
+                'myentries.' . $medium_subset_medium . '.classification',
                 $current_competition->Classification
             )
             ;
