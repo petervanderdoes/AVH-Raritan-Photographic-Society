@@ -149,7 +149,7 @@ class AVH_RPS_Client
         $this->app->singleton(
             'Session',
             function () {
-                return new Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
+                return new \Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
             }
         )
         ;
