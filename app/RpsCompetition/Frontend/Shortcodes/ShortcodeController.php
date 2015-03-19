@@ -18,11 +18,11 @@ final class ShortcodeController
     /**
      * Constructor
      *
-     * @param Application $container
+     * @param Application $app
      */
-    public function __construct(Application $container)
+    public function __construct(Application $app)
     {
-        $this->html = $container->make('HtmlBuilder');
+        $this->html = $app->make('HtmlBuilder');
     }
 
     /**

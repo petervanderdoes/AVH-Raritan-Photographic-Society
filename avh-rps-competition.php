@@ -61,7 +61,7 @@ class AVH_RPS_Client
     /**
      * @var Application
      */
-    private $container;
+    private $app;
     /** @var  Settings */
     private $settings;
 
@@ -73,11 +73,11 @@ class AVH_RPS_Client
      */
     public function __construct($dir, $basename)
     {
-        $this->container = new Application();
+        $this->app = new Application();
 
         $this->registerBindings();
 
-        $this->settings = $this->container->make('Settings');
+        $this->settings = $this->app->make('Settings');
         $this->settings->set('plugin_dir', $dir);
         $this->settings->set('plugin_file', $basename);
 
@@ -101,9 +101,9 @@ class AVH_RPS_Client
             add_action('activate_' . $this->settings->get('plugin_basename'), [$this, 'pluginActivation']);
             add_action('deactivate_' . $this->settings->get('plugin_basename'), [$this, 'pluginDeactivation']);
 
-            new Admin($this->container);
+            new Admin($this->app);
         } else {
-            new Frontend($this->container);
+            new Frontend($this->app);
         }
     }
 
@@ -138,24 +138,24 @@ class AVH_RPS_Client
          * Setup Interfaces
          *
          */
-        $this->container->bind('Avh\DataHandler\AttributeBagInterface', 'Avh\DataHandler\NamespacedAttributeBag');
+        $this->app->bind('Avh\DataHandler\AttributeBagInterface', 'Avh\DataHandler\NamespacedAttributeBag');
 
         /**
          * Setup Singleton classes
          *
          */
-        $this->container->singleton('Settings', 'RpsCompetition\Settings');
+        $this->app->singleton('Settings', 'RpsCompetition\Settings');
 
-        $this->container->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
-        $this->container->singleton(
+        $this->app->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
+        $this->app->singleton(
             'Session',
             function () {
                 return new Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
             }
         )
         ;
-        $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
-        $this->container->instance(
+        $this->app->singleton('IlluminateRequest', '\Illuminate\Http\Request');
+        $this->app->instance(
             'IlluminateRequest',
             forward_static_call(['Illuminate\Http\Request', 'createFromGlobals'])
         )
@@ -166,7 +166,7 @@ class AVH_RPS_Client
          *
          */
 
-        $this->container->bind(
+        $this->app->bind(
             'RequestController',
             function (Application $app) {
                 return new RequestController($app);
@@ -174,7 +174,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'FrontendView',
             function (Application $app) {
                 return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
@@ -182,7 +182,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'PhotoHelper',
             function (Application $app) {
                 return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
@@ -190,7 +190,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'SeasonHelper',
             function (Application $app) {
                 return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
@@ -198,7 +198,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'WpSeoHelper',
             function (Application $app) {
                 return new WpseoHelper(
@@ -212,7 +212,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'CompetitionHelper',
             function (Application $app) {
                 return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
@@ -220,7 +220,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
+        $this->app->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
 
         $this->registerBindingShortCodes();
         $this->registerBindingSocialNetworks();
@@ -233,14 +233,14 @@ class AVH_RPS_Client
     private function registerBindingShortCodes()
     {
         // General Shortcode classes
-        $this->container->bind(
+        $this->app->bind(
             'ShortcodeRouter',
             function () {
                 return new ShortcodeRouter();
             }
         )
         ;
-        $this->container->bind(
+        $this->app->bind(
             'ShortcodeController',
             function (Application $app) {
                 return new ShortcodeController($app);
@@ -248,7 +248,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'ShortcodeView',
             function (Application $app) {
                 $settings = $app->make('Settings');
@@ -264,22 +264,22 @@ class AVH_RPS_Client
      */
     private function registerBindingSocialNetworks()
     {
-        $this->container->bind(
+        $this->app->bind(
             'SocialNetworksRouter',
             function (Application $app) {
                 return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
             }
         )
         ;
-        $this->container->bind(
+        $this->app->bind(
             'SocialNetworksController',
             function (Application $app) {
                 return new SocialNetworksController($app);
             }
         )
         ;
-        $this->container->bind('SocialNetworksModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
-        $this->container->bind(
+        $this->app->bind('SocialNetworksModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
+        $this->app->bind(
             'SocialNetworksView',
             function (Application $app) {
                 $settings = $app->make('Settings');
@@ -297,7 +297,7 @@ class AVH_RPS_Client
      */
     private function registerBindingsForms()
     {
-        $this->container->bind(
+        $this->app->bind(
             'formFactory',
             function (Application $app) {
                 $validator_builder = Validation::createValidatorBuilder();

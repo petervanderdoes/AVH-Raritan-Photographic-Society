@@ -20,7 +20,7 @@ use RpsCompetition\Settings;
  */
 class Frontend
 {
-    private $container;
+    private $app;
     /** @var \Symfony\Component\Form\FormFactory */
     private $formFactory;
     /** @var Options */
@@ -39,21 +39,21 @@ class Frontend
     /**
      * Constructor
      *
-     * @param Application $container
+     * @param Application $app
      */
-    public function __construct(Application $container)
+    public function __construct(Application $app)
     {
-        $this->container = $container;
-        $this->session = $container->make('Session');
+        $this->app = $app;
+        $this->session = $app->make('Session');
         $this->session->start();
 
-        $this->settings = $container->make('Settings');
-        $this->rpsdb = $container->make('RpsDb');
-        $this->request = $container->make('IlluminateRequest');
-        $this->options = $container->make('OptionsGeneral');
+        $this->settings = $app->make('Settings');
+        $this->rpsdb = $app->make('RpsDb');
+        $this->request = $app->make('IlluminateRequest');
+        $this->options = $app->make('OptionsGeneral');
 
-        $this->view = $container->make('FrontendView');
-        $this->formFactory = $container->make('formFactory');
+        $this->view = $app->make('FrontendView');
+        $this->formFactory = $app->make('formFactory');
 
         $this->setupRequestHandling();
 
@@ -128,7 +128,7 @@ class Frontend
 
         $this->setupShortcodes();
 
-        $query_competitions = $this->container->make('QueryCompetitions');
+        $query_competitions = $this->app->make('QueryCompetitions');
         $query_competitions->setAllPastCompetitionsClose();
 
         $this->setupWpSeoActionsFilters();
@@ -152,7 +152,7 @@ class Frontend
     public function actionShowcaseCompetitionThumbnails($foo)
     {
         if (is_front_page()) {
-            $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+            $query_miscellaneous = $this->app->make('QueryMiscellaneous');
             $records = $query_miscellaneous->getEightsAndHigher(5);
             $data = [];
             $data['records'] = $records;
@@ -489,7 +489,7 @@ class Frontend
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
 
-            $query_competitions = $this->container->make('QueryCompetitions');
+            $query_competitions = $this->app->make('QueryCompetitions');
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
@@ -565,7 +565,7 @@ class Frontend
     private function setupRequestHandling()
     {
         /** @var \RpsCompetition\Frontend\Requests\RequestController $requests_controller */
-        $requests_controller = $this->container->make('RequestController');
+        $requests_controller = $this->app->make('RequestController');
         add_action('parse_query', [$requests_controller, 'handleParseQuery']);
 
         if ($this->request->isMethod('POST')) {
@@ -580,9 +580,9 @@ class Frontend
     private function setupShortcodes()
     {
         /** @var ShortcodeRouter $shortcode */
-        $shortcode = $this->container->make('ShortcodeRouter');
-        $shortcode->setShortcodeController($this->container->make('ShortcodeController'));
-        $shortcode->setContainer($this->container);
+        $shortcode = $this->app->make('ShortcodeRouter');
+        $shortcode->setShortcodeController($this->app->make('ShortcodeController'));
+        $shortcode->setContainer($this->app);
         $shortcode->initializeShortcodes();
     }
 
@@ -592,7 +592,7 @@ class Frontend
      */
     private function setupSocialButtons()
     {
-        $social_networks_controller = $this->container->make('SocialNetworksRouter');
+        $social_networks_controller = $this->app->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = '8cfdecd';
@@ -627,7 +627,7 @@ class Frontend
      */
     private function setupWpSeoActionsFilters()
     {
-        $wpseo = $this->container->make('WpSeoHelper');
+        $wpseo = $this->app->make('WpSeoHelper');
         add_action('wpseo_register_extra_replacements', [$wpseo, 'actionWpseoRegisterExtraReplacements']);
         add_action('wpseo_do_sitemap_competition-entries', [$wpseo, 'actionWpseoSitemapCompetitionEntries']);
         add_action('wpseo_do_sitemap_competition-winners', [$wpseo, 'actionWpseoSitemapCompetitionWinners']);

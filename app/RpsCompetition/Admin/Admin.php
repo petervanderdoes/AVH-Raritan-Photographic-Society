@@ -29,7 +29,7 @@ final class Admin
     /* @var $formBuilder FormBuilder */
 
     private $competition_list;
-    private $container;
+    private $app;
     private $entries_list;
     private $hooks = [];
     private $message = '';
@@ -47,16 +47,16 @@ final class Admin
     /**
      * Constructor
      *
-     * @param Application $container
+     * @param Application $app
      */
-    public function __construct(Application $container)
+    public function __construct(Application $app)
     {
-        $this->container = $container;
+        $this->app = $app;
 
-        $this->settings = $container->make('Settings');
-        $this->rpsdb = $container->make('RpsDb');
-        $this->request = $container->make('IlluminateRequest');
-        $this->options = $container->make('OptionsGeneral');
+        $this->settings = $app->make('Settings');
+        $this->rpsdb = $app->make('RpsDb');
+        $this->request = $app->make('IlluminateRequest');
+        $this->options = $app->make('OptionsGeneral');
 
         // Admin menu
         add_action('admin_menu', [$this, 'actionAdminMenu']);
