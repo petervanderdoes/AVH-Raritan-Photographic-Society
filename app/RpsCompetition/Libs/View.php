@@ -1,8 +1,6 @@
 <?php
 namespace RpsCompetition\Libs;
 
-use Avh\DataHandler\DataHandler;
-use Avh\DataHandler\NamespacedAttributeBag;
 use Symfony\Bridge\Twig\Extension\FormExtension;
 use Symfony\Bridge\Twig\Form\TwigRenderer;
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
@@ -25,10 +23,6 @@ class View
      */
     public $parserExtensions = [];
     /**
-     * @var DataHandler Data available to the templates
-     */
-    private $data;
-    /**
      * @var \Twig_Environment The Twig environment for rendering templates.
      */
     private $environmentInstance = null;
@@ -49,8 +43,6 @@ class View
         if (WP_LOCAL_DEV !== true) {
             $this->environmentOptions['cache'] = $cache_dir;
         }
-
-        $this->data = new DataHandler(new NamespacedAttributeBag('_view'));
     }
 
     /**
@@ -74,24 +66,6 @@ class View
     public function addTemplateDir($dir = '')
     {
         $this->loader->addPath($dir);
-    }
-
-    /**
-     * Return view data
-     *
-     * @return array
-     */
-    public function all()
-    {
-        return $this->data->all();
-    }
-
-    /**
-     * Clear view data
-     */
-    public function clear()
-    {
-        $this->data->clear();
     }
 
     /**
@@ -120,41 +94,6 @@ class View
     }
 
     /**
-     * Return view data value with key
-     *
-     * @param string $key
-     *
-     * @return mixed
-     */
-    public function get($key)
-    {
-        return $this->data->get($key);
-    }
-
-    /**
-     * Does view data have value with key?
-     *
-     * @param string $key
-     *
-     * @return boolean
-     */
-    public function has($key)
-    {
-        return $this->data->has($key);
-    }
-
-    /**
-     * Set view data value with key
-     *
-     * @param string $key
-     * @param mixed  $value
-     */
-    public function set($key, $value)
-    {
-        $this->data->set($key, $value);
-    }
-
-    /**
      * Get the Twig Environment
      *
      * @return \Twig_Environment
@@ -178,8 +117,8 @@ class View
     /**
      * Render the template
      *
-     * @param string     $template
-     * @param null|array $data
+     * @param string $template
+     * @param array  $data
      *
      * @return string
      */
@@ -187,7 +126,10 @@ class View
     {
         $twig = $this->getEnvironmentInstance();
         $parser = $twig->loadTemplate($template);
-        $data = array_merge($this->data->all(), (array) $data);
+
+        if ($data === null) {
+            $data = [];
+        }
 
         return $parser->render($data);
     }
