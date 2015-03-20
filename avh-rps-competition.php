@@ -93,6 +93,7 @@ class AVH_RPS_Client
 
     public function load()
     {
+        $this->app->make('OptionsGeneral');
         $this->setSettings();
         add_action('init', [$this, 'actionInit'], 10);
 
