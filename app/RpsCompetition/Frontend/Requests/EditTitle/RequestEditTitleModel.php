@@ -76,7 +76,6 @@ class RequestEditTitleModel
         $new_file_name = $new_file_name_noext . '.' . $ext;
         if (!$this->photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
             die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
-            exit();
         }
 
         // Update the Title and File Name in the database
