@@ -80,7 +80,6 @@ class Frontend
         global $wp_query;
         global $post;
 
-        //todo Make as an option in the admin section.
         $options = get_option('avh-rps');
         $all_masonry_pages = [];
         $all_masonry_pages[$options['monthly_entries_post_id']] = true;

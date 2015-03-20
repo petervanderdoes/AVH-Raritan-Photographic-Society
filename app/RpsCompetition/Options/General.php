@@ -9,6 +9,7 @@ use Avh\Utility\OptionsAbstract;
  * @author    Peter van der Does
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Options
+ * @todo      Make the options avaiable through the admin interface
  */
 final class General extends OptionsAbstract
 {
