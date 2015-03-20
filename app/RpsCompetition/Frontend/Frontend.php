@@ -2,14 +2,12 @@
 namespace RpsCompetition\Frontend;
 
 use Avh\Network\Session;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
-use RpsCompetition\Api\Client;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
-use RpsCompetition\Options\General as Options;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class Frontend
@@ -55,7 +53,8 @@ class Frontend
         $this->setupActionsFilters();
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->session->save();
     }
 
@@ -148,40 +147,6 @@ class Frontend
             $data['thumb_size'] = '150';
             echo $this->view->renderShowcaseCompetitionThumbnails($data);
             unset($query_miscellaneous);
-        }
-    }
-
-    /**
-     * Handles the requests by the RPS Windows Client
-     *
-     * @internal Hook: template_redirect
-     */
-    public function actionTemplateRedirectRpsWindowsClient()
-    {
-        if ($this->request->has('rpswinclient')) {
-
-            $api_client = new Client();
-
-            define('DONOTCACHEPAGE', true);
-            global $hyper_cache_stop;
-            $hyper_cache_stop = true;
-            add_filter('w3tc_can_print_comment', '__return_false');
-
-            // Properties of the logged in user
-            status_header(200);
-            switch ($this->request->input('rpswinclient')) {
-                case 'getcompdate':
-                    $api_client->sendXmlCompetitionDates($this->request);
-                    break;
-                case 'download':
-                    $api_client->sendCompetitions($this->request);
-                    break;
-                case 'uploadscore':
-                    $api_client->doUploadScore($this->request);
-                    break;
-                default:
-                    break;
-            }
         }
     }
 
@@ -573,6 +538,9 @@ class Frontend
 
         if ($this->request->isMethod('POST')) {
             add_action('wp', [$requests_controller, 'handleWp']);
+        }
+        if ($this->request->has('rpswinclient')) {
+            add_action('template_redirect', [$requests_controller, 'handleTemplateRedirect']);
         }
     }
 

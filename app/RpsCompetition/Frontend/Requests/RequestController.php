@@ -88,4 +88,12 @@ class RequestController
             }
         }
     }
+
+    public function handleTemplateRedirect(){
+        if ($this->request->has('rpswinclient')) {
+            $request = $this->app('RequestRpsClient');
+            $request->handleRpsClient();
+
+        }
+    }
 }
