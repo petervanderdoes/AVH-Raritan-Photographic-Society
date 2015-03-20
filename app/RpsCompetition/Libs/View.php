@@ -117,8 +117,8 @@ class View
     /**
      * Render the template
      *
-     * @param string $template
-     * @param array  $data
+     * @param string     $template
+     * @param null|array $data
      *
      * @return string
      */
