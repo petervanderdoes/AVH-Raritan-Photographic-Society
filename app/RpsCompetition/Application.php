@@ -2,7 +2,7 @@
 
 namespace RpsCompetition;
 
-use Avh\Contracts\Foundation\Application as ApplicationContract;
+use Avh\Contracts\Foundation\ApplicationInterface;
 use Avh\Support\ProviderRepository;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
@@ -16,7 +16,7 @@ use RpsCompetition\Common\Helper as CommonHelper;
  * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition
  */
-class Application extends Container implements ApplicationContract
+class Application extends Container implements ApplicationInterface
 {
     /**
      * The Plugin Version
