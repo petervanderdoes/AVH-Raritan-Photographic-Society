@@ -140,108 +140,6 @@ class View
     }
 
     /**
-     * Display the form for selecting the month and season.
-     *
-     * @param string  $selected_season
-     * @param string  $selected_date
-     * @param boolean $is_scored_competitions
-     * @param array   $months
-     *
-     * @return string
-     */
-    public function renderMonthAndSeasonSelectionForm(
-        $selected_season,
-        $selected_date,
-        $is_scored_competitions,
-        $months
-    ) {
-        global $post;
-        $output = '<script type="text/javascript">';
-        $output .= 'function submit_form(control_name) {' . "\n";
-        $output .= '	document.month_season_form.submit_control.value = control_name;' . "\n";
-        $output .= '	document.month_season_form.submit();' . "\n";
-        $output .= '}' . "\n";
-        $output .= '</script>';
-
-        $action = home_url('/' . get_page_uri($post->ID));
-        $output .= $this->form_builder->open($action, ['name' => 'month_season_form']);
-        $output .= $this->form_builder->hidden('submit_control');
-        $output .= $this->form_builder->hidden('selected_season', $selected_season);
-        $output .= $this->form_builder->hidden('selected_date', $selected_date);
-
-        if ($is_scored_competitions) {
-            // Drop down list for months
-            $output .= $this->getMonthsDropdown($months, $selected_date);
-        } else {
-            $output .= 'No scored competitions this season. ';
-        }
-
-        // Drop down list for season
-        $output .= $this->season_helper->getSeasonDropdown($selected_season);
-        $output .= $this->form_builder->close();
-
-        return $output;
-    }
-
-    /**
-     * Render the HTML for the Monthly Entries
-     *
-     * @param array $data
-     *
-     * @return string
-     */
-    public function renderMonthlyEntries($data)
-    {
-        $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($data['months']);
-        $data['images'] = [];
-        if (is_array($data['entries'])) {
-            // Iterate through all the award winners and display each thumbnail in a grid
-            /** @var QueryEntries $entry */
-            foreach ($data['entries'] as $entry) {
-                $user_info = get_userdata($entry->Member_ID);
-                $caption_data = [
-                    'title'      => $entry->Title,
-                    'first_name' => $user_info->user_firstname,
-                    'last_name'  => $user_info->user_lastname
-                ];
-                $data['images'][] = $this->dataPhotoMasonry($entry, $data['thumb_size'], $caption_data);
-            }
-        }
-        $template = $this->twig->loadTemplate('monthly-entries.html.twig');
-        unset ($data['entries']);
-
-        return $template->render($data);
-    }
-
-    /**
-     *  Render the Person winners thumbnails.
-     *
-     * @param array $data
-     *
-     * @see Shortcodes::shortcodePersonWinners
-     *
-     * @return string
-     */
-    public function renderPersonWinners($data)
-    {
-        $data['images'] = [];
-        foreach ($data['records'] as $recs) {
-            $user_info = get_userdata($recs->Member_ID);
-            $caption_data = [
-                'title'      => $recs->Title,
-                'first_name' => $user_info->user_firstname,
-                'last_name'  => $user_info->user_lastname
-            ];
-            $data['images'][] = $this->dataPhotoMasonry($recs, $data['thumb_size'], $caption_data);
-        }
-        unset ($data['records']);
-
-        $template = $this->twig->loadTemplate('person-winners.html.twig');
-
-        return $template->render($data);
-    }
-
-    /**
      * Render the Showcase competition thumbnails
      *
      * @param array $data
@@ -260,25 +158,6 @@ class View
         unset ($data['records']);
 
         return $template->render($data);
-    }
-
-    /**
-     * Collect needed data to render the Month and Season select form
-     *
-     * @param array $months
-     *
-     * @return array
-     */
-    private function dataMonthAndSeasonSelectionForm($months)
-    {
-        global $post;
-        $data = [];
-        $data['action'] = home_url('/' . get_page_uri($post->ID));
-        $data['months'] = $months;
-        $seasons = $this->season_helper->getSeasons();
-        $data['seasons'] = array_combine($seasons, $seasons);
-
-        return $data;
     }
 
     /**
@@ -342,27 +221,5 @@ class View
         $data['caption'] = $this->dataPhotoCredit($caption['title'], $caption['first_name'], $caption['last_name']);
 
         return $data;
-    }
-
-    /**
-     * Display a dropdown for the given months
-     *
-     * @param array  $months
-     * @param string $selected_month
-     *
-     * @return string
-     */
-    private function getMonthsDropdown($months, $selected_month)
-    {
-
-        $output = $this->form_builder->select(
-            'new_month',
-            $months,
-            $selected_month,
-            ['onChange' => 'submit_form("new_month")']
-        )
-        ;
-
-        return $output;
     }
 }

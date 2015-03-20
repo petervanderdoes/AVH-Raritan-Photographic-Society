@@ -21,10 +21,6 @@ use \Illuminate\Config\Repository as Settings;
 class Frontend
 {
     private $app;
-    /** @var \Symfony\Component\Form\FormFactory */
-    private $formFactory;
-    /** @var Options */
-    private $options;
     /** @var Request */
     private $request;
     /** @var RpsDb */
@@ -50,10 +46,8 @@ class Frontend
         $this->settings = $app->make('Settings');
         $this->rpsdb = $app->make('RpsDb');
         $this->request = $app->make('IlluminateRequest');
-        $this->options = $app->make('OptionsGeneral');
 
         $this->view = $app->make('FrontendView');
-        $this->formFactory = $app->make('formFactory');
 
         $this->setupRequestHandling();
 

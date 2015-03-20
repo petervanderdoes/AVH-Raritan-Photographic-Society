@@ -15,7 +15,6 @@ class SocialNetworksController
     /** @var SocialNetworksModel */
     protected $model;
     private $app;
-    private $options;
     private $settings;
     /** @var  SocialNetworksView */
     private $view;
@@ -29,7 +28,6 @@ class SocialNetworksController
     {
         $this->app = $app;
         $this->settings = $this->app->make('Settings');
-        $this->options = $this->app->make('OptionsGeneral');
 
         $this->model = $this->app->make('SocialNetworksModel');
         $this->view = $this->app->make('SocialNetworksView');

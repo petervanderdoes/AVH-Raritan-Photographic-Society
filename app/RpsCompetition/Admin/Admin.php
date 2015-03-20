@@ -3,6 +3,7 @@ namespace RpsCompetition\Admin;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
 use RpsCompetition\Common\Helper as CommonHelper;
@@ -12,9 +13,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
-use RpsCompetition\Options\General as OptionsGeneral;
 use RpsCompetition\Photo\Helper as PhotoHelper;
-use \Illuminate\Config\Repository as Settings;
 use Valitron\Validator;
 
 /**
@@ -26,15 +25,13 @@ use Valitron\Validator;
  */
 final class Admin
 {
+    private $app;
     /* @var $formBuilder FormBuilder */
 
     private $competition_list;
-    private $app;
     private $entries_list;
     private $hooks = [];
     private $message = '';
-    /** @var OptionsGeneral */
-    private $options;
     private $referer;
     /** @var Request */
     private $request;
@@ -56,7 +53,6 @@ final class Admin
         $this->settings = $app->make('Settings');
         $this->rpsdb = $app->make('RpsDb');
         $this->request = $app->make('IlluminateRequest');
-        $this->options = $app->make('OptionsGeneral');
 
         // Admin menu
         add_action('admin_menu', [$this, 'actionAdminMenu']);
