@@ -3,7 +3,7 @@
 namespace RpsCompetition\Frontend\Requests;
 
 use RpsCompetition\Application;
-
+use Illuminate\Http\Request as IlluminateRequest;
 /**
  * Class RequestController
  *
@@ -16,6 +16,8 @@ class RequestController
     private $app;
     /** @var array */
     private $options;
+    /** @var IlluminateRequest */
+    private $request;
 
     /**
      * Constructor
@@ -26,6 +28,7 @@ class RequestController
     {
         $this->app = $app;
         $this->options = get_option('avh-rps');
+        $this->request = $app->make('IlluminateRequest');
     }
 
     /**
@@ -91,7 +94,7 @@ class RequestController
 
     public function handleTemplateRedirect(){
         if ($this->request->has('rpswinclient')) {
-            $request = $this->app('RequestRpsClient');
+            $request = $this->app->make('RequestRpsClient');
             $request->handleRpsClient();
 
         }
