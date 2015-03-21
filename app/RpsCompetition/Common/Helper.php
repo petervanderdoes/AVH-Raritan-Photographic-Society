@@ -4,9 +4,9 @@ namespace RpsCompetition\Common;
 /**
  * Class Helper
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Common
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class Helper
 {

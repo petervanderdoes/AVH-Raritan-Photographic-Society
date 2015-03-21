@@ -7,9 +7,9 @@ use \Illuminate\Config\Repository as Settings;
 /**
  * Class UploadImageController
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\UploadImage
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class UploadImageController
 {

@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 /**
  * Class Client
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Api
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class Client
 {

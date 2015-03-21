@@ -15,9 +15,9 @@ use Symfony\Component\Form\FormFactory;
 /**
  * Class BanquetEntriesModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class BanquetEntriesModel
 {

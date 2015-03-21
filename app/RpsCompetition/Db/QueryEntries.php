@@ -4,6 +4,10 @@ namespace RpsCompetition\Db;
 /**
  * Class QueryEntries
  *
+ * @package   RpsCompetition\Db
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
+ *
  * @property integer ID
  * @property integer Competition_ID
  * @property integer Member_ID
@@ -14,10 +18,6 @@ namespace RpsCompetition\Db;
  * @property string  Date_Modified
  * @property float   Score
  * @property string  Award
- *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Db
  */
 class QueryEntries
 {

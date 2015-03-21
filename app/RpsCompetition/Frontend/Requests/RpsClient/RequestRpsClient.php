@@ -10,7 +10,7 @@ use RpsCompetition\Api\Client;
  *
  * @package   RpsCompetition\Frontend\Requests\RpsClient
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class RequestRpsClient
 {

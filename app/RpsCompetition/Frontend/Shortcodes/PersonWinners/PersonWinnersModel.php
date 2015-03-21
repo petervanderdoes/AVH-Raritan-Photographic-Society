@@ -7,9 +7,9 @@ use RpsCompetition\Photo\Helper as PhotoHelper;
 /**
  * Class PersonWinnersModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\PersonWinners
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class PersonWinnersModel
 {

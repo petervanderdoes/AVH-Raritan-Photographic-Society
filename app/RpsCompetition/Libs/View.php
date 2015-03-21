@@ -8,9 +8,9 @@ use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 /**
  * Class View
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Libs
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class View
 {

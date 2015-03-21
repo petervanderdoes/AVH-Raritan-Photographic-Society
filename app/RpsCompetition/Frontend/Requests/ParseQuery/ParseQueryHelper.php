@@ -11,7 +11,7 @@ use RpsCompetition\Season\Helper as SeasonHelper;
  *
  * @package   RpsCompetition\Frontend\Requests\ParseQuery
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class ParseQueryHelper
 {

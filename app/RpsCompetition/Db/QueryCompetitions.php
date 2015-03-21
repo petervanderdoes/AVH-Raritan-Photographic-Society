@@ -1,11 +1,15 @@
 <?php
 namespace RpsCompetition\Db;
 
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Season\Helper as SeasonHelper;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class QueryCompetitions
+ *
+ * @package   RpsCompetition\Db
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  *
  * @property  integer     ID
  * @property  string      Competition_Date
@@ -20,10 +24,6 @@ use \Illuminate\Config\Repository as Settings;
  * @property  integer     Max_Entries
  * @property  integer     Num_Judges
  * @property  string      Special_Event
- *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Db
  */
 class QueryCompetitions
 {

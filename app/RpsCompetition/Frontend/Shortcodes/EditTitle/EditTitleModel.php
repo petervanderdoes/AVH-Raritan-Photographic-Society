@@ -13,9 +13,9 @@ use Symfony\Component\Form\FormFactory;
 /**
  * Class EditTitleModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\EditTitle
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class EditTitleModel
 {
