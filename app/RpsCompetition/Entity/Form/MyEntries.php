@@ -11,7 +11,7 @@ namespace RpsCompetition\Entity\Form;
  */
 class MyEntries
 {
-    protected $_wpnonce;
+    protected $wp_nonce;
     protected $classification;
     protected $comp_date;
     protected $medium;
@@ -122,7 +122,7 @@ class MyEntries
      */
     public function getWpnonce()
     {
-        return $this->_wpnonce;
+        return $this->wp_nonce;
     }
 
     /**
@@ -130,6 +130,6 @@ class MyEntries
      */
     public function setWpnonce($wpnonce)
     {
-        $this->_wpnonce = $wpnonce;
+        $this->wp_nonce = $wpnonce;
     }
 }
