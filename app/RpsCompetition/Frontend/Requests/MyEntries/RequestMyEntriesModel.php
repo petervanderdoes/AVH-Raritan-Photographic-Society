@@ -2,9 +2,9 @@
 
 namespace RpsCompetition\Frontend\Requests\MyEntries;
 
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Photo\Helper as PhotoHelper;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class RequestMyEntriesModel
@@ -43,7 +43,6 @@ class RequestMyEntriesModel
     {
         if (is_array($entries)) {
             foreach ($entries as $id) {
-
                 $entry_record = $this->query_entries->getEntryById($id);
                 if ($entry_record == false) {
                     $this->settings->set(

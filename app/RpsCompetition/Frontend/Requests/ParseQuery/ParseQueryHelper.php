@@ -19,8 +19,11 @@ class ParseQueryHelper
      * @param SeasonHelper      $season_helper
      * @param CompetitionHelper $competition_helper
      */
-    public function __construct(QueryCompetitions $query_competitions, SeasonHelper $season_helper, CompetitionHelper $competition_helper)
-    {
+    public function __construct(
+        QueryCompetitions $query_competitions,
+        SeasonHelper $season_helper,
+        CompetitionHelper $competition_helper
+    ) {
 
         $this->query_competitions = $query_competitions;
         $this->season_helper = $season_helper;

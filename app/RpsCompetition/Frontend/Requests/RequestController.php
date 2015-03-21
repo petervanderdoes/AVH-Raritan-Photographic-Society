@@ -2,8 +2,9 @@
 
 namespace RpsCompetition\Frontend\Requests;
 
-use RpsCompetition\Application;
 use Illuminate\Http\Request as IlluminateRequest;
+use RpsCompetition\Application;
+
 /**
  * Class RequestController
  *
@@ -55,6 +56,14 @@ class RequestController
         }
     }
 
+    public function handleTemplateRedirect()
+    {
+        if ($this->request->has('rpswinclient')) {
+            $request = $this->app->make('RequestRpsClient');
+            $request->handleRpsClient();
+        }
+    }
+
     /**
      * Handle HTTP Requests
      *
@@ -89,14 +98,6 @@ class RequestController
                 $request = $this->app->make('RequestUploadImage');
                 $request->handleUploadImage();
             }
-        }
-    }
-
-    public function handleTemplateRedirect(){
-        if ($this->request->has('rpswinclient')) {
-            $request = $this->app->make('RequestRpsClient');
-            $request->handleRpsClient();
-
         }
     }
 }
