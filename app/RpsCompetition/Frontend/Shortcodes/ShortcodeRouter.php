@@ -12,6 +12,10 @@ use Avh\Utility\ShortcodesAbstract;
  */
 class ShortcodeRouter extends ShortcodesAbstract
 {
+    /**
+     * Initialize the shortcodes used.
+     *
+     */
     public function initializeShortcodes()
     {
         $this->register('rps_category_winners', 'shortcodeCategoryWinners', 'CategoryWinnersController');

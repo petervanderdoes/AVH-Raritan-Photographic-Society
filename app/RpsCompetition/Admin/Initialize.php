@@ -18,6 +18,10 @@ class Initialize
     {
     }
 
+    /**
+     * Load the needed widgets
+     *
+     */
     public static function load()
     {
         // Room to initialize widgets.
