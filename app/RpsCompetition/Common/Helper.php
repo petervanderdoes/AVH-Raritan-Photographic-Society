@@ -23,7 +23,8 @@ class Helper
         $row_is_object = false;
         $sort_column_array = [];
 
-        // Create multiple arrays using the array $cols. These arrays hold the values of each field that we want to sort on.
+        // Create multiple arrays using the array $cols.
+        // These arrays hold the values of each field that we want to sort on.
         foreach ($cols as $col => $order) {
             $sort_column_array[$col] = [];
             foreach ($array as $key => $row) {
