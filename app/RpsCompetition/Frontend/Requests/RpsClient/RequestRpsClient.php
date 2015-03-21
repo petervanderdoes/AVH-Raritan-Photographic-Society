@@ -5,6 +5,13 @@ namespace RpsCompetition\Frontend\Requests\RpsClient;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Api\Client;
 
+/**
+ * Class RequestRpsClient
+ *
+ * @package   RpsCompetition\Frontend\Requests\RpsClient
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright 2014-2015, AVH Software
+ */
 class RequestRpsClient
 {
     private $client;

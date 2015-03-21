@@ -3,6 +3,7 @@
 namespace RpsCompetition\Frontend\Requests\UploadImage;
 
 use Avh\Network\Session;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
@@ -10,7 +11,6 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Photo\Helper as PhotoHelper;
-use \Illuminate\Config\Repository as Settings;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -73,6 +73,8 @@ class RequestUploadImageModel
 
     /**
      * Check if the upload is valid, move the uploaded file and create thumbnails
+     *
+     * @param \Symfony\Component\Form\Form $form
      *
      * @return bool
      */

@@ -6,6 +6,13 @@ use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Season\Helper as SeasonHelper;
 
+/**
+ * Class ParseQueryHelper
+ *
+ * @package   RpsCompetition\Frontend\Requests\ParseQuery
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright 2014-2015, AVH Software
+ */
 class ParseQueryHelper
 {
     private $competition_helper;
