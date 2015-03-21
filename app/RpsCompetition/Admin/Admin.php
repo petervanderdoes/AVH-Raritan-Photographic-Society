@@ -495,7 +495,6 @@ final class Admin
 
         // If the administrator role exists, add required capabilities for the plugin.
         if (!empty($role)) {
-
             // Role management capabilities.
             $role->add_cap('rps_edit_competition_classification');
             $role->add_cap('rps_edit_competitions');
@@ -873,7 +872,6 @@ final class Admin
 
         $goDelete = 0;
         foreach ($competitionIdsArray as $competitionID) {
-
             $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competitionID);
             $entries = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
@@ -1273,7 +1271,6 @@ final class Admin
 
         $goDelete = 0;
         foreach ($entryIdsArray as $entryID) {
-
             $entry = $query_entries->getEntryById($entryID);
             if ($entry !== null) {
                 $user = get_user_by('id', $entry->Member_ID);

@@ -441,7 +441,6 @@ class Frontend
     {
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
-
             $query_competitions = $this->app->make('QueryCompetitions');
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);

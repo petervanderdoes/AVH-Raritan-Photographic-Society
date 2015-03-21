@@ -1,13 +1,13 @@
 <?php
 namespace RpsCompetition\Frontend;
 
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class WpseoHelper
