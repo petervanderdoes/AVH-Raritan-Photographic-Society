@@ -82,7 +82,7 @@ class RequestUploadImageModel
     {
         $this->form = $form;
 
-        if (!$this->getMyEntriesSession()) {
+        if (!$this->hasMyEntriesSession()) {
             return false;
         }
 
@@ -221,7 +221,7 @@ class RequestUploadImageModel
      *
      * @return bool
      */
-    private function getMyEntriesSession()
+    private function hasMyEntriesSession()
     {
         $return = true;
         if ($this->session->has('myentries')) {
@@ -266,7 +266,6 @@ class RequestUploadImageModel
         // If the .jpg file is too big resize it
         $return = true;
         if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
-
             // Resize the image and deposit it in the destination directory
             $this->photo_helper->doResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
         } else {
