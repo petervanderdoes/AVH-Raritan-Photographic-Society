@@ -1315,7 +1315,8 @@ final class Admin
          */
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        /** @var PhotoHelper $photo_helper */
+        $photo_helper = $this->app->make('PhotoHelper');
 
         $updated = false;
 
@@ -1481,7 +1482,8 @@ final class Admin
     {
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        /** @var PhotoHelper $photo_helper */
+        $photo_helper = $this->app->make('PhotoHelper');
         $medium_array = Constants::getMediums();
         $classification_array = Constants::getClassifications();
         $return = false;

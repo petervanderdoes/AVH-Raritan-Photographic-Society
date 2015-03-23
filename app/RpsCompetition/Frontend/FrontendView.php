@@ -32,13 +32,14 @@ class FrontendView
      * @param Settings          $settings
      * @param RpsDb             $rpsdb
      * @param IlluminateRequest $request
+     * @param PhotoHelper       $photo_helper
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, IlluminateRequest $request)
+    public function __construct(Settings $settings, RpsDb $rpsdb, IlluminateRequest $request, PhotoHelper $photo_helper)
     {
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
         $this->request = $request;
-        $this->photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        $this->photo_helper = $photo_helper;
         $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
         if (WP_LOCAL_DEV !== true) {
             $this->twig = new Twig_Environment(
