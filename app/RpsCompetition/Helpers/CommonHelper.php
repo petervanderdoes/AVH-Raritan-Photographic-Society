@@ -2,7 +2,7 @@
 namespace RpsCompetition\Helpers;
 
 /**
- * Class Helper
+ * Class CommonHelper
  *
  * @package   RpsCompetition\Helpers
  * @author    Peter van der Does <peter@avirtualhome.com>

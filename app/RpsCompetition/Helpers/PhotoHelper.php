@@ -11,9 +11,9 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 
 /**
- * Class Helper
+ * Class PhotoHelper
  *
- * @package   RpsCompetition\Photo
+ * @package   RpsCompetition\Helpers
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
  */

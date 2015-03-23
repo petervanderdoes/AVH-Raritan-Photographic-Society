@@ -8,7 +8,7 @@ use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 
 /**
- * Class Helper
+ * Class SeasonHelper
  *
  * @package   RpsCompetition\Helpers
  * @author    Peter van der Does <peter@avirtualhome.com>
