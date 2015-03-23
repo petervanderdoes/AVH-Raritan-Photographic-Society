@@ -2,8 +2,8 @@
 
 namespace RpsCompetition\Frontend\Requests\ParseQuery;
 
-use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\SeasonHelper;
 
 /**

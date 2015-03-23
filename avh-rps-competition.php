@@ -12,7 +12,6 @@
  */
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Application;
-use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Frontend\Requests\RequestController;
@@ -24,6 +23,7 @@ use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
 use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
+use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\PhotoHelper;
 use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
