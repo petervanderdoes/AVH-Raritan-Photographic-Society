@@ -24,7 +24,7 @@ use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
 use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;

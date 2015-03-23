@@ -10,7 +10,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 

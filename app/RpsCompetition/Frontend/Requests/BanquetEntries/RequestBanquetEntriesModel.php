@@ -7,7 +7,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class RequestBanquetEntriesModel

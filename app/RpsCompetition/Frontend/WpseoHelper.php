@@ -7,7 +7,7 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class WpseoHelper

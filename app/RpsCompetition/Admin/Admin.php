@@ -13,7 +13,7 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use Valitron\Validator;
 
 /**

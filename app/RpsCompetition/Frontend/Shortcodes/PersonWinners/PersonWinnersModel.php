@@ -2,7 +2,7 @@
 namespace RpsCompetition\Frontend\Shortcodes\PersonWinners;
 
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class PersonWinnersModel

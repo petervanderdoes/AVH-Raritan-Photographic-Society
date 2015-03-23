@@ -7,7 +7,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
