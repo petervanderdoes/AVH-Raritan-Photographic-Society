@@ -3,9 +3,9 @@ namespace RpsCompetition\Season;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class Helper

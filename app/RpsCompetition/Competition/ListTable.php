@@ -2,12 +2,12 @@
 namespace RpsCompetition\Competition;
 
 use Avh\Html\HtmlBuilder;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class ListTable

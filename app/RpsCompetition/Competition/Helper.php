@@ -1,9 +1,9 @@
 <?php
 namespace RpsCompetition\Competition;
 
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class Helper

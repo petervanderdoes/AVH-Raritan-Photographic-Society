@@ -11,13 +11,13 @@ namespace RpsCompetition\Entity\Form;
  */
 class MyEntries
 {
-    protected $wp_nonce;
     protected $classification;
     protected $comp_date;
     protected $medium;
     protected $select_comp;
     protected $selected_medium;
     protected $submit_control;
+    protected $wp_nonce;
     private $selected_comp_choices = [];
     private $selected_medium_choices = [];
 

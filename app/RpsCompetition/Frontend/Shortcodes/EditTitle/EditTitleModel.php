@@ -2,12 +2,12 @@
 
 namespace RpsCompetition\Frontend\Shortcodes\EditTitle;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
 use RpsCompetition\Photo\Helper as PhotoHelper;
-use \Illuminate\Config\Repository as Settings;
 use Symfony\Component\Form\FormFactory;
 
 /**

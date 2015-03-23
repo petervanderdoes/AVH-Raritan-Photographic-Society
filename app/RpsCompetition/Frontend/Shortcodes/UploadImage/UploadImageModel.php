@@ -1,10 +1,10 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\UploadImage;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Form\Type\UploadImageType;
-use \Illuminate\Config\Repository as Settings;
 use Symfony\Component\Form\FormFactory;
 
 /**

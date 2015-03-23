@@ -2,6 +2,7 @@
 namespace RpsCompetition\Entries;
 
 use Avh\Html\HtmlBuilder;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
@@ -9,7 +10,6 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Season\Helper as SeasonHelper;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class ListTable
