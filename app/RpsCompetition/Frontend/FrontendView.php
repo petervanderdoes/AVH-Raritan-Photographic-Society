@@ -50,34 +50,13 @@ class FrontendView
     }
 
     /**
-     * Collect needed data to render the Category Winners
-     *
-     * @param array $data
-     *
-     * @see Shortcodes::shortcodeCategoryWinners
-     *
-     * @return string
-     */
-    public function renderCategoryWinners($data)
-    {
-        $data['images'] = [];
-        foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
-        }
-        $template = $this->twig->loadTemplate('category-winners.html.twig');
-        unset ($data['records']);
-
-        return $template->render($data);
-    }
-
-    /**
      * Display the Facebook thumbs for the Category Winners Page.
      *
      * @param array $entries
      *
      * @return string
      */
-    public function renderCategoryWinnersFacebookThumbs($entries)
+    public function renderFacebookThumbs($entries)
     {
         $images = [];
         foreach ($entries as $entry) {

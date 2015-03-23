@@ -272,7 +272,7 @@ class Frontend
                     $entries[] = $entry;
                 }
             }
-            $output = $this->view->renderCategoryWinnersFacebookThumbs($entries);
+            $output = $this->view->renderFacebookThumbs($entries);
 
             return $output;
         }
