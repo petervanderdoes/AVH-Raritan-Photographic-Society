@@ -180,7 +180,7 @@ return array(
     'RpsCompetition\\Helpers\\CommonHelper' => $baseDir . '/app/RpsCompetition/Helpers/CommonHelper.php',
     'RpsCompetition\\Helpers\\CompetitionHelper' => $baseDir . '/app/RpsCompetition/Helpers/CompetitionHelper.php',
     'RpsCompetition\\Helpers\\PhotoHelper' => $baseDir . '/app/RpsCompetition/Helpers/PhotoHelper.php',
+    'RpsCompetition\\Helpers\\SeasonHelper' => $baseDir . '/app/RpsCompetition/Helpers/SeasonHelper.php',
     'RpsCompetition\\Libs\\View' => $baseDir . '/app/RpsCompetition/Libs/View.php',
     'RpsCompetition\\Options\\General' => $baseDir . '/app/RpsCompetition/Options/General.php',
-    'RpsCompetition\\Season\\Helper' => $baseDir . '/app/RpsCompetition/Season/Helper.php',
 );
