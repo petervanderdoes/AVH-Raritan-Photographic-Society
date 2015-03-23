@@ -4,7 +4,7 @@ namespace RpsCompetition\Frontend\Requests\ParseQuery;
 
 use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 
 /**
  * Class ParseQueryHelper

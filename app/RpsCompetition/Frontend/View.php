@@ -8,7 +8,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Helpers\PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 

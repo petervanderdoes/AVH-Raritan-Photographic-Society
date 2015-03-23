@@ -5,7 +5,7 @@ use Avh\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Helpers\PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 
 /**
  * Class MonthlyWinnersModel

@@ -8,7 +8,7 @@ use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Form\AllScores as EntityFormAllScores;
 use RpsCompetition\Form\Type\AllScoresType;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**

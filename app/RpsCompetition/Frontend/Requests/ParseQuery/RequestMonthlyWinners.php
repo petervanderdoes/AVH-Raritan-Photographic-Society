@@ -7,7 +7,7 @@ use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 
 /**
  * Class RequestMonthlyWinners
