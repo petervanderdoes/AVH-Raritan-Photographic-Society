@@ -4,10 +4,10 @@ namespace RpsCompetition\Frontend\Requests\MyEntries;
 
 use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
+use RpsCompetition\Helpers\CommonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**

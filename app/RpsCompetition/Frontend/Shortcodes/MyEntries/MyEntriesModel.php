@@ -3,17 +3,17 @@ namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
 use Avh\Network\Session;
 use Carbon\Carbon;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
-use \Illuminate\Config\Repository as Settings;
+use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\CompetitionHelper;
+use RpsCompetition\Helpers\PhotoHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**

@@ -5,8 +5,8 @@ namespace RpsCompetition\Frontend\Shortcodes\MonthlyEntries;
 use Avh\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\PhotoHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 
 /**
  * Class MonthlyEntriesModel

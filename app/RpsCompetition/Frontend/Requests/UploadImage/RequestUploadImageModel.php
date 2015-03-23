@@ -5,12 +5,12 @@ namespace RpsCompetition\Frontend\Requests\UploadImage;
 use Avh\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 

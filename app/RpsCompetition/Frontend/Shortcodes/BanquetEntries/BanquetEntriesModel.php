@@ -9,7 +9,7 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
 use RpsCompetition\Form\Type\BanquetEntriesType;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**

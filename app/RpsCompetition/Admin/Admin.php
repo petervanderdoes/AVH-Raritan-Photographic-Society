@@ -6,14 +6,14 @@ use Avh\Html\HtmlBuilder;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\ListTable as CompetitionListTable;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use Valitron\Validator;
 
 /**

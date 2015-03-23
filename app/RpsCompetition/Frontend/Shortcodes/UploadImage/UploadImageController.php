@@ -1,8 +1,8 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\UploadImage;
 
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class UploadImageController

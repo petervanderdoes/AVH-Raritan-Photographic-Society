@@ -1,15 +1,14 @@
 <?php
-namespace RpsCompetition\Photo;
+namespace RpsCompetition\Helpers;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
-use \Illuminate\Config\Repository as Settings;
 
 /**
  * Class Helper
@@ -18,7 +17,7 @@ use \Illuminate\Config\Repository as Settings;
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class Helper
+class PhotoHelper
 {
     /** @var IlluminateRequest */
     private $request;
