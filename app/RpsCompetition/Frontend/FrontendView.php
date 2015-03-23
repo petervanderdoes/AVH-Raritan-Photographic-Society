@@ -1,14 +1,11 @@
 <?php
 namespace RpsCompetition\Frontend;
 
-use Avh\Html\FormBuilder;
-use Avh\Html\HtmlBuilder;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Helpers\PhotoHelper;
-use RpsCompetition\Helpers\SeasonHelper;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -21,16 +18,10 @@ use Twig_Loader_Filesystem;
  */
 class FrontendView
 {
-    /** @var FormBuilder */
-    private $form_builder;
-    /** @var HtmlBuilder */
-    private $html_builder;
     /** @var PhotoHelper */
     private $photo_helper;
     private $request;
     private $rpsdb;
-    /** @var SeasonHelper */
-    private $season_helper;
     private $settings;
     /** @var Twig_Environment */
     private $twig;
@@ -47,10 +38,7 @@ class FrontendView
         $this->settings = $settings;
         $this->rpsdb = $rpsdb;
         $this->request = $request;
-        $this->html_builder = new HtmlBuilder();
-        $this->form_builder = new FormBuilder($this->html_builder);
         $this->photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
-        $this->season_helper = new SeasonHelper($this->settings, $this->rpsdb);
         $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
         if (WP_LOCAL_DEV !== true) {
             $this->twig = new Twig_Environment(
