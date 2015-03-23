@@ -3,12 +3,12 @@ namespace RpsCompetition\Frontend;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Photo\Helper as PhotoHelper;
 use RpsCompetition\Season\Helper as SeasonHelper;
-use \Illuminate\Config\Repository as Settings;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 

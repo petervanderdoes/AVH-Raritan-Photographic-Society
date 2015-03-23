@@ -1,15 +1,15 @@
 <?php
 namespace RpsCompetition\Photo;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
-use \Illuminate\Config\Repository as Settings;
+use RpsCompetition\Helpers\CommonHelper;
 
 /**
  * Class Helper

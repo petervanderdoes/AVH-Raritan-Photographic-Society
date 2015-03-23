@@ -7,7 +7,7 @@ use Avh\Support\ProviderRepository;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
-use RpsCompetition\Common\Helper as CommonHelper;
+use RpsCompetition\Helpers\CommonHelper;
 
 /**
  * Class Application

@@ -2,11 +2,11 @@
 
 namespace RpsCompetition\Frontend\Requests\UploadImage;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Form\Type\UploadImageType;
-use \Illuminate\Config\Repository as Settings;
+use RpsCompetition\Helpers\CommonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**

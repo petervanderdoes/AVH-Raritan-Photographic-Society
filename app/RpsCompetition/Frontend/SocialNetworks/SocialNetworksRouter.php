@@ -1,8 +1,8 @@
 <?php
 namespace RpsCompetition\Frontend\SocialNetworks;
 
-use RpsCompetition\Common\Helper as CommonHelper;
-use \Illuminate\Config\Repository as Settings;
+use Illuminate\Config\Repository as Settings;
+use RpsCompetition\Helpers\CommonHelper;
 
 /**
  * Class SocialNetworksRouter

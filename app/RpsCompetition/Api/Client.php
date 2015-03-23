@@ -4,8 +4,8 @@ namespace RpsCompetition\Api;
 use DOMDocument;
 use Illuminate\Http\Request;
 use PDO;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsPdo;
+use RpsCompetition\Helpers\CommonHelper;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
@@ -241,7 +241,6 @@ class Client
         try {
             $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
             $stmt = $db->prepare($sql);
-
         } catch (\PDOException $e) {
             $this->doRESTError('Error - ' . $e->getMessage() . ' - ' . $sql);
             die();
