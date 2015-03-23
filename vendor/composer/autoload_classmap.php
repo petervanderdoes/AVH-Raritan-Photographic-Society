@@ -179,8 +179,8 @@ return array(
     'RpsCompetition\\Frontend\\View' => $baseDir . '/app/RpsCompetition/Frontend/View.php',
     'RpsCompetition\\Frontend\\WpseoHelper' => $baseDir . '/app/RpsCompetition/Frontend/WpseoHelper.php',
     'RpsCompetition\\Helpers\\CommonHelper' => $baseDir . '/app/RpsCompetition/Helpers/CommonHelper.php',
+    'RpsCompetition\\Helpers\\PhotoHelper' => $baseDir . '/app/RpsCompetition/Helpers/PhotoHelper.php',
     'RpsCompetition\\Libs\\View' => $baseDir . '/app/RpsCompetition/Libs/View.php',
     'RpsCompetition\\Options\\General' => $baseDir . '/app/RpsCompetition/Options/General.php',
-    'RpsCompetition\\Photo\\Helper' => $baseDir . '/app/RpsCompetition/Photo/Helper.php',
     'RpsCompetition\\Season\\Helper' => $baseDir . '/app/RpsCompetition/Season/Helper.php',
 );
