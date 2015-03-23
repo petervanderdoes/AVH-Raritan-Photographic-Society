@@ -14,6 +14,7 @@ use RpsCompetition\Admin\Admin;
 use RpsCompetition\Application;
 use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
+use RpsCompetition\Frontend\FrontendView;
 use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
@@ -21,7 +22,6 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
-use RpsCompetition\Frontend\FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\PhotoHelper;
@@ -177,15 +177,31 @@ class AVH_RPS_Client
         $this->app->bind(
             'FrontendView',
             function (Application $app) {
-                return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
+                return new FrontendView(
+                    $app->make('Settings'),
+                    $app->make('RpsDb'),
+                    $app->make('IlluminateRequest'),
+                    $app->make('PhotoHelper')
+                );
             }
         )
         ;
 
+        if (class_exists('Imagick')) {
+            $this->app->bind('\Imagine\Image\ImagineInterface', '\Imagine\Imagick\Imagine');
+        } else {
+            $this->app->bind('\Imagine\Image\ImagineInterface', '\Imagine\Gd\Imagine');
+        }
+
         $this->app->bind(
             'PhotoHelper',
             function (Application $app) {
-                return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+                return new PhotoHelper(
+                    $app->make('Settings'),
+                    $app->make('IlluminateRequest'),
+                    $app->make('RpsDb'),
+                    $app->make('\Imagine\Image\ImagineInterface')
+                );
             }
         )
         ;

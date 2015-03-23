@@ -3,8 +3,8 @@ namespace RpsCompetition\Helpers;
 
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
-use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
+use Imagine\Image\ImagineInterface;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
@@ -19,11 +19,9 @@ use RpsCompetition\Db\RpsDb;
  */
 class PhotoHelper
 {
-    /** @var IlluminateRequest */
+    private $imagine;
     private $request;
-    /** @var RpsDb */
     private $rpsdb;
-    /** @var Settings */
     private $settings;
 
     /**
@@ -32,12 +30,14 @@ class PhotoHelper
      * @param Settings          $settings
      * @param IlluminateRequest $request
      * @param RpsDb             $rpsdb
+     * @param ImagineInterface  $imagine
      */
-    public function __construct(Settings $settings, IlluminateRequest $request, RpsDb $rpsdb)
+    public function __construct(Settings $settings, IlluminateRequest $request, RpsDb $rpsdb, ImagineInterface $imagine)
     {
         $this->settings = $settings;
         $this->request = $request;
         $this->rpsdb = $rpsdb;
+        $this->imagine = $imagine;
     }
 
     /**
@@ -206,8 +206,7 @@ class PhotoHelper
             return true;
         }
 
-        $imagine = new Imagine();
-        $image = $imagine->open($image_name);
+        $image = $this->imagine->open($image_name);
 
         $new_size = Constants::getImageSize($size);
 
@@ -217,10 +216,11 @@ class PhotoHelper
             ;
             $image->resize($box);
         } else {
+            /** @var \Imagine\Image\BoxInterface $box */
             $box = new Box($new_size['width'], $new_size['height']);
             $image->keepAspectRatio()
                   ->resize($box)
-            ;;
+            ;
         }
         $image->save($thumb_path . '/' . $thumb_name, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
 
