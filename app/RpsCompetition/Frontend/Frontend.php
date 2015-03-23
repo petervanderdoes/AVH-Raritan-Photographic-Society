@@ -516,7 +516,6 @@ class Frontend
         add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
         add_action('init', [$this, 'actionInit'], 11);
 
-        add_action('template_redirect', [$this, 'actionTemplateRedirectRpsWindowsClient']);
         add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
 
         add_filter('query_vars', [$this, 'filterQueryVars']);
