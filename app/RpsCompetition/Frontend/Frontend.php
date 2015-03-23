@@ -27,7 +27,7 @@ class Frontend
     private $session;
     /** @var Settings */
     private $settings;
-    /** @var \Rpscompetition\Frontend\View */
+    /** @var \Rpscompetition\Frontend\FrontendView */
     private $view;
 
     /**

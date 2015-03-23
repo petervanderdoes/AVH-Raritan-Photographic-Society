@@ -13,7 +13,7 @@ use Twig_Environment;
 use Twig_Loader_Filesystem;
 
 /**
- * Class View
+ * Class FrontendView
  *
  * @package   RpsCompetition\Frontend
  * @author    Peter van der Does <peter@avirtualhome.com>
