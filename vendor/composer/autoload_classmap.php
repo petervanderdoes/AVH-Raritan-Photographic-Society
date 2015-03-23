@@ -105,6 +105,7 @@ return array(
     'RpsCompetition\\Db\\QueryMiscellaneous' => $baseDir . '/app/RpsCompetition/Db/QueryMiscellaneous.php',
     'RpsCompetition\\Db\\RpsDb' => $baseDir . '/app/RpsCompetition/Db/RpsDb.php',
     'RpsCompetition\\Db\\RpsPdo' => $baseDir . '/app/RpsCompetition/Db/RpsPdo.php',
+    'RpsCompetition\\Definitions\\ViewAbstract' => $baseDir . '/app/RpsCompetition/Definitions/ViewAbstract.php',
     'RpsCompetition\\Entity\\Form\\AllScores' => $baseDir . '/app/RpsCompetition/Entity/Form/AllScores.php',
     'RpsCompetition\\Entity\\Form\\BanquetEntries' => $baseDir . '/app/RpsCompetition/Entity/Form/BanquetEntries.php',
     'RpsCompetition\\Entity\\Form\\EditTitle' => $baseDir . '/app/RpsCompetition/Entity/Form/EditTitle.php',
@@ -181,6 +182,5 @@ return array(
     'RpsCompetition\\Helpers\\CompetitionHelper' => $baseDir . '/app/RpsCompetition/Helpers/CompetitionHelper.php',
     'RpsCompetition\\Helpers\\PhotoHelper' => $baseDir . '/app/RpsCompetition/Helpers/PhotoHelper.php',
     'RpsCompetition\\Helpers\\SeasonHelper' => $baseDir . '/app/RpsCompetition/Helpers/SeasonHelper.php',
-    'RpsCompetition\\Libs\\View' => $baseDir . '/app/RpsCompetition/Libs/View.php',
     'RpsCompetition\\Options\\General' => $baseDir . '/app/RpsCompetition/Options/General.php',
 );

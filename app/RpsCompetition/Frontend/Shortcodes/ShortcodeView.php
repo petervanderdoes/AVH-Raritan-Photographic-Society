@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes;
 
-use RpsCompetition\Libs\View;
+use RpsCompetition\Definitions\ViewAbstract;
 
 /**
  * Class ShortcodeView
@@ -10,7 +10,7 @@ use RpsCompetition\Libs\View;
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
  */
-final class ShortcodeView extends View
+final class ShortcodeView extends ViewAbstract
 {
     /**
      * Contructor

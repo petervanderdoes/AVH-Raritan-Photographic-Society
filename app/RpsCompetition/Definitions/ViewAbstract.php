@@ -1,18 +1,18 @@
 <?php
-namespace RpsCompetition\Libs;
+namespace RpsCompetition\Definitions;
 
 use Symfony\Bridge\Twig\Extension\FormExtension;
 use Symfony\Bridge\Twig\Form\TwigRenderer;
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 
 /**
- * Class View
+ * Class ViewAbstract
  *
  * @package   RpsCompetition\Libs
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class View
+class ViewAbstract
 {
     /**
      * @var array The options for the Twig environment, see http://www.twig-project.org/book/03-Twig-for-Developers
