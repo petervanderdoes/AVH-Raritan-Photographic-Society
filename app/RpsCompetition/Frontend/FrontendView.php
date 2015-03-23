@@ -19,7 +19,7 @@ use Twig_Loader_Filesystem;
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class View
+class FrontendView
 {
     /** @var FormBuilder */
     private $form_builder;

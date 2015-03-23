@@ -21,7 +21,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
-use RpsCompetition\Frontend\View as FrontendView;
+use RpsCompetition\Frontend\FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\PhotoHelper;
