@@ -1,18 +1,18 @@
 <?php
-namespace RpsCompetition\Competition;
+namespace RpsCompetition\Helpers;
 
 use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
 
 /**
- * Class Helper
+ * Class CompetitionHelper
  *
- * @package   RpsCompetition\Competition
+ * @package   RpsCompetition\Helpers
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class Helper
+class CompetitionHelper
 {
     private $rpsdb;
     private $settings;

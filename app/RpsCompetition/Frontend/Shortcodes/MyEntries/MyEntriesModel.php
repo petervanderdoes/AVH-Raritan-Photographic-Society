@@ -5,7 +5,7 @@ use Avh\Network\Session;
 use Carbon\Carbon;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
+use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;

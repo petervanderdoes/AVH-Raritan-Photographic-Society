@@ -12,7 +12,7 @@
  */
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Application;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
+use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Frontend\Requests\RequestController;

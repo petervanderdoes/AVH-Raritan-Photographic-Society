@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Requests\ParseQuery;
 
-use RpsCompetition\Competition\Helper as CompetitionHelper;
+use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Season\Helper as SeasonHelper;
 
