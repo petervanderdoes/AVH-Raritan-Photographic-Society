@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.9-rc.1
+#### Version 2.0.9
 * Make use of ImageMagick for better quality and less memory usage.
 
 #### Version 2.0.7
