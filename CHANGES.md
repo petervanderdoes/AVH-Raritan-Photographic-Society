@@ -1,10 +1,7 @@
 ## Changelog
 
 #### Version 2.0.9-rc.1
-* Preparation for new development cycle.
-
-#### Version 2.0.8
-* Preparation for new development cycle.
+* Make use of ImageMagick for better quality and less memory usage.
 
 #### Version 2.0.7
 * Fix Banquet Entries
