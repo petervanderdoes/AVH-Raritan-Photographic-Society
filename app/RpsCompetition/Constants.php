@@ -33,7 +33,7 @@ final class Constants
     /**
      * General Constants
      */
-    const PLUGIN_VERSION = '2.0.9-dev.53';
+    const PLUGIN_VERSION = '2.0.9';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
     // @formatter:off
     private static $image_sizes = [
