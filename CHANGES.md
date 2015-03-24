@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.10-dev.1
+* Preparation for new development cycle.
+
 #### Version 2.0.9
 * Make use of ImageMagick for better quality and less memory usage.
 
