@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\MyEntries as MyEntriesEntity;
+use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -11,21 +11,21 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class MyEntriesType
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Form\Type
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class MyEntriesType extends AbstractType
 {
-    /** @var MyEntriesEntity */
+    /** @var EntityFormMyEntries */
     private $entity;
 
     /**
      * Constructor
      *
-     * @param MyEntriesEntity $entity
+     * @param EntityFormMyEntries $entity
      */
-    public function __construct(MyEntriesEntity $entity)
+    public function __construct(EntityFormMyEntries $entity)
     {
         $this->entity = $entity;
     }
@@ -76,7 +76,7 @@ class MyEntriesType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\MyEntries',
+                'data_class' => 'RpsCompetition\Entity\Form\MyEntries',
             ]
         )
         ;

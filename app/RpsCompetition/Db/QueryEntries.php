@@ -1,14 +1,12 @@
 <?php
 namespace RpsCompetition\Db;
 
-if (!class_exists('AVH_RPS_Client')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
-}
-
 /**
  * Class QueryEntries
+ *
+ * @package   RpsCompetition\Db
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  *
  * @property integer ID
  * @property integer Competition_ID
@@ -20,10 +18,6 @@ if (!class_exists('AVH_RPS_Client')) {
  * @property string  Date_Modified
  * @property float   Score
  * @property string  Award
- *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Db
  */
 class QueryEntries
 {

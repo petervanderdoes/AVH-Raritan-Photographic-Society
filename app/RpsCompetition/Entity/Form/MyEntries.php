@@ -1,23 +1,23 @@
 <?php
 
-namespace RpsCompetition\Entity\Forms;
+namespace RpsCompetition\Entity\Form;
 
 /**
  * Class MyEntries
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Entity\Forms
+ * @package   RpsCompetition\Entity\Form
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class MyEntries
 {
-    protected $_wpnonce;
     protected $classification;
     protected $comp_date;
     protected $medium;
     protected $select_comp;
     protected $selected_medium;
     protected $submit_control;
+    protected $wp_nonce;
     private $selected_comp_choices = [];
     private $selected_medium_choices = [];
 
@@ -122,7 +122,7 @@ class MyEntries
      */
     public function getWpnonce()
     {
-        return $this->_wpnonce;
+        return $this->wp_nonce;
     }
 
     /**
@@ -130,6 +130,6 @@ class MyEntries
      */
     public function setWpnonce($wpnonce)
     {
-        $this->_wpnonce = $wpnonce;
+        $this->wp_nonce = $wpnonce;
     }
 }

@@ -4,21 +4,22 @@ namespace RpsCompetition\Frontend\Requests\ParseQuery;
 
 use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\CompetitionHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 
 /**
  * Class RequestMonthlyWinners
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Requests\ParseQuery
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class RequestMonthlyWinners
 {
     private $competition_helper;
+    private $pq_helper;
     private $query_competitions;
     private $request;
     private $season_helper;
@@ -27,6 +28,7 @@ class RequestMonthlyWinners
     /**
      * Constructor
      *
+     * @param ParseQueryHelper  $pq_helper
      * @param QueryCompetitions $query_competitions
      * @param SeasonHelper      $season_helper
      * @param CompetitionHelper $competition_helper
@@ -34,6 +36,7 @@ class RequestMonthlyWinners
      * @param Session           $session
      */
     public function __construct(
+        ParseQueryHelper $pq_helper,
         QueryCompetitions $query_competitions,
         SeasonHelper $season_helper,
         CompetitionHelper $competition_helper,
@@ -46,6 +49,7 @@ class RequestMonthlyWinners
         $this->competition_helper = $competition_helper;
         $this->request = $request;
         $this->session = $session;
+        $this->pq_helper = $pq_helper;
     }
 
     /**
@@ -63,12 +67,12 @@ class RequestMonthlyWinners
          */
         switch ($this->request->input('submit_control', null)) {
             case 'new_season':
-                $selected_season = esc_attr($this->request->input('new_season'));
-                $selected_date = '';
+                $this->pq_helper->setSelectedSeason(esc_attr($this->request->input('new_season')));
+                $this->pq_helper->setSelectedDate('');
                 break;
             case 'new_month':
-                $selected_date = esc_attr($this->request->input('new_month'));
-                $selected_season = esc_attr($this->request->input('selected_season'));
+                $this->pq_helper->setSelectedSeason(esc_attr($this->request->input('selected_season')));
+                $this->pq_helper->setSelectedDate(esc_attr($this->request->input('new_month')));
                 break;
             default:
                 if ($query_var_selected_date === false || (!CommonHelper::isValidDate(
@@ -86,43 +90,31 @@ class RequestMonthlyWinners
                     )
                     ;
                     $date_object = new \DateTime($last_scored->Competition_Date);
-                    $selected_date = $date_object->format(('Y-m-d'));
+                    $this->pq_helper->setSelectedDate($date_object->format(('Y-m-d')));
                     $redirect = true;
                 } else {
-                    $selected_date = $query_var_selected_date;
+                    $this->pq_helper->setSelectedDate($query_var_selected_date);
                 }
-                $selected_season = $this->season_helper->getSeasonId($selected_date);
+                $this->pq_helper->setSelectedSeason(
+                    $this->season_helper->getSeasonId($this->pq_helper->getSelectedDate())
+                )
+                ;
                 break;
         }
 
-        if (!$this->season_helper->isValidSeason($selected_season)) {
-            $selected_season = $this->season_helper->getSeasonId(date('r'));
-            $competitions = $this->query_competitions->getCompetitionBySeasonId($selected_season, ['Scored' => 'Y']);
-            /** @var QueryCompetitions $competition */
-            $competition = end($competitions);
-            $date_object = new \DateTime($competition->Competition_Date);
-            $selected_date = $date_object->format(('Y-m-d'));
-        }
+        $this->pq_helper->checkValidSeason();
+        $this->pq_helper->checkScoredCompetition();
 
-        if (!$this->competition_helper->isScoredCompetitionDate($selected_date)) {
-            $competitions = $this->query_competitions->getCompetitionBySeasonId($selected_season, ['Scored' => 'Y']);
-            /** @var QueryCompetitions $competition */
-            $competition = end($competitions);
-            $date_object = new \DateTime($competition->Competition_Date);
-            $selected_date = $date_object->format(('Y-m-d'));
-        }
-
-        if ($selected_date != $query_var_selected_date) {
+        if ($this->pq_helper->getSelectedDate() != $query_var_selected_date) {
             $redirect = true;
         }
 
         if ($redirect) {
-            wp_redirect('/events/monthly-winners/' . $selected_date . '/', $status);
+            wp_redirect('/events/monthly-winners/' . $this->pq_helper->getSelectedDate() . '/', $status);
             exit();
         }
 
-        $this->session->set('monthly_winners_selected_date', $selected_date);
-        $this->session->set('monthly_winners_selected_season', $selected_season);
-        $this->session->save();
+        $this->session->set('monthly_winners_selected_date', $this->pq_helper->getSelectedDate());
+        $this->session->set('monthly_winners_selected_season', $this->pq_helper->getSelectedSeason());
     }
 }

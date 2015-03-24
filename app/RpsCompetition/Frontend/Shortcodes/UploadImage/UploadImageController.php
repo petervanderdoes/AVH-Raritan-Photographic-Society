@@ -1,15 +1,15 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\UploadImage;
 
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
-use RpsCompetition\Settings;
 
 /**
  * Class UploadImageController
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\UploadImage
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class UploadImageController
 {

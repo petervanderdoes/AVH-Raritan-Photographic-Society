@@ -1,24 +1,18 @@
 <?php
-namespace RpsCompetition\Competition;
+namespace RpsCompetition\Helpers;
 
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
-use RpsCompetition\Settings;
-
-if (!class_exists('AVH_RPS_Client')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
-}
 
 /**
- * Class Helper
+ * Class CompetitionHelper
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Competition
+ * @package   RpsCompetition\Helpers
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class Helper
+class CompetitionHelper
 {
     private $rpsdb;
     private $settings;

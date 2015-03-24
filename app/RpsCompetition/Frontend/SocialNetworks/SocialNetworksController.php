@@ -3,25 +3,18 @@ namespace RpsCompetition\Frontend\SocialNetworks;
 
 use RpsCompetition\Application;
 
-if (!class_exists('AVH_RPS_Client')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
-}
-
 /**
  * Class SocialNetworksController
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\SocialNetworks
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class SocialNetworksController
 {
     /** @var SocialNetworksModel */
     protected $model;
-    private $container;
-    private $options;
+    private $app;
     private $settings;
     /** @var  SocialNetworksView */
     private $view;
@@ -29,16 +22,15 @@ class SocialNetworksController
     /**
      * Constructor
      *
-     * @param Application $container
+     * @param Application $app
      */
-    public function __construct(Application $container)
+    public function __construct(Application $app)
     {
-        $this->container = $container;
-        $this->settings = $this->container->make('Settings');
-        $this->options = $this->container->make('OptionsGeneral');
+        $this->app = $app;
+        $this->settings = $this->app->make('Settings');
 
-        $this->model = $this->container->make('SocialNetworksModel');
-        $this->view = $this->container->make('SocialNetworksView');
+        $this->model = $this->app->make('SocialNetworksModel');
+        $this->view = $this->app->make('SocialNetworksView');
     }
 
     /**

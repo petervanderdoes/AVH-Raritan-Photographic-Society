@@ -2,19 +2,19 @@
 
 namespace RpsCompetition\Frontend\Requests\MyEntries;
 
-
+use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Settings;
+use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class RequestMyEntriesModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Requests\MyEntries
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class RequestMyEntriesModel {
+class RequestMyEntriesModel
+{
     private $photo_helper;
     private $query_entries;
     private $settings;
@@ -26,7 +26,8 @@ class RequestMyEntriesModel {
      * @param PhotoHelper  $photo_helper
      * @param Settings     $settings
      */
-    public function __construct(QueryEntries $query_entries, PhotoHelper $photo_helper, Settings $settings) {
+    public function __construct(QueryEntries $query_entries, PhotoHelper $photo_helper, Settings $settings)
+    {
 
         $this->query_entries = $query_entries;
         $this->photo_helper = $photo_helper;
@@ -42,7 +43,6 @@ class RequestMyEntriesModel {
     {
         if (is_array($entries)) {
             foreach ($entries as $id) {
-
                 $entry_record = $this->query_entries->getEntryById($id);
                 if ($entry_record == false) {
                     $this->settings->set(

@@ -2,19 +2,19 @@
 
 namespace RpsCompetition\Frontend\Requests\EditTitle;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Common\Helper as CommonHelper;
-use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
+use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Settings;
+use RpsCompetition\Helpers\CommonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
  * Class RequestEditTitle
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Requests\EditTitle
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class RequestEditTitle
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace RpsCompetition\Entity\Forms;
+namespace RpsCompetition\Entity\Form;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -9,9 +9,9 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 /**
  * Class UploadImage
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Entity\Forms
+ * @package   RpsCompetition\Entity\Form
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class UploadImage
 {

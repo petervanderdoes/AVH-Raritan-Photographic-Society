@@ -4,15 +4,15 @@ namespace RpsCompetition\Frontend\Shortcodes\MonthlyWinners;
 use Avh\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\PhotoHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 
 /**
  * Class MonthlyWinnersModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\MonthlyWinners
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class MonthlyWinnersModel
 {

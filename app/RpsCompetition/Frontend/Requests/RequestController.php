@@ -2,20 +2,23 @@
 
 namespace RpsCompetition\Frontend\Requests;
 
+use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Application;
 
 /**
  * Class RequestController
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Requests
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class RequestController
 {
     private $app;
     /** @var array */
     private $options;
+    /** @var IlluminateRequest */
+    private $request;
 
     /**
      * Constructor
@@ -26,6 +29,7 @@ class RequestController
     {
         $this->app = $app;
         $this->options = get_option('avh-rps');
+        $this->request = $app->make('IlluminateRequest');
     }
 
     /**
@@ -49,6 +53,14 @@ class RequestController
                 $request = $this->app->make('RequestMonthlyWinners');
                 $request->handleRequestMonthlyWinners();
             }
+        }
+    }
+
+    public function handleTemplateRedirect()
+    {
+        if ($this->request->has('rpswinclient')) {
+            $request = $this->app->make('RequestRpsClient');
+            $request->handleRpsClient();
         }
     }
 

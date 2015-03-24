@@ -11,7 +11,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class UploadImageType
  *
- * @package RpsCompetition\Form\Type
+ * @package   RpsCompetition\Form\Type
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class UploadImageType extends AbstractType
 {
@@ -94,7 +96,7 @@ class UploadImageType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\UploadImage',
+                'data_class' => 'RpsCompetition\Entity\Form\UploadImage',
             ]
         )
         ;

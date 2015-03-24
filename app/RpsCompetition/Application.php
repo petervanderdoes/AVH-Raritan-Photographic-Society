@@ -2,20 +2,21 @@
 
 namespace RpsCompetition;
 
-use Avh\Contracts\Foundation\Application as ApplicationContract;
+use Avh\Contracts\Foundation\ApplicationInterface;
 use Avh\Support\ProviderRepository;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
+use RpsCompetition\Helpers\CommonHelper;
 
 /**
  * Class Application
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class Application extends Container implements ApplicationContract
+class Application extends Container implements ApplicationInterface
 {
     /**
      * The Plugin Version
@@ -110,6 +111,7 @@ class Application extends Container implements ApplicationContract
             '\RpsCompetition\Frontend\Shortcodes\PersonWinners\PersonWinnersServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser\ScoresCurrentUserServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\UploadImage\UploadImageServiceProvider',
+            '\RpsCompetition\Db\DbServiceProvider',
         ];
         $this->registerCoreContainerAliases();
         $this->registerConfiguredProviders();
@@ -252,7 +254,9 @@ class Application extends Container implements ApplicationContract
     public function registerConfiguredProviders()
     {
         $upload_dir_info = wp_upload_dir();
-        $manifestPath = $upload_dir_info['basedir'] . '/avh-rps/framework/services.json';
+        $manifestPath_directory = $upload_dir_info['basedir'] . '/avh-rps/framework';
+        CommonHelper::createDirectory($manifestPath_directory);
+        $manifestPath = $manifestPath_directory . '/services.json';
 
         (new ProviderRepository($this, new Filesystem(), $manifestPath))->load($this->config['app.providers']);
     }

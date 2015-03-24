@@ -2,20 +2,20 @@
 
 namespace RpsCompetition\Frontend\Shortcodes\EditTitle;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\EditTitle as EntityFormEditTitle;
+use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Settings;
+use RpsCompetition\Helpers\PhotoHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
  * Class EditTitleModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\EditTitle
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class EditTitleModel
 {

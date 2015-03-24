@@ -3,46 +3,35 @@ namespace RpsCompetition\Admin;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
-use RpsCompetition\Common\Core;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Competition\ListTable as CompetitionListTable;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
-use RpsCompetition\Options\General as OptionsGeneral;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Settings;
+use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use Valitron\Validator;
-
-if (!class_exists('AVH_RPS_Client')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
-}
 
 /**
  * Class Admin
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Admin
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 final class Admin
 {
+    private $app;
     /* @var $formBuilder FormBuilder */
 
     private $competition_list;
-    private $container;
-    private $core;
     private $entries_list;
     private $hooks = [];
     private $message = '';
-    /** @var OptionsGeneral */
-    private $options;
     private $referer;
     /** @var Request */
     private $request;
@@ -55,17 +44,15 @@ final class Admin
     /**
      * Constructor
      *
-     * @param Application $container
+     * @param Application $app
      */
-    public function __construct(Application $container)
+    public function __construct(Application $app)
     {
-        $this->container = $container;
+        $this->app = $app;
 
-        $this->settings = $container->make('Settings');
-        $this->rpsdb = $container->make('RpsDb');
-        $this->request = $container->make('IlluminateRequest');
-        $this->options = $container->make('OptionsGeneral');
-        $this->core = new Core($this->settings);
+        $this->settings = $app->make('Settings');
+        $this->rpsdb = $app->make('RpsDb');
+        $this->request = $app->make('IlluminateRequest');
 
         // Admin menu
         add_action('admin_menu', [$this, 'actionAdminMenu']);
@@ -508,7 +495,6 @@ final class Admin
 
         // If the administrator role exists, add required capabilities for the plugin.
         if (!empty($role)) {
-
             // Role management capabilities.
             $role->add_cap('rps_edit_competition_classification');
             $role->add_cap('rps_edit_competitions');
@@ -886,7 +872,6 @@ final class Admin
 
         $goDelete = 0;
         foreach ($competitionIdsArray as $competitionID) {
-
             $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competitionID);
             $entries = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
             $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
@@ -1286,7 +1271,6 @@ final class Admin
 
         $goDelete = 0;
         foreach ($entryIdsArray as $entryID) {
-
             $entry = $query_entries->getEntryById($entryID);
             if ($entry !== null) {
                 $user = get_user_by('id', $entry->Member_ID);
@@ -1331,7 +1315,8 @@ final class Admin
          */
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        /** @var PhotoHelper $photo_helper */
+        $photo_helper = $this->app->make('PhotoHelper');
 
         $updated = false;
 
@@ -1497,7 +1482,8 @@ final class Admin
     {
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $photo_helper = new PhotoHelper($this->settings, $this->request, $this->rpsdb);
+        /** @var PhotoHelper $photo_helper */
+        $photo_helper = $this->app->make('PhotoHelper');
         $medium_array = Constants::getMediums();
         $classification_array = Constants::getClassifications();
         $return = false;

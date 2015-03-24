@@ -5,16 +5,16 @@ namespace RpsCompetition\Frontend\Requests\BanquetEntries;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\BanquetEntries as EntityBanquetEntries;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Common\Helper as CommonHelper;
+use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
+use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class RequestBanquetEntriesModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Requests\BanquetEntries
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class RequestBanquetEntriesModel
 {
@@ -28,7 +28,7 @@ class RequestBanquetEntriesModel
     private $request;
 
     /**
-     * @param EntityBanquetEntries $entity
+     * @param EntityFormBanquetEntries $entity
      * @param IlluminateRequest        $request
      * @param QueryEntries             $query_entries
      * @param QueryCompetitions        $query_competitions
@@ -36,7 +36,7 @@ class RequestBanquetEntriesModel
      *
      */
     public function __construct(
-        EntityBanquetEntries $entity,
+        EntityFormBanquetEntries $entity,
         IlluminateRequest $request,
         QueryEntries $query_entries,
         QueryCompetitions $query_competitions,
@@ -78,8 +78,8 @@ class RequestBanquetEntriesModel
                     // Need to create the destination folder?
                     copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
                     $data = [
-                        'Competition_ID' => $banquet_record->ID,
-                        'Title' => $entry->Title,
+                        'Competition_ID'   => $banquet_record->ID,
+                        'Title'            => $entry->Title,
                         'Client_File_Name' => $entry->Client_File_Name,
                         'Server_File_Name' => $new_file_name
                     ];

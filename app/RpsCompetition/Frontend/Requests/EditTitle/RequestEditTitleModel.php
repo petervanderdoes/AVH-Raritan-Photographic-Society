@@ -5,15 +5,15 @@ namespace RpsCompetition\Frontend\Requests\EditTitle;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Entity\Forms\EditTitle as EntityEditTitle;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
+use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class RequestEditTitleModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Requests\EditTitle
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class RequestEditTitleModel
 {
@@ -24,14 +24,14 @@ class RequestEditTitleModel
     private $request;
 
     /**
-     * @param EntityEditTitle   $entity
-     * @param QueryCompetitions $query_competitions
-     * @param QueryEntries      $query_entries
-     * @param PhotoHelper       $photo_helper
-     * @param IlluminateRequest $request
+     * @param EntityFormEditTitle $entity
+     * @param QueryCompetitions   $query_competitions
+     * @param QueryEntries        $query_entries
+     * @param PhotoHelper         $photo_helper
+     * @param IlluminateRequest   $request
      */
     public function __construct(
-        EntityEditTitle $entity,
+        EntityFormEditTitle $entity,
         QueryCompetitions $query_competitions,
         QueryEntries $query_entries,
         PhotoHelper $photo_helper,
@@ -76,7 +76,6 @@ class RequestEditTitleModel
         $new_file_name = $new_file_name_noext . '.' . $ext;
         if (!$this->photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
             die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
-            exit();
         }
 
         // Update the Title and File Name in the database

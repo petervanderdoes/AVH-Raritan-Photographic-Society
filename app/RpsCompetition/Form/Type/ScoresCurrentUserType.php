@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Form\Type;
 
-use RpsCompetition\Entity\Forms\ScoresCurrentUser as ScoresCurrentUserEntity;
+use RpsCompetition\Entity\Form\ScoresCurrentUser as EntityFormScoresCurrentUser;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -9,19 +9,19 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 /**
  * Class ScoresCurrentUserType
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Form\Type
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class ScoresCurrentUserType extends AbstractType
 {
-    /** @var ScoresCurrentUserEntity */
+    /** @var EntityFormScoresCurrentUser */
     private $entity;
 
     /**
-     * @param ScoresCurrentUserEntity $entity
+     * @param EntityFormScoresCurrentUser $entity
      */
-    public function __construct(ScoresCurrentUserEntity $entity)
+    public function __construct(EntityFormScoresCurrentUser $entity)
     {
         $this->entity = $entity;
     }
@@ -59,7 +59,7 @@ class ScoresCurrentUserType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'RpsCompetition\Entity\Forms\ScoresCurrentUser',
+                'data_class' => 'RpsCompetition\Entity\Form\ScoresCurrentUser',
             ]
         )
         ;

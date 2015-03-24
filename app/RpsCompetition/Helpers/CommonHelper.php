@@ -1,20 +1,14 @@
 <?php
-namespace RpsCompetition\Common;
-
-if (!class_exists('AVH_RPS_Client')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
-}
+namespace RpsCompetition\Helpers;
 
 /**
- * Class Helper
+ * Class CommonHelper
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Common
+ * @package   RpsCompetition\Helpers
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
-class Helper
+class CommonHelper
 {
     /**
      * Sort an array on multiple columns
@@ -29,7 +23,8 @@ class Helper
         $row_is_object = false;
         $sort_column_array = [];
 
-        // Create multiple arrays using the array $cols. These arrays hold the values of each field that we want to sort on.
+        // Create multiple arrays using the array $cols.
+        // These arrays hold the values of each field that we want to sort on.
         foreach ($cols as $col => $order) {
             $sort_column_array[$col] = [];
             foreach ($array as $key => $row) {

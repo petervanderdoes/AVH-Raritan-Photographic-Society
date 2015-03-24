@@ -6,6 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Twig' => array($baseDir . '/'),
     'Imagine' => array($vendorDir . '/imagine/imagine/lib'),
 );

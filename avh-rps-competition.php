@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.8
+ * Version: 2.0.9
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -12,13 +12,9 @@
  */
 use RpsCompetition\Admin\Admin;
 use RpsCompetition\Application;
-use RpsCompetition\Common\Core;
-use RpsCompetition\Competition\Helper as CompetitionHelper;
 use RpsCompetition\Constants;
-use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Frontend;
+use RpsCompetition\Frontend\FrontendView;
 use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
@@ -26,11 +22,10 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
-use RpsCompetition\Frontend\View as FrontendView;
 use RpsCompetition\Frontend\WpseoHelper;
-use RpsCompetition\Photo\Helper as PhotoHelper;
-use RpsCompetition\Season\Helper as SeasonHelper;
-use RpsCompetition\Settings;
+use RpsCompetition\Helpers\CompetitionHelper;
+use RpsCompetition\Helpers\PhotoHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\Forms as SymfonyForms;
@@ -57,16 +52,16 @@ $rps_basename = plugin_basename($plugin);
 /**
  * Class AVH_RPS_Client
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class AVH_RPS_Client
 {
     /**
      * @var Application
      */
-    private $container;
-    /** @var  Settings */
+    private $app;
+    /** @var \Illuminate\Config\Repository */
     private $settings;
 
     /**
@@ -77,34 +72,38 @@ class AVH_RPS_Client
      */
     public function __construct($dir, $basename)
     {
-        $this->container = new Application();
+        $this->app = new Application();
 
         $this->registerBindings();
-        $upload_dir_info = wp_upload_dir();
-        $this->settings = $this->container->make('Settings');
+
+        $this->settings = $this->app->make('Settings');
         $this->settings->set('plugin_dir', $dir);
         $this->settings->set('plugin_file', $basename);
-        $this->settings->set('template_dir', $dir . '/resources/views');
-        $this->settings->set('plugin_basename', $basename);
-        $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
-        $this->settings->set('javascript_dir', $dir . '/assets/js/');
-        $this->settings->set('css_dir', $dir . '/assets/css/');
-        $this->settings->set('images_dir', $dir . '/assets/images/');
-        $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
+
         if (!defined('WP_INSTALLING') || WP_INSTALLING === false) {
             add_action('plugins_loaded', [$this, 'load']);
         }
     }
 
+    public function actionInit()
+    {
+        $this->setupRewriteRules();
+        add_image_size('150w', 150, 9999);
+    }
+
     public function load()
     {
+        $this->app->make('OptionsGeneral');
+        $this->setSettings();
+        add_action('init', [$this, 'actionInit'], 10);
+
         if (is_admin()) {
             add_action('activate_' . $this->settings->get('plugin_basename'), [$this, 'pluginActivation']);
             add_action('deactivate_' . $this->settings->get('plugin_basename'), [$this, 'pluginDeactivation']);
 
-            new Admin($this->container);
+            new Admin($this->app);
         } else {
-            new Frontend($this->container);
+            new Frontend($this->app);
         }
     }
 
@@ -136,27 +135,27 @@ class AVH_RPS_Client
     {
 
         /**
-         * Setup Interfaces
-         *
-         */
-        $this->container->bind('Avh\DataHandler\AttributeBagInterface', 'Avh\DataHandler\NamespacedAttributeBag');
-
-        /**
          * Setup Singleton classes
          *
          */
-        $this->container->singleton('Settings', 'RpsCompetition\Settings');
-        $this->container->singleton('RpsDb', 'RpsCompetition\Db\RpsDb');
-        $this->container->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
-        $this->container->singleton(
-            'Session',
+        $this->app->singleton(
+            'Settings',
             function () {
-                return new Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
+                return new \Illuminate\Config\Repository();
             }
         )
         ;
-        $this->container->singleton('IlluminateRequest', '\Illuminate\Http\Request');
-        $this->container->instance(
+
+        $this->app->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
+        $this->app->singleton(
+            'Session',
+            function () {
+                return new \Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
+            }
+        )
+        ;
+        $this->app->singleton('IlluminateRequest', '\Illuminate\Http\Request');
+        $this->app->instance(
             'IlluminateRequest',
             forward_static_call(['Illuminate\Http\Request', 'createFromGlobals'])
         )
@@ -167,15 +166,7 @@ class AVH_RPS_Client
          *
          */
 
-        $this->container->bind(
-            'Core',
-            function (Application $app) {
-                return new Core($app->make('Settings'));
-            }
-        )
-        ;
-
-        $this->container->bind(
+        $this->app->bind(
             'RequestController',
             function (Application $app) {
                 return new RequestController($app);
@@ -183,23 +174,39 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'FrontendView',
             function (Application $app) {
-                return new FrontendView($app->make('Settings'), $app->make('RpsDb'), $app->make('IlluminateRequest'));
+                return new FrontendView(
+                    $app->make('Settings'),
+                    $app->make('RpsDb'),
+                    $app->make('IlluminateRequest'),
+                    $app->make('PhotoHelper')
+                );
             }
         )
         ;
 
-        $this->container->bind(
+        if (class_exists('Imagick')) {
+            $this->app->bind('\Imagine\Image\ImagineInterface', '\Imagine\Imagick\Imagine');
+        } else {
+            $this->app->bind('\Imagine\Image\ImagineInterface', '\Imagine\Gd\Imagine');
+        }
+
+        $this->app->bind(
             'PhotoHelper',
             function (Application $app) {
-                return new PhotoHelper($app->make('Settings'), $app->make('IlluminateRequest'), $app->make('RpsDb'));
+                return new PhotoHelper(
+                    $app->make('Settings'),
+                    $app->make('IlluminateRequest'),
+                    $app->make('RpsDb'),
+                    $app->make('\Imagine\Image\ImagineInterface')
+                );
             }
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'SeasonHelper',
             function (Application $app) {
                 return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
@@ -207,7 +214,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'WpSeoHelper',
             function (Application $app) {
                 return new WpseoHelper(
@@ -221,7 +228,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'CompetitionHelper',
             function (Application $app) {
                 return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
@@ -229,48 +236,11 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
+        $this->app->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
 
-        $this->registerBindingDb();
         $this->registerBindingShortCodes();
         $this->registerBindingSocialNetworks();
         $this->registerBindingsForms();
-    }
-
-    /**
-     * Register all the binding for the Database classes
-     *
-     */
-    private function registerBindingDb()
-    {
-        $this->container->bind(
-            'QueryEntries',
-            function (Application $app) {
-                return new QueryEntries($app->make('RpsDb'));
-            }
-        )
-        ;
-        $this->container->bind(
-            'QueryCompetitions',
-            function (Application $app) {
-                return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
-            }
-        )
-        ;
-        $this->container->bind(
-            'QueryMiscellaneous',
-            function (Application $app) {
-                return new QueryMiscellaneous($app->make('RpsDb'));
-            }
-        )
-        ;
-        $this->container->bind(
-            'QueryBanquet',
-            function (Application $app) {
-                return new QueryBanquet($app->make('RpsDb'));
-            }
-        )
-        ;
     }
 
     /**
@@ -279,14 +249,14 @@ class AVH_RPS_Client
     private function registerBindingShortCodes()
     {
         // General Shortcode classes
-        $this->container->bind(
+        $this->app->bind(
             'ShortcodeRouter',
             function () {
                 return new ShortcodeRouter();
             }
         )
         ;
-        $this->container->bind(
+        $this->app->bind(
             'ShortcodeController',
             function (Application $app) {
                 return new ShortcodeController($app);
@@ -294,7 +264,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->container->bind(
+        $this->app->bind(
             'ShortcodeView',
             function (Application $app) {
                 $settings = $app->make('Settings');
@@ -310,22 +280,22 @@ class AVH_RPS_Client
      */
     private function registerBindingSocialNetworks()
     {
-        $this->container->bind(
+        $this->app->bind(
             'SocialNetworksRouter',
             function (Application $app) {
                 return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
             }
         )
         ;
-        $this->container->bind(
+        $this->app->bind(
             'SocialNetworksController',
             function (Application $app) {
                 return new SocialNetworksController($app);
             }
         )
         ;
-        $this->container->bind('SocialNetworksModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
-        $this->container->bind(
+        $this->app->bind('SocialNetworksModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
+        $this->app->bind(
             'SocialNetworksView',
             function (Application $app) {
                 $settings = $app->make('Settings');
@@ -343,7 +313,7 @@ class AVH_RPS_Client
      */
     private function registerBindingsForms()
     {
-        $this->container->bind(
+        $this->app->bind(
             'formFactory',
             function (Application $app) {
                 $validator_builder = Validation::createValidatorBuilder();
@@ -360,6 +330,60 @@ class AVH_RPS_Client
             }
         )
         ;
+    }
+
+    /**
+     * Set the required settings to be used throughout the plugin
+     */
+    private function setSettings()
+    {
+
+        $dir = $this->settings->get('plugin_dir');
+        $basename = $this->settings->get('plugin_file');
+        $upload_dir_info = wp_upload_dir();
+
+        $this->settings->set('template_dir', $dir . '/resources/views');
+        $this->settings->set('plugin_basename', $basename);
+        $this->settings->set('upload_dir', $upload_dir_info['basedir'] . '/avh-rps');
+        $this->settings->set('javascript_dir', $dir . '/assets/js/');
+        $this->settings->set('css_dir', $dir . '/assets/css/');
+        $this->settings->set('images_dir', $dir . '/assets/images/');
+        $this->settings->set('plugin_url', plugins_url('', Constants::PLUGIN_FILE));
+        $this->settings->set('club_max_entries_per_member_per_date', 4);
+        $this->settings->set('club_max_banquet_entries_per_member', 5);
+        $this->settings->set('digital_chair_email', 'digitalchair@raritanphoto.com');
+
+        $this->settings->set('siteurl', get_option('siteurl'));
+    }
+
+    /**
+     * Setup Rewrite rules
+     *
+     */
+    private function setupRewriteRules()
+    {
+        $options = get_option('avh-rps');
+        $url = get_permalink($options['monthly_entries_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule(
+                $url . '?([^/]*)',
+                'index.php?page_id=' . $options['monthly_entries_post_id'] . '&selected_date=$matches[1]',
+                'top'
+            );
+        }
+
+        $url = get_permalink($options['monthly_winners_post_id']);
+        if ($url !== false) {
+            $url = substr(parse_url($url, PHP_URL_PATH), 1);
+            add_rewrite_rule(
+                $url . '?([^/]*)',
+                'index.php?page_id=' . $options['monthly_winners_post_id'] . '&selected_date=$matches[1]',
+                'top'
+            );
+        }
+
+        flush_rewrite_rules();
     }
 }
 

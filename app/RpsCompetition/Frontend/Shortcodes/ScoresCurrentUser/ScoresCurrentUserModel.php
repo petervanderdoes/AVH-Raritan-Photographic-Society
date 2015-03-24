@@ -4,17 +4,17 @@ namespace RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser;
 
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\ScoresCurrentUser as ScoresCurrentUserEntity;
+use RpsCompetition\Entity\Form\ScoresCurrentUser as EntityFormScoresCurrentUser;
 use RpsCompetition\Form\Type\ScoresCurrentUserType;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
  * Class ScoresCurrentUserModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class ScoresCurrentUserModel
 {
@@ -61,7 +61,7 @@ class ScoresCurrentUserModel
         if (!empty($scores)) {
             $data = $this->getTemplateData($season_options, $selected_season, $scores);
         }
-        $entity = new ScoresCurrentUserEntity();
+        $entity = new EntityFormScoresCurrentUser();
         $action = home_url('/' . get_page_uri($post->ID));
         $entity->setSeasonChoices($season_options);
         $entity->setSeasons($selected_season);

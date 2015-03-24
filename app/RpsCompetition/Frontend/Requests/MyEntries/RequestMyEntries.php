@@ -4,18 +4,18 @@ namespace RpsCompetition\Frontend\Requests\MyEntries;
 
 use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Entity\Forms\MyEntries as EntityFormMyEntries;
+use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
+use RpsCompetition\Helpers\CommonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
  * Class RequestMyEntries
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Requests\MyEntries
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class RequestMyEntries
 {
@@ -135,7 +135,7 @@ class RequestMyEntries
                     }
                     break;
             }
-            $medium_subset_medium = $this->session->get('myentries/subset');
+            $medium_subset_medium = $this->session->get('myentries.subset');
             $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
             $current_competition = $this->query_competitions->getCompetitionByDateClassMedium(
                 $competition_date,
@@ -145,17 +145,16 @@ class RequestMyEntries
             ;
 
             $this->session->set(
-                'myentries/' . $medium_subset_medium . '/competition_date',
+                'myentries.' . $medium_subset_medium . '.competition_date',
                 $current_competition->Competition_Date
             )
             ;
-            $this->session->set('myentries/' . $medium_subset_medium . '/medium', $current_competition->Medium);
+            $this->session->set('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
             $this->session->set(
-                'myentries/' . $medium_subset_medium . '/classification',
+                'myentries.' . $medium_subset_medium . '.classification',
                 $current_competition->Classification
             )
             ;
-            $this->session->save();
             $redirect = get_permalink($post->ID);
             wp_redirect($redirect);
             exit();

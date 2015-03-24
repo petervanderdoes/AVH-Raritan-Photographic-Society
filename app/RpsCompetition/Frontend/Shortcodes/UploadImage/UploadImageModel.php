@@ -1,18 +1,18 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\UploadImage;
 
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Entity\Forms\UploadImage as UploadImageEntity;
+use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Form\Type\UploadImageType;
-use RpsCompetition\Settings;
 use Symfony\Component\Form\FormFactory;
 
 /**
  * Class UploadImageModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\UploadImage
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class UploadImageModel
 {
@@ -61,7 +61,7 @@ class UploadImageModel
 
         $ref = $this->request->input('wp_get_referer', wp_get_referer());
 
-        $entity = new UploadImageEntity();
+        $entity = new EntityFormUploadImage();
         $entity->setWpGetReferer($ref);
         $entity->setMediumSubset($medium_subset);
         $form = $this->form_factory->create(

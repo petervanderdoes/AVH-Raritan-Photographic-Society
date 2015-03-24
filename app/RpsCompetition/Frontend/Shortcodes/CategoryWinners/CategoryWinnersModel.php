@@ -3,14 +3,14 @@
 namespace RpsCompetition\Frontend\Shortcodes\CategoryWinners;
 
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Photo\Helper as PhotoHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class CategoryWinnersModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\CategoryWinners
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class CategoryWinnersModel
 {
@@ -28,29 +28,6 @@ class CategoryWinnersModel
 
         $this->query_miscellaneous = $query_miscellaneous;
         $this->photo_helper = $photo_helper;
-    }
-
-    /**
-     * Collect needed data to render the Category Winners
-     *
-     * @param string $class
-     * @param array  $entries
-     * @param string $thumb_size
-     *
-     * @return array
-     */
-    public function getAllData($class, $entries, $thumb_size)
-    {
-        $data = [];
-        $data['class'] = $class;
-        $data['records'] = $entries;
-        $data['thumb_size'] = $thumb_size;
-        $data['images'] = [];
-        foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->photo_helper->dataPhotoGallery($recs, $data['thumb_size']);
-        }
-
-        return $data;
     }
 
     /**

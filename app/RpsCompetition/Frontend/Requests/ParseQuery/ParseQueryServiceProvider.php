@@ -7,9 +7,9 @@ use RpsCompetition\Application;
 /**
  * Class ParseQueryServiceProvider
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
- * @package   RpsCompetition\Frontend\Shortcodes\ParseQuery
+ * @package   RpsCompetition\Frontend\Requests\ParseQuery
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class ParseQueryServiceProvider extends ServiceProvider
 {
@@ -39,9 +39,19 @@ class ParseQueryServiceProvider extends ServiceProvider
     {
 
         $this->app->bind(
+            '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper',
+            function (Application $app) {
+                return new ParseQueryHelper(
+                    $app->make('QueryCompetitions'), $app->make('SeasonHelper'), $app->make('CompetitionHelper')
+                );
+            }
+        )
+        ;
+        $this->app->bind(
             'RequestMonthlyEntries',
             function (Application $app) {
                 return new RequestMonthlyEntries(
+                    $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
                     $app->make('QueryCompetitions'),
                     $app->make('SeasonHelper'),
                     $app->make('CompetitionHelper'),
@@ -55,6 +65,7 @@ class ParseQueryServiceProvider extends ServiceProvider
             'RequestMonthlyWinners',
             function (Application $app) {
                 return new RequestMonthlyWinners(
+                    $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
                     $app->make('QueryCompetitions'),
                     $app->make('SeasonHelper'),
                     $app->make('CompetitionHelper'),

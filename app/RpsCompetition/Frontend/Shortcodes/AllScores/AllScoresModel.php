@@ -3,20 +3,20 @@
 namespace RpsCompetition\Frontend\Shortcodes\AllScores;
 
 use Illuminate\Http\Request as IlluminateRequest;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Forms\AllScores as AllScoresEntity;
+use RpsCompetition\Entity\Form\AllScores as EntityFormAllScores;
 use RpsCompetition\Form\Type\AllScoresType;
-use RpsCompetition\Season\Helper as SeasonHelper;
+use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
  * Class AllScoresModel
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend\Shortcodes\AllScores
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class AllScoresModel
 {
@@ -115,7 +115,7 @@ class AllScoresModel
         // Start the form
         global $post;
         $action = home_url('/' . get_page_uri($post->ID));
-        $entity = new AllScoresEntity();
+        $entity = new EntityFormAllScores();
         $entity->setSeasonChoices($season_options);
         $entity->setSeasons($selected_season);
         $form = $this->form_factory->create(

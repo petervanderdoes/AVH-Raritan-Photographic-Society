@@ -4,22 +4,16 @@ namespace RpsCompetition\Api;
 use DOMDocument;
 use Illuminate\Http\Request;
 use PDO;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsPdo;
+use RpsCompetition\Helpers\CommonHelper;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
-
-if (!class_exists('AVH_RPS_Client')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
-}
 
 /**
  * Class Client
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Api
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class Client
 {
@@ -238,9 +232,6 @@ class Client
     private function handleUploadScoresFile($db, $file_name)
     {
         $warning = '';
-        $score = '';
-        $award = '';
-        $entry_id = '';
 
         $xml = simplexml_load_file($file_name);
         if (!$xml) {
@@ -248,11 +239,8 @@ class Client
             die();
         }
         try {
-            $sql = 'UPDATE `entries` SET `Score` = :score, `Date_Modified` = NOW(), `Award` = :award WHERE `ID` = :entryid';
-            $sth = $db->prepare($sql);
-            $sth->bindParam(':score', $score, PDO::PARAM_STR);
-            $sth->bindParam(':award', $award, PDO::PARAM_STR);
-            $sth->bindParam(':entryid', $entry_id, PDO::PARAM_INT);
+            $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
+            $stmt = $db->prepare($sql);
         } catch (\PDOException $e) {
             $this->doRESTError('Error - ' . $e->getMessage() . ' - ' . $sql);
             die();
@@ -275,7 +263,10 @@ class Client
                     if ($entry_id != '') {
                         if ($score != '') {
                             try {
-                                $sth->execute();
+                                $stmt->bindValue(':score', $score, PDO::PARAM_STR);
+                                $stmt->bindValue(':award', $award, PDO::PARAM_STR);
+                                $stmt->bindValue(':entryid', $entry_id, PDO::PARAM_INT);
+                                $stmt->execute();
                             } catch (\PDOException $e) {
                                 $this->doRESTError(
                                     'Failed to UPDATE scores in database - ' . $e->getMessage() . ' - ' . $sql
@@ -283,7 +274,7 @@ class Client
                                 ;
                                 die();
                             }
-                            if ($sth->rowCount() < 1) {
+                            if ($stmt->rowCount() < 1) {
                                 $warning .= '  <info>' . (string) $comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title . ' -- Row failed to update</info>' . "\n";
                             }
                         }
@@ -295,14 +286,16 @@ class Client
 
             // Mark this competition as scored
             try {
-                $sql = 'UPDATE competitions SET Scored=\'Y\', Date_Modified=NOW()
-                        WHERE Competition_Date=\'' . $comp_date . '\' AND
-                        Classification=\'' . $classification . '\' AND
-                        Medium = \'' . $medium . '\'';
-                if (!$rs = mysql_query($sql)) {
-                    throw new \Exception(mysql_error());
-                }
-            } catch (\Exception $e) {
+                $sql = 'UPDATE competitions SET Scored="Y", Date_Modified=NOW()
+                        WHERE Competition_Date=":comp_date" AND
+                        Classification=":classification" AND
+                        Medium = ":medium"';
+                $stmt = $db->prepare($sql);
+                $stmt->bindValue(':compdate', $comp_date);
+                $stmt->bindValue(':classification', $classification);
+                $stmt->bindValue(':medium', $medium);
+                $stmt->execute();
+            } catch (\PDOException $e) {
                 $this->doRESTError(
                     'Failed to execute UPDATE to set Scored flag to Y in database for ' . $comp_date . ' / ' . $classification
                 )
@@ -347,13 +340,13 @@ class Client
         }
         $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification
         FROM competitions
-        WHERE Competition_Date = DATE(:compdate) AND Closed = \'Y\' ' . $medium_clause . '
+        WHERE Competition_Date = DATE(:compdate) AND Closed = "Y" ' . $medium_clause . '
         ORDER BY Medium, Classification';
         try {
             $sth_competitions = $db->prepare($sql);
             $sth_competitions->bindParam(':compdate', $comp_date);
             $sth_competitions->execute();
-        } catch (\Exception $e) {
+        } catch (\PDOException $e) {
             $this->doRESTError(
                 'Failed to SELECT competition records with date = ' . $comp_date . ' from database - ' . $e->getMessage(
                 )
@@ -395,7 +388,7 @@ class Client
                 WHERE entries.Competition_ID = :comp_id
                         ORDER BY entries.Member_ID, entries.Title';
                 $sth_entries = $db->prepare($sql);
-                $sth_entries->bindParam(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
+                $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
                 $sth_entries->execute();
             } catch (\Exception $e) {
                 $this->doRESTError('Failed to SELECT competition entries from database - ' . $e->getMessage());

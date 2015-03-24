@@ -2,39 +2,23 @@
 namespace RpsCompetition\Frontend;
 
 use Avh\Network\Session;
+use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
-use RpsCompetition\Api\Client;
 use RpsCompetition\Application;
-use RpsCompetition\Common\Core;
-use RpsCompetition\Common\Helper as CommonHelper;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
-use RpsCompetition\Options\General as Options;
-use RpsCompetition\Settings;
-
-if (!class_exists('AVH_RPS_Client')) {
-    header('Status: 403 Forbidden');
-    header('HTTP/1.1 403 Forbidden');
-    exit();
-}
+use RpsCompetition\Helpers\CommonHelper;
 
 /**
  * Class Frontend
  *
- * @author    Peter van der Does
- * @copyright Copyright (c) 2015, AVH Software
  * @package   RpsCompetition\Frontend
+ * @author    Peter van der Does <peter@avirtualhome.com>
+ * @copyright Copyright (c) 2014-2015, AVH Software
  */
 class Frontend
 {
-    /** @var Application */
-    private $container;
-    /** @var Core */
-    private $core;
-    /** @var \Symfony\Component\Form\FormFactory */
-    private $formFactory;
-    /** @var Options */
-    private $options;
+    private $app;
     /** @var Request */
     private $request;
     /** @var RpsDb */
@@ -43,42 +27,35 @@ class Frontend
     private $session;
     /** @var Settings */
     private $settings;
-    /** @var \Rpscompetition\Frontend\View */
+    /** @var \Rpscompetition\Frontend\FrontendView */
     private $view;
 
     /**
      * Constructor
      *
-     * @param Application $container
+     * @param Application $app
      */
-    public function __construct(Application $container)
+    public function __construct(Application $app)
     {
-        $this->container = $container;
-        $this->session = $container->make('Session');
+        $this->app = $app;
+        $this->session = $app->make('Session');
         $this->session->start();
 
-        $this->settings = $container->make('Settings');
-        $this->rpsdb = $container->make('RpsDb');
-        $this->request = $container->make('IlluminateRequest');
-        $this->options = $container->make('OptionsGeneral');
-        $this->core = $container->make('Core');
+        $this->settings = $app->make('Settings');
+        $this->rpsdb = $app->make('RpsDb');
+        $this->request = $app->make('IlluminateRequest');
 
-        $this->view = $container->make('FrontendView');
-        $this->formFactory = $container->make('formFactory');
+        $this->view = $app->make('FrontendView');
 
         $this->setupRequestHandling();
 
         // The actions are in order as how WordPress executes them
-        add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
-        add_action('init', [$this, 'actionInit'], 11);
+        $this->setupActionsFilters();
+    }
 
-        add_action('template_redirect', [$this, 'actionTemplateRedirectRpsWindowsClient']);
-        add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
-
-        add_filter('query_vars', [$this, 'filterQueryVars']);
-        add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 2);
-        add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
-        add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
+    public function __destruct()
+    {
+        $this->session->save();
     }
 
     /**
@@ -103,7 +80,6 @@ class Frontend
         global $wp_query;
         global $post;
 
-        //todo Make as an option in the admin section.
         $options = get_option('avh-rps');
         $all_masonry_pages = [];
         $all_masonry_pages[$options['monthly_entries_post_id']] = true;
@@ -139,7 +115,7 @@ class Frontend
 
         $this->setupShortcodes();
 
-        $query_competitions = $this->container->make('QueryCompetitions');
+        $query_competitions = $this->app->make('QueryCompetitions');
         $query_competitions->setAllPastCompetitionsClose();
 
         $this->setupWpSeoActionsFilters();
@@ -163,47 +139,13 @@ class Frontend
     public function actionShowcaseCompetitionThumbnails($foo)
     {
         if (is_front_page()) {
-            $query_miscellaneous = $this->container->make('QueryMiscellaneous');
+            $query_miscellaneous = $this->app->make('QueryMiscellaneous');
             $records = $query_miscellaneous->getEightsAndHigher(5);
             $data = [];
             $data['records'] = $records;
             $data['thumb_size'] = '150';
             echo $this->view->renderShowcaseCompetitionThumbnails($data);
             unset($query_miscellaneous);
-        }
-    }
-
-    /**
-     * Handles the requests by the RPS Windows Client
-     *
-     * @internal Hook: template_redirect
-     */
-    public function actionTemplateRedirectRpsWindowsClient()
-    {
-        if ($this->request->has('rpswinclient')) {
-
-            $api_client = new Client();
-
-            define('DONOTCACHEPAGE', true);
-            global $hyper_cache_stop;
-            $hyper_cache_stop = true;
-            add_filter('w3tc_can_print_comment', '__return_false');
-
-            // Properties of the logged in user
-            status_header(200);
-            switch ($this->request->input('rpswinclient')) {
-                case 'getcompdate':
-                    $api_client->sendXmlCompetitionDates($this->request);
-                    break;
-                case 'download':
-                    $api_client->sendCompetitions($this->request);
-                    break;
-                case 'uploadscore':
-                    $api_client->doUploadScore($this->request);
-                    break;
-                default:
-                    break;
-            }
         }
     }
 
@@ -330,7 +272,7 @@ class Frontend
                     $entries[] = $entry;
                 }
             }
-            $output = $this->view->renderCategoryWinnersFacebookThumbs($entries);
+            $output = $this->view->renderFacebookThumbs($entries);
 
             return $output;
         }
@@ -499,8 +441,7 @@ class Frontend
     {
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
-
-            $query_competitions = $this->container->make('QueryCompetitions');
+            $query_competitions = $this->app->make('QueryCompetitions');
             $selected_date = get_query_var('selected_date');
             $competitions = $query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);
@@ -570,17 +511,33 @@ class Frontend
         );
     }
 
+    private function setupActionsFilters()
+    {
+        add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);
+        add_action('init', [$this, 'actionInit'], 11);
+
+        add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
+
+        add_filter('query_vars', [$this, 'filterQueryVars']);
+        add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 2);
+        add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
+        add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
+    }
+
     /**
      * Setup the action to be handles by the Request Controller
      */
     private function setupRequestHandling()
     {
         /** @var \RpsCompetition\Frontend\Requests\RequestController $requests_controller */
-        $requests_controller = $this->container->make('RequestController');
+        $requests_controller = $this->app->make('RequestController');
         add_action('parse_query', [$requests_controller, 'handleParseQuery']);
 
         if ($this->request->isMethod('POST')) {
             add_action('wp', [$requests_controller, 'handleWp']);
+        }
+        if ($this->request->has('rpswinclient')) {
+            add_action('template_redirect', [$requests_controller, 'handleTemplateRedirect']);
         }
     }
 
@@ -591,9 +548,9 @@ class Frontend
     private function setupShortcodes()
     {
         /** @var ShortcodeRouter $shortcode */
-        $shortcode = $this->container->make('ShortcodeRouter');
-        $shortcode->setShortcodeController($this->container->make('ShortcodeController'));
-        $shortcode->setContainer($this->container);
+        $shortcode = $this->app->make('ShortcodeRouter');
+        $shortcode->setShortcodeController($this->app->make('ShortcodeController'));
+        $shortcode->setContainer($this->app);
         $shortcode->initializeShortcodes();
     }
 
@@ -603,7 +560,7 @@ class Frontend
      */
     private function setupSocialButtons()
     {
-        $social_networks_controller = $this->container->make('SocialNetworksRouter');
+        $social_networks_controller = $this->app->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = '8cfdecd';
@@ -638,7 +595,7 @@ class Frontend
      */
     private function setupWpSeoActionsFilters()
     {
-        $wpseo = $this->container->make('WpSeoHelper');
+        $wpseo = $this->app->make('WpSeoHelper');
         add_action('wpseo_register_extra_replacements', [$wpseo, 'actionWpseoRegisterExtraReplacements']);
         add_action('wpseo_do_sitemap_competition-entries', [$wpseo, 'actionWpseoSitemapCompetitionEntries']);
         add_action('wpseo_do_sitemap_competition-winners', [$wpseo, 'actionWpseoSitemapCompetitionWinners']);
