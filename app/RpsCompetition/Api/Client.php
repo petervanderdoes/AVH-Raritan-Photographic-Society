@@ -388,7 +388,7 @@ class Client
                 WHERE entries.Competition_ID = :comp_id
                         ORDER BY entries.Member_ID, entries.Title';
                 $sth_entries = $db->prepare($sql);
-                $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
+                $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
                 $sth_entries->execute();
             } catch (\Exception $e) {
                 $this->doRESTError('Failed to SELECT competition entries from database - ' . $e->getMessage());
