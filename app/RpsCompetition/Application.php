@@ -112,6 +112,7 @@ class Application extends Container implements ApplicationInterface
             '\RpsCompetition\Frontend\Shortcodes\ScoresCurrentUser\ScoresCurrentUserServiceProvider',
             '\RpsCompetition\Frontend\Shortcodes\UploadImage\UploadImageServiceProvider',
             '\RpsCompetition\Db\DbServiceProvider',
+            '\RpsCompetition\Frontend\Requests\RpsClient\RpsClientServiceProvider',
         ];
         $this->registerCoreContainerAliases();
         $this->registerConfiguredProviders();
