@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.10-rc.1
+#### Version 2.0.10
 * Caption for photo's in the gallery is wrong.
 * RPS Client: Retrieving photos results in 404 error.
 * RPS Client: Upload of scores does not work.
