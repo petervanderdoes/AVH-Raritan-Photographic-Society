@@ -363,7 +363,7 @@ class Frontend
                 if (!empty($caption_text)) {
                     $caption_text .= '<br />';
                 }
-                $caption_text .= '<span class="wp-caption-credit">Credit: ' . $photographer_name . '</span>';
+                $caption_text .= '<span class="wp-caption-credit">Photo: ' . $photographer_name . '</span>';
             }
             if (!empty($caption_text)) {
                 $output .= '<' . $captiontag . ' class="wp-caption-text gallery-caption">' . wptexturize(

@@ -286,25 +286,27 @@ class Client
 
             // Mark this competition as scored
             try {
-                $sql = 'UPDATE competitions SET Scored="Y", Date_Modified=NOW()
-                        WHERE Competition_Date=":comp_date" AND
-                        Classification=":classification" AND
-                        Medium = ":medium"';
-                $stmt = $db->prepare($sql);
-                $stmt->bindValue(':compdate', $comp_date);
-                $stmt->bindValue(':classification', $classification);
-                $stmt->bindValue(':medium', $medium);
-                $stmt->execute();
+                $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
+                        WHERE Competition_Date = :comp_date AND
+                        Classification = :classification AND
+                        Medium = :medium';
+                $stmt_update = $db->prepare($sql_update);
+                $date = new \DateTime($comp_date);
+                $sql_date = $date->format('Y-m-d H:i:s');
+                $stmt_update->bindValue(':comp_date', $sql_date, PDO::PARAM_STR);
+                $stmt_update->bindValue(':classification', $classification, PDO::PARAM_STR);
+                $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);
+                $stmt_update->execute();
             } catch (\PDOException $e) {
                 $this->doRESTError(
-                    'Failed to execute UPDATE to set Scored flag to Y in database for ' . $comp_date . ' / ' . $classification
+                    'Failed to execute UPDATE' . $e->getMessage()
                 )
                 ;
                 die();
             }
-            if (mysql_affected_rows() < 1) {
+            if ($stmt_update->rowCount() < 1) {
                 $this->doRESTError(
-                    'No rows updated when setting Scored flag to Y in database for ' . $comp_date . ' / ' . $classification
+                    'No rows updated when setting Scored flag to Y in database for ' . $sql_date . ' / ' . $classification . ' / ' . $medium
                 )
                 ;
                 die();
@@ -388,7 +390,7 @@ class Client
                 WHERE entries.Competition_ID = :comp_id
                         ORDER BY entries.Member_ID, entries.Title';
                 $sth_entries = $db->prepare($sql);
-                $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT, 11);
+                $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
                 $sth_entries->execute();
             } catch (\Exception $e) {
                 $this->doRESTError('Failed to SELECT competition entries from database - ' . $e->getMessage());
