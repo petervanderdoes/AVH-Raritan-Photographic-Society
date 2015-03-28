@@ -1,7 +1,9 @@
 ## Changelog
 
-#### Version 2.0.10-dev.1
-* Preparation for new development cycle.
+#### Version 2.0.10
+* Caption for photo's in the gallery is wrong.
+* RPS Client: Retrieving photos results in 404 error.
+* RPS Client: Upload of scores does not work.
 
 #### Version 2.0.9
 * Make use of ImageMagick for better quality and less memory usage.
