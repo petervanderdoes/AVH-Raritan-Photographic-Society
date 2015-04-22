@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.11-rc.1
+#### Version 2.0.11
 * Display message when there are no open competitions.
 
 #### Version 2.0.10
