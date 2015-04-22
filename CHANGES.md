@@ -1,7 +1,7 @@
 ## Changelog
 
-#### Version 2.0.11-dev.1
-* Preparation for new development cycle.
+#### Version 2.0.11
+* Display message when there are no open competitions.
 
 #### Version 2.0.10
 * Caption for photo's in the gallery is wrong.
