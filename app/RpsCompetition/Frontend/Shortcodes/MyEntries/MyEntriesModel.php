@@ -79,7 +79,7 @@ class MyEntriesModel
      *
      * @param string $medium_subset_medium
      *
-     * @return array
+     * @return array|boolean
      */
     public function getMyEntries($medium_subset_medium)
     {
@@ -88,35 +88,38 @@ class MyEntriesModel
 
         $open_competitions = $this->getOpenCompetitions($medium_subset_medium);
 
-        $open_competitions_options = $this->getOpenCompetitionsOptions($open_competitions);
+        if ($open_competitions === []) {
+            $return = false;
+        } else {
+            $open_competitions_options = $this->getOpenCompetitionsOptions($open_competitions);
 
-        $current_competition = $this->getCurrentCompetition($medium_subset_medium, $open_competitions);
+            $current_competition = $this->getCurrentCompetition($medium_subset_medium, $open_competitions);
 
-        $this->saveSession($medium_subset_medium, $current_competition);
+            $this->saveSession($medium_subset_medium, $current_competition);
 
-        $data = $this->getTemplateData($current_competition);
+            $data = $this->getTemplateData($current_competition);
 
-        $action = home_url('/' . get_page_uri($post->ID));
-        $entity = new EntityFormMyEntries();
-        $entity->setWpnonce(wp_create_nonce('avh-rps-myentries'));
-        $entity->setSelectComp($current_competition->Competition_Date);
-        $entity->setSelectedMedium($current_competition->Medium);
-        $entity->setSelectedCompChoices($open_competitions_options);
-        $entity->setSelectedMediumChoices($this->competition_helper->getMedium($open_competitions));
-        $entity->setClassification($current_competition->Classification);
-        /** @var \Symfony\Component\Form\Form $form */
-        $form = $this->form_factory->create(
-            new MyEntriesType($entity),
-            $entity,
-            ['action' => $action, 'attr' => ['id' => 'myentries']]
-        )
-        ;
+            $action = home_url('/' . get_page_uri($post->ID));
+            $entity = new EntityFormMyEntries();
+            $entity->setWpnonce(wp_create_nonce('avh-rps-myentries'));
+            $entity->setSelectComp($current_competition->Competition_Date);
+            $entity->setSelectedMedium($current_competition->Medium);
+            $entity->setSelectedCompChoices($open_competitions_options);
+            $entity->setSelectedMediumChoices($this->competition_helper->getMedium($open_competitions));
+            $entity->setClassification($current_competition->Classification);
+            /** @var \Symfony\Component\Form\Form $form */
+            $form = $this->form_factory->create(
+                new MyEntriesType($entity),
+                $entity,
+                ['action' => $action, 'attr' => ['id' => 'myentries']]
+            )
+            ;
 
-        $this->addFormButtons($current_competition, $form);
-
-        $return = [];
-        $return['data'] = $data;
-        $return['form'] = $form;
+            $this->addFormButtons($current_competition, $form);
+            $return = [];
+            $return['data'] = $data;
+            $return['form'] = $form;
+        }
 
         return $return;
     }

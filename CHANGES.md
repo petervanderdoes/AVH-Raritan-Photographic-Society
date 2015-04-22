@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.11
+* Display message when there are no open competitions.
+
 #### Version 2.0.10
 * Caption for photo's in the gallery is wrong.
 * RPS Client: Retrieving photos results in 404 error.
