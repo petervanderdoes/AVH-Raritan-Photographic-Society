@@ -182,11 +182,13 @@ class CommonHelper
      */
     public static function isRequestCanceled($form, $cancel, $redirect_to)
     {
-        if ($form->get($cancel)
-                 ->isClicked()
-        ) {
-            wp_redirect($redirect_to);
-            exit();
+        if ($form->has($cancel)) {
+            if ($form->get($cancel)
+                     ->isClicked()
+            ) {
+                wp_redirect($redirect_to);
+                exit();
+            }
         }
     }
 

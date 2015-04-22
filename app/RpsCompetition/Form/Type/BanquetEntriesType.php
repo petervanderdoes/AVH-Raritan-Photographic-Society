@@ -44,31 +44,6 @@ class BanquetEntriesType extends AbstractType
                         'attr'     => ['onchange' => 'submit_form("select_season")']
                     ]
                 )
-                ->add(
-                    'update',
-                    'submit',
-                    ['label' => 'Update']
-                )
-                ->add(
-                    'cancel',
-                    'submit',
-                    [
-                        'label' => 'Cancel',
-                        'attr'  => [
-                            'formnovalidate' => 'formnovalidate'
-                        ]
-                    ]
-                )
-                ->add(
-                    'reset',
-                    'reset',
-                    [
-                        'label' => 'Reset',
-                        'attr'  => [
-                            'formnovalidate' => 'formnovalidate'
-                        ]
-                    ]
-                )
         ;
     }
 

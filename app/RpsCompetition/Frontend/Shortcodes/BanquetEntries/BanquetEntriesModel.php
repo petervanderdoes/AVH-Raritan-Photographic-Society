@@ -112,7 +112,11 @@ class BanquetEntriesModel
             ['action' => $action, 'attr' => ['id' => 'banquetentries']]
         )
         ;
-
+        if ($this->banquet_id_array != [] && !empty($scores)) {
+            $form->add('update', 'submit', ['label' => 'Update']);
+            $form->add('cancel', 'submit', ['label' => 'Cancel', 'attr' => ['formnovalidate' => 'formnovalidate']]);
+            $form->add('reset', 'reset', ['label' => 'Reset', 'attr' => ['formnovalidate' => 'formnovalidate']]);
+        }
         $return = [];
         $return['data'] = $data;
         $return ['form'] = $form;
