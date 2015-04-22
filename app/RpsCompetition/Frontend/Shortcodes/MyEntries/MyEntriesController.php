@@ -44,10 +44,14 @@ class MyEntriesController
 
         $attr = shortcode_atts(['medium' => 'digital'], $attr);
         $model_data = $this->model->getMyEntries($attr['medium']);
-        $data = $model_data['data'];
-        /** @var \Symfony\Component\Form\Form $form */
-        $form = $model_data['form'];
+        if ($model_data === false) {
+            return $this->view->fetch('add_entries_no_open_competition.html.twig');
+        } else {
+            $data = $model_data['data'];
+            /** @var \Symfony\Component\Form\Form $form */
+            $form = $model_data['form'];
 
-        return $this->view->fetch('add_entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
+            return $this->view->fetch('add_entries.html.twig', ['data' => $data, 'form' => $form->createView()]);
+        }
     }
 }
