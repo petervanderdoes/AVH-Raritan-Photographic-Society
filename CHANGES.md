@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.12-rc.1
+#### Version 2.0.12
 * Fix the Banquet Entries Page.
 
 #### Version 2.0.11
