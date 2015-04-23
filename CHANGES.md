@@ -1,7 +1,7 @@
 ## Changelog
 
 #### Version 2.0.12-rc.1
-* Preparation for new development cycle.
+* Fix the Banquet Entries Page.
 
 #### Version 2.0.11
 * Display message when there are no open competitions.
