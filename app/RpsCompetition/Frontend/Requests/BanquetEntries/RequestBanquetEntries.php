@@ -75,10 +75,12 @@ class RequestBanquetEntries
         $redirect_to = $this->entity->getWpGetReferer();
         CommonHelper::isRequestCanceled($form, 'cancel', $redirect_to);
 
-        if ($form->get('update')
-                 ->isClicked()
-        ) {
-            $this->handleUpdate();
+        if ($form->has('update')) {
+            if ($form->get('update')
+                     ->isClicked()
+            ) {
+                $this->handleUpdate();
+            }
         }
     }
 
