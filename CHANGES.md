@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.13-dev.1
+* Preparation for new development cycle.
+
 #### Version 2.0.12
 * Fix the Banquet Entries Page.
 
