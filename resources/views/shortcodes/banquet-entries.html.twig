@@ -12,25 +12,26 @@ Select season: <span class="season-form">
     <h3>Banquet Competition is not found</h3>
 {% else %}
     {% if not data.disabled %}
-        <p>Select up to 5 entries</p>
+        {% if data.scores %}
+            <p>Select up to 5 entries</p>
+        {% endif %}
     {% endif %}
     <table class="banquet form_frame" width="99%">
-        <tr>
-            <th>Banquet Entry</th>
-            <th width="12%">Date</th>
-            <th>Theme</th>
-            <th>Competition</th>
-            <th>Title</th>
-            <th width="8%">Score</th>
-            <th width="8%">Award</th>
-            <th width="3%"></th>
-        </tr>
-
-        {% if data.scores is not defined %}
+        {% if not data.scores %}
             <tr>
-                <td colspan="6">No eligible banquet entries</td>
+                <td colspan="6"><h3>No eligible banquet entries</h3></td>
             </tr>
         {% else %}
+            <tr>
+                <th>Banquet Entry</th>
+                <th width="12%">Date</th>
+                <th>Theme</th>
+                <th>Competition</th>
+                <th>Title</th>
+                <th width="8%">Score</th>
+                <th width="8%">Award</th>
+                <th width="3%"></th>
+            </tr>
             {% set counter = 0 %}
             {% for entry in data.entries %}
                 <tr class="{{ cycle(['even', 'odd'], loop.index0) }}">

@@ -112,7 +112,8 @@ class BanquetEntriesModel
             ['action' => $action, 'attr' => ['id' => 'banquetentries']]
         )
         ;
-        if ($this->banquet_id_array != [] && !empty($scores)) {
+        // If there is a Banquet Competition and the user has scores for the season.
+        if ($data['scores'] && !$data['disabled']) {
             $form->add('update', 'submit', ['label' => 'Update']);
             $form->add('cancel', 'submit', ['label' => 'Cancel', 'attr' => ['formnovalidate' => 'formnovalidate']]);
             $form->add('reset', 'reset', ['label' => 'Reset', 'attr' => ['formnovalidate' => 'formnovalidate']]);
@@ -172,9 +173,14 @@ class BanquetEntriesModel
         $data['disabled'] = $this->form_disabled;
         $data['seasons'] = $season_options;
         $data['selected_season'] = $selected_season;
-        $data['scores'] = true;
 
         $data['entries'] = $this->getEntriesData($scores);
+
+        if ($data['entries'] === []) {
+            $data['scores'] = false;
+        } else {
+            $data['scores'] = true;
+        }
 
         return $data;
     }
