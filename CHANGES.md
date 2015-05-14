@@ -1,7 +1,8 @@
 ## Changelog
 
 #### Version 2.0.14-dev.1
-* Preparation for new development cycle.
+* Undefined index error.    
+  Rearrange the conditions to see if buttons need to be displayed.
 
 #### Version 2.0.13
 * Adding Banquet Entries fails.  

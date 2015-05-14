@@ -112,8 +112,15 @@ class BanquetEntriesModel
             ['action' => $action, 'attr' => ['id' => 'banquetentries']]
         )
         ;
-        // If there is a Banquet Competition and the user has scores for the season.
-        if ($data['disabled'] === true || $data['scores'] === false || $scores === []) {
+        /**
+         * Remove the buttons when one of the following conditions is true:
+         * - There is no Banquet to enter
+         * - The photographer has no scores for the season
+         * - The form has been disabled
+         * - The photographer has no eligble scores for the season.
+         *
+         */
+        if ($this->banquet_id_array == [] || empty($scores) || $data['disabled'] === true || $data['scores'] === false) {
             $form->remove('update');
             $form->remove('cancel');
             $form->remove('reset');
