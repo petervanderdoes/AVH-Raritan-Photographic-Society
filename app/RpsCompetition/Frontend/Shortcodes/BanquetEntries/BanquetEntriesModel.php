@@ -113,10 +113,10 @@ class BanquetEntriesModel
         )
         ;
         // If there is a Banquet Competition and the user has scores for the season.
-        if ($data['scores'] && !$data['disabled']) {
-            $form->add('update', 'submit', ['label' => 'Update']);
-            $form->add('cancel', 'submit', ['label' => 'Cancel', 'attr' => ['formnovalidate' => 'formnovalidate']]);
-            $form->add('reset', 'reset', ['label' => 'Reset', 'attr' => ['formnovalidate' => 'formnovalidate']]);
+        if ($data['disabled'] === true || $data['scores'] === false || $scores === []) {
+            $form->remove('update');
+            $form->remove('cancel');
+            $form->remove('reset');
         }
         $return = [];
         $return['data'] = $data;
