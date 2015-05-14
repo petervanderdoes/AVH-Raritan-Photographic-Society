@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.13-rc.1
+#### Version 2.0.13
 * Adding Banquet Entries fails.  
   Instead of adding the buttons to the form when needed, it's better to add them to the entity and remove them when needed.
 
