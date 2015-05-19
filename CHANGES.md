@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.14-dev.1
+#### Version 2.0.14-rc.1
 * Undefined index error.    
   Rearrange the conditions to see if buttons need to be displayed.
 
