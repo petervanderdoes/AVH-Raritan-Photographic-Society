@@ -72,6 +72,7 @@ class RequestBanquetEntries
         ;
         $form->handleRequest($this->request);
 
+        $this->model->removeUpdateSession();
         $redirect_to = $this->entity->getWpGetReferer();
         CommonHelper::isRequestCanceled($form, 'cancel', $redirect_to);
 
@@ -82,6 +83,9 @@ class RequestBanquetEntries
                 $this->handleUpdate();
             }
         }
+
+        wp_redirect($this->request->fullUrl());
+        exit();
     }
 
     /**
@@ -92,5 +96,6 @@ class RequestBanquetEntries
     {
         $this->model->deleteAllEntries();
         $this->model->addSelectedEntries();
+        $this->model->setUpdateSession();
     }
 }

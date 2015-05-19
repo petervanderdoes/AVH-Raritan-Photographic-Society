@@ -457,7 +457,7 @@ class Frontend
     private function register_scripts_styles()
     {
         if (WP_LOCAL_DEV !== true) {
-            $rps_competition_css_version = 'abb1385';
+            $rps_competition_css_version = 'a06a6dd';
             $rps_masonry_version = 'abb1385';
             $masonry_version = '8cfdecd';
             $imagesloaded_version = '8cfdecd';

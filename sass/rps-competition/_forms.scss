@@ -63,9 +63,17 @@
   }
 }
 
-#myentries {
+#myentries, #banquetentries {
   .message {
     color: $color-message;
+    text-align: center;
+    font-weight: 600;
+  }
+}
+
+#myentries, #banquetentries {
+  .updated {
+    color: $color-updated;
     text-align: center;
     font-weight: 600;
   }
