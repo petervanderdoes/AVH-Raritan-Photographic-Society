@@ -57,7 +57,8 @@ class RequestBanquetEntriesServiceProvider extends ServiceProvider
                     $app->make('IlluminateRequest'),
                     $app->make('QueryEntries'),
                     $app->make('QueryCompetitions'),
-                    $app->make('PhotoHelper')
+                    $app->make('PhotoHelper'),
+                    $app->make('Session')
                 );
             }
         )

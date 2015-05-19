@@ -94,6 +94,10 @@ class BanquetEntriesModel
         } else {
             if (!empty($scores)) {
                 $data = $this->getTemplateData($season_options, $selected_season, $scores);
+                if ($this->session->get('banquet.updated') === 'yes') {
+                    $data['updated'] = true;
+                    $this->session->remove('banquet.updated');
+                }
             }
         }
 

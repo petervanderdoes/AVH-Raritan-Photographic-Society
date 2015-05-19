@@ -2,6 +2,7 @@
 
 namespace RpsCompetition\Frontend\Requests\BanquetEntries;
 
+use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
@@ -26,6 +27,10 @@ class RequestBanquetEntriesModel
      * @var IlluminateRequest
      */
     private $request;
+    /**
+     * @var Session
+     */
+    private $session;
 
     /**
      * @param EntityFormBanquetEntries $entity
@@ -33,14 +38,15 @@ class RequestBanquetEntriesModel
      * @param QueryEntries             $query_entries
      * @param QueryCompetitions        $query_competitions
      * @param PhotoHelper              $photo_helper
-     *
+     * @param Session                  $session
      */
     public function __construct(
         EntityFormBanquetEntries $entity,
         IlluminateRequest $request,
         QueryEntries $query_entries,
         QueryCompetitions $query_competitions,
-        PhotoHelper $photo_helper
+        PhotoHelper $photo_helper,
+        Session $session
     ) {
 
         $this->query_entries = $query_entries;
@@ -48,6 +54,7 @@ class RequestBanquetEntriesModel
         $this->entity = $entity;
         $this->request = $request;
         $this->query_competitions = $query_competitions;
+        $this->session = $session;
     }
 
     public function addSelectedEntries()
@@ -99,5 +106,15 @@ class RequestBanquetEntriesModel
                 $this->photo_helper->deleteEntryFromDisk($entry);
             }
         }
+    }
+
+    public function removeUpdateSession()
+    {
+        $this->session->remove('banquet.updated');
+    }
+
+    public function setUpdateSession()
+    {
+        $this->session->set('banquet.updated', 'yes');
     }
 }
