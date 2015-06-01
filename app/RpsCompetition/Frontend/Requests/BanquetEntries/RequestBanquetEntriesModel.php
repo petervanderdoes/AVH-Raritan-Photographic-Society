@@ -85,8 +85,8 @@ class RequestBanquetEntriesModel
                     // Need to create the destination folder?
                     copy($original_filename, $this->request->server('DOCUMENT_ROOT') . $new_file_name);
                     $data = [
-                        'Competition_ID' => $banquet_record->ID,
-                        'Title' => $entry->Title,
+                        'Competition_ID'   => $banquet_record->ID,
+                        'Title'            => $entry->Title,
                         'Client_File_Name' => $entry->Client_File_Name,
                         'Server_File_Name' => $new_file_name
                     ];

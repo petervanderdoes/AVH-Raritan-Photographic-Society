@@ -61,12 +61,12 @@ class CommonHelper
      * Create a directory if it does not exist.
      *
      * @param string $path
+     *
+     * @return bool
      */
     public static function createDirectory($path)
     {
-        if (!file_exists($path)) { // Create the directory if it is missing
-            wp_mkdir_p($path);
-        }
+        return wp_mkdir_p($path);
     }
 
     /**
