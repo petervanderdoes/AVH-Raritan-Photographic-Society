@@ -6,7 +6,6 @@ use Avh\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\SeasonHelper;
 
 /**
@@ -18,7 +17,6 @@ use RpsCompetition\Helpers\SeasonHelper;
  */
 class RequestMonthlyEntries
 {
-    private $competition_helper;
     private $pq_helper;
     private $query_competitions;
     private $request;
@@ -31,7 +29,6 @@ class RequestMonthlyEntries
      * @param ParseQueryHelper  $parse_query_helper
      * @param QueryCompetitions $query_competitions
      * @param SeasonHelper      $season_helper
-     * @param CompetitionHelper $competition_helper
      * @param IlluminateRequest $request
      * @param Session           $session
      */
@@ -39,14 +36,12 @@ class RequestMonthlyEntries
         ParseQueryHelper $parse_query_helper,
         QueryCompetitions $query_competitions,
         SeasonHelper $season_helper,
-        CompetitionHelper $competition_helper,
         IlluminateRequest $request,
         Session $session
     ) {
 
         $this->query_competitions = $query_competitions;
         $this->season_helper = $season_helper;
-        $this->competition_helper = $competition_helper;
         $this->request = $request;
         $this->session = $session;
         $this->pq_helper = $parse_query_helper;
@@ -83,8 +78,7 @@ class RequestMonthlyEntries
                 ) {
                     $last_scored = $this->query_competitions->query(
                         ['where' => 'Scored="Y"', 'orderby' => 'Competition_Date', 'order' => 'DESC', 'number' => 1]
-                    )
-                    ;
+                    );
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $this->pq_helper->setSelectedDate($date_object->format(('Y-m-d')));
                     $redirect = true;
@@ -93,8 +87,7 @@ class RequestMonthlyEntries
                 }
                 $this->pq_helper->setSelectedSeason(
                     $this->season_helper->getSeasonId($this->pq_helper->getSelectedDate())
-                )
-                ;
+                );
                 break;
         }
 

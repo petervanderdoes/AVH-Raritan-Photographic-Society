@@ -179,8 +179,6 @@ class AVH_RPS_Client
             function (Application $app) {
                 return new FrontendView(
                     $app->make('Settings'),
-                    $app->make('RpsDb'),
-                    $app->make('IlluminateRequest'),
                     $app->make('PhotoHelper')
                 );
             }
@@ -209,7 +207,7 @@ class AVH_RPS_Client
         $this->app->bind(
             'SeasonHelper',
             function (Application $app) {
-                return new SeasonHelper($app->make('Settings'), $app->make('RpsDb'));
+                return new SeasonHelper($app->make('RpsDb'));
             }
         )
         ;
@@ -219,7 +217,6 @@ class AVH_RPS_Client
             function (Application $app) {
                 return new WpseoHelper(
                     $app->make('Settings'),
-                    $app->make('RpsDb'),
                     $app->make('QueryCompetitions'),
                     $app->make('QueryMiscellaneous'),
                     $app->make('PhotoHelper')

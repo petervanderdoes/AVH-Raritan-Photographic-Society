@@ -3,7 +3,6 @@ namespace RpsCompetition\Helpers;
 
 use Avh\Html\FormBuilder;
 use Avh\Html\HtmlBuilder;
-use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 
@@ -18,18 +17,14 @@ class SeasonHelper
 {
     /** @var RpsDb */
     private $rpsdb;
-    /** @var Settings */
-    private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
+     * @param RpsDb $rpsdb
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb)
+    public function __construct(RpsDb $rpsdb)
     {
-        $this->settings = $settings;
         $this->rpsdb = $rpsdb;
     }
 
@@ -52,8 +47,7 @@ class SeasonHelper
             array_combine($seasons, $seasons),
             $selected_season,
             ['onChange' => 'submit_form("new_season")']
-        )
-        ;
+        );
 
         if ($echo) {
             echo $form;
@@ -120,8 +114,7 @@ class SeasonHelper
             'ASC',
             $options['season_start_month_num'],
             $options['season_end_month_num']
-        )
-        ;
+        );
 
         unset($query_miscellaneous);
 

@@ -7,13 +7,11 @@ use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\PhotoHelper;
-use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
@@ -33,26 +31,23 @@ class MyEntriesModel
     private $query_competitions;
     private $query_entries;
     private $request;
-    private $season_helper;
     private $session;
     private $settings;
 
     /**
-     * @param QueryCompetitions  $query_competitions
-     * @param QueryEntries       $query_entries
-     * @param PhotoHelper        $photo_helper
-     * @param SeasonHelper       $season_helper
-     * @param CompetitionHelper  $competition_helper
-     * @param Session            $session
-     * @param FormFactory        $form_factory
-     * @param Settings           $settings
-     * @param IlluminateRequest  $request
+     * @param QueryCompetitions $query_competitions
+     * @param QueryEntries      $query_entries
+     * @param PhotoHelper       $photo_helper
+     * @param CompetitionHelper $competition_helper
+     * @param Session           $session
+     * @param FormFactory       $form_factory
+     * @param Settings          $settings
+     * @param IlluminateRequest $request
      */
     public function __construct(
         QueryCompetitions $query_competitions,
         QueryEntries $query_entries,
         PhotoHelper $photo_helper,
-        SeasonHelper $season_helper,
         CompetitionHelper $competition_helper,
         Session $session,
         FormFactory $form_factory,
@@ -62,7 +57,6 @@ class MyEntriesModel
         $this->query_competitions = $query_competitions;
         $this->query_entries = $query_entries;
         $this->photo_helper = $photo_helper;
-        $this->season_helper = $season_helper;
         $this->competition_helper = $competition_helper;
         $this->session = $session;
         $this->form_factory = $form_factory;
