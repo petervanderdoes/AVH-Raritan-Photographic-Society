@@ -386,7 +386,8 @@ class QueryCompetitions
         $sql_pre_prepare = 'SELECT *
             FROM competitions c
             WHERE c.Classification IN  (%s)
-                AND c.Closed = "N"';
+                AND c.Closed = "N"
+                AND c.Special_Event = "N"';
         $sql_pre_prepare .= $and_medium_subset;
         $sql_pre_prepare .= ' GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium';
 

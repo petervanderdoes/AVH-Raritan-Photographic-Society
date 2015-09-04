@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.15
+* Preparation for new development cycle.
+
 #### Version 2.0.14
 * Undefined index error.    
   Rearrange the conditions to see if buttons need to be displayed.

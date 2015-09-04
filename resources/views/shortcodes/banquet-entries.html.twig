@@ -3,6 +3,13 @@
     }
 </script>
 
+{% if data.updated is defined %}
+    <div class="alert-box info">
+        <i class="fa fa-info"></i>
+        Entries updated.
+    </div>
+{% endif %}
+
 {{ form_start(form) }}
 Select season: <span class="season-form">
 {{ form_widget(form.seasons) }}
@@ -12,9 +19,6 @@ Select season: <span class="season-form">
     <h3>Banquet Competition is not found</h3>
 {% else %}
     {% if not data.disabled %}
-        {% if data.updated is defined %}
-            <p class="updated">Entries updated</p>
-        {% endif %}
         {% if data.scores %}
             <p>Select up to 5 entries</p>
         {% endif %}

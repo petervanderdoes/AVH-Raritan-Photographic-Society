@@ -91,6 +91,10 @@ class RequestBanquetEntriesModel
                         'Server_File_Name' => $new_file_name
                     ];
                     $this->query_entries->addEntry($data, get_current_user_id());
+                    $this->photo_helper->createCommonThumbnails(
+                        $this->query_entries->getEntryById($this->query_entries->getInsertId())
+                    )
+                    ;
                 }
             }
         }
