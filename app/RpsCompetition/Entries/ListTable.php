@@ -244,7 +244,7 @@ class ListTable extends \WP_List_Table
 
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $season_helper = new SeasonHelper($this->rpsdb);
         $options = get_option('avh-rps');
 
         echo '<div class="alignleft actions">';
@@ -362,7 +362,7 @@ class ListTable extends \WP_List_Table
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $season_helper = new SeasonHelper($this->rpsdb);
 
         $entry_status = $this->request->input('entry_status', 'all');
         if (!in_array($entry_status, ['all'])) {

@@ -236,7 +236,7 @@ class QueryCompetitions
      */
     public function getCompetitionBySeasonId($season_id, $filter = null, $output = OBJECT)
     {
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $season_helper = new SeasonHelper($this->rpsdb);
 
         $sql_filter_array = ['1=1'];
 
