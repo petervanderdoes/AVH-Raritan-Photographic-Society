@@ -7,6 +7,8 @@ language: php
 php:
     - "5.4"
 
+sudo: false
+
 # WordPress version used in first build configuration.
 env:
     - WP_VERSION=4.3
