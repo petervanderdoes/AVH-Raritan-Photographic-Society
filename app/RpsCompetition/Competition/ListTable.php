@@ -126,8 +126,7 @@ class ListTable extends \WP_List_Table
             $urlDelete,
             'Delete',
             ['class' => 'delete', 'title' => 'Delete this competition']
-        )
-        ;
+        );
         $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this competition']);
 
         echo '<div class="row-actions">';
@@ -447,8 +446,7 @@ class ListTable extends \WP_List_Table
 
         $total_competitions = $query_competitions->query(
             array_merge($args, ['count' => true, 'offset' => 0, 'number' => 0])
-        )
-        ;
+        );
 
         $this->set_pagination_args(['total_items' => $total_competitions, 'per_page' => $competitions_per_page]);
 

@@ -68,8 +68,7 @@ class RequestEditTitle
             $this->edit_title_type,
             $this->entity,
             ['attr' => ['id' => 'edittitle']]
-        )
-        ;
+        );
         $form->handleRequest($this->request);
 
         $redirect_to = $this->entity->getWpGetReferer();

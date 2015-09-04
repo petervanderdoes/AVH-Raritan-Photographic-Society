@@ -106,8 +106,7 @@ class RequestUploadImageModel
 
         $this->photo_helper->createCommonThumbnails(
             $this->query_entries->getEntryById($this->query_entries->getInsertId())
-        )
-        ;
+        );
 
         return true;
     }
@@ -202,8 +201,7 @@ class RequestUploadImageModel
             $this->classification,
             $this->medium,
             ARRAY_A
-        )
-        ;
+        );
 
         if (is_array($recs)) {
             $return = $recs;
@@ -254,8 +252,7 @@ class RequestUploadImageModel
             $this->comp_date,
             $this->classification,
             $this->medium
-        )
-        ;
+        );
         $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
 
         $user = wp_get_current_user();

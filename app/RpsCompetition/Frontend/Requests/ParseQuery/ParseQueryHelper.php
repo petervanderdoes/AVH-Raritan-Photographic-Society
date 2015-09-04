@@ -43,8 +43,7 @@ class ParseQueryHelper
             $competitions = $this->query_competitions->getCompetitionBySeasonId(
                 $this->selected_season,
                 ['Scored' => 'Y']
-            )
-            ;
+            );
             /** @var QueryCompetitions $competition */
             $competition = end($competitions);
             $date_object = new \DateTime($competition->Competition_Date);
@@ -59,8 +58,7 @@ class ParseQueryHelper
             $competitions = $this->query_competitions->getCompetitionBySeasonId(
                 $this->selected_season,
                 ['Scored' => 'Y']
-            )
-            ;
+            );
             /** @var QueryCompetitions $competition */
             $competition = end($competitions);
             $date_object = new \DateTime($competition->Competition_Date);

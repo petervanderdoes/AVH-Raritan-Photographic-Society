@@ -102,7 +102,6 @@ class EditTitleType extends AbstractType
             [
                 'data_class' => 'RpsCompetition\Entity\Form\EditTitle',
             ]
-        )
-        ;
+        );
     }
 }

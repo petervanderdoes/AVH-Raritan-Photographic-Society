@@ -45,8 +45,7 @@ class UploadImageServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('UploadImageModel'), $app->make('Settings')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'UploadImageModel',
@@ -55,7 +54,6 @@ class UploadImageServiceProvider extends ServiceProvider
                     $app->make('formFactory'), $app->make('Settings'), $app->make('IlluminateRequest')
                 );
             }
-        )
-        ;
+        );
     }
 }

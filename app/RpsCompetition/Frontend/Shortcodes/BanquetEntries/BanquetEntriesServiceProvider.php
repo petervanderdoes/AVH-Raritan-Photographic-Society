@@ -46,8 +46,7 @@ class BanquetEntriesServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('BanquetEntriesModel')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'QueryBanquet',
@@ -56,8 +55,7 @@ class BanquetEntriesServiceProvider extends ServiceProvider
                     $app->make('RpsDb')
                 );
             }
-        )
-        ;
+        );
         $this->app->bind(
             'BanquetEntriesModel',
             function (Application $app) {
@@ -71,7 +69,6 @@ class BanquetEntriesServiceProvider extends ServiceProvider
                     $app->make('Session')
                 );
             }
-        )
-        ;
+        );
     }
 }

@@ -74,8 +74,7 @@ class PhotoHelper
                 $thumb_dir,
                 $thumb_name,
                 $size
-            )
-            ;
+            );
         }
     }
 
@@ -167,8 +166,7 @@ class PhotoHelper
                 $competition_record->Competition_Date,
                 $competition_record->Classification,
                 $competition_record->Medium
-            )
-        ;
+            );
         $file_parts = pathinfo($entry->Server_File_Name);
         $thumbnail_path = $competition_path . '/thumbnails';
 

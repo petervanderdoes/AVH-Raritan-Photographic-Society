@@ -69,8 +69,7 @@ class ScoresCurrentUserModel
             new ScoresCurrentUserType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'scorescurrentuser']]
-        )
-        ;
+        );
 
         $return = [];
         $return['data'] = $data;
@@ -94,8 +93,7 @@ class ScoresCurrentUserModel
             get_current_user_id(),
             $season_start_date,
             $season_end_date
-        )
-        ;
+        );
 
         return $scores;
     }

@@ -45,28 +45,24 @@ class DbServiceProvider extends ServiceProvider
             function (Application $app) {
                 return new QueryEntries($app->make('RpsDb'));
             }
-        )
-        ;
+        );
         $this->app->bind(
             'QueryCompetitions',
             function (Application $app) {
                 return new QueryCompetitions($app->make('Settings'), $app->make('RpsDb'));
             }
-        )
-        ;
+        );
         $this->app->bind(
             'QueryMiscellaneous',
             function (Application $app) {
                 return new QueryMiscellaneous($app->make('RpsDb'));
             }
-        )
-        ;
+        );
         $this->app->bind(
             'QueryBanquet',
             function (Application $app) {
                 return new QueryBanquet($app->make('RpsDb'));
             }
-        )
-        ;
+        );
     }
 }

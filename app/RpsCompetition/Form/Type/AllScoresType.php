@@ -40,8 +40,7 @@ class AllScoresType extends AbstractType
                 'choices'  => $this->entity->getSeasonChoices(),
                 'attr'     => ['onchange' => 'submit_form("select_season")']
             ]
-        )
-        ;
+        );
     }
 
     /**
@@ -61,7 +60,6 @@ class AllScoresType extends AbstractType
             [
                 'data_class' => 'RpsCompetition\Entity\Form\AllScores',
             ]
-        )
-        ;
+        );
     }
 }

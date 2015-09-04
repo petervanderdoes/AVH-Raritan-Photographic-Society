@@ -122,8 +122,7 @@ class AllScoresModel
             new AllScoresType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'allscores']]
-        )
-        ;
+        );
 
         return $form;
     }
@@ -157,8 +156,7 @@ class AllScoresModel
         $club_competition_results_unsorted = $this->query_miscellaneous->getCompetitionResultByDate(
             $season_start_date,
             $season_end_date
-        )
-        ;
+        );
         $club_competition_results = CommonHelper::arrayMsort(
             $club_competition_results_unsorted,
             [
@@ -168,8 +166,7 @@ class AllScoresModel
                 'FirstName'        => [SORT_ASC],
                 'Competition_Date' => [SORT_ASC]
             ]
-        )
-        ;
+        );
         unset($club_competition_results_unsorted);
         $average_score = 0;
         $medium_array = [];

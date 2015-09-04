@@ -62,8 +62,7 @@ class RequestEditTitleModel
             $competition->Competition_Date,
             $competition->Classification,
             $competition->Medium
-        )
-        ;
+        );
         $old_file_parts = pathinfo($server_file_name);
         $old_file_name = $old_file_parts['basename'];
         $ext = $old_file_parts['extension'];

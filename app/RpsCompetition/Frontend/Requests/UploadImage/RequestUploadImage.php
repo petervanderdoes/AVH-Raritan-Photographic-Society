@@ -65,8 +65,7 @@ class RequestUploadImage
             $this->upload_image_type,
             $this->entity,
             ['attr' => ['id' => 'uploadentry']]
-        )
-        ;
+        );
         $form->handleRequest($this->request);
 
         $redirect_to = $this->entity->getWpGetReferer();

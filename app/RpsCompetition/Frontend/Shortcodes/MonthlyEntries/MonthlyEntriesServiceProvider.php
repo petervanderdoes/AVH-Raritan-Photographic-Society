@@ -45,8 +45,7 @@ class MonthlyEntriesServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('MonthlyEntriesModel'), $app->make('Settings')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'MonthlyEntriesModel',
@@ -59,7 +58,6 @@ class MonthlyEntriesServiceProvider extends ServiceProvider
                     $app->make('SeasonHelper')
                 );
             }
-        )
-        ;
+        );
     }
 }

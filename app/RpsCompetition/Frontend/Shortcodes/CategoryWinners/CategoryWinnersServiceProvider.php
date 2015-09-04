@@ -45,8 +45,7 @@ class CategoryWinnersServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('CategoryWinnersModel'), $app->make('Settings')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'CategoryWinnersModel',
@@ -55,7 +54,6 @@ class CategoryWinnersServiceProvider extends ServiceProvider
                     $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
                 );
             }
-        )
-        ;
+        );
     }
 }

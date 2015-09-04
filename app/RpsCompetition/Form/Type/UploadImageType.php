@@ -98,7 +98,6 @@ class UploadImageType extends AbstractType
             [
                 'data_class' => 'RpsCompetition\Entity\Form\UploadImage',
             ]
-        )
-        ;
+        );
     }
 }

@@ -47,8 +47,7 @@ class RequestBanquetEntriesServiceProvider extends ServiceProvider
 
                 return new BanquetEntriesType($entity);
             }
-        )
-        ;
+        );
         $this->app->bind(
             '\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesModel',
             function (Application $app) {
@@ -61,8 +60,7 @@ class RequestBanquetEntriesServiceProvider extends ServiceProvider
                     $app->make('Session')
                 );
             }
-        )
-        ;
+        );
         $this->app->bind(
             'RequestBanquetEntries',
             function (Application $app) {
@@ -74,7 +72,6 @@ class RequestBanquetEntriesServiceProvider extends ServiceProvider
                     $app->make('formFactory')
                 );
             }
-        )
-        ;
+        );
     }
 }

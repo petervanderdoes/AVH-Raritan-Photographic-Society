@@ -44,8 +44,7 @@ class MonthlyWinnersServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('MonthlyWinnersModel'), $app->make('Settings')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'MonthlyWinnersModel',
@@ -58,7 +57,6 @@ class MonthlyWinnersServiceProvider extends ServiceProvider
                     $app->make('SeasonHelper')
                 );
             }
-        )
-        ;
+        );
     }
 }

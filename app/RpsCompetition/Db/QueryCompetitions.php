@@ -11,19 +11,19 @@ use RpsCompetition\Helpers\SeasonHelper;
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
  *
- * @property  integer     ID
- * @property  string      Competition_Date
- * @property  string      Medium
- * @property  string      Classification
- * @property  string      Theme
- * @property  string      Date_Created
- * @property  string      Date_Modified
- * @property  string      Closed
- * @property  string      Scored
- * @property  string      Close_Date
- * @property  integer     Max_Entries
- * @property  integer     Num_Judges
- * @property  string      Special_Event
+ * @property  integer ID
+ * @property  string  Competition_Date
+ * @property  string  Medium
+ * @property  string  Classification
+ * @property  string  Theme
+ * @property  string  Date_Created
+ * @property  string  Date_Modified
+ * @property  string  Closed
+ * @property  string  Scored
+ * @property  string  Close_Date
+ * @property  integer Max_Entries
+ * @property  integer Num_Judges
+ * @property  string  Special_Event
  */
 class QueryCompetitions
 {
@@ -63,8 +63,7 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        )
-        ;
+        );
         $closed = $this->rpsdb->get_var($sql);
 
         if ($closed == 'Y') {
@@ -90,8 +89,7 @@ class QueryCompetitions
         $count = $this->rpsdb->get_results(
             'SELECT Closed, COUNT( * ) AS num_competitions FROM competitions GROUP BY Closed',
             ARRAY_A
-        )
-        ;
+        );
 
         $total = 0;
         $status = ['N' => 'open', 'Y' => 'closed'];
@@ -154,8 +152,7 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        )
-        ;
+        );
         $return = $this->rpsdb->get_row($sql, $output);
 
         return $return;
@@ -184,8 +181,7 @@ class QueryCompetitions
                 Competition_Date <= %s',
             $competition_date_start,
             $competition_date_end
-        )
-        ;
+        );
         $result = $this->rpsdb->get_results($sql, $output);
 
         return $result;
@@ -207,8 +203,7 @@ class QueryCompetitions
             WHERE c.ID =  e.Competition_ID
                 AND e.ID = %s',
             $entry_id
-        )
-        ;
+        );
         $result = $this->rpsdb->get_row($sql, $output);
 
         return $result;
@@ -266,8 +261,7 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $season_start_date,
             $season_end_date
-        )
-        ;
+        );
         $return = $this->rpsdb->get_results($sql, $output);
 
         return $return;
@@ -293,8 +287,7 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        )
-        ;
+        );
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -321,8 +314,7 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $date_start,
             $date_end
-        )
-        ;
+        );
         $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
         return $return;
@@ -349,8 +341,7 @@ class QueryCompetitions
             $competition_date,
             $classification,
             $medium
-        )
-        ;
+        );
         $return = $this->rpsdb->get_var($sql);
 
         return $return;
@@ -446,8 +437,7 @@ class QueryCompetitions
             ORDER BY Competition_Date',
             $competition_date_start,
             $competition_date_end
-        )
-        ;
+        );
         $return = $this->rpsdb->get_results($sql, $output);
 
         return $return;
@@ -620,8 +610,7 @@ class QueryCompetitions
                 AND Close_Date < %s',
             $current_time,
             $current_time
-        )
-        ;
+        );
         $result = $this->rpsdb->query($sql);
 
         return $result;

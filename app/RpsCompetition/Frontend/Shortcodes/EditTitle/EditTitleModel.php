@@ -126,8 +126,7 @@ class EditTitleModel
             new EditTitleType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'edittitle']]
-        )
-        ;
+        );
 
         return $form;
     }
