@@ -6,7 +6,6 @@ use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class MyEntriesType
@@ -78,7 +77,6 @@ class MyEntriesType extends AbstractType
             [
                 'data_class' => 'RpsCompetition\Entity\Form\MyEntries',
             ]
-        )
-        ;
+        );
     }
 }

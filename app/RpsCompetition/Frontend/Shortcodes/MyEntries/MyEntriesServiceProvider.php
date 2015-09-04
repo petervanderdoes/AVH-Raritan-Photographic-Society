@@ -54,7 +54,6 @@ class MyEntriesServiceProvider extends ServiceProvider
                 return new MyEntriesModel(
                     $app->make('QueryCompetitions'),
                     $app->make('QueryEntries'),
-                    $app->make('QueryMiscellaneous'),
                     $app->make('PhotoHelper'),
                     $app->make('SeasonHelper'),
                     $app->make('CompetitionHelper'),

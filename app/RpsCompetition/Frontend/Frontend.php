@@ -21,8 +21,6 @@ class Frontend
     private $app;
     /** @var Request */
     private $request;
-    /** @var RpsDb */
-    private $rpsdb;
     /** @var Session */
     private $session;
     /** @var Settings */
@@ -42,7 +40,6 @@ class Frontend
         $this->session->start();
 
         $this->settings = $app->make('Settings');
-        $this->rpsdb = $app->make('RpsDb');
         $this->request = $app->make('IlluminateRequest');
 
         $this->view = $app->make('FrontendView');
