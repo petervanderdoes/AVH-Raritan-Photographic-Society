@@ -22,13 +22,13 @@ class ListTable extends \WP_List_Table
 {
     public $messages;
     public $screen;
+    protected $extra_items;
     /** @var HtmlBuilder */
     private $html;
     private $request;
     private $rpsdb;
     private $settings;
 
-    protected $extra_items;
     /**
      * Constructor
      *
