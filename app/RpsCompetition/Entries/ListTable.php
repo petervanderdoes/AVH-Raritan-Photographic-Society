@@ -28,6 +28,7 @@ class ListTable extends \WP_List_Table
     private $rpsdb;
     private $settings;
 
+    protected $extra_items;
     /**
      * Constructor
      *
@@ -107,8 +108,8 @@ class ListTable extends \WP_List_Table
         $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
         echo $this->html->anchor(
             $urlUser,
-            $user->first_name . ' ' . $user->last_name,
-            ['title' => 'Entries for ' . $user->first_name . ' ' . $user->last_name]
+            $user->user_firstname . ' ' . $user->user_lastname,
+            ['title' => 'Entries for ' . $user->user_firstname . ' ' . $user->user_lastname]
         );
     }
 

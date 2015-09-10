@@ -1263,8 +1263,8 @@ final class Admin
                     __('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'),
                     $entryID,
                     $entry->Title,
-                    $user->first_name,
-                    $user->last_name,
+                    $user->user_firstname,
+                    $user->user_lastname,
                     $competition->Theme,
                     mysql2date(get_option('date_format'), $competition->Competition_Date)
                 );
@@ -1341,7 +1341,7 @@ final class Admin
         echo $formBuilder->openTable();
 
         $user = get_user_by('id', $entry->Member_ID);
-        echo '<h3>Photographer: ' . $user->first_name . ' ' . $user->last_name . "</h3>\n";
+        echo '<h3>Photographer: ' . $user->user_firstname . ' ' . $user->user_lastname . "</h3>\n";
         echo '<img src="' . $photo_helper->getThumbnailUrl($entry->Server_File_Name, '200') . '" />' . "\n";
 
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));

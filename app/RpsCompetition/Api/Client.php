@@ -408,10 +408,10 @@ class Client
                     $id->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['ID'])));
 
                     $fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($user->first_name)));
+                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_firstname)));
 
                     $lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($user->last_name)));
+                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_lastname)));
 
                     $title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
                     $title_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Title'])));
