@@ -180,7 +180,6 @@ class AllScoresModel
         $default_score_array = $this->getDefaultScoreArray($competition_dates);
 
         foreach ($club_competition_results as $result) {
-
             $medium_key = $medium_map[$result['Medium']];
             if ($result['Member_ID'] !== $previous_member || $result['Medium'] !== $previous_medium) {
                 $previous_member = $result['Member_ID'];

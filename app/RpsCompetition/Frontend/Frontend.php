@@ -118,7 +118,7 @@ class Frontend
         $this->setupUserMeta();
         $this->setupSocialButtons();
 
-        $this->register_scripts_styles();
+        $this->registerScriptsStyles();
 
         unset($query_competitions);
     }
@@ -450,7 +450,7 @@ class Frontend
         return $title;
     }
 
-    private function register_scripts_styles()
+    private function registerScriptsStyles()
     {
         if (WP_LOCAL_DEV !== true) {
             $rps_competition_css_version = 'a06a6dd';

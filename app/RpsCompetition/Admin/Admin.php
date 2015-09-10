@@ -321,7 +321,6 @@ final class Admin
         ];
 
         foreach ($all_classifications as $data) {
-
             if (current_user_can('rps_edit_competition_classification')) {
                 echo $formBuilder->outputLabel($formBuilder->label($data['name'], $data['name']));
                 echo $formBuilder->outputField($formBuilder->select($data['name'], $classification, $data['selected']));

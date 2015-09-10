@@ -187,7 +187,6 @@ class WpseoHelper
         $options = get_option('avh-rps');
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
-
             $selected_date = get_query_var('selected_date');
             $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
             $competition = current($competitions);

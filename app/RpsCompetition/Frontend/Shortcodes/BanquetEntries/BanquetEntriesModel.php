@@ -305,7 +305,6 @@ class BanquetEntriesModel
     {
         $return = false;
         foreach ($this->banquet_entries as $banquet_entry) {
-
             if (!empty($banquet_entry) && $banquet_entry->Title == $entry['title']) {
                 $return = true;
                 break;
