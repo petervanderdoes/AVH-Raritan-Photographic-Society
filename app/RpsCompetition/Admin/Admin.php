@@ -638,7 +638,7 @@ final class Admin
                                 }
                             }
                         }
-                        unset ($medium_keys, $classification_keys);
+                        unset($medium_keys, $classification_keys);
                     } else {
                         $this->message = $validator->errors();
                         $this->status = 'error';
@@ -1500,7 +1500,7 @@ final class Admin
             $return = $query_entries->updateEntry($data);
         }
 
-        unset ($query_entries, $query_competitions, $photo_helper);
+        unset($query_entries, $query_competitions, $photo_helper);
 
         return $return;
     }
