@@ -26,6 +26,6 @@
     }
   ],
   "require": {
-    "imagine/imagine": "dev-develop"
+    "imagine/imagine": "dev-master"
   }
 }
