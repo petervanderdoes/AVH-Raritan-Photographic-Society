@@ -22,44 +22,23 @@ abstract class AbstractImage implements ImageInterface
     protected $metadata;
 
     /**
-     * Assures the metadata instance will be cloned, too
-     */
-    public function __clone()
-    {
-        if ($this->metadata !== null) {
-            $this->metadata = clone $this->metadata;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function metadata()
-    {
-        return $this->metadata;
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @return ImageInterface
      */
-    public function thumbnail(
-        BoxInterface $size,
-        $mode = ImageInterface::THUMBNAIL_INSET,
-        $filter = ImageInterface::FILTER_UNDEFINED
-    ) {
-        if ($mode !== ImageInterface::THUMBNAIL_INSET && $mode !== ImageInterface::THUMBNAIL_OUTBOUND) {
+    public function thumbnail(BoxInterface $size, $mode = ImageInterface::THUMBNAIL_INSET, $filter = ImageInterface::FILTER_UNDEFINED)
+    {
+        if ($mode !== ImageInterface::THUMBNAIL_INSET &&
+            $mode !== ImageInterface::THUMBNAIL_OUTBOUND) {
             throw new InvalidArgumentException('Invalid mode specified');
         }
 
         $imageSize = $this->getSize();
-        $ratios = [
+        $ratios = array(
             $size->getWidth() / $imageSize->getWidth(),
             $size->getHeight() / $imageSize->getHeight()
-        ];
+        );
 
-        /** @var self $thumbnail */
         $thumbnail = $this->copy();
 
         $thumbnail->usePalette($this->palette());
@@ -79,30 +58,23 @@ abstract class AbstractImage implements ImageInterface
         if ($mode === ImageInterface::THUMBNAIL_OUTBOUND) {
             if (!$imageSize->contains($size)) {
                 $size = new Box(
-                    min($imageSize->getWidth(), $size->getWidth()), min($imageSize->getHeight(), $size->getHeight())
+                    min($imageSize->getWidth(), $size->getWidth()),
+                    min($imageSize->getHeight(), $size->getHeight())
                 );
             } else {
-                $imageSize = $thumbnail->getSize()
-                                       ->scale($ratio)
-                ;
+                $imageSize = $thumbnail->getSize()->scale($ratio);
                 $thumbnail->resize($imageSize, $filter);
             }
-            $thumbnail->crop(
-                new Point(
-                    max(0, round(($imageSize->getWidth() - $size->getWidth()) / 2)),
-                    max(0, round(($imageSize->getHeight() - $size->getHeight()) / 2))
-                ),
-                $size
-            )
-            ;
+            $thumbnail->crop(new Point(
+                max(0, round(($imageSize->getWidth() - $size->getWidth()) / 2)),
+                max(0, round(($imageSize->getHeight() - $size->getHeight()) / 2))
+            ), $size);
         } else {
             if (!$imageSize->contains($size)) {
                 $imageSize = $imageSize->scale($ratio);
                 $thumbnail->resize($imageSize, $filter);
             } else {
-                $imageSize = $thumbnail->getSize()
-                                       ->scale($ratio)
-                ;
+                $imageSize = $thumbnail->getSize()->scale($ratio);
                 $thumbnail->resize($imageSize, $filter);
             }
         }
@@ -126,4 +98,23 @@ abstract class AbstractImage implements ImageInterface
 
         return $options;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function metadata()
+    {
+        return $this->metadata;
+    }
+
+    /**
+     * Assures the metadata instance will be cloned, too
+     */
+    public function __clone()
+    {
+        if ($this->metadata !== null) {
+            $this->metadata = clone $this->metadata;
+        }
+    }
+
 }

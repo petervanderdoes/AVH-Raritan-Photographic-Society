@@ -12,12 +12,12 @@
 namespace Imagine\Filter\Advanced;
 
 use Imagine\Filter\FilterInterface;
-use Imagine\Image\BoxInterface;
 use Imagine\Image\ImageInterface;
-use Imagine\Image\ImagineInterface;
-use Imagine\Image\Palette\Color\ColorInterface;
+use Imagine\Image\BoxInterface;
 use Imagine\Image\Point;
 use Imagine\Image\PointInterface;
+use Imagine\Image\Palette\Color\ColorInterface;
+use Imagine\Image\ImagineInterface;
 
 /**
  * A canvas filter
@@ -25,21 +25,24 @@ use Imagine\Image\PointInterface;
 class Canvas implements FilterInterface
 {
     /**
-     * @var ColorInterface
+     * @var BoxInterface
      */
-    private $background;
-    /**
-     * @var ImagineInterface
-     */
-    private $imagine;
+    private $size;
+
     /**
      * @var PointInterface
      */
     private $placement;
+
     /**
-     * @var BoxInterface
+     * @var ColorInterface
      */
-    private $size;
+    private $background;
+
+    /**
+     * @var ImagineInterface
+     */
+    private $imagine;
 
     /**
      * Constructs Canvas filter with given width and height and the placement of the current image
@@ -50,12 +53,8 @@ class Canvas implements FilterInterface
      * @param PointInterface   $placement
      * @param ColorInterface   $background
      */
-    public function __construct(
-        ImagineInterface $imagine,
-        BoxInterface $size,
-        PointInterface $placement = null,
-        ColorInterface $background = null
-    ) {
+    public function __construct(ImagineInterface $imagine, BoxInterface $size, PointInterface $placement = null, ColorInterface $background = null)
+    {
         $this->imagine = $imagine;
         $this->size = $size;
         $this->placement = $placement ?: new Point(0, 0);

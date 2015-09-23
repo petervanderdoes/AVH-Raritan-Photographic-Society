@@ -11,8 +11,8 @@
 
 namespace Imagine\Image\Fill\Gradient;
 
-use Imagine\Image\Fill\FillInterface;
 use Imagine\Image\Palette\Color\ColorInterface;
+use Imagine\Image\Fill\FillInterface;
 use Imagine\Image\PointInterface;
 
 /**
@@ -21,17 +21,19 @@ use Imagine\Image\PointInterface;
 abstract class Linear implements FillInterface
 {
     /**
-     * @var ColorInterface
-     */
-    private $end;
-    /**
      * @var integer
      */
     private $length;
+
     /**
      * @var ColorInterface
      */
     private $start;
+
+    /**
+     * @var ColorInterface
+     */
+    private $end;
 
     /**
      * Constructs a linear gradient with overall gradient length, and start and
@@ -44,18 +46,9 @@ abstract class Linear implements FillInterface
     final public function __construct($length, ColorInterface $start, ColorInterface $end)
     {
         $this->length = $length;
-        $this->start = $start;
-        $this->end = $end;
+        $this->start  = $start;
+        $this->end    = $end;
     }
-
-    /**
-     * Get the distance of the position relative to the beginning of the gradient
-     *
-     * @param PointInterface $position
-     *
-     * @return integer
-     */
-    abstract protected function getDistance(PointInterface $position);
 
     /**
      * {@inheritdoc}
@@ -72,9 +65,15 @@ abstract class Linear implements FillInterface
             return $this->start;
         }
 
-        return $this->start->getPalette()
-                           ->blend($this->start, $this->end, $l / $this->length)
-            ;
+        return $this->start->getPalette()->blend($this->start, $this->end, $l / $this->length);
+    }
+
+    /**
+     * @return ColorInterface
+     */
+    final public function getStart()
+    {
+        return $this->start;
     }
 
     /**
@@ -86,10 +85,11 @@ abstract class Linear implements FillInterface
     }
 
     /**
-     * @return ColorInterface
+     * Get the distance of the position relative to the beginning of the gradient
+     *
+     * @param PointInterface $position
+     *
+     * @return integer
      */
-    final public function getStart()
-    {
-        return $this->start;
-    }
+    abstract protected function getDistance(PointInterface $position);
 }

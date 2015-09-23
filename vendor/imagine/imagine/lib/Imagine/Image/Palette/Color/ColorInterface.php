@@ -15,34 +15,25 @@ use Imagine\Image\Palette\PaletteInterface;
 
 interface ColorInterface
 {
-    const COLOR_BLUE = 'blue';
-    const COLOR_CYAN = 'cyan';
-    const COLOR_GRAY = 'gray';
-    const COLOR_GREEN = 'green';
-    const COLOR_KEYLINE = 'keyline';
-    const COLOR_MAGENTA = 'magenta';
     const COLOR_RED = 'red';
+    const COLOR_GREEN = 'green';
+    const COLOR_BLUE = 'blue';
+
+    const COLOR_CYAN = 'cyan';
+    const COLOR_MAGENTA = 'magenta';
     const COLOR_YELLOW = 'yellow';
+    const COLOR_KEYLINE = 'keyline';
+
+    const COLOR_GRAY = 'gray';
 
     /**
-     * Returns a copy of the current color, darkened by the specified number of
-     * shades
+     * Return the value of one of the component.
      *
-     * @param integer $shade
+     * @param string $component One of the ColorInterface::COLOR_* component
      *
-     * @return ColorInterface
+     * @return Integer
      */
-    public function darken($shade);
-
-    /**
-     * Returns a copy of current color, incrementing the alpha channel by the
-     * given amount
-     *
-     * @param integer $alpha
-     *
-     * @return ColorInterface
-     */
-    public function dissolve($alpha);
+    public function getValue($component);
 
     /**
      * Returns percentage of transparency of the color
@@ -59,13 +50,34 @@ interface ColorInterface
     public function getPalette();
 
     /**
-     * Return the value of one of the component.
+     * Returns a copy of current color, incrementing the alpha channel by the
+     * given amount
      *
-     * @param string $component One of the ColorInterface::COLOR_* component
+     * @param integer $alpha
      *
-     * @return Integer
+     * @return ColorInterface
      */
-    public function getValue($component);
+    public function dissolve($alpha);
+
+    /**
+     * Returns a copy of the current color, lightened by the specified number
+     * of shades
+     *
+     * @param integer $shade
+     *
+     * @return ColorInterface
+     */
+    public function lighten($shade);
+
+    /**
+     * Returns a copy of the current color, darkened by the specified number of
+     * shades
+     *
+     * @param integer $shade
+     *
+     * @return ColorInterface
+     */
+    public function darken($shade);
 
     /**
      * Returns a gray related to the current color
@@ -80,14 +92,4 @@ interface ColorInterface
      * @return Boolean
      */
     public function isOpaque();
-
-    /**
-     * Returns a copy of the current color, lightened by the specified number
-     * of shades
-     *
-     * @param integer $shade
-     *
-     * @return ColorInterface
-     */
-    public function lighten($shade);
 }

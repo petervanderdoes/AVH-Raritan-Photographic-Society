@@ -25,14 +25,16 @@ class Border implements FilterInterface
      * @var ColorInterface
      */
     private $color;
-    /**
-     * @var integer
-     */
-    private $height;
+
     /**
      * @var integer
      */
     private $width;
+
+    /**
+     * @var integer
+     */
+    private $height;
 
     /**
      * Constructs Border filter with given color, width and height
@@ -60,33 +62,35 @@ class Border implements FilterInterface
         $draw = $image->draw();
 
         // Draw top and bottom lines
-        $draw->line(
-            new Point(0, 0),
-            new Point($width - 1, 0),
-            $this->color,
-            $this->height
-        )
-             ->line(
-                 new Point($width - 1, $height - 1),
-                 new Point(0, $height - 1),
-                 $this->color,
-                 $this->height
-             )
+        $draw
+            ->line(
+                new Point(0, 0),
+                new Point($width - 1, 0),
+                $this->color,
+                $this->height
+            )
+            ->line(
+                new Point($width - 1, $height - 1),
+                new Point(0, $height - 1),
+                $this->color,
+                $this->height
+            )
         ;
 
         // Draw sides
-        $draw->line(
-            new Point(0, 0),
-            new Point(0, $height - 1),
-            $this->color,
-            $this->width
-        )
-             ->line(
-                 new Point($width - 1, 0),
-                 new Point($width - 1, $height - 1),
-                 $this->color,
-                 $this->width
-             )
+        $draw
+            ->line(
+                new Point(0, 0),
+                new Point(0, $height - 1),
+                $this->color,
+                $this->width
+            )
+            ->line(
+                new Point($width - 1, 0),
+                new Point($width - 1, $height - 1),
+                $this->color,
+                $this->width
+            )
         ;
 
         return $image;

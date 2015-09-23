@@ -14,16 +14,16 @@ namespace Imagine\Image;
 interface ProfileInterface
 {
     /**
-     * Returns the profile data
-     *
-     * @return String
-     */
-    public function data();
-
-    /**
      * Returns the name of the profile
      *
      * @return String
      */
     public function name();
+
+    /**
+     * Returns the profile data
+     *
+     * @return String
+     */
+    public function data();
 }

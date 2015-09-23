@@ -4,15 +4,17 @@ env:
   - IMAGINE_DRIVER=imagick
   - IMAGINE_DRIVER=gmagick
 
-before_script:
+before_install:
   - composer self-update
+
+install:
   - composer install --prefer-source
   - sudo apt-get remove -y imagemagick libmagickcore-dev libmagickwand-dev
   - sudo apt-get install -y libtiff-dev libjpeg-dev libdjvulibre-dev libwmf-dev pkg-config
   - echo '' > ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
   - sh -e -c " if [ '$IMAGINE_DRIVER' = 'imagick' ]; then
-              wget http://www.imagemagick.org/download/ImageMagick-6.8.9-10.tar.gz;
-              tar xzf ImageMagick-6.8.9-10.tar.gz;
+              wget http://www.imagemagick.org/download/releases/ImageMagick-6.8.9-10.tar.xz;
+              tar -xf ImageMagick-6.8.9-10.tar.xz;
               cd ImageMagick-6.8.9-10;
               ./configure --prefix=/opt/imagemagick;
               make -j;
@@ -44,8 +46,12 @@ before_script:
             fi"
 
 php:
-  - 5.3.3
   - 5.3
   - 5.4
   - 5.5
   - 5.6
+  - 7.0
+
+matrix:
+    allow_failures:
+        - php: 7.0
