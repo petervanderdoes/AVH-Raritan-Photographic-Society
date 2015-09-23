@@ -19,23 +19,6 @@ use Imagine\Image\Palette\Color\ColorInterface;
 interface FontInterface
 {
     /**
-     * Gets BoxInterface of font size on the image based on string and angle
-     *
-     * @param string  $string
-     * @param integer $angle
-     *
-     * @return BoxInterface
-     */
-    public function box($string, $angle = 0);
-
-    /**
-     * Gets font's color
-     *
-     * @return ColorInterface
-     */
-    public function getColor();
-
-    /**
      * Gets the fontfile for current font
      *
      * @return string
@@ -48,4 +31,21 @@ interface FontInterface
      * @return integer
      */
     public function getSize();
+
+    /**
+     * Gets font's color
+     *
+     * @return ColorInterface
+     */
+    public function getColor();
+
+    /**
+     * Gets BoxInterface of font size on the image based on string and angle
+     *
+     * @param string  $string
+     * @param integer $angle
+     *
+     * @return BoxInterface
+     */
+    public function box($string, $angle = 0);
 }

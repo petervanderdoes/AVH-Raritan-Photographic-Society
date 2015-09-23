@@ -1,7 +1,19 @@
 # CHANGELOG
 
-### 0.6.x (2015-xx-xx)
+### 0.6.3-avh2 (2015-09-23)
   * Add option to keep aspect ratio when resizing.
+  * Add scrutinizer file
+  
+### 0.6.3 (2015-09-19)
+  * Fix wrong array_merge when calling Transformation::getFilters without filters
+  * Add export-ignore git attribute (@Benoth)
+  * Fix docblocks (@Sm0ke0ut and @norkunas)
+  * Fix animated gif loop length options (@jygaulier)
+  * Multiple tweaks for the repository and travis builds (@localheinz, @vrkansagara and @dunzun)
+  * Fix metadata extraction from streams (@armatronic)
+  * Fix autorotation (@tarleb)
+  * Load exifmetadata reader whenever possible
+  * Add metadata getter
 
 ### 0.6.2 (2014-11-11)
   * Stripping image containing an invalid ICC profile fails

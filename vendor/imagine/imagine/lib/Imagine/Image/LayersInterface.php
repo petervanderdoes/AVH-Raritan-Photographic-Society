@@ -11,9 +11,9 @@
 
 namespace Imagine\Image;
 
+use Imagine\Exception\RuntimeException;
 use Imagine\Exception\InvalidArgumentException;
 use Imagine\Exception\OutOfBoundsException;
-use Imagine\Exception\RuntimeException;
 
 /**
  * The layers interface
@@ -21,15 +21,11 @@ use Imagine\Exception\RuntimeException;
 interface LayersInterface extends \Iterator, \Countable, \ArrayAccess
 {
     /**
-     * Adds an image at the end of the layers stack
-     *
-     * @param ImageInterface $image
-     *
-     * @return LayersInterface
+     * Merge layers into the original objects
      *
      * @throws RuntimeException
      */
-    public function add(ImageInterface $image);
+    public function merge();
 
     /**
      * Animates layers
@@ -52,6 +48,43 @@ interface LayersInterface extends \Iterator, \Countable, \ArrayAccess
     public function coalesce();
 
     /**
+     * Adds an image at the end of the layers stack
+     *
+     * @param ImageInterface $image
+     *
+     * @return LayersInterface
+     *
+     * @throws RuntimeException
+     */
+    public function add(ImageInterface $image);
+
+    /**
+     * Set an image at offset
+     *
+     * @param integer        $offset
+     * @param ImageInterface $image
+     *
+     * @return LayersInterface
+     *
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
+     * @throws OutOfBoundsException
+     */
+    public function set($offset, ImageInterface $image);
+
+    /**
+     * Removes the image at offset
+     *
+     * @param integer $offset
+     *
+     * @return LayersInterface
+     *
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
+     */
+    public function remove($offset);
+
+    /**
      * Returns the image at offset
      *
      * @param integer $offset
@@ -71,37 +104,4 @@ interface LayersInterface extends \Iterator, \Countable, \ArrayAccess
      * @return Boolean
      */
     public function has($offset);
-
-    /**
-     * Merge layers into the original objects
-     *
-     * @throws RuntimeException
-     */
-    public function merge();
-
-    /**
-     * Removes the image at offset
-     *
-     * @param integer $offset
-     *
-     * @return LayersInterface
-     *
-     * @throws RuntimeException
-     * @throws InvalidArgumentException
-     */
-    public function remove($offset);
-
-    /**
-     * Set an image at offset
-     *
-     * @param integer        $offset
-     * @param ImageInterface $image
-     *
-     * @return LayersInterface
-     *
-     * @throws RuntimeException
-     * @throws InvalidArgumentException
-     * @throws OutOfBoundsException
-     */
-    public function set($offset, ImageInterface $image);
 }

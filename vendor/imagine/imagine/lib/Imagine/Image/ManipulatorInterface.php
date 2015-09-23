@@ -11,34 +11,26 @@
 
 namespace Imagine\Image;
 
+use Imagine\Exception\InvalidArgumentException;
 use Imagine\Exception\OutOfBoundsException;
 use Imagine\Exception\RuntimeException;
-use Imagine\Image\Fill\FillInterface;
 use Imagine\Image\Palette\Color\ColorInterface;
+use Imagine\Image\Fill\FillInterface;
 
 /**
  * The manipulator interface
  */
 interface ManipulatorInterface
 {
-    const THUMBNAIL_INSET = 'inset';
+    const THUMBNAIL_INSET    = 'inset';
     const THUMBNAIL_OUTBOUND = 'outbound';
-
-    /**
-     * Applies a given mask to current image's alpha channel
-     *
-     * @param ImageInterface $mask
-     *
-     * @return ManipulatorInterface
-     */
-    public function applyMask(ImageInterface $mask);
 
     /**
      * Copies current source image into a new ImageInterface instance
      *
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
     public function copy();
 
@@ -52,56 +44,9 @@ interface ManipulatorInterface
      * @throws OutOfBoundsException
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
     public function crop(PointInterface $start, BoxInterface $size);
-
-    /**
-     * Fills image with provided filling, by replacing each pixel's color in
-     * the current image with corresponding color from FillInterface, and
-     * returns modified image
-     *
-     * @param FillInterface $fill
-     *
-     * @return ManipulatorInterface
-     */
-    public function fill(FillInterface $fill);
-
-    /**
-     * Flips current image using horizontal axis
-     *
-     * @throws RuntimeException
-     *
-     * @return ManipulatorInterface
-     */
-    public function flipHorizontally();
-
-    /**
-     * Flips current image using vertical axis
-     *
-     * @throws RuntimeException
-     *
-     * @return ManipulatorInterface
-     */
-    public function flipVertically();
-
-    /**
-     * Pastes an image into a parent image
-     * Throws exceptions if image exceeds parent image borders or if paste
-     * operation fails
-     *
-     * Returns source image
-     *
-     * @param ImageInterface $image
-     * @param PointInterface $start
-     *
-     * @throws \InvalidArgumentException
-     * @throws OutOfBoundsException
-     * @throws RuntimeException
-     *
-     * @return ManipulatorInterface
-     */
-    public function paste(ImageInterface $image, PointInterface $start);
 
     /**
      * Resizes current image and returns self
@@ -111,7 +56,7 @@ interface ManipulatorInterface
      *
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
     public function resize(BoxInterface $size, $filter = ImageInterface::FILTER_UNDEFINED);
 
@@ -125,9 +70,27 @@ interface ManipulatorInterface
      *
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
     public function rotate($angle, ColorInterface $background = null);
+
+    /**
+     * Pastes an image into a parent image
+     * Throws exceptions if image exceeds parent image borders or if paste
+     * operation fails
+     *
+     * Returns source image
+     *
+     * @param ImageInterface $image
+     * @param PointInterface $start
+     *
+     * @throws InvalidArgumentException
+     * @throws OutOfBoundsException
+     * @throws RuntimeException
+     *
+     * @return static
+     */
+    public function paste(ImageInterface $image, PointInterface $start);
 
     /**
      * Saves the image at a specified path, the target file extension is used
@@ -139,9 +102,9 @@ interface ManipulatorInterface
      *
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
-    public function save($path = null, array $options = []);
+    public function save($path = null, array $options = array());
 
     /**
      * Outputs the image content
@@ -151,16 +114,34 @@ interface ManipulatorInterface
      *
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
-    public function show($format, array $options = []);
+    public function show($format, array $options = array());
+
+    /**
+     * Flips current image using horizontal axis
+     *
+     * @throws RuntimeException
+     *
+     * @return static
+     */
+    public function flipHorizontally();
+
+    /**
+     * Flips current image using vertical axis
+     *
+     * @throws RuntimeException
+     *
+     * @return static
+     */
+    public function flipVertically();
 
     /**
      * Remove all profiles and comments
      *
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
     public function strip();
 
@@ -174,11 +155,27 @@ interface ManipulatorInterface
      *
      * @throws RuntimeException
      *
-     * @return ManipulatorInterface
+     * @return static
      */
-    public function thumbnail(
-        BoxInterface $size,
-        $mode = self::THUMBNAIL_INSET,
-        $filter = ImageInterface::FILTER_UNDEFINED
-    );
+    public function thumbnail(BoxInterface $size, $mode = self::THUMBNAIL_INSET, $filter = ImageInterface::FILTER_UNDEFINED);
+
+    /**
+     * Applies a given mask to current image's alpha channel
+     *
+     * @param ImageInterface $mask
+     *
+     * @return static
+     */
+    public function applyMask(ImageInterface $mask);
+
+    /**
+     * Fills image with provided filling, by replacing each pixel's color in
+     * the current image with corresponding color from FillInterface, and
+     * returns modified image
+     *
+     * @param FillInterface $fill
+     *
+     * @return static
+     */
+    public function fill(FillInterface $fill);
 }

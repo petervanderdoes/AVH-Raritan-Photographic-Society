@@ -11,14 +11,27 @@
 
 namespace Imagine\Image\Palette;
 
-use Imagine\Image\Palette\Color\ColorInterface;
 use Imagine\Image\ProfileInterface;
+use Imagine\Image\Palette\Color\ColorInterface;
 
 interface PaletteInterface
 {
-    const PALETTE_CMYK = 'cmyk';
     const PALETTE_GRAYSCALE = 'gray';
     const PALETTE_RGB = 'rgb';
+    const PALETTE_CMYK = 'cmyk';
+
+    /**
+     * Returns a color given some values
+     *
+     * @param string|array|integer $color A color
+     * @param integer|null         $alpha Set alpha to null to disable it
+     *
+     * @return ColorInterface
+     *
+     * @throws InvalidArgumentException In case you pass an alpha value to a
+     *                                  Palette that does not support alpha
+     */
+    public function color($color, $alpha = null);
 
     /**
      * Blend two colors given an amount
@@ -32,16 +45,22 @@ interface PaletteInterface
     public function blend(ColorInterface $color1, ColorInterface $color2, $amount);
 
     /**
-     * Returns a color given some values
+     * Attachs an ICC profile to this Palette.
      *
-     * @param string|array|integer $color A color
-     * @param integer|null         $alpha Set alpha to null to disable it
+     * (A default profile is provided by default)
      *
-     * @return ColorInterface
+     * @param ProfileInterface $profile
      *
-     * @throws \InvalidArgumentException In case you pass an alpha value to a Palette that does not support alpha
+     * @return PaletteInterface
      */
-    public function color($color, $alpha = null);
+    public function useProfile(ProfileInterface $profile);
+
+    /**
+     * Returns the ICC profile attached to this Palette.
+     *
+     * @return ProfileInterface
+     */
+    public function profile();
 
     /**
      * Returns the name of this Palette, one of PaletteInterface::PALETTE_*
@@ -60,27 +79,9 @@ interface PaletteInterface
     public function pixelDefinition();
 
     /**
-     * Returns the ICC profile attached to this Palette.
-     *
-     * @return ProfileInterface
-     */
-    public function profile();
-
-    /**
      * Tells if alpha channel is supported in this palette
      *
      * @return Boolean
      */
     public function supportsAlpha();
-
-    /**
-     * Attachs an ICC profile to this Palette.
-     *
-     * (A default profile is provided by default)
-     *
-     * @param ProfileInterface $profile
-     *
-     * @return PaletteInterface
-     */
-    public function useProfile(ProfileInterface $profile);
 }

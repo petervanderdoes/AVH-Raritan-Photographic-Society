@@ -30,54 +30,12 @@ class Effects implements EffectsInterface
     /**
      * {@inheritdoc}
      */
-    public function blur($sigma = 1)
-    {
-        try {
-            $this->imagick->gaussianBlurImage(0, $sigma);
-        } catch (\ImagickException $e) {
-            throw new RuntimeException('Failed to blur the image', $e->getCode(), $e);
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function colorize(ColorInterface $color)
-    {
-        try {
-            $this->imagick->colorizeImage((string) $color, 1);
-        } catch (\ImagickException $e) {
-            throw new RuntimeException('Failed to colorize the image');
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function gamma($correction)
     {
         try {
             $this->imagick->gammaImage($correction, \Imagick::CHANNEL_ALL);
         } catch (\ImagickException $e) {
             throw new RuntimeException('Failed to apply gamma correction to the image');
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function grayscale()
-    {
-        try {
-            $this->imagick->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
-        } catch (\ImagickException $e) {
-            throw new RuntimeException('Failed to grayscale the image');
         }
 
         return $this;
@@ -100,12 +58,54 @@ class Effects implements EffectsInterface
     /**
      * {@inheritdoc}
      */
+    public function grayscale()
+    {
+        try {
+            $this->imagick->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
+        } catch (\ImagickException $e) {
+            throw new RuntimeException('Failed to grayscale the image');
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function colorize(ColorInterface $color)
+    {
+        try {
+            $this->imagick->colorizeImage((string) $color, 1);
+        } catch (\ImagickException $e) {
+            throw new RuntimeException('Failed to colorize the image');
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function sharpen()
     {
         try {
             $this->imagick->sharpenImage(2, 1);
         } catch (\ImagickException $e) {
             throw new RuntimeException('Failed to sharpen the image');
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function blur($sigma = 1)
+    {
+        try {
+            $this->imagick->gaussianBlurImage(0, $sigma);
+        } catch (\ImagickException $e) {
+            throw new RuntimeException('Failed to blur the image', $e->getCode(), $e);
         }
 
         return $this;

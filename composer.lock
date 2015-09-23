@@ -1,24 +1,37 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "95e73a01ce025b8f621ef36b93de9c3a",
+    "hash": "b1ba7250b3149306a184494ff504d847",
+    "content-hash": "d0cead43b797969f7b57e1f32f2e8a87",
     "packages": [
         {
             "name": "imagine/imagine",
-            "version": "dev-develop",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/petervanderdoes/imagine.git",
-                "reference": "18cb1cc1200b3dd1d9f9cd6c3d977af4808f7b09"
+                "reference": "759fd0b5c2be85b564daa1ecd5ce4c0cf06be929"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/petervanderdoes/imagine/zipball/18cb1cc1200b3dd1d9f9cd6c3d977af4808f7b09",
-                "reference": "18cb1cc1200b3dd1d9f9cd6c3d977af4808f7b09",
+                "url": "https://api.github.com/repos/petervanderdoes/imagine/zipball/759fd0b5c2be85b564daa1ecd5ce4c0cf06be929",
+                "reference": "759fd0b5c2be85b564daa1ecd5ce4c0cf06be929",
                 "shasum": ""
+            },
+            "archive": {
+                "exclude": [
+                    "/.*",
+                    "/tests",
+                    "/vendor",
+                    "/bin",
+                    "docs/_build",
+                    "Imagine-*.tgz",
+                    "imagine-*.phar",
+                    "composer.phar"
+                ]
             },
             "require": {
                 "php": ">=5.3.2"
@@ -61,10 +74,10 @@
                 "image processing"
             ],
             "support": {
-                "source": "https://github.com/petervanderdoes/imagine/tree/develop",
+                "source": "https://github.com/petervanderdoes/imagine/tree/v0.6.3-avh2",
                 "issues": "https://github.com/petervanderdoes/imagine/issues"
             },
-            "time": "2015-03-03 19:35:38"
+            "time": "2015-09-23 15:30:04"
         }
     ],
     "packages-dev": [],

@@ -11,17 +11,17 @@
 
 namespace Imagine\Gmagick;
 
-use Imagine\Exception\InvalidArgumentException;
-use Imagine\Exception\NotSupportedException;
-use Imagine\Exception\RuntimeException;
 use Imagine\Image\AbstractImagine;
+use Imagine\Exception\NotSupportedException;
 use Imagine\Image\BoxInterface;
 use Imagine\Image\Metadata\MetadataBag;
-use Imagine\Image\Palette\CMYK;
-use Imagine\Image\Palette\Color\CMYK as CMYKColor;
 use Imagine\Image\Palette\Color\ColorInterface;
 use Imagine\Image\Palette\Grayscale;
+use Imagine\Image\Palette\CMYK;
 use Imagine\Image\Palette\RGB;
+use Imagine\Image\Palette\Color\CMYK as CMYKColor;
+use Imagine\Exception\InvalidArgumentException;
+use Imagine\Exception\RuntimeException;
 
 /**
  * Imagine implementation using the Gmagick PHP extension
@@ -36,6 +36,23 @@ class Imagine extends AbstractImagine
         if (!class_exists('Gmagick')) {
             throw new RuntimeException('Gmagick not installed');
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function open($path)
+    {
+        $path = $this->checkPath($path);
+
+        try {
+            $gmagick = new \Gmagick($path);
+            $image = new Image($gmagick, $this->createPalette($gmagick), $this->getMetadataReader()->readFile($path));
+        } catch (\GmagickException $e) {
+            throw new RuntimeException(sprintf('Unable to open image %s', $path), $e->getCode(), $e);
+        }
+
+        return $image;
     }
 
     /**
@@ -56,15 +73,13 @@ class Imagine extends AbstractImagine
             if ($color instanceof CMYKColor) {
                 $switchPalette = $palette;
                 $palette = new RGB();
-                $pixel = new \GmagickPixel($palette->color((string) $color));
+                $pixel   = new \GmagickPixel($palette->color((string) $color));
             } else {
                 $switchPalette = null;
-                $pixel = new \GmagickPixel((string) $color);
+                $pixel   = new \GmagickPixel((string) $color);
             }
 
-            if ($color->getPalette()
-                      ->supportsAlpha() && $color->getAlpha() < 100
-            ) {
+            if ($color->getPalette()->supportsAlpha() && $color->getAlpha() < 100) {
                 throw new NotSupportedException('alpha transparency is not supported');
             }
 
@@ -87,47 +102,9 @@ class Imagine extends AbstractImagine
     /**
      * {@inheritdoc}
      */
-    public function font($file, $size, ColorInterface $color)
-    {
-        $gmagick = new \Gmagick();
-        $gmagick->newimage(1, 1, 'transparent');
-
-        return new Font($gmagick, $file, $size, $color);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function load($string)
     {
-        return $this->doLoad(
-            $string,
-            $this->getMetadataReader()
-                 ->readData($string)
-        )
-            ;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function open($path)
-    {
-        $path = $this->checkPath($path);
-
-        try {
-            $gmagick = new \Gmagick($path);
-            $image = new Image(
-                $gmagick,
-                $this->createPalette($gmagick),
-                $this->getMetadataReader()
-                     ->readFile($path)
-            );
-        } catch (\GmagickException $e) {
-            throw new RuntimeException(sprintf('Unable to open image %s', $path), $e->getCode(), $e);
-        }
-
-        return $image;
+        return $this->doLoad($string, $this->getMetadataReader()->readData($string));
     }
 
     /**
@@ -145,12 +122,18 @@ class Imagine extends AbstractImagine
             throw new InvalidArgumentException('Couldn\'t read given resource');
         }
 
-        return $this->doLoad(
-            $content,
-            $this->getMetadataReader()
-                 ->readStream($resource)
-        )
-            ;
+        return $this->doLoad($content, $this->getMetadataReader()->readStream($resource));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function font($file, $size, ColorInterface $color)
+    {
+        $gmagick = new \Gmagick();
+        $gmagick->newimage(1, 1, 'transparent');
+
+        return new Font($gmagick, $file, $size, $color);
     }
 
     private function createPalette(\Gmagick $gmagick)

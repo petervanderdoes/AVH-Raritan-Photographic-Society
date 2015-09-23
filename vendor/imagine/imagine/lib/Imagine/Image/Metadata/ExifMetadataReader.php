@@ -21,17 +21,14 @@ class ExifMetadataReader extends AbstractMetadataReader
 {
     public function __construct()
     {
-        if (!function_exists('exif_read_data')) {
+        if (!self::isSupported()) {
             throw new NotSupportedException('PHP exif extension is required to use the ExifMetadataReader');
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function extractFromData($data)
+    public static function isSupported()
     {
-        return $this->doReadData($data);
+        return function_exists('exif_read_data');
     }
 
     /**
@@ -49,8 +46,23 @@ class ExifMetadataReader extends AbstractMetadataReader
     /**
      * {@inheritdoc}
      */
+    protected function extractFromData($data)
+    {
+        return $this->doReadData($data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function extractFromStream($resource)
     {
+        if (0 < ftell($resource)) {
+            $metadata = stream_get_meta_data($resource);
+            if ($metadata['seekable']) {
+                rewind($resource);
+            }
+        }
+
         return $this->doReadData(stream_get_contents($resource));
     }
 
@@ -82,18 +94,18 @@ class ExifMetadataReader extends AbstractMetadataReader
     private function extract($path)
     {
         if (false === $exifData = @exif_read_data($path, null, true, false)) {
-            return [];
+            return array();
         }
 
-        $metadata = [];
-        $sources = ['EXIF' => 'exif', 'IFD0' => 'ifd0'];
+        $metadata = array();
+        $sources = array('EXIF' => 'exif', 'IFD0' => 'ifd0');
 
         foreach ($sources as $name => $prefix) {
             if (!isset($exifData[$name])) {
                 continue;
             }
             foreach ($exifData[$name] as $prop => $value) {
-                $metadata[$prefix . '.' . $prop] = $value;
+                $metadata[$prefix.'.'.$prop] = $value;
             }
         }
 
