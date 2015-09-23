@@ -47,8 +47,7 @@ class RequestUploadImageServiceProvider extends ServiceProvider
 
                 return new UploadImageType($entity);
             }
-        )
-        ;
+        );
         $this->app->bind(
             '\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageModel',
             function (Application $app) {
@@ -63,8 +62,7 @@ class RequestUploadImageServiceProvider extends ServiceProvider
 
                 );
             }
-        )
-        ;
+        );
         $this->app->bind(
             'RequestUploadImage',
             function (Application $app) {
@@ -77,7 +75,6 @@ class RequestUploadImageServiceProvider extends ServiceProvider
                     $app->make('Settings')
                 );
             }
-        )
-        ;
+        );
     }
 }

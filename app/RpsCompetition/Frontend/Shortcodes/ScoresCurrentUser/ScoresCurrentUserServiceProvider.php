@@ -45,8 +45,7 @@ class ScoresCurrentUserServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('ScoresCurrentUserModel')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'ScoresCurrentUserModel',
@@ -58,7 +57,6 @@ class ScoresCurrentUserServiceProvider extends ServiceProvider
                     $app->make('IlluminateRequest')
                 );
             }
-        )
-        ;
+        );
     }
 }

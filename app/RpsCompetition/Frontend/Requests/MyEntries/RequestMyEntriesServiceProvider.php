@@ -47,8 +47,7 @@ class RequestMyEntriesServiceProvider extends ServiceProvider
 
                 return new MyEntriesType($entity);
             }
-        )
-        ;
+        );
         $this->app->bind('\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesModel');
         $this->app->bind(
             'RequestMyEntries',
@@ -63,7 +62,6 @@ class RequestMyEntriesServiceProvider extends ServiceProvider
                     $app->make('Session')
                 );
             }
-        )
-        ;
+        );
     }
 }

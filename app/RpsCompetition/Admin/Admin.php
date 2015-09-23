@@ -266,13 +266,11 @@ final class Admin
         $rps_class_print_bw = $this->request->input(
             'rps_class_print_bw',
             get_user_meta($userID, 'rps_class_print_bw', true)
-        )
-        ;
+        );
         $rps_class_print_color = $this->request->input(
             'rps_class_print_color',
             get_user_meta($userID, 'rps_class_print_color', true)
-        )
-        ;
+        );
 
         update_user_meta($userID, 'rps_class_bw', $rps_class_bw);
         update_user_meta($userID, 'rps_class_color', $rps_class_color);
@@ -323,7 +321,6 @@ final class Admin
         ];
 
         foreach ($all_classifications as $data) {
-
             if (current_user_can('rps_edit_competition_classification')) {
                 echo $formBuilder->outputLabel($formBuilder->label($data['name'], $data['name']));
                 echo $formBuilder->outputField($formBuilder->select($data['name'], $classification, $data['selected']));
@@ -641,7 +638,7 @@ final class Admin
                                 }
                             }
                         }
-                        unset ($medium_keys, $classification_keys);
+                        unset($medium_keys, $classification_keys);
                     } else {
                         $this->message = $validator->errors();
                         $this->status = 'error';
@@ -728,8 +725,7 @@ final class Admin
         echo $formBuilder->open(
             admin_url('admin.php') . '?page=' . Constants::MENU_SLUG_COMPETITION_ADD,
             ['method' => 'post', 'id' => 'rps-competitionadd', 'accept-charset' => get_bloginfo('charset')]
-        )
-        ;
+        );
         echo $formBuilder->openTable();
         echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
         echo $formBuilder->outputField($formBuilder->text('date', $form_options['date']));
@@ -800,8 +796,7 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
         echo $formBuilder->outputField(
             $formBuilder->select('max-entries', $array_max_entries, $form_options['max-entries'])
-        )
-        ;
+        );
         unset($array_max_entries);
 
         $array_judges = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
@@ -812,8 +807,7 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
         echo $formBuilder->outputField(
             $formBuilder->checkbox('special_event', $form_options['special_event'], $form_options['special_event'])
-        )
-        ;
+        );
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Add Competition', ['class' => 'button-primary']);
@@ -859,8 +853,7 @@ final class Admin
                 'name'           => 'updatecompetitions',
                 'accept-charset' => get_bloginfo('charset')
             ]
-        )
-        ;
+        );
         wp_nonce_field('delete-competitions');
         echo $this->referer;
 
@@ -917,7 +910,6 @@ final class Admin
 
     /**
      * Display the page to edit a competition.
-
      */
     private function displayPageCompetitionEdit()
     {
@@ -963,8 +955,7 @@ final class Admin
         echo $formBuilder->open(
             admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'),
             ['method' => 'post', 'id' => 'rps-competitionedit', 'accept-charset' => get_bloginfo('charset')]
-        )
-        ;
+        );
         echo $formBuilder->openTable();
         echo $formBuilder->outputLabel($formBuilder->label('date', 'Date'));
         echo $formBuilder->outputField($formBuilder->text('date', $formOptions['date']));
@@ -989,8 +980,7 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField(
             $formBuilder->select('medium', $medium_array, $selectedMedium, ['autocomplete' => 'off'])
-        )
-        ;
+        );
 
         $classification_array = Constants::getClassifications();
 
@@ -1003,8 +993,7 @@ final class Admin
                 $selectedClassification,
                 ['autocomplete' => 'off']
             )
-        )
-        ;
+        );
 
         $max_entries = [
             '1'  => '1',
@@ -1021,15 +1010,13 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('max-entries', 'Max Entries'));
         echo $formBuilder->outputField(
             $formBuilder->select('max-entries', $max_entries, $competition->Max_Entries, ['autocomplete' => 'off'])
-        )
-        ;
+        );
 
         $judges = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
         echo $formBuilder->outputLabel($formBuilder->label('judges', 'No. Judges'));
         echo $formBuilder->outputField(
             $formBuilder->select('judges', $judges, $competition->Num_Judges, ['autocomplete' => 'off'])
-        )
-        ;
+        );
 
         echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
         echo $formBuilder->outputField(
@@ -1038,8 +1025,7 @@ final class Admin
                 ($competition->Special_Event == 'Y' ? true : false),
                 ($competition->Special_Event == 'Y' ? true : false)
             )
-        )
-        ;
+        );
 
         echo $formBuilder->outputLabel($formBuilder->label('closed', 'Closed'));
         echo $formBuilder->outputField(
@@ -1048,8 +1034,7 @@ final class Admin
                 ($competition->Closed == 'Y' ? true : false),
                 ($competition->Closed == 'Y' ? true : false)
             )
-        )
-        ;
+        );
 
         echo $formBuilder->outputLabel($formBuilder->label('scored', 'Scored'));
         echo $formBuilder->outputField(
@@ -1058,8 +1043,7 @@ final class Admin
                 ($competition->Scored == 'Y' ? true : false),
                 ($competition->Scored == 'Y' ? true : false)
             )
-        )
-        ;
+        );
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Competition', ['class' => 'button-primary']);
@@ -1199,8 +1183,7 @@ final class Admin
                 'name'           => 'updatecompetitions',
                 'accept-charset' => get_bloginfo('charset')
             ]
-        )
-        ;
+        );
         wp_nonce_field($action . '-competitions');
         echo $this->referer;
 
@@ -1260,8 +1243,7 @@ final class Admin
                 'name'           => 'updateentries',
                 'accept-charset' => get_bloginfo('charset')
             ]
-        )
-        ;
+        );
 
         echo '<p>' . _n(
                 'You have specified this entry for deletion:',
@@ -1281,8 +1263,8 @@ final class Admin
                     __('ID #%1s: <strong>%2s</strong> by <em>%3s %4s</em> for the competition <em>%5s</em> on %6s'),
                     $entryID,
                     $entry->Title,
-                    $user->first_name,
-                    $user->last_name,
+                    $user->user_firstname,
+                    $user->user_lastname,
                     $competition->Theme,
                     mysql2date(get_option('date_format'), $competition->Competition_Date)
                 );
@@ -1355,12 +1337,11 @@ final class Admin
         echo $formBuilder->open(
             admin_url('admin.php') . '?' . http_build_query($queryEdit, '', '&'),
             ['method' => 'post', 'id' => 'rps-entryedit', 'accept-charset' => get_bloginfo('charset')]
-        )
-        ;
+        );
         echo $formBuilder->openTable();
 
         $user = get_user_by('id', $entry->Member_ID);
-        echo '<h3>Photographer: ' . $user->first_name . ' ' . $user->last_name . "</h3>\n";
+        echo '<h3>Photographer: ' . $user->user_firstname . ' ' . $user->user_lastname . "</h3>\n";
         echo '<img src="' . $photo_helper->getThumbnailUrl($entry->Server_File_Name, '200') . '" />' . "\n";
 
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));
@@ -1371,8 +1352,7 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField(
             $formBuilder->select('medium', $medium_array, $selectedMedium, ['autocomplete' => 'off'])
-        )
-        ;
+        );
 
         $classification_array = Constants::getClassifications();
         $selectedClassification = array_search($competition->Classification, $classification_array);
@@ -1384,8 +1364,7 @@ final class Admin
                 $selectedClassification,
                 ['autocomplete' => 'off']
             )
-        )
-        ;
+        );
 
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', ['class' => 'button-primary']);
@@ -1494,8 +1473,7 @@ final class Admin
             $competition->Competition_Date,
             $classification_array[$formOptionsNew['classification']],
             $medium_array[$formOptionsNew['medium']]
-        )
-        ;
+        );
         $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
         $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
 
@@ -1503,8 +1481,7 @@ final class Admin
             $competition->Competition_Date,
             $classification_array[$formOptionsNew['classification']],
             $medium_array[$formOptionsNew['medium']]
-        )
-        ;
+        );
         $data = [];
         $data['Competition_ID'] = $new_competition->ID;
         $data['ID'] = $id;
@@ -1519,12 +1496,11 @@ final class Admin
             $photo_helper->removeThumbnails(
                 pathinfo($old_file, PATHINFO_DIRNAME),
                 pathinfo($old_file, PATHINFO_FILENAME)
-            )
-            ;
+            );
             $return = $query_entries->updateEntry($data);
         }
 
-        unset ($query_entries, $query_competitions, $photo_helper);
+        unset($query_entries, $query_competitions, $photo_helper);
 
         return $return;
     }

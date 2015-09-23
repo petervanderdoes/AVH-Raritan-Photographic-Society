@@ -7,9 +7,11 @@ language: php
 php:
     - "5.4"
 
+sudo: false
+
 # WordPress version used in first build configuration.
 env:
-    - WP_VERSION=4.2
+    - WP_VERSION=4.3
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
@@ -27,11 +29,11 @@ env:
 matrix:
   include:
     - php: "5.5"
-      env: WP_VERSION=4.1
+      env: WP_VERSION=4.3
     - php: "5.6"
-      env: WP_VERSION=4.1
+      env: WP_VERSION=4.3
     - php: "7"
-      env: WP_VERSION=4.1
+      env: WP_VERSION=4.3
 
 
 # Clones WordPress and configures our testing environment.
@@ -57,8 +59,8 @@ before_script:
     - sed -i "s/yourusernamehere/travis/" wp-tests-config.php
     - sed -i "s/yourpasswordhere//" wp-tests-config.php
 # Comment out the echo as this interferes with Sessions.
-    - sed -i '61 s/^/\/\/ /' tests/phpunit/includes/bootstrap.php
-    - sed -i '33 s/^/\/\/ /' tests/phpunit/includes/install.php
+    - sed -i '62 s/^/\/\/ /' tests/phpunit/includes/bootstrap.php
+    - sed -i '34 s/^/\/\/ /' tests/phpunit/includes/install.php
 # Setup database credentials
     - echo "define( 'RPS_DB_NAME', 'rps_tests' );" >> wp-tests-config.php
     - echo "define( 'RPS_DB_USER', 'travis' );" >> wp-tests-config.php

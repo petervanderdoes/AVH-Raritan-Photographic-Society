@@ -60,8 +60,7 @@ class MonthlyWinnersController
             $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
                 'didFilterWpseoPreAnalysisPostsContent',
                 false
-            )
-            ;
+            );
             if (!$didFilterWpseoPreAnalysisPostsContent) {
                 $data = $this->model->getFacebookData($selected_date, $selected_date);
                 $output = $this->view->fetch('facebook.html.twig', $data);

@@ -45,8 +45,7 @@ class EditTitleServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('EditTitleModel'), $app->make('Settings')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'EditTitleModel',
@@ -59,7 +58,6 @@ class EditTitleServiceProvider extends ServiceProvider
                     $app->make('IlluminateRequest')
                 );
             }
-        )
-        ;
+        );
     }
 }

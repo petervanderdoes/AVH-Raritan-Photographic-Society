@@ -67,7 +67,6 @@ class BanquetEntriesType extends AbstractType
             [
                 'data_class' => 'RpsCompetition\Entity\Form\BanquetEntries',
             ]
-        )
-        ;
+        );
     }
 }

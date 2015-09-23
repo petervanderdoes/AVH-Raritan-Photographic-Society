@@ -2,9 +2,7 @@
 namespace RpsCompetition\Frontend;
 
 use Illuminate\Config\Repository as Settings;
-use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Helpers\PhotoHelper;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
@@ -20,8 +18,6 @@ class FrontendView
 {
     /** @var PhotoHelper */
     private $photo_helper;
-    private $request;
-    private $rpsdb;
     private $settings;
     /** @var Twig_Environment */
     private $twig;
@@ -29,16 +25,12 @@ class FrontendView
     /**
      * Constructor
      *
-     * @param Settings          $settings
-     * @param RpsDb             $rpsdb
-     * @param IlluminateRequest $request
-     * @param PhotoHelper       $photo_helper
+     * @param Settings    $settings
+     * @param PhotoHelper $photo_helper
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, IlluminateRequest $request, PhotoHelper $photo_helper)
+    public function __construct(Settings $settings, PhotoHelper $photo_helper)
     {
         $this->settings = $settings;
-        $this->rpsdb = $rpsdb;
-        $this->request = $request;
         $this->photo_helper = $photo_helper;
         $loader = new Twig_Loader_Filesystem($this->settings->get('template_dir'));
         if (WP_LOCAL_DEV !== true) {

@@ -15,7 +15,6 @@ class SocialNetworksController
     /** @var SocialNetworksModel */
     protected $model;
     private $app;
-    private $settings;
     /** @var  SocialNetworksView */
     private $view;
 
@@ -27,8 +26,6 @@ class SocialNetworksController
     public function __construct(Application $app)
     {
         $this->app = $app;
-        $this->settings = $this->app->make('Settings');
-
         $this->model = $this->app->make('SocialNetworksModel');
         $this->view = $this->app->make('SocialNetworksView');
     }

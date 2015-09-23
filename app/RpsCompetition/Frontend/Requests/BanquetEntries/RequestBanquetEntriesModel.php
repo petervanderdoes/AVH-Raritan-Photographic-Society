@@ -72,8 +72,7 @@ class RequestBanquetEntriesModel
                         $banquet_record->Competition_Date,
                         $banquet_record->Classification,
                         $banquet_record->Medium
-                    )
-                    ;
+                    );
                     CommonHelper::createDirectory($path);
                     $file_info = pathinfo($entry->Server_File_Name);
                     $new_file_name = $path . '/' . $file_info['basename'];
@@ -93,8 +92,7 @@ class RequestBanquetEntriesModel
                     $this->query_entries->addEntry($data, get_current_user_id());
                     $this->photo_helper->createCommonThumbnails(
                         $this->query_entries->getEntryById($this->query_entries->getInsertId())
-                    )
-                    ;
+                    );
                 }
             }
         }

@@ -46,7 +46,6 @@ class RpsClientServiceProvider extends ServiceProvider
                     $app->make('\RpsCompetition\Api\Client'), $app->make('IlluminateRequest')
                 );
             }
-        )
-        ;
+        );
     }
 }

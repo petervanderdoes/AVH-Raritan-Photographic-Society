@@ -22,6 +22,7 @@ class ListTable extends \WP_List_Table
 {
     public $messages;
     public $screen;
+    protected $extra_items;
     /** @var HtmlBuilder */
     private $html;
     private $request;
@@ -107,10 +108,9 @@ class ListTable extends \WP_List_Table
         $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
         echo $this->html->anchor(
             $urlUser,
-            $user->first_name . ' ' . $user->last_name,
-            ['title' => 'Entries for ' . $user->first_name . ' ' . $user->last_name]
-        )
-        ;
+            $user->user_firstname . ' ' . $user->user_lastname,
+            ['title' => 'Entries for ' . $user->user_firstname . ' ' . $user->user_lastname]
+        );
     }
 
     /**
@@ -178,8 +178,7 @@ class ListTable extends \WP_List_Table
             $urlDelete,
             'Delete',
             ['class' => 'delete', 'title' => 'Delete this competition']
-        )
-        ;
+        );
         $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this entry']);
 
         echo '<div class="row-actions">';
@@ -212,7 +211,7 @@ class ListTable extends \WP_List_Table
 
         $this->display_tablenav('top');
 
-        echo '<table class="' . implode(' ', $this->get_table_classes()) . '" cellspacing="0">';
+        echo '<table class="wp-list-table ' . implode(' ', $this->get_table_classes()) . '" cellspacing="0">';
         echo '<thead>';
         echo '<tr>';
         $this->print_column_headers();
@@ -246,7 +245,7 @@ class ListTable extends \WP_List_Table
 
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $season_helper = new SeasonHelper($this->rpsdb);
         $options = get_option('avh-rps');
 
         echo '<div class="alignleft actions">';
@@ -255,8 +254,7 @@ class ListTable extends \WP_List_Table
                 'DESC',
                 $options['season_start_month_num'],
                 $options['season_end_month_num']
-            )
-            ;
+            );
             $selected_season = $this->request->input('filter-season', 0);
             echo '<select name="filter-season">';
             echo '<option' . selected($selected_season, 0, false) . ' value="0">' . __('All seasons') . '</option>';
@@ -271,8 +269,7 @@ class ListTable extends \WP_List_Table
                 $theme_request = $this->request->input('filter-theme', 0);
                 list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd(
                     $this->request->input('filter-season')
-                )
-                ;
+                );
                 $competitions = $query_competitions->getCompetitionByDates($season_start_date, $season_end_date);
 
                 $themes = [];
@@ -366,7 +363,7 @@ class ListTable extends \WP_List_Table
 
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $season_helper = new SeasonHelper($this->settings, $this->rpsdb);
+        $season_helper = new SeasonHelper($this->rpsdb);
 
         $entry_status = $this->request->input('entry_status', 'all');
         if (!in_array($entry_status, ['all'])) {
@@ -385,8 +382,7 @@ class ListTable extends \WP_List_Table
         $number = (int) $this->request->input(
             'number',
             $entries_per_page + min(8, $entries_per_page)
-        )
-        ; // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
+        ); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
 
         $where = '1=1';
         if ($this->request->has('user_id')) {
@@ -395,14 +391,12 @@ class ListTable extends \WP_List_Table
         if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
             list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd(
                 $this->request->input('filter-season')
-            )
-            ;
+            );
             $where = $this->rpsdb->prepare(
                 'Competition_Date >= %s AND Competition_Date <= %s',
                 $season_start_date,
                 $season_end_date
-            )
-            ;
+            );
 
             $filter_theme = $this->request->input('filter-theme', 0);
             if ($filter_theme != 0) {

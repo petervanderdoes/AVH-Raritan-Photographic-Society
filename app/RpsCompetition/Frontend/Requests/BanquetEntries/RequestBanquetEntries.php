@@ -68,8 +68,7 @@ class RequestBanquetEntries
             $this->banquet_current_user_type,
             $this->entity,
             ['attr' => ['id' => 'banquetentries']]
-        )
-        ;
+        );
         $form->handleRequest($this->request);
 
         $this->model->removeUpdateSession();

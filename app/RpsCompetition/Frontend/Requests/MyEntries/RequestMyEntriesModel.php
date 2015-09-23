@@ -48,8 +48,7 @@ class RequestMyEntriesModel
                     $this->settings->set(
                         'errmsg',
                         sprintf('<b>Failed to SELECT competition entry with ID %s from database</b><br>', $id)
-                    )
-                    ;
+                    );
                 } else {
                     // Delete the record from the database
                     $result = $this->query_entries->deleteEntry($id);
@@ -57,8 +56,7 @@ class RequestMyEntriesModel
                         $this->settings->set(
                             'errmsg',
                             sprintf('<b>Failed to DELETE competition entry %s from database</b><br>')
-                        )
-                        ;
+                        );
                     } else {
                         // Delete the file from the server file system
                         $this->photo_helper->deleteEntryFromDisk($entry_record);

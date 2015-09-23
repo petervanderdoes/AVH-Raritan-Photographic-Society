@@ -141,20 +141,17 @@ class RequestMyEntries
                 $competition_date,
                 $classification,
                 $medium
-            )
-            ;
+            );
 
             $this->session->set(
                 'myentries.' . $medium_subset_medium . '.competition_date',
                 $current_competition->Competition_Date
-            )
-            ;
+            );
             $this->session->set('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
             $this->session->set(
                 'myentries.' . $medium_subset_medium . '.classification',
                 $current_competition->Classification
-            )
-            ;
+            );
             $redirect = get_permalink($post->ID);
             wp_redirect($redirect);
             exit();

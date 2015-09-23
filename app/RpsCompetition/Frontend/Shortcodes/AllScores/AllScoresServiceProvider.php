@@ -45,8 +45,7 @@ class AllScoresServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('AllScoresModel')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'AllScoresModel',
@@ -59,7 +58,6 @@ class AllScoresServiceProvider extends ServiceProvider
                     $app->make('formFactory')
                 );
             }
-        )
-        ;
+        );
     }
 }

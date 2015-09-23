@@ -47,8 +47,7 @@ class RequestEditTitleServiceProvider extends ServiceProvider
 
                 return new EditTitleType($entity);
             }
-        )
-        ;
+        );
         $this->app->bind(
             '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel',
             function (Application $app) {
@@ -60,8 +59,7 @@ class RequestEditTitleServiceProvider extends ServiceProvider
                     $app->make('IlluminateRequest')
                 );
             }
-        )
-        ;
+        );
         $this->app->bind(
             'RequestEditTitle',
             function (Application $app) {
@@ -74,7 +72,6 @@ class RequestEditTitleServiceProvider extends ServiceProvider
                     $app->make('Settings')
                 );
             }
-        )
-        ;
+        );
     }
 }

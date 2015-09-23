@@ -270,8 +270,7 @@ class Client
                             } catch (\PDOException $e) {
                                 $this->doRESTError(
                                     'Failed to UPDATE scores in database - ' . $e->getMessage() . ' - ' . $sql
-                                )
-                                ;
+                                );
                                 die();
                             }
                             if ($stmt->rowCount() < 1) {
@@ -300,15 +299,13 @@ class Client
             } catch (\PDOException $e) {
                 $this->doRESTError(
                     'Failed to execute UPDATE' . $e->getMessage()
-                )
-                ;
+                );
                 die();
             }
             if ($stmt_update->rowCount() < 1) {
                 $this->doRESTError(
                     'No rows updated when setting Scored flag to Y in database for ' . $sql_date . ' / ' . $classification . ' / ' . $medium
-                )
-                ;
+                );
                 die();
             }
         }
@@ -352,8 +349,7 @@ class Client
             $this->doRESTError(
                 'Failed to SELECT competition records with date = ' . $comp_date . ' from database - ' . $e->getMessage(
                 )
-            )
-            ;
+            );
             die();
         }
         // Create a Competitions node
@@ -412,10 +408,10 @@ class Client
                     $id->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['ID'])));
 
                     $fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($user->first_name)));
+                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_firstname)));
 
                     $lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($user->last_name)));
+                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_lastname)));
 
                     $title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
                     $title_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Title'])));
@@ -429,8 +425,7 @@ class Client
                     $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
                     $url_node->AppendChild(
                         $dom->CreateTextNode(utf8_encode(home_url($record_entries['Server_File_Name'])))
-                    )
-                    ;
+                    );
                 }
             }
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);

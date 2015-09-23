@@ -45,8 +45,7 @@ class ParseQueryServiceProvider extends ServiceProvider
                     $app->make('QueryCompetitions'), $app->make('SeasonHelper'), $app->make('CompetitionHelper')
                 );
             }
-        )
-        ;
+        );
         $this->app->bind(
             'RequestMonthlyEntries',
             function (Application $app) {
@@ -54,13 +53,11 @@ class ParseQueryServiceProvider extends ServiceProvider
                     $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
                     $app->make('QueryCompetitions'),
                     $app->make('SeasonHelper'),
-                    $app->make('CompetitionHelper'),
                     $app->make('IlluminateRequest'),
                     $app->make('Session')
                 );
             }
-        )
-        ;
+        );
         $this->app->bind(
             'RequestMonthlyWinners',
             function (Application $app) {
@@ -68,12 +65,10 @@ class ParseQueryServiceProvider extends ServiceProvider
                     $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
                     $app->make('QueryCompetitions'),
                     $app->make('SeasonHelper'),
-                    $app->make('CompetitionHelper'),
                     $app->make('IlluminateRequest'),
                     $app->make('Session')
                 );
             }
-        )
-        ;
+        );
     }
 }

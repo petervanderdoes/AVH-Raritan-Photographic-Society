@@ -5,7 +5,6 @@ use Avh\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
-use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Helpers\CommonHelper;
 
@@ -21,8 +20,6 @@ class Frontend
     private $app;
     /** @var Request */
     private $request;
-    /** @var RpsDb */
-    private $rpsdb;
     /** @var Session */
     private $session;
     /** @var Settings */
@@ -42,7 +39,6 @@ class Frontend
         $this->session->start();
 
         $this->settings = $app->make('Settings');
-        $this->rpsdb = $app->make('RpsDb');
         $this->request = $app->make('IlluminateRequest');
 
         $this->view = $app->make('FrontendView');
@@ -122,7 +118,7 @@ class Frontend
         $this->setupUserMeta();
         $this->setupSocialButtons();
 
-        $this->register_scripts_styles();
+        $this->registerScriptsStyles();
 
         unset($query_competitions);
     }
@@ -454,7 +450,7 @@ class Frontend
         return $title;
     }
 
-    private function register_scripts_styles()
+    private function registerScriptsStyles()
     {
         if (WP_LOCAL_DEV !== true) {
             $rps_competition_css_version = 'a06a6dd';

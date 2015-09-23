@@ -45,8 +45,7 @@ class MyEntriesServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('MyEntriesModel')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'MyEntriesModel',
@@ -54,9 +53,7 @@ class MyEntriesServiceProvider extends ServiceProvider
                 return new MyEntriesModel(
                     $app->make('QueryCompetitions'),
                     $app->make('QueryEntries'),
-                    $app->make('QueryMiscellaneous'),
                     $app->make('PhotoHelper'),
-                    $app->make('SeasonHelper'),
                     $app->make('CompetitionHelper'),
                     $app->make('Session'),
                     $app->make('formFactory'),
@@ -64,7 +61,6 @@ class MyEntriesServiceProvider extends ServiceProvider
                     $app->make('IlluminateRequest')
                 );
             }
-        )
-        ;
+        );
     }
 }

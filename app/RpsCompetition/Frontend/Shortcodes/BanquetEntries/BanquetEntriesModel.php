@@ -114,8 +114,7 @@ class BanquetEntriesModel
             new BanquetEntriesType($entity),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'banquetentries']]
-        )
-        ;
+        );
         /**
          * Remove the buttons when one of the following conditions is true:
          * - There is no Banquet to enter
@@ -151,8 +150,7 @@ class BanquetEntriesModel
             get_current_user_id(),
             $season_start_date,
             $season_end_date
-        )
-        ;
+        );
 
         return $scores;
     }
@@ -307,7 +305,6 @@ class BanquetEntriesModel
     {
         $return = false;
         foreach ($this->banquet_entries as $banquet_entry) {
-
             if (!empty($banquet_entry) && $banquet_entry->Title == $entry['title']) {
                 $return = true;
                 break;

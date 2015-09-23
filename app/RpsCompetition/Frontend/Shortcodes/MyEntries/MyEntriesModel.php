@@ -7,13 +7,11 @@ use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\PhotoHelper;
-use RpsCompetition\Helpers\SeasonHelper;
 use Symfony\Component\Form\FormFactory;
 
 /**
@@ -32,30 +30,24 @@ class MyEntriesModel
     private $photo_helper;
     private $query_competitions;
     private $query_entries;
-    private $query_miscellaneous;
     private $request;
-    private $season_helper;
     private $session;
     private $settings;
 
     /**
-     * @param QueryCompetitions  $query_competitions
-     * @param QueryEntries       $query_entries
-     * @param QueryMiscellaneous $query_miscellaneous
-     * @param PhotoHelper        $photo_helper
-     * @param SeasonHelper       $season_helper
-     * @param CompetitionHelper  $competition_helper
-     * @param Session            $session
-     * @param FormFactory        $form_factory
-     * @param Settings           $settings
-     * @param IlluminateRequest  $request
+     * @param QueryCompetitions $query_competitions
+     * @param QueryEntries      $query_entries
+     * @param PhotoHelper       $photo_helper
+     * @param CompetitionHelper $competition_helper
+     * @param Session           $session
+     * @param FormFactory       $form_factory
+     * @param Settings          $settings
+     * @param IlluminateRequest $request
      */
     public function __construct(
         QueryCompetitions $query_competitions,
         QueryEntries $query_entries,
-        QueryMiscellaneous $query_miscellaneous,
         PhotoHelper $photo_helper,
-        SeasonHelper $season_helper,
         CompetitionHelper $competition_helper,
         Session $session,
         FormFactory $form_factory,
@@ -64,9 +56,7 @@ class MyEntriesModel
     ) {
         $this->query_competitions = $query_competitions;
         $this->query_entries = $query_entries;
-        $this->query_miscellaneous = $query_miscellaneous;
         $this->photo_helper = $photo_helper;
-        $this->season_helper = $season_helper;
         $this->competition_helper = $competition_helper;
         $this->session = $session;
         $this->form_factory = $form_factory;
@@ -112,8 +102,7 @@ class MyEntriesModel
                 new MyEntriesType($entity),
                 $entity,
                 ['action' => $action, 'attr' => ['id' => 'myentries']]
-            )
-            ;
+            );
 
             $this->addFormButtons($current_competition, $form);
             $return = [];
@@ -137,15 +126,13 @@ class MyEntriesModel
             $current_competition->Competition_Date,
             $current_competition->Classification,
             $current_competition->Medium
-        )
-        ;
+        );
 
         // Retrieve the total number of entries submitted by this member for this competition date
         $total_entries_submitted = $this->query_entries->countEntriesSubmittedByMember(
             get_current_user_id(),
             $current_competition->Competition_Date
-        )
-        ;
+        );
 
         // Don't show the Add button if the max number of images per member reached
         if ($this->num_rows < $max_entries_per_member_per_comp && $total_entries_submitted < $this->settings->get(
@@ -176,16 +163,14 @@ class MyEntriesModel
         $competition_date = $this->session->get(
             'myentries.' . $medium_subset_medium . '.competition_date',
             mysql2date('Y-m-d', $current_competition->Competition_Date)
-        )
-        ;
+        );
         $medium = $this->session->get('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
         $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $this->query_competitions->getCompetitionByDateClassMedium(
             $competition_date,
             $classification,
             $medium
-        )
-        ;
+        );
 
         return $current_competition;
     }
@@ -205,8 +190,7 @@ class MyEntriesModel
             $current_competition->Competition_Date,
             $current_competition->Classification,
             $current_competition->Medium
-        )
-        ;
+        );
         // Build the rows of submitted images
         $this->num_rows = 0;
         /** @var QueryEntries $recs */
@@ -242,13 +226,11 @@ class MyEntriesModel
         $open_competitions = $this->query_competitions->getOpenCompetitions(
             get_current_user_id(),
             $medium_subset_medium
-        )
-        ;
+        );
         $open_competitions = CommonHelper::arrayMsort(
             $open_competitions,
             ['Competition_Date' => [SORT_ASC], 'Medium' => [SORT_ASC]]
-        )
-        ;
+        );
 
         return $open_competitions;
     }
@@ -303,8 +285,7 @@ class MyEntriesModel
             $current_competition->Competition_Date,
             $current_competition->Classification,
             $current_competition->Medium
-        )
-        ;
+        );
         if ($close_date !== null) {
             // We give a warning 7 days in advance that a competition will close.
             $close_competition_warning_date = Carbon::instance(
@@ -337,13 +318,11 @@ class MyEntriesModel
         $this->session->set(
             'myentries.' . $medium_subset_medium . '.competition_date',
             $current_competition->Competition_Date
-        )
-        ;
+        );
         $this->session->set('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
         $this->session->set(
             'myentries.' . $medium_subset_medium . '.classification',
             $current_competition->Classification
-        )
-        ;
+        );
     }
 }

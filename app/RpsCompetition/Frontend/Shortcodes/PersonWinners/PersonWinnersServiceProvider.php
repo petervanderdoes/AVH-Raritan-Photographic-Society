@@ -45,8 +45,7 @@ class PersonWinnersServiceProvider extends ServiceProvider
                     $app->make('ShortcodeView'), $app->make('PersonWinnersModel')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'PersonWinnersModel',
@@ -55,7 +54,6 @@ class PersonWinnersServiceProvider extends ServiceProvider
                     $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
                 );
             }
-        )
-        ;
+        );
     }
 }

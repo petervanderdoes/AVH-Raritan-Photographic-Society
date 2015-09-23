@@ -68,8 +68,7 @@ class UploadImageModel
             new UploadImageType(),
             $entity,
             ['action' => $action, 'attr' => ['id' => 'uploadentry']]
-        )
-        ;
+        );
 
         return $form;
     }
