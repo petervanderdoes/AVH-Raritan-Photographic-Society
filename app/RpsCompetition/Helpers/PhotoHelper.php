@@ -155,12 +155,6 @@ class PhotoHelper
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
-        // Remove main file from disk
-        if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {
-            unlink($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name);
-        }
-
-        // Remove thumbnails
         $competition_record = $query_competitions->getCompetitionById($entry->Competition_ID);
         $competition_path = $this->request->server('DOCUMENT_ROOT') . $this->getCompetitionPath(
                 $competition_record->Competition_Date,
@@ -170,6 +164,12 @@ class PhotoHelper
         $file_parts = pathinfo($entry->Server_File_Name);
         $thumbnail_path = $competition_path . '/thumbnails';
 
+        // Remove main file from disk
+        if (is_file($competition_path . $entry->Server_File_Name)) {
+            unlink($competition_path . $entry->Server_File_Name);
+        }
+
+        // Remove thumbnails
         if (is_dir($thumbnail_path)) {
             $thumb_base_name = $thumbnail_path . '/' . $file_parts['filename'];
             // Get all the matching thumbnail files
