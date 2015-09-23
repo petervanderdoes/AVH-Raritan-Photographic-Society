@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 2.0.17-dev.1
+* Preparation for new development cycle.
+
 #### Version 2.0.16
 * Fix layput of Entries and Competitions.
 * When removing an entrie the main file is not deleted.
