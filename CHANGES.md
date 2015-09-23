@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 2.0.16-rc.1
+#### Version 2.0.16
 * Fix layput of Entries and Competitions.
 * When removing an entrie the main file is not deleted.
 
