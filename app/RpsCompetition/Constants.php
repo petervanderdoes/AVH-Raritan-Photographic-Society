@@ -10,8 +10,8 @@ namespace RpsCompetition;
  */
 final class Constants
 {
-    const IMAGE_MAX_HEIGHT_ENTRY = 768;
-    const IMAGE_MAX_WIDTH_ENTRY = 1024;
+    const IMAGE_MAX_HEIGHT_ENTRY = 1536;
+    const IMAGE_MAX_WIDTH_ENTRY = 2048;
     const IMAGE_QUALITY = 90;
     /**
      * Plugin Specfic Constants
@@ -43,7 +43,7 @@ final class Constants
         '250'      => ['width' => 250, 'height' => 250],
         '800'      => ['width' => 800, 'height' => 800],
         'fb_thumb' => ['width' => 1200, 'height' => 628],
-        'FULL'     => ['width' => 1024, 'height' => 768],
+        'FULL'     => ['width' => self::IMAGE_MAX_WIDTH_ENTRY, 'height' => self::IMAGE_MAX_HEIGHT_ENTRY],
     ];
 
     /**
