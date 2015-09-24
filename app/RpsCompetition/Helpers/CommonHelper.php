@@ -90,7 +90,6 @@ class CommonHelper
 
     /**
      * Get the Dynamic Pages.
-     *
      * These are the pages where we implement javascript to get different competitions and seasons within the page.
      *
      * @return array
@@ -170,7 +169,7 @@ class CommonHelper
             return false;
         }
 
-        return in_array('s2member_level4', (array) $user->roles);
+        return ($user->has_cap('access_s2member_level4'));
     }
 
     /**
