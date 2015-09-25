@@ -1,8 +1,10 @@
 ## Changelog
 
 #### Version 2.0.17-dev.5
-* Preparation for new development cycle.
-
+* Add flexibility to the image size for the client.
+  We can now change the size of the image that's being used by the client rather quickly.
+  It's a matter of adding the size to the image_size array and updating the constant that set the client image size.
+  
 #### Version 2.0.16
 * Fix layput of Entries and Competitions.
 * When removing an entrie the main file is not deleted.
