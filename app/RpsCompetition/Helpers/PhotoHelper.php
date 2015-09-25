@@ -47,7 +47,7 @@ class PhotoHelper
      */
     public function createCommonThumbnails($entry)
     {
-        $standard_size = ['75', '150w', '800', '1024', 'fb_thumb'];
+        $standard_size = ['75', '150w', '800', 'fb_thumb'];
 
         foreach ($standard_size as $size) {
             $this->createThumbnail($entry->Server_File_Name, $size);
