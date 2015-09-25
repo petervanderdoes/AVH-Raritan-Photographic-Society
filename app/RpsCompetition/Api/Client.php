@@ -4,6 +4,7 @@ namespace RpsCompetition\Api;
 use DOMDocument;
 use Illuminate\Http\Request;
 use PDO;
+use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsPdo;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
@@ -431,7 +432,7 @@ class Client
                     $url_node->AppendChild(
                         $dom->CreateTextNode(
                             utf8_encode(
-                                $this->photo_helper->getThumbnailUrl($record_entries['Server_File_Name'], '1024')
+                                $this->photo_helper->getThumbnailUrl($record_entries['Server_File_Name'], Constants::IMAGE_CLIENT_SIZE)
                             )
                         )
                     );
