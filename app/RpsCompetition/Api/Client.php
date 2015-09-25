@@ -4,8 +4,10 @@ namespace RpsCompetition\Api;
 use DOMDocument;
 use Illuminate\Http\Request;
 use PDO;
+use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsPdo;
 use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\PhotoHelper;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
@@ -17,12 +19,16 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
  */
 class Client
 {
+    private $photo_helper;
+
     /**
      * Constructor
      *
+     * @param PhotoHelper $photo_helper
      */
-    public function __construct()
+    public function __construct(PhotoHelper $photo_helper)
     {
+        $this->photo_helper = $photo_helper;
     }
 
     /**
@@ -424,7 +430,11 @@ class Client
 
                     $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
                     $url_node->AppendChild(
-                        $dom->CreateTextNode(utf8_encode(home_url($record_entries['Server_File_Name'])))
+                        $dom->CreateTextNode(
+                            utf8_encode(
+                                $this->photo_helper->getThumbnailUrl($record_entries['Server_File_Name'], Constants::IMAGE_CLIENT_SIZE)
+                            )
+                        )
                     );
                 }
             }

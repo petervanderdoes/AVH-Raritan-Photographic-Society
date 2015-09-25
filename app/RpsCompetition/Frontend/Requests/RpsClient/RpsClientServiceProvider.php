@@ -2,6 +2,7 @@
 namespace RpsCompetition\Frontend\Requests\RpsClient;
 
 use Illuminate\Support\ServiceProvider;
+use RpsCompetition\Api\Client;
 use RpsCompetition\Application;
 
 /**
@@ -38,12 +39,17 @@ class RpsClientServiceProvider extends ServiceProvider
     public function register()
     {
 
-        $this->app->bind('\RpsCompetition\Api\Client');
+        $this->app->bind(
+            'ApiClient',
+            function (Application $app) {
+                return new Client($app->make('PhotoHelper'));
+            }
+        );
         $this->app->bind(
             'RequestRpsClient',
             function (Application $app) {
                 return new RequestRpsClient(
-                    $app->make('\RpsCompetition\Api\Client'), $app->make('IlluminateRequest')
+                    $app->make('ApiClient'), $app->make('IlluminateRequest')
                 );
             }
         );

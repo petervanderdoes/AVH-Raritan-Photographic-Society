@@ -205,6 +205,7 @@ class PhotoHelper
         }
 
         $image = $this->imagine->open($image_name);
+        $original_image_size = $image->getSize();
 
         $new_size = Constants::getImageSize($size);
 
@@ -220,7 +221,17 @@ class PhotoHelper
                   ->resize($box)
             ;
         }
-        $image->save($thumb_path . '/' . $thumb_name, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
+
+        $resized_image_size = $image->getSize();
+        if ($original_image_size->getHeight() == $resized_image_size->getHeight() &&
+            $original_image_size->getWidth() == $resized_image_size->getWidth()
+        ) {
+            copy($image_name, $thumb_path . '/' . $thumb_name);
+        } else {
+            $image->save($thumb_path . '/' . $thumb_name, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
+        }
+
+        unset($image);
 
         return true;
     }
