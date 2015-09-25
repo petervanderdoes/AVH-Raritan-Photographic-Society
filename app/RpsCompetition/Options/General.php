@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Options;
 
-use Avh\Utility\OptionsAbstract;
+use Avh\Framework\Utility\OptionsAbstract;
 
 /**
  * Class General
@@ -40,8 +40,8 @@ final class General extends OptionsAbstract
         parent::__construct();
 
         /* Clear the cache on update/add */
-        add_action('add_option_' . $this->option_name, ['Avh\Utility\Common', 'clearCache']);
-        add_action('update_option_' . $this->option_name, ['Avh\Utility\Common', 'clearCache']);
+        add_action('add_option_' . $this->option_name, ['Avh\Framework\Utility\Common', 'clearCache']);
+        add_action('update_option_' . $this->option_name, ['Avh\Framework\Utility\Common', 'clearCache']);
     }
 
     /**

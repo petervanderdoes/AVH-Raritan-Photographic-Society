@@ -1,8 +1,8 @@
 <?php
 namespace RpsCompetition\Admin;
 
-use Avh\Html\FormBuilder;
-use Avh\Html\HtmlBuilder;
+use Avh\Framework\Html\FormBuilder;
+use Avh\Framework\Html\HtmlBuilder;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;

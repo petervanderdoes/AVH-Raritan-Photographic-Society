@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Requests\UploadImage;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Constants;

@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\MyEntries;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use Carbon\Carbon;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;

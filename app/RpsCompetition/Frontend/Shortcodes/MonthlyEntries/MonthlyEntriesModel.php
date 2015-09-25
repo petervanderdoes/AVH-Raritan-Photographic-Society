@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Shortcodes\MonthlyEntries;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Helpers\PhotoHelper;

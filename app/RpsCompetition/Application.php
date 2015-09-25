@@ -2,8 +2,8 @@
 
 namespace RpsCompetition;
 
-use Avh\Contracts\Foundation\ApplicationInterface;
-use Avh\Support\ProviderRepository;
+use Avh\Framework\Contracts\Foundation\ApplicationInterface;
+use Avh\Framework\Support\ProviderRepository;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;

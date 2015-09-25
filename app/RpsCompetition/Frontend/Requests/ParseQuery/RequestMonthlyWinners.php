@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Requests\ParseQuery;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Helpers\CommonHelper;

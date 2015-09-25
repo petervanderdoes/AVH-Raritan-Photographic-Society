@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Shortcodes\BanquetEntries;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryBanquet;
 use RpsCompetition\Db\QueryEntries;

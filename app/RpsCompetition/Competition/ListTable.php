@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Competition;
 
-use Avh\Html\HtmlBuilder;
+use Avh\Framework\Html\HtmlBuilder;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Constants;

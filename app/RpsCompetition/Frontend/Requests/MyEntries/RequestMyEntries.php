@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Requests\MyEntries;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;

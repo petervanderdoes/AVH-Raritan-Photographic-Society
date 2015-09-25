@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes;
 
-use Avh\Utility\ShortcodesAbstract;
+use Avh\Framework\Utility\ShortcodesAbstract;
 
 /**
  * Class ShortcodeRouter

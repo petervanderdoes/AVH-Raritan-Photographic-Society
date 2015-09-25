@@ -12,7 +12,7 @@ use RpsCompetition\Application;
  */
 final class ShortcodeController
 {
-    /** @var \Avh\Html\HtmlBuilder */
+    /** @var \Avh\Framework\Html\HtmlBuilder */
     private $html;
 
     /**

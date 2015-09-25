@@ -1,8 +1,8 @@
 <?php
 namespace RpsCompetition\Helpers;
 
-use Avh\Html\FormBuilder;
-use Avh\Html\HtmlBuilder;
+use Avh\Framework\Html\FormBuilder;
+use Avh\Framework\Html\HtmlBuilder;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Db\RpsDb;
 

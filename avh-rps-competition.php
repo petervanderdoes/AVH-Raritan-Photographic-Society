@@ -150,7 +150,7 @@ class AVH_RPS_Client
         $this->app->singleton(
             'Session',
             function () {
-                return new \Avh\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
+                return new \Avh\Framework\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
             }
         )
         ;
@@ -233,7 +233,7 @@ class AVH_RPS_Client
         )
         ;
 
-        $this->app->bind('HtmlBuilder', '\Avh\Html\HtmlBuilder');
+        $this->app->bind('HtmlBuilder', '\Avh\Framework\Html\HtmlBuilder');
 
         $this->registerBindingShortCodes();
         $this->registerBindingSocialNetworks();

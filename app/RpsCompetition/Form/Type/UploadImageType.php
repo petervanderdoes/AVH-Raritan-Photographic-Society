@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Form\Type;
 
-use Avh\Validator\Constraints\IsJpeg;
+use Avh\Framework\Validator\Constraints\IsJpeg;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
