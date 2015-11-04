@@ -334,6 +334,7 @@ class Client
 
         // Start building the XML response
         $dom = new \DOMDocument('1.0', 'utf-8');
+        $dom->formatOutput=true;
         // Create the root node
         $node = $dom->CreateElement('rsp');
         $node->SetAttribute('stat', 'ok');
@@ -358,6 +359,13 @@ class Client
             );
             die();
         }
+        $config = $rsp->AppendChild($dom->CreateElement('Configuration'));
+        $size_node = $config->AppendChild($dom->CreateElement('ImageSize'));
+        $width_node = $size_node->AppendChild($dom->CreateElement('Width'));
+        $width_node->AppendChild($dom->CreateTextNode(utf8_encode("1440")));
+        $height_node = $size_node->AppendChild($dom->CreateElement('Height'));
+        $height_node->AppendChild($dom->CreateTextNode(utf8_encode("900")));
+
         // Create a Competitions node
         $xml_competitions = $rsp->AppendChild($dom->CreateElement('Competitions'));
         // Iterate through all the matching Competitions and create corresponding Competition nodes
