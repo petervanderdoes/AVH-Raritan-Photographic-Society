@@ -332,13 +332,7 @@ class Client
     private function sendXmlCompetitions($db, $requested_medium, $comp_date)
     {
 
-        // Start building the XML response
-        $dom = new \DOMDocument('1.0', 'utf-8');
-        $dom->formatOutput=true;
-        // Create the root node
-        $node = $dom->CreateElement('rsp');
-        $node->SetAttribute('stat', 'ok');
-        $rsp = $dom->AppendChild($node);
+        $json=[];
 
         $medium_clause = '';
         if (!(empty($requested_medium))) {
@@ -359,15 +353,10 @@ class Client
             );
             die();
         }
-        $config = $rsp->AppendChild($dom->CreateElement('Configuration'));
-        $size_node = $config->AppendChild($dom->CreateElement('ImageSize'));
-        $width_node = $size_node->AppendChild($dom->CreateElement('Width'));
-        $width_node->AppendChild($dom->CreateTextNode(utf8_encode("1440")));
-        $height_node = $size_node->AppendChild($dom->CreateElement('Height'));
-        $height_node->AppendChild($dom->CreateTextNode(utf8_encode("900")));
+        $json['Configuration']['ImageSize']['Width']=1440;
+        $json['Configuration']['ImageSize']['Height']=990;
 
         // Create a Competitions node
-        $xml_competitions = $rsp->AppendChild($dom->CreateElement('Competitions'));
         // Iterate through all the matching Competitions and create corresponding Competition nodes
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ($record_competitions !== false) {
@@ -378,19 +367,11 @@ class Client
             $medium = $record_competitions['Medium'];
             $classification = $record_competitions['Classification'];
             // Create the competition node in the XML response
-            $competition_element = $xml_competitions->AppendChild($dom->CreateElement('Competition'));
-
-            $date_element = $competition_element->AppendChild($dom->CreateElement('Date'));
-            $date_element->AppendChild($dom->CreateTextNode(utf8_encode($date)));
-
-            $theme_element = $competition_element->AppendChild($dom->CreateElement('Theme'));
-            $theme_element->AppendChild($dom->CreateTextNode(utf8_encode($theme)));
-
-            $medium_element = $competition_element->AppendChild($dom->CreateElement('Medium'));
-            $medium_element->AppendChild($dom->CreateTextNode(utf8_encode($medium)));
-
-            $classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
-            $classification_node->AppendChild($dom->CreateTextNode(utf8_encode($classification)));
+            $competition=[];
+            $competition['Date']=$date;
+            $competition['Theme']=$theme;
+            $competition['Medium']=$medium;
+            $competition['Classification']=$classification;
 
             // Get all the entries for this competition
             try {
@@ -409,48 +390,33 @@ class Client
             $all_records_entries = $sth_entries->fetchAll();
             // Create an Entries node
 
-            $entries = $competition_element->AppendChild($dom->CreateElement('Entries'));
             // Iterate through all the entries for this competition
+            $entries=[];
             foreach ($all_records_entries as $record_entries) {
                 $user = get_user_by('id', $record_entries['Member_ID']);
                 if (CommonHelper::isPaidMember($user->ID)) {
-
+                    $entry=[];
                     // Create an Entry node
-                    $entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
-
-                    $id = $entry_element->AppendChild($dom->CreateElement('ID'));
-                    $id->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['ID'])));
-
-                    $fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_firstname)));
-
-                    $lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_lastname)));
-
-                    $title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
-                    $title_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Title'])));
-
-                    $score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
-                    $score_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Score'])));
-
-                    $award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
-                    $award_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Award'])));
-
-                    $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
-                    $url_node->AppendChild(
-                        $dom->CreateTextNode(
-                            utf8_encode(
-                                $this->photo_helper->getThumbnailUrl($record_entries['Server_File_Name'], Constants::IMAGE_CLIENT_SIZE)
-                            )
-                        )
-                    );
+                    $entry['ID']=$record_entries['ID'];
+                    $entry['First_Name']=$user->user_firstname;
+                    $entry['Last_Name']=$user->user_lastname;
+                    $entry['Title']=$record_entries['Title'];
+                    $entry['Score']=$record_entries['Score'];
+                    $entry['Award']=$record_entries['Award'];
+                    $entry['Image_URL']=$this->photo_helper->getThumbnailUrl($record_entries['Server_File_Name'], Constants::IMAGE_CLIENT_SIZE);
+                    $entries[]=$entry;
                 }
             }
+            $competition['Entries']=$entries;
+            $competitions[]=$competition;
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         }
+        $json['Competitions']=$competitions;
         // Send the completed XML response back to the client
         // header('Content-Type: text/xml');
-        $dom->save('peter.xml');
-        echo $dom->saveXML();
+        $fp = fopen('peter.json', 'w');
+        fwrite($fp, json_encode($json));
+        fclose($fp);
+        //echo $dom->saveXML();
     }
 }
