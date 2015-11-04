@@ -280,11 +280,29 @@ class Client
                                 die();
                             }
                             if ($stmt->rowCount() < 1) {
-                                $warning .= '  <info>' . (string) $comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title . ' -- Row failed to update</info>' . "\n";
+                                $warning .= '  <info>' .
+                                            (string) $comp_date .
+                                            ', ' .
+                                            $first_name .
+                                            ' ' .
+                                            $last_name .
+                                            ', ' .
+                                            $title .
+                                            ' -- Row failed to update</info>' .
+                                            "\n";
                             }
                         }
                     } else {
-                        $warning .= '  <info>' . (string) $comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title . ' -- ID is Null -- skipped</info>' . "\n";
+                        $warning .= '  <info>' .
+                                    (string) $comp_date .
+                                    ', ' .
+                                    $first_name .
+                                    ' ' .
+                                    $last_name .
+                                    ', ' .
+                                    $title .
+                                    ' -- ID is Null -- skipped</info>' .
+                                    "\n";
                     }
                 }
             }
@@ -310,7 +328,12 @@ class Client
             }
             if ($stmt_update->rowCount() < 1) {
                 $this->doRESTError(
-                    'No rows updated when setting Scored flag to Y in database for ' . $sql_date . ' / ' . $classification . ' / ' . $medium
+                    'No rows updated when setting Scored flag to Y in database for ' .
+                    $sql_date .
+                    ' / ' .
+                    $classification .
+                    ' / ' .
+                    $medium
                 );
                 die();
             }
@@ -332,11 +355,13 @@ class Client
     private function sendXmlCompetitions($db, $requested_medium, $comp_date)
     {
 
-        $json=[];
+        $json = [];
+        $total_entries = 0;
 
         $medium_clause = '';
         if (!(empty($requested_medium))) {
-            $medium_clause = ($requested_medium == 'prints') ? ' AND Medium like \'%Prints\' ' : ' AND Medium like \'%Digital\' ';
+            $medium_clause = ($requested_medium ==
+                              'prints') ? ' AND Medium like \'%Prints\' ' : ' AND Medium like \'%Digital\' ';
         }
         $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification
         FROM competitions
@@ -348,13 +373,13 @@ class Client
             $sth_competitions->execute();
         } catch (\PDOException $e) {
             $this->doRESTError(
-                'Failed to SELECT competition records with date = ' . $comp_date . ' from database - ' . $e->getMessage(
-                )
+                'Failed to SELECT competition records with date = ' .
+                $comp_date .
+                ' from database - ' .
+                $e->getMessage()
             );
             die();
         }
-        $json['Configuration']['ImageSize']['Width']=1440;
-        $json['Configuration']['ImageSize']['Height']=990;
 
         // Create a Competitions node
         // Iterate through all the matching Competitions and create corresponding Competition nodes
@@ -367,11 +392,11 @@ class Client
             $medium = $record_competitions['Medium'];
             $classification = $record_competitions['Classification'];
             // Create the competition node in the XML response
-            $competition=[];
-            $competition['Date']=$date;
-            $competition['Theme']=$theme;
-            $competition['Medium']=$medium;
-            $competition['Classification']=$classification;
+            $competition = [];
+            $competition['Date'] = $date;
+            $competition['Theme'] = $theme;
+            $competition['Medium'] = $medium;
+            $competition['Classification'] = $classification;
 
             // Get all the entries for this competition
             try {
@@ -391,27 +416,34 @@ class Client
             // Create an Entries node
 
             // Iterate through all the entries for this competition
-            $entries=[];
+            $entries = [];
             foreach ($all_records_entries as $record_entries) {
                 $user = get_user_by('id', $record_entries['Member_ID']);
                 if (CommonHelper::isPaidMember($user->ID)) {
-                    $entry=[];
+                    $entry = [];
                     // Create an Entry node
-                    $entry['ID']=$record_entries['ID'];
-                    $entry['First_Name']=$user->user_firstname;
-                    $entry['Last_Name']=$user->user_lastname;
-                    $entry['Title']=$record_entries['Title'];
-                    $entry['Score']=$record_entries['Score'];
-                    $entry['Award']=$record_entries['Award'];
-                    $entry['Image_URL']=$this->photo_helper->getThumbnailUrl($record_entries['Server_File_Name'], Constants::IMAGE_CLIENT_SIZE);
-                    $entries[]=$entry;
+                    $entry['ID'] = $record_entries['ID'];
+                    $entry['First_Name'] = $user->user_firstname;
+                    $entry['Last_Name'] = $user->user_lastname;
+                    $entry['Title'] = $record_entries['Title'];
+                    $entry['Score'] = $record_entries['Score'];
+                    $entry['Award'] = $record_entries['Award'];
+                    $entry['Image_URL'] = $this->photo_helper->getThumbnailUrl(
+                        $record_entries['Server_File_Name'],
+                        Constants::IMAGE_CLIENT_SIZE
+                    );
+                    $entries[] = $entry;
+                    $total_entries++;
                 }
             }
-            $competition['Entries']=$entries;
-            $competitions[]=$competition;
+            $competition['Entries'] = $entries;
+            $competitions[] = $competition;
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         }
-        $json['Competitions']=$competitions;
+        $json['Configuration']['ImageSize']['Width'] = 1440;
+        $json['Configuration']['ImageSize']['Height'] = 990;
+        $json['Configuration']['TotalEntries'] = $total_entries;
+        $json['Competitions'] = $competitions;
         // Send the completed XML response back to the client
         // header('Content-Type: text/xml');
         $fp = fopen('peter.json', 'w');
