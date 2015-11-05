@@ -41,7 +41,7 @@ class RequestRpsClient
         status_header(200);
         switch ($this->request->input('rpswinclient')) {
             case 'getcompdate':
-                $this->client->sendXmlCompetitionDates($this->request);
+                $this->client->sendCompetitionDates($this->request);
                 break;
             case 'download':
                 $this->client->sendCompetitions($this->request);
