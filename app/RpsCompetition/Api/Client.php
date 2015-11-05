@@ -93,7 +93,8 @@ class Client
         if (is_object($db)) {
             $this->checkUserAuthentication($username, $password);
             // @todo Check if the user has the role needed.
-            $this->sendXmlCompetitions($db, $request->input('medium'), $request->input('comp_date'));
+            $competition_info = $this->getCompetitionInfo($db, $request->input('medium'), $request->input('comp_date'));
+            echo json_encode($competition_info);
         }
         die();
     }
@@ -343,7 +344,7 @@ class Client
     }
 
     /**
-     * Create a XML file for the client with information about images for a particular date
+     * Collect information for the client
      *
      * @param RpsPdo $db
      *            Connection to the RPS Database
@@ -351,11 +352,13 @@ class Client
      *            Which competition medium to use, either digital or print
      * @param string $comp_date
      *            The competition date
+     *
+     * @return array
      */
-    private function sendXmlCompetitions($db, $requested_medium, $comp_date)
+    private function getCompetitionInfo($db, $requested_medium, $comp_date)
     {
 
-        $json = [];
+        $competition_information = [];
         $total_entries = 0;
 
         $medium_clause = '';
@@ -440,14 +443,14 @@ class Client
             $competitions[] = $competition;
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         }
-        $json['Configuration']['ImageSize']['Width'] = 1440;
-        $json['Configuration']['ImageSize']['Height'] = 990;
-        $json['Configuration']['TotalEntries'] = $total_entries;
-        $json['Competitions'] = $competitions;
+        $competition_information['Configuration']['ImageSize']['Width'] = 1440;
+        $competition_information['Configuration']['ImageSize']['Height'] = 990;
+        $competition_information['Configuration']['TotalEntries'] = $total_entries;
+        $competition_information['Competitions'] = $competitions;
 
         $fp = fopen('peter.json', 'w');
-        fwrite($fp, json_encode($json));
+        fwrite($fp, json_encode($competition_information));
         fclose($fp);
-        echo json_encode($json);
+        return $competition_information;
     }
 }
