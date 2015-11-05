@@ -444,11 +444,10 @@ class Client
         $json['Configuration']['ImageSize']['Height'] = 990;
         $json['Configuration']['TotalEntries'] = $total_entries;
         $json['Competitions'] = $competitions;
-        // Send the completed XML response back to the client
-        // header('Content-Type: text/xml');
+
         $fp = fopen('peter.json', 'w');
         fwrite($fp, json_encode($json));
         fclose($fp);
-        //echo $dom->saveXML();
+        echo json_encode($json);
     }
 }
