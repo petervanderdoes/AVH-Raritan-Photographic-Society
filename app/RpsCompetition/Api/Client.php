@@ -7,7 +7,6 @@ use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsPdo;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
  * Class Client
@@ -31,7 +30,7 @@ class Client
     }
 
     /**
-     * Handles the uploading of the score file
+     * Handles the competitions results
      *
      * @param Request $request
      */
@@ -39,65 +38,43 @@ class Client
     {
         $username = $request->input('username');
         $password = $request->input('password');
-        $comp_date = $request->input('date');
         $db = $this->getDatabaseHandle();
 
         if (is_object($db)) {
             $this->checkUserAuthentication($username, $password);
             // Check to see if there were any file upload errors
-            $file = $request->file('file');
-            if ($file === null) {
-                $this->doRESTError('No file was given to upload!');
-                die();
+            $json = $request->input('json');
+            if ($json !== null) {
+                $scores = json_decode($json);
+                $warning = $this->handleCompetitionResults($db, $scores);
+
+                // Return success to the client
+                $warning = '  <info>Scores successfully uploaded</info>' . "\n" . $warning;
+                $this->doRESTSuccess($warning);
             }
-
-            if (!$file->isValid()) {
-                $this->doRESTError($file->getErrorMessage());
-                die();
-            }
-
-            // Move the file to its final location
-            $path = $request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
-            $dest_name = 'scores_' . $comp_date . '.xml';
-            $file_name = $path . '/' . $dest_name;
-            try {
-                $file->move($path, $dest_name);
-            } catch (FileException $e) {
-                $this->doRESTError($e->getMessage());
-                die();
-            }
-
-            $warning = $this->handleUploadScoresFile($db, $file_name);
-
-            // Remove the uploaded .xml file
-            unlink($file_name);
-
-            // Return success to the client
-            $warning = '  <info>Scores successfully uploaded</info>' . "\n" . $warning;
-            $this->doRESTSuccess($warning);
         }
         die();
     }
 
     /**
-     * Create a XML File with the competition dates
+     * Handle request by client for Competition Dates
      *
      * @param Request $request
      */
     public function sendCompetitionDates(Request $request)
     {
-        // Connect to the Database
-        $db = $this->getDatabaseHandle();
-
         $closed = $request->input('closed');
         $scored = $request->input('scored');
-        $dates = $this->getCompetitionDates($db, $closed, $scored);
-        echo json_encode($dates);
+        $db = $this->getDatabaseHandle();
+        if (is_object($db)) {
+            $dates = $this->getCompetitionDates($db, $closed, $scored);
+            echo json_encode($dates);
+        }
         die();
     }
 
     /**
-     * Handles request by client to download images for a particular date,
+     * Handles request by client to download images for a particular date.
      *
      * @param Request $request
      */
@@ -233,6 +210,7 @@ class Client
     {
 
         $competition_information = [];
+        $competitions = [];
         $total_entries = 0;
 
         $medium_clause = '';
@@ -348,22 +326,17 @@ class Client
     }
 
     /**
-     * Handle the XML file containing the scores and add them to the database
+     * Handle the data containing the competition results and add them to the database
      *
      * @param RpsPdo $db Database handle.
-     * @param string $file_name
+     * @param array  $competition_results
      *
      * @return string|null
      */
-    private function handleUploadScoresFile($db, $file_name)
+    private function handleCompetitionResults($db, $competition_results)
     {
         $warning = '';
 
-        $xml = simplexml_load_file($file_name);
-        if (!$xml) {
-            $this->doRESTError('Failed to open scores XML file');
-            die();
-        }
         try {
             $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
             $stmt = $db->prepare($sql);
@@ -372,93 +345,102 @@ class Client
             die();
         }
 
-        foreach ($xml->{'Competition'} as $comp) {
-            $comp_date = (string) $comp->{'Date'};
-            $classification = (string) $comp->{'Classification'};
-            $medium = (string) $comp->{'Medium'};
+        foreach ($competition_results->Competitions as $competition) {
+            $comp_date = (string) $competition->CompDate;
+            $classification = (string) $competition->Classification;
+            $medium = (string) $competition->Medium;
 
-            foreach ($comp->{'Entries'} as $entries) {
-                foreach ($entries->{'Entry'} as $entry) {
-                    $entry_id = $entry->{'ID'};
-                    $first_name = html_entity_decode($entry->{'First_Name'});
-                    $last_name = html_entity_decode($entry->{'Last_Name'});
-                    $title = html_entity_decode($entry->{'Title'});
-                    $score = html_entity_decode($entry->{'Score'});
-                    $award = html_entity_decode($entry->{'Award'});
+            foreach ($competition->Entries as $entry) {
+                $entry_id = $entry->ID;
+                $first_name = html_entity_decode($entry->First_Name);
+                $last_name = html_entity_decode($entry->Last_Name);
+                $title = html_entity_decode($entry->Title);
+                $score = html_entity_decode($entry->Score);
+                $award = html_entity_decode($entry->Award);
 
-                    if ($entry_id != '') {
-                        if ($score != '') {
-                            try {
-                                $stmt->bindValue(':score', $score, PDO::PARAM_STR);
-                                $stmt->bindValue(':award', $award, PDO::PARAM_STR);
-                                $stmt->bindValue(':entryid', $entry_id, PDO::PARAM_INT);
-                                $stmt->execute();
-                            } catch (\PDOException $e) {
-                                $this->doRESTError(
-                                    'Failed to UPDATE scores in database - ' . $e->getMessage() . ' - ' . $sql
-                                );
-                                die();
-                            }
-                            if ($stmt->rowCount() < 1) {
-                                $warning .= '  <info>' .
-                                            (string) $comp_date .
-                                            ', ' .
-                                            $first_name .
-                                            ' ' .
-                                            $last_name .
-                                            ', ' .
-                                            $title .
-                                            ' -- Row failed to update</info>' .
-                                            "\n";
-                            }
+                if ($entry_id != '') {
+                    if ($score != '') {
+                        try {
+                            $stmt->bindValue(':score', $score, PDO::PARAM_STR);
+                            $stmt->bindValue(':award', $award, PDO::PARAM_STR);
+                            $stmt->bindValue(':entryid', $entry_id, PDO::PARAM_INT);
+                            $stmt->execute();
+                        } catch (\PDOException $e) {
+                            $this->doRESTError(
+                                'Failed to UPDATE scores in database - ' . $e->getMessage() . ' - ' . $sql
+                            );
+                            die();
                         }
-                    } else {
-                        $warning .= '  <info>' .
-                                    (string) $comp_date .
-                                    ', ' .
-                                    $first_name .
-                                    ' ' .
-                                    $last_name .
-                                    ', ' .
-                                    $title .
-                                    ' -- ID is Null -- skipped</info>' .
-                                    "\n";
+                        if ($stmt->rowCount() < 1) {
+                            $warning .= '  <info>' .
+                                        (string) $comp_date .
+                                        ', ' .
+                                        $first_name .
+                                        ' ' .
+                                        $last_name .
+                                        ', ' .
+                                        $title .
+                                        ' -- Row failed to update</info>' .
+                                        "\n";
+                        }
                     }
+                } else {
+                    $warning .= '  <info>' .
+                                (string) $comp_date .
+                                ', ' .
+                                $first_name .
+                                ' ' .
+                                $last_name .
+                                ', ' .
+                                $title .
+                                ' -- ID is Null -- skipped</info>' .
+                                "\n";
                 }
             }
-
-            // Mark this competition as scored
-            try {
-                $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
-                        WHERE Competition_Date = :comp_date AND
-                        Classification = :classification AND
-                        Medium = :medium';
-                $stmt_update = $db->prepare($sql_update);
-                $date = new \DateTime($comp_date);
-                $sql_date = $date->format('Y-m-d H:i:s');
-                $stmt_update->bindValue(':comp_date', $sql_date, PDO::PARAM_STR);
-                $stmt_update->bindValue(':classification', $classification, PDO::PARAM_STR);
-                $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);
-                $stmt_update->execute();
-            } catch (\PDOException $e) {
-                $this->doRESTError(
-                    'Failed to execute UPDATE' . $e->getMessage()
-                );
-                die();
-            }
-            if ($stmt_update->rowCount() < 1) {
-                $this->doRESTError(
-                    'No rows updated when setting Scored flag to Y in database for ' .
-                    $sql_date .
-                    ' / ' .
-                    $classification .
-                    ' / ' .
-                    $medium
-                );
-                die();
-            }
+            $this->markCompetitonScored($db, $comp_date, $classification, $medium);
         }
 
         return $warning;
+    }
+
+    /**
+     * Mark a competition as scored.
+     *
+     * @param RpsPdo $db
+     * @param string $comp_date
+     * @param string $classification
+     * @param string $medium
+     */
+    private function markCompetitonScored($db, $comp_date, $classification, $medium)
+    {
+        try {
+            $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
+                        WHERE Competition_Date = :comp_date AND
+                        Classification = :classification AND
+                        Medium = :medium';
+            $stmt_update = $db->prepare($sql_update);
+            $date = new \DateTime($comp_date);
+            $sql_date = $date->format('Y-m-d H:i:s');
+            $stmt_update->bindValue(':comp_date', $sql_date, PDO::PARAM_STR);
+            $stmt_update->bindValue(':classification', $classification, PDO::PARAM_STR);
+            $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);
+            $stmt_update->execute();
+        } catch (\PDOException $e) {
+            $this->doRESTError(
+                'Failed to execute UPDATE' . $e->getMessage()
+            );
+            die();
+        }
+        if ($stmt_update->rowCount() < 1) {
+            $this->doRESTError(
+                'No rows updated when setting Scored flag to Y in database for ' .
+                $sql_date .
+                ' / ' .
+                $classification .
+                ' / ' .
+                $medium
+            );
+            die();
+        }
     }
 }
