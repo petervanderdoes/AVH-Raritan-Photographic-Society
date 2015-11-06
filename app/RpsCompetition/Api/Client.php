@@ -197,12 +197,9 @@ class Client
     /**
      * Collect information for the client
      *
-     * @param RpsPdo $db
-     *            Connection to the RPS Database
-     * @param string $requested_medium
-     *            Which competition medium to use, either digital or print
-     * @param string $comp_date
-     *            The competition date
+     * @param RpsPdo $db               Connection to the RPS Database
+     * @param string $requested_medium Which competition medium to use, either digital or print
+     * @param string $comp_date        The competition date
      *
      * @return array
      */
@@ -235,9 +232,7 @@ class Client
             );
             die();
         }
-
-        // Create a Competitions node
-        // Iterate through all the matching Competitions and create corresponding Competition nodes
+        // Iterate through all the matching Competitions
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         while ($record_competitions !== false) {
             $comp_id = $record_competitions['ID'];
@@ -268,7 +263,6 @@ class Client
                 die();
             }
             $all_records_entries = $sth_entries->fetchAll();
-            // Create an Entries node
 
             // Iterate through all the entries for this competition
             $entries = [];
