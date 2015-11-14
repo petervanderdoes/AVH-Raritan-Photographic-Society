@@ -3,6 +3,7 @@ namespace RpsCompetition\Frontend\Requests\RpsClient;
 
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Api\Client;
+use RpsCompetition\Api\Json;
 use RpsCompetition\Application;
 
 /**
@@ -38,11 +39,17 @@ class RpsClientServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind(
+            'Json',
+            function () {
+                return new Json();
+            }
+        );
 
         $this->app->bind(
             'ApiClient',
             function (Application $app) {
-                return new Client($app->make('PhotoHelper'));
+                return new Client($app->make('PhotoHelper'), $app->make('Json'));
             }
         );
         $this->app->bind(
