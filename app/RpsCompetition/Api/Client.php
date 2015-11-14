@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Api;
 
-use Avh\Framework\Utility\Common;
 use Illuminate\Http\Request;
 use PDO;
 use RpsCompetition\Constants;
@@ -19,8 +18,8 @@ use RpsCompetition\Helpers\PhotoHelper;
 class Client
 {
     private $json;
-    private $photo_helper;
     private $json_error;
+    private $photo_helper;
 
     /**
      * Constructor
@@ -61,7 +60,6 @@ class Client
         die();
     }
 
-
     /**
      * Handle request by client for Competition Dates
      *
@@ -74,12 +72,11 @@ class Client
         $db = $this->getDatabaseHandle();
         if (is_object($db)) {
             $result = $this->getCompetitionDates($db, $closed, $scored);
-            $this->json->send_response(null,null,$result);
+            $this->json->send_response(null, null, $result);
         } else {
             $this->json->addError('Can not connect to server database.');
             $this->json->send_response();
         }
-
     }
 
     /**
@@ -103,14 +100,26 @@ class Client
 
     /**
      * @param string $key
-     * @param mixed $data
+     * @param mixed  $data
      *
      * @return array
      */
-    private function addJsonData($key,$data)
+    private function addJsonData($key, $data)
     {
-        $this->json_data['data'][$key]=$data;
+        $this->json_data['data'][$key] = $data;
+    }
 
+    /**
+     * Create a REST error
+     *
+     * @param string $error_message The actual error message
+     *
+     * @return array
+     */
+    private function addJsonError($error_message)
+    {
+        $error_detail['detail'] = $error_message;
+        $this->json_error['errors'][] = $error_detail;
     }
 
     /**
@@ -129,20 +138,6 @@ class Client
         }
 
         return;
-    }
-
-    /**
-     * Create a REST error
-     *
-     * @param string $error_message The actual error message
-     *
-     * @return array
-     */
-    private function addJsonError($error_message)
-    {
-        $error_detail['detail'] = $error_message;
-        $this->json_error['errors'][] = $error_detail;
-
     }
 
     /**
@@ -186,15 +181,16 @@ class Client
     }
 
     /**
-     * @param RpsPdo $db     Connection to the RPS Database
-     * @param string  $closed Competition closed info
-     * @param string  $scored Competition scored info
+     * Fetch the competiton dates from the databse.
      *
-     * @return array
+     * @param RpsPdo $db
+     * @param string $closed
+     * @param string $scored
+     *
+     * @return array|boolean
      */
-    private function getCompetitionDates($db, $closed, $scored)
+    private function fetchCompetitionDates($db, $closed, $scored)
     {
-        $dates = [];
         try {
             $select = 'SELECT DISTINCT(Competition_Date) FROM competitions ';
             if ($closed !== null || $scored !== null) {
@@ -219,26 +215,46 @@ class Client
             }
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->json->addError('Failed to SELECT list of competitions from database - ' . $e->getMessage());
-            return $this->json->get_json();
+            return $e;
         }
 
-        $recs = $sth->fetch(\PDO::FETCH_ASSOC);
-        while ($recs != false) {
-            $date_parts = explode(' ', $recs['Competition_Date']);
+        $recs = $sth->fetchall(\PDO::FETCH_ASSOC);
+
+        return $recs;
+    }
+
+    /**
+     * @param RpsPdo $db     Connection to the RPS Database
+     * @param string $closed Competition closed info
+     * @param string $scored Competition scored info
+     *
+     * @return array
+     */
+    private function getCompetitionDates($db, $closed, $scored)
+    {
+        $dates = [];
+        $recs = $this->fetchCompetitionDates($db, $closed, $scored);
+        if (get_class($recs) == "PDOException") {
+            /* @var $recs PDOExection */
+            $this->json->addError('Failed to SELECT list of competitions from database');
+            $this->json->addError($recs->getMessage());
+
+            return $this->json->get_json();
+        }
+        foreach ($recs as $record) {
+            $date_parts = explode(' ', $record['Competition_Date']);
             $dates[] = $date_parts[0];
-            $recs = $sth->fetch(\PDO::FETCH_ASSOC);
         }
         if ($dates === []) {
             $this->json->addError('No competition dates found');
         } else {
-            $this->json->addResource('CompetitionDates',$dates);
+            $this->json->addResource('CompetitionDates', $dates);
         }
 
         return $this->json->get_json();
     }
 
-   /**
+    /**
      * Collect information for the client
      *
      * @param RpsPdo $db               Connection to the RPS Database
