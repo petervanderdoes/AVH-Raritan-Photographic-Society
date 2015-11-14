@@ -245,11 +245,7 @@ class Client
             $date_parts = explode(' ', $record['Competition_Date']);
             $dates[] = $date_parts[0];
         }
-        if ($dates === []) {
-            $this->json->addError('No competition dates found');
-        } else {
-            $this->json->addResource('CompetitionDates', $dates);
-        }
+        $this->json->addResource('CompetitionDates', $dates);
 
         return $this->json->get_json();
     }
