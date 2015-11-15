@@ -16,13 +16,24 @@ class Json
      * content type headers
      */
     const CONTENT_TYPE_OFFICIAL = 'application/vnd.api+json';
-    const ENCODE_DEBUG          = 448;
+
+
     /**
      * json encode options
      * default is JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE
-     * in debug mode (@see ::$debug) JSON_PRETTY_PRINT is added
      */
-    const ENCODE_DEFAULT               = 320;
+    const ENCODE_DEFAULT = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+    const ENCODE_DEBUG   = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT;
+
+    /**
+     * advised http status codes
+     */
+    const STATUS_OK                    = 200;
+    const STATUS_PERMANENT_REDIRECT    = 308;
+    const STATUS_SERVICE_UNAVAILABLE   = 503;
+    const STATUS_TEMPORARY_REDIRECT    = 307;
+    const STATUS_UNAUTHORIZED          = 401;
+    const STATUS_UNPROCESSABLE_ENTITY  = 422;
     const STATUS_BAD_REQUEST           = 400;
     const STATUS_CREATED               = 201;
     const STATUS_FORBIDDEN             = 403;
@@ -31,17 +42,9 @@ class Json
     const STATUS_NOT_FOUND             = 404;
     const STATUS_NOT_MODIFIED          = 304;
     const STATUS_NO_CONTENT            = 204;
+
     /**
-     * advised http status codes
-     */
-    const STATUS_OK                   = 200;
-    const STATUS_PERMANENT_REDIRECT   = 308;
-    const STATUS_SERVICE_UNAVAILABLE  = 503;
-    const STATUS_TEMPORARY_REDIRECT   = 307;
-    const STATUS_UNAUTHORIZED         = 401;
-    const STATUS_UNPROCESSABLE_ENTITY = 422;
-    /**
-     * whether or not ->send_response() sends out basic status headers
+     * whether or not ->sendResponse() sends out basic status headers
      * if set to true, it sends the status code and the location header
      */
     public static $send_status_headers = true;
@@ -87,7 +90,7 @@ class Json
      *
      * @return array
      */
-    private function get_array()
+    private function getArray()
     {
         $response = [];
         $response['data'] = $this->data;
@@ -100,23 +103,21 @@ class Json
 
     /**
      * sends out the json response to the browser
-     * this will fetch the response from ->get_json() if not given via $response
+     * this will fetch the response from ->getJson() if not given via $response
      *
      * @note this also sets the needed http headers (status, location and content-type)
      *
      * @param  string $content_type   optional, defaults to ::CONTENT_TYPE_OFFICIAL (the official IANA registered one)
-     *                                ..
-     *                                .. or to ::CONTENT_TYPE_DEBUG, @see ::$debug
      * @param  int    $encode_options optional, $options for json_encode()
      *                                defaults to ::ENCODE_DEFAULT or ::ENCODE_DEBUG, @see ::$debug
-     * @param  json   $response       optional, defaults to ::get_json()
+     * @param  json   $response       optional, defaults to ::getJson()
      *
      * @return void                   however, a string will be echo'd to the browser
      */
-    public function send_response($content_type = null, $encode_options = null, $response = null)
+    public function sendResponse($content_type = null, $encode_options = null, $response = null)
     {
         if (is_null($response) && $this->http_status != self::STATUS_NO_CONTENT) {
-            $response = $this->get_json($encode_options);
+            $response = $this->getJson($encode_options);
         }
 
         if (empty($content_type)) {
@@ -124,7 +125,7 @@ class Json
         }
 
         if (self::$send_status_headers) {
-            $this->send_status_headers();
+            $this->sendStatusHeaders();
         }
 
         header('Content-Type: ' . $content_type . '; charset=utf-8');
@@ -142,16 +143,16 @@ class Json
      *
      * @param int $http_status any will do, you can easily pass one of the predefined ones in ::STATUS_*
      */
-    public function set_http_status($http_status)
+    public function setHttpStatus($http_status)
     {
         $this->http_status = $http_status;
     }
 
     /**
      * returns the whole response body as json
-     * it generates the response via ->get_array()
+     * it generates the response via ->getArray()
      *
-     * @see ->get_array() for the structure
+     * @see ->getArray() for the structure
      * @see json_encode() options
      *
      * @param  int $encode_options  optional, $options for json_encode()
@@ -159,13 +160,13 @@ class Json
      *
      * @return json
      */
-    public function get_json($encode_options = null)
+    public function getJson($encode_options = null)
     {
         if (is_int($encode_options) == false) {
             $encode_options = self::ENCODE_DEFAULT;
         }
 
-        $response = $this->get_array();
+        $response = $this->getArray();
         $json = json_encode($response, $encode_options);
 
         return $json;
@@ -177,11 +178,11 @@ class Json
      *
      * @return void
      */
-    private function send_status_headers()
+    private function sendStatusHeaders()
     {
         if ($this->redirect_location) {
             if ($this->http_status == self::STATUS_OK) {
-                $this->set_http_status(self::STATUS_TEMPORARY_REDIRECT);
+                $this->setHttpStatus(self::STATUS_TEMPORARY_REDIRECT);
             }
 
             header('Location: ' . $this->redirect_location, true, $this->http_status);

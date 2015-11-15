@@ -72,10 +72,10 @@ class Client
         $db = $this->getDatabaseHandle();
         if (is_object($db)) {
             $result = $this->getCompetitionDates($db, $closed, $scored);
-            $this->json->send_response(null, null, $result);
+            $this->json->sendResponse(null, null, $result);
         } else {
             $this->json->addError('Can not connect to server database.');
-            $this->json->send_response();
+            $this->json->sendResponse();
         }
     }
 
@@ -239,7 +239,7 @@ class Client
             $this->json->addError('Failed to SELECT list of competitions from database');
             $this->json->addError($recs->getMessage());
 
-            return $this->json->get_json();
+            return $this->json->getJson();
         }
         foreach ($recs as $record) {
             $date_parts = explode(' ', $record['Competition_Date']);
@@ -247,7 +247,7 @@ class Client
         }
         $this->json->addResource('CompetitionDates', $dates);
 
-        return $this->json->get_json();
+        return $this->json->getJson();
     }
 
     /**
