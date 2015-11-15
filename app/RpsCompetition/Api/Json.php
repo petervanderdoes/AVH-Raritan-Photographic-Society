@@ -15,7 +15,7 @@ class Json
     /**
      * content type headers
      */
-    const CONTENT_TYPE_OFFICIAL = 'application/vnd.api+json';
+    const CONTENT_TYPE_OFFICIAL = 'application/json';
 
 
     /**
