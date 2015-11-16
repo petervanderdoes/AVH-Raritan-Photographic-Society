@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Api;
 
+use Avh\Framework\Utility\Common;
 use Illuminate\Http\Request;
 use PDO;
 use RpsCompetition\Constants;
@@ -38,26 +39,28 @@ class Client
      *
      * @param Request $request
      */
-    public function doUploadScore(Request $request)
+    public function receiveScores(Request $request)
     {
         $username = $request->input('username');
         $password = $request->input('password');
         $db = $this->getDatabaseHandle();
 
         if (is_object($db)) {
-            $this->checkUserAuthentication($username, $password);
-            // Check to see if there were any file upload errors
-            $json = $request->input('json');
-            if ($json !== null) {
-                $scores = json_decode($json);
-                $warning = $this->handleCompetitionResults($db, $scores);
-
-                // Return success to the client
-                $warning = '  <info>Scores successfully uploaded</info>' . "\n" . $warning;
-                $this->doRESTSuccess($warning);
+            if ($this->checkUserAuthentication($username, $password)) {
+                // Check to see if there were any file upload errors
+                $json = $request->input('json');
+                if ($json !== null) {
+                    $scores = json_decode($json);
+                    $this->handleCompetitionResults($db, $scores);
+                } else {
+                    $this->json->addError('Empty JSON');
+                    $this->json->setStatusError();
+                }
+            } else {
+                $this->json->setStatusError();
             }
         }
-        die();
+        $this->json->sendResponse();
     }
 
     /**
@@ -290,14 +293,17 @@ class Client
      */
     private function handleCompetitionResults($db, $competition_results)
     {
-        $warning = '';
-
+        $this->json->setStatusSuccess();
+        Common::writeVarDump($competition_results);
         try {
             $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
             $stmt = $db->prepare($sql);
         } catch (\PDOException $e) {
-            $this->doRESTError('Error - ' . $e->getMessage() . ' - ' . $sql);
-            die();
+            $this->json->addError($e->getMessage());
+            $this->json->addError($sql);
+            $this->json->setStatusError();
+
+            return;
         }
 
         foreach ($competition_results->Competitions as $competition) {
@@ -314,48 +320,49 @@ class Client
                 $award = html_entity_decode($entry->Award);
 
                 if ($entry_id != '') {
-                    if ($score != '') {
-                        try {
-                            $stmt->bindValue(':score', $score, PDO::PARAM_STR);
-                            $stmt->bindValue(':award', $award, PDO::PARAM_STR);
-                            $stmt->bindValue(':entryid', $entry_id, PDO::PARAM_INT);
-                            $stmt->execute();
-                        } catch (\PDOException $e) {
-                            $this->doRESTError(
-                                'Failed to UPDATE scores in database - ' . $e->getMessage() . ' - ' . $sql
-                            );
-                            die();
-                        }
-                        if ($stmt->rowCount() < 1) {
-                            $warning .= '  <info>' .
-                                        (string) $comp_date .
-                                        ', ' .
-                                        $first_name .
-                                        ' ' .
-                                        $last_name .
-                                        ', ' .
-                                        $title .
-                                        ' -- Row failed to update</info>' .
-                                        "\n";
-                        }
+                    try {
+                        $stmt->bindValue(':score', $score, PDO::PARAM_STR);
+                        $stmt->bindValue(':award', $award, PDO::PARAM_STR);
+                        $stmt->bindValue(':entryid', $entry_id, PDO::PARAM_INT);
+                        $stmt->execute();
+                    } catch (\PDOException $e) {
+                        $this->json->addError($e->getMessage());
+                        $this->json->addError($sql);
+                        $this->json->setStatusError();
+
+                        return;
+                    }
+                    if ($stmt->rowCount() < 1) {
+                        $this->json->setStatusFail();
+                        $this->json->addError(
+                            (string) $comp_date .
+                            ', ' .
+                            $first_name .
+                            ' ' .
+                            $last_name .
+                            ', ' .
+                            $title .
+                            ' -- Row failed to update'
+                        );
                     }
                 } else {
-                    $warning .= '  <info>' .
-                                (string) $comp_date .
-                                ', ' .
-                                $first_name .
-                                ' ' .
-                                $last_name .
-                                ', ' .
-                                $title .
-                                ' -- ID is Null -- skipped</info>' .
-                                "\n";
+                    $this->json->setStatusFail();
+                    $this->json->addError(
+                        (string) $comp_date .
+                        ', ' .
+                        $first_name .
+                        ' ' .
+                        $last_name .
+                        ', ' .
+                        $title .
+                        ' -- ID is Null -- skipped'
+                    );
                 }
             }
             $this->markCompetitonScored($db, $comp_date, $classification, $medium);
         }
 
-        return $warning;
+        return;
     }
 
     /**
@@ -500,13 +507,12 @@ class Client
             $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);
             $stmt_update->execute();
         } catch (\PDOException $e) {
-            $this->doRESTError(
-                'Failed to execute UPDATE' . $e->getMessage()
-            );
-            die();
+            $this->json->addError('Failed to mark competition as scored');
+            $this->json->addError($e->getMessage());
+            $this->json->setStatusFail();
         }
         if ($stmt_update->rowCount() < 1) {
-            $this->doRESTError(
+            $this->json->addError(
                 'No rows updated when setting Scored flag to Y in database for ' .
                 $sql_date .
                 ' / ' .
@@ -514,7 +520,7 @@ class Client
                 ' / ' .
                 $medium
             );
-            die();
+            $this->json->setStatusFail();
         }
     }
 }

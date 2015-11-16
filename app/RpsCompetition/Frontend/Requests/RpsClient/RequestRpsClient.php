@@ -47,7 +47,7 @@ class RequestRpsClient
                 $this->client->sendCompetitions($this->request);
                 die();
             case 'uploadscore':
-                $this->client->doUploadScore($this->request);
+                $this->client->receiveScores($this->request);
                 die();
             default:
                 break;
