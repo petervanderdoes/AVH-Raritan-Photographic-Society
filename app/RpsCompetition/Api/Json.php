@@ -23,6 +23,10 @@ class Json
     private $errors = [];
     private $status = null;
 
+    /**
+     * Constructor
+     *
+     */
     public function __construct()
     {
     }
@@ -80,6 +84,8 @@ class Json
     }
 
     /**
+     * Get the JSON status
+     *
      * @return string
      */
     public function getStatus()
@@ -88,6 +94,8 @@ class Json
     }
 
     /**
+     * Set the JSON status
+     *
      * @param string $status
      */
     public function setStatus($status)
@@ -104,7 +112,7 @@ class Json
      *                                      defaults to ::JSON_ENCODE_DEFAULT
      * @param  string|null  $response       optional, defaults to ::getJson()
      *
-     * @return void                   however, a string will be echo'd to the browser
+     * @return void
      */
     public function sendResponse($content_type = null, $encode_options = null, $response = null)
     {
@@ -122,19 +130,19 @@ class Json
     }
 
     /**
-     * Set JSON Status to Fail
-     */
-    public function setStatusFail()
-    {
-        $this->setStatus(self::JSON_STATUS_FAIL);
-    }
-
-    /**
      * Set JSON Status to Error
      */
     public function setStatusError()
     {
         $this->setStatus(self::JSON_STATUS_ERROR);
+    }
+
+    /**
+     * Set JSON Status to Fail
+     */
+    public function setStatusFail()
+    {
+        $this->setStatus(self::JSON_STATUS_FAIL);
     }
 
     /**
