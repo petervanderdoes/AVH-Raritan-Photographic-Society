@@ -334,29 +334,15 @@ class Client
                     }
                     if ($stmt->rowCount() < 1) {
                         $this->json->setStatusFail();
-                        $this->json->addError(
-                            (string) $comp_date .
-                            ', ' .
-                            $first_name .
-                            ' ' .
-                            $last_name .
-                            ', ' .
-                            $title .
-                            ' -- Row failed to update'
-                        );
+                        $this->json->addError('-- Record failed to update -- skipped the following record');
+                        $this->json->addError($comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title);
+                        $this->json->addError('------');
                     }
                 } else {
                     $this->json->setStatusFail();
-                    $this->json->addError(
-                        (string) $comp_date .
-                        ', ' .
-                        $first_name .
-                        ' ' .
-                        $last_name .
-                        ', ' .
-                        $title .
-                        ' -- ID is Null -- skipped'
-                    );
+                    $this->json->addError(' -- ID is Empty -- skipped the following record');
+                    $this->json->addError($comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title);
+                    $this->json->addError('------');
                 }
             }
             $this->markCompetitonScored($db, $comp_date, $classification, $medium);
@@ -509,17 +495,13 @@ class Client
         } catch (\PDOException $e) {
             $this->json->addError('Failed to mark competition as scored');
             $this->json->addError($e->getMessage());
+            $this->json->addError('------');
             $this->json->setStatusFail();
         }
         if ($stmt_update->rowCount() < 1) {
-            $this->json->addError(
-                'No rows updated when setting Scored flag to Y in database for ' .
-                $sql_date .
-                ' / ' .
-                $classification .
-                ' / ' .
-                $medium
-            );
+            $this->json->addError('-- No rows updated when setting Scored flag to Y in database for:');
+            $this->json->addError($sql_date . ' / ' . $classification . ' / ' . $medium);
+            $this->json->addError('------');
             $this->json->setStatusFail();
         }
     }
