@@ -67,7 +67,7 @@ class Json
      * @param  int $encode_options  optional, $options for json_encode()
      *                              defaults to ::ENCODE_DEFAULT or ::ENCODE_DEBUG, @see ::$debug
      *
-     * @return json
+     * @return string
      */
     public function getJson($encode_options = null)
     {
