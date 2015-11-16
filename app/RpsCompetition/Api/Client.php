@@ -127,46 +127,6 @@ class Client
     }
 
     /**
-     * Create a REST error
-     *
-     * @param string $error_message The actual error message
-     *
-     * @return array
-     */
-    private function doRESTError($error_message)
-    {
-
-        $error_detail['detail'] = $error_message;
-        $json_error[] = $error_detail;
-
-        return $json_error;
-    }
-
-    /**
-     * Create the REST response
-     *
-     * @param string $status
-     * @param string $message
-     */
-    private function doRESTResponse($status, $message)
-    {
-        echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
-        echo '<rsp stat="' . $status . '">' . "\n";
-        echo '	' . $message . "\n";
-        echo '</rsp>' . "\n";
-    }
-
-    /**
-     * Create a REST success message
-     *
-     * @param string $message The actual message
-     */
-    private function doRESTSuccess($message)
-    {
-        $this->doRESTResponse('ok', $message);
-    }
-
-    /**
      * Fetch the competiton dates from the databse.
      *
      * @param RpsPdo $db
