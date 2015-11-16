@@ -64,6 +64,8 @@ class Client
      * Handle request by client for Competition Dates
      *
      * @param Request $request
+     *
+     * @return void
      */
     public function sendCompetitionDates(Request $request)
     {
@@ -84,6 +86,8 @@ class Client
      * Handles request by client to download images for a particular date.
      *
      * @param Request $request
+     *
+     * @return void
      */
     public function sendCompetitions(Request $request)
     {
@@ -91,36 +95,25 @@ class Client
         $password = $request->input('password');
         $db = $this->getDatabaseHandle();
         if (is_object($db)) {
-            $this->checkUserAuthentication($username, $password);
-            // @todo Check if the user has the role needed.
-            $competition_info = $this->getCompetitionInfo($db, $request->input('medium'), $request->input('comp_date'));
-            echo json_encode($competition_info);
+            if ($this->checkUserAuthentication($username, $password)) {
+
+                // @todo Check if the user has the role needed.
+                $response = $this->getCompetitionInfo(
+                    $db,
+                    $request->input('medium'),
+                    $request->input('comp_date')
+                );
+            } else {
+                // Error message is set in the checking method.
+                $this->json->setStatusError();
+                $response = $this->json->getJson();
+            }
+        } else {
+            $this->json->setStatusError();
+            $this->json->addError('Can not connect to server database.');
+            $response = $this->json->getJson();
         }
-        die();
-    }
-
-    /**
-     * @param string $key
-     * @param mixed  $data
-     *
-     * @return array
-     */
-    private function addJsonData($key, $data)
-    {
-        $this->json_data['data'][$key] = $data;
-    }
-
-    /**
-     * Create a REST error
-     *
-     * @param string $error_message The actual error message
-     *
-     * @return array
-     */
-    private function addJsonError($error_message)
-    {
-        $error_detail['detail'] = $error_message;
-        $this->json_error['errors'][] = $error_detail;
+        $this->json->sendResponse(null, null, $response);
     }
 
     /**
@@ -128,17 +121,20 @@ class Client
      *
      * @param string $username
      * @param string $password
+     *
+     * @return bool
      */
     private function checkUserAuthentication($username, $password)
     {
         $user = wp_authenticate($username, $password);
         if (is_wp_error($user)) {
             $error_message = strip_tags($user->get_error_message());
-            $this->doRESTError($error_message);
-            die();
+            $this->json->addError($error_message);
+
+            return false;
         }
 
-        return;
+        return true;
     }
 
     /**
@@ -249,6 +245,7 @@ class Client
         }
         $this->json->addResource('CompetitionDates', $dates);
         $this->json->setStatusSuccess();
+
         return $this->json->getJson();
     }
 
@@ -259,7 +256,7 @@ class Client
      * @param string $requested_medium Which competition medium to use, either digital or print
      * @param string $comp_date        The competition date
      *
-     * @return array
+     * @return string
      */
     private function getCompetitionInfo($db, $requested_medium, $comp_date)
     {
@@ -282,13 +279,15 @@ class Client
             $sth_competitions->bindParam(':compdate', $comp_date);
             $sth_competitions->execute();
         } catch (\PDOException $e) {
-            $this->doRESTError(
+            $this->json->setStatusError();
+            $this->json->addError(
                 'Failed to SELECT competition records with date = ' .
                 $comp_date .
                 ' from database - ' .
                 $e->getMessage()
             );
-            die();
+
+            return $this->json->getJson();
         }
         // Iterate through all the matching Competitions
         $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
@@ -317,8 +316,9 @@ class Client
                 $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
                 $sth_entries->execute();
             } catch (\Exception $e) {
-                $this->doRESTError('Failed to SELECT competition entries from database - ' . $e->getMessage());
-                die();
+                $this->json->addError('Failed to SELECT competition entries from database - ' . $e->getMessage());
+
+                return $this->json->getJson();
             }
             $all_records_entries = $sth_entries->fetchAll();
 
@@ -343,20 +343,25 @@ class Client
                     $total_entries++;
                 }
             }
-            $competition['Entries'] = $entries;
+            $competition['Entries'] = array_rand($entries);
             $competitions[] = $competition;
             $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
         }
-        $competition_information['Configuration']['ImageSize']['Width'] = 1440;
-        $competition_information['Configuration']['ImageSize']['Height'] = 990;
-        $competition_information['Configuration']['TotalEntries'] = $total_entries;
-        $competition_information['Competitions'] = $competitions;
+        $competition_information['ImageSize']['Width'] = 1440;
+        $competition_information['ImageSize']['Height'] = 990;
+        $competition_information['TotalEntries'] = $total_entries;
+        $this->json->setStatusSuccess();
+        $this->json->addResource('Configuration', $competition_information);
+        $this->json->addResource('Competitions', $competitions);
 
         $fp = fopen('peter.json', 'w');
-        fwrite($fp, json_encode($competition_information));
+        fwrite(
+            $fp,
+            $this->json->getJson(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+        );
         fclose($fp);
 
-        return $competition_information;
+        return $this->json->getJson();
     }
 
     /**
