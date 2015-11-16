@@ -120,7 +120,6 @@ class Json
         header('Content-Type: ' . $content_type . '; charset=utf-8');
 
         echo $response;
-        die();
     }
 
     /**
