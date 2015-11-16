@@ -34,9 +34,9 @@ class Json
      */
     public function addError($error_message)
     {
-        $error_detail = [];
-        $error_detail['detail'] = $error_message;
-        $this->errors[] = $error_detail;
+        $error = [];
+        $error['detail'] = $error_message;
+        $this->errors[] = $error;
     }
 
     /**
