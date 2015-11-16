@@ -247,7 +247,7 @@ class Client
      * Handle the data containing the competition results and add them to the database
      *
      * @param RpsPdo $db Database handle.
-     * @param array  $competition_results
+     * @param mixed  $competition_results
      *
      * @return string|null
      */
@@ -260,7 +260,6 @@ class Client
             $stmt = $db->prepare($sql);
         } catch (\PDOException $e) {
             $this->json->addError($e->getMessage());
-            $this->json->addError($sql);
             $this->json->setStatusError();
 
             return;
@@ -398,7 +397,7 @@ class Client
         $dates = [];
         $recs = $this->fetchCompetitionDates($db, $closed, $scored);
         if (get_class($recs) == 'PDOException') {
-            /* @var $recs PDOExection */
+            /* @var $recs \PDOException */
             $this->json->setStatusError();
             $this->json->addError('Failed to SELECT list of competitions from database');
             $this->json->addError($recs->getMessage());
@@ -452,15 +451,15 @@ class Client
             $stmt_update->bindValue(':classification', $classification, PDO::PARAM_STR);
             $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);
             $stmt_update->execute();
+            if ($stmt_update->rowCount() < 1) {
+                $this->json->addError('-- No rows updated when setting Scored flag to Y in database for:');
+                $this->json->addError($sql_date . ' / ' . $classification . ' / ' . $medium);
+                $this->json->addError('------');
+                $this->json->setStatusFail();
+            }
         } catch (\PDOException $e) {
             $this->json->addError('Failed to mark competition as scored');
             $this->json->addError($e->getMessage());
-            $this->json->addError('------');
-            $this->json->setStatusFail();
-        }
-        if ($stmt_update->rowCount() < 1) {
-            $this->json->addError('-- No rows updated when setting Scored flag to Y in database for:');
-            $this->json->addError($sql_date . ' / ' . $classification . ' / ' . $medium);
             $this->json->addError('------');
             $this->json->setStatusFail();
         }
