@@ -170,7 +170,7 @@ class Client
      * @param string $closed
      * @param string $scored
      *
-     * @return array|boolean
+     * @return array|\PDOException
      */
     private function fetchCompetitionDates($db, $closed, $scored)
     {
@@ -233,7 +233,7 @@ class Client
      * @param RpsPdo $db      Connection to the RPS Database
      * @param int    $comp_id Competition ID
      *
-     * @return array
+     * @return array|false
      */
     private function getEntries($db, $comp_id)
     {
@@ -444,7 +444,7 @@ class Client
     {
         $dates = [];
         $recs = $this->fetchCompetitionDates($db, $closed, $scored);
-        if (get_class($recs) == "PDOException") {
+        if (get_class($recs) == 'PDOException') {
             /* @var $recs PDOExection */
             $this->json->setStatusError();
             $this->json->addError('Failed to SELECT list of competitions from database');

@@ -34,6 +34,7 @@ class Json
      */
     public function addError($error_message)
     {
+        $error_detail = [];
         $error_detail['detail'] = $error_message;
         $this->errors[] = $error_detail;
     }
@@ -61,17 +62,14 @@ class Json
      * returns the whole response body as json
      * it generates the response via ->getArray()
      *
-     * @see ->getArray() for the structure
-     * @see json_encode() options
-     *
-     * @param  int $encode_options  optional, $options for json_encode()
-     *                              defaults to ::ENCODE_DEFAULT or ::ENCODE_DEBUG, @see ::$debug
+     * @param integer|null $encode_options optional, $options for json_encode()
+     *                                     defaults to ::ENCODE_DEFAULT or ::ENCODE_DEBUG, @see ::$debug
      *
      * @return string
      */
     public function getJson($encode_options = null)
     {
-        if (is_int($encode_options) == false) {
+        if (is_int($encode_options) === false) {
             $encode_options = self::JSON_ENCODE_DEFAULT;
         }
 
@@ -82,7 +80,7 @@ class Json
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getStatus()
     {
@@ -90,99 +88,107 @@ class Json
     }
 
     /**
-     * @param mixed $status
+     * @param string $status
      */
     public function setStatus($status)
     {
         $this->status = $status;
     }
 
-    /**
-     * Send out the json response to the browser
-     *
-     * @param  string $content_type   optional, defaults to ::CONTENT_TYPE_OFFICIAL (the official IANA registered one)
-     * @param  int    $encode_options optional, $options for json_encode()
-     *                                defaults to ::JSON_ENCODE_DEFAULT
-     * @param  json   $response       optional, defaults to ::getJson()
-     *
-     * @return void                   however, a string will be echo'd to the browser
-     */
-    public function sendResponse($content_type = null, $encode_options = null, $response = null)
-    {
-        if (is_null($response)) {
-            $response = $this->getJson($encode_options);
+/**
+ * Send out the json response to the browser
+ *
+ * @param  string|null  $content_type   optional, defaults to ::CONTENT_TYPE_OFFICIAL (the official IANA registered
+ *                                      one)
+ * @param  integer|null $encode_options optional, $options for json_encode()
+ *                                      defaults to ::JSON_ENCODE_DEFAULT
+ * @param  string|null  $response       optional, defaults to ::getJson()
+ *
+ * @return void                   however, a string will be echo'd to the browser
+ */
+public
+function sendResponse($content_type = null, $encode_options = null, $response = null)
+{
+    if (is_null($response)) {
+        $response = $this->getJson($encode_options);
+    }
+
+    if (empty($content_type)) {
+        $content_type = self::CONTENT_TYPE_OFFICIAL;
+    }
+
+    header('Content-Type: ' . $content_type . '; charset=utf-8');
+
+    echo $response;
+}
+
+/**
+ * Set JSON Status to Fail
+ */
+public
+function setStatuFail()
+{
+    $this->setStatus(self::JSON_STATUS_FAIL);
+}
+
+/**
+ * Set JSON Status to Error
+ */
+public
+function setStatusError()
+{
+    $this->setStatus(self::JSON_STATUS_ERROR);
+}
+
+/**
+ * Set JSON Status to Success
+ */
+public
+function setStatusSuccess()
+{
+    $this->setStatus(self::JSON_STATUS_SUCCESS);
+}
+
+/**
+ * Generate an array for the whole response body.
+ *
+ * @return array
+ */
+private
+function getArray()
+{
+    $response = [];
+    if ($this->validateJsonStatus()) {
+        $response['status'] = $this->status;
+        if ($this->status !== self::JSON_STATUS_ERROR) {
+            $response['data'] = $this->data;
         }
-
-        if (empty($content_type)) {
-            $content_type = self::CONTENT_TYPE_OFFICIAL;
-        }
-
-        header('Content-Type: ' . $content_type . '; charset=utf-8');
-
-        echo $response;
-    }
-
-    /**
-     * Set JSON Status to Fail
-     */
-    public function setStatuFail()
-    {
-        $this->setStatus(self::JSON_STATUS_FAIL);
-    }
-
-    /**
-     * Set JSON Status to Error
-     */
-    public function setStatusError()
-    {
-        $this->setStatus(self::JSON_STATUS_ERROR);
-    }
-
-    /**
-     * Set JSON Status to Success
-     */
-    public function setStatusSuccess()
-    {
-        $this->setStatus(self::JSON_STATUS_SUCCESS);
-    }
-
-    /**
-     * Generate an array for the whole response body.
-     *
-     * @return array
-     */
-    private function getArray()
-    {
-        $response = [];
-        if ($this->validateJsonStatus()) {
-            $response['status'] = $this->status;
-            if ($this->status !== self::JSON_STATUS_ERROR) {
-                $response['data'] = $this->data;
-            }
-            if ($this->errors !== []) {
-                $response['errors'] = $this->errors;
-            }
-        } else {
-            $response['status'] = self::JSON_STATUS_ERROR;
-            $this->cleanErrors();
-            $this->addError('Invalid status code given: ' . html_entity_decode($this->status));
+        if ($this->errors !== []) {
             $response['errors'] = $this->errors;
         }
-
-        return $response;
+    } else {
+        $response['status'] = self::JSON_STATUS_ERROR;
+        $this->cleanErrors();
+        $this->addError('Invalid status code given: ' . html_entity_decode($this->status));
+        $response['errors'] = $this->errors;
     }
 
-    /**
-     * Validate the JSON status code.
-     *
-     * @return bool
-     */
-    private function validateJsonStatus()
-    {
-        $valid_response[self::JSON_STATUS_ERROR] = true;
-        $valid_response[self::JSON_STATUS_FAIL] = true;
-        $valid_response[self::JSON_STATUS_SUCCESS] = true;
+    return $response;
+}
 
-        return array_key_exists($this->status, $valid_response);
-    }
+/**
+ * Validate the JSON status code.
+ *
+ * @return bool
+ */
+private
+function validateJsonStatus()
+{
+    $valid_response = [];
+    $valid_response[self::JSON_STATUS_ERROR] = true;
+    $valid_response[self::JSON_STATUS_FAIL] = true;
+    $valid_response[self::JSON_STATUS_SUCCESS] = true;
+
+    return array_key_exists($this->status, $valid_response);
+}
 }

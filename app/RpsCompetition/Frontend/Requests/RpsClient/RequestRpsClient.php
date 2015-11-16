@@ -43,15 +43,12 @@ class RequestRpsClient
             case 'getcompdate':
                 $this->client->sendCompetitionDates($this->request);
                 die();
-                break;
             case 'download':
                 $this->client->sendCompetitions($this->request);
                 die();
-                break;
             case 'uploadscore':
                 $this->client->doUploadScore($this->request);
                 die();
-                break;
             default:
                 break;
         }
