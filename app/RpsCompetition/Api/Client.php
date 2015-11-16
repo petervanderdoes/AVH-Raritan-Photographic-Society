@@ -1,14 +1,13 @@
 <?php
 namespace RpsCompetition\Api;
 
-use DOMDocument;
+use Avh\Framework\Utility\Common;
 use Illuminate\Http\Request;
 use PDO;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsPdo;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
  * Class Client
@@ -19,71 +18,75 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
  */
 class Client
 {
+    private $json;
     private $photo_helper;
+    private $total_entries;
 
     /**
      * Constructor
      *
      * @param PhotoHelper $photo_helper
+     * @param Json        $json
      */
-    public function __construct(PhotoHelper $photo_helper)
+    public function __construct(PhotoHelper $photo_helper, Json $json)
     {
         $this->photo_helper = $photo_helper;
+        $this->json = $json;
     }
 
     /**
-     * Handles the uploading of the score file
+     * Handles the competitions results
      *
      * @param Request $request
      */
-    public function doUploadScore(Request $request)
+    public function receiveScores(Request $request)
     {
         $username = $request->input('username');
         $password = $request->input('password');
-        $comp_date = $request->input('date');
         $db = $this->getDatabaseHandle();
 
         if (is_object($db)) {
-            $this->checkUserAuthentication($username, $password);
-            // Check to see if there were any file upload errors
-            $file = $request->file('file');
-            if ($file === null) {
-                $this->doRESTError('No file was given to upload!');
-                die();
+            if ($this->checkUserAuthentication($username, $password)) {
+                // Check to see if there were any file upload errors
+                $json = $request->input('json');
+                if ($json !== null) {
+                    $scores = json_decode($json);
+                    $this->handleCompetitionResults($db, $scores);
+                } else {
+                    $this->json->addError('Empty JSON');
+                    $this->json->setStatusError();
+                }
+            } else {
+                $this->json->setStatusError();
             }
-
-            if (!$file->isValid()) {
-                $this->doRESTError($file->getErrorMessage());
-                die();
-            }
-
-            // Move the file to its final location
-            $path = $request->server('DOCUMENT_ROOT') . '/Digital_Competitions';
-            $dest_name = 'scores_' . $comp_date . '.xml';
-            $file_name = $path . '/' . $dest_name;
-            try {
-                $file->move($path, $dest_name);
-            } catch (FileException $e) {
-                $this->doRESTError($e->getMessage());
-                die();
-            }
-
-            $warning = $this->handleUploadScoresFile($db, $file_name);
-
-            // Remove the uploaded .xml file
-            unlink($file_name);
-
-            // Return success to the client
-            $warning = '  <info>Scores successfully uploaded</info>' . "\n" . $warning;
-            $this->doRESTSuccess($warning);
         }
-        die();
+        $this->json->sendResponse();
     }
 
     /**
-     * Handles request by client to download images for a particular date,
+     * Handle request by client for Competition Dates
      *
      * @param Request $request
+     *
+     * @return void
+     */
+    public function sendCompetitionDates(Request $request)
+    {
+        $closed = $request->input('closed');
+        $scored = $request->input('scored');
+        $db = $this->getDatabaseHandle();
+        if (is_object($db)) {
+            $this->jsonCompetitionDates($db, $closed, $scored);
+        }
+        $this->json->sendResponse();
+    }
+
+    /**
+     * Handles request by client to download images for a particular date.
+     *
+     * @param Request $request
+     *
+     * @return void
      */
     public function sendCompetitions(Request $request)
     {
@@ -91,70 +94,15 @@ class Client
         $password = $request->input('password');
         $db = $this->getDatabaseHandle();
         if (is_object($db)) {
-            $this->checkUserAuthentication($username, $password);
-            // @todo Check if the user has the role needed.
-            $this->sendXmlCompetitions($db, $request->input('medium'), $request->input('comp_date'));
-        }
-        die();
-    }
+            if ($this->checkUserAuthentication($username, $password)) {
 
-    /**
-     * Create a XML File with the competition dates
-     *
-     * @param Request $request
-     */
-    public function sendXmlCompetitionDates(Request $request)
-    {
-        // Connect to the Database
-        $db = $this->getDatabaseHandle();
-
-        try {
-            $select = 'SELECT DISTINCT(Competition_Date) FROM competitions ';
-            if ($request->has('closed') || $request->has('scored')) {
-                $where = 'WHERE';
-                if ($request->has('closed')) {
-                    $where .= ' Closed=:closed';
-                }
-                if ($request->has('scored')) {
-                    $where .= ' AND Scored=:scored';
-                }
+                // @todo Check if the user has the role needed.
+                $this->jsonCompetitionData($db, $request->input('medium'), $request->input('comp_date'));
             } else {
-                $where = 'WHERE Competition_Date >= CURDATE()';
+                $this->json->setStatusError();
             }
-
-            $sth = $db->prepare($select . $where);
-            if ($request->has('closed')) {
-                $closed = $request->input('closed');
-                $sth->bindParam(':closed', $closed, \PDO::PARAM_STR, 1);
-            }
-            if ($request->has('scored')) {
-                $scored = $request->input('scored');
-                $sth->bindParam(':scored', $scored, \PDO::PARAM_STR, 1);
-            }
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->doRESTError('Failed to SELECT list of competitions from database - ' . $e->getMessage());
-            die($e->getMessage());
         }
-
-        $dom = new DOMDocument('1.0', 'utf-8');
-        $dom->formatOutput = true;
-        $root = $dom->createElement('rsp');
-        $dom->appendChild($root);
-        $stat = $dom->createAttribute('stat');
-        $root->appendChild($stat);
-        $value = $dom->CreateTextNode('ok');
-        $stat->appendChild($value);
-        $recs = $sth->fetch(\PDO::FETCH_ASSOC);
-        while ($recs != false) {
-            $date_parts = explode(' ', $recs['Competition_Date']);
-            $comp_date = $root->appendChild($dom->createElement('Competition_Date'));
-            $comp_date->appendChild($dom->createTextNode($date_parts[0]));
-            $recs = $sth->fetch(\PDO::FETCH_ASSOC);
-        }
-        echo $dom->saveXML();
-        unset($db);
-        die();
+        $this->json->sendResponse();
     }
 
     /**
@@ -162,51 +110,63 @@ class Client
      *
      * @param string $username
      * @param string $password
+     *
+     * @return bool
      */
     private function checkUserAuthentication($username, $password)
     {
         $user = wp_authenticate($username, $password);
         if (is_wp_error($user)) {
             $error_message = strip_tags($user->get_error_message());
-            $this->doRESTError($error_message);
-            die();
+            $this->json->addError($error_message);
+
+            return false;
         }
 
-        return;
+        return true;
     }
 
     /**
-     * Create a REST error
+     * Fetch the competiton dates from the databse.
      *
-     * @param string $errMsg The actual error message
+     * @param RpsPdo $db
+     * @param string $closed
+     * @param string $scored
+     *
+     * @return array|\PDOException
      */
-    private function doRESTError($errMsg)
+    private function fetchCompetitionDates($db, $closed, $scored)
     {
-        $this->doRESTResponse('fail', '<err msg="' . $errMsg . '" ></err>');
-    }
+        try {
+            $select = 'SELECT DISTINCT(Competition_Date) FROM competitions ';
+            if ($closed !== null || $scored !== null) {
+                $where = 'WHERE';
+                if ($closed !== null) {
+                    $where .= ' Closed=:closed';
+                }
+                if ($scored !== null) {
+                    $where .= ' AND Scored=:scored';
+                }
+            } else {
+                $where = 'WHERE Competition_Date >= CURDATE()';
+            }
 
-    /**
-     * Create the REST response
-     *
-     * @param string $status
-     * @param string $message
-     */
-    private function doRESTResponse($status, $message)
-    {
-        echo '<?xml version="1.0" encoding="utf-8" ?>' . "\n";
-        echo '<rsp stat="' . $status . '">' . "\n";
-        echo '	' . $message . "\n";
-        echo '</rsp>' . "\n";
-    }
+            $sth = $db->prepare($select . $where);
 
-    /**
-     * Create a REST success message
-     *
-     * @param string $message The actual message
-     */
-    private function doRESTSuccess($message)
-    {
-        $this->doRESTResponse('ok', $message);
+            if ($closed !== null) {
+                $sth->bindParam(':closed', $closed, \PDO::PARAM_STR, 1);
+            }
+            if ($scored !== null) {
+                $sth->bindParam(':scored', $scored, \PDO::PARAM_STR, 1);
+            }
+            $sth->execute();
+        } catch (\PDOException $e) {
+            return $e;
+        }
+
+        $recs = $sth->fetchall(\PDO::FETCH_ASSOC);
+
+        return $recs;
     }
 
     /**
@@ -220,129 +180,154 @@ class Client
             $db = new RpsPdo();
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
-            $this->doRESTError('Failed to obtain database handle ' . $e->getMessage());
-            die($e->getMessage());
+            $this->json->setStatusError();
+            $this->json->addError('Failed to obtain database handle');
+            $this->json->addError($e->getMessage());
+
+            return null;
         }
 
         return $db;
     }
 
     /**
-     * Handle the XML file containing the scores and add them to the database
+     * Get all the entries for this competition
+     *
+     * @param RpsPdo $db      Connection to the RPS Database
+     * @param int    $comp_id Competition ID
+     *
+     * @return array|false
+     */
+    private function getEntries($db, $comp_id)
+    {
+        try {
+            $sql = 'SELECT entries.ID, entries.Title, entries.Member_ID,
+            entries.Server_File_Name, entries.Score, entries.Award
+            FROM entries
+                WHERE entries.Competition_ID = :comp_id
+                        ORDER BY entries.Member_ID, entries.Title';
+            $sth_entries = $db->prepare($sql);
+            $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
+            $sth_entries->execute();
+        } catch (\Exception $e) {
+            $this->json->addError('Failed to SELECT competition entries from database');
+            $this->json->addError($e->getMessage());
+
+            return false;
+        }
+
+        $entries = $sth_entries->fetchAll();
+
+        // Iterate through all the entries for this competition
+        $all_entries = [];
+        foreach ($entries as $entry) {
+            $user = get_user_by('id', $entry['Member_ID']);
+            if (CommonHelper::isPaidMember($user->ID)) {
+                $entry = [];
+                // Create an Entry node
+                $entry['id'] = $entry['ID'];
+                $entry['first_name'] = $user->user_firstname;
+                $entry['last_name'] = $user->user_lastname;
+                $entry['title'] = $entry['Title'];
+                $entry['score'] = $entry['Score'];
+                $entry['award'] = $entry['Award'];
+                $entry['image_url'] = $this->photo_helper->getThumbnailUrl(
+                    $entry['Server_File_Name'],
+                    Constants::IMAGE_CLIENT_SIZE
+                );
+                $all_entries[] = $entry;
+                $this->total_entries++;
+            }
+        }
+
+        return $all_entries;
+    }
+
+    /**
+     * Handle the data containing the competition results and add them to the database
      *
      * @param RpsPdo $db Database handle.
-     * @param string $file_name
+     * @param mixed  $competition_results
      *
      * @return string|null
      */
-    private function handleUploadScoresFile($db, $file_name)
+    private function handleCompetitionResults($db, $competition_results)
     {
-        $warning = '';
-
-        $xml = simplexml_load_file($file_name);
-        if (!$xml) {
-            $this->doRESTError('Failed to open scores XML file');
-            die();
-        }
+        $this->json->setStatusSuccess();
+        Common::writeVarDump($competition_results);
         try {
             $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
             $stmt = $db->prepare($sql);
         } catch (\PDOException $e) {
-            $this->doRESTError('Error - ' . $e->getMessage() . ' - ' . $sql);
-            die();
+            $this->json->addError($e->getMessage());
+            $this->json->setStatusError();
+
+            return;
         }
 
-        foreach ($xml->{'Competition'} as $comp) {
-            $comp_date = (string) $comp->{'Date'};
-            $classification = (string) $comp->{'Classification'};
-            $medium = (string) $comp->{'Medium'};
+        foreach ($competition_results->Competitions as $competition) {
+            $comp_date = (string) $competition->CompDate;
+            $classification = (string) $competition->Classification;
+            $medium = (string) $competition->Medium;
 
-            foreach ($comp->{'Entries'} as $entries) {
-                foreach ($entries->{'Entry'} as $entry) {
-                    $entry_id = $entry->{'ID'};
-                    $first_name = html_entity_decode($entry->{'First_Name'});
-                    $last_name = html_entity_decode($entry->{'Last_Name'});
-                    $title = html_entity_decode($entry->{'Title'});
-                    $score = html_entity_decode($entry->{'Score'});
-                    $award = html_entity_decode($entry->{'Award'});
+            foreach ($competition->Entries as $entry) {
+                $entry_id = $entry->ID;
+                $first_name = html_entity_decode($entry->First_Name);
+                $last_name = html_entity_decode($entry->Last_Name);
+                $title = html_entity_decode($entry->Title);
+                $score = html_entity_decode($entry->Score);
+                $award = html_entity_decode($entry->Award);
 
-                    if ($entry_id != '') {
-                        if ($score != '') {
-                            try {
-                                $stmt->bindValue(':score', $score, PDO::PARAM_STR);
-                                $stmt->bindValue(':award', $award, PDO::PARAM_STR);
-                                $stmt->bindValue(':entryid', $entry_id, PDO::PARAM_INT);
-                                $stmt->execute();
-                            } catch (\PDOException $e) {
-                                $this->doRESTError(
-                                    'Failed to UPDATE scores in database - ' . $e->getMessage() . ' - ' . $sql
-                                );
-                                die();
-                            }
-                            if ($stmt->rowCount() < 1) {
-                                $warning .= '  <info>' . (string) $comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title . ' -- Row failed to update</info>' . "\n";
-                            }
-                        }
-                    } else {
-                        $warning .= '  <info>' . (string) $comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title . ' -- ID is Null -- skipped</info>' . "\n";
+                if ($entry_id != '') {
+                    try {
+                        $stmt->bindValue(':score', $score, PDO::PARAM_STR);
+                        $stmt->bindValue(':award', $award, PDO::PARAM_STR);
+                        $stmt->bindValue(':entryid', $entry_id, PDO::PARAM_INT);
+                        $stmt->execute();
+                    } catch (\PDOException $e) {
+                        $this->json->addError($e->getMessage());
+                        $this->json->addError($sql);
+                        $this->json->setStatusError();
+
+                        return;
                     }
+                    if ($stmt->rowCount() < 1) {
+                        $this->json->setStatusFail();
+                        $this->json->addError('-- Record failed to update -- skipped the following record');
+                        $this->json->addError($comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title);
+                        $this->json->addError('------');
+                    }
+                } else {
+                    $this->json->setStatusFail();
+                    $this->json->addError(' -- ID is Empty -- skipped the following record');
+                    $this->json->addError($comp_date . ', ' . $first_name . ' ' . $last_name . ', ' . $title);
+                    $this->json->addError('------');
                 }
             }
-
-            // Mark this competition as scored
-            try {
-                $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
-                        WHERE Competition_Date = :comp_date AND
-                        Classification = :classification AND
-                        Medium = :medium';
-                $stmt_update = $db->prepare($sql_update);
-                $date = new \DateTime($comp_date);
-                $sql_date = $date->format('Y-m-d H:i:s');
-                $stmt_update->bindValue(':comp_date', $sql_date, PDO::PARAM_STR);
-                $stmt_update->bindValue(':classification', $classification, PDO::PARAM_STR);
-                $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);
-                $stmt_update->execute();
-            } catch (\PDOException $e) {
-                $this->doRESTError(
-                    'Failed to execute UPDATE' . $e->getMessage()
-                );
-                die();
-            }
-            if ($stmt_update->rowCount() < 1) {
-                $this->doRESTError(
-                    'No rows updated when setting Scored flag to Y in database for ' . $sql_date . ' / ' . $classification . ' / ' . $medium
-                );
-                die();
-            }
+            $this->markCompetitonScored($db, $comp_date, $classification, $medium);
         }
 
-        return $warning;
+        return;
     }
 
     /**
-     * Create a XML file for the client with information about images for a particular date
+     * Collect information for the client
      *
-     * @param RpsPdo $db
-     *            Connection to the RPS Database
-     * @param string $requested_medium
-     *            Which competition medium to use, either digital or print
-     * @param string $comp_date
-     *            The competition date
+     * @param RpsPdo $db               Connection to the RPS Database
+     * @param string $requested_medium Which competition medium to use, either digital or print
+     * @param string $comp_date        The competition date
+     *
+     * @return void
      */
-    private function sendXmlCompetitions($db, $requested_medium, $comp_date)
+    private function jsonCompetitionData($db, $requested_medium, $comp_date)
     {
-
-        // Start building the XML response
-        $dom = new \DOMDocument('1.0', 'utf-8');
-        $dom->formatOutput=true;
-        // Create the root node
-        $node = $dom->CreateElement('rsp');
-        $node->SetAttribute('stat', 'ok');
-        $rsp = $dom->AppendChild($node);
+        $competitions = [];
+        $this->total_entries = 0;
 
         $medium_clause = '';
         if (!(empty($requested_medium))) {
-            $medium_clause = ($requested_medium == 'prints') ? ' AND Medium like \'%Prints\' ' : ' AND Medium like \'%Digital\' ';
+            $medium_clause = ($requested_medium ==
+                              'prints') ? ' AND Medium like \'%Prints\' ' : ' AND Medium like \'%Digital\' ';
         }
         $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification
         FROM competitions
@@ -353,104 +338,130 @@ class Client
             $sth_competitions->bindParam(':compdate', $comp_date);
             $sth_competitions->execute();
         } catch (\PDOException $e) {
-            $this->doRESTError(
-                'Failed to SELECT competition records with date = ' . $comp_date . ' from database - ' . $e->getMessage(
-                )
+            $this->json->setStatusError();
+            $this->json->addError(
+                'Failed to SELECT competition records with date = ' . $comp_date . ' from database'
             );
-            die();
-        }
-        $config = $rsp->AppendChild($dom->CreateElement('Configuration'));
-        $size_node = $config->AppendChild($dom->CreateElement('ImageSize'));
-        $width_node = $size_node->AppendChild($dom->CreateElement('Width'));
-        $width_node->AppendChild($dom->CreateTextNode(utf8_encode("1440")));
-        $height_node = $size_node->AppendChild($dom->CreateElement('Height'));
-        $height_node->AppendChild($dom->CreateTextNode(utf8_encode("900")));
+            $this->json->addError($e->getMessage());
 
-        // Create a Competitions node
-        $xml_competitions = $rsp->AppendChild($dom->CreateElement('Competitions'));
-        // Iterate through all the matching Competitions and create corresponding Competition nodes
-        $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
-        while ($record_competitions !== false) {
-            $comp_id = $record_competitions['ID'];
-            $date_parts = explode(' ', $record_competitions['Competition_Date']);
+            return;
+        }
+        // Iterate through all the matching Competitions
+        $record_competitions = $sth_competitions->fetchall(\PDO::FETCH_ASSOC);
+        foreach ($record_competitions as $record_competition) {
+            $comp_id = $record_competition['ID'];
+            $date_parts = explode(' ', $record_competition['Competition_Date']);
             $date = $date_parts[0];
-            $theme = $record_competitions['Theme'];
-            $medium = $record_competitions['Medium'];
-            $classification = $record_competitions['Classification'];
+            $theme = $record_competition['theme'];
+            $medium = $record_competition['Medium'];
+            $classification = $record_competition['Classification'];
             // Create the competition node in the XML response
-            $competition_element = $xml_competitions->AppendChild($dom->CreateElement('Competition'));
-
-            $date_element = $competition_element->AppendChild($dom->CreateElement('Date'));
-            $date_element->AppendChild($dom->CreateTextNode(utf8_encode($date)));
-
-            $theme_element = $competition_element->AppendChild($dom->CreateElement('Theme'));
-            $theme_element->AppendChild($dom->CreateTextNode(utf8_encode($theme)));
-
-            $medium_element = $competition_element->AppendChild($dom->CreateElement('Medium'));
-            $medium_element->AppendChild($dom->CreateTextNode(utf8_encode($medium)));
-
-            $classification_node = $competition_element->AppendChild($dom->CreateElement('Classification'));
-            $classification_node->AppendChild($dom->CreateTextNode(utf8_encode($classification)));
-
-            // Get all the entries for this competition
-            try {
-                $sql = 'SELECT entries.ID, entries.Title, entries.Member_ID,
-            entries.Server_File_Name, entries.Score, entries.Award
-            FROM entries
-                WHERE entries.Competition_ID = :comp_id
-                        ORDER BY entries.Member_ID, entries.Title';
-                $sth_entries = $db->prepare($sql);
-                $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
-                $sth_entries->execute();
-            } catch (\Exception $e) {
-                $this->doRESTError('Failed to SELECT competition entries from database - ' . $e->getMessage());
-                die();
+            $competition = [];
+            $competition['date'] = $date;
+            $competition['theme'] = $theme;
+            $competition['medium'] = $medium;
+            $competition['classification'] = $classification;
+            $entries = $this->getEntries($db, $comp_id);
+            if ($entries === false) {
+                return;
             }
-            $all_records_entries = $sth_entries->fetchAll();
-            // Create an Entries node
 
-            $entries = $competition_element->AppendChild($dom->CreateElement('Entries'));
-            // Iterate through all the entries for this competition
-            foreach ($all_records_entries as $record_entries) {
-                $user = get_user_by('id', $record_entries['Member_ID']);
-                if (CommonHelper::isPaidMember($user->ID)) {
-
-                    // Create an Entry node
-                    $entry_element = $entries->AppendChild($dom->CreateElement('Entry'));
-
-                    $id = $entry_element->AppendChild($dom->CreateElement('ID'));
-                    $id->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['ID'])));
-
-                    $fname = $entry_element->AppendChild($dom->CreateElement('First_Name'));
-                    $fname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_firstname)));
-
-                    $lname = $entry_element->AppendChild($dom->CreateElement('Last_Name'));
-                    $lname->AppendChild($dom->CreateTextNode(utf8_encode($user->user_lastname)));
-
-                    $title_node = $entry_element->AppendChild($dom->CreateElement('Title'));
-                    $title_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Title'])));
-
-                    $score_node = $entry_element->AppendChild($dom->CreateElement('Score'));
-                    $score_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Score'])));
-
-                    $award_node = $entry_element->AppendChild($dom->CreateElement('Award'));
-                    $award_node->AppendChild($dom->CreateTextNode(utf8_encode($record_entries['Award'])));
-
-                    $url_node = $entry_element->AppendChild($dom->CreateElement('Image_URL'));
-                    $url_node->AppendChild(
-                        $dom->CreateTextNode(
-                            utf8_encode(
-                                $this->photo_helper->getThumbnailUrl($record_entries['Server_File_Name'], Constants::IMAGE_CLIENT_SIZE)
-                            )
-                        )
-                    );
-                }
-            }
-            $record_competitions = $sth_competitions->fetch(\PDO::FETCH_ASSOC);
+            $competition['entries'] = $entries;
+            $competitions[] = $competition;
         }
-        // Send the completed XML response back to the client
-        // header('Content-Type: text/xml');
-        $dom->save('peter.xml');
-        echo $dom->saveXML();
+        $this->jsonCompetitionInformation();
+        $this->json->setStatusSuccess();
+        $this->json->addResource('competitions', $competitions);
+
+        $fp = fopen('peter.json', 'w');
+        fwrite(
+            $fp,
+            $this->json->getJson(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+        );
+        fclose($fp);
+
+        return;
+    }
+
+    /**
+     * Set JSON data for the competition dates.
+     *
+     * @param RpsPdo $db     Connection to the RPS Database
+     * @param string $closed Competition closed info
+     * @param string $scored Competition scored info
+     *
+     * @return void
+     */
+    private function jsonCompetitionDates($db, $closed, $scored)
+    {
+        $dates = [];
+        $recs = $this->fetchCompetitionDates($db, $closed, $scored);
+        if (get_class($recs) == 'PDOException') {
+            /* @var $recs \PDOException */
+            $this->json->setStatusError();
+            $this->json->addError('Failed to SELECT list of competitions from database');
+            $this->json->addError($recs->getMessage());
+
+            return;
+        }
+        foreach ($recs as $record) {
+            $date_parts = explode(' ', $record['Competition_Date']);
+            $dates[] = $date_parts[0];
+        }
+        $this->json->addResource('competition_dates', $dates);
+        $this->json->setStatusSuccess();
+
+        return;
+    }
+
+    /**
+     * Add JSON Competition Information
+     *
+     * @return void
+     */
+    private function jsonCompetitionInformation()
+    {
+        $competition_information = [];
+        $competition_information['ImageSize']['Width'] = 1440;
+        $competition_information['ImageSize']['Height'] = 990;
+        $competition_information['total_entries'] = $this->total_entries;
+
+        $this->json->addResource('information', $competition_information);
+    }
+
+    /**
+     * Mark a competition as scored.
+     *
+     * @param RpsPdo $db
+     * @param string $comp_date
+     * @param string $classification
+     * @param string $medium
+     */
+    private function markCompetitonScored($db, $comp_date, $classification, $medium)
+    {
+        try {
+            $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
+                        WHERE Competition_Date = :comp_date AND
+                        Classification = :classification AND
+                        Medium = :medium';
+            $stmt_update = $db->prepare($sql_update);
+            $date = new \DateTime($comp_date);
+            $sql_date = $date->format('Y-m-d H:i:s');
+            $stmt_update->bindValue(':comp_date', $sql_date, PDO::PARAM_STR);
+            $stmt_update->bindValue(':classification', $classification, PDO::PARAM_STR);
+            $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);
+            $stmt_update->execute();
+            if ($stmt_update->rowCount() < 1) {
+                $this->json->addError('-- No rows updated when setting Scored flag to Y in database for:');
+                $this->json->addError($sql_date . ' / ' . $classification . ' / ' . $medium);
+                $this->json->addError('------');
+                $this->json->setStatusFail();
+            }
+        } catch (\PDOException $e) {
+            $this->json->addError('Failed to mark competition as scored');
+            $this->json->addError($e->getMessage());
+            $this->json->addError('------');
+            $this->json->setStatusFail();
+        }
     }
 }

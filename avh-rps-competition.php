@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.17-dev.21
+ * Version: 2.0.17-dev.51
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -112,7 +112,6 @@ class AVH_RPS_Client
      *
      * @internal Hook: activate_
      * @see      AVH_RPS_Client::load
-     *
      */
     public function pluginActivation()
     {
@@ -124,7 +123,6 @@ class AVH_RPS_Client
      *
      * @internal Hook: deactivate_
      * @see      AVH_RPS_Client::load
-     *
      */
     public function pluginDeactivation()
     {
@@ -136,15 +134,13 @@ class AVH_RPS_Client
 
         /**
          * Setup Singleton classes
-         *
          */
         $this->app->singleton(
             'Settings',
             function () {
                 return new \Illuminate\Config\Repository();
             }
-        )
-        ;
+        );
 
         $this->app->singleton('OptionsGeneral', 'RpsCompetition\Options\General');
         $this->app->singleton(
@@ -152,18 +148,15 @@ class AVH_RPS_Client
             function () {
                 return new \Avh\Framework\Network\Session(['name' => 'raritan_' . COOKIEHASH]);
             }
-        )
-        ;
+        );
         $this->app->singleton('IlluminateRequest', '\Illuminate\Http\Request');
         $this->app->instance(
             'IlluminateRequest',
             forward_static_call(['Illuminate\Http\Request', 'createFromGlobals'])
-        )
-        ;
+        );
 
         /**
          * Setup Classes
-         *
          */
 
         $this->app->bind(
@@ -171,19 +164,16 @@ class AVH_RPS_Client
             function (Application $app) {
                 return new RequestController($app);
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'FrontendView',
             function (Application $app) {
                 return new FrontendView(
-                    $app->make('Settings'),
-                    $app->make('PhotoHelper')
+                    $app->make('Settings'), $app->make('PhotoHelper')
                 );
             }
-        )
-        ;
+        );
 
         if (class_exists('Imagick')) {
             $this->app->bind('\Imagine\Image\ImagineInterface', '\Imagine\Imagick\Imagine');
@@ -201,16 +191,14 @@ class AVH_RPS_Client
                     $app->make('\Imagine\Image\ImagineInterface')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'SeasonHelper',
             function (Application $app) {
                 return new SeasonHelper($app->make('RpsDb'));
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'WpSeoHelper',
@@ -222,16 +210,14 @@ class AVH_RPS_Client
                     $app->make('PhotoHelper')
                 );
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'CompetitionHelper',
             function (Application $app) {
                 return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
             }
-        )
-        ;
+        );
 
         $this->app->bind('HtmlBuilder', '\Avh\Framework\Html\HtmlBuilder');
 
@@ -251,15 +237,13 @@ class AVH_RPS_Client
             function () {
                 return new ShortcodeRouter();
             }
-        )
-        ;
+        );
         $this->app->bind(
             'ShortcodeController',
             function (Application $app) {
                 return new ShortcodeController($app);
             }
-        )
-        ;
+        );
 
         $this->app->bind(
             'ShortcodeView',
@@ -268,8 +252,7 @@ class AVH_RPS_Client
 
                 return new ShortcodeView($settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/');
             }
-        )
-        ;
+        );
     }
 
     /**
@@ -282,15 +265,13 @@ class AVH_RPS_Client
             function (Application $app) {
                 return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
             }
-        )
-        ;
+        );
         $this->app->bind(
             'SocialNetworksController',
             function (Application $app) {
                 return new SocialNetworksController($app);
             }
-        )
-        ;
+        );
         $this->app->bind('SocialNetworksModel', 'RpsCompetition\Frontend\SocialNetworks\SocialNetworksModel');
         $this->app->bind(
             'SocialNetworksView',
@@ -301,8 +282,7 @@ class AVH_RPS_Client
                     $settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/'
                 );
             }
-        )
-        ;
+        );
     }
 
     /**
@@ -325,8 +305,7 @@ class AVH_RPS_Client
 
                 return $formFactory;
             }
-        )
-        ;
+        );
     }
 
     /**
@@ -355,7 +334,6 @@ class AVH_RPS_Client
 
     /**
      * Setup Rewrite rules
-     *
      */
     private function setupRewriteRules()
     {
