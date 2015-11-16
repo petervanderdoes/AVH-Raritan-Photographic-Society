@@ -74,6 +74,7 @@ class Client
             $result = $this->getCompetitionDates($db, $closed, $scored);
             $this->json->sendResponse(null, null, $result);
         } else {
+            $this->json->setStatusError();
             $this->json->addError('Can not connect to server database.');
             $this->json->sendResponse();
         }
@@ -236,6 +237,7 @@ class Client
         $recs = $this->fetchCompetitionDates($db, $closed, $scored);
         if (get_class($recs) == "PDOException") {
             /* @var $recs PDOExection */
+            $this->json->setStatusError();
             $this->json->addError('Failed to SELECT list of competitions from database');
             $this->json->addError($recs->getMessage());
 
@@ -246,7 +248,7 @@ class Client
             $dates[] = $date_parts[0];
         }
         $this->json->addResource('CompetitionDates', $dates);
-
+        $this->json->setStatusSuccess();
         return $this->json->getJson();
     }
 

@@ -82,7 +82,7 @@ class Json
     }
 
     /**
-     * @return null
+     * @return mixed
      */
     public function getStatus()
     {
@@ -90,7 +90,7 @@ class Json
     }
 
     /**
-     * @param null $status
+     * @param mixed $status
      */
     public function setStatus($status)
     {
@@ -121,6 +121,30 @@ class Json
 
         echo $response;
         die();
+    }
+
+    /**
+     * Set JSON Status to Fail
+     */
+    public function setStatuFail()
+    {
+        $this->setStatus(self::JSON_STATUS_FAIL);
+    }
+
+    /**
+     * Set JSON Status to Error
+     */
+    public function setStatusError()
+    {
+        $this->setStatus(self::JSON_STATUS_ERROR);
+    }
+
+    /**
+     * Set JSON Status to Success
+     */
+    public function setStatusSuccess()
+    {
+        $this->setStatus(self::JSON_STATUS_SUCCESS);
     }
 
     /**
@@ -157,8 +181,8 @@ class Json
     private function validateJsonStatus()
     {
         $valid_response[self::JSON_STATUS_ERROR] = true;
-        $valid_response[self::JSON_STATUS_ERROR] = true;
-        $valid_response[self::JSON_STATUS_ERROR] = true;
+        $valid_response[self::JSON_STATUS_FAIL] = true;
+        $valid_response[self::JSON_STATUS_SUCCESS] = true;
 
         return array_key_exists($this->status, $valid_response);
     }
