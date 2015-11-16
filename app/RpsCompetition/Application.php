@@ -209,7 +209,7 @@ class Application extends Container implements ApplicationInterface
      *
      * @return mixed
      */
-    public function make($abstract, $parameters = [])
+    public function make($abstract, array $parameters = [])
     {
         $abstract = $this->getAlias($abstract);
 
