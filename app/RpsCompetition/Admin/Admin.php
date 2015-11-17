@@ -26,9 +26,10 @@ use Valitron\Validator;
 final class Admin
 {
     private $app;
-    /* @var $formBuilder FormBuilder */
 
+    /** @var  \WP_List_Table */
     private $competition_list;
+    /** @var  \WP_List_Table */
     private $entries_list;
     private $hooks = [];
     private $message = '';
