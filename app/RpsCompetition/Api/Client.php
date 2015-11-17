@@ -254,7 +254,6 @@ class Client
     private function handleCompetitionResults($db, $competition_results)
     {
         $this->json->setStatusSuccess();
-        Common::writeVarDump($competition_results);
         try {
             $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
             $stmt = $db->prepare($sql);
