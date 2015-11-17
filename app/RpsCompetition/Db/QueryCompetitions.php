@@ -10,7 +10,6 @@ use RpsCompetition\Helpers\SeasonHelper;
  * @package   RpsCompetition\Db
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
- *
  * @property  integer ID
  * @property  string  Competition_Date
  * @property  string  Medium
@@ -23,6 +22,7 @@ use RpsCompetition\Helpers\SeasonHelper;
  * @property  string  Close_Date
  * @property  integer Max_Entries
  * @property  integer Num_Judges
+ * @property  string  Image_Size
  * @property  string  Special_Event
  */
 class QueryCompetitions
@@ -395,7 +395,6 @@ class QueryCompetitions
 
     /**
      * Get all scored competitions.
-     *
      * With the filter you can set extra filters for the select like Special_Event = "N"
      * The format of the filter array is "field"=>"value"
      *
@@ -467,20 +466,20 @@ class QueryCompetitions
             }
         } else {
             $current_time = current_time('mysql');
-            //@formatter:off
-            $default_options = ['Competition_Date' => $current_time,
-                'Medium' => '',
-                'Classification' => '',
-                'Theme' => '',
-                'Date_Created' => $current_time,
-                'Date_Modified' => $current_time,
-                'Closed' => 'N',
-                'Scored' => 'N',
-                'Max_Entries' => 2,
-                'Num_Judges' => 1,
-                'Special_Event' => 'N'
+            $default_options = [
+                'Competition_Date' => $current_time,
+                'Medium'           => '',
+                'Classification'   => '',
+                'Theme'            => '',
+                'Date_Created'     => $current_time,
+                'Date_Modified'    => $current_time,
+                'Closed'           => 'N',
+                'Scored'           => 'N',
+                'Max_Entries'      => 2,
+                'Num_Judges'       => 1,
+                'Image_Size'       => '1440',
+                'Special_Event'    => 'N'
             ];
-            // @formatter:on
             $data = $data + $default_options;
 
             if (!isset($data['Close_Date'])) {

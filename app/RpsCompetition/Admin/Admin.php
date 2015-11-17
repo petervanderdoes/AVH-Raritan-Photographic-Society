@@ -26,12 +26,11 @@ use Valitron\Validator;
 final class Admin
 {
     private $app;
-
     /** @var  \WP_List_Table */
     private $competition_list;
     /** @var  \WP_List_Table */
     private $entries_list;
-    private $hooks = [];
+    private $hooks   = [];
     private $message = '';
     private $referer;
     /** @var Request */
@@ -556,6 +555,7 @@ final class Admin
             ],
             'max-entries'    => '2',
             'judges'         => '1',
+            'image_size'     => '1440',
             'special_event'  => false
         ];
 
@@ -620,6 +620,7 @@ final class Admin
                         $data['Theme'] = $form_new_options['theme'];
                         $data['Max_Entries'] = $form_new_options['max-entries'];
                         $data['Num_Judges'] = $form_new_options['judges'];
+                        $data['Image_Size'] = $form_new_options['image_size'];
                         $data['Special_Event'] = ($form_new_options['special_event'] ? 'Y' : 'N');
                         $medium_keys = array_keys($form_new_options['medium']);
                         foreach ($medium_keys as $medium_key) {
@@ -805,6 +806,17 @@ final class Admin
         echo $formBuilder->outputField($formBuilder->select('judges', $array_judges, $form_options['judges']));
         unset($array_judges);
 
+        $array_image_size = [
+            '1024' => '1024x768',
+            '1400' => '1400x1050'
+        ];
+        array_sort($array_image_size);
+        echo $formBuilder->outputLabel($formBuilder->label('image_size', 'Image Size'));
+        echo $formBuilder->outputField(
+            $formBuilder->select('image_size', $array_image_size, $form_options['image_size'])
+        );
+        unset($array_image_size);
+
         echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
         echo $formBuilder->outputField(
             $formBuilder->checkbox('special_event', $form_options['special_event'], $form_options['special_event'])
@@ -888,13 +900,13 @@ final class Admin
                 echo '<li><input type="hidden" name="competitions[]" value="' . esc_attr(
                         $competitionID
                     ) . '" />' . sprintf(
-                        __('ID #%1s: %2s - %3s - %4s - %5s'),
-                        $competitionID,
-                        mysql2date(get_option('date_format'), $competition->Competition_Date),
-                        $competition->Theme,
-                        $competition->Classification,
-                        $competition->Medium
-                    ) . '</li>' . "\n";
+                         __('ID #%1s: %2s - %3s - %4s - %5s'),
+                         $competitionID,
+                         mysql2date(get_option('date_format'), $competition->Competition_Date),
+                         $competition->Theme,
+                         $competition->Classification,
+                         $competition->Medium
+                     ) . '</li>' . "\n";
                 $goDelete++;
             }
         }
@@ -1018,6 +1030,17 @@ final class Admin
         echo $formBuilder->outputField(
             $formBuilder->select('judges', $judges, $competition->Num_Judges, ['autocomplete' => 'off'])
         );
+
+        $array_image_size = [
+            '1024' => '1024x768',
+            '1400' => '1400x1050'
+        ];
+        array_sort($array_image_size);
+        echo $formBuilder->outputLabel($formBuilder->label('image_size', 'Image Size'));
+        echo $formBuilder->outputField(
+            $formBuilder->select('image_size', $array_image_size, $competition->Image_Size, ['autocomplete' => 'off'])
+        );
+        unset($array_image_size);
 
         echo $formBuilder->outputLabel($formBuilder->label('special_event', 'Special Event'));
         echo $formBuilder->outputField(
@@ -1202,13 +1225,13 @@ final class Admin
             echo '<li><input type="hidden" name="competitions[]" value="' . esc_attr(
                     $competitionID
                 ) . '" />' . sprintf(
-                    __('ID #%1s: %2s - %3s - %4s - %5s'),
-                    $competitionID,
-                    mysql2date(get_option('date_format'), $competition->Competition_Date),
-                    $competition->Theme,
-                    $competition->Classification,
-                    $competition->Medium
-                ) . '</li>' . "\n";
+                     __('ID #%1s: %2s - %3s - %4s - %5s'),
+                     $competitionID,
+                     mysql2date(get_option('date_format'), $competition->Competition_Date),
+                     $competition->Theme,
+                     $competition->Classification,
+                     $competition->Medium
+                 ) . '</li>' . "\n";
         }
 
         echo $formBuilder->hidden('action', 'do' . $action);
@@ -1734,7 +1757,6 @@ final class Admin
 
     /**
      * Set the default values for teh jQuery Datepicker plugin
-     *
      */
     private function printDatepickerDefaults()
     {
@@ -1772,6 +1794,7 @@ final class Admin
         $formOptionsNew['classification'] = $formOptions['classification'];
         $formOptionsNew['max-entries'] = $formOptions['max-entries'];
         $formOptionsNew['judges'] = $formOptions['judges'];
+        $formOptionsNew['image_size'] = isset($formOptions['image_size']) ? $formOptions['image_size'] : '1440';
         $formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
@@ -1785,6 +1808,7 @@ final class Admin
         $data['Theme'] = $formOptionsNew['theme'];
         $data['Max_Entries'] = $formOptionsNew['max-entries'];
         $data['Num_Judges'] = $formOptionsNew['judges'];
+        $data['Image_Size'] = $formOptionsNew['image_size'];
         $data['Special_Event'] = ($formOptionsNew['special_event'] ? 'Y' : 'N');
         $data['Closed'] = ($formOptionsNew['closed'] ? 'Y' : 'N');
         $data['Scored'] = ($formOptionsNew['scored'] ? 'Y' : 'N');
