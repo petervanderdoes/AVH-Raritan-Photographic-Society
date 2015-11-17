@@ -95,6 +95,7 @@ class AVH_RPS_Client
     {
         $this->app->make('OptionsGeneral');
         $this->setSettings();
+        $this->doUpgrade();
         add_action('init', [$this, 'actionInit'], 10);
 
         if (is_admin()) {
@@ -224,6 +225,36 @@ class AVH_RPS_Client
         $this->registerBindingShortCodes();
         $this->registerBindingSocialNetworks();
         $this->registerBindingsForms();
+    }
+
+    /**
+     * Handle Upgrade of the Database Schema
+     */
+    private function doUpgrade()
+    {
+        $db_version = 1;
+        $options = get_option('avh-rps');
+        $current_db_version = avh_array_get($options, 'db_version', 0);
+        if ($db_version == $current_db_version) {
+            return;
+        }
+        if ($current_db_version < 1) {
+            $this->doUpgrade200($options);
+        }
+        $options['db_version'] = $db_version;
+        update_option( 'avh-rps', $options );
+    }
+
+    /**
+     *  Execute changes made in AVH Rps Competition 2.0.0
+     *
+     * @param array $options
+     */
+    private function doUpgrade200($options)
+    {
+        //@todo Update Database, add the field Image_Size to the competition table.
+
+        return;
     }
 
     /**
