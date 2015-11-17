@@ -5,7 +5,7 @@ namespace RpsCompetition\Form\Type;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class MyEntriesType
@@ -63,20 +63,20 @@ class MyEntriesType extends AbstractType
     /**
      * {@inheritDoc}
      */
-    public function getName()
-    {
-        return 'form';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(
             [
                 'data_class' => 'RpsCompetition\Entity\Form\MyEntries',
             ]
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName()
+    {
+        return 'form';
     }
 }

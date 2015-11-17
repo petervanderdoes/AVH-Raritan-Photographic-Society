@@ -4,7 +4,7 @@ namespace RpsCompetition\Form\Type;
 use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class BanquetEntriesType
@@ -53,20 +53,20 @@ class BanquetEntriesType extends AbstractType
     /**
      * {@inheritDoc}
      */
-    public function getName()
-    {
-        return 'form';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(
             [
                 'data_class' => 'RpsCompetition\Entity\Form\BanquetEntries',
             ]
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName()
+    {
+        return 'form';
     }
 }
