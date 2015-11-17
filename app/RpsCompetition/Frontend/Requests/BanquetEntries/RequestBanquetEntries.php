@@ -63,7 +63,7 @@ class RequestBanquetEntries
      */
     public function handleBanquetEntries()
     {
-        /** @var \Symfony\Component\Form\Form $form */
+        /** @var \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface $form */
         $form = $this->form_factory->create(
             $this->banquet_current_user_type,
             $this->entity,
