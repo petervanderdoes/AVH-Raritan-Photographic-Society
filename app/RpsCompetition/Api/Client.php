@@ -210,6 +210,7 @@ class Client
             $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
             $sth_entries->execute();
         } catch (\Exception $e) {
+            $this->json->setStatusError();
             $this->json->addError('Failed to SELECT competition entries from database');
             $this->json->addError($e->getMessage());
 
@@ -323,6 +324,8 @@ class Client
         $competitions = [];
         $this->total_entries = 0;
 
+        $this->json->setStatusSuccess();
+
         $medium_clause = '';
         if (!(empty($requested_medium))) {
             $medium_clause = ($requested_medium ==
@@ -354,6 +357,11 @@ class Client
             $theme = $record_competition['theme'];
             $medium = $record_competition['Medium'];
             $classification = $record_competition['Classification'];
+            if (empty($record_competition['Image_Size'])) {
+                $image_size = '1024';
+            } else {
+                $image_size = $record_competition['Image_Size'];
+            }
             // Create the competition node in the XML response
             $competition = [];
             $competition['date'] = $date;
@@ -368,9 +376,9 @@ class Client
             $competition['entries'] = $entries;
             $competitions[] = $competition;
         }
-        $this->jsonCompetitionInformation();
-        $this->json->setStatusSuccess();
         $this->json->addResource('competitions', $competitions);
+        $this->jsonCompetitionInformation($image_size);
+
 
         $fp = fopen('peter.json', 'w');
         fwrite(
@@ -418,11 +426,17 @@ class Client
      *
      * @return void
      */
-    private function jsonCompetitionInformation()
+    private function jsonCompetitionInformation($image_size)
     {
         $competition_information = [];
-        $competition_information['ImageSize']['Width'] = 1400;
-        $competition_information['ImageSize']['Height'] = 1050;
+        $seleced_image_size=Constants::getImageSize($image_size);
+        if ($seleced_image_size === null) {
+            $this->json->setStatusFail();
+            $this->json->addError('Unknown Image Size for the comeptition. Value given: '. $image_size);
+            $seleced_image_size=Constants::getImageSize('1400');
+        }
+        $competition_information['ImageSize']['Width'] = $seleced_image_size['width'];
+        $competition_information['ImageSize']['Height'] = $seleced_image_size['height'];
         $competition_information['total_entries'] = $this->total_entries;
 
         $this->json->addResource('information', $competition_information);
