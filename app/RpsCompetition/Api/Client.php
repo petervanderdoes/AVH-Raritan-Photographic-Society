@@ -200,6 +200,7 @@ class Client
      */
     private function getEntries($db, $comp_id)
     {
+
         try {
             $sql = 'SELECT entries.ID, entries.Title, entries.Member_ID,
             entries.Server_File_Name, entries.Score, entries.Award
@@ -213,34 +214,31 @@ class Client
             $this->json->setStatusError();
             $this->json->addError('Failed to SELECT competition entries from database');
             $this->json->addError($e->getMessage());
-
             return false;
         }
 
         $entries = $sth_entries->fetchAll();
-
         // Iterate through all the entries for this competition
         $all_entries = [];
-        foreach ($entries as $entry) {
-            $user = get_user_by('id', $entry['Member_ID']);
+        foreach ($entries as $entry_record) {
+            $user = get_user_by('id', $entry_record['Member_ID']);
             if (CommonHelper::isPaidMember($user->ID)) {
                 $entry = [];
                 // Create an Entry node
-                $entry['id'] = $entry['ID'];
+                $entry['id'] = $entry_record['ID'];
                 $entry['first_name'] = $user->user_firstname;
                 $entry['last_name'] = $user->user_lastname;
-                $entry['title'] = $entry['Title'];
-                $entry['score'] = $entry['Score'];
-                $entry['award'] = $entry['Award'];
+                $entry['title'] = $entry_record['Title'];
+                $entry['score'] = $entry_record['Score'];
+                $entry['award'] = $entry_record['Award'];
                 $entry['image_url'] = $this->photo_helper->getThumbnailUrl(
-                    $entry['Server_File_Name'],
+                    $entry_record['Server_File_Name'],
                     Constants::IMAGE_CLIENT_SIZE
                 );
                 $all_entries[] = $entry;
                 $this->total_entries++;
             }
         }
-
         return $all_entries;
     }
 
@@ -331,7 +329,7 @@ class Client
             $medium_clause = ($requested_medium ==
                               'prints') ? ' AND Medium like \'%Prints\' ' : ' AND Medium like \'%Digital\' ';
         }
-        $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification
+        $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification, Image_Size
         FROM competitions
         WHERE Competition_Date = DATE(:compdate) AND Closed = "Y" ' . $medium_clause . '
         ORDER BY Medium, Classification';
@@ -350,11 +348,12 @@ class Client
         }
         // Iterate through all the matching Competitions
         $record_competitions = $sth_competitions->fetchall(\PDO::FETCH_ASSOC);
+
         foreach ($record_competitions as $record_competition) {
             $comp_id = $record_competition['ID'];
             $date_parts = explode(' ', $record_competition['Competition_Date']);
             $date = $date_parts[0];
-            $theme = $record_competition['theme'];
+            $theme = $record_competition['Theme'];
             $medium = $record_competition['Medium'];
             $classification = $record_competition['Classification'];
             if (empty($record_competition['Image_Size'])) {
@@ -403,7 +402,7 @@ class Client
     {
         $dates = [];
         $recs = $this->fetchCompetitionDates($db, $closed, $scored);
-        if (get_class($recs) == 'PDOException') {
+        if (is_object($recs) && get_class($recs) == 'PDOException') {
             /* @var $recs \PDOException */
             $this->json->setStatusError();
             $this->json->addError('Failed to SELECT list of competitions from database');
