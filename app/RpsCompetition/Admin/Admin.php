@@ -555,7 +555,7 @@ final class Admin
             ],
             'max-entries'    => '2',
             'judges'         => '1',
-            'image_size'     => '1440',
+            'image_size'     => '1400',
             'special_event'  => false
         ];
 
@@ -601,6 +601,7 @@ final class Admin
                             false
                         );
                     }
+
                     $form_new_options['special_event'] = (bool) avh_array_get(
                         $form_new_options,
                         'special_event',
@@ -806,11 +807,7 @@ final class Admin
         echo $formBuilder->outputField($formBuilder->select('judges', $array_judges, $form_options['judges']));
         unset($array_judges);
 
-        $array_image_size = [
-            '1024' => '1024x768',
-            '1400' => '1400x1050'
-        ];
-        array_sort($array_image_size);
+        $array_image_size = $this->getArrayImageSize();
         echo $formBuilder->outputLabel($formBuilder->label('image_size', 'Image Size'));
         echo $formBuilder->outputField(
             $formBuilder->select('image_size', $array_image_size, $form_options['image_size'])
@@ -1031,14 +1028,20 @@ final class Admin
             $formBuilder->select('judges', $judges, $competition->Num_Judges, ['autocomplete' => 'off'])
         );
 
-        $array_image_size = [
-            '1024' => '1024x768',
-            '1400' => '1400x1050'
-        ];
-        array_sort($array_image_size);
+        $array_image_size = $this->getArrayImageSize();
+        if ($competition->Image_Size === null) {
+            $selected_image_size = '1024';
+        } else {
+            $selected_image_size = $competition->Image_Size;
+        }
         echo $formBuilder->outputLabel($formBuilder->label('image_size', 'Image Size'));
         echo $formBuilder->outputField(
-            $formBuilder->select('image_size', $array_image_size, $competition->Image_Size, ['autocomplete' => 'off'])
+            $formBuilder->select(
+                'image_size',
+                $selected_image_size,
+                $competition->Image_Size,
+                ['autocomplete' => 'off']
+            )
         );
         unset($array_image_size);
 
@@ -1530,6 +1533,22 @@ final class Admin
     }
 
     /**
+     * Build array with image size used by the forms
+     *
+     * @return array
+     */
+    private function getArrayImageSize()
+    {
+        $array_image_size = [
+            '1024' => '1024x768',
+            '1400' => '1400x1050'
+        ];
+        ksort($array_image_size);
+
+        return $array_image_size;
+    }
+
+    /**
      * Handle the HTTP Request before the page of the menu Competition is displayed.
      * This is needed for the redirects.
      */
@@ -1794,7 +1813,7 @@ final class Admin
         $formOptionsNew['classification'] = $formOptions['classification'];
         $formOptionsNew['max-entries'] = $formOptions['max-entries'];
         $formOptionsNew['judges'] = $formOptions['judges'];
-        $formOptionsNew['image_size'] = isset($formOptions['image_size']) ? $formOptions['image_size'] : '1440';
+        $formOptionsNew['image_size'] = isset($formOptions['image_size']) ? $formOptions['image_size'] : '1400';
         $formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';

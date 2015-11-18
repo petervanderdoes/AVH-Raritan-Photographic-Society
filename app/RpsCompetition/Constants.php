@@ -52,7 +52,7 @@ final class Constants
         '250'      => ['width' => 250, 'height' => 250],
         '800'      => ['width' => 800, 'height' => 800],
         '1024'     => ['width' => 1024, 'height' => 768],
-        '1440'     => ['width' => 1440, 'height' => 1050],
+        '1400'     => ['width' => 1400, 'height' => 1050],
         'fb_thumb' => ['width' => 1200, 'height' => 628],
         'FULL'     => ['width' => self::IMAGE_MAX_WIDTH_ENTRY, 'height' => self::IMAGE_MAX_HEIGHT_ENTRY],
     ];

@@ -477,7 +477,7 @@ class QueryCompetitions
                 'Scored'           => 'N',
                 'Max_Entries'      => 2,
                 'Num_Judges'       => 1,
-                'Image_Size'       => '1440',
+                'Image_Size'       => '1400',
                 'Special_Event'    => 'N'
             ];
             $data = $data + $default_options;

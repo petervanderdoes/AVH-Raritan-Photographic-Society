@@ -421,8 +421,8 @@ class Client
     private function jsonCompetitionInformation()
     {
         $competition_information = [];
-        $competition_information['ImageSize']['Width'] = 1440;
-        $competition_information['ImageSize']['Height'] = 990;
+        $competition_information['ImageSize']['Width'] = 1400;
+        $competition_information['ImageSize']['Height'] = 1050;
         $competition_information['total_entries'] = $this->total_entries;
 
         $this->json->addResource('information', $competition_information);
