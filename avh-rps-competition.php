@@ -239,20 +239,21 @@ class AVH_RPS_Client
             return;
         }
         if ($current_db_version < 1) {
-            $this->doUpgrade200($options);
+            $this->doUpgrade2017();
         }
         $options['db_version'] = $db_version;
-        update_option( 'avh-rps', $options );
+        update_option('avh-rps', $options);
     }
 
     /**
-     *  Execute changes made in AVH Rps Competition 2.0.0
-     *
-     * @param array $options
+     *  Execute changes made in AVH Rps Competition 2.0.17
      */
-    private function doUpgrade200($options)
+    private function doUpgrade2017()
     {
-        //@todo Update Database, add the field Image_Size to the competition table.
+        /** @var RpsCompetition\Db\RpsDb $rpsdb */
+        $rpsdb = $this->app->make('RpsDb');
+
+        $rpsdb->query('ALTER TABLE competitions ADD Image_Size VARCHAR(4)');
 
         return;
     }
