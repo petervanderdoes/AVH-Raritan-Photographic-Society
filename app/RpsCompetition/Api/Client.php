@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Api;
 
-use Avh\Framework\Utility\Common;
 use Illuminate\Http\Request;
 use PDO;
 use RpsCompetition\Constants;
@@ -214,6 +213,7 @@ class Client
             $this->json->setStatusError();
             $this->json->addError('Failed to SELECT competition entries from database');
             $this->json->addError($e->getMessage());
+
             return false;
         }
 
@@ -239,6 +239,7 @@ class Client
                 $this->total_entries++;
             }
         }
+
         return $all_entries;
     }
 
@@ -321,6 +322,7 @@ class Client
     {
         $competitions = [];
         $this->total_entries = 0;
+        $image_size = '1024';
 
         $this->json->setStatusSuccess();
 
@@ -378,7 +380,6 @@ class Client
         $this->json->addResource('competitions', $competitions);
         $this->jsonCompetitionInformation($image_size);
 
-
         $fp = fopen('peter.json', 'w');
         fwrite(
             $fp,
@@ -423,16 +424,21 @@ class Client
     /**
      * Add JSON Competition Information
      *
+     * @param $image_size
+     *
      * @return void
      */
     private function jsonCompetitionInformation($image_size)
     {
         $competition_information = [];
-        $seleced_image_size=Constants::getImageSize($image_size);
+        $seleced_image_size = Constants::getImageSize($image_size);
+        /**
+         * If the image size does not exists in our table we set the size to the default value and set a fail in the JSON file
+         */
         if ($seleced_image_size === null) {
             $this->json->setStatusFail();
-            $this->json->addError('Unknown Image Size for the comeptition. Value given: '. $image_size);
-            $seleced_image_size=Constants::getImageSize('1400');
+            $this->json->addError('Unknown Image Size for the comeptition. Value given: ' . $image_size);
+            $seleced_image_size = Constants::getImageSize('1400');
         }
         $competition_information['ImageSize']['Width'] = $seleced_image_size['width'];
         $competition_information['ImageSize']['Height'] = $seleced_image_size['height'];
