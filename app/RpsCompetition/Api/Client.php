@@ -6,6 +6,7 @@ use PDO;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsPdo;
 use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\ImageSizeHelper;
 use RpsCompetition\Helpers\PhotoHelper;
 
 /**
@@ -432,14 +433,14 @@ class Client
     {
         $options = get_option('avh-rps');
         $competition_information = [];
-        $seleced_image_size = Constants::getImageSize($image_size);
+        $seleced_image_size = ImageSizeHelper::getImageSize($image_size);
         /**
          * If the image size does not exists in our table we set the size to the default value and set a fail in the JSON file
          */
         if ($seleced_image_size === null) {
             $this->json->setStatusFail();
             $this->json->addError('Unknown Image Size for the comeptition. Value given: ' . $image_size);
-            $seleced_image_size = Constants::getImageSize($options['default_image_size']);
+            $seleced_image_size = ImageSizeHelper::getImageSize($options['default_image_size']);
         }
         $competition_information['ImageSize']['Width'] = $seleced_image_size['width'];
         $competition_information['ImageSize']['Height'] = $seleced_image_size['height'];

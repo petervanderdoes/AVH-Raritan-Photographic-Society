@@ -3,7 +3,7 @@ namespace RpsCompetition\Options;
 
 use Avh\Framework\Utility\Common;
 use Avh\Framework\Utility\OptionsAbstract;
-use RpsCompetition\Constants;
+use RpsCompetition\Helpers\ImageSizeHelper;
 
 /**
  * Class General
@@ -105,7 +105,7 @@ final class General extends OptionsAbstract
                     break;
 
                 case 'default_image_size':
-                    if (Constants::isImageSize($dirty[$key])) {
+                    if (ImageSizeHelper::isImageSize($dirty[$key])) {
                         $clean[$key] = $dirty[$key];
                     }
                     break;
