@@ -81,7 +81,7 @@ final class Constants
      */
     public static function getImageSize($size)
     {
-        if (array_key_exists($size, self::$image_sizes)) {
+        if (self::isImageSize((string) $size)) {
             return self::$image_sizes[(string) $size];
         }
 
@@ -102,5 +102,17 @@ final class Constants
             'medium_bwp' => 'B&W Prints',
             'medium_cp'  => 'Color Prints'
         ];
+    }
+
+    /**
+     * Check if the given size is a valid image size
+     *
+     * @param string $size
+     *
+     * @return bool
+     */
+    public static function isImageSize($size)
+    {
+        return array_key_exists($size, self::$image_sizes);
     }
 }

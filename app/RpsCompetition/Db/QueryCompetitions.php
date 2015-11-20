@@ -452,6 +452,7 @@ class QueryCompetitions
      */
     public function insertCompetition(array $data)
     {
+        $options = get_option('avh-rps');
         // Are we updating or creating?
         if (!empty($data['ID'])) {
             $competition_ID = (int) $data['ID'];
@@ -477,7 +478,7 @@ class QueryCompetitions
                 'Scored'           => 'N',
                 'Max_Entries'      => 2,
                 'Num_Judges'       => 1,
-                'Image_Size'       => '1400',
+                'Image_Size'       => $options['default_image_size'],
                 'Special_Event'    => 'N'
             ];
             $data = $data + $default_options;

@@ -533,6 +533,7 @@ final class Admin
      */
     public function menuCompetitionAdd()
     {
+        $options = get_option('avh-rps');
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition_add');
@@ -555,7 +556,7 @@ final class Admin
             ],
             'max-entries'    => '2',
             'judges'         => '1',
-            'image_size'     => '1400',
+            'image_size'     => $options['default_image_size'],
             'special_event'  => false
         ];
 
@@ -1800,6 +1801,7 @@ final class Admin
      */
     private function updateCompetition()
     {
+        $options = get_option('avh-rps');
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         $formOptionsNew = [];
         $data = [];
@@ -1813,7 +1815,7 @@ final class Admin
         $formOptionsNew['classification'] = $formOptions['classification'];
         $formOptionsNew['max-entries'] = $formOptions['max-entries'];
         $formOptionsNew['judges'] = $formOptions['judges'];
-        $formOptionsNew['image_size'] = isset($formOptions['image_size']) ? $formOptions['image_size'] : '1400';
+        $formOptionsNew['image_size'] = isset($formOptions['image_size']) ? $formOptions['image_size'] : $options['default_image_size'];
         $formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
         $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
         $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';

@@ -430,6 +430,7 @@ class Client
      */
     private function jsonCompetitionInformation($image_size)
     {
+        $options = get_option('avh-rps');
         $competition_information = [];
         $seleced_image_size = Constants::getImageSize($image_size);
         /**
@@ -438,7 +439,7 @@ class Client
         if ($seleced_image_size === null) {
             $this->json->setStatusFail();
             $this->json->addError('Unknown Image Size for the comeptition. Value given: ' . $image_size);
-            $seleced_image_size = Constants::getImageSize('1400');
+            $seleced_image_size = Constants::getImageSize($options['default_image_size']);
         }
         $competition_information['ImageSize']['Width'] = $seleced_image_size['width'];
         $competition_information['ImageSize']['Height'] = $seleced_image_size['height'];

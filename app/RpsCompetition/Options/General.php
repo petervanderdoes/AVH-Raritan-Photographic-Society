@@ -1,7 +1,9 @@
 <?php
 namespace RpsCompetition\Options;
 
+use Avh\Framework\Utility\Common;
 use Avh\Framework\Utility\OptionsAbstract;
+use RpsCompetition\Constants;
 
 /**
  * Class General
@@ -28,7 +30,8 @@ final class General extends OptionsAbstract
         'banquet_entries'         => 984,
         'edit_title'              => 75,
         'upload_image'            => 89,
-        'db_version'              => 0
+        'db_version'              => 0,
+        'default_image_size'      => '1400'
     ];
 
     /**
@@ -101,11 +104,18 @@ final class General extends OptionsAbstract
                     $clean[$key] = filter_var($dirty[$key], FILTER_VALIDATE_INT);
                     break;
 
+                case 'default_image_size':
+                    if (Constants::isImageSize($dirty[$key])) {
+                        $clean[$key] = $dirty[$key];
+                    }
+                    break;
                 /**
                  * Boolean  fields
                  */
                 default:
-                   wp_die('Error while updating option. Probably missing validation. See \RpsCompetition\Options\General validateOption');
+                    wp_die(
+                        'Error while updating option. Probably missing validation. See \RpsCompetition\Options\General validateOption'
+                    );
                     break;
             }
         }
