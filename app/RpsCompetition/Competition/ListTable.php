@@ -18,6 +18,7 @@ use RpsCompetition\Db\RpsDb;
  */
 class ListTable extends \WP_List_Table
 {
+    public $extra_items;
     public $messages;
     public $screen;
     /** @var HtmlBuilder */
