@@ -47,7 +47,7 @@ class MonthlyWinnersModel
     /**
      * return an array with the awards up to the maximum number of awrads.
      *
-     * @param integer $max_num_awards
+     * @param int $max_num_awards
      *
      * @return array
      */
@@ -113,7 +113,6 @@ class MonthlyWinnersModel
      * @param string $selected_date
      *
      * @return array
-     *
      */
     public function getMonthlyWinners($selected_season, $selected_date)
     {

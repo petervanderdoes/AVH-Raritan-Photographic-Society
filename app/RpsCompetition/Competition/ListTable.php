@@ -325,7 +325,7 @@ class ListTable extends \WP_List_Table
     /**
      * @param string $competition_status
      *
-     * @return integer|mixed|void
+     * @return int|mixed|void
      */
     public function get_per_page($competition_status = 'open')
     {

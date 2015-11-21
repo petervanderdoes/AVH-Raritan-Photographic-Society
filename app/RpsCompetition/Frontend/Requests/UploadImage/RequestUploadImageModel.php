@@ -113,15 +113,14 @@ class RequestUploadImageModel
 
     /**
      * Check if the uploaded entry is valid.
-     *
      * Checks include:
      * - Duplicate Title
      * - Maximum entries per competition
      * - Maximum entries per date (Hmm, not sure if this is needed)
      *
-     * @param integer $comp_id
-     * @param integer $max_entries
-     * @param string  $title
+     * @param int    $comp_id
+     * @param int    $max_entries
+     * @param string $title
      *
      * @return bool
      */
@@ -131,7 +130,9 @@ class RequestUploadImageModel
         // an entry already submitted to this competition. Duplicate title result in duplicate
         // file names on the server
         if ($this->query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
-            $error_message = 'You have already submitted an entry with a title of "' . $title . '" in this competition. Please submit your entry again with a different title.';
+            $error_message = 'You have already submitted an entry with a title of "' .
+                             $title .
+                             '" in this competition. Please submit your entry again with a different title.';
             $this->setFormError($this->form, $error_message, 'title');
 
             return false;
@@ -142,7 +143,9 @@ class RequestUploadImageModel
         // maximum images per competition by having two upload windows open simultaneously.
         $max_per_id = $this->query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
         if ($max_per_id >= $max_entries) {
-            $error_message = 'You have already submitted the maximum of ' . $max_entries . ' entries into this competition. You must Remove an image before you can submit another';
+            $error_message = 'You have already submitted the maximum of ' .
+                             $max_entries .
+                             ' entries into this competition. You must Remove an image before you can submit another';
             $this->setFormError($this->form, $error_message);
 
             return false;
@@ -151,7 +154,9 @@ class RequestUploadImageModel
         $max_per_date = $this->query_entries->countEntriesByCompetitionDate($this->comp_date, get_current_user_id());
         if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
             $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
-            $error_message = 'You have already submitted the maximum of ' . $max_entries_member_date . ' entries for this competition date. You must Remove an image before you can submit another';
+            $error_message = 'You have already submitted the maximum of ' .
+                             $max_entries_member_date .
+                             ' entries for this competition date. You must Remove an image before you can submit another';
             $this->setFormError($this->form, $error_message);
 
             return false;
@@ -163,8 +168,8 @@ class RequestUploadImageModel
     /**
      * Add the netry to the database.
      *
-     * @param integer $comp_id
-     * @param string  $title
+     * @param int    $comp_id
+     * @param string $title
      *
      * @return bool
      */
@@ -206,7 +211,13 @@ class RequestUploadImageModel
         if (is_array($recs)) {
             $return = $recs;
         } else {
-            $error_message = 'Competition ' . $this->comp_date . '/' . $this->classification . '/' . $this->medium . ' not found in database';
+            $error_message = 'Competition ' .
+                             $this->comp_date .
+                             '/' .
+                             $this->classification .
+                             '/' .
+                             $this->medium .
+                             ' not found in database';
             $this->setFormError($this->form, $error_message);
 
             $return = false;
@@ -265,7 +276,9 @@ class RequestUploadImageModel
 
         // If the .jpg file is too big resize it
         $return = true;
-        if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
+        if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY ||
+            $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY
+        ) {
             // Resize the image and deposit it in the destination directory
             $this->photo_helper->doResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
         } else {

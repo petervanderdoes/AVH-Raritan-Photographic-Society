@@ -123,8 +123,8 @@ class CommonHelper
     /**
      * Get the user classification based on the medium
      *
-     * @param integer $userID
-     * @param string  $medium
+     * @param int    $userID
+     * @param string $medium
      *
      * @return string
      */
@@ -153,7 +153,7 @@ class CommonHelper
     /**
      * Check if the user is a paid member
      *
-     * @param integer|null $user_id UserID to check
+     * @param int|null $user_id UserID to check
      *
      * @return bool true if a paid member, false if non-existing user or non-paid member.`
      */

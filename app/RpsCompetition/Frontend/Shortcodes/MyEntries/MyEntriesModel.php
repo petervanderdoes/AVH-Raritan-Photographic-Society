@@ -25,7 +25,7 @@ class MyEntriesModel
 {
     private $competition_helper;
     private $form_factory;
-    /** @var  integer */
+    /** @var  int */
     private $num_rows;
     private $photo_helper;
     private $query_competitions;
@@ -311,7 +311,7 @@ class MyEntriesModel
      * Save the session.
      * We store the Competition Date, Medium and Classification in a session.
      *
-     * @param string $medium_subset_medium
+     * @param string                        $medium_subset_medium
      * @param array|mixed|QueryCompetitions $current_competition
      */
     private function saveSession($medium_subset_medium, $current_competition)

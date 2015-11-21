@@ -10,20 +10,20 @@ use RpsCompetition\Helpers\SeasonHelper;
  * @package   RpsCompetition\Db
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
- * @property  integer ID
- * @property  string  Competition_Date
- * @property  string  Medium
- * @property  string  Classification
- * @property  string  Theme
- * @property  string  Date_Created
- * @property  string  Date_Modified
- * @property  string  Closed
- * @property  string  Scored
- * @property  string  Close_Date
- * @property  integer Max_Entries
- * @property  integer Num_Judges
- * @property  string  Image_Size
- * @property  string  Special_Event
+ * @property  int    ID
+ * @property  string Competition_Date
+ * @property  string Medium
+ * @property  string Classification
+ * @property  string Theme
+ * @property  string Date_Created
+ * @property  string Date_Modified
+ * @property  string Closed
+ * @property  string Scored
+ * @property  string Close_Date
+ * @property  int    Max_Entries
+ * @property  int    Num_Judges
+ * @property  string Image_Size
+ * @property  string Special_Event
  */
 class QueryCompetitions
 {
@@ -79,9 +79,9 @@ class QueryCompetitions
      * Count competitions.
      * Return an object with the count of open, closed and total competitions.
      *
-     * @property integer open
-     * @property integer closed
-     * @property integer all
+     * @property int open
+     * @property int closed
+     * @property int all
      * @return QueryCompetitions|array
      */
     public function countCompetitions()
@@ -118,7 +118,7 @@ class QueryCompetitions
     /**
      * Delete a competition.
      *
-     * @param integer $id
+     * @param int $id
      *
      * @return bool
      */
@@ -190,8 +190,8 @@ class QueryCompetitions
     /**
      * Get competition by entry ID
      *
-     * @param integer $entry_id
-     * @param string  $output
+     * @param int    $entry_id
+     * @param string $output
      *
      * @return QueryCompetitions|array
      */
@@ -212,8 +212,8 @@ class QueryCompetitions
     /**
      * Get the whole competition record
      *
-     * @param integer $id
-     * @param string  $output default is OBJECT
+     * @param int    $id
+     * @param string $output default is OBJECT
      *
      * @return QueryCompetitions|array
      */
@@ -327,7 +327,7 @@ class QueryCompetitions
      * @param string $classification
      * @param string $medium
      *
-     * @return integer
+     * @return int
      */
     public function getCompetitionMaxEntries($competition_date, $classification, $medium)
     {
@@ -350,9 +350,9 @@ class QueryCompetitions
     /**
      * Get open competitions
      *
-     * @param integer $user_id
-     * @param string  $subset
-     * @param string  $output
+     * @param int    $user_id
+     * @param string $subset
+     * @param string $output
      *
      * @return QueryCompetitions|array
      */
@@ -448,7 +448,7 @@ class QueryCompetitions
      *
      * @param array $data
      *
-     * @return \WP_Error|integer
+     * @return \WP_Error|int
      */
     public function insertCompetition(array $data)
     {
@@ -515,14 +515,14 @@ class QueryCompetitions
         /**
          * Define used variables after the extract function.
          *
-         * @var string  $order
-         * @var string  $join
-         * @var string  $where
-         * @var string  $offset
-         * @var integer $number
-         * @var string  $orderby
-         * @var string  $order
-         * @var bool    $count
+         * @var string $order
+         * @var string $join
+         * @var string $where
+         * @var string $offset
+         * @var int    $number
+         * @var string $orderby
+         * @var string $order
+         * @var bool   $count
          */
         $defaults = [
             'join'    => '',

@@ -311,14 +311,21 @@ class Frontend
         $layout = strtolower($layout);
 
         $size_class = sanitize_html_class($size);
-        $gallery_div = '<div id="' . $selector . '" class="gallery galleryid-' . $id . ' gallery-columns-' . $columns . ' gallery-size-' . $size_class . '">';
+        $gallery_div = '<div id="' .
+                       $selector .
+                       '" class="gallery galleryid-' .
+                       $id .
+                       ' gallery-columns-' .
+                       $columns .
+                       ' gallery-size-' .
+                       $size_class .
+                       '">';
 
         /**
          * Filter the default gallery shortcode CSS styles.
          *
          * @param string $gallery_style Default gallery shortcode CSS styles.
          * @param string $gallery_div   Opening HTML div container for the gallery shortcode output.
-         *
          */
         $output = apply_filters('gallery_style', $gallery_style . $gallery_div);
         $counter = 0;
@@ -347,7 +354,15 @@ class Frontend
 
             $output .= '<' . $itemtag . ' class="gallery-item">';
             $output .= '<div class="gallery-item-content">';
-            $output .= '<' . $icontag . ' class="gallery-icon ' . $orientation . '" > ' . $image_output . '</' . $icontag . ' >';
+            $output .= '<' .
+                       $icontag .
+                       ' class="gallery-icon ' .
+                       $orientation .
+                       '" > ' .
+                       $image_output .
+                       '</' .
+                       $icontag .
+                       ' >';
 
             $caption_text = '';
             if ($captiontag && trim($attachment->post_excerpt)) {
@@ -386,8 +401,8 @@ class Frontend
     /**
      * Change the permalink for the dynamic pages.
      *
-     * @param string  $link
-     * @param integer $post_id
+     * @param string $link
+     * @param int    $post_id
      *
      * @internal Hook: _get_page_link
      * @return string
@@ -427,9 +442,8 @@ class Frontend
      * Filter the title
      * For the Dynamic Pages we create a more elaborate title.
      *
-     * @param string  $title
-     *
-     * @param integer $post_id
+     * @param string $title
+     * @param int    $post_id
      *
      * @return string
      */
@@ -552,7 +566,6 @@ class Frontend
 
     /**
      * Setup the Social Buttons.
-     *
      */
     private function setupSocialButtons()
     {
@@ -566,7 +579,10 @@ class Frontend
             $version_separator = '';
         }
         $data = [];
-        $data['script'] = 'rps-competition.social-buttons' . $version_separator . $social_buttons_script_version . '.js';
+        $data['script'] = 'rps-competition.social-buttons' .
+                          $version_separator .
+                          $social_buttons_script_version .
+                          '.js';
         $social_networks_controller->initializeSocialNetworks($data);
     }
 
@@ -587,7 +603,6 @@ class Frontend
 
     /**
      * Setup the filters and action for the plugin WordPress Seo by Yoast
-     *
      */
     private function setupWpSeoActionsFilters()
     {

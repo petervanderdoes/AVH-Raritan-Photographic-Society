@@ -7,16 +7,16 @@ namespace RpsCompetition\Db;
  * @package   RpsCompetition\Db
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
- * @property integer ID
- * @property integer Competition_ID
- * @property integer Member_ID
- * @property string  Title
- * @property string  Client_File_Name
- * @property string  Server_File_Name
- * @property string  Date_Created
- * @property string  Date_Modified
- * @property float   Score
- * @property string  Award
+ * @property int    ID
+ * @property int    Competition_ID
+ * @property int    Member_ID
+ * @property string Title
+ * @property string Client_File_Name
+ * @property string Server_File_Name
+ * @property string Date_Created
+ * @property string Date_Modified
+ * @property float  Score
+ * @property string Award
  */
 class QueryEntries
 {
@@ -35,8 +35,8 @@ class QueryEntries
     /**
      * Add an entry
      *
-     * @param array   $data
-     * @param integer $user_id
+     * @param array $data
+     * @param int   $user_id
      *
      * @return bool
      */
@@ -52,9 +52,9 @@ class QueryEntries
     /**
      * Check if the title already exists for the given competition.
      *
-     * @param integer $id
-     * @param string  $title
-     * @param integer $user_id
+     * @param int    $id
+     * @param string $title
+     * @param int    $user_id
      *
      * @return bool
      */
@@ -83,10 +83,10 @@ class QueryEntries
     /**
      * Count the entries for a member on a given competition date
      *
-     * @param string  $date
-     * @param integer $user_id
+     * @param string $date
+     * @param int    $user_id
      *
-     * @return integer
+     * @return int
      */
     public function countEntriesByCompetitionDate($date, $user_id)
     {
@@ -107,10 +107,10 @@ class QueryEntries
     /**
      * Get the amount of entries for the given competition.
      *
-     * @param integer $id
-     * @param integer $user_id
+     * @param int $id
+     * @param int $user_id
      *
-     * @return integer
+     * @return int
      */
     public function countEntriesByCompetitionId($id, $user_id)
     {
@@ -129,10 +129,10 @@ class QueryEntries
     /**
      * Count entries submitted by this member for this competition date.
      *
-     * @param integer $user_id
-     * @param string  $competition_date
+     * @param int    $user_id
+     * @param string $competition_date
      *
-     * @return integer
+     * @return int
      */
     public function countEntriesSubmittedByMember($user_id, $competition_date)
     {
@@ -155,7 +155,7 @@ class QueryEntries
     /**
      * Delete an entry
      *
-     * @param integer $id
+     * @param int $id
      *
      * @return bool
      */
@@ -169,10 +169,10 @@ class QueryEntries
     /**
      * Get entries submitted for the member on the given competition date in the given classification and medium
      *
-     * @param integer $user_id
-     * @param string  $competition_date
-     * @param string  $classification
-     * @param string  $medium
+     * @param int    $user_id
+     * @param string $competition_date
+     * @param string $classification
+     * @param string $medium
      *
      * @return array
      */
@@ -201,8 +201,8 @@ class QueryEntries
     /**
      * Get the Entry Record by Id
      *
-     * @param integer $id
-     * @param string  $output
+     * @param int    $id
+     * @param string $output
      *
      * @return QueryEntries
      */
@@ -239,13 +239,13 @@ class QueryEntries
     public function query(array $query_vars, $output = OBJECT)
     {
         /**
-         * @var string  $join
-         * @var string  $where
-         * @var integer $offset
-         * @var integer $number
-         * @var string  $orderby
-         * @var string  $order
-         * @var bool    $count
+         * @var string $join
+         * @var string $where
+         * @var int    $offset
+         * @var int    $number
+         * @var string $orderby
+         * @var string $order
+         * @var bool   $count
          */
         $defaults = [
             'join'    => '',

@@ -66,7 +66,7 @@ class EditTitleModel
     /**
      * Get the entry
      *
-     * @param integer $entry_id
+     * @param int $entry_id
      *
      * @return QueryEntries
      */
@@ -78,7 +78,7 @@ class EditTitleModel
     /**
      * Get the entry ID based on the reqeust
      *
-     * @return integer
+     * @return int
      */
     public function getEntryId()
     {
@@ -101,9 +101,9 @@ class EditTitleModel
     /**
      * Create a new form
      *
-     * @param integer $entry_id
-     * @param string  $title
-     * @param string  $server_file_name
+     * @param int    $entry_id
+     * @param string $title
+     * @param string $server_file_name
      *
      * @return \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface
      */

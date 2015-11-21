@@ -12,7 +12,10 @@ namespace RpsCompetition\Api;
 class Json
 {
     const CONTENT_TYPE_OFFICIAL = 'application/json';
-    const JSON_ENCODE_DEFAULT   = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+    /**
+     * JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE = 320
+     */
+    const JSON_ENCODE_DEFAULT   = 320;
     const JSON_STATUS_ERROR     = 'error';
     const JSON_STATUS_FAIL      = 'fail';
     const JSON_STATUS_SUCCESS   = 'success';
@@ -25,7 +28,7 @@ class Json
 
     /**
      * Constructor
-     *
+
      */
     public function __construct()
     {
@@ -66,7 +69,7 @@ class Json
      * returns the whole response body as json
      * it generates the response via ->getArray()
      *
-     * @param integer|null $encode_options optional, $options for json_encode()
+     * @param int|null $encode_options     optional, $options for json_encode()
      *                                     defaults to ::ENCODE_DEFAULT or ::ENCODE_DEBUG, @see ::$debug
      *
      * @return string
@@ -106,11 +109,11 @@ class Json
     /**
      * Send out the json response to the browser
      *
-     * @param  string|null  $content_type   optional, defaults to ::CONTENT_TYPE_OFFICIAL (the official IANA registered
+     * @param  string|null $content_type    optional, defaults to ::CONTENT_TYPE_OFFICIAL (the official IANA registered
      *                                      one)
-     * @param  integer|null $encode_options optional, $options for json_encode()
+     * @param  int|null    $encode_options  optional, $options for json_encode()
      *                                      defaults to ::JSON_ENCODE_DEFAULT
-     * @param  string|null  $response       optional, defaults to ::getJson()
+     * @param  string|null $response        optional, defaults to ::getJson()
      *
      * @return void
      */

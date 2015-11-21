@@ -67,7 +67,7 @@ final class Admin
     /**
      * Setup User metadata
      *
-     * @param integer $userID
+     * @param int $userID
      *
      * @internal Hook: user_register
      */
@@ -253,7 +253,7 @@ final class Admin
     /**
      * Update the user meta concerning Classification when a user is updated.
      *
-     * @param integer $user_id
+     * @param int $user_id
      *
      * @internal Hook: personal_options_update
      * @internal Hook: edit_user_profile_update
@@ -383,11 +383,11 @@ final class Admin
      *
      * @see      filter screen_meta_screen
      *
-     * @param integer $columns
-     * @param integer $screen
+     * @param int $columns
+     * @param int $screen
      *
      * @internal Hook: screen_layout_columns
-     * @return integer
+     * @return int
      */
     public function filterScreenLayoutColumns($columns, $screen)
     {
@@ -408,12 +408,12 @@ final class Admin
      * Used when we set our own screen options.
      * The filter needs to be set during construct otherwise it's not recognized.
      *
-     * @param integer $error_value
-     * @param string  $option
-     * @param integer $value
+     * @param int    $error_value
+     * @param string $option
+     * @param int    $value
      *
      * @internal Hook:
-     * @return integer
+     * @return int
      */
     public function filterSetScreenOption($error_value, $option, $value)
     {
@@ -1479,7 +1479,7 @@ final class Admin
      * Perform the actual update of an entry.
      *
      * @param array             $formOptionsNew
-     * @param integer           $id
+     * @param int               $id
      * @param QueryEntries      $entry       Entry record
      * @param QueryCompetitions $competition Competition record
      *

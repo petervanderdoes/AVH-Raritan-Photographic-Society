@@ -117,7 +117,7 @@ class QueryMiscellaneous
      * Get random entries that scored 8 or higher.
      * The amount of records returned can be set by the $limit argument.
      *
-     * @param integer $limit Amount of records to return. Default is 5.
+     * @param int $limit Amount of records to return. Default is 5.
      *
      * @return mixed
      */
@@ -144,7 +144,7 @@ class QueryMiscellaneous
     /**
      * Get all photos of the given member_id with a score that is 8 or higher.
      *
-     * @param integer $member_id
+     * @param int $member_id
      *
      * @return array
      */
@@ -174,7 +174,7 @@ class QueryMiscellaneous
      * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
-     * @return integer
+     * @return int
      */
     public function getMaxAwards($competition_date_start, $competition_date_end = null)
     {
@@ -204,7 +204,7 @@ class QueryMiscellaneous
     /**
      * Get the scores for the given user for competitions between the given dates.
      *
-     * @param integer     $user_id
+     * @param int         $user_id
      * @param string      $competition_date_start
      * @param null|string $competition_date_end
      *
@@ -238,9 +238,9 @@ class QueryMiscellaneous
     /**
      * Get a list of seasons
      *
-     * @param string  $order
-     * @param integer $season_start_month_num
-     * @param integer $season_end_month_num
+     * @param string $order
+     * @param int    $season_start_month_num
+     * @param int    $season_end_month_num
      *
      * @return array
      */
@@ -269,8 +269,8 @@ class QueryMiscellaneous
     /**
      * Get Season list plus amount of entries and teh season has at least 1 entry.
      *
-     * @param integer $season_start_month_num
-     * @param integer $season_end_month_num
+     * @param int $season_start_month_num
+     * @param int $season_end_month_num
      *
      * @return array
      */

@@ -330,7 +330,7 @@ class ListTable extends \WP_List_Table
     /**
      * @param string $entry_status
      *
-     * @return integer|mixed|void
+     * @return int|mixed|void
      */
     public function get_per_page($entry_status = 'all')
     {

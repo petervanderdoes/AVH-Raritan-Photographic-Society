@@ -32,8 +32,8 @@ class PersonWinnersModel
     /**
      * Get given amount of random images for the given user.
      *
-     * @param integer $user_id
-     * @param integer $amount_of_images
+     * @param int $user_id
+     * @param int $amount_of_images
      *
      * @return array
      */
