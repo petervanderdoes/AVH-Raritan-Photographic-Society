@@ -189,7 +189,7 @@ class Frontend
             'gallery'
         );
 
-        $id = (int)($short_code_atts['id']);
+        $id = (int) ($short_code_atts['id']);
         if ('RAND' == $short_code_atts['order']) {
             $short_code_atts['orderby'] = 'none';
         }
@@ -240,32 +240,22 @@ class Frontend
             $icontag = 'dt';
         }
 
-        $columns = intval($short_code_atts['columns']);
+        $columns = (int) $short_code_atts['columns'];
 
         $selector = 'gallery-' . $instance;
-
-        $gallery_style = '';
 
         $layout = strtolower($short_code_atts['layout']);
 
         $size_class = sanitize_html_class($short_code_atts['size']);
-        $gallery_div = '<div id="' .
-                       $selector .
-                       '" class="gallery galleryid-' .
-                       $id .
-                       ' gallery-columns-' .
-                       $columns .
-                       ' gallery-size-' .
-                       $size_class .
-                       '">';
-
-        /**
-         * Filter the default gallery shortcode CSS styles.
-         *
-         * @param string $gallery_style Default gallery shortcode CSS styles.
-         * @param string $gallery_div   Opening HTML div container for the gallery shortcode output.
-         */
-        $output = apply_filters('gallery_style', $gallery_style . $gallery_div);
+        $output = '<div id="' .
+                  $selector .
+                  '" class="gallery galleryid-' .
+                  $id .
+                  ' gallery-columns-' .
+                  $columns .
+                  ' gallery-size-' .
+                  $size_class .
+                  '">';
         $counter = 0;
         foreach ($attachments as $id => $attachment) {
             if ($counter % $columns == 0) {
@@ -275,14 +265,14 @@ class Frontend
                     $output .= '<div class="gallery-row">';
                 }
             }
-            if (!empty($link) && 'file' === $link) {
-                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], false, false);
-            } elseif (!empty($link) && 'none' === $link) {
-                $image_output = wp_get_attachment_image($id, $short_code_atts['size'], false);
+            $attr = (trim($attachment->post_excerpt)) ? ['aria-describedby' => "$selector-$id"] : '';
+            if (!empty($short_code_atts['link']) && 'file' === $short_code_atts['link']) {
+                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], false, false, false, $attr);
+            } elseif (!empty($short_code_atts['link']) && 'none' === $short_code_atts['link']) {
+                $image_output = wp_get_attachment_image($id, $short_code_atts['size'], false, $attr);
             } else {
-                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], true, false);
+                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], true, false, false, $attr);
             }
-
             $image_meta = wp_get_attachment_metadata($id);
 
             $orientation = '';
