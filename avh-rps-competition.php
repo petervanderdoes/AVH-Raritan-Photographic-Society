@@ -14,6 +14,7 @@ use RpsCompetition\Admin\Admin;
 use RpsCompetition\Application;
 use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
+use RpsCompetition\Frontend\FrontendModel;
 use RpsCompetition\Frontend\FrontendView;
 use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
@@ -175,7 +176,12 @@ class AVH_RPS_Client
                 );
             }
         );
-
+        $this->app->bind(
+            'FrontendModel',
+            function () {
+                return new FrontendModel;
+            }
+        );
         if (class_exists('Imagick')) {
             $this->app->bind('\Imagine\Image\ImagineInterface', '\Imagine\Imagick\Imagine');
         } else {

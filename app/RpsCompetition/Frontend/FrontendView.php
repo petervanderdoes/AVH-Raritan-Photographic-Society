@@ -100,6 +100,26 @@ class FrontendView
     }
 
     /**
+     * Render the feed of attachements.
+     *
+     * @param array  $attachments
+     * @param string $size
+     *
+     * @see \RpsCompetition\Frontend\Frontend::filterPostGallery
+     * @return string
+     */
+    public function renderPostGalleryFeed($attachments, $size)
+    {
+        $output = "\n";
+        $attachments_id = array_keys($attachments);
+        foreach ($attachments_id as $id) {
+            $output .= wp_get_attachment_link($id, $size, true) . "\n";
+        }
+
+        return $output;
+    }
+
+    /**
      * Render the Showcase competition thumbnails
      *
      * @param array $data

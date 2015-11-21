@@ -18,6 +18,8 @@ use RpsCompetition\Helpers\CommonHelper;
 class Frontend
 {
     private $app;
+    /** @var \Rpscompetition\Frontend\FrontendModel */
+    private $model;
     /** @var Request */
     private $request;
     /** @var Session */
@@ -42,6 +44,7 @@ class Frontend
         $this->request = $app->make('IlluminateRequest');
 
         $this->view = $app->make('FrontendView');
+        $this->model = $app->make('FrontendModel');
 
         $this->setupRequestHandling();
 
@@ -257,27 +260,14 @@ class Frontend
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
 
         if (!$didFilterWpseoPreAnalysisPostsContent) {
-            $entries = [];
-            foreach ($attachments as $id => $attachment) {
-                $img_url = wp_get_attachment_url($id);
-                $home_url = home_url();
-                if (substr($img_url, 0, strlen($home_url)) == $home_url) {
-                    $entry = new \stdClass;
-                    $img_relative_path = substr($img_url, strlen($home_url));
-                    $entry->Server_File_Name = $img_relative_path;
-                    $entries[] = $entry;
-                }
-            }
+            $entries = $this->model->getFacebookThumbEntries($attachments);
             $output = $this->view->renderFacebookThumbs($entries);
 
             return $output;
         }
 
         if (is_feed()) {
-            $output = "\n";
-            foreach ($attachments as $att_id => $attachment) {
-                $output .= wp_get_attachment_link($att_id, $size, true) . "\n";
-            }
+            $output = $this->view->renderPostGalleryFeed($attachments, $size);
 
             return $output;
         }

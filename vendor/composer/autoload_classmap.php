@@ -119,6 +119,7 @@ return array(
     'RpsCompetition\\Form\\Type\\ScoresCurrentUserType' => $baseDir . '/app/RpsCompetition/Form/Type/ScoresCurrentUserType.php',
     'RpsCompetition\\Form\\Type\\UploadImageType' => $baseDir . '/app/RpsCompetition/Form/Type/UploadImageType.php',
     'RpsCompetition\\Frontend\\Frontend' => $baseDir . '/app/RpsCompetition/Frontend/Frontend.php',
+    'RpsCompetition\\Frontend\\FrontendModel' => $baseDir . '/app/RpsCompetition/Frontend/FrontendModel.php',
     'RpsCompetition\\Frontend\\FrontendView' => $baseDir . '/app/RpsCompetition/Frontend/FrontendView.php',
     'RpsCompetition\\Frontend\\Requests\\BanquetEntries\\RequestBanquetEntries' => $baseDir . '/app/RpsCompetition/Frontend/Requests/BanquetEntries/RequestBanquetEntries.php',
     'RpsCompetition\\Frontend\\Requests\\BanquetEntries\\RequestBanquetEntriesModel' => $baseDir . '/app/RpsCompetition/Frontend/Requests/BanquetEntries/RequestBanquetEntriesModel.php',
