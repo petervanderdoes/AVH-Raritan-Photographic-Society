@@ -378,8 +378,8 @@ class Client
             $competition['entries'] = $entries;
             $competitions[] = $competition;
         }
-        $this->json->addResource('competitions', $competitions);
         $this->jsonCompetitionInformation($image_size);
+        $this->json->addResource('competitions', $competitions);
 
         $fp = fopen('peter.json', 'w');
         fwrite(
