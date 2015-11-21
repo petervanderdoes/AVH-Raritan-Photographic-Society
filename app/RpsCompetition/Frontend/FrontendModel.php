@@ -42,4 +42,56 @@ class FrontendModel
 
         return $entries;
     }
+
+    /**
+     * @param array $short_code_atts
+     * @param int   $id
+     *
+     * @return array
+     */
+    public function getPostGalleryAttachments($short_code_atts, $id)
+    {
+        $attachments = [];
+        if (!empty($short_code_atts['include'])) {
+            $_attachments = get_posts(
+                [
+                    'include'        => $short_code_atts['include'],
+                    'post_status'    => 'inherit',
+                    'post_type'      => 'attachment',
+                    'post_mime_type' => 'image',
+                    'order'          => $short_code_atts['order'],
+                    'orderby'        => $short_code_atts['orderby']
+                ]
+            );
+
+            foreach ($_attachments as $key => $val) {
+                $attachments[$val->ID] = $_attachments[$key];
+            }
+        } elseif (!empty($short_code_atts['exclude'])) {
+            $attachments = get_children(
+                [
+                    'post_parent'    => $id,
+                    'exclude'        => $short_code_atts['exclude'],
+                    'post_status'    => 'inherit',
+                    'post_type'      => 'attachment',
+                    'post_mime_type' => 'image',
+                    'order'          => $short_code_atts['order'],
+                    'orderby'        => $short_code_atts['orderby']
+                ]
+            );
+        } else {
+            $attachments = get_children(
+                [
+                    'post_parent'    => $id,
+                    'post_status'    => 'inherit',
+                    'post_type'      => 'attachment',
+                    'post_mime_type' => 'image',
+                    'order'          => $short_code_atts['order'],
+                    'orderby'        => $short_code_atts['orderby']
+                ]
+            );
+        }
+
+        return $attachments;
+    }
 }
