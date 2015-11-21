@@ -110,7 +110,7 @@ final class General extends OptionsAbstract
                     }
                     break;
                 /**
-                 * Boolean  fields
+                 * Boolean fields
                  */
                 default:
                     wp_die(

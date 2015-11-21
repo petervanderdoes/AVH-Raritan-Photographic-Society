@@ -155,7 +155,7 @@ class CommonHelper
      *
      * @param integer|null $user_id UserID to check
      *
-     * @return boolean true if a paid member, false if non-existing user or non-paid member.`
+     * @return bool true if a paid member, false if non-existing user or non-paid member.`
      */
     public static function isPaidMember($user_id = null)
     {

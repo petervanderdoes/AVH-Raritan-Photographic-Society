@@ -1483,7 +1483,7 @@ final class Admin
      * @param QueryEntries      $entry       Entry record
      * @param QueryCompetitions $competition Competition record
      *
-     * @return \WP_Error|boolean
+     * @return \WP_Error|bool
      */
     private function doUpdateEntry($formOptionsNew, $id, $entry, $competition)
     {
@@ -1845,7 +1845,7 @@ final class Admin
     /**
      * Update an entry after a POST
      *
-     * @return \WP_Error|boolean
+     * @return \WP_Error|bool
      */
     private function updateEntry()
     {

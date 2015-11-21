@@ -50,7 +50,7 @@ class QueryCompetitions
      * @param string $classification
      * @param string $medium
      *
-     * @return boolean
+     * @return bool
      */
     public function checkCompetitionClosed($competition_date, $classification, $medium)
     {
@@ -120,7 +120,7 @@ class QueryCompetitions
      *
      * @param integer $id
      *
-     * @return boolean
+     * @return bool
      */
     public function deleteCompetition($id)
     {
@@ -522,7 +522,7 @@ class QueryCompetitions
          * @var integer $number
          * @var string  $orderby
          * @var string  $order
-         * @var boolean $count
+         * @var bool    $count
          */
         $defaults = [
             'join'    => '',
@@ -598,7 +598,7 @@ class QueryCompetitions
     /**
      * Close all competitions with a closing date in the past.
      *
-     * @return boolean
+     * @return bool
      */
     public function setAllPastCompetitionsClose()
     {

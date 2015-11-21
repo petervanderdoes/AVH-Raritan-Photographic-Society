@@ -192,7 +192,7 @@ class PhotoHelper
      * @param string $thumb_name
      * @param string $size
      *
-     * @return boolean
+     * @return bool
      */
     public function doResizeImage($image_name, $thumb_path, $thumb_name, $size)
     {
@@ -329,7 +329,7 @@ class PhotoHelper
      * @param string $old_name
      * @param string $new_name
      *
-     * @return boolean
+     * @return bool
      */
     public function renameImageFile($path, $old_name, $new_name)
     {

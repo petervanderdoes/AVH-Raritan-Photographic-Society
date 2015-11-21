@@ -20,8 +20,8 @@ use RpsCompetition\Helpers\SeasonHelper;
  */
 class ListTable extends \WP_List_Table
 {
-    public $messages;
-    public $screen;
+    public    $messages;
+    public    $screen;
     protected $extra_items;
     /** @var HtmlBuilder */
     private $html;
@@ -60,7 +60,7 @@ class ListTable extends \WP_List_Table
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function ajax_user_can()
     {
@@ -133,7 +133,9 @@ class ListTable extends \WP_List_Table
         if ($competition != false) {
             $unix_date = mysql2date('U', $competition->Competition_Date);
             $competition_month = date('n', $unix_date);
-            if ($competition_month >= $options['season_start_month_num'] && $competition_month <= $options['season_end_month_num']) {
+            if ($competition_month >= $options['season_start_month_num'] &&
+                $competition_month <= $options['season_end_month_num']
+            ) {
                 $season_text = date('Y', $unix_date) . ' - ' . date('Y', strtotime('+1 year', $unix_date));
             } else {
                 $season_text = date('Y', strtotime('-1 year', $unix_date)) . ' - ' . date('Y', $unix_date);
@@ -191,7 +193,7 @@ class ListTable extends \WP_List_Table
     }
 
     /**
-     * @return boolean|string
+     * @return bool|string
      */
     public function current_action()
     {

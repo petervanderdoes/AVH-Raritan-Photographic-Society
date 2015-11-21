@@ -69,7 +69,7 @@ class MyEntriesModel
      *
      * @param string $medium_subset_medium
      *
-     * @return array|boolean
+     * @return array|bool
      */
     public function getMyEntries($medium_subset_medium)
     {
@@ -253,9 +253,11 @@ class MyEntriesModel
             }
             $previous_date = $open_competition->Competition_Date;
             $open_competitions_options[$open_competition->Competition_Date] = strftime(
-                    '%d-%b-%Y',
-                    strtotime($open_competition->Competition_Date)
-                ) . ' ' . $open_competition->Theme;
+                                                                                  '%d-%b-%Y',
+                                                                                  strtotime(
+                                                                                      $open_competition->Competition_Date
+                                                                                  )
+                                                                              ) . ' ' . $open_competition->Theme;
         }
 
         return $open_competitions_options;
@@ -309,7 +311,7 @@ class MyEntriesModel
      * Save the session.
      * We store the Competition Date, Medium and Classification in a session.
      *
-     * @param string                        $medium_subset_medium
+     * @param string $medium_subset_medium
      * @param array|mixed|QueryCompetitions $current_competition
      */
     private function saveSession($medium_subset_medium, $current_competition)

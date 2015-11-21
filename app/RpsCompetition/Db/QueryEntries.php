@@ -7,7 +7,6 @@ namespace RpsCompetition\Db;
  * @package   RpsCompetition\Db
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
- *
  * @property integer ID
  * @property integer Competition_ID
  * @property integer Member_ID
@@ -39,7 +38,7 @@ class QueryEntries
      * @param array   $data
      * @param integer $user_id
      *
-     * @return boolean
+     * @return bool
      */
     public function addEntry($data, $user_id)
     {
@@ -57,7 +56,7 @@ class QueryEntries
      * @param string  $title
      * @param integer $user_id
      *
-     * @return boolean
+     * @return bool
      */
     public function checkDuplicateTitle($id, $title, $user_id)
     {
@@ -158,7 +157,7 @@ class QueryEntries
      *
      * @param integer $id
      *
-     * @return boolean
+     * @return bool
      */
     public function deleteEntry($id)
     {
@@ -246,7 +245,7 @@ class QueryEntries
          * @var integer $number
          * @var string  $orderby
          * @var string  $order
-         * @var boolean $count
+         * @var bool    $count
          */
         $defaults = [
             'join'    => '',
@@ -309,7 +308,7 @@ class QueryEntries
      *
      * @param array $data
      *
-     * @return \WP_Error|boolean
+     * @return \WP_Error|bool
      */
     public function updateEntry($data)
     {

@@ -58,7 +58,7 @@ class ListTable extends \WP_List_Table
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function ajax_user_can()
     {
@@ -222,7 +222,7 @@ class ListTable extends \WP_List_Table
     }
 
     /**
-     * @return boolean|string
+     * @return bool|string
      */
     public function current_action()
     {
