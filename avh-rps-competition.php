@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 2.0.17-dev.51
+ * Version: 2.0.17-dev.70
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -95,6 +95,7 @@ class AVH_RPS_Client
     {
         $this->app->make('OptionsGeneral');
         $this->setSettings();
+        $this->doUpgrade();
         add_action('init', [$this, 'actionInit'], 10);
 
         if (is_admin()) {
@@ -227,6 +228,37 @@ class AVH_RPS_Client
     }
 
     /**
+     * Handle Upgrade of the Database Schema
+     */
+    private function doUpgrade()
+    {
+        $db_version = 1;
+        $options = get_option('avh-rps');
+        $current_db_version = avh_array_get($options, 'db_version', 0);
+        if ($db_version == $current_db_version) {
+            return;
+        }
+        if ($current_db_version < 1) {
+            $this->doUpgrade2017();
+        }
+        $options['db_version'] = $db_version;
+        update_option('avh-rps', $options);
+    }
+
+    /**
+     *  Execute changes made in AVH Rps Competition 2.0.17
+     */
+    private function doUpgrade2017()
+    {
+        /** @var RpsCompetition\Db\RpsDb $rpsdb */
+        $rpsdb = $this->app->make('RpsDb');
+
+        $rpsdb->query('ALTER TABLE competitions ADD Image_Size VARCHAR(4)');
+
+        return;
+    }
+
+    /**
      * Register all the bindings for the Shortcode classes
      */
     private function registerBindingShortCodes()
@@ -294,7 +326,6 @@ class AVH_RPS_Client
             'formFactory',
             function (Application $app) {
                 $validator_builder = Validation::createValidatorBuilder();
-                $validator_builder->setApiVersion(Validation::API_VERSION_2_5);
                 $validator_builder->addMethodMapping('loadValidatorMetadata');
                 $validator = $validator_builder->getValidator();
                 $formFactory = SymfonyForms::createFormFactoryBuilder()

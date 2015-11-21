@@ -207,7 +207,7 @@ class PhotoHelper
         $image = $this->imagine->open($image_name);
         $original_image_size = $image->getSize();
 
-        $new_size = Constants::getImageSize($size);
+        $new_size = ImageSizeHelper::getImageSize($size);
 
         if ($new_size['height'] == null) {
             $box = $image->getSize()

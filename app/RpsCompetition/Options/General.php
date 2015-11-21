@@ -1,7 +1,9 @@
 <?php
 namespace RpsCompetition\Options;
 
+use Avh\Framework\Utility\Common;
 use Avh\Framework\Utility\OptionsAbstract;
+use RpsCompetition\Helpers\ImageSizeHelper;
 
 /**
  * Class General
@@ -9,7 +11,6 @@ use Avh\Framework\Utility\OptionsAbstract;
  * @package   RpsCompetition\Options
  * @author    Peter van der Does <peter@avirtualhome.com>
  * @copyright Copyright (c) 2014-2015, AVH Software
- *
  * @todo      Make the options avaiable through the admin interface
  */
 final class General extends OptionsAbstract
@@ -17,8 +18,8 @@ final class General extends OptionsAbstract
     /**
      * @var  string  option name
      */
-    public $option_name = 'avh-rps';
-    protected $defaults = [
+    public    $option_name = 'avh-rps';
+    protected $defaults    = [
         'season_start_month_num'  => 9,
         'season_end_month_num'    => 12,
         'monthly_entries_post_id' => 1005,
@@ -28,12 +29,13 @@ final class General extends OptionsAbstract
         'my_print_entries'        => 58,
         'banquet_entries'         => 984,
         'edit_title'              => 75,
-        'upload_image'            => 89
+        'upload_image'            => 89,
+        'db_version'              => 0,
+        'default_image_size'      => '1400'
     ];
 
     /**
      * Constructor
-     *
      */
     public function __construct()
     {
@@ -75,7 +77,7 @@ final class General extends OptionsAbstract
     }
 
     /**
-     *  validate all values within the option
+     *  Validate all values within the option
      *
      * @param array $dirty
      * @param array $clean
@@ -85,7 +87,39 @@ final class General extends OptionsAbstract
      */
     protected function validateOption($dirty, $clean, $old)
     {
-        // TODO: Implement validateOption() method.
+        $keys = array_keys($this->defaults);
+        foreach ($keys as $key) {
+            switch ($key) {
+                case 'season_start_month_num':
+                case 'season_end_month_num':
+                case 'monthly_entries_post_id':
+                case 'monthly_winners_post_id':
+                case 'members_page':
+                case 'my_digital_entries':
+                case 'my_print_entries':
+                case 'banquet_entries':
+                case 'edit_title':
+                case 'upload_image':
+                case 'db_version':
+                    $clean[$key] = filter_var($dirty[$key], FILTER_VALIDATE_INT);
+                    break;
+
+                case 'default_image_size':
+                    if (ImageSizeHelper::isImageSize($dirty[$key])) {
+                        $clean[$key] = $dirty[$key];
+                    }
+                    break;
+                /**
+                 * Boolean  fields
+                 */
+                default:
+                    wp_die(
+                        'Error while updating option. Probably missing validation. See \RpsCompetition\Options\General validateOption'
+                    );
+                    break;
+            }
+        }
+
         return $clean;
     }
 }
