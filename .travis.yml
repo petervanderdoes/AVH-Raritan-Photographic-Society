@@ -11,7 +11,7 @@ sudo: false
 
 # WordPress version used in first build configuration.
 env:
-    - WP_VERSION=4.3
+    - WP_VERSION=4.3.1
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
