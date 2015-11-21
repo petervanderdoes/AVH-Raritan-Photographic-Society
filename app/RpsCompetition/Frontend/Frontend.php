@@ -162,14 +162,6 @@ class Frontend
     {
         $post = get_post();
 
-        if (!empty($attr['ids'])) {
-            // 'ids' is explicitly ordered, unless you specify otherwise.
-            if (empty($attr['orderby'])) {
-                $attr['orderby'] = 'post__in';
-            }
-            $attr['include'] = $attr['ids'];
-        }
-
         // We're trusting author input, so let's at least make sure it looks like a valid orderby statement
         if (isset($attr['orderby'])) {
             $attr['orderby'] = sanitize_sql_orderby($attr['orderby']);
@@ -196,55 +188,13 @@ class Frontend
             $attr,
             'gallery'
         );
-        extract(
-            $short_code_atts
-        );
 
-        $id = intval($id);
-        if ('RAND' == $order) {
-            $orderby = 'none';
+        $id = (int)($short_code_atts['id']);
+        if ('RAND' == $short_code_atts['order']) {
+            $short_code_atts['orderby'] = 'none';
         }
 
-        if (!empty($include)) {
-            $_attachments = get_posts(
-                [
-                    'include'        => $include,
-                    'post_status'    => 'inherit',
-                    'post_type'      => 'attachment',
-                    'post_mime_type' => 'image',
-                    'order'          => $order,
-                    'orderby'        => $orderby
-                ]
-            );
-
-            $attachments = [];
-            foreach ($_attachments as $key => $val) {
-                $attachments[$val->ID] = $_attachments[$key];
-            }
-        } elseif (!empty($exclude)) {
-            $attachments = get_children(
-                [
-                    'post_parent'    => $id,
-                    'exclude'        => $exclude,
-                    'post_status'    => 'inherit',
-                    'post_type'      => 'attachment',
-                    'post_mime_type' => 'image',
-                    'order'          => $order,
-                    'orderby'        => $orderby
-                ]
-            );
-        } else {
-            $attachments = get_children(
-                [
-                    'post_parent'    => $id,
-                    'post_status'    => 'inherit',
-                    'post_type'      => 'attachment',
-                    'post_mime_type' => 'image',
-                    'order'          => $order,
-                    'orderby'        => $orderby
-                ]
-            );
-        }
+        $attachments = $this->model->getPostGalleryAttachments($short_code_atts, $id);
 
         if (empty($attachments)) {
             return '';
@@ -265,20 +215,20 @@ class Frontend
         }
 
         if (is_feed()) {
-            $output = $this->view->renderPostGalleryFeed($attachments, $size);
+            $output = $this->view->renderPostGalleryFeed($attachments, $short_code_atts['size']);
 
             return $output;
         }
 
-        if (strtolower($layout) == 'masonry') {
+        if (strtolower($$short_code_atts['layout']) == 'masonry') {
             $output = $this->view->renderGalleryMasonry($attachments);
 
             return $output;
         }
 
-        $itemtag = tag_escape($itemtag);
-        $captiontag = tag_escape($captiontag);
-        $icontag = tag_escape($icontag);
+        $itemtag = tag_escape($short_code_atts['itemtag']);
+        $captiontag = tag_escape($short_code_atts['captiontag']);
+        $icontag = tag_escape($short_code_atts['icontag']);
         $valid_tags = wp_kses_allowed_html('post');
         if (!isset($valid_tags[$itemtag])) {
             $itemtag = 'dl';
@@ -290,15 +240,15 @@ class Frontend
             $icontag = 'dt';
         }
 
-        $columns = intval($columns);
+        $columns = intval($short_code_atts['columns']);
 
         $selector = 'gallery-' . $instance;
 
         $gallery_style = '';
 
-        $layout = strtolower($layout);
+        $layout = strtolower($short_code_atts['layout']);
 
-        $size_class = sanitize_html_class($size);
+        $size_class = sanitize_html_class($short_code_atts['size']);
         $gallery_div = '<div id="' .
                        $selector .
                        '" class="gallery galleryid-' .
@@ -326,11 +276,11 @@ class Frontend
                 }
             }
             if (!empty($link) && 'file' === $link) {
-                $image_output = wp_get_attachment_link($id, $size, false, false);
+                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], false, false);
             } elseif (!empty($link) && 'none' === $link) {
-                $image_output = wp_get_attachment_image($id, $size, false);
+                $image_output = wp_get_attachment_image($id, $short_code_atts['size'], false);
             } else {
-                $image_output = wp_get_attachment_link($id, $size, true, false);
+                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], true, false);
             }
 
             $image_meta = wp_get_attachment_metadata($id);
