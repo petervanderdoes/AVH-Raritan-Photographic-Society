@@ -12,7 +12,6 @@ class RpsDb extends \wpdb
 {
     /**
      * Constructor
-     *
      */
     public function __construct()
     {

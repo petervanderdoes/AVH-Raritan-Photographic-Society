@@ -44,9 +44,7 @@ class CategoryWinnersController
      * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @internal Shortcode: rps_category_winners
-     *
      */
     public function shortcodeCategoryWinners($attr, $content, $tag)
     {

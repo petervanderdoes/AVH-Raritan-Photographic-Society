@@ -53,7 +53,6 @@ class WpseoHelper
 
     /**
      * Build sitemap for Competition Entries
-     *
      */
     public function actionWpseoSitemapCompetitionEntries()
     {
@@ -65,7 +64,6 @@ class WpseoHelper
 
     /**
      * Build sitemap for Competition Winners
-     *
      */
     public function actionWpseoSitemapCompetitionWinners()
     {
@@ -196,10 +194,20 @@ class WpseoHelper
             $entries_amount = $this->query_miscellaneous->countAllEntries($selected_date);
 
             if ($post->ID == $options['monthly_entries_post_id']) {
-                $meta_description = 'The ' . $entries_amount . ' entries submitted to Raritan Photographic Society for the theme "' . $theme . '" held on ' . $date_text;
+                $meta_description = 'The ' .
+                                    $entries_amount .
+                                    ' entries submitted to Raritan Photographic Society for the theme "' .
+                                    $theme .
+                                    '" held on ' .
+                                    $date_text;
             }
             if ($post->ID == $options['monthly_winners_post_id']) {
-                $meta_description = 'Out of ' . $entries_amount . ' entries, a jury selected these winners of the competition with the theme "' . $theme . '" held on ' . $date_text;
+                $meta_description = 'Out of ' .
+                                    $entries_amount .
+                                    ' entries, a jury selected these winners of the competition with the theme "' .
+                                    $theme .
+                                    '" held on ' .
+                                    $date_text;
             }
         }
 
@@ -396,7 +404,11 @@ class WpseoHelper
 
                         $image_data['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
                         $image_data['title'] = $record->Title;
-                        $image_data['caption'] = $record->Title . ' Credit: ' . $user_info->user_firstname . ' ' . $user_info->user_lastname;
+                        $image_data['caption'] = $record->Title .
+                                                 ' Credit: ' .
+                                                 $user_info->user_firstname .
+                                                 ' ' .
+                                                 $user_info->user_lastname;
                         $data_images[] = $image_data;
                     }
                 }

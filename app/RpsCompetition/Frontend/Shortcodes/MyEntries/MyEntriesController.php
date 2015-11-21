@@ -36,7 +36,6 @@ class MyEntriesController
      * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @see Frontend::actionHandleHttpPostRpsMyEntries
      */
     public function shortcodeMyEntries($attr, $content, $tag)

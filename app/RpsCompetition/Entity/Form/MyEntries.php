@@ -18,8 +18,8 @@ class MyEntries
     protected $selected_medium;
     protected $submit_control;
     protected $wp_nonce;
-    private $selected_comp_choices = [];
-    private $selected_medium_choices = [];
+    private   $selected_comp_choices   = [];
+    private   $selected_medium_choices = [];
 
     /**
      * @return string

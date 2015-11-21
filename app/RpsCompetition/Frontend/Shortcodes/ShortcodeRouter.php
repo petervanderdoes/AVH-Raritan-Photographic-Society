@@ -14,7 +14,6 @@ class ShortcodeRouter extends ShortcodesAbstract
 {
     /**
      * Initialize the shortcodes used.
-     *
      */
     public function initializeShortcodes()
     {

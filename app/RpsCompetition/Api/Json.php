@@ -15,10 +15,10 @@ class Json
     /**
      * JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE = 320
      */
-    const JSON_ENCODE_DEFAULT   = 320;
-    const JSON_STATUS_ERROR     = 'error';
-    const JSON_STATUS_FAIL      = 'fail';
-    const JSON_STATUS_SUCCESS   = 'success';
+    const JSON_ENCODE_DEFAULT = 320;
+    const JSON_STATUS_ERROR   = 'error';
+    const JSON_STATUS_FAIL    = 'fail';
+    const JSON_STATUS_SUCCESS = 'success';
     /**
      * internal data containers
      */
@@ -28,7 +28,6 @@ class Json
 
     /**
      * Constructor
-
      */
     public function __construct()
     {

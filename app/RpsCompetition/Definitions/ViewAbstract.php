@@ -86,7 +86,6 @@ class ViewAbstract
      * @param null|array $data
      *
      * @return string
-     *
      */
     public function fetch($template, $data = null)
     {

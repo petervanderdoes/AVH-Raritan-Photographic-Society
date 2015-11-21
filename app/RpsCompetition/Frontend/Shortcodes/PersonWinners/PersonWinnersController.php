@@ -36,7 +36,6 @@ class PersonWinnersController
      * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @internal Shortcode: rps_person_winners
      */
     public function shortcodePersonWinners($attr, $content, $tag)

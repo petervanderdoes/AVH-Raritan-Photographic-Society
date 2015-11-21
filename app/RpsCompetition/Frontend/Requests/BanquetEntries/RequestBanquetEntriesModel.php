@@ -66,7 +66,9 @@ class RequestBanquetEntriesModel
             $banquet_ids = json_decode(base64_decode($this->entity->getBanquetids()));
             foreach ($banquet_ids as $banquet_id) {
                 $banquet_record = $this->query_competitions->getCompetitionByID($banquet_id);
-                if ($competition->Medium == $banquet_record->Medium && $competition->Classification == $banquet_record->Classification) {
+                if ($competition->Medium == $banquet_record->Medium &&
+                    $competition->Classification == $banquet_record->Classification
+                ) {
                     // Move the file to its final location
                     $path = $this->photo_helper->getCompetitionPath(
                         $banquet_record->Competition_Date,

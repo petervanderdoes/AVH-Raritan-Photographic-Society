@@ -12,7 +12,6 @@ class Initialize
 {
     /**
      * Constructor
-     *
      */
     public function __construct()
     {
@@ -20,7 +19,6 @@ class Initialize
 
     /**
      * Load the needed widgets
-     *
      */
     public static function load()
     {

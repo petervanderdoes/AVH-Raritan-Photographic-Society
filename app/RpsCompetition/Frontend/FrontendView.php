@@ -105,7 +105,6 @@ class FrontendView
      * @param array $data
      *
      * @see Frontend::actionShowcaseCompetitionThumbnails
-     *
      * @return string
      */
     public function renderShowcaseCompetitionThumbnails($data)

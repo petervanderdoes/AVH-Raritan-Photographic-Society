@@ -89,7 +89,6 @@ class RequestBanquetEntries
 
     /**
      * Handles the required functions for when a user submits their Banquet Entries
-     *
      */
     private function handleUpdate()
     {

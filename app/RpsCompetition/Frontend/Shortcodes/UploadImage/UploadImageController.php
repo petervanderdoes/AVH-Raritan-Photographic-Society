@@ -39,7 +39,6 @@ class UploadImageController
      * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
      */
     public function shortcodeUploadImage($attr, $content, $tag)

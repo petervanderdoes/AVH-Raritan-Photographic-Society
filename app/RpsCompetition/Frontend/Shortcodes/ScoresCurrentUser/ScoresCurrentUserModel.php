@@ -84,7 +84,6 @@ class ScoresCurrentUserModel
      * @param string $season
      *
      * @return array
-     *
      */
     public function getScores($season)
     {
@@ -164,7 +163,12 @@ class ScoresCurrentUserModel
                 $score_award .= ' / ' . $entry['award'];
             }
 
-            $entry['href_title'] = $entry['title'] . ' / ' . $entry['competition_date'] . '/' . $entry['medium'] . $score_award;
+            $entry['href_title'] = $entry['title'] .
+                                   ' / ' .
+                                   $entry['competition_date'] .
+                                   '/' .
+                                   $entry['medium'] .
+                                   $score_award;
             $data['entries'][] = $entry;
         }
 

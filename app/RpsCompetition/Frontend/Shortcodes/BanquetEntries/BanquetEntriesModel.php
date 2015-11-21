@@ -121,9 +121,12 @@ class BanquetEntriesModel
          * - The photographer has no scores for the season
          * - The form has been disabled
          * - The photographer has no eligble scores for the season.
-         *
          */
-        if ($this->banquet_id_array == [] || empty($scores) || $data['disabled'] === true || $data['scores'] === false) {
+        if ($this->banquet_id_array == [] ||
+            empty($scores) ||
+            $data['disabled'] === true ||
+            $data['scores'] === false
+        ) {
             $form->remove('update');
             $form->remove('cancel');
             $form->remove('reset');
@@ -141,7 +144,6 @@ class BanquetEntriesModel
      * @param string $season
      *
      * @return array
-     *
      */
     public function getScores($season)
     {

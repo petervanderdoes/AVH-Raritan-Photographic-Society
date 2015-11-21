@@ -32,18 +32,6 @@ final class ImageSizeHelper
     ];
 
     /**
-     * Check if the given size is a valid image size
-     *
-     * @param string $size
-     *
-     * @return bool
-     */
-    public static function isImageSize($size)
-    {
-        return array_key_exists($size, self::$image_sizes);
-    }
-
-    /**
      * Returns the width and height for the given image size.
      *
      * @param string $size
@@ -57,5 +45,17 @@ final class ImageSizeHelper
         }
 
         return null;
+    }
+
+    /**
+     * Check if the given size is a valid image size
+     *
+     * @param string $size
+     *
+     * @return bool
+     */
+    public static function isImageSize($size)
+    {
+        return array_key_exists($size, self::$image_sizes);
     }
 }

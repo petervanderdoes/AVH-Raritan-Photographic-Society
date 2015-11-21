@@ -42,7 +42,6 @@ class MonthlyEntriesController
      * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @internal Shortcode: rps_monthly_entries
      */
     public function shortcodeMonthlyEntries($attr, $content, $tag)

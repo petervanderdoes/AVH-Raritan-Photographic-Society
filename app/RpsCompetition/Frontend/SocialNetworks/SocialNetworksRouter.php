@@ -33,7 +33,6 @@ final class SocialNetworksRouter
 
     /**
      * Initialize for Social Networks
-     *
      * Add the action/filter/style/scripts
      *
      * @param array $data

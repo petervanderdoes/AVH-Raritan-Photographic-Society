@@ -35,7 +35,6 @@ class BanquetEntriesController
      * @param string $tag     The shortcode name
      *
      * @see Frontend::actionHandleHttpPostRpsBanquetEntries
-     *
      * @return string
      */
     public function shortcodeBanquetEntries($attr, $content, $tag)

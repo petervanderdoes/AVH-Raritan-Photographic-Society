@@ -20,7 +20,6 @@ class RpsPdo extends \PDO
 
     /**
      * Constructor
-     *
      */
     public function __construct()
     {

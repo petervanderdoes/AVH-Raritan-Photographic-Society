@@ -82,7 +82,6 @@ class AllScoresModel
 
     /**
      * Create an empty score array.
-     *
      * This array is used per Medium/User so all competitions are populated.
      *
      * @param array $competition_dates
@@ -206,9 +205,7 @@ class AllScoresModel
 
             /**
              * Calculate the average score for the user for the medium.
-             *
              * This works without an array because the array we're walking through is sorted.
-             *
              */
             if ($result['Score'] !== null) {
                 $scored_entries++;

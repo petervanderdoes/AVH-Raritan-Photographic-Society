@@ -87,7 +87,6 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * Constructor
-     *
      */
     public function __construct()
     {
@@ -201,7 +200,6 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * Resolve the given type from the container.
-     *
      * (Overriding Container::make)
      *
      * @param  string $abstract
@@ -250,7 +248,6 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * Register all of the configured providers.
-     *
      */
     public function registerConfiguredProviders()
     {

@@ -41,7 +41,6 @@ class MonthlyWinnersController
      * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @internal Shortcode: rps_monthly_winners
      */
     public function shortcodeMonthlyWinners($attr, $content, $tag)

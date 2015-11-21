@@ -68,13 +68,18 @@ class RequestEditTitleModel
         $ext = $old_file_parts['extension'];
         $current_user = wp_get_current_user();
         $new_file_name_noext = sanitize_file_name(
-                $new_title
-            ) . '+' . $current_user->user_login . '+' . filemtime(
-                $this->request->server('DOCUMENT_ROOT') . $server_file_name
-            );
+                                   $new_title
+                               ) . '+' . $current_user->user_login . '+' . filemtime(
+                                   $this->request->server('DOCUMENT_ROOT') . $server_file_name
+                               );
         $new_file_name = $new_file_name_noext . '.' . $ext;
         if (!$this->photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
-            die('<b>Failed to rename image file</b><br>Path: ' . $path . '<br>Old Name: ' . $old_file_name . '<br>New Name: ' . $new_file_name_noext);
+            die('<b>Failed to rename image file</b><br>Path: ' .
+                $path .
+                '<br>Old Name: ' .
+                $old_file_name .
+                '<br>New Name: ' .
+                $new_file_name_noext);
         }
 
         // Update the Title and File Name in the database

@@ -34,7 +34,6 @@ class RequestEditTitle
      * @param IlluminateRequest     $request
      * @param FormFactory           $form_factory
      * @param Settings              $settings
-     *
      */
     public function __construct(
         EntityFormEditTitle $entity,

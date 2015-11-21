@@ -42,7 +42,6 @@ class EditTitleController
      * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
      */
     public function shortcodeEditTitle($attr, $content, $tag)

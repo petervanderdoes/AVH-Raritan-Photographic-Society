@@ -56,7 +56,6 @@ class RequestRpsClient
 
     /**
      * Disable able all known WordPress cache plugins.
-     *
      */
     private function disableCachePlugins()
     {
