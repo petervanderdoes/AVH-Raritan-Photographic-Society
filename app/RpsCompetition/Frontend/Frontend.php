@@ -152,17 +152,15 @@ class Frontend
      * Filter the output of the standard WordPress gallery.
      * Through this filter we create our own gallery layout.
      *
-     * @param string $output The gallery output. Default empty.
-     * @param array  $attr   Attributes of the gallery shortcode.
+     * @param string $output   The gallery output. Default empty.
+     * @param array  $attr     Attributes of the gallery shortcode.
+     * @param int    $instance Unique numeric ID of this gallery shortcode instance.
      *
      * @return string
      */
-    public function filterPostGallery($output, $attr)
+    public function filterPostGallery($output, $attr, $instance)
     {
         $post = get_post();
-
-        static $instance = 0;
-        $instance++;
 
         if (!empty($attr['ids'])) {
             // 'ids' is explicitly ordered, unless you specify otherwise.
@@ -519,7 +517,7 @@ class Frontend
         add_action('wp_enqueue_scripts', [$this, 'actionEnqueueScripts'], 999);
 
         add_filter('query_vars', [$this, 'filterQueryVars']);
-        add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 2);
+        add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 3);
         add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
         add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
     }
