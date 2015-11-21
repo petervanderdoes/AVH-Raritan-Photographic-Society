@@ -439,7 +439,7 @@ class Client
          */
         if ($seleced_image_size === null) {
             $this->json->setStatusFail();
-            $this->json->addError('Unknown Image Size for the comeptition. Value given: ' . $image_size);
+            $this->json->addError('Unknown Image Size for the competition. Value given: ' . $image_size);
             $seleced_image_size = ImageSizeHelper::getImageSize($options['default_image_size']);
         }
         $competition_information['ImageSize']['Width'] = $seleced_image_size['width'];
