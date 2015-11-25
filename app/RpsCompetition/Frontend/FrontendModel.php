@@ -37,20 +37,19 @@ class FrontendModel
      */
     public function getFacebookThumbEntries($attachments)
     {
-        $entries = [];
+        $data = [];
+        $images=[];
         $attachments_key = array_keys($attachments);
         foreach ($attachments_key as $id) {
             $img_url = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
-                $entry = new \stdClass;
                 $img_relative_path = substr($img_url, strlen($home_url));
-                $entry->Server_File_Name = $img_relative_path;
-                $entries[] = $entry;
+                $images[] = $this->photo_helper->getThumbnailUrl($img_relative_path, 'fb_thumb');
             }
         }
-
-        return $entries;
+        $data['images'] = $images;
+        return $data;
     }
 
     /**

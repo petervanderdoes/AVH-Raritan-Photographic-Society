@@ -35,20 +35,16 @@ class FrontendView extends ViewAbstract
     }
 
     /**
-     * Display the Facebook thumbs for the Category Winners Page.
+     * Render Facebook
      *
-     * @param array $entries
+     * @param array $data
      *
      * @return string
      */
-    public function renderFacebookThumbs($entries)
+    public function renderFacebookThumbs($data)
     {
-        $images = [];
-        foreach ($entries as $entry) {
-            $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
-        }
 
-        return $this->fetch('facebook.html.twig', ['images' => $images]);
+        return $this->fetch('facebook.html.twig', $data);
     }
 
     /**

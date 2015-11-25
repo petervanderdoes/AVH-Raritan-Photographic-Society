@@ -203,13 +203,19 @@ class Frontend
         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
          *
-         * @see Frontend::filterWpseoPreAnalysisPostsContent
+         * @see \RpsCompetition\Frontend\WpseoHelper::filterWpseoPreAnalysisPostsContent
          */
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
 
         if (!$didFilterWpseoPreAnalysisPostsContent) {
-            $entries = $this->model->getFacebookThumbEntries($attachments);
-            $output = $this->view->renderFacebookThumbs($entries);
+            $data = $this->model->getFacebookThumbEntries($attachments);
+            /**
+             * The output is just a list of img tags with source set to Facebook thumbnails.
+             * This soutput is used by WordPressSeo to create Facebook meta tags
+             *
+             * @see: \WPSEO_OpenGraph_Image::get_content_images
+             */
+            $output = $this->view->renderFacebookThumbs($data);
 
             return $output;
         }
