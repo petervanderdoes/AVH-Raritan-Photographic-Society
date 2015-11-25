@@ -220,108 +220,16 @@ class Frontend
             return $output;
         }
 
-        if (strtolower($$short_code_atts['layout']) == 'masonry') {
-            $output = $this->view->renderGalleryMasonry($attachments);
+
+        if (strtolower($short_code_atts['layout']) == 'masonry') {
+            $data = $this->model->getPostGalleryMasonry($attachments);
+            $output = $this->view->renderGalleryMasonry($data);
 
             return $output;
         }
 
-        $itemtag = tag_escape($short_code_atts['itemtag']);
-        $captiontag = tag_escape($short_code_atts['captiontag']);
-        $icontag = tag_escape($short_code_atts['icontag']);
-        $valid_tags = wp_kses_allowed_html('post');
-        if (!isset($valid_tags[$itemtag])) {
-            $itemtag = 'dl';
-        }
-        if (!isset($valid_tags[$captiontag])) {
-            $captiontag = 'dd';
-        }
-        if (!isset($valid_tags[$icontag])) {
-            $icontag = 'dt';
-        }
-
-        $columns = (int) $short_code_atts['columns'];
-
-        $selector = 'gallery-' . $instance;
-
-        $layout = strtolower($short_code_atts['layout']);
-
-        $size_class = sanitize_html_class($short_code_atts['size']);
-        $output = '<div id="' .
-                  $selector .
-                  '" class="gallery galleryid-' .
-                  $id .
-                  ' gallery-columns-' .
-                  $columns .
-                  ' gallery-size-' .
-                  $size_class .
-                  '">';
-        $counter = 0;
-        foreach ($attachments as $id => $attachment) {
-            if ($counter % $columns == 0) {
-                if ($layout == 'row-equal') {
-                    $output .= '<div class="gallery-row gallery-row-equal">';
-                } else {
-                    $output .= '<div class="gallery-row">';
-                }
-            }
-            $attr = (trim($attachment->post_excerpt)) ? ['aria-describedby' => "$selector-$id"] : '';
-            if (!empty($short_code_atts['link']) && 'file' === $short_code_atts['link']) {
-                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], false, false, false, $attr);
-            } elseif (!empty($short_code_atts['link']) && 'none' === $short_code_atts['link']) {
-                $image_output = wp_get_attachment_image($id, $short_code_atts['size'], false, $attr);
-            } else {
-                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], true, false, false, $attr);
-            }
-            $image_meta = wp_get_attachment_metadata($id);
-
-            $orientation = '';
-            if (isset($image_meta['height'], $image_meta['width'])) {
-                $orientation = ($image_meta['height'] > $image_meta['width']) ? 'portrait' : 'landscape';
-            }
-
-            $output .= '<' . $itemtag . ' class="gallery-item">';
-            $output .= '<div class="gallery-item-content">';
-            $output .= '<' .
-                       $icontag .
-                       ' class="gallery-icon ' .
-                       $orientation .
-                       '" > ' .
-                       $image_output .
-                       '</' .
-                       $icontag .
-                       ' >';
-
-            $caption_text = '';
-            if ($captiontag && trim($attachment->post_excerpt)) {
-                $caption_text .= $attachment->post_excerpt;
-            }
-            $photographer_name = get_post_meta($attachment->ID, '_rps_photographer_name', true);
-            // If image credit fields have data then attach the image credit
-            if ($photographer_name != '') {
-                if (!empty($caption_text)) {
-                    $caption_text .= '<br />';
-                }
-                $caption_text .= '<span class="wp-caption-credit">Photo: ' . $photographer_name . '</span>';
-            }
-            if (!empty($caption_text)) {
-                $output .= '<' . $captiontag . ' class="wp-caption-text gallery-caption">' . wptexturize(
-                        $caption_text
-                    ) . '</' . $captiontag . '>';
-            }
-
-            $output .= '</div>';
-            $output .= '</' . $itemtag . '>';
-
-            if ($columns > 0 && ++$counter % $columns == 0) {
-                $output .= '</div>';
-            }
-        }
-
-        if ($columns > 0 && $counter % $columns !== 0) {
-            $output .= '</div>';
-        }
-        $output .= '</div>' . "\n";
+        $data = $this->model->getPostGalleryOutput($short_code_atts, $id, $instance, $attachments);
+        $output = $this->view->renderPostGallery($data);
 
         return $output;
     }

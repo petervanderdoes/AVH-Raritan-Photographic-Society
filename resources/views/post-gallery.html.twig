@@ -1,0 +1,17 @@
+{% if general.layout == 'row-equal' %}
+    {% set equalclass = ' gallery-row-equal' %}
+{% else %}
+    {% set equalclass = '' %}
+{% endif %}
+<div id="gallery-{{ general.instance }}" class="gallery galleryid-{{ general.id }} gallery-columns-{{ general.columns }} gallery-size-{{ general.size_class }}">
+    {% for row in images|batch(general.columns) %}
+        <div class="gallery-row{{ equalclass }}">
+            {% for image in row %}
+                {% include 'inc/photo_gallery.html.twig' %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+{% if general.layout == 'row-equal' %}
+    {% include 'inc/set_equal_height.js.twig' %}
+{% endif %}

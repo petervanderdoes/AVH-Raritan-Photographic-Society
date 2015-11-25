@@ -171,15 +171,20 @@ class AVH_RPS_Client
         $this->app->bind(
             'FrontendView',
             function (Application $app) {
+                $settings = $app->make('Settings');
+
                 return new FrontendView(
-                    $app->make('Settings'), $app->make('PhotoHelper')
+                    $settings->get('template_dir'),
+                    $settings->get('upload_dir') . '/twig-cache/',
+                    $settings,
+                    $app->make('PhotoHelper')
                 );
             }
         );
         $this->app->bind(
             'FrontendModel',
-            function () {
-                return new FrontendModel;
+            function (Application $app) {
+                return new FrontendModel($app->make('PhotoHelper'));
             }
         );
         if (class_exists('Imagick')) {
