@@ -105,39 +105,10 @@ class FrontendModel
         return $attachments;
     }
 
-    /**
-     * Collect data to display image in masonry format.
-     *
-     * @param array $attachments
-     *
-     * @return array
-     */
     public function getPostGalleryMasonry($attachments)
     {
         $data = [];
-        $caption_data = [];
-
-        foreach ($attachments as $id => $attachment) {
-            $img_url = wp_get_attachment_url($id);
-            $home_url = home_url();
-            if (substr($img_url, 0, strlen($home_url)) == $home_url) {
-                /** @var \RpsCompetition\Db\QueryEntries $entry */
-                $entry = new \stdClass;
-                $img_relative_path = substr($img_url, strlen($home_url));
-                $entry->Server_File_Name = $img_relative_path;
-                $entry->ID = $attachment->ID;
-
-                if (trim($attachment->post_excerpt)) {
-                    $caption_data['title'] = $attachment->post_excerpt;
-                } else {
-                    $caption_data['title'] = $attachment->post_title;
-                }
-                $caption_data['first_name'] = get_post_meta($attachment->ID, '_rps_photographer_name', true);
-                $caption_data['last_name'] = '';
-
-                $data['images'][] = $this->dataPhotoMasonry($entry, '150w', $caption_data);
-            }
-        }
+        $data['images'] = $this->getImageData($attachments, '150w');
 
         return $data;
     }
@@ -158,57 +129,25 @@ class FrontendModel
         $data['general']['size_class'] = $size_class;
         $data['general']['layout'] = $layout;
 
-        foreach ($attachments as $id => $attachment) {
-            $img_url = wp_get_attachment_url($id);
-            $home_url = home_url();
-            if (substr($img_url, 0, strlen($home_url)) == $home_url) {
-                /** @var \RpsCompetition\Db\QueryEntries $entry */
-                $entry = new \stdClass;
-                $img_relative_path = substr($img_url, strlen($home_url));
-                $entry->Server_File_Name = $img_relative_path;
-                $entry->ID = $attachment->ID;
+        $data['images'] = $this->getImageData($attachments, '150w');
 
-                if (trim($attachment->post_excerpt)) {
-                    $caption_data['title'] = $attachment->post_excerpt;
-                } else {
-                    $caption_data['title'] = $attachment->post_title;
-                }
-                $caption_data['first_name'] = get_post_meta($attachment->ID, '_rps_photographer_name', true);
-                $caption_data['last_name'] = '';
+        return $data;
+    }
 
-                $data['images'][] = $this->dataPhotoMasonry($entry, '150w', $caption_data);
-            }
-        }
-//        foreach ($attachments as $id => $attachment) {
-//
-//            $attr = (trim($attachment->post_excerpt)) ? ['aria-describedby' => "$selector-$id"] : '';
-//            if (!empty($short_code_atts['link']) && 'file' === $short_code_atts['link']) {
-//                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], false, false, false, $attr);
-//            } elseif (!empty($short_code_atts['link']) && 'none' === $short_code_atts['link']) {
-//                $image_output = wp_get_attachment_image($id, $short_code_atts['size'], false, $attr);
-//            } else {
-//                $image_output = wp_get_attachment_link($id, $short_code_atts['size'], true, false, false, $attr);
-//            }
-//
-//            $image_meta = wp_get_attachment_metadata($id);
-//
-//            $orientation = '';
-//            if (isset($image_meta['height'], $image_meta['width'])) {
-//                $orientation = ($image_meta['height'] > $image_meta['width']) ? 'portrait' : 'landscape';
-//            }
-//
-//            $data['attachments'][$counter]['orientation'] = $orientation;
-//            $data['attachments'][$counter]['image_output'] = $image_output;
-//
-//            $caption_text = '';
-//            if ($captiontag && trim($attachment->post_excerpt)) {
-//                $caption_text .= $attachment->post_excerpt;
-//            }
-//            $photographer_name = get_post_meta($attachment->ID, '_rps_photographer_name', true);
-//
-//            $data['attachments'][$counter]['photographer_name'] = $photographer_name;
-//            $data['attachments'][$counter]['caption_text'] = $caption_text;
-//        }
+    /**
+     * Collect needed data to render the photo credit
+     *
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return array
+     */
+    private function dataPhotoCredit($title, $first_name, $last_name)
+    {
+        $data = [];
+        $data['title'] = $title;
+        $data['credit'] = $first_name . ' ' . $last_name;
 
         return $data;
     }
@@ -259,19 +198,39 @@ class FrontendModel
     }
 
     /**
-     * Collect needed data to render the photo credit
+     * Collect data to display image in masonry format.
      *
-     * @param string $title
-     * @param string $first_name
-     * @param string $last_name
+     * @param array $attachments
+     * @param       $thumb_size
      *
      * @return array
      */
-    private function dataPhotoCredit($title, $first_name, $last_name)
+    private function getImageData($attachments, $thumb_size)
     {
         $data = [];
-        $data['title'] = $title;
-        $data['credit'] = $first_name . ' ' . $last_name;
+
+        foreach ($attachments as $id => $attachment) {
+            $img_url = wp_get_attachment_url($id);
+            $home_url = home_url();
+            if (substr($img_url, 0, strlen($home_url)) == $home_url) {
+                /** @var \RpsCompetition\Db\QueryEntries $entry */
+                $entry = new \stdClass;
+                $img_relative_path = substr($img_url, strlen($home_url));
+                $entry->Server_File_Name = $img_relative_path;
+                $entry->ID = $attachment->ID;
+
+                $caption_data = [];
+                if (trim($attachment->post_excerpt)) {
+                    $caption_data['title'] = $attachment->post_excerpt;
+                } else {
+                    $caption_data['title'] = $attachment->post_title;
+                }
+                $caption_data['first_name'] = get_post_meta($attachment->ID, '_rps_photographer_name', true);
+                $caption_data['last_name'] = '';
+
+                $data[] = $this->dataPhotoMasonry($entry, $thumb_size, $caption_data);
+            }
+        }
 
         return $data;
     }
