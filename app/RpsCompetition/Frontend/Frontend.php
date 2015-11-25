@@ -208,7 +208,7 @@ class Frontend
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
 
         if (!$didFilterWpseoPreAnalysisPostsContent) {
-            $data = $this->model->getFacebookThumbEntries($attachments);
+            $data = $this->model->getFacebookData($attachments);
             /**
              * The output is just a list of img tags with source set to Facebook thumbnails.
              * This soutput is used by WordPressSeo to create Facebook meta tags

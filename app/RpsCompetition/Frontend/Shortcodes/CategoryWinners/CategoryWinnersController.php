@@ -65,7 +65,7 @@ class CategoryWinnersController
 
         if (is_array($entries)) {
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $data = $this->model->getFacebookThumbs($entries);
+                $data = $this->model->getFacebookData($entries);
                 $output = $this->view->fetch('facebook.html.twig', $data);
             } else {
                 $data = $this->model->getCategoryWinners($class, $entries, '250');

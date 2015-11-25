@@ -254,6 +254,23 @@ class PhotoHelper
     }
 
     /**
+     * Get the Facebook thumbs for the given entries
+     *
+     * @param array $entries
+     *
+     * @return array
+     */
+    public function getFacebookThumbs($entries)
+    {
+        $images = [];
+        foreach ($entries as $entry) {
+            $images[] = $this->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
+        }
+
+        return ['images' => $images];
+    }
+
+    /**
      * Get the image size of the given thumbnail file
      *
      * @param string $file_path

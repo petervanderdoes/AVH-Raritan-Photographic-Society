@@ -84,26 +84,9 @@ class MonthlyWinnersModel
     public function getFacebookData($selected_start_date, $selected_end_date)
     {
         $entries = $this->query_miscellaneous->getWinners($selected_start_date, $selected_end_date);
-        $data = $this->getFacebookThumbs($entries);
+        $data = $this->photo_helper->getFacebookThumbs($entries);
 
         return $data;
-    }
-
-    /**
-     * Get the Facebook thumbs for the Category Winners Page.
-     *
-     * @param array $entries
-     *
-     * @return array
-     */
-    public function getFacebookThumbs($entries)
-    {
-        $images = [];
-        foreach ($entries as $entry) {
-            $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
-        }
-
-        return ['images' => $images];
     }
 
     /**

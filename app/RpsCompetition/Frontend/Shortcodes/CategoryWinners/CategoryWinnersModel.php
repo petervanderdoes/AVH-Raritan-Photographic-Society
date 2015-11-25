@@ -60,14 +60,9 @@ class CategoryWinnersModel
      *
      * @return array
      */
-    public function getFacebookThumbs($entries)
+    public function getFacebookData($entries)
     {
-        $images = [];
-        foreach ($entries as $entry) {
-            $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
-        }
-
-        return ['images' => $images];
+        return $this->photo_helper->getFacebookThumbs($entries);
     }
 
     /**

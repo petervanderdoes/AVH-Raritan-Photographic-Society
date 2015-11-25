@@ -35,20 +35,22 @@ class FrontendModel
      *
      * @return array
      */
-    public function getFacebookThumbEntries($attachments)
+    public function getFacebookData($attachments)
     {
-        $data = [];
-        $images=[];
+
         $attachments_key = array_keys($attachments);
         foreach ($attachments_key as $id) {
             $img_url = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
+                $entry = new \stdClass;
                 $img_relative_path = substr($img_url, strlen($home_url));
-                $images[] = $this->photo_helper->getThumbnailUrl($img_relative_path, 'fb_thumb');
+                $entry->Server_File_Name = $img_relative_path;
+                $entries[] = $entry;
             }
         }
-        $data['images'] = $images;
+        $data = $this->photo_helper->getFacebookThumbs($entries);
+
         return $data;
     }
 
@@ -105,21 +107,6 @@ class FrontendModel
     }
 
     /**
-     * Get the date for a Post Gallery Masonary Layout
-     *
-     * @param array $attachments
-     *
-     * @return array
-     */
-    public function getPostGalleryMasonryData($attachments)
-    {
-        $data = [];
-        $data['images'] = $this->getAttachmentsData($attachments, '150w');
-
-        return $data;
-    }
-
-    /**
      * Get the data for a Post Gallery Regular Layout
      *
      * @param array $short_code_atts
@@ -151,39 +138,16 @@ class FrontendModel
     }
 
     /**
-     * Collect needed data to render the photo credit
+     * Get the date for a Post Gallery Masonary Layout
      *
-     * @param string $title
-     * @param string $first_name
-     * @param string $last_name
+     * @param array $attachments
      *
      * @return array
      */
-    private function getPhotoCreditData($title, $first_name, $last_name)
+    public function getPostGalleryMasonryData($attachments)
     {
         $data = [];
-        $data['title'] = $title;
-        $data['credit'] = $first_name . ' ' . $last_name;
-
-        return $data;
-    }
-
-    /**
-     * Collect image data
-     *
-     * @param \RpsCompetition\Db\QueryEntries $record
-     * @param string                          $thumb_size
-     * @param array                           $caption
-     *
-     * @return array<string,string|array>
-     */
-    private function getImageData($record, $thumb_size, $caption)
-    {
-        $data = [];
-        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
-        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['caption'] = $this->getPhotoCreditData($caption['title'], $caption['first_name'], $caption['last_name']);
+        $data['images'] = $this->getAttachmentsData($attachments, '150w');
 
         return $data;
     }
@@ -222,6 +186,44 @@ class FrontendModel
                 $data[] = $this->getImageData($entry, $thumb_size, $caption_data);
             }
         }
+
+        return $data;
+    }
+
+    /**
+     * Collect image data
+     *
+     * @param \RpsCompetition\Db\QueryEntries $record
+     * @param string                          $thumb_size
+     * @param array                           $caption
+     *
+     * @return array<string,string|array>
+     */
+    private function getImageData($record, $thumb_size, $caption)
+    {
+        $data = [];
+        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
+        $data['caption'] = $this->getPhotoCreditData($caption['title'], $caption['first_name'], $caption['last_name']);
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render the photo credit
+     *
+     * @param string $title
+     * @param string $first_name
+     * @param string $last_name
+     *
+     * @return array
+     */
+    private function getPhotoCreditData($title, $first_name, $last_name)
+    {
+        $data = [];
+        $data['title'] = $title;
+        $data['credit'] = $first_name . ' ' . $last_name;
 
         return $data;
     }
