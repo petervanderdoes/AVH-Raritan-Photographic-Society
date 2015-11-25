@@ -105,15 +105,32 @@ class FrontendModel
         return $attachments;
     }
 
-    public function getPostGalleryMasonry($attachments)
+    /**
+     * Get the date for a Post Gallery Masonary Layout
+     *
+     * @param array $attachments
+     *
+     * @return array
+     */
+    public function getPostGalleryMasonryData($attachments)
     {
         $data = [];
-        $data['images'] = $this->getImageData($attachments, '150w');
+        $data['images'] = $this->getAttachmentsData($attachments, '150w');
 
         return $data;
     }
 
-    public function getPostGalleryOutput($short_code_atts, $id, $instance, $attachments)
+    /**
+     * Get the data for a Post Gallery Regular Layout
+     *
+     * @param array $short_code_atts
+     * @param int   $id
+     * @param int   $instance
+     * @param array $attachments
+     *
+     * @return array
+     */
+    public function getPostGalleryData($short_code_atts, $id, $instance, $attachments)
     {
         $data = [];
 
@@ -129,7 +146,7 @@ class FrontendModel
         $data['general']['size_class'] = $size_class;
         $data['general']['layout'] = $layout;
 
-        $data['images'] = $this->getImageData($attachments, '150w');
+        $data['images'] = $this->getAttachmentsData($attachments, '150w');
 
         return $data;
     }
@@ -143,7 +160,7 @@ class FrontendModel
      *
      * @return array
      */
-    private function dataPhotoCredit($title, $first_name, $last_name)
+    private function getPhotoCreditData($title, $first_name, $last_name)
     {
         $data = [];
         $data['title'] = $title;
@@ -153,32 +170,7 @@ class FrontendModel
     }
 
     /**
-     * Collect needed data to render a photo in masonry style.
-     *
-     * @param \RpsCompetition\Db\QueryEntries $record
-     * @param string                          $thumb_size
-     *
-     * @return array<string,string|array>
-     */
-    private function dataPhotoGallery($record, $thumb_size)
-    {
-
-        $data = [];
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
-        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
-        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
-
-        return $data;
-    }
-
-    /**
-     * Collect needed data to render a photo in masonry style.
+     * Collect image data
      *
      * @param \RpsCompetition\Db\QueryEntries $record
      * @param string                          $thumb_size
@@ -186,26 +178,26 @@ class FrontendModel
      *
      * @return array<string,string|array>
      */
-    private function dataPhotoMasonry($record, $thumb_size, $caption)
+    private function getImageData($record, $thumb_size, $caption)
     {
         $data = [];
         $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['caption'] = $this->dataPhotoCredit($caption['title'], $caption['first_name'], $caption['last_name']);
+        $data['caption'] = $this->getPhotoCreditData($caption['title'], $caption['first_name'], $caption['last_name']);
 
         return $data;
     }
 
     /**
-     * Collect data to display image in masonry format.
+     * Collect data of all the attachmenets
      *
      * @param array $attachments
      * @param       $thumb_size
      *
      * @return array
      */
-    private function getImageData($attachments, $thumb_size)
+    private function getAttachmentsData($attachments, $thumb_size)
     {
         $data = [];
 
@@ -228,7 +220,7 @@ class FrontendModel
                 $caption_data['first_name'] = get_post_meta($attachment->ID, '_rps_photographer_name', true);
                 $caption_data['last_name'] = '';
 
-                $data[] = $this->dataPhotoMasonry($entry, $thumb_size, $caption_data);
+                $data[] = $this->getImageData($entry, $thumb_size, $caption_data);
             }
         }
 

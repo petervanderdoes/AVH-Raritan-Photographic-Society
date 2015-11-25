@@ -52,7 +52,7 @@ class FrontendView extends ViewAbstract
     }
 
     /**
-     * Display the Gallery as Masonry.
+     * Render a Masonry Post Gallery
      *
      * @param array $data
      *
@@ -63,6 +63,13 @@ class FrontendView extends ViewAbstract
         return $this->fetch('gallery-masonry.html.twig', $data);
     }
 
+    /**
+     * Render a regular Post Gallery
+     *
+     * @param array $data
+     *
+     * @return string
+     */
     public function renderPostGallery($data)
     {
 

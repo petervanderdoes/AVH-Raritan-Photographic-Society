@@ -222,13 +222,13 @@ class Frontend
 
 
         if (strtolower($short_code_atts['layout']) == 'masonry') {
-            $data = $this->model->getPostGalleryMasonry($attachments);
+            $data = $this->model->getPostGalleryMasonryData($attachments);
             $output = $this->view->renderGalleryMasonry($data);
 
             return $output;
         }
 
-        $data = $this->model->getPostGalleryOutput($short_code_atts, $id, $instance, $attachments);
+        $data = $this->model->getPostGalleryData($short_code_atts, $id, $instance, $attachments);
         $output = $this->view->renderPostGallery($data);
 
         return $output;
