@@ -37,7 +37,7 @@ class FrontendModel
      */
     public function getFacebookData($attachments)
     {
-
+        $entries = [];
         $attachments_key = array_keys($attachments);
         foreach ($attachments_key as $id) {
             $img_url = wp_get_attachment_url($id);
@@ -155,8 +155,8 @@ class FrontendModel
     /**
      * Collect data of all the attachmenets
      *
-     * @param array $attachments
-     * @param       $thumb_size
+     * @param array  $attachments
+     * @param string $thumb_size
      *
      * @return array
      */
