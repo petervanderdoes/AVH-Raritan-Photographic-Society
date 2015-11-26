@@ -54,8 +54,8 @@ class RequestUploadImage
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
      *
-     * @see      Shortcodes::shortcodeUploadImage
      * @internal Hook: suffusion_before_post
+     * @see      Shortcodes::shortcodeUploadImage
      */
     public function handleUploadImage()
     {

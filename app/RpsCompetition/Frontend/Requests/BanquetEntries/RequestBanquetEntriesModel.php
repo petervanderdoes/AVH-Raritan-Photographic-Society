@@ -57,6 +57,10 @@ class RequestBanquetEntriesModel
         $this->session = $session;
     }
 
+    /**
+     * Add the selected entries for the banquet
+     *
+     */
     public function addSelectedEntries()
     {
         $entries = (array) $this->request->input('form.entry_id', []);
@@ -100,6 +104,10 @@ class RequestBanquetEntriesModel
         }
     }
 
+    /**
+     * Remove all banquet entries.
+     *
+     */
     public function deleteAllEntries()
     {
         $all_entries = json_decode(base64_decode($this->entity->getAllentries()));
@@ -112,11 +120,18 @@ class RequestBanquetEntriesModel
         }
     }
 
+    /**
+     * Remove the session setting banquet.updated
+     */
     public function removeUpdateSession()
     {
         $this->session->remove('banquet.updated');
     }
 
+    /**
+     * Set the session setting banquet.updated
+     *
+     */
     public function setUpdateSession()
     {
         $this->session->set('banquet.updated', 'yes');

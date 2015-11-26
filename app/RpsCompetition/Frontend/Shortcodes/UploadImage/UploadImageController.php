@@ -34,12 +34,13 @@ class UploadImageController
     /**
      * Displays the form to upload a new entry.
      *
+     * @see Frontend::actionHandleHttpPostRpsUploadEntry
+     *
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
      * @return string
-     * @see Frontend::actionHandleHttpPostRpsUploadEntry
      */
     public function shortcodeUploadImage($attr, $content, $tag)
     {

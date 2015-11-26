@@ -36,12 +36,13 @@ class MonthlyWinnersController
      * All winners of the month are shown, which defaults to the latest month.
      * A dropdown selection to choose different months and/or season is also displayed.
      *
+     * @internal Shortcode: rps_monthly_winners
+     *
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
      * @return string
-     * @internal Shortcode: rps_monthly_winners
      */
     public function shortcodeMonthlyWinners($attr, $content, $tag)
     {

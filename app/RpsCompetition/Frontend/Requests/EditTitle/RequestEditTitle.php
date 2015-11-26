@@ -57,8 +57,8 @@ class RequestEditTitle
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
      *
-     * @see      Shortcodes::shortcodeEditTitle
      * @internal Hook: suffusion_before_post
+     * @see      Shortcodes::shortcodeEditTitle
      */
     public function handleRequestEditTitle()
     {

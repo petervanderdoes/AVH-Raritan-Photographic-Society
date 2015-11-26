@@ -56,6 +56,10 @@ class RequestController
         }
     }
 
+    /**
+     * Handle the request redirection for the RPS Competition Client
+     *
+     */
     public function handleTemplateRedirect()
     {
         if ($this->request->has('rpswinclient')) {

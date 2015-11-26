@@ -52,6 +52,10 @@ class Frontend
         $this->setupActionsFilters();
     }
 
+    /**
+     * Destructor
+     *
+     */
     public function __destruct()
     {
         $this->session->save();
@@ -130,8 +134,8 @@ class Frontend
      * Display the showcase on the front page.
      * This will display the showcase as used on the front page.
      *
-     * @see      actionAfterThemeSetup
      * @internal Hook: rps_showcase
+     * @see      actionAfterThemeSetup
      *
      * @param null $foo
      */
@@ -303,6 +307,10 @@ class Frontend
         return $title;
     }
 
+    /**
+     * Register all javascript and css files for use in WordPress
+     *
+     */
     private function registerScriptsStyles()
     {
         if (WP_LOCAL_DEV !== true) {
@@ -360,6 +368,10 @@ class Frontend
         );
     }
 
+    /**
+     * Set up all needed actions and filters
+     *
+     */
     private function setupActionsFilters()
     {
         add_action('after_setup_theme', [$this, 'actionAfterThemeSetup'], 14);

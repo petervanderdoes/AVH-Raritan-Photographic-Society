@@ -37,12 +37,13 @@ class EditTitleController
     /**
      * Display the form to edit the title of the selected entry
      *
+     * @see Frontend::actionHandleHttpPostRpsEditTitle
+     *
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
      * @return string
-     * @see Frontend::actionHandleHttpPostRpsEditTitle
      */
     public function shortcodeEditTitle($attr, $content, $tag)
     {

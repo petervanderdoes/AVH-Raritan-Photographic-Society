@@ -30,13 +30,14 @@ class MyEntriesController
      * Display the entries of the current user.
      * This page shows the current entries for a competition of the current user.
      *
+     * @see Frontend::actionHandleHttpPostRpsMyEntries
+     *
      * @param array  $attr    The shortcode argument list. Allowed arguments:
      *                        - medium
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
      * @return string
-     * @see Frontend::actionHandleHttpPostRpsMyEntries
      */
     public function shortcodeMyEntries($attr, $content, $tag)
     {

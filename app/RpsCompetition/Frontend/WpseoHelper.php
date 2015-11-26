@@ -78,9 +78,10 @@ class WpseoHelper
      * By default the plugin uses the title as created to be shown in the browser which includes the site name.
      * Facebook recommends to exclude branding.
      *
+     * @see https://developers.facebook.com/docs/sharing/best-practices#tags
+     *
      * @param string $title
      *
-     * @see https://developers.facebook.com/docs/sharing/best-practices#tags
      * @return string
      */
     public function filterOpenGraphTitle($title)

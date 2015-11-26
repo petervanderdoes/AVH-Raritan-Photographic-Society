@@ -55,6 +55,8 @@ class FrontendModel
     }
 
     /**
+     * Get the Attachement for a Post Gallery
+     * 
      * @param array $short_code_atts
      * @param int   $id
      *

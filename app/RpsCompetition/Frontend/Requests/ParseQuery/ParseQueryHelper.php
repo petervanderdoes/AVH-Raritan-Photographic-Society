@@ -37,6 +37,9 @@ class ParseQueryHelper
         $this->competition_helper = $competition_helper;
     }
 
+    /**
+     * Set the date of the last competition for the selected season.
+     */
     public function checkScoredCompetition()
     {
         if (!$this->competition_helper->isScoredCompetitionDate($this->selected_date)) {
@@ -51,6 +54,10 @@ class ParseQueryHelper
         }
     }
 
+    /**
+     * Set selected date of the last competition for the selected season
+     *
+     */
     public function checkValidSeason()
     {
         if (!$this->season_helper->isValidSeason($this->selected_season)) {

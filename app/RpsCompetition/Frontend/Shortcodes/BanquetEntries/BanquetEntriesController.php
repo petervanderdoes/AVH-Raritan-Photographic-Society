@@ -30,11 +30,12 @@ class BanquetEntriesController
     /**
      * Display the possible Banquet entries for the current user.
      *
+     * @see Frontend::actionHandleHttpPostRpsBanquetEntries
+     *
      * @param array  $attr    The shortcode argument list
      * @param string $content The content of a shortcode when it wraps some content.
      * @param string $tag     The shortcode name
      *
-     * @see Frontend::actionHandleHttpPostRpsBanquetEntries
      * @return string
      */
     public function shortcodeBanquetEntries($attr, $content, $tag)

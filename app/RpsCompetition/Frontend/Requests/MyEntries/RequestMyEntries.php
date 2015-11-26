@@ -62,8 +62,8 @@ class RequestMyEntries
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
      *
-     * @see      Shortcodes::shortcodeMyEntries
      * @internal Hook: suffusion_before_post
+     * @see      Shortcodes::shortcodeMyEntries
      */
     public function handleRequestMyEntries()
     {
