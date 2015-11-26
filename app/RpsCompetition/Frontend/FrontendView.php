@@ -2,7 +2,6 @@
 namespace RpsCompetition\Frontend;
 
 use Illuminate\Config\Repository as Settings;
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Definitions\ViewAbstract;
 use RpsCompetition\Helpers\PhotoHelper;
 
@@ -75,10 +74,11 @@ class FrontendView extends ViewAbstract
     /**
      * Render the feed of attachements.
      *
+     * @see \RpsCompetition\Frontend\Frontend::filterPostGallery
+     *
      * @param array  $attachments
      * @param string $size
      *
-     * @see \RpsCompetition\Frontend\Frontend::filterPostGallery
      * @return string
      */
     public function renderPostGalleryFeed($attachments, $size)
@@ -95,62 +95,16 @@ class FrontendView extends ViewAbstract
     /**
      * Render the Showcase competition thumbnails
      *
+     * @see Frontend::actionShowcaseCompetitionThumbnails
+     *
      * @param array $data
      *
-     * @see Frontend::actionShowcaseCompetitionThumbnails
-     * @return string
+     * @return void
      */
     public function renderShowcaseCompetitionThumbnails($data)
     {
-        $data['images'] = [];
-        foreach ($data['records'] as $recs) {
-            $data['images'][] = $this->dataPhotoGallery($recs, $data['thumb_size']);
-        }
-        unset ($data['records']);
+        $this->display('showcase.html.twig', $data);
 
-        return $this->fetch('showcase.html.twig', $data);
-    }
-
-    /**
-     * Collect needed data to render the photo credit
-     *
-     * @param string $title
-     * @param string $first_name
-     * @param string $last_name
-     *
-     * @return array
-     */
-    private function dataPhotoCredit($title, $first_name, $last_name)
-    {
-        $data = [];
-        $data['title'] = $title;
-        $data['credit'] = $first_name . ' ' . $last_name;
-
-        return $data;
-    }
-
-    /**
-     * Collect needed data to render a photo in masonry style.
-     *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
-     *
-     * @return array<string,string|array>
-     */
-    private function dataPhotoGallery($record, $thumb_size)
-    {
-
-        $data = [];
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
-        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
-        $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
-
-        return $data;
+        return;
     }
 }

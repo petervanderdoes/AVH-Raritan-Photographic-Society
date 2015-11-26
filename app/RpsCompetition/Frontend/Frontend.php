@@ -140,10 +140,8 @@ class Frontend
         if (is_front_page()) {
             $query_miscellaneous = $this->app->make('QueryMiscellaneous');
             $records = $query_miscellaneous->getEightsAndHigher(5);
-            $data = [];
-            $data['records'] = $records;
-            $data['thumb_size'] = '150';
-            echo $this->view->renderShowcaseCompetitionThumbnails($data);
+            $data = $this->model->getShowcaseData($records, '150');
+            $this->view->renderShowcaseCompetitionThumbnails($data);
             unset($query_miscellaneous);
         }
     }
@@ -225,7 +223,6 @@ class Frontend
 
             return $output;
         }
-
 
         if (strtolower($short_code_atts['layout']) == 'masonry') {
             $data = $this->model->getPostGalleryMasonryData($attachments);

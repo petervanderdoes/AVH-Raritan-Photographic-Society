@@ -153,6 +153,46 @@ class FrontendModel
     }
 
     /**
+     * Collect Showcase Data
+     *
+     * @param array  $records
+     * @param string $size
+     *
+     * @return array
+     */
+    public function getShowcaseData($records, $size)
+    {
+        $data['images'] = [];
+        foreach ($records as $recs) {
+            $data['images'][] = $this->dataPhotoGallery($recs, $size);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Collect needed data to render a photo.
+     *
+     * @param \RpsCompetition\Db\QueryEntries $record
+     * @param string                          $thumb_size
+     *
+     * @return array<string,string|array>
+     */
+    private function dataPhotoGallery($record, $thumb_size)
+    {
+        $user_info = get_userdata($record->Member_ID);
+        $data = $this->getImageData(
+            $record,
+            $thumb_size,
+            $record->Title,
+            $user_info->user_firstname,
+            $user_info->user_lastname
+        );
+
+        return $data;
+    }
+
+    /**
      * Collect data of all the attachmenets
      *
      * @param array  $attachments
@@ -174,16 +214,20 @@ class FrontendModel
                 $entry->Server_File_Name = $img_relative_path;
                 $entry->ID = $attachment->ID;
 
-                $caption_data = [];
                 if (trim($attachment->post_excerpt)) {
-                    $caption_data['title'] = $attachment->post_excerpt;
+                    $caption_title = $attachment->post_excerpt;
                 } else {
-                    $caption_data['title'] = $attachment->post_title;
+                    $caption_title = $attachment->post_title;
                 }
-                $caption_data['first_name'] = get_post_meta($attachment->ID, '_rps_photographer_name', true);
-                $caption_data['last_name'] = '';
+                $caption_photographer_first_name = get_post_meta($attachment->ID, '_rps_photographer_name', true);
 
-                $data[] = $this->getImageData($entry, $thumb_size, $caption_data);
+                $data[] = $this->getImageData(
+                    $entry,
+                    $thumb_size,
+                    $caption_title,
+                    $caption_photographer_first_name,
+                    ''
+                );
             }
         }
 
@@ -195,17 +239,19 @@ class FrontendModel
      *
      * @param \RpsCompetition\Db\QueryEntries $record
      * @param string                          $thumb_size
-     * @param array                           $caption
+     * @param string                          $photo_title
+     * @param string                          $photographer_first_name
+     * @param string                          $photographer_last_name
      *
-     * @return array<string,string|array>
+     * @return array <string,string|array>
      */
-    private function getImageData($record, $thumb_size, $caption)
+    private function getImageData($record, $thumb_size, $photo_title, $photographer_first_name, $photographer_last_name)
     {
         $data = [];
         $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
         $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['caption'] = $this->getPhotoCreditData($caption['title'], $caption['first_name'], $caption['last_name']);
+        $data['caption'] = $this->getPhotoCreditData($photo_title, $photographer_first_name, $photographer_last_name);
 
         return $data;
     }
