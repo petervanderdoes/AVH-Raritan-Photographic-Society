@@ -5,7 +5,7 @@
             columnWidth: '.grid-sizer',
             isFitWidth: true
         });
-        if (typeof getRpsMasonryItems == 'function') {
+        if (typeof getRpsMasonryItems === 'function') {
             var $items = getRpsMasonryItems();
             $container.masonryImagesReveal($items);
         }
