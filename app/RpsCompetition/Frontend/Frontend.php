@@ -54,7 +54,6 @@ class Frontend
 
     /**
      * Destructor
-     *
      */
     public function __destruct()
     {
@@ -309,7 +308,6 @@ class Frontend
 
     /**
      * Register all javascript and css files for use in WordPress
-     *
      */
     private function registerScriptsStyles()
     {
@@ -370,7 +368,6 @@ class Frontend
 
     /**
      * Set up all needed actions and filters
-     *
      */
     private function setupActionsFilters()
     {

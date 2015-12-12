@@ -59,7 +59,6 @@ class RequestBanquetEntriesModel
 
     /**
      * Add the selected entries for the banquet
-     *
      */
     public function addSelectedEntries()
     {
@@ -106,7 +105,6 @@ class RequestBanquetEntriesModel
 
     /**
      * Remove all banquet entries.
-     *
      */
     public function deleteAllEntries()
     {
@@ -130,7 +128,6 @@ class RequestBanquetEntriesModel
 
     /**
      * Set the session setting banquet.updated
-     *
      */
     public function setUpdateSession()
     {

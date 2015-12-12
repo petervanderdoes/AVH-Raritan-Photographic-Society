@@ -56,7 +56,6 @@ class ParseQueryHelper
 
     /**
      * Set selected date of the last competition for the selected season
-     *
      */
     public function checkValidSeason()
     {
