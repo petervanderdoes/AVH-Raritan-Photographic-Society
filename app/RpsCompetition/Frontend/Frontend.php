@@ -353,11 +353,12 @@ class Frontend
             'to_remove',
             true
         );
-
-        wp_register_style(
-            'rps-competition.fontawesome.style',
-            'http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"'
-        );
+        if (is_ssl()) {
+            $font_awesome = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
+        } else {
+            $font_awesome = 'http://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
+        }
+        wp_register_style('rps-competition.fontawesome.style', $font_awesome);
         wp_register_style(
             'rps-competition.general.style',
             CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')),
