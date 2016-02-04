@@ -2,7 +2,7 @@
     <div class="gallery-item-content">
         <div class="gallery-item-content-image">
             <a href="{{ image.url_large }}" rel="gallery-0" title="{{ image.title|escape }}">
-                <img width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}" src="{{ image.url_thumb }}">
+                <img alt="{{ image.caption.title|escape }}" width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}" src="{{ image.url_thumb }}">
             </a>
         </div>
         <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title|escape }}<br><span class="wp-caption-credit">Photo: {{ image.caption.credit|escape }}</span>
