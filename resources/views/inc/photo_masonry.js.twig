@@ -1,13 +1,13 @@
 {# @formatter:off #}
-<figure class="gallery-item-masonry masonry-150">\
+<div class="gallery-item-masonry masonry-150">\
     <div class="gallery-item-content">\
-        <div class="gallery-item-content-images">\
+        <figure class="gallery-item-content-images">\
             <a href="{{ image.url_large }}" rel="gallery-0" title="{{ image.title|escape }}">\
                 <img alt="{{ image.caption.title|trim|escape }}" src="{{ image.url_thumb }}" width="{{ image.dimensions.width }}" height="{{ image.dimensions.height }}">\
             </a>\
-        </div>\
-        <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title|trim|escape }}<br>\
-            <span class="wp-caption-credit">Photo: {{ image.caption.credit|trim|escape }}</span>\
-        </figcaption>\
+            <figcaption class="wp-caption-text showcase-caption">{{ image.caption.title|trim|escape }}<br>\
+                <span class="wp-caption-credit">Photo: {{ image.caption.credit|trim|escape }}</span>\
+            </figcaption>\
+        </figure>\
     </div>\
-</figure>
+</div>
