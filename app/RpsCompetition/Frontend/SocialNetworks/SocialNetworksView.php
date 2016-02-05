@@ -8,7 +8,7 @@ use RpsCompetition\Definitions\ViewAbstract;
  *
  * @package   RpsCompetition\Frontend\SocialNetworks
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 final class SocialNetworksView extends ViewAbstract
 {
