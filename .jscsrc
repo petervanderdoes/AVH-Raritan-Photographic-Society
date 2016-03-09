@@ -1,0 +1,8 @@
+{
+	"preset": "airbnb",
+	"excludeFiles": [
+		"./assets/js/imagesloaded.js",
+    "./assets/js/masonry.js"
+	],
+  "maxErrors": 1000
+}
