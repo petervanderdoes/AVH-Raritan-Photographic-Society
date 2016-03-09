@@ -313,9 +313,9 @@ class Frontend
     {
         if (WP_LOCAL_DEV !== true) {
             $rps_competition_css_version = 'a06a6dd';
-            $rps_masonry_version = 'abb1385';
-            $masonry_version = '8cfdecd';
-            $imagesloaded_version = '8cfdecd';
+            $rps_masonry_version = 'a172153';
+            $masonry_version = 'b80e985';
+            $imagesloaded_version = 'bce608e';
             $version_separator = '-';
         } else {
             $rps_competition_css_version = '';
@@ -421,7 +421,7 @@ class Frontend
         $social_networks_controller = $this->app->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = '8cfdecd';
+            $social_buttons_script_version = 'a172153';
             $version_separator = '-';
         } else {
             $social_buttons_script_version = '';
