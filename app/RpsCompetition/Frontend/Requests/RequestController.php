@@ -35,12 +35,12 @@ class RequestController
     /**
      * Handle HTTP Requests.
      *
-     * @param $wp_query
+     * @param \WP_Query $wp_query
      *
      * @internal Hook: parse_query
      * @see      FrontEnd::setupRequestHandling
      */
-    public function handleParseQuery($wp_query)
+    public function handleParseQuery(\WP_Query $wp_query)
     {
         if (isset($wp_query->query['page_id'])) {
             if ($wp_query->query['page_id'] == $this->options['monthly_entries_post_id']) {
