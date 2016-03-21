@@ -137,7 +137,7 @@ class Client
      *
      * @return array|\PDOException
      */
-    private function fetchCompetitionDates($db, $closed, $scored)
+    private function fetchCompetitionDates(RpsPdo $db, $closed, $scored)
     {
         try {
             $select = 'SELECT DISTINCT(Competition_Date) FROM competitions ';
@@ -200,7 +200,7 @@ class Client
      *
      * @return array|false
      */
-    private function getEntries($db, $comp_id)
+    private function getEntries(RpsPdo $db, $comp_id)
     {
 
         try {
@@ -252,7 +252,7 @@ class Client
      *
      * @return string|null
      */
-    private function handleCompetitionResults($db, $competition_results)
+    private function handleCompetitionResults(RpsPdo $db, \stdClass $competition_results)
     {
         $this->json->setStatusSuccess();
         try {
@@ -319,7 +319,7 @@ class Client
      *
      * @return void
      */
-    private function jsonCompetitionData($db, $requested_medium, $comp_date)
+    private function jsonCompetitionData(RpsPdo $db, $requested_medium, $comp_date)
     {
         $competitions = [];
         $this->total_entries = 0;
@@ -399,7 +399,7 @@ class Client
      *
      * @return void
      */
-    private function jsonCompetitionDates($db, $closed, $scored)
+    private function jsonCompetitionDates(RpsPdo $db, $closed, $scored)
     {
         $dates = [];
         $recs = $this->fetchCompetitionDates($db, $closed, $scored);
@@ -456,7 +456,7 @@ class Client
      * @param string $classification
      * @param string $medium
      */
-    private function markCompetitonScored($db, $comp_date, $classification, $medium)
+    private function markCompetitonScored(RpsPdo $db, $comp_date, $classification, $medium)
     {
         try {
             $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
