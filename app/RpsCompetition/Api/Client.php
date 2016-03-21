@@ -115,8 +115,10 @@ class Client
      */
     private function checkUserAuthentication($username, $password)
     {
+
         $user = wp_authenticate($username, $password);
         if (is_wp_error($user)) {
+            /** @var \WP_Error $user */
             $error_message = strip_tags($user->get_error_message());
             $this->json->addError($error_message);
 
@@ -164,7 +166,7 @@ class Client
             return $e;
         }
 
-        $recs = $sth->fetchall(\PDO::FETCH_ASSOC);
+        $recs = $sth->fetchAll(\PDO::FETCH_ASSOC);
 
         return $recs;
     }
@@ -350,7 +352,7 @@ class Client
             return;
         }
         // Iterate through all the matching Competitions
-        $record_competitions = $sth_competitions->fetchall(\PDO::FETCH_ASSOC);
+        $record_competitions = $sth_competitions->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($record_competitions as $record_competition) {
             $comp_id = $record_competition['ID'];

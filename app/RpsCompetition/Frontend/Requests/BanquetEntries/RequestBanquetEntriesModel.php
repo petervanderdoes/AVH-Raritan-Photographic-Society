@@ -65,10 +65,10 @@ class RequestBanquetEntriesModel
         $entries = (array) $this->request->input('form.entry_id', []);
         foreach ($entries as $entry_id) {
             $entry = $this->query_entries->getEntryById($entry_id);
-            $competition = $this->query_competitions->getCompetitionByID($entry->Competition_ID);
+            $competition = $this->query_competitions->getCompetitionById($entry->Competition_ID);
             $banquet_ids = json_decode(base64_decode($this->entity->getBanquetids()));
             foreach ($banquet_ids as $banquet_id) {
-                $banquet_record = $this->query_competitions->getCompetitionByID($banquet_id);
+                $banquet_record = $this->query_competitions->getCompetitionById($banquet_id);
                 if ($competition->Medium == $banquet_record->Medium &&
                     $competition->Classification == $banquet_record->Classification
                 ) {

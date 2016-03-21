@@ -488,6 +488,7 @@ final class Admin
     public function initRoles()
     {
         // Get the administrator role.
+        /** @var \WP_Role $role */
         $role = get_role('administrator');
 
         // If the administrator role exists, add required capabilities for the plugin.
