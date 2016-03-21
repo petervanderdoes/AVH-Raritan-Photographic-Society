@@ -99,13 +99,13 @@ class WpseoHelper
      * by getting the articles on the front page and using the most recent modified date of that post.
      * If we don't do this, the entry will take the modified date from the actual page, which never changes.
      *
-     * @param array  $data
-     * @param string $type
-     * @param object $current_post
+     * @param array    $data
+     * @param string   $type
+     * @param \WP_Post $current_post
      *
      * @return array
      */
-    public function filterSitemapEntry($data, $type, $current_post)
+    public function filterSitemapEntry($data, $type, \WP_Post $current_post)
     {
         if ($type === 'post' && $current_post->ID == get_option('page_on_front')) {
             $data['pri'] = 1;
