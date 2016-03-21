@@ -45,7 +45,7 @@ class PhotoHelper
      *
      * @param QueryEntries $entry
      */
-    public function createCommonThumbnails($entry)
+    public function createCommonThumbnails(QueryEntries $entry)
     {
         $standard_size = ['75', '150w', '800', 'fb_thumb'];
 
@@ -106,7 +106,7 @@ class PhotoHelper
      *
      * @return array<string,string|array>
      */
-    public function dataPhotoGallery($record, $thumb_size)
+    public function dataPhotoGallery(QueryEntries $record, $thumb_size)
     {
 
         $data = [];
@@ -132,7 +132,7 @@ class PhotoHelper
      *
      * @return array
      */
-    public function dataPhotoMasonry($record, $thumb_size)
+    public function dataPhotoMasonry(QueryEntries $record, $thumb_size)
     {
         $data = [];
         $user_info = get_userdata($record->Member_ID);
@@ -153,7 +153,7 @@ class PhotoHelper
      *
      * @param QueryEntries $entry
      */
-    public function deleteEntryFromDisk($entry)
+    public function deleteEntryFromDisk(QueryEntries $entry)
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
