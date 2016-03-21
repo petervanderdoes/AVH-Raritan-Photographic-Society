@@ -328,9 +328,12 @@ class Client
         $this->json->setStatusSuccess();
 
         $medium_clause = '';
-        if (!(empty($requested_medium))) {
-            $medium_clause = ($requested_medium ==
-                              'prints') ? ' AND Medium like \'%Prints\' ' : ' AND Medium like \'%Digital\' ';
+        if (!empty($requested_medium)) {
+            if ($requested_medium == 'prints') {
+                $medium_clause = ' AND Medium like \'%Prints\' ';
+            } else {
+                $medium_clause = ' AND Medium like \'%Digital\' ';
+            }
         }
         $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification, Image_Size
         FROM competitions
