@@ -41,11 +41,11 @@ class AllScoresModel
                                 IlluminateRequest $request,
                                 FormFactory $form_factory)
     {
-        $this->query_competitions  = $query_competitions;
+        $this->query_competitions = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->season_helper       = $season_helper;
-        $this->request             = $request;
-        $this->form_factory        = $form_factory;
+        $this->season_helper = $season_helper;
+        $this->request = $request;
+        $this->form_factory = $form_factory;
     }
 
     /**
@@ -55,12 +55,12 @@ class AllScoresModel
      */
     public function getAllData()
     {
-        $season_options  = $this->getSeasonsOptions();
+        $season_options = $this->getSeasonsOptions();
         $selected_season = $this->request->input('form.seasons', end($season_options));
 
-        $template_data  = $this->getTemplateData($selected_season);
-        $form           = $this->getFormData($season_options, $selected_season);
-        $return         = [];
+        $template_data = $this->getTemplateData($selected_season);
+        $form = $this->getFormData($season_options, $selected_season);
+        $return = [];
         $return['data'] = $template_data;
         $return['form'] = $form;
 
@@ -133,12 +133,13 @@ class AllScoresModel
     private function getTemplateData($selected_season)
     {
 
-        $award_map          = ['1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H'];
+        $award_map = ['1st' => '1', '2nd' => '2', '3rd' => '3', 'HM' => 'H'];
         $classification_map = ['0' => 'B', '1' => 'A', '2' => 'S'];
-        $medium_map         = ['Color Prints'  => 'cp',
-                               'Color Digital' => 'cd',
-                               'B&W Prints'    => 'bp',
-                               'B&W Digital'   => 'bd'
+        $medium_map = [
+            'Color Prints'  => 'cp',
+            'Color Digital' => 'cd',
+            'B&W Prints'    => 'bp',
+            'B&W Digital'   => 'bd'
         ];
 
         list ($season_start_date, $season_end_date) = $this->season_helper->getSeasonStartEnd($selected_season);
@@ -147,52 +148,52 @@ class AllScoresModel
 
         $heading = [];
         foreach ($competition_dates as &$recs) {
-            $date                     = new \DateTime($recs['Competition_Date']);
-            $date_key                 = $date->format('Y-m-d');
+            $date = new \DateTime($recs['Competition_Date']);
+            $date_key = $date->format('Y-m-d');
             $recs['Competition_Date'] = $date_key;
-            $heading[$date_key]       = ['date' => $date->format('m/d'), 'entries' => $recs['Max_Entries']];
+            $heading[$date_key] = ['date' => $date->format('m/d'), 'entries' => $recs['Max_Entries']];
         }
 
         $club_competition_results_unsorted = $this->query_miscellaneous->getCompetitionResultByDate($season_start_date,
                                                                                                     $season_end_date);
-        $club_competition_results          = CommonHelper::arrayMsort($club_competition_results_unsorted,
-                                                                      [
-                                                                          'Medium'           => [SORT_DESC],
-                                                                          'Class_Code'       => [SORT_ASC],
-                                                                          'LastName'         => [SORT_ASC],
-                                                                          'FirstName'        => [SORT_ASC],
-                                                                          'Competition_Date' => [SORT_ASC]
-                                                                      ]);
+        $club_competition_results = CommonHelper::arrayMsort($club_competition_results_unsorted,
+                                                             [
+                                                                 'Medium'           => [SORT_DESC],
+                                                                 'Class_Code'       => [SORT_ASC],
+                                                                 'LastName'         => [SORT_ASC],
+                                                                 'FirstName'        => [SORT_ASC],
+                                                                 'Competition_Date' => [SORT_ASC]
+                                                             ]);
         unset($club_competition_results_unsorted);
-        $average_score       = 0;
-        $medium_array        = [];
-        $new_entries         = 0;
-        $previous_date       = '';
-        $previous_medium     = '';
-        $previous_member     = '';
-        $scored_entries      = 0;
-        $scores              = [];
-        $total_score         = 0;
+        $average_score = 0;
+        $medium_array = [];
+        $new_entries = 0;
+        $previous_date = '';
+        $previous_medium = '';
+        $previous_member = '';
+        $scored_entries = 0;
+        $scores = [];
+        $total_score = 0;
         $default_score_array = $this->getDefaultScoreArray($competition_dates);
 
         foreach ($club_competition_results as $result) {
             $medium_key = $medium_map[$result['Medium']];
             if ($result['Member_ID'] !== $previous_member || $result['Medium'] !== $previous_medium) {
-                $previous_member                           = $result['Member_ID'];
-                $previous_medium                           = $result['Medium'];
-                $scored_entries                            = 0;
-                $total_score                               = 0;
-                $new_entries                               = 0;
+                $previous_member = $result['Member_ID'];
+                $previous_medium = $result['Medium'];
+                $scored_entries = 0;
+                $total_score = 0;
+                $new_entries = 0;
                 $scores[$medium_key][$result['Member_ID']] = $default_score_array;
             }
 
             $award = avh_get_array_value($award_map, $result['Award']);
 
-            $date                 = new \DateTime($result['Competition_Date']);
+            $date = new \DateTime($result['Competition_Date']);
             $competition_date_key = $date->format('Y-m-d');
 
             if ($competition_date_key !== $previous_date) {
-                $new_entries   = 0;
+                $new_entries = 0;
                 $previous_date = $competition_date_key;
             }
             $scores[$medium_key][$result['Member_ID']][$competition_date_key][$new_entries++] = [
@@ -210,14 +211,14 @@ class AllScoresModel
                 $average_score = $total_score / $scored_entries;
             }
 
-            $classification                                           = $classification_map[$result['Class_Code']];
+            $classification = $classification_map[$result['Class_Code']];
             $medium_array[$medium_key]['users'][$result['Member_ID']] = [
                 'name'           => $result['FirstName'] . ' ' . $result['LastName'],
                 'classification' => $classification,
                 'scores'         => $scores[$medium_key][$result['Member_ID']],
                 'average_score'  => $average_score
             ];
-            $medium_array[$medium_key]['title']                       = $result['Medium'];
+            $medium_array[$medium_key]['title'] = $result['Medium'];
         }
 
         return ['entries' => $medium_array, 'heading' => $heading];

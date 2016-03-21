@@ -123,7 +123,7 @@ class ViewAbstract
      */
     private function render($template, $data = null)
     {
-        $twig   = $this->getEnvironmentInstance();
+        $twig = $this->getEnvironmentInstance();
         $parser = $twig->loadTemplate($template);
 
         if ($data === null) {

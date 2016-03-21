@@ -39,13 +39,13 @@ class ScoresCurrentUserServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind('ScoresCurrentUserController',
-            function (Application $app) {
+            function(Application $app) {
                 return new ScoresCurrentUserController($app->make('ShortcodeView'),
                                                        $app->make('ScoresCurrentUserModel'));
             });
 
         $this->app->bind('ScoresCurrentUserModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new ScoresCurrentUserModel($app->make('formFactory'),
                                                   $app->make('QueryMiscellaneous'),
                                                   $app->make('SeasonHelper'),

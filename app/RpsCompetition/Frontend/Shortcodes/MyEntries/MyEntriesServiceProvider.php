@@ -39,12 +39,12 @@ class MyEntriesServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind('MyEntriesController',
-            function (Application $app) {
+            function(Application $app) {
                 return new MyEntriesController($app->make('ShortcodeView'), $app->make('MyEntriesModel'));
             });
 
         $this->app->bind('MyEntriesModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new MyEntriesModel($app->make('QueryCompetitions'),
                                           $app->make('QueryEntries'),
                                           $app->make('PhotoHelper'),

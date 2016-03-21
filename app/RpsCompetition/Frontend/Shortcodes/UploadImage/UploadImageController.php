@@ -26,8 +26,8 @@ class UploadImageController
      */
     public function __construct(ShortcodeView $view, UploadImageModel $model, Settings $settings)
     {
-        $this->view     = $view;
-        $this->model    = $model;
+        $this->view = $view;
+        $this->model = $model;
         $this->settings = $settings;
     }
 

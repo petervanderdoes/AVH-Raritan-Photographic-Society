@@ -39,14 +39,14 @@ class UploadImageServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind('UploadImageController',
-            function (Application $app) {
+            function(Application $app) {
                 return new UploadImageController($app->make('ShortcodeView'),
                                                  $app->make('UploadImageModel'),
                                                  $app->make('Settings'));
             });
 
         $this->app->bind('UploadImageModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new UploadImageModel($app->make('formFactory'),
                                             $app->make('Settings'),
                                             $app->make('IlluminateRequest'));

@@ -40,16 +40,16 @@ class BanquetEntriesServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind('BanquetEntriesController',
-            function (Application $app) {
+            function(Application $app) {
                 return new BanquetEntriesController($app->make('ShortcodeView'), $app->make('BanquetEntriesModel'));
             });
 
         $this->app->bind('QueryBanquet',
-            function (Application $app) {
+            function(Application $app) {
                 return new QueryBanquet($app->make('RpsDb'));
             });
         $this->app->bind('BanquetEntriesModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new BanquetEntriesModel($app->make('formFactory'),
                                                $app->make('SeasonHelper'),
                                                $app->make('QueryMiscellaneous'),

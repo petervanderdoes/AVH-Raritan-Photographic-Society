@@ -51,8 +51,8 @@ final class Admin
         $this->app = $app;
 
         $this->settings = $app->make('Settings');
-        $this->rpsdb    = $app->make('RpsDb');
-        $this->request  = $app->make('IlluminateRequest');
+        $this->rpsdb = $app->make('RpsDb');
+        $this->request = $app->make('IlluminateRequest');
 
         // Admin menu
         add_action('admin_menu', [$this, 'actionAdminMenu']);
@@ -99,7 +99,8 @@ final class Admin
                           '1.8.22',
                           'screen');
         wp_register_script('avhrps-comp-ajax',
-                           CommonHelper::getPluginUrl('avh-rps.admin.ajax.js', $this->settings->get('javascript_dir')),
+                           CommonHelper::getPluginUrl('avh-rps.admin.ajax.js',
+                                                      $this->settings->get('javascript_dir')),
                            ['jquery'],
                            false,
                            true);
@@ -112,15 +113,15 @@ final class Admin
                       '',
                       Constants::MENU_POSITION_COMPETITION);
 
-        $this->hooks['avhrps_menu_competition']     = add_submenu_page(Constants::MENU_SLUG_COMPETITION,
-                                                                       'All Competitions',
-                                                                       'All Competitions',
-                                                                       'rps_edit_competitions',
-                                                                       Constants::MENU_SLUG_COMPETITION,
-                                                                       [
-                                                                           $this,
-                                                                           'menuCompetition'
-                                                                       ]);
+        $this->hooks['avhrps_menu_competition'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION,
+                                                                   'All Competitions',
+                                                                   'All Competitions',
+                                                                   'rps_edit_competitions',
+                                                                   Constants::MENU_SLUG_COMPETITION,
+                                                                   [
+                                                                       $this,
+                                                                       'menuCompetition'
+                                                                   ]);
         $this->hooks['avhrps_menu_competition_add'] = add_submenu_page(Constants::MENU_SLUG_COMPETITION,
                                                                        'Add Competition',
                                                                        'Add Competition',
@@ -245,12 +246,12 @@ final class Admin
      */
     public function actionProfileUpdateSave($user_id)
     {
-        $userID                = $user_id;
-        $rps_class_bw          = $this->request->input('rps_class_bw', get_user_meta($userID, 'rps_class_bw', true));
-        $rps_class_color       = $this->request->input('rps_class_color',
-                                                       get_user_meta($userID, 'rps_class_color', true));
-        $rps_class_print_bw    = $this->request->input('rps_class_print_bw',
-                                                       get_user_meta($userID, 'rps_class_print_bw', true));
+        $userID = $user_id;
+        $rps_class_bw = $this->request->input('rps_class_bw', get_user_meta($userID, 'rps_class_bw', true));
+        $rps_class_color = $this->request->input('rps_class_color',
+                                                 get_user_meta($userID, 'rps_class_color', true));
+        $rps_class_print_bw = $this->request->input('rps_class_print_bw',
+                                                    get_user_meta($userID, 'rps_class_print_bw', true));
         $rps_class_print_color = $this->request->input('rps_class_print_color',
                                                        get_user_meta($userID, 'rps_class_print_color', true));
 
@@ -305,7 +306,9 @@ final class Admin
         foreach ($all_classifications as $data) {
             if (current_user_can('rps_edit_competition_classification')) {
                 echo $formBuilder->outputLabel($formBuilder->label($data['name'], $data['name']));
-                echo $formBuilder->outputField($formBuilder->select($data['name'], $classification, $data['selected']));
+                echo $formBuilder->outputField($formBuilder->select($data['name'],
+                                                                    $classification,
+                                                                    $data['selected']));
             } else {
                 echo '<tr>';
                 echo '<th>' . $data['label'] . '</th>';
@@ -354,7 +357,7 @@ final class Admin
      */
     public function filterRpsUserActionLinks($actions, $user)
     {
-        $link               = admin_url() . '?page=avh-rps-entries&user_id=' . $user->ID;
+        $link = admin_url() . '?page=avh-rps-entries&user_id=' . $user->ID;
         $actions['entries'] = '<a href="' . $link . '">Entries</a>';
 
         return $actions;
@@ -401,7 +404,7 @@ final class Admin
     {
         switch ($option) {
             case 'competitions_per_page':
-                $value  = (int)$value;
+                $value = (int)$value;
                 $return = $value;
                 if ($value < 1 || $value > 999) {
                     $return = $error_value;
@@ -437,20 +440,20 @@ final class Admin
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         if ($this->request->has('scored')) {
-            $data     = [];
+            $data = [];
             $response = '';
-            $result   = null;
+            $result = null;
             if ($this->request->input('scored') == 'Yes') {
-                $data['ID']     = (int)$this->request->input('id');
+                $data['ID'] = (int)$this->request->input('id');
                 $data['Scored'] = 'N';
-                $result         = $query_competitions->insertCompetition($data);
-                $response       = json_encode(['text' => 'N', 'scored' => 'No', 'scoredtext' => 'Yes']);
+                $result = $query_competitions->insertCompetition($data);
+                $response = json_encode(['text' => 'N', 'scored' => 'No', 'scoredtext' => 'Yes']);
             }
             if ($this->request->input('scored') == 'No') {
-                $data['ID']     = (int)$this->request->input('id');
+                $data['ID'] = (int)$this->request->input('id');
                 $data['Scored'] = 'Y';
-                $result         = $query_competitions->insertCompetition($data);
-                $response       = json_encode(['text' => 'Y', 'scored' => 'Yes', 'scoredtext' => 'No']);
+                $result = $query_competitions->insertCompetition($data);
+                $response = json_encode(['text' => 'Y', 'scored' => 'Yes', 'scoredtext' => 'No']);
             }
             if (is_wp_error($result)) {
                 echo 'Error updating competition';
@@ -516,9 +519,9 @@ final class Admin
      */
     public function menuCompetitionAdd()
     {
-        $options            = get_option('avh-rps');
+        $options = get_option('avh-rps');
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $formBuilder        = new FormBuilder(new HtmlBuilder());
+        $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition_add');
 
         $data = [];
@@ -589,31 +592,31 @@ final class Admin
                     $validator_errors = $validator->errors();
                     if (empty($validator_errors)) {
                         $this->message = 'Competition Added';
-                        $this->status  = 'updated';
+                        $this->status = 'updated';
 
                         $medium_array = Constants::getMediums();
 
                         $classification_array = Constants::getClassifications();
 
                         $data['Competition_Date'] = $form_new_options['date'];
-                        $data['Theme']            = $form_new_options['theme'];
-                        $data['Max_Entries']      = $form_new_options['max-entries'];
-                        $data['Num_Judges']       = $form_new_options['judges'];
-                        $data['Image_Size']       = $form_new_options['image_size'];
-                        $data['Special_Event']    = ($form_new_options['special_event'] ? 'Y' : 'N');
-                        $medium_keys              = array_keys($form_new_options['medium']);
+                        $data['Theme'] = $form_new_options['theme'];
+                        $data['Max_Entries'] = $form_new_options['max-entries'];
+                        $data['Num_Judges'] = $form_new_options['judges'];
+                        $data['Image_Size'] = $form_new_options['image_size'];
+                        $data['Special_Event'] = ($form_new_options['special_event'] ? 'Y' : 'N');
+                        $medium_keys = array_keys($form_new_options['medium']);
                         foreach ($medium_keys as $medium_key) {
                             if ($form_new_options['medium'][$medium_key] === false) {
                                 continue;
                             }
-                            $data['Medium']      = $medium_array[$medium_key];
+                            $data['Medium'] = $medium_array[$medium_key];
                             $classification_keys = array_keys($form_new_options['classification']);
                             foreach ($classification_keys as $classification_key) {
                                 if ($form_new_options['classification'][$classification_key] === false) {
                                     continue;
                                 }
                                 $data['Classification'] = $classification_array[$classification_key];
-                                $competition_ID         = $query_competitions->insertCompetition($data);
+                                $competition_ID = $query_competitions->insertCompetition($data);
                                 if (is_wp_error($competition_ID)) {
                                     wp_die($competition_ID);
                                 }
@@ -622,7 +625,7 @@ final class Admin
                         unset($medium_keys, $classification_keys);
                     } else {
                         $this->message = $validator->errors();
-                        $this->status  = 'error';
+                        $this->status = 'error';
                     }
                     $this->displayMessage();
                     $form_options = $form_new_options;
@@ -685,9 +688,9 @@ final class Admin
         }
 
         if ($message != '') {
-            $status        = $this->status;
+            $status = $this->status;
             $this->message = $this->status = ''; // Reset
-            $status        = ($status != '') ? $status : 'updated fade';
+            $status = ($status != '') ? $status : 'updated fade';
             echo '<div id="message"	class="' . $status . '">';
             echo '<p><strong>' . $message . '</strong></p></div>';
         }
@@ -823,7 +826,7 @@ final class Admin
          */
         global $wpdb;
 
-        $query_entries      = new QueryEntries($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         if (!$this->request->has('competitions')) {
@@ -851,9 +854,9 @@ final class Admin
 
         $goDelete = 0;
         foreach ($competitionIdsArray as $competitionID) {
-            $sqlWhere    = $wpdb->prepare('Competition_ID=%d', $competitionID);
-            $entries     = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
-            $sqlWhere    = $wpdb->prepare('ID=%d', $competitionID);
+            $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competitionID);
+            $entries = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
+            $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
             $competition = $query_competitions->query(['where' => $sqlWhere]);
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
@@ -906,7 +909,7 @@ final class Admin
         $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition-edit');
 
-        $updated     = false;
+        $updated = false;
         $formOptions = [];
         if ($this->request->has('update')) {
             $updated = $this->updateCompetition();
@@ -917,7 +920,7 @@ final class Admin
 
         $competition = $query_competitions->getCompetitionById($this->request->input('competition'));
 
-        $formOptions['date']       = mysql2date('Y-m-d', $competition->Competition_Date);
+        $formOptions['date'] = mysql2date('Y-m-d', $competition->Competition_Date);
         $formOptions['close-date'] = mysql2date('Y-m-d', $competition->Close_Date);
         $formOptions['close-time'] = mysql2date('H:i:s', $competition->Close_Date);
 
@@ -953,8 +956,8 @@ final class Admin
 
         $time = [];
         for ($hour = 0; $hour <= 23; $hour++) {
-            $time_val        = sprintf('%02d:00:00', $hour);
-            $time_text       = date('g:i a', strtotime($time_val));
+            $time_val = sprintf('%02d:00:00', $hour);
+            $time_text = date('g:i a', strtotime($time_val));
             $time[$time_val] = $time_text;
         }
         // echo $formBuilder->select('Closing Time', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
@@ -1066,13 +1069,13 @@ final class Admin
                 case 'del':
                 case 'del_many':
                     $deleteCount = (int)$this->request->input('deleteCount', 0);
-                    $messages[]  = '<div id="message" class="updated"><p>' .
-                                   sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount),
-                                           number_format_i18n($deleteCount)) .
-                                   '</p></div>';
+                    $messages[] = '<div id="message" class="updated"><p>' .
+                                  sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount),
+                                          number_format_i18n($deleteCount)) .
+                                  '</p></div>';
                     break;
                 case 'open_many':
-                    $openCount  = (int)$this->request->input('count', 0);
+                    $openCount = (int)$this->request->input('count', 0);
                     $messages[] = '<div id="message" class="updated"><p>' .
                                   sprintf(_n('Competition opened.', '%s competitions opened.', $openCount),
                                           number_format_i18n($openCount)) .
@@ -1139,14 +1142,14 @@ final class Admin
 
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
-        $title       = '';
+        $title = '';
         $action_verb = '';
         if ($action == 'open') {
-            $title       = 'Open Competitions';
+            $title = 'Open Competitions';
             $action_verb = 'openend';
         }
         if ($action == 'close ') {
-            $title       = 'Close Competitions';
+            $title = 'Close Competitions';
             $action_verb = 'closed';
         }
 
@@ -1174,7 +1177,7 @@ final class Admin
                         count($competitionIdsArray)) . '</p>';
 
         foreach ($competitionIdsArray as $competitionID) {
-            $sqlWhere    = $wpdb->prepare('ID=%d', $competitionID);
+            $sqlWhere = $wpdb->prepare('ID=%d', $competitionID);
             $competition = $query_competitions->query(['where' => $sqlWhere]);
             /** @var QueryCompetitions $competition */
             $competition = $competition[0];
@@ -1204,7 +1207,7 @@ final class Admin
      */
     private function displayPageEntriesDelete()
     {
-        $query_entries      = new QueryEntries($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $formBuilder = new FormBuilder(new HtmlBuilder());
@@ -1232,7 +1235,7 @@ final class Admin
         foreach ($entryIdsArray as $entryID) {
             $entry = $query_entries->getEntryById($entryID);
             if ($entry !== null) {
-                $user        = get_user_by('id', $entry->Member_ID);
+                $user = get_user_by('id', $entry->Member_ID);
                 $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
                 echo '<li>';
                 echo $formBuilder->hidden('entries[]', $entryID);
@@ -1270,7 +1273,7 @@ final class Admin
         /**
          * @var string $wp_http_referer
          */
-        $query_entries      = new QueryEntries($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         /** @var PhotoHelper $photo_helper */
         $photo_helper = $this->app->make('PhotoHelper');
@@ -1290,8 +1293,8 @@ final class Admin
 
         $wp_http_referer = $this->request->input('wp_http_referer', '');
         $wp_http_referer = remove_query_arg(['update'], stripslashes($wp_http_referer));
-        $entry           = $query_entries->getEntryById($this->request->input('entry'));
-        $competition     = $query_competitions->getCompetitionById($entry->Competition_ID);
+        $entry = $query_entries->getEntryById($this->request->input('entry'));
+        $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
 
         $this->displayAdminHeader('Edit Entry');
 
@@ -1324,7 +1327,7 @@ final class Admin
         echo $formBuilder->outputLabel($formBuilder->label('title', 'Title'));
         echo $formBuilder->outputField($formBuilder->text('title', $entry->Title));
 
-        $medium_array   = Constants::getMediums();
+        $medium_array = Constants::getMediums();
         $selectedMedium = array_search($competition->Medium, $medium_array);
         echo $formBuilder->outputLabel($formBuilder->label('medium', 'Medium'));
         echo $formBuilder->outputField($formBuilder->select('medium',
@@ -1332,7 +1335,7 @@ final class Admin
                                                             $selectedMedium,
                                                             ['autocomplete' => 'off']));
 
-        $classification_array   = Constants::getClassifications();
+        $classification_array = Constants::getClassifications();
         $selectedClassification = array_search($competition->Classification, $classification_array);
         echo $formBuilder->outputLabel($formBuilder->label('classification', 'Classification'));
         echo $formBuilder->outputField($formBuilder->select('classification',
@@ -1366,10 +1369,10 @@ final class Admin
                 case 'del':
                 case 'del_many':
                     $deleteCount = (int)$this->request->input('deleteCount', 0);
-                    $messages[]  = '<div id="message" class="updated"><p>' .
-                                   sprintf(_n('Entry deleted.', '%s entries deleted.', $deleteCount),
-                                           number_format_i18n($deleteCount)) .
-                                   '</p></div>';
+                    $messages[] = '<div id="message" class="updated"><p>' .
+                                  sprintf(_n('Entry deleted.', '%s entries deleted.', $deleteCount),
+                                          number_format_i18n($deleteCount)) .
+                                  '</p></div>';
                     break;
             }
         }
@@ -1430,30 +1433,30 @@ final class Admin
      */
     private function doUpdateEntry($formOptionsNew, $id, $entry, $competition)
     {
-        $query_entries      = new QueryEntries($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
         /** @var PhotoHelper $photo_helper */
-        $photo_helper         = $this->app->make('PhotoHelper');
-        $medium_array         = Constants::getMediums();
+        $photo_helper = $this->app->make('PhotoHelper');
+        $medium_array = Constants::getMediums();
         $classification_array = Constants::getClassifications();
-        $return               = false;
+        $return = false;
 
-        $old_file             = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
-        $user                 = get_user_by('id', $entry->Member_ID);
+        $old_file = $this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name;
+        $user = get_user_by('id', $entry->Member_ID);
         $relative_server_path = $photo_helper->getCompetitionPath($competition->Competition_Date,
                                                                   $classification_array[$formOptionsNew['classification']],
                                                                   $medium_array[$formOptionsNew['medium']]);
-        $full_server_path     = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
-        $dest_name            = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
+        $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
+        $dest_name = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
 
-        $new_competition          = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
-                                                                                         $classification_array[$formOptionsNew['classification']],
-                                                                                         $medium_array[$formOptionsNew['medium']]);
-        $data                     = [];
-        $data['Competition_ID']   = $new_competition->ID;
-        $data['ID']               = $id;
+        $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
+                                                                                $classification_array[$formOptionsNew['classification']],
+                                                                                $medium_array[$formOptionsNew['medium']]);
+        $data = [];
+        $data['Competition_ID'] = $new_competition->ID;
+        $data['ID'] = $id;
         $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
-        $data['Title']            = $formOptionsNew['title'];
+        $data['Title'] = $formOptionsNew['title'];
 
         // Need to create the destination folder?
         CommonHelper::createDirectory($full_server_path);
@@ -1545,11 +1548,11 @@ final class Admin
                     exit();
                 }
                 $competitionIds = $this->request->input('competitions');
-                $count          = 0;
+                $count = 0;
 
                 foreach ((array)$competitionIds as $id) {
-                    $data           = [];
-                    $data['ID']     = (int)$id;
+                    $data = [];
+                    $data['ID'] = (int)$id;
                     $data['Closed'] = 'N';
                     $query_competitions->insertCompetition($data);
                     ++$count;
@@ -1565,11 +1568,11 @@ final class Admin
                     exit();
                 }
                 $competitionIds = $this->request->input('competitions');
-                $count          = 0;
+                $count = 0;
 
                 foreach ((array)$competitionIds as $id) {
-                    $data           = [];
-                    $data['ID']     = (int)$id;
+                    $data = [];
+                    $data['ID'] = (int)$id;
                     $data['Closed'] = 'Y';
                     $query_competitions->insertCompetition($data);
                     ++$count;
@@ -1581,8 +1584,8 @@ final class Admin
             case 'setscore':
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
-                    $data           = [];
-                    $data['ID']     = (int)$this->request->input('competition');
+                    $data = [];
+                    $data['ID'] = (int)$this->request->input('competition');
                     $data['Scored'] = 'Y';
                     $query_competitions->insertCompetition($data);
                 }
@@ -1592,8 +1595,8 @@ final class Admin
             case 'Unsetscore':
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
-                    $data           = [];
-                    $data['ID']     = (int)$this->request->input('competition');
+                    $data = [];
+                    $data['ID'] = (int)$this->request->input('competition');
                     $data['Scored'] = 'N';
                     $query_competitions->insertCompetition($data);
                 }
@@ -1722,41 +1725,41 @@ final class Admin
      */
     private function updateCompetition()
     {
-        $options            = get_option('avh-rps');
+        $options = get_option('avh-rps');
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $formOptionsNew     = [];
-        $data               = [];
-        $formOptions        = $this->request->input('competition-edit');
+        $formOptionsNew = [];
+        $data = [];
+        $formOptions = $this->request->input('competition-edit');
 
-        $formOptionsNew['date']           = $formOptions['date'];
-        $formOptionsNew['close-date']     = $formOptions['close-date'];
-        $formOptionsNew['close-time']     = $formOptions['close-time'];
-        $formOptionsNew['theme']          = $formOptions['theme'];
-        $formOptionsNew['medium']         = $formOptions['medium'];
+        $formOptionsNew['date'] = $formOptions['date'];
+        $formOptionsNew['close-date'] = $formOptions['close-date'];
+        $formOptionsNew['close-time'] = $formOptions['close-time'];
+        $formOptionsNew['theme'] = $formOptions['theme'];
+        $formOptionsNew['medium'] = $formOptions['medium'];
         $formOptionsNew['classification'] = $formOptions['classification'];
-        $formOptionsNew['max-entries']    = $formOptions['max-entries'];
-        $formOptionsNew['judges']         = $formOptions['judges'];
-        $formOptionsNew['image_size']     = isset($formOptions['image_size']) ? $formOptions['image_size'] : $options['default_image_size'];
-        $formOptionsNew['special_event']  = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
-        $formOptionsNew['closed']         = isset($formOptions['closed']) ? $formOptions['closed'] : '';
-        $formOptionsNew['scored']         = isset($formOptions['scored']) ? $formOptions['scored'] : '';
+        $formOptionsNew['max-entries'] = $formOptions['max-entries'];
+        $formOptionsNew['judges'] = $formOptions['judges'];
+        $formOptionsNew['image_size'] = isset($formOptions['image_size']) ? $formOptions['image_size'] : $options['default_image_size'];
+        $formOptionsNew['special_event'] = isset($formOptions['special_event']) ? $formOptions['special_event'] : '';
+        $formOptionsNew['closed'] = isset($formOptions['closed']) ? $formOptions['closed'] : '';
+        $formOptionsNew['scored'] = isset($formOptions['scored']) ? $formOptions['scored'] : '';
 
         $medium_array = Constants::getMediums();
 
-        $classification_array     = Constants::getClassifications();
-        $data['ID']               = $this->request->input('competition');
+        $classification_array = Constants::getClassifications();
+        $data['ID'] = $this->request->input('competition');
         $data['Competition_Date'] = $formOptionsNew['date'];
-        $data['Close_Date']       = $formOptionsNew['close-date'] . ' ' . $formOptionsNew['close-time'];
-        $data['Theme']            = $formOptionsNew['theme'];
-        $data['Max_Entries']      = $formOptionsNew['max-entries'];
-        $data['Num_Judges']       = $formOptionsNew['judges'];
-        $data['Image_Size']       = $formOptionsNew['image_size'];
-        $data['Special_Event']    = ($formOptionsNew['special_event'] ? 'Y' : 'N');
-        $data['Closed']           = ($formOptionsNew['closed'] ? 'Y' : 'N');
-        $data['Scored']           = ($formOptionsNew['scored'] ? 'Y' : 'N');
-        $data['Medium']           = $medium_array[$formOptionsNew['medium']];
-        $data['Classification']   = $classification_array[$formOptionsNew['classification']];
-        $competition_ID           = $query_competitions->insertCompetition($data);
+        $data['Close_Date'] = $formOptionsNew['close-date'] . ' ' . $formOptionsNew['close-time'];
+        $data['Theme'] = $formOptionsNew['theme'];
+        $data['Max_Entries'] = $formOptionsNew['max-entries'];
+        $data['Num_Judges'] = $formOptionsNew['judges'];
+        $data['Image_Size'] = $formOptionsNew['image_size'];
+        $data['Special_Event'] = ($formOptionsNew['special_event'] ? 'Y' : 'N');
+        $data['Closed'] = ($formOptionsNew['closed'] ? 'Y' : 'N');
+        $data['Scored'] = ($formOptionsNew['scored'] ? 'Y' : 'N');
+        $data['Medium'] = $medium_array[$formOptionsNew['medium']];
+        $data['Classification'] = $classification_array[$formOptionsNew['classification']];
+        $competition_ID = $query_competitions->insertCompetition($data);
 
         unset($query_competitions);
 
@@ -1770,24 +1773,24 @@ final class Admin
      */
     private function updateEntry()
     {
-        $query_entries     = new QueryEntries($this->rpsdb);
+        $query_entries = new QueryEntries($this->rpsdb);
         $competition_query = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $formOptions = $this->request->input('entry-edit');
-        $id          = (int)$this->request->input('entry');
-        $entry       = $query_entries->getEntryById($id);
+        $id = (int)$this->request->input('entry');
+        $entry = $query_entries->getEntryById($id);
         /** @var QueryCompetitions $competition */
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
-        $medium_array         = Constants::getMediums();
+        $medium_array = Constants::getMediums();
         $classification_array = Constants::getClassifications();
 
-        $selectedMedium         = array_search($competition->Medium, $medium_array);
+        $selectedMedium = array_search($competition->Medium, $medium_array);
         $selectedClassification = array_search($competition->Classification, $classification_array);
 
-        $formOptionsNew                   = [];
-        $formOptionsNew['title']          = empty($formOptions['title']) ? $entry->Title : $formOptions['title'];
-        $formOptionsNew['medium']         = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
+        $formOptionsNew = [];
+        $formOptionsNew['title'] = empty($formOptions['title']) ? $entry->Title : $formOptions['title'];
+        $formOptionsNew['medium'] = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
 
         $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);

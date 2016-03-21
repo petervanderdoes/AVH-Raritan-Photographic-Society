@@ -32,7 +32,7 @@ class ParseQueryHelper
     {
 
         $this->query_competitions = $query_competitions;
-        $this->season_helper      = $season_helper;
+        $this->season_helper = $season_helper;
         $this->competition_helper = $competition_helper;
     }
 
@@ -45,8 +45,8 @@ class ParseQueryHelper
             $competitions = $this->query_competitions->getCompetitionBySeasonId($this->selected_season,
                                                                                 ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
-            $competition         = end($competitions);
-            $date_object         = new \DateTime($competition->Competition_Date);
+            $competition = end($competitions);
+            $date_object = new \DateTime($competition->Competition_Date);
             $this->selected_date = $date_object->format(('Y-m-d'));
         }
     }
@@ -58,11 +58,11 @@ class ParseQueryHelper
     {
         if (!$this->season_helper->isValidSeason($this->selected_season)) {
             $this->selected_season = $this->season_helper->getSeasonId(date('r'));
-            $competitions          = $this->query_competitions->getCompetitionBySeasonId($this->selected_season,
-                                                                                         ['Scored' => 'Y']);
+            $competitions = $this->query_competitions->getCompetitionBySeasonId($this->selected_season,
+                                                                                ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
-            $competition         = end($competitions);
-            $date_object         = new \DateTime($competition->Competition_Date);
+            $competition = end($competitions);
+            $date_object = new \DateTime($competition->Competition_Date);
             $this->selected_date = $date_object->format(('Y-m-d'));
         }
     }

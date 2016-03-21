@@ -25,9 +25,9 @@ class SocialNetworksController
      */
     public function __construct(Application $app)
     {
-        $this->app   = $app;
+        $this->app = $app;
         $this->model = $this->app->make('SocialNetworksModel');
-        $this->view  = $this->app->make('SocialNetworksView');
+        $this->view = $this->app->make('SocialNetworksView');
     }
 
     /**

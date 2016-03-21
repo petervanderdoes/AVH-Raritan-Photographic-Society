@@ -48,12 +48,12 @@ class RequestBanquetEntriesModel
                                 Session $session)
     {
 
-        $this->query_entries      = $query_entries;
-        $this->photo_helper       = $photo_helper;
-        $this->entity             = $entity;
-        $this->request            = $request;
+        $this->query_entries = $query_entries;
+        $this->photo_helper = $photo_helper;
+        $this->entity = $entity;
+        $this->request = $request;
         $this->query_competitions = $query_competitions;
-        $this->session            = $session;
+        $this->session = $session;
     }
 
     /**
@@ -63,7 +63,7 @@ class RequestBanquetEntriesModel
     {
         $entries = (array)$this->request->input('form.entry_id', []);
         foreach ($entries as $entry_id) {
-            $entry       = $this->query_entries->getEntryById($entry_id);
+            $entry = $this->query_entries->getEntryById($entry_id);
             $competition = $this->query_competitions->getCompetitionById($entry->Competition_ID);
             $banquet_ids = json_decode(base64_decode($this->entity->getBanquetids()));
             foreach ($banquet_ids as $banquet_id) {
@@ -76,8 +76,8 @@ class RequestBanquetEntriesModel
                                                                     $banquet_record->Classification,
                                                                     $banquet_record->Medium);
                     CommonHelper::createDirectory($path);
-                    $file_info         = pathinfo($entry->Server_File_Name);
-                    $new_file_name     = $path . '/' . $file_info['basename'];
+                    $file_info = pathinfo($entry->Server_File_Name);
+                    $new_file_name = $path . '/' . $file_info['basename'];
                     $original_filename = html_entity_decode($this->request->server('DOCUMENT_ROOT') .
                                                             $entry->Server_File_Name,
                                                             ENT_QUOTES,

@@ -39,14 +39,14 @@ class CategoryWinnersServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind('CategoryWinnersController',
-            function (Application $app) {
+            function(Application $app) {
                 return new CategoryWinnersController($app->make('ShortcodeView'),
                                                      $app->make('CategoryWinnersModel'),
                                                      $app->make('Settings'));
             });
 
         $this->app->bind('CategoryWinnersModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new CategoryWinnersModel($app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
             });
     }

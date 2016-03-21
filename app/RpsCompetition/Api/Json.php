@@ -40,9 +40,9 @@ class Json
      */
     public function addError($error_message)
     {
-        $error           = [];
+        $error = [];
         $error['detail'] = $error_message;
-        $this->errors[]  = $error;
+        $this->errors[] = $error;
     }
 
     /**
@@ -80,7 +80,7 @@ class Json
         }
 
         $response = $this->getArray();
-        $json     = json_encode($response, $encode_options);
+        $json = json_encode($response, $encode_options);
 
         return $json;
     }
@@ -188,9 +188,9 @@ class Json
      */
     private function validateJsonStatus()
     {
-        $valid_response                            = [];
-        $valid_response[self::JSON_STATUS_ERROR]   = true;
-        $valid_response[self::JSON_STATUS_FAIL]    = true;
+        $valid_response = [];
+        $valid_response[self::JSON_STATUS_ERROR] = true;
+        $valid_response[self::JSON_STATUS_FAIL] = true;
         $valid_response[self::JSON_STATUS_SUCCESS] = true;
 
         return array_key_exists($this->status, $valid_response);

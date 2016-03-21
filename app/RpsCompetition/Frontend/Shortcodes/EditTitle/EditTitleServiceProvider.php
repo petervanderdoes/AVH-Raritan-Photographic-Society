@@ -39,14 +39,14 @@ class EditTitleServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind('EditTitleController',
-            function (Application $app) {
+            function(Application $app) {
                 return new EditTitleController($app->make('ShortcodeView'),
                                                $app->make('EditTitleModel'),
                                                $app->make('Settings'));
             });
 
         $this->app->bind('EditTitleModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new EditTitleModel($app->make('QueryEntries'),
                                           $app->make('PhotoHelper'),
                                           $app->make('formFactory'),

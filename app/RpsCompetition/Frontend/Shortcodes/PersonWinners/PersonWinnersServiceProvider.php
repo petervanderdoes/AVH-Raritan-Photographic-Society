@@ -39,12 +39,12 @@ class PersonWinnersServiceProvider extends ServiceProvider
     {
         // My Entries Shortcode
         $this->app->bind('PersonWinnersController',
-            function (Application $app) {
+            function(Application $app) {
                 return new PersonWinnersController($app->make('ShortcodeView'), $app->make('PersonWinnersModel'));
             });
 
         $this->app->bind('PersonWinnersModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new PersonWinnersModel($app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
             });
     }

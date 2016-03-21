@@ -40,10 +40,10 @@ class RequestMonthlyEntries
     {
 
         $this->query_competitions = $query_competitions;
-        $this->season_helper      = $season_helper;
-        $this->request            = $request;
-        $this->session            = $session;
-        $this->pq_helper          = $parse_query_helper;
+        $this->season_helper = $season_helper;
+        $this->request = $request;
+        $this->session = $session;
+        $this->pq_helper = $parse_query_helper;
     }
 
     /**
@@ -52,8 +52,8 @@ class RequestMonthlyEntries
     public function handleRequestMonthlyEntries()
     {
 
-        $redirect                = false;
-        $status                  = 303;
+        $redirect = false;
+        $status = 303;
         $query_var_selected_date = get_query_var('selected_date', false);
 
         /**
@@ -73,10 +73,11 @@ class RequestMonthlyEntries
                 if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date,
                                                                                       'Y-m-d'))
                 ) {
-                    $last_scored = $this->query_competitions->query(['where'   => 'Scored="Y"',
-                                                                     'orderby' => 'Competition_Date',
-                                                                     'order'   => 'DESC',
-                                                                     'number'  => 1
+                    $last_scored = $this->query_competitions->query([
+                                                                        'where'   => 'Scored="Y"',
+                                                                        'orderby' => 'Competition_Date',
+                                                                        'order'   => 'DESC',
+                                                                        'number'  => 1
                                                                     ]);
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $this->pq_helper->setSelectedDate($date_object->format(('Y-m-d')));

@@ -41,13 +41,13 @@ class RequestEditTitleServiceProvider extends ServiceProvider
 
         $this->app->singleton('\RpsCompetition\Entity\Form\EditTitle');
         $this->app->bind('\RpsCompetition\Form\Type\EditTitleType',
-            function (Application $app) {
+            function(Application $app) {
                 $entity = $app->make('\RpsCompetition\Entity\Form\EditTitle');
 
                 return new EditTitleType($entity);
             });
         $this->app->bind('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new RequestEditTitleModel($app->make('\RpsCompetition\Entity\Form\EditTitle'),
                                                  $app->make('QueryCompetitions'),
                                                  $app->make('QueryEntries'),
@@ -55,7 +55,7 @@ class RequestEditTitleServiceProvider extends ServiceProvider
                                                  $app->make('IlluminateRequest'));
             });
         $this->app->bind('RequestEditTitle',
-            function (Application $app) {
+            function(Application $app) {
                 return new RequestEditTitle($app->make('\RpsCompetition\Entity\Form\EditTitle'),
                                             $app->make('\RpsCompetition\Form\Type\EditTitleType'),
                                             $app->make('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel'),

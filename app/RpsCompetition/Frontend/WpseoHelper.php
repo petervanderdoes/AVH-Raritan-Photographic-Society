@@ -36,10 +36,10 @@ class WpseoHelper
                                 PhotoHelper $photo_helper)
     {
 
-        $this->settings            = $settings;
-        $this->query_competitions  = $query_competitions;
+        $this->settings = $settings;
+        $this->query_competitions = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper        = $photo_helper;
+        $this->photo_helper = $photo_helper;
     }
 
     /**
@@ -56,7 +56,7 @@ class WpseoHelper
     public function actionWpseoSitemapCompetitionEntries()
     {
         $options = get_option('avh-rps');
-        $url     = get_permalink($options['monthly_entries_post_id']);
+        $url = get_permalink($options['monthly_entries_post_id']);
         $this->buildWpseoSitemap($url, true);
         exit();
     }
@@ -67,7 +67,7 @@ class WpseoHelper
     public function actionWpseoSitemapCompetitionWinners()
     {
         $options = get_option('avh-rps');
-        $url     = get_permalink($options['monthly_winners_post_id']);
+        $url = get_permalink($options['monthly_winners_post_id']);
         $this->buildWpseoSitemap($url);
         exit();
     }
@@ -128,7 +128,7 @@ class WpseoHelper
             }
             rsort($post_date_modified);
             $date_modified = new \DateTime(reset($post_date_modified));
-            $data['mod']   = $date_modified->format('c');
+            $data['mod'] = $date_modified->format('c');
         }
 
         return $data;
@@ -151,14 +151,14 @@ class WpseoHelper
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
             $selected_date = get_query_var('selected_date');
-            $date          = new \DateTime($selected_date);
-            $date_text     = $date->format('F j, Y');
-            $competitions  = $this->query_competitions->getCompetitionByDates($selected_date);
-            $competition   = current($competitions);
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
+            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
+            $competition = current($competitions);
 
-            $new_title_array   = [];
+            $new_title_array = [];
             $new_title_array[] = $post->post_title . ' for the theme "' . $competition->Theme . '" on ' . $date_text;
-            $title_array       = $new_title_array;
+            $title_array = $new_title_array;
         }
 
         return $title_array;
@@ -180,15 +180,15 @@ class WpseoHelper
         if (!is_object($post)) {
             return $meta_description;
         }
-        $options     = get_option('avh-rps');
+        $options = get_option('avh-rps');
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
-            $selected_date  = get_query_var('selected_date');
-            $competitions   = $this->query_competitions->getCompetitionByDates($selected_date);
-            $competition    = current($competitions);
-            $theme          = ucfirst($competition->Theme);
-            $date           = new \DateTime($selected_date);
-            $date_text      = $date->format('F j, Y');
+            $selected_date = get_query_var('selected_date');
+            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
+            $competition = current($competitions);
+            $theme = ucfirst($competition->Theme);
+            $date = new \DateTime($selected_date);
+            $date_text = $date->format('F j, Y');
             $entries_amount = $this->query_miscellaneous->countAllEntries($selected_date);
 
             if ($post->ID == $options['monthly_entries_post_id']) {
@@ -283,24 +283,24 @@ class WpseoHelper
     public function filterWpseoSitemapIndex()
     {
         $all_competitions = $this->query_competitions->getScoredCompetitions('1970-01-01', '2200-01-01');
-        $years            = [];
-        $old_year         = 0;
-        $old_mod_date     = 0;
+        $years = [];
+        $old_year = 0;
+        $old_mod_date = 0;
         foreach ($all_competitions as $competition) {
             $date = new \DateTime($competition->Competition_Date);
             $year = $date->format('Y');
 
-            $date_modified      = new \DateTime($competition->Date_Modified,
-                                                new \DateTimeZone(get_option('timezone_string')));
-            $mod_date           = $date_modified->format('U');
+            $date_modified = new \DateTime($competition->Date_Modified,
+                                           new \DateTimeZone(get_option('timezone_string')));
+            $mod_date = $date_modified->format('U');
             $last_modified_date = $date_modified->format('c');
 
             if ($year != $old_year) {
                 $old_mod_date = 0;
-                $old_year     = $year;
+                $old_year = $year;
             }
             if ($mod_date > $old_mod_date) {
-                $old_mod_date       = $mod_date;
+                $old_mod_date = $mod_date;
                 $last_modified_date = $date_modified->format('c');
             }
             $years[$year] = $last_modified_date;
@@ -379,16 +379,15 @@ class WpseoHelper
         $date->setDate($sitemap_n, 1, 1);
         $start_date = $date->format('Y-m-d');
         $date->setDate($sitemap_n, 12, 31);
-        $end_date            = $date->format('Y-m-d');
+        $end_date = $date->format('Y-m-d');
         $scored_competitions = $this->query_competitions->getScoredCompetitions($start_date, $end_date);
 
         $sitemap_data = [];
         /** @var QueryCompetitions $competition */
         foreach ($scored_competitions as $competition) {
             $competition_date = new \DateTime($competition->Competition_Date);
-            $key              = $competition_date->format('U');
-            $date             = new \DateTime($competition->Date_Modified,
-                                              new \DateTimeZone(get_option('timezone_string')));
+            $key = $competition_date->format('U');
+            $date = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
 
             $sitemap_data[$key] = [
                 'loc' => $url . $competition_date->format('Y-m-d') . '/',
@@ -398,7 +397,7 @@ class WpseoHelper
             ];
 
             if ($include_images) {
-                $entries     = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
+                $entries = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
                 $data_images = [];
                 if (is_array($entries)) {
                     /** @var QueryEntries $record */
@@ -406,14 +405,15 @@ class WpseoHelper
                     foreach ($entries as $record) {
                         $user_info = get_userdata($record->Member_ID);
 
-                        $image_data['loc']     = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-                        $image_data['title']   = $record->Title;
+                        $image_data['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name,
+                                                                                  '800');
+                        $image_data['title'] = $record->Title;
                         $image_data['caption'] = $record->Title .
                                                  ' Credit: ' .
                                                  $user_info->user_firstname .
                                                  ' ' .
                                                  $user_info->user_lastname;
-                        $data_images[]         = $image_data;
+                        $data_images[] = $image_data;
                     }
                 }
                 $sitemap_data[$key]['images'] = $data_images;

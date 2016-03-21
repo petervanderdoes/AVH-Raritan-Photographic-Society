@@ -40,12 +40,12 @@ class RequestUploadImage
                                 FormFactory $form_factory,
                                 Settings $settings)
     {
-        $this->entity            = $entity;
+        $this->entity = $entity;
         $this->upload_image_type = $upload_image_type;
-        $this->model             = $model;
-        $this->request           = $request;
-        $this->form_factory      = $form_factory;
-        $this->settings          = $settings;
+        $this->model = $model;
+        $this->request = $request;
+        $this->form_factory = $form_factory;
+        $this->settings = $settings;
     }
 
     /**

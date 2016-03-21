@@ -29,8 +29,8 @@ class EditTitleController
      */
     public function __construct(ShortcodeView $view, EditTitleModel $model, Settings $settings)
     {
-        $this->view     = $view;
-        $this->model    = $model;
+        $this->view = $view;
+        $this->model = $model;
         $this->settings = $settings;
     }
 
@@ -49,15 +49,15 @@ class EditTitleController
     {
 
         if ($this->settings->has('formerror')) {
-            $form             = $this->model->getSubmittedForm();
+            $form = $this->model->getSubmittedForm();
             $server_file_name = $form->get('server_file_name')
                                      ->getData()
             ;
         } else {
-            $entry_id         = $this->model->getEntryId();
-            $entry            = $this->model->getEntry($entry_id);
+            $entry_id = $this->model->getEntryId();
+            $entry = $this->model->getEntry($entry_id);
             $server_file_name = $entry->Server_File_Name;
-            $form             = $this->model->getNewForm($entry_id, $entry->Title, $entry->Server_File_Name);
+            $form = $this->model->getNewForm($entry_id, $entry->Title, $entry->Server_File_Name);
         }
         $data = $this->model->getData($server_file_name);
 

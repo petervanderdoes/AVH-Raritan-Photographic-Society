@@ -38,14 +38,14 @@ class MonthlyWinnersServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('MonthlyWinnersController',
-            function (Application $app) {
+            function(Application $app) {
                 return new MonthlyWinnersController($app->make('ShortcodeView'),
                                                     $app->make('MonthlyWinnersModel'),
                                                     $app->make('Settings'));
             });
 
         $this->app->bind('MonthlyWinnersModel',
-            function (Application $app) {
+            function(Application $app) {
                 return new MonthlyWinnersModel($app->make('Session'),
                                                $app->make('QueryCompetitions'),
                                                $app->make('QueryMiscellaneous'),

@@ -31,7 +31,7 @@ class Client
     public function __construct(PhotoHelper $photo_helper, Json $json)
     {
         $this->photo_helper = $photo_helper;
-        $this->json         = $json;
+        $this->json = $json;
     }
 
     /**
@@ -43,7 +43,7 @@ class Client
     {
         $username = $request->input('username');
         $password = $request->input('password');
-        $db       = $this->getDatabaseHandle();
+        $db = $this->getDatabaseHandle();
 
         if (is_object($db)) {
             if ($this->checkUserAuthentication($username, $password)) {
@@ -74,7 +74,7 @@ class Client
     {
         $closed = $request->input('closed');
         $scored = $request->input('scored');
-        $db     = $this->getDatabaseHandle();
+        $db = $this->getDatabaseHandle();
         if (is_object($db)) {
             $this->jsonCompetitionDates($db, $closed, $scored);
         }
@@ -92,7 +92,7 @@ class Client
     {
         $username = $request->input('username');
         $password = $request->input('password');
-        $db       = $this->getDatabaseHandle();
+        $db = $this->getDatabaseHandle();
         if (is_object($db)) {
             if ($this->checkUserAuthentication($username, $password)) {
 
@@ -204,7 +204,7 @@ class Client
     {
 
         try {
-            $sql         = 'SELECT entries.ID, entries.Title, entries.Member_ID,
+            $sql = 'SELECT entries.ID, entries.Title, entries.Member_ID,
             entries.Server_File_Name, entries.Score, entries.Award
             FROM entries
                 WHERE entries.Competition_ID = :comp_id
@@ -228,15 +228,15 @@ class Client
             if (CommonHelper::isPaidMember($user->ID)) {
                 $entry = [];
                 // Create an Entry node
-                $entry['id']         = $entry_record['ID'];
+                $entry['id'] = $entry_record['ID'];
                 $entry['first_name'] = $user->user_firstname;
-                $entry['last_name']  = $user->user_lastname;
-                $entry['title']      = $entry_record['Title'];
-                $entry['score']      = $entry_record['Score'];
-                $entry['award']      = $entry_record['Award'];
-                $entry['image_url']  = $this->photo_helper->getThumbnailUrl($entry_record['Server_File_Name'],
-                                                                            Constants::IMAGE_CLIENT_SIZE);
-                $all_entries[]       = $entry;
+                $entry['last_name'] = $user->user_lastname;
+                $entry['title'] = $entry_record['Title'];
+                $entry['score'] = $entry_record['Score'];
+                $entry['award'] = $entry_record['Award'];
+                $entry['image_url'] = $this->photo_helper->getThumbnailUrl($entry_record['Server_File_Name'],
+                                                                           Constants::IMAGE_CLIENT_SIZE);
+                $all_entries[] = $entry;
                 $this->total_entries++;
             }
         }
@@ -256,7 +256,7 @@ class Client
     {
         $this->json->setStatusSuccess();
         try {
-            $sql  = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
+            $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
             $stmt = $db->prepare($sql);
         } catch (\PDOException $e) {
             $this->json->addError($e->getMessage());
@@ -266,17 +266,17 @@ class Client
         }
 
         foreach ($competition_results->Competitions as $competition) {
-            $comp_date      = (string)$competition->CompDate;
+            $comp_date = (string)$competition->CompDate;
             $classification = (string)$competition->Classification;
-            $medium         = (string)$competition->Medium;
+            $medium = (string)$competition->Medium;
 
             foreach ($competition->Entries as $entry) {
-                $entry_id   = $entry->ID;
+                $entry_id = $entry->ID;
                 $first_name = html_entity_decode($entry->First_Name);
-                $last_name  = html_entity_decode($entry->Last_Name);
-                $title      = html_entity_decode($entry->Title);
-                $score      = html_entity_decode($entry->Score);
-                $award      = html_entity_decode($entry->Award);
+                $last_name = html_entity_decode($entry->Last_Name);
+                $title = html_entity_decode($entry->Title);
+                $score = html_entity_decode($entry->Score);
+                $award = html_entity_decode($entry->Award);
 
                 if ($entry_id != '') {
                     try {
@@ -321,9 +321,9 @@ class Client
      */
     private function jsonCompetitionData($db, $requested_medium, $comp_date)
     {
-        $competitions        = [];
+        $competitions = [];
         $this->total_entries = 0;
-        $image_size          = '1024';
+        $image_size = '1024';
 
         $this->json->setStatusSuccess();
 
@@ -351,11 +351,11 @@ class Client
         $record_competitions = $sth_competitions->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($record_competitions as $record_competition) {
-            $comp_id        = $record_competition['ID'];
-            $date_parts     = explode(' ', $record_competition['Competition_Date']);
-            $date           = $date_parts[0];
-            $theme          = $record_competition['Theme'];
-            $medium         = $record_competition['Medium'];
+            $comp_id = $record_competition['ID'];
+            $date_parts = explode(' ', $record_competition['Competition_Date']);
+            $date = $date_parts[0];
+            $theme = $record_competition['Theme'];
+            $medium = $record_competition['Medium'];
             $classification = $record_competition['Classification'];
             if (empty($record_competition['Image_Size'])) {
                 $image_size = '1024';
@@ -363,18 +363,18 @@ class Client
                 $image_size = $record_competition['Image_Size'];
             }
             // Create the competition node in the XML response
-            $competition                   = [];
-            $competition['date']           = $date;
-            $competition['theme']          = $theme;
-            $competition['medium']         = $medium;
+            $competition = [];
+            $competition['date'] = $date;
+            $competition['theme'] = $theme;
+            $competition['medium'] = $medium;
             $competition['classification'] = $classification;
-            $entries                       = $this->getEntries($db, $comp_id);
+            $entries = $this->getEntries($db, $comp_id);
             if ($entries === false) {
                 return;
             }
 
             $competition['entries'] = $entries;
-            $competitions[]         = $competition;
+            $competitions[] = $competition;
         }
         $this->jsonCompetitionInformation($image_size);
         $this->json->addResource('competitions', $competitions);
@@ -399,7 +399,7 @@ class Client
     private function jsonCompetitionDates($db, $closed, $scored)
     {
         $dates = [];
-        $recs  = $this->fetchCompetitionDates($db, $closed, $scored);
+        $recs = $this->fetchCompetitionDates($db, $closed, $scored);
         if (is_object($recs) && get_class($recs) == 'PDOException') {
             /* @var $recs \PDOException */
             $this->json->setStatusError();
@@ -410,7 +410,7 @@ class Client
         }
         foreach ($recs as $record) {
             $date_parts = explode(' ', $record['Competition_Date']);
-            $dates[]    = $date_parts[0];
+            $dates[] = $date_parts[0];
         }
         $this->json->addResource('competition_dates', $dates);
         $this->json->setStatusSuccess();
@@ -427,9 +427,9 @@ class Client
      */
     private function jsonCompetitionInformation($image_size)
     {
-        $options                 = get_option('avh-rps');
+        $options = get_option('avh-rps');
         $competition_information = [];
-        $seleced_image_size      = ImageSizeHelper::getImageSize($image_size);
+        $seleced_image_size = ImageSizeHelper::getImageSize($image_size);
         /**
          * If the image size does not exists in our table we set the size to the default value and set a fail in the JSON file
          */
@@ -438,9 +438,9 @@ class Client
             $this->json->addError('Unknown Image Size for the competition. Value given: ' . $image_size);
             $seleced_image_size = ImageSizeHelper::getImageSize($options['default_image_size']);
         }
-        $competition_information['ImageSize']['Width']  = $seleced_image_size['width'];
+        $competition_information['ImageSize']['Width'] = $seleced_image_size['width'];
         $competition_information['ImageSize']['Height'] = $seleced_image_size['height'];
-        $competition_information['total_entries']       = $this->total_entries;
+        $competition_information['total_entries'] = $this->total_entries;
 
         $this->json->addResource('information', $competition_information);
     }
@@ -456,13 +456,13 @@ class Client
     private function markCompetitonScored($db, $comp_date, $classification, $medium)
     {
         try {
-            $sql_update  = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
+            $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
                         WHERE Competition_Date = :comp_date AND
                         Classification = :classification AND
                         Medium = :medium';
             $stmt_update = $db->prepare($sql_update);
-            $date        = new \DateTime($comp_date);
-            $sql_date    = $date->format('Y-m-d H:i:s');
+            $date = new \DateTime($comp_date);
+            $sql_date = $date->format('Y-m-d H:i:s');
             $stmt_update->bindValue(':comp_date', $sql_date, PDO::PARAM_STR);
             $stmt_update->bindValue(':classification', $classification, PDO::PARAM_STR);
             $stmt_update->bindValue(':medium', $medium, PDO::PARAM_STR);

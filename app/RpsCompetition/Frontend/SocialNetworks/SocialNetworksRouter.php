@@ -27,7 +27,7 @@ final class SocialNetworksRouter
     public function __construct(Settings $settings, SocialNetworksController $controller)
     {
 
-        $this->settings   = $settings;
+        $this->settings = $settings;
         $this->controller = $controller;
     }
 

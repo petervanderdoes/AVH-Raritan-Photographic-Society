@@ -46,11 +46,11 @@ class RequestBanquetEntries
                                 FormFactory $form_factory)
     {
 
-        $this->entity                    = $entity;
-        $this->model                     = $model;
+        $this->entity = $entity;
+        $this->model = $model;
         $this->banquet_current_user_type = $banquet_current_user_type;
-        $this->request                   = $request;
-        $this->form_factory              = $form_factory;
+        $this->request = $request;
+        $this->form_factory = $form_factory;
     }
 
     /**

@@ -54,13 +54,13 @@ class MyEntriesModel
                                 IlluminateRequest $request)
     {
         $this->query_competitions = $query_competitions;
-        $this->query_entries      = $query_entries;
-        $this->photo_helper       = $photo_helper;
+        $this->query_entries = $query_entries;
+        $this->photo_helper = $photo_helper;
         $this->competition_helper = $competition_helper;
-        $this->session            = $session;
-        $this->form_factory       = $form_factory;
-        $this->settings           = $settings;
-        $this->request            = $request;
+        $this->session = $session;
+        $this->form_factory = $form_factory;
+        $this->settings = $settings;
+        $this->request = $request;
     }
 
     /**
@@ -102,7 +102,7 @@ class MyEntriesModel
                                                 ['action' => $action, 'attr' => ['id' => 'myentries']]);
 
             $this->addFormButtons($current_competition, $form);
-            $return         = [];
+            $return = [];
             $return['data'] = $data;
             $return['form'] = $form;
         }
@@ -136,7 +136,9 @@ class MyEntriesModel
         if ($this->num_rows > 0) {
             $form->add('delete', 'submit', ['label' => 'Remove', 'attr' => ['onclick' => 'return  confirmSubmit()']]);
             if ($max_entries_per_member_per_comp > 0) {
-                $form->add('edit', 'submit', ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
+                $form->add('edit',
+                           'submit',
+                           ['label' => 'Edit Title', 'attr' => ['onclick' => 'submit_form("edit")']]);
             }
         }
     }
@@ -152,11 +154,11 @@ class MyEntriesModel
     private function getCurrentCompetition($medium_subset_medium, $open_competitions)
     {
         $current_competition = reset($open_competitions);
-        $competition_date    = $this->session->get('myentries.' . $medium_subset_medium . '.competition_date',
-                                                   mysql2date('Y-m-d', $current_competition->Competition_Date));
-        $medium              = $this->session->get('myentries.' . $medium_subset_medium . '.medium',
-                                                   $current_competition->Medium);
-        $classification      = CommonHelper::getUserClassification(get_current_user_id(), $medium);
+        $competition_date = $this->session->get('myentries.' . $medium_subset_medium . '.competition_date',
+                                                mysql2date('Y-m-d', $current_competition->Competition_Date));
+        $medium = $this->session->get('myentries.' . $medium_subset_medium . '.medium',
+                                      $current_competition->Medium);
+        $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
         $current_competition = $this->query_competitions->getCompetitionByDateClassMedium($competition_date,
                                                                                           $classification,
                                                                                           $medium);
@@ -173,7 +175,7 @@ class MyEntriesModel
      */
     private function getEntries($current_competition)
     {
-        $data    = [];
+        $data = [];
         $entries = $this->query_entries->getEntriesSubmittedByMember(get_current_user_id(),
                                                                      $current_competition->Competition_Date,
                                                                      $current_competition->Classification,
@@ -185,18 +187,17 @@ class MyEntriesModel
             $competition = $this->query_competitions->getCompetitionById($recs->Competition_ID);
             $this->num_rows++;
 
-            $entry                     = [];
-            $entry['id']               = $recs->ID;
-            $entry['image']['url']     = home_url($recs->Server_File_Name);
-            $entry['image']['title']   = $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium;
-            $entry['image']['source']  = $this->photo_helper->getThumbnailUrl($recs->Server_File_Name, '75');
-            $entry['title']            = $recs->Title;
+            $entry = [];
+            $entry['id'] = $recs->ID;
+            $entry['image']['url'] = home_url($recs->Server_File_Name);
+            $entry['image']['title'] = $recs->Title . ' ' . $competition->Classification . ' ' . $competition->Medium;
+            $entry['image']['source'] = $this->photo_helper->getThumbnailUrl($recs->Server_File_Name, '75');
+            $entry['title'] = $recs->Title;
             $entry['client_file_name'] = $recs->Client_File_Name;
-            $size                      = getimagesize($this->request->server('DOCUMENT_ROOT') .
-                                                      $recs->Server_File_Name);
-            $entry['size']['x']        = $size[0];
-            $entry['size']['y']        = $size[1];
-            $data[]                    = $entry;
+            $size = getimagesize($this->request->server('DOCUMENT_ROOT') . $recs->Server_File_Name);
+            $entry['size']['x'] = $size[0];
+            $entry['size']['y'] = $size[1];
+            $data[] = $entry;
         }
 
         return $data;
@@ -230,12 +231,12 @@ class MyEntriesModel
     private function getOpenCompetitionsOptions($open_competitions)
     {
         $open_competitions_options = [];
-        $previous_date             = '';
+        $previous_date = '';
         foreach ($open_competitions as $open_competition) {
             if ($previous_date == $open_competition->Competition_Date) {
                 continue;
             }
-            $previous_date                                                  = $open_competition->Competition_Date;
+            $previous_date = $open_competition->Competition_Date;
             $open_competitions_options[$open_competition->Competition_Date] = strftime('%d-%b-%Y',
                                                                                        strtotime($open_competition->Competition_Date)) .
                                                                               ' ' .
@@ -254,15 +255,15 @@ class MyEntriesModel
      */
     private function getTemplateData($current_competition)
     {
-        $data                     = [];
+        $data = [];
         $data['competition_date'] = $current_competition->Competition_Date;
-        $data['medium']           = $current_competition->Medium;
-        $data['classification']   = $current_competition->Classification;
+        $data['medium'] = $current_competition->Medium;
+        $data['classification'] = $current_competition->Classification;
 
         $img = CommonHelper::getCompetitionThumbnail($current_competition);
 
         $data['image_source'] = CommonHelper::getPluginUrl($img, $this->settings->get('images_dir'));
-        $data['theme']        = $current_competition->Theme;
+        $data['theme'] = $current_competition->Theme;
 
         // Display a warning message if the competition is within one week aka 604800 secs (60*60*24*7) of closing
         $close_date = $this->query_competitions->getCompetitionCloseDate($current_competition->Competition_Date,

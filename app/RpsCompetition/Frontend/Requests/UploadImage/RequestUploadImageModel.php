@@ -58,13 +58,13 @@ class RequestUploadImageModel
                                 PhotoHelper $photo_helper)
     {
 
-        $this->session            = $session;
-        $this->request            = $request;
+        $this->session = $session;
+        $this->request = $request;
         $this->query_competitions = $query_competitions;
-        $this->query_entries      = $query_entries;
-        $this->photo_helper       = $photo_helper;
-        $this->entity             = $entity;
-        $this->settings           = $settings;
+        $this->query_entries = $query_entries;
+        $this->photo_helper = $photo_helper;
+        $this->entity = $entity;
+        $this->settings = $settings;
     }
 
     /**
@@ -151,9 +151,9 @@ class RequestUploadImageModel
         $max_per_date = $this->query_entries->countEntriesByCompetitionDate($this->comp_date, get_current_user_id());
         if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
             $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
-            $error_message           = 'You have already submitted the maximum of ' .
-                                       $max_entries_member_date .
-                                       ' entries for this competition date. You must Remove an image before you can submit another';
+            $error_message = 'You have already submitted the maximum of ' .
+                             $max_entries_member_date .
+                             ' entries for this competition date. You must Remove an image before you can submit another';
             $this->setFormError($this->form, $error_message);
 
             return false;
@@ -172,17 +172,17 @@ class RequestUploadImageModel
      */
     private function addEntry($comp_id, $title)
     {
-        $file             = $this->request->file('form.file_name');
+        $file = $this->request->file('form.file_name');
         $client_file_name = $file->getClientOriginalName();
 
         $server_file_name = $this->relative_server_path . '/' . $this->dest_name . '.jpg';
-        $data             = [
+        $data = [
             'Competition_ID'   => $comp_id,
             'Title'            => $title,
             'Client_File_Name' => $client_file_name,
             'Server_File_Name' => $server_file_name
         ];
-        $result           = $this->query_entries->addEntry($data, get_current_user_id());
+        $result = $this->query_entries->addEntry($data, get_current_user_id());
         if ($result === false) {
             $error_message = 'Failed to INSERT entry record into database';
             $this->setFormError($this->form, $error_message);
@@ -230,9 +230,9 @@ class RequestUploadImageModel
     {
         $return = true;
         if ($this->session->has('myentries')) {
-            $subset               = $this->session->get('myentries.subset', null);
-            $this->comp_date      = $this->session->get('myentries.' . $subset . '.competition_date', null);
-            $this->medium         = $this->session->get('myentries.' . $subset . '.medium', null);
+            $subset = $this->session->get('myentries.subset', null);
+            $this->comp_date = $this->session->get('myentries.' . $subset . '.competition_date', null);
+            $this->medium = $this->session->get('myentries.' . $subset . '.medium', null);
             $this->classification = $this->session->get('myentries.' . $subset . '.classification', null);
         } else {
             $error_message = 'Missing "myentries" in session.';
@@ -257,17 +257,13 @@ class RequestUploadImageModel
         $relative_server_path = $this->photo_helper->getCompetitionPath($this->comp_date,
                                                                         $this->classification,
                                                                         $this->medium);
-        $full_server_path     = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
+        $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
 
-        $user               = wp_get_current_user();
-        $file               = $this->request->file('form.file_name');
+        $user = wp_get_current_user();
+        $file = $this->request->file('form.file_name');
         $uploaded_file_name = $file->getRealPath();
         $uploaded_file_info = getimagesize($uploaded_file_name);
-        $dest_name          = sanitize_file_name($title) .
-                              '+' .
-                              $user->user_login .
-                              '+' .
-                              filemtime($uploaded_file_name);
+        $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
         // Need to create the destination folder?
         CommonHelper::createDirectory($full_server_path);
 
@@ -288,7 +284,7 @@ class RequestUploadImageModel
             }
         }
         $this->relative_server_path = $relative_server_path;
-        $this->dest_name            = $dest_name;
+        $this->dest_name = $dest_name;
 
         return $return;
     }

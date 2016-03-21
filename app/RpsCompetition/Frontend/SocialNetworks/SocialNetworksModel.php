@@ -19,10 +19,10 @@ class SocialNetworksModel
      */
     public function getNetworks($networks = [])
     {
-        $networks['facebook']   = ['text' => 'facebook', 'api' => true];
+        $networks['facebook'] = ['text' => 'facebook', 'api' => true];
         $networks['googleplus'] = ['text' => 'google', 'api' => false];
-        $networks['twitter']    = ['text' => 'twitter', 'api' => false];
-        $networks['email']      = ['text' => 'email', 'api' => false];
+        $networks['twitter'] = ['text' => 'twitter', 'api' => false];
+        $networks['email'] = ['text' => 'email', 'api' => false];
 
         return $networks;
     }
@@ -62,11 +62,11 @@ class SocialNetworksModel
             'googleplus' => 'google-plus',
             'email'      => 'envelope-o'
         ];
-        $data          = [];
+        $data = [];
 
         $network_icons = array_merge($default_icons, $icons);
-        $data['url']   = get_permalink();
-        $data['id']    = 'share';
+        $data['url'] = get_permalink();
+        $data['id'] = 'share';
         $data['title'] = get_the_title();
         foreach ($networks as $network => $value) {
             $data['networks'][$network] = ['text' => $value['text'], 'icon' => $network_icons[$network]];
