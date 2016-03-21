@@ -40,38 +40,28 @@ class RequestEditTitleServiceProvider extends ServiceProvider
     {
 
         $this->app->singleton('\RpsCompetition\Entity\Form\EditTitle');
-        $this->app->bind(
-            '\RpsCompetition\Form\Type\EditTitleType',
+        $this->app->bind('\RpsCompetition\Form\Type\EditTitleType',
             function (Application $app) {
                 $entity = $app->make('\RpsCompetition\Entity\Form\EditTitle');
 
                 return new EditTitleType($entity);
-            }
-        );
-        $this->app->bind(
-            '\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel',
+            });
+        $this->app->bind('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel',
             function (Application $app) {
-                return new RequestEditTitleModel(
-                    $app->make('\RpsCompetition\Entity\Form\EditTitle'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryEntries'),
-                    $app->make('PhotoHelper'),
-                    $app->make('IlluminateRequest')
-                );
-            }
-        );
-        $this->app->bind(
-            'RequestEditTitle',
+                return new RequestEditTitleModel($app->make('\RpsCompetition\Entity\Form\EditTitle'),
+                                                 $app->make('QueryCompetitions'),
+                                                 $app->make('QueryEntries'),
+                                                 $app->make('PhotoHelper'),
+                                                 $app->make('IlluminateRequest'));
+            });
+        $this->app->bind('RequestEditTitle',
             function (Application $app) {
-                return new RequestEditTitle(
-                    $app->make('\RpsCompetition\Entity\Form\EditTitle'),
-                    $app->make('\RpsCompetition\Form\Type\EditTitleType'),
-                    $app->make('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('formFactory'),
-                    $app->make('Settings')
-                );
-            }
-        );
+                return new RequestEditTitle($app->make('\RpsCompetition\Entity\Form\EditTitle'),
+                                            $app->make('\RpsCompetition\Form\Type\EditTitleType'),
+                                            $app->make('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel'),
+                                            $app->make('IlluminateRequest'),
+                                            $app->make('formFactory'),
+                                            $app->make('Settings'));
+            });
     }
 }

@@ -38,22 +38,18 @@ class UploadImageServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'UploadImageController',
+        $this->app->bind('UploadImageController',
             function (Application $app) {
-                return new UploadImageController(
-                    $app->make('ShortcodeView'), $app->make('UploadImageModel'), $app->make('Settings')
-                );
-            }
-        );
+                return new UploadImageController($app->make('ShortcodeView'),
+                                                 $app->make('UploadImageModel'),
+                                                 $app->make('Settings'));
+            });
 
-        $this->app->bind(
-            'UploadImageModel',
+        $this->app->bind('UploadImageModel',
             function (Application $app) {
-                return new UploadImageModel(
-                    $app->make('formFactory'), $app->make('Settings'), $app->make('IlluminateRequest')
-                );
-            }
-        );
+                return new UploadImageModel($app->make('formFactory'),
+                                            $app->make('Settings'),
+                                            $app->make('IlluminateRequest'));
+            });
     }
 }

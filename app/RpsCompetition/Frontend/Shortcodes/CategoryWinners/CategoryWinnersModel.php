@@ -27,7 +27,7 @@ class CategoryWinnersModel
     {
 
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
+        $this->photo_helper        = $photo_helper;
     }
 
     /**
@@ -41,11 +41,11 @@ class CategoryWinnersModel
      */
     public function getCategoryWinners($class, $entries, $thumb_size)
     {
-        $data = [];
-        $data['class'] = $class;
-        $data['records'] = $entries;
+        $data               = [];
+        $data['class']      = $class;
+        $data['records']    = $entries;
         $data['thumb_size'] = $thumb_size;
-        $data['images'] = [];
+        $data['images']     = [];
         foreach ($data['records'] as $recs) {
             $data['images'][] = $this->photo_helper->dataPhotoGallery($recs, $data['thumb_size']);
         }
@@ -77,7 +77,7 @@ class CategoryWinnersModel
     public function getWinner($class, $award, $date)
     {
         $competition_date = date('Y-m-d H:i:s', strtotime($date));
-        $award_map = ['1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM'];
+        $award_map        = ['1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM'];
 
         return $this->query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
     }

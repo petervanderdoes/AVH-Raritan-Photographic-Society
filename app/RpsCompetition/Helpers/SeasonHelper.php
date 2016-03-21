@@ -38,16 +38,14 @@ class SeasonHelper
      */
     public function getSeasonDropdown($selected_season, $echo = false)
     {
-        $seasons = $this->getSeasons();
+        $seasons      = $this->getSeasons();
         $html_builder = new HtmlBuilder();
         $form_builder = new FormBuilder($html_builder);
 
-        $form = $form_builder->select(
-            'new_season',
-            array_combine($seasons, $seasons),
-            $selected_season,
-            ['onChange' => 'submit_form("new_season")']
-        );
+        $form = $form_builder->select('new_season',
+                                      array_combine($seasons, $seasons),
+                                      $selected_season,
+                                      ['onChange' => 'submit_form("new_season")']);
 
         if ($echo) {
             echo $form;
@@ -67,9 +65,9 @@ class SeasonHelper
      */
     public function getSeasonId($date)
     {
-        $options = get_option('avh-rps');
-        $date_object = new \DateTime($date);
-        $selected_year = (int) $date_object->format('Y');
+        $options       = get_option('avh-rps');
+        $date_object   = new \DateTime($date);
+        $selected_year = (int)$date_object->format('Y');
         if ($date_object->format('m') < $options['season_start_month_num']) {
             $selected_year--;
         }
@@ -86,16 +84,16 @@ class SeasonHelper
      */
     public function getSeasonStartEnd($selected_season)
     {
-        $options = get_option('avh-rps');
+        $options     = get_option('avh-rps');
         $season_date = [];
         // @TODO: Serious to do: Take this construction and make it better.
         $season_start_year = substr($selected_season, 0, 4);
 
-        $date = new \DateTime($season_start_year . '-' . $options['season_start_month_num']);
+        $date          = new \DateTime($season_start_year . '-' . $options['season_start_month_num']);
         $season_date[] = $date->format('Y-m-d');
 
         // @TODO: The 6 is the end of the season.
-        $date = new \DateTime(substr($selected_season, 5, 2) . '-6-1');
+        $date          = new \DateTime(substr($selected_season, 5, 2) . '-6-1');
         $season_date[] = $date->format('Y-m-t');
 
         return $season_date;
@@ -108,13 +106,11 @@ class SeasonHelper
      */
     public function getSeasons()
     {
-        $options = get_option('avh-rps');
+        $options             = get_option('avh-rps');
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $seasons = $query_miscellaneous->getSeasonList(
-            'ASC',
-            $options['season_start_month_num'],
-            $options['season_end_month_num']
-        );
+        $seasons             = $query_miscellaneous->getSeasonList('ASC',
+                                                                   $options['season_start_month_num'],
+                                                                   $options['season_end_month_num']);
 
         unset($query_miscellaneous);
 
@@ -130,7 +126,7 @@ class SeasonHelper
      */
     public function isValidSeason($season)
     {
-        $return = true;
+        $return  = true;
         $seasons = $this->getSeasons();
         if (!in_array($season, $seasons)) {
             $return = false;

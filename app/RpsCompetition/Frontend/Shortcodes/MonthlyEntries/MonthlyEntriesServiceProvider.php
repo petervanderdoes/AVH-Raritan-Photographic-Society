@@ -38,26 +38,20 @@ class MonthlyEntriesServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'MonthlyEntriesController',
+        $this->app->bind('MonthlyEntriesController',
             function (Application $app) {
-                return new MonthlyEntriesController(
-                    $app->make('ShortcodeView'), $app->make('MonthlyEntriesModel'), $app->make('Settings')
-                );
-            }
-        );
+                return new MonthlyEntriesController($app->make('ShortcodeView'),
+                                                    $app->make('MonthlyEntriesModel'),
+                                                    $app->make('Settings'));
+            });
 
-        $this->app->bind(
-            'MonthlyEntriesModel',
+        $this->app->bind('MonthlyEntriesModel',
             function (Application $app) {
-                return new MonthlyEntriesModel(
-                    $app->make('Session'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('PhotoHelper'),
-                    $app->make('SeasonHelper')
-                );
-            }
-        );
+                return new MonthlyEntriesModel($app->make('Session'),
+                                               $app->make('QueryCompetitions'),
+                                               $app->make('QueryMiscellaneous'),
+                                               $app->make('PhotoHelper'),
+                                               $app->make('SeasonHelper'));
+            });
     }
 }

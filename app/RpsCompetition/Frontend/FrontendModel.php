@@ -37,16 +37,16 @@ class FrontendModel
      */
     public function getFacebookData($attachments)
     {
-        $entries = [];
+        $entries         = [];
         $attachments_key = array_keys($attachments);
         foreach ($attachments_key as $id) {
-            $img_url = wp_get_attachment_url($id);
+            $img_url  = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
-                $entry = new \stdClass;
-                $img_relative_path = substr($img_url, strlen($home_url));
+                $entry                   = new \stdClass;
+                $img_relative_path       = substr($img_url, strlen($home_url));
                 $entry->Server_File_Name = $img_relative_path;
-                $entries[] = $entry;
+                $entries[]               = $entry;
             }
         }
         $data = $this->photo_helper->getFacebookThumbs($entries);
@@ -66,43 +66,37 @@ class FrontendModel
     {
         $attachments = [];
         if (!empty($short_code_atts['include'])) {
-            $_attachments = get_posts(
-                [
-                    'include'        => $short_code_atts['include'],
-                    'post_status'    => 'inherit',
-                    'post_type'      => 'attachment',
-                    'post_mime_type' => 'image',
-                    'order'          => $short_code_atts['order'],
-                    'orderby'        => $short_code_atts['orderby']
-                ]
-            );
+            $_attachments = get_posts([
+                                          'include'        => $short_code_atts['include'],
+                                          'post_status'    => 'inherit',
+                                          'post_type'      => 'attachment',
+                                          'post_mime_type' => 'image',
+                                          'order'          => $short_code_atts['order'],
+                                          'orderby'        => $short_code_atts['orderby']
+                                      ]);
 
             foreach ($_attachments as $key => $val) {
                 $attachments[$val->ID] = $_attachments[$key];
             }
         } elseif (!empty($short_code_atts['exclude'])) {
-            $attachments = get_children(
-                [
-                    'post_parent'    => $id,
-                    'exclude'        => $short_code_atts['exclude'],
-                    'post_status'    => 'inherit',
-                    'post_type'      => 'attachment',
-                    'post_mime_type' => 'image',
-                    'order'          => $short_code_atts['order'],
-                    'orderby'        => $short_code_atts['orderby']
-                ]
-            );
+            $attachments = get_children([
+                                            'post_parent'    => $id,
+                                            'exclude'        => $short_code_atts['exclude'],
+                                            'post_status'    => 'inherit',
+                                            'post_type'      => 'attachment',
+                                            'post_mime_type' => 'image',
+                                            'order'          => $short_code_atts['order'],
+                                            'orderby'        => $short_code_atts['orderby']
+                                        ]);
         } else {
-            $attachments = get_children(
-                [
-                    'post_parent'    => $id,
-                    'post_status'    => 'inherit',
-                    'post_type'      => 'attachment',
-                    'post_mime_type' => 'image',
-                    'order'          => $short_code_atts['order'],
-                    'orderby'        => $short_code_atts['orderby']
-                ]
-            );
+            $attachments = get_children([
+                                            'post_parent'    => $id,
+                                            'post_status'    => 'inherit',
+                                            'post_type'      => 'attachment',
+                                            'post_mime_type' => 'image',
+                                            'order'          => $short_code_atts['order'],
+                                            'orderby'        => $short_code_atts['orderby']
+                                        ]);
         }
 
         return $attachments;
@@ -122,17 +116,17 @@ class FrontendModel
     {
         $data = [];
 
-        $columns = (int) $short_code_atts['columns'];
+        $columns = (int)$short_code_atts['columns'];
 
         $layout = strtolower($short_code_atts['layout']);
 
         $size_class = sanitize_html_class($short_code_atts['size']);
 
-        $data['general']['instance'] = $instance;
-        $data['general']['id'] = $id;
-        $data['general']['columns'] = $columns;
+        $data['general']['instance']   = $instance;
+        $data['general']['id']         = $id;
+        $data['general']['columns']    = $columns;
         $data['general']['size_class'] = $size_class;
-        $data['general']['layout'] = $layout;
+        $data['general']['layout']     = $layout;
 
         $data['images'] = $this->getAttachmentsData($attachments, '150w');
 
@@ -148,7 +142,7 @@ class FrontendModel
      */
     public function getPostGalleryMasonryData($attachments)
     {
-        $data = [];
+        $data           = [];
         $data['images'] = $this->getAttachmentsData($attachments, '150w');
 
         return $data;
@@ -183,13 +177,11 @@ class FrontendModel
     private function dataPhotoGallery($record, $thumb_size)
     {
         $user_info = get_userdata($record->Member_ID);
-        $data = $this->getImageData(
-            $record,
-            $thumb_size,
-            $record->Title,
-            $user_info->user_firstname,
-            $user_info->user_lastname
-        );
+        $data      = $this->getImageData($record,
+                                         $thumb_size,
+                                         $record->Title,
+                                         $user_info->user_firstname,
+                                         $user_info->user_lastname);
 
         return $data;
     }
@@ -207,14 +199,14 @@ class FrontendModel
         $data = [];
 
         foreach ($attachments as $id => $attachment) {
-            $img_url = wp_get_attachment_url($id);
+            $img_url  = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
                 /** @var \RpsCompetition\Db\QueryEntries $entry */
-                $entry = new \stdClass;
-                $img_relative_path = substr($img_url, strlen($home_url));
+                $entry                   = new \stdClass;
+                $img_relative_path       = substr($img_url, strlen($home_url));
                 $entry->Server_File_Name = $img_relative_path;
-                $entry->ID = $attachment->ID;
+                $entry->ID               = $attachment->ID;
 
                 if (trim($attachment->post_excerpt)) {
                     $caption_title = $attachment->post_excerpt;
@@ -223,13 +215,11 @@ class FrontendModel
                 }
                 $caption_photographer_first_name = get_post_meta($attachment->ID, '_rps_photographer_name', true);
 
-                $data[] = $this->getImageData(
-                    $entry,
-                    $thumb_size,
-                    $caption_title,
-                    $caption_photographer_first_name,
-                    ''
-                );
+                $data[] = $this->getImageData($entry,
+                                              $thumb_size,
+                                              $caption_title,
+                                              $caption_photographer_first_name,
+                                              '');
             }
         }
 
@@ -249,11 +239,13 @@ class FrontendModel
      */
     private function getImageData($record, $thumb_size, $photo_title, $photographer_first_name, $photographer_last_name)
     {
-        $data = [];
-        $data['url_large'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data               = [];
+        $data['url_large']  = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb']  = $this->photo_helper->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->photo_helper->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['caption'] = $this->getPhotoCreditData($photo_title, $photographer_first_name, $photographer_last_name);
+        $data['caption']    = $this->getPhotoCreditData($photo_title,
+                                                        $photographer_first_name,
+                                                        $photographer_last_name);
 
         return $data;
     }
@@ -269,8 +261,8 @@ class FrontendModel
      */
     private function getPhotoCreditData($title, $first_name, $last_name)
     {
-        $data = [];
-        $data['title'] = $title;
+        $data           = [];
+        $data['title']  = $title;
         $data['credit'] = $first_name . ' ' . $last_name;
 
         return $data;

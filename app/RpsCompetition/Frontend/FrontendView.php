@@ -28,7 +28,7 @@ class FrontendView extends ViewAbstract
      */
     public function __construct($template_dir, $cache_dir, Settings $settings, PhotoHelper $photo_helper)
     {
-        $this->settings = $settings;
+        $this->settings     = $settings;
         $this->photo_helper = $photo_helper;
         parent::__construct($template_dir, $cache_dir);
     }
@@ -83,7 +83,7 @@ class FrontendView extends ViewAbstract
      */
     public function renderPostGalleryFeed($attachments, $size)
     {
-        $output = "\n";
+        $output         = "\n";
         $attachments_id = array_keys($attachments);
         foreach ($attachments_id as $id) {
             $output .= wp_get_attachment_link($id, $size, true) . "\n";

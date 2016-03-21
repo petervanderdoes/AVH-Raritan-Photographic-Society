@@ -113,9 +113,7 @@ final class General extends OptionsAbstract
                  * Boolean fields
                  */
                 default:
-                    wp_die(
-                        'Error while updating option. Probably missing validation. See \RpsCompetition\Options\General validateOption'
-                    );
+                    wp_die('Error while updating option. Probably missing validation. See \RpsCompetition\Options\General validateOption');
                     break;
             }
         }

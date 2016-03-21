@@ -38,37 +38,27 @@ class ParseQueryServiceProvider extends ServiceProvider
     public function register()
     {
 
-        $this->app->bind(
-            '\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper',
+        $this->app->bind('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper',
             function (Application $app) {
-                return new ParseQueryHelper(
-                    $app->make('QueryCompetitions'), $app->make('SeasonHelper'), $app->make('CompetitionHelper')
-                );
-            }
-        );
-        $this->app->bind(
-            'RequestMonthlyEntries',
+                return new ParseQueryHelper($app->make('QueryCompetitions'),
+                                            $app->make('SeasonHelper'),
+                                            $app->make('CompetitionHelper'));
+            });
+        $this->app->bind('RequestMonthlyEntries',
             function (Application $app) {
-                return new RequestMonthlyEntries(
-                    $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('SeasonHelper'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('Session')
-                );
-            }
-        );
-        $this->app->bind(
-            'RequestMonthlyWinners',
+                return new RequestMonthlyEntries($app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
+                                                 $app->make('QueryCompetitions'),
+                                                 $app->make('SeasonHelper'),
+                                                 $app->make('IlluminateRequest'),
+                                                 $app->make('Session'));
+            });
+        $this->app->bind('RequestMonthlyWinners',
             function (Application $app) {
-                return new RequestMonthlyWinners(
-                    $app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('SeasonHelper'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('Session')
-                );
-            }
-        );
+                return new RequestMonthlyWinners($app->make('\RpsCompetition\Frontend\Requests\ParseQuery\ParseQueryHelper'),
+                                                 $app->make('QueryCompetitions'),
+                                                 $app->make('SeasonHelper'),
+                                                 $app->make('IlluminateRequest'),
+                                                 $app->make('Session'));
+            });
     }
 }

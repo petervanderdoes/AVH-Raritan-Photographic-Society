@@ -40,38 +40,28 @@ class RequestBanquetEntriesServiceProvider extends ServiceProvider
     {
 
         $this->app->singleton('\RpsCompetition\Entity\Form\BanquetEntries');
-        $this->app->bind(
-            '\RpsCompetition\Form\Type\BanquetEntriesType',
+        $this->app->bind('\RpsCompetition\Form\Type\BanquetEntriesType',
             function (Application $app) {
                 $entity = $app->make('\RpsCompetition\Entity\Form\BanquetEntries');
 
                 return new BanquetEntriesType($entity);
-            }
-        );
-        $this->app->bind(
-            '\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesModel',
+            });
+        $this->app->bind('\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesModel',
             function (Application $app) {
-                return new RequestBanquetEntriesModel(
-                    $app->make('\RpsCompetition\Entity\Form\BanquetEntries'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('QueryEntries'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('PhotoHelper'),
-                    $app->make('Session')
-                );
-            }
-        );
-        $this->app->bind(
-            'RequestBanquetEntries',
+                return new RequestBanquetEntriesModel($app->make('\RpsCompetition\Entity\Form\BanquetEntries'),
+                                                      $app->make('IlluminateRequest'),
+                                                      $app->make('QueryEntries'),
+                                                      $app->make('QueryCompetitions'),
+                                                      $app->make('PhotoHelper'),
+                                                      $app->make('Session'));
+            });
+        $this->app->bind('RequestBanquetEntries',
             function (Application $app) {
-                return new RequestBanquetEntries(
-                    $app->make('\RpsCompetition\Entity\Form\BanquetEntries'),
-                    $app->make('\RpsCompetition\Form\Type\BanquetEntriesType'),
-                    $app->make('\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesModel'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('formFactory')
-                );
-            }
-        );
+                return new RequestBanquetEntries($app->make('\RpsCompetition\Entity\Form\BanquetEntries'),
+                                                 $app->make('\RpsCompetition\Form\Type\BanquetEntriesType'),
+                                                 $app->make('\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesModel'),
+                                                 $app->make('IlluminateRequest'),
+                                                 $app->make('formFactory'));
+            });
     }
 }

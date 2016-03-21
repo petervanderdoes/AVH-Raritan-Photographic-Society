@@ -40,28 +40,22 @@ class RequestMyEntriesServiceProvider extends ServiceProvider
     {
 
         $this->app->singleton('\RpsCompetition\Entity\Form\MyEntries');
-        $this->app->bind(
-            '\RpsCompetition\Form\Type\MyEntriesType',
+        $this->app->bind('\RpsCompetition\Form\Type\MyEntriesType',
             function (Application $app) {
                 $entity = $app->make('\RpsCompetition\Entity\Form\MyEntries');
 
                 return new MyEntriesType($entity);
-            }
-        );
+            });
         $this->app->bind('\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesModel');
-        $this->app->bind(
-            'RequestMyEntries',
+        $this->app->bind('RequestMyEntries',
             function (Application $app) {
-                return new RequestMyEntries(
-                    $app->make('\RpsCompetition\Entity\Form\MyEntries'),
-                    $app->make('\RpsCompetition\Form\Type\MyEntriesType'),
-                    $app->make('\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesModel'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('formFactory'),
-                    $app->make('Session')
-                );
-            }
-        );
+                return new RequestMyEntries($app->make('\RpsCompetition\Entity\Form\MyEntries'),
+                                            $app->make('\RpsCompetition\Form\Type\MyEntriesType'),
+                                            $app->make('\RpsCompetition\Frontend\Requests\MyEntries\RequestMyEntriesModel'),
+                                            $app->make('QueryCompetitions'),
+                                            $app->make('IlluminateRequest'),
+                                            $app->make('formFactory'),
+                                            $app->make('Session'));
+            });
     }
 }

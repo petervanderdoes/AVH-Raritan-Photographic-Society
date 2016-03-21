@@ -38,29 +38,21 @@ class MyEntriesServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'MyEntriesController',
+        $this->app->bind('MyEntriesController',
             function (Application $app) {
-                return new MyEntriesController(
-                    $app->make('ShortcodeView'), $app->make('MyEntriesModel')
-                );
-            }
-        );
+                return new MyEntriesController($app->make('ShortcodeView'), $app->make('MyEntriesModel'));
+            });
 
-        $this->app->bind(
-            'MyEntriesModel',
+        $this->app->bind('MyEntriesModel',
             function (Application $app) {
-                return new MyEntriesModel(
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryEntries'),
-                    $app->make('PhotoHelper'),
-                    $app->make('CompetitionHelper'),
-                    $app->make('Session'),
-                    $app->make('formFactory'),
-                    $app->make('Settings'),
-                    $app->make('IlluminateRequest')
-                );
-            }
-        );
+                return new MyEntriesModel($app->make('QueryCompetitions'),
+                                          $app->make('QueryEntries'),
+                                          $app->make('PhotoHelper'),
+                                          $app->make('CompetitionHelper'),
+                                          $app->make('Session'),
+                                          $app->make('formFactory'),
+                                          $app->make('Settings'),
+                                          $app->make('IlluminateRequest'));
+            });
     }
 }

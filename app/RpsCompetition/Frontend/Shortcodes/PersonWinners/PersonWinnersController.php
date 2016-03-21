@@ -23,7 +23,7 @@ class PersonWinnersController
      */
     public function __construct(ShortcodeView $view, PersonWinnersModel $model)
     {
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 

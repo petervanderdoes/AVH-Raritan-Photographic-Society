@@ -40,8 +40,8 @@ final class ImageSizeHelper
      */
     public static function getImageSize($size)
     {
-        if (self::isImageSize((string) $size)) {
-            return self::$image_sizes[(string) $size];
+        if (self::isImageSize((string)$size)) {
+            return self::$image_sizes[(string)$size];
         }
 
         return null;

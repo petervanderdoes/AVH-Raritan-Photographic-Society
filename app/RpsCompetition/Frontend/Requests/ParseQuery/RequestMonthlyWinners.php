@@ -32,19 +32,18 @@ class RequestMonthlyWinners
      * @param IlluminateRequest $request
      * @param Session           $session
      */
-    public function __construct(
-        ParseQueryHelper $pq_helper,
-        QueryCompetitions $query_competitions,
-        SeasonHelper $season_helper,
-        IlluminateRequest $request,
-        Session $session
-    ) {
+    public function __construct(ParseQueryHelper $pq_helper,
+                                QueryCompetitions $query_competitions,
+                                SeasonHelper $season_helper,
+                                IlluminateRequest $request,
+                                Session $session)
+    {
 
         $this->query_competitions = $query_competitions;
-        $this->season_helper = $season_helper;
-        $this->request = $request;
-        $this->session = $session;
-        $this->pq_helper = $pq_helper;
+        $this->season_helper      = $season_helper;
+        $this->request            = $request;
+        $this->session            = $session;
+        $this->pq_helper          = $pq_helper;
     }
 
     /**
@@ -52,8 +51,8 @@ class RequestMonthlyWinners
      */
     public function handleRequestMonthlyWinners()
     {
-        $redirect = false;
-        $status = 303;
+        $redirect                = false;
+        $status                  = 303;
         $query_var_selected_date = get_query_var('selected_date', false);
 
         /**
@@ -70,28 +69,22 @@ class RequestMonthlyWinners
                 $this->pq_helper->setSelectedDate(esc_attr($this->request->input('new_month')));
                 break;
             default:
-                if ($query_var_selected_date === false || (!CommonHelper::isValidDate(
-                        $query_var_selected_date,
-                        'Y-m-d'
-                    ))
+                if ($query_var_selected_date === false || (!CommonHelper::isValidDate($query_var_selected_date,
+                                                                                      'Y-m-d'))
                 ) {
-                    $last_scored = $this->query_competitions->query(
-                        [
-                            'where'   => 'Scored="Y" AND Special_Event="N"',
-                            'orderby' => 'Competition_Date',
-                            'order'   => 'DESC',
-                            'number'  => 1
-                        ]
-                    );
+                    $last_scored = $this->query_competitions->query([
+                                                                        'where'   => 'Scored="Y" AND Special_Event="N"',
+                                                                        'orderby' => 'Competition_Date',
+                                                                        'order'   => 'DESC',
+                                                                        'number'  => 1
+                                                                    ]);
                     $date_object = new \DateTime($last_scored->Competition_Date);
                     $this->pq_helper->setSelectedDate($date_object->format(('Y-m-d')));
                     $redirect = true;
                 } else {
                     $this->pq_helper->setSelectedDate($query_var_selected_date);
                 }
-                $this->pq_helper->setSelectedSeason(
-                    $this->season_helper->getSeasonId($this->pq_helper->getSelectedDate())
-                );
+                $this->pq_helper->setSelectedSeason($this->season_helper->getSeasonId($this->pq_helper->getSelectedDate()));
                 break;
         }
 

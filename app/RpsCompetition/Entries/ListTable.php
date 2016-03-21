@@ -39,11 +39,11 @@ class ListTable extends \WP_List_Table
     public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
     {
         $this->settings = $settings;
-        $this->rpsdb = $rpsdb;
-        $this->html = new HtmlBuilder();
-        $this->request = $request;
+        $this->rpsdb    = $rpsdb;
+        $this->html     = new HtmlBuilder();
+        $this->request  = $request;
 
-        $this->screen = 'avh_rps_page_avh_rps_entries_';
+        $this->screen   = 'avh_rps_page_avh_rps_entries_';
         $default_status = get_user_option('avhrps_entries_list_last_view');
         if (empty($default_status)) {
             $default_status = 'all';
@@ -91,7 +91,7 @@ class ListTable extends \WP_List_Table
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
-        $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
+        $competition      = $query_competitions->getCompetitionById($entry->Competition_ID);
         $competition_text = $competition->Theme . ' - ' . $competition->Medium . ' - ' . $competition->Classification;
         echo $competition_text;
 
@@ -103,14 +103,12 @@ class ListTable extends \WP_List_Table
      */
     public function column_name($entry)
     {
-        $user = get_user_by('id', $entry->Member_ID);
+        $user      = get_user_by('id', $entry->Member_ID);
         $queryUser = ['page' => Constants::MENU_SLUG_ENTRIES, 'user_id' => $user->ID];
-        $urlUser = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
-        echo $this->html->anchor(
-            $urlUser,
-            $user->user_firstname . ' ' . $user->user_lastname,
-            ['title' => 'Entries for ' . $user->user_firstname . ' ' . $user->user_lastname]
-        );
+        $urlUser   = admin_url('admin.php') . '?' . http_build_query($queryUser, '', '&');
+        echo $this->html->anchor($urlUser,
+                                 $user->user_firstname . ' ' . $user->user_lastname,
+                                 ['title' => 'Entries for ' . $user->user_firstname . ' ' . $user->user_lastname]);
     }
 
     /**
@@ -127,11 +125,11 @@ class ListTable extends \WP_List_Table
     public function column_season($entry)
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $options = get_option('avh-rps');
+        $options            = get_option('avh-rps');
 
         $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
         if ($competition != false) {
-            $unix_date = mysql2date('U', $competition->Competition_Date);
+            $unix_date         = mysql2date('U', $competition->Competition_Date);
             $competition_month = date('n', $unix_date);
             if ($competition_month >= $options['season_start_month_num'] &&
                 $competition_month <= $options['season_end_month_num']
@@ -155,7 +153,7 @@ class ListTable extends \WP_List_Table
         echo $entry->Title;
         $url = admin_url('admin.php') . '?';
 
-        $queryReferer = ['page' => Constants::MENU_SLUG_ENTRIES];
+        $queryReferer    = ['page' => Constants::MENU_SLUG_ENTRIES];
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
         $nonceDelete = wp_create_nonce('bulk-entries');
@@ -165,7 +163,7 @@ class ListTable extends \WP_List_Table
             'action'   => 'delete',
             '_wpnonce' => $nonceDelete
         ];
-        $urlDelete = $url . http_build_query($queryDelete, '', '&');
+        $urlDelete   = $url . http_build_query($queryDelete, '', '&');
 
         $queryEdit = [
             'page'            => Constants::MENU_SLUG_ENTRIES,
@@ -173,15 +171,13 @@ class ListTable extends \WP_List_Table
             'action'          => 'edit',
             'wp_http_referer' => $wp_http_referer
         ];
-        $urlEdit = $url . http_build_query($queryEdit, '', '&');
+        $urlEdit   = $url . http_build_query($queryEdit, '', '&');
 
-        $actions = [];
-        $actions['delete'] = $this->html->anchor(
-            $urlDelete,
-            'Delete',
-            ['class' => 'delete', 'title' => 'Delete this competition']
-        );
-        $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this entry']);
+        $actions           = [];
+        $actions['delete'] = $this->html->anchor($urlDelete,
+                                                 'Delete',
+                                                 ['class' => 'delete', 'title' => 'Delete this competition']);
+        $actions['edit']   = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this entry']);
 
         echo '<div class="row-actions">';
         $sep = '';
@@ -246,32 +242,32 @@ class ListTable extends \WP_List_Table
     {
 
         $query_miscellaneous = new QueryMiscellaneous($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $season_helper = new SeasonHelper($this->rpsdb);
-        $options = get_option('avh-rps');
+        $query_competitions  = new QueryCompetitions($this->settings, $this->rpsdb);
+        $season_helper       = new SeasonHelper($this->rpsdb);
+        $options             = get_option('avh-rps');
 
         echo '<div class="alignleft actions">';
         if ('top' == $which) {
-            $seasons = $query_miscellaneous->getSeasonList(
-                'DESC',
-                $options['season_start_month_num'],
-                $options['season_end_month_num']
-            );
+            $seasons         = $query_miscellaneous->getSeasonList('DESC',
+                                                                   $options['season_start_month_num'],
+                                                                   $options['season_end_month_num']);
             $selected_season = $this->request->input('filter-season', 0);
             echo '<select name="filter-season">';
             echo '<option' . selected($selected_season, 0, false) . ' value="0">' . __('All seasons') . '</option>';
             foreach ($seasons as $season) {
-                echo '<option' . selected($selected_season, $season, false) . ' value="' . esc_attr(
-                        $season
-                    ) . '">' . $season . '</option>';
+                echo '<option' .
+                     selected($selected_season, $season, false) .
+                     ' value="' .
+                     esc_attr($season) .
+                     '">' .
+                     $season .
+                     '</option>';
             }
             echo '</select>';
 
             if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
                 $theme_request = $this->request->input('filter-theme', 0);
-                list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd(
-                    $this->request->input('filter-season')
-                );
+                list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($this->request->input('filter-season'));
                 $competitions = $query_competitions->getCompetitionByDates($season_start_date, $season_end_date);
 
                 $themes = [];
@@ -284,13 +280,19 @@ class ListTable extends \WP_List_Table
                 asort($themes);
 
                 echo $this->html->element('select', ['name' => 'filter-theme']);
-                echo '<option' . selected($theme_request, 0, false) . ' value="0">' . __(
-                        'All Competition Themes'
-                    ) . '</option>';
+                echo '<option' .
+                     selected($theme_request, 0, false) .
+                     ' value="0">' .
+                     __('All Competition Themes') .
+                     '</option>';
                 foreach ($themes as $theme_key => $theme_value) {
-                    echo '<option' . selected($theme_request, $theme_key, false) . ' value="' . esc_attr(
-                            $theme_key
-                        ) . '">' . $theme_value . '</option>';
+                    echo '<option' .
+                         selected($theme_request, $theme_key, false) .
+                         ' value="' .
+                         esc_attr($theme_key) .
+                         '">' .
+                         $theme_value .
+                         '</option>';
                 }
                 echo '</select>';
             }
@@ -305,7 +307,7 @@ class ListTable extends \WP_List_Table
      */
     public function get_bulk_actions()
     {
-        $actions = [];
+        $actions           = [];
         $actions['delete'] = __('Delete');
 
         return $actions;
@@ -363,9 +365,9 @@ class ListTable extends \WP_List_Table
     {
         global $entry_status, $search;
 
-        $query_entries = new QueryEntries($this->rpsdb);
+        $query_entries      = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
-        $season_helper = new SeasonHelper($this->rpsdb);
+        $season_helper      = new SeasonHelper($this->rpsdb);
 
         $entry_status = $this->request->input('entry_status', 'all');
         if (!in_array($entry_status, ['all'])) {
@@ -375,30 +377,26 @@ class ListTable extends \WP_List_Table
         $search = $this->request->input('s', '');
 
         $orderby = $this->request->input('orderby', 'Competition_ID DESC, Member_ID');
-        $order = $this->request->input('order', '');
+        $order   = $this->request->input('order', '');
 
         $entries_per_page = $this->get_per_page($entry_status);
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        $number = (int) $this->request->input(
-            'number',
-            $entries_per_page + min(8, $entries_per_page)
-        ); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
+        $number = (int)$this->request->input('number',
+                                             $entries_per_page +
+                                             min(8,
+                                                 $entries_per_page)); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
 
         $where = '1=1';
         if ($this->request->has('user_id')) {
             $where = 'Member_ID=' . esc_sql($this->request->input('user_id'));
         }
         if ($this->request->has('filter-season') && $this->request->input('filter-season') != 0) {
-            list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd(
-                $this->request->input('filter-season')
-            );
-            $where = $this->rpsdb->prepare(
-                'Competition_Date >= %s AND Competition_Date <= %s',
-                $season_start_date,
-                $season_end_date
-            );
+            list ($season_start_date, $season_end_date) = $season_helper->getSeasonStartEnd($this->request->input('filter-season'));
+            $where = $this->rpsdb->prepare('Competition_Date >= %s AND Competition_Date <= %s',
+                                           $season_start_date,
+                                           $season_end_date);
 
             $filter_theme = $this->request->input('filter-theme', 0);
             if ($filter_theme != 0) {
@@ -420,10 +418,10 @@ class ListTable extends \WP_List_Table
         }
         $page = $this->get_pagenum();
 
-        $start = (int) $this->request->input('start', ($page - 1) * $entries_per_page);
+        $start = (int)$this->request->input('start', ($page - 1) * $entries_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
-            $start += (int) $this->request->input('offset');
+            $start += (int)$this->request->input('offset');
         }
 
         $args = [
@@ -435,8 +433,8 @@ class ListTable extends \WP_List_Table
             'where'   => $where
         ];
 
-        $entries = $query_entries->query($args);
-        $this->items = array_slice($entries, 0, $entries_per_page);
+        $entries           = $query_entries->query($args);
+        $this->items       = array_slice($entries, 0, $entries_per_page);
         $this->extra_items = array_slice($entries, $entries_per_page);
 
         $total_entries = $query_entries->query(array_merge($args, ['count' => true, 'offset' => 0, 'number' => 0]));

@@ -20,7 +20,7 @@ class CommonHelper
      */
     public static function arrayMsort($array, $cols)
     {
-        $row_is_object = false;
+        $row_is_object     = false;
         $sort_column_array = [];
 
         // Create multiple arrays using the array $cols.
@@ -29,7 +29,7 @@ class CommonHelper
             $sort_column_array[$col] = [];
             foreach ($array as $key => $row) {
                 if (is_object($row)) {
-                    $row = (array) $row;
+                    $row           = (array)$row;
                     $row_is_object = true;
                 }
                 $sort_column_array[$col][$key] = strtolower($row[$col]);
@@ -50,7 +50,7 @@ class CommonHelper
         call_user_func_array('array_multisort', $params);
         if ($row_is_object) {
             foreach ($array as $key => $row) {
-                $array[$key] = (object) $row;
+                $array[$key] = (object)$row;
             }
         }
 
@@ -78,12 +78,12 @@ class CommonHelper
      */
     public static function getCompetitionThumbnail($current_competition)
     {
-        $image = [];
+        $image                  = [];
         $image['Color Digital'] = '/thumb-comp-digital-color.jpg';
-        $image['Color Prints'] = '/thumb-comp-print-color.jpg';
-        $image['B&W Digital'] = '/thumb-comp-digital-bw.jpg';
-        $image['B&W Prints'] = '/thumb-comp-print-bw.jpg';
-        $img = $image[$current_competition->Medium];
+        $image['Color Prints']  = '/thumb-comp-print-color.jpg';
+        $image['B&W Digital']   = '/thumb-comp-digital-bw.jpg';
+        $image['B&W Prints']    = '/thumb-comp-print-bw.jpg';
+        $img                    = $image[$current_competition->Medium];
 
         return $img;
     }
@@ -96,7 +96,7 @@ class CommonHelper
      */
     public static function getDynamicPages()
     {
-        $options = get_option('avh-rps');
+        $options     = get_option('avh-rps');
         $pages_array = [$options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true];
 
         return $pages_array;

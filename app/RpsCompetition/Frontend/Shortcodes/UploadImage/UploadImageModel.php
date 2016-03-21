@@ -29,8 +29,8 @@ class UploadImageModel
      */
     public function __construct(FormFactory $form_factory, Settings $settings, IlluminateRequest $request)
     {
-        $this->settings = $settings;
-        $this->request = $request;
+        $this->settings     = $settings;
+        $this->request      = $request;
         $this->form_factory = $form_factory;
     }
 
@@ -56,7 +56,7 @@ class UploadImageModel
     {
         global $post;
 
-        $action = home_url('/' . get_page_uri($post->ID));
+        $action        = home_url('/' . get_page_uri($post->ID));
         $medium_subset = $this->getMediumSubset();
 
         $ref = $this->request->input('wp_get_referer', wp_get_referer());
@@ -64,11 +64,9 @@ class UploadImageModel
         $entity = new EntityFormUploadImage();
         $entity->setWpGetReferer($ref);
         $entity->setMediumSubset($medium_subset);
-        $form = $this->form_factory->create(
-            new UploadImageType(),
-            $entity,
-            ['action' => $action, 'attr' => ['id' => 'uploadentry']]
-        );
+        $form = $this->form_factory->create(new UploadImageType(),
+                                            $entity,
+                                            ['action' => $action, 'attr' => ['id' => 'uploadentry']]);
 
         return $form;
     }
@@ -82,7 +80,7 @@ class UploadImageModel
     {
         /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
         $error_obj = $this->settings->get('formerror');
-        $form = $error_obj->getForm();
+        $form      = $error_obj->getForm();
 
         return $form;
     }

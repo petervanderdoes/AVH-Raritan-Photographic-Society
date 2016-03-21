@@ -30,8 +30,8 @@ class RequestMyEntriesModel
     {
 
         $this->query_entries = $query_entries;
-        $this->photo_helper = $photo_helper;
-        $this->settings = $settings;
+        $this->photo_helper  = $photo_helper;
+        $this->settings      = $settings;
     }
 
     /**
@@ -45,18 +45,15 @@ class RequestMyEntriesModel
             foreach ($entries as $id) {
                 $entry_record = $this->query_entries->getEntryById($id);
                 if ($entry_record == false) {
-                    $this->settings->set(
-                        'errmsg',
-                        sprintf('<b>Failed to SELECT competition entry with ID %s from database</b><br>', $id)
-                    );
+                    $this->settings->set('errmsg',
+                                         sprintf('<b>Failed to SELECT competition entry with ID %s from database</b><br>',
+                                                 $id));
                 } else {
                     // Delete the record from the database
                     $result = $this->query_entries->deleteEntry($id);
                     if ($result === false) {
-                        $this->settings->set(
-                            'errmsg',
-                            sprintf('<b>Failed to DELETE competition entry %s from database</b><br>')
-                        );
+                        $this->settings->set('errmsg',
+                                             sprintf('<b>Failed to DELETE competition entry %s from database</b><br>'));
                     } else {
                         // Delete the file from the server file system
                         $this->photo_helper->deleteEntryFromDisk($entry_record);

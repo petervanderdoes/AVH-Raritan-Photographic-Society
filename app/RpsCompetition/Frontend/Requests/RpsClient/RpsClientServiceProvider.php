@@ -39,26 +39,18 @@ class RpsClientServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(
-            'Json',
+        $this->app->bind('Json',
             function () {
                 return new Json();
-            }
-        );
+            });
 
-        $this->app->bind(
-            'ApiClient',
+        $this->app->bind('ApiClient',
             function (Application $app) {
                 return new Client($app->make('PhotoHelper'), $app->make('Json'));
-            }
-        );
-        $this->app->bind(
-            'RequestRpsClient',
+            });
+        $this->app->bind('RequestRpsClient',
             function (Application $app) {
-                return new RequestRpsClient(
-                    $app->make('ApiClient'), $app->make('IlluminateRequest')
-                );
-            }
-        );
+                return new RequestRpsClient($app->make('ApiClient'), $app->make('IlluminateRequest'));
+            });
     }
 }

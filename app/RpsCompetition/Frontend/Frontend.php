@@ -36,14 +36,14 @@ class Frontend
      */
     public function __construct(Application $app)
     {
-        $this->app = $app;
+        $this->app     = $app;
         $this->session = $app->make('Session');
         $this->session->start();
 
         $this->settings = $app->make('Settings');
-        $this->request = $app->make('IlluminateRequest');
+        $this->request  = $app->make('IlluminateRequest');
 
-        $this->view = $app->make('FrontendView');
+        $this->view  = $app->make('FrontendView');
         $this->model = $app->make('FrontendModel');
 
         $this->setupRequestHandling();
@@ -82,8 +82,8 @@ class Frontend
         global $wp_query;
         global $post;
 
-        $options = get_option('avh-rps');
-        $all_masonry_pages = [];
+        $options                                                = get_option('avh-rps');
+        $all_masonry_pages                                      = [];
         $all_masonry_pages[$options['monthly_entries_post_id']] = true;
         if (array_key_exists($wp_query->get_queried_object_id(), $all_masonry_pages)) {
             wp_enqueue_script('rps-masonryInit');
@@ -142,8 +142,8 @@ class Frontend
     {
         if (is_front_page()) {
             $query_miscellaneous = $this->app->make('QueryMiscellaneous');
-            $records = $query_miscellaneous->getEightsAndHigher(5);
-            $data = $this->model->getShowcaseData($records, '150');
+            $records             = $query_miscellaneous->getEightsAndHigher(5);
+            $data                = $this->model->getShowcaseData($records, '150');
             $this->view->renderShowcaseCompetitionThumbnails($data);
             unset($query_miscellaneous);
         }
@@ -171,26 +171,24 @@ class Frontend
             }
         }
 
-        $short_code_atts = shortcode_atts(
-            [
-                'order'      => 'ASC',
-                'orderby'    => 'menu_order ID',
-                'id'         => $post ? $post->ID : 0,
-                'itemtag'    => 'figure',
-                'icontag'    => 'div',
-                'captiontag' => 'figcaption',
-                'columns'    => 3,
-                'size'       => 'thumbnail',
-                'include'    => '',
-                'exclude'    => '',
-                'link'       => '',
-                'layout'     => 'row-equal'
-            ],
-            $attr,
-            'gallery'
-        );
+        $short_code_atts = shortcode_atts([
+                                              'order'      => 'ASC',
+                                              'orderby'    => 'menu_order ID',
+                                              'id'         => $post ? $post->ID : 0,
+                                              'itemtag'    => 'figure',
+                                              'icontag'    => 'div',
+                                              'captiontag' => 'figcaption',
+                                              'columns'    => 3,
+                                              'size'       => 'thumbnail',
+                                              'include'    => '',
+                                              'exclude'    => '',
+                                              'link'       => '',
+                                              'layout'     => 'row-equal'
+                                          ],
+                                          $attr,
+                                          'gallery');
 
-        $id = (int) ($short_code_atts['id']);
+        $id = (int)($short_code_atts['id']);
         if ('RAND' == $short_code_atts['order']) {
             $short_code_atts['orderby'] = 'none';
         }
@@ -228,13 +226,13 @@ class Frontend
         }
 
         if (strtolower($short_code_atts['layout']) == 'masonry') {
-            $data = $this->model->getPostGalleryMasonryData($attachments);
+            $data   = $this->model->getPostGalleryMasonryData($attachments);
             $output = $this->view->renderGalleryMasonry($data);
 
             return $output;
         }
 
-        $data = $this->model->getPostGalleryData($short_code_atts, $id, $instance, $attachments);
+        $data   = $this->model->getPostGalleryData($short_code_atts, $id, $instance, $attachments);
         $output = $this->view->renderPostGallery($data);
 
         return $output;
@@ -294,12 +292,12 @@ class Frontend
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
             $query_competitions = $this->app->make('QueryCompetitions');
-            $selected_date = get_query_var('selected_date');
-            $competitions = $query_competitions->getCompetitionByDates($selected_date);
-            $competition = current($competitions);
-            $theme = ucfirst($competition->Theme);
-            $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
+            $selected_date      = get_query_var('selected_date');
+            $competitions       = $query_competitions->getCompetitionByDates($selected_date);
+            $competition        = current($competitions);
+            $theme              = ucfirst($competition->Theme);
+            $date               = new \DateTime($selected_date);
+            $date_text          = $date->format('F j, Y');
             $title .= ' for the theme "' . $theme . '" on ' . $date_text;
         }
 
@@ -313,58 +311,50 @@ class Frontend
     {
         if (WP_LOCAL_DEV !== true) {
             $rps_competition_css_version = 'a06a6dd';
-            $rps_masonry_version = 'a172153';
-            $masonry_version = 'f833162';
-            $imagesloaded_version = 'bce608e';
-            $version_separator = '-';
+            $rps_masonry_version         = 'a172153';
+            $masonry_version             = 'f833162';
+            $imagesloaded_version        = 'bce608e';
+            $version_separator           = '-';
         } else {
             $rps_competition_css_version = '';
-            $rps_masonry_version = '';
-            $masonry_version = '';
-            $imagesloaded_version = '';
-            $version_separator = '';
+            $rps_masonry_version         = '';
+            $masonry_version             = '';
+            $imagesloaded_version        = '';
+            $version_separator           = '';
         }
 
-        $rps_masonry_script = 'rps.masonry' . $version_separator . $rps_masonry_version . '.js';
-        $masonry_script = 'masonry' . $version_separator . $masonry_version . '.js';
-        $imagesloaded_script = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
+        $rps_masonry_script    = 'rps.masonry' . $version_separator . $rps_masonry_version . '.js';
+        $masonry_script        = 'masonry' . $version_separator . $masonry_version . '.js';
+        $imagesloaded_script   = 'imagesloaded' . $version_separator . $imagesloaded_version . '.js';
         $rps_competition_style = 'rps-competition' . $version_separator . $rps_competition_css_version . '.css';
 
         $javascript_directory = $this->settings->get('javascript_dir');
         wp_deregister_script('masonry');
-        wp_register_script(
-            'masonry',
-            CommonHelper::getPluginUrl($masonry_script, $javascript_directory),
-            [],
-            'to_remove',
-            1
-        );
-        wp_register_script(
-            'rps-imagesloaded',
-            CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory),
-            ['masonry'],
-            'to_remove',
-            true
-        );
-        wp_register_script(
-            'rps-masonryInit',
-            CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory),
-            ['rps-imagesloaded'],
-            'to_remove',
-            true
-        );
+        wp_register_script('masonry',
+                           CommonHelper::getPluginUrl($masonry_script, $javascript_directory),
+                           [],
+                           'to_remove',
+                           1);
+        wp_register_script('rps-imagesloaded',
+                           CommonHelper::getPluginUrl($imagesloaded_script, $javascript_directory),
+                           ['masonry'],
+                           'to_remove',
+                           true);
+        wp_register_script('rps-masonryInit',
+                           CommonHelper::getPluginUrl($rps_masonry_script, $javascript_directory),
+                           ['rps-imagesloaded'],
+                           'to_remove',
+                           true);
         if (is_ssl()) {
             $font_awesome = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
         } else {
             $font_awesome = 'http://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
         }
         wp_register_style('rps-competition.fontawesome.style', $font_awesome);
-        wp_register_style(
-            'rps-competition.general.style',
-            CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')),
-            ['rps-competition.fontawesome.style'],
-            'to_remove'
-        );
+        wp_register_style('rps-competition.general.style',
+                          CommonHelper::getPluginUrl($rps_competition_style, $this->settings->get('css_dir')),
+                          ['rps-competition.fontawesome.style'],
+                          'to_remove');
     }
 
     /**
@@ -422,12 +412,12 @@ class Frontend
 
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = 'a172153';
-            $version_separator = '-';
+            $version_separator             = '-';
         } else {
             $social_buttons_script_version = '';
-            $version_separator = '';
+            $version_separator             = '';
         }
-        $data = [];
+        $data           = [];
         $data['script'] = 'rps-competition.social-buttons' .
                           $version_separator .
                           $social_buttons_script_version .
@@ -440,7 +430,7 @@ class Frontend
      */
     private function setupUserMeta()
     {
-        $user_id = get_current_user_id();
+        $user_id   = get_current_user_id();
         $user_meta = get_user_meta($user_id, 'rps_class_bw', true);
         if (empty($user_meta)) {
             update_user_meta($user_id, 'rps_class_bw', 'beginner');

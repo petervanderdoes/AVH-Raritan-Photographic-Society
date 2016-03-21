@@ -37,11 +37,11 @@ class ListTable extends \WP_List_Table
     public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
     {
         $this->settings = $settings;
-        $this->rpsdb = $rpsdb;
-        $this->request = $request;
-        $this->html = new HtmlBuilder();
+        $this->rpsdb    = $rpsdb;
+        $this->request  = $request;
+        $this->html     = new HtmlBuilder();
 
-        $this->screen = 'avh_rps_page_avh_rps_competition_';
+        $this->screen   = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');
         if (empty($default_status)) {
             $default_status = 'all';
@@ -91,7 +91,7 @@ class ListTable extends \WP_List_Table
 
         $url = admin_url('admin.php') . '?';
 
-        $queryReferer = ['page' => Constants::MENU_SLUG_COMPETITION];
+        $queryReferer    = ['page' => Constants::MENU_SLUG_COMPETITION];
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
         $nonceDelete = wp_create_nonce('bulk-competitions');
@@ -101,7 +101,7 @@ class ListTable extends \WP_List_Table
             'action'      => 'delete',
             '_wpnonce'    => $nonceDelete
         ];
-        $urlDelete = $url . http_build_query($queryDelete, '', '&');
+        $urlDelete   = $url . http_build_query($queryDelete, '', '&');
 
         $queryEdit = [
             'page'            => Constants::MENU_SLUG_COMPETITION,
@@ -109,7 +109,7 @@ class ListTable extends \WP_List_Table
             'action'          => 'edit',
             'wp_http_referer' => $wp_http_referer
         ];
-        $urlEdit = $url . http_build_query($queryEdit, '', '&');
+        $urlEdit   = $url . http_build_query($queryEdit, '', '&');
 
         // We'll not add these for now, maybe later. There is no real need to open/close a single part of a competition anyway.
         // if ($competition->Closed == 'Y') {
@@ -122,13 +122,11 @@ class ListTable extends \WP_List_Table
         // $actions['close'] = '<a ' . Common::attributes(array('href' => $urlClose,'title' => 'Close this competition')) . '>' . 'Close' . '</a>';
         // }
 
-        $actions = [];
-        $actions['delete'] = $this->html->anchor(
-            $urlDelete,
-            'Delete',
-            ['class' => 'delete', 'title' => 'Delete this competition']
-        );
-        $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this competition']);
+        $actions           = [];
+        $actions['delete'] = $this->html->anchor($urlDelete,
+                                                 'Delete',
+                                                 ['class' => 'delete', 'title' => 'Delete this competition']);
+        $actions['edit']   = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this competition']);
 
         echo '<div class="row-actions">';
         $sep = '';
@@ -151,7 +149,7 @@ class ListTable extends \WP_List_Table
         $query_entries = new QueryEntries($this->rpsdb);
 
         $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competition->ID);
-        $entries = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
+        $entries  = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
         echo $entries;
 
         unset($query_entries);
@@ -353,17 +351,13 @@ class ListTable extends \WP_List_Table
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $num_competitions = $query_competitions->countCompetitions();
-        $status_links = [];
-        $stati = [
+        $status_links     = [];
+        $stati            = [
             'all'    => _nx_noop('All', 'All', 'competitions'),
-            'open'   => _n_noop(
-                'Open <span class="count">(<span class="open-count">%s</span>)</span>',
-                'Open <span class="count">(<span class="open-count">%s</span>)</span>'
-            ),
-            'closed' => _n_noop(
-                'Closed <span class="count">(<span class="closed-count">%s</span>)</span>',
-                'Closed <span class="count">(<span class="closed-count">%s</span>)</span>'
-            )
+            'open'   => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>',
+                                'Open <span class="count">(<span class="open-count">%s</span>)</span>'),
+            'closed' => _n_noop('Closed <span class="count">(<span class="closed-count">%s</span>)</span>',
+                                'Closed <span class="count">(<span class="closed-count">%s</span>)</span>')
         ];
 
         $link = 'admin.php?page=' . Constants::MENU_SLUG_COMPETITION;
@@ -376,10 +370,14 @@ class ListTable extends \WP_List_Table
             }
             $link = add_query_arg('competition_status', $status, $link);
             // I toyed with this, but decided against it. Leaving it in here in case anyone thinks it is a good idea. ~ Mark if ( !empty( $_REQUEST['s'] ) ) $link = add_query_arg( 's', esc_attr( stripslashes( $_REQUEST['s'] ) ), $link );
-            $status_links[$status] = '<a href="' . $link . '"' . $class . '>' . sprintf(
-                    translate_nooped_plural($label, $num_competitions->$status),
-                    number_format_i18n($num_competitions->$status)
-                ) . '</a>';
+            $status_links[$status] = '<a href="' .
+                                     $link .
+                                     '"' .
+                                     $class .
+                                     '>' .
+                                     sprintf(translate_nooped_plural($label, $num_competitions->$status),
+                                             number_format_i18n($num_competitions->$status)) .
+                                     '</a>';
         }
 
         unset($query_competitions);
@@ -422,14 +420,14 @@ class ListTable extends \WP_List_Table
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        $number = (int) $this->request->input('number', $competitions_per_page + min(8, $competitions_per_page));
+        $number = (int)$this->request->input('number', $competitions_per_page + min(8, $competitions_per_page));
 
         $page = $this->get_pagenum();
 
-        $start = (int) $this->request->input('start', ($page - 1) * $competitions_per_page);
+        $start = (int)$this->request->input('start', ($page - 1) * $competitions_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
-            $start += (int) $this->request->input('offset', 0);
+            $start += (int)$this->request->input('offset', 0);
         }
 
         $args = [
@@ -441,13 +439,12 @@ class ListTable extends \WP_List_Table
             'order'   => $order
         ];
 
-        $competitions = $query_competitions->query($args);
-        $this->items = array_slice($competitions, 0, $competitions_per_page);
+        $competitions      = $query_competitions->query($args);
+        $this->items       = array_slice($competitions, 0, $competitions_per_page);
         $this->extra_items = array_slice($competitions, $competitions_per_page);
 
-        $total_competitions = $query_competitions->query(
-            array_merge($args, ['count' => true, 'offset' => 0, 'number' => 0])
-        );
+        $total_competitions = $query_competitions->query(array_merge($args,
+                                                                     ['count' => true, 'offset' => 0, 'number' => 0]));
 
         $this->set_pagination_args(['total_items' => $total_competitions, 'per_page' => $competitions_per_page]);
 
@@ -460,7 +457,7 @@ class ListTable extends \WP_List_Table
     public function single_row($a_competition)
     {
         $competition = $a_competition;
-        $status = ($competition->Closed == 'Y' ? '' : 'closed');
+        $status      = ($competition->Closed == 'Y' ? '' : 'closed');
         echo '<tr id="competition-' . $competition->ID . '" class="' . $status . '">';
         $this->single_row_columns($competition);
         echo '</tr>';

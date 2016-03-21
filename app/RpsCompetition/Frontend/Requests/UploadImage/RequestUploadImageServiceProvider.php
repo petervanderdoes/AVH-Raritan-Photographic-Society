@@ -40,41 +40,32 @@ class RequestUploadImageServiceProvider extends ServiceProvider
     {
 
         $this->app->singleton('\RpsCompetition\Entity\Form\UploadImage');
-        $this->app->bind(
-            '\RpsCompetition\Form\Type\UploadImageType',
+        $this->app->bind('\RpsCompetition\Form\Type\UploadImageType',
             function (Application $app) {
                 $entity = $app->make('\RpsCompetition\Entity\Form\UploadImage');
 
                 return new UploadImageType($entity);
-            }
-        );
-        $this->app->bind(
-            '\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageModel',
+            });
+        $this->app->bind('\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageModel',
             function (Application $app) {
-                return new RequestUploadImageModel(
-                    $app->make('\RpsCompetition\Entity\Form\UploadImage'),
-                    $app->make('Session'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('Settings'),
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryEntries'),
-                    $app->make('PhotoHelper')
+                return new RequestUploadImageModel($app->make('\RpsCompetition\Entity\Form\UploadImage'),
+                                                   $app->make('Session'),
+                                                   $app->make('IlluminateRequest'),
+                                                   $app->make('Settings'),
+                                                   $app->make('QueryCompetitions'),
+                                                   $app->make('QueryEntries'),
+                                                   $app->make('PhotoHelper')
 
                 );
-            }
-        );
-        $this->app->bind(
-            'RequestUploadImage',
+            });
+        $this->app->bind('RequestUploadImage',
             function (Application $app) {
-                return new RequestUploadImage(
-                    $app->make('\RpsCompetition\Entity\Form\UploadImage'),
-                    $app->make('\RpsCompetition\Form\Type\UploadImageType'),
-                    $app->make('\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageModel'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('formFactory'),
-                    $app->make('Settings')
-                );
-            }
-        );
+                return new RequestUploadImage($app->make('\RpsCompetition\Entity\Form\UploadImage'),
+                                              $app->make('\RpsCompetition\Form\Type\UploadImageType'),
+                                              $app->make('\RpsCompetition\Frontend\Requests\UploadImage\RequestUploadImageModel'),
+                                              $app->make('IlluminateRequest'),
+                                              $app->make('formFactory'),
+                                              $app->make('Settings'));
+            });
     }
 }

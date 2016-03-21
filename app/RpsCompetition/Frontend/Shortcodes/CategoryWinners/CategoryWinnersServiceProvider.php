@@ -38,22 +38,16 @@ class CategoryWinnersServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'CategoryWinnersController',
+        $this->app->bind('CategoryWinnersController',
             function (Application $app) {
-                return new CategoryWinnersController(
-                    $app->make('ShortcodeView'), $app->make('CategoryWinnersModel'), $app->make('Settings')
-                );
-            }
-        );
+                return new CategoryWinnersController($app->make('ShortcodeView'),
+                                                     $app->make('CategoryWinnersModel'),
+                                                     $app->make('Settings'));
+            });
 
-        $this->app->bind(
-            'CategoryWinnersModel',
+        $this->app->bind('CategoryWinnersModel',
             function (Application $app) {
-                return new CategoryWinnersModel(
-                    $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
-                );
-            }
-        );
+                return new CategoryWinnersModel($app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+            });
     }
 }
