@@ -15,7 +15,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class BanquetEntriesType extends AbstractType
 {
-    /** @var EntityFormBanquetEntries */
     private $entity;
 
     /**
@@ -34,16 +33,12 @@ class BanquetEntriesType extends AbstractType
         $builder->add('allentries', 'hidden')
                 ->add('banquetids', 'hidden')
                 ->add('wp_get_referer', 'hidden')
-                ->add(
-                    'seasons',
-                    'choice',
-                    [
+                ->add('seasons', 'choice', [
                         'multiple' => false,
                         'expanded' => false,
                         'choices'  => $this->entity->getSeasonsChoices(),
                         'attr'     => ['onchange' => 'submit_form("select_season")']
-                    ]
-                )
+                    ])
                 ->add('update', 'submit', ['label' => 'Update'])
                 ->add('cancel', 'submit', ['label' => 'Cancel', 'attr' => ['formnovalidate' => 'formnovalidate']])
                 ->add('reset', 'reset', ['label' => 'Reset', 'attr' => ['formnovalidate' => 'formnovalidate']])
@@ -55,11 +50,9 @@ class BanquetEntriesType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(
-            [
+        $resolver->setDefaults([
                 'data_class' => 'RpsCompetition\Entity\Form\BanquetEntries',
-            ]
-        );
+            ]);
     }
 
     /**

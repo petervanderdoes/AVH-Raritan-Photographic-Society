@@ -16,7 +16,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class MyEntriesType extends AbstractType
 {
-    /** @var EntityFormMyEntries */
     private $entity;
 
     /**
@@ -37,26 +36,18 @@ class MyEntriesType extends AbstractType
         $builder->add('submit_control', 'hidden')
                 ->add('classification', 'hidden')
                 ->add('_wpnonce', 'hidden')
-                ->add(
-                    'select_comp',
-                    'choice',
-                    [
+                ->add('select_comp', 'choice', [
                         'multiple' => false,
                         'expanded' => false,
                         'choices'  => $this->entity->getSelectedCompChoices(),
                         'attr'     => ['onchange' => 'submit_form("select_comp")']
-                    ]
-                )
-                ->add(
-                    'selected_medium',
-                    'choice',
-                    [
+                    ])
+                ->add('selected_medium', 'choice', [
                         'multiple' => false,
                         'expanded' => false,
                         'choices'  => $this->entity->getSelectedMediumChoices(),
                         'attr'     => ['onchange' => 'submit_form("select_medium")']
-                    ]
-                )
+                    ])
         ;
     }
 
@@ -65,11 +56,9 @@ class MyEntriesType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(
-            [
+        $resolver->setDefaults([
                 'data_class' => 'RpsCompetition\Entity\Form\MyEntries',
-            ]
-        );
+            ]);
     }
 
     /**

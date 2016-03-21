@@ -15,7 +15,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class ScoresCurrentUserType extends AbstractType
 {
-    /** @var EntityFormScoresCurrentUser */
     private $entity;
 
     /**
@@ -31,16 +30,12 @@ class ScoresCurrentUserType extends AbstractType
      */
     public function buildform(FormBuilderInterface $builder, array $options)
     {
-        $builder->add(
-            'seasons',
-            'choice',
-            [
+        $builder->add('seasons', 'choice', [
                 'multiple' => false,
                 'expanded' => false,
                 'choices'  => $this->entity->getSeasonChoices(),
                 'attr'     => ['onchange' => 'submit_form("select_season")']
-            ]
-        );
+            ]);
     }
 
     /**
@@ -48,11 +43,9 @@ class ScoresCurrentUserType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(
-            [
+        $resolver->setDefaults([
                 'data_class' => 'RpsCompetition\Entity\Form\ScoresCurrentUser',
-            ]
-        );
+            ]);
     }
 
     /**
