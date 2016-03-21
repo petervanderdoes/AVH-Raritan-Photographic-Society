@@ -51,7 +51,6 @@ class RequestMonthlyEntries
      */
     public function handleRequestMonthlyEntries()
     {
-
         $redirect = false;
         $status = 303;
         $query_var_selected_date = get_query_var('selected_date', false);
