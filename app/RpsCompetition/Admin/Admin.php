@@ -264,12 +264,12 @@ final class Admin
     /**
      * Show the Classification meta on the user profile page.
      *
-     * @param object $user
+     * @param \WP_User $user
      *
      * @internal Hook: edit_user_profile
      * @internal Hook: show_user_profile
      */
-    public function actionUserProfile($user)
+    public function actionUserProfile(\WP_User $user)
     {
         $userID = $user->ID;
 
@@ -349,13 +349,13 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param array  $actions
-     * @param object $user
+     * @param array    $actions
+     * @param \WP_User $user
      *
-     * @internal Hook: user_row_actions
      * @return array
+     * @internal Hook: user_row_actions
      */
-    public function filterRpsUserActionLinks($actions, $user)
+    public function filterRpsUserActionLinks($actions, \WP_User $user)
     {
         $link = admin_url() . '?page=avh-rps-entries&user_id=' . $user->ID;
         $actions['entries'] = '<a href="' . $link . '">Entries</a>';
@@ -702,7 +702,7 @@ final class Admin
      * @param FormBuilder $formBuilder
      * @param array       $form_options
      */
-    private function displayPageCompetitionAdd($formBuilder, $form_options)
+    private function displayPageCompetitionAdd(FormBuilder $formBuilder, $form_options)
     {
         $this->displayAdminHeader('Add Competition');
 
@@ -1431,7 +1431,7 @@ final class Admin
      *
      * @return \WP_Error|bool
      */
-    private function doUpdateEntry($formOptionsNew, $id, $entry, $competition)
+    private function doUpdateEntry($formOptionsNew, $id, QueryEntries $entry, QueryCompetitions $competition)
     {
         $query_entries = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
