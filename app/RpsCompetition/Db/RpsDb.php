@@ -17,7 +17,6 @@ class RpsDb extends \wpdb
     {
         parent::__construct(RPS_DB_USER, RPS_DB_PASSWORD, RPS_DB_NAME, DB_HOST);
         $this->show_errors(true);
-        $this->user_id = get_current_user_id();
     }
 
     /**
