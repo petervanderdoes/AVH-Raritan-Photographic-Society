@@ -38,25 +38,18 @@ class ScoresCurrentUserServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'ScoresCurrentUserController',
+        $this->app->bind('ScoresCurrentUserController',
             function (Application $app) {
-                return new ScoresCurrentUserController(
-                    $app->make('ShortcodeView'), $app->make('ScoresCurrentUserModel')
-                );
-            }
-        );
+                return new ScoresCurrentUserController($app->make('ShortcodeView'),
+                                                       $app->make('ScoresCurrentUserModel'));
+            });
 
-        $this->app->bind(
-            'ScoresCurrentUserModel',
+        $this->app->bind('ScoresCurrentUserModel',
             function (Application $app) {
-                return new ScoresCurrentUserModel(
-                    $app->make('formFactory'),
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('SeasonHelper'),
-                    $app->make('IlluminateRequest')
-                );
-            }
-        );
+                return new ScoresCurrentUserModel($app->make('formFactory'),
+                                                  $app->make('QueryMiscellaneous'),
+                                                  $app->make('SeasonHelper'),
+                                                  $app->make('IlluminateRequest'));
+            });
     }
 }

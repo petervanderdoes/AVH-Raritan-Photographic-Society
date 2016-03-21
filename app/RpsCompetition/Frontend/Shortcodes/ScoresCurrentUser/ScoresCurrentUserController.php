@@ -24,7 +24,7 @@ class ScoresCurrentUserController
      */
     public function __construct(ShortcodeView $view, ScoresCurrentUserModel $model)
     {
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
@@ -42,7 +42,7 @@ class ScoresCurrentUserController
     public function shortcodeScoresCurrentUser($attr, $content, $tag)
     {
         $model_data = $this->model->getAllData();
-        $data = $model_data['data'];
+        $data       = $model_data['data'];
         /** @var \Symfony\Component\Form\Form $form */
         $form = $model_data['form'];
 

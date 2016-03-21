@@ -31,59 +31,41 @@ class EditTitleType extends AbstractType
      */
     public function buildform(FormBuilderInterface $builder, array $options)
     {
-        $builder->add(
-            'new_title',
-            'text',
-            [
-                'label'       => 'Title',
-                'constraints' => new Assert\Length(
-                    [
-                        'min'        => 2,
-                        'max'        => 128,
-                        'minMessage' => 'The title must be at least {{ limit }} characters long',
-                        'maxMessage' => 'The title can not be longer than {{ limit }} characters',
-                    ]
-                ),
-                'attr'        => [
-                    'maxlength' => '128'
-                ]
-            ]
-        )
-                ->add(
-                    'submit',
-                    'submit',
-                    ['label' => 'Submit']
-                )
-                ->add(
-                    'cancel',
-                    'submit',
-                    [
-                        'label' => 'Cancel',
-                        'attr'  => [
-                            'formnovalidate' => 'formnovalidate'
-                        ]
-                    ]
-                )
-                ->add(
-                    'id',
-                    'hidden'
-                )
-                ->add(
-                    'title',
-                    'hidden'
-                )
-                ->add(
-                    'server_file_name',
-                    'hidden'
-                )
-                ->add(
-                    'm',
-                    'hidden'
-                )
-                ->add(
-                    'wp_get_referer',
-                    'hidden'
-                )
+        $builder->add('new_title',
+                      'text',
+                      [
+                          'label'       => 'Title',
+                          'constraints' => new Assert\Length([
+                                                                 'min'        => 2,
+                                                                 'max'        => 128,
+                                                                 'minMessage' => 'The title must be at least {{ limit }} characters long',
+                                                                 'maxMessage' => 'The title can not be longer than {{ limit }} characters',
+                                                             ]),
+                          'attr'        => [
+                              'maxlength' => '128'
+                          ]
+                      ])
+                ->add('submit',
+                      'submit',
+                      ['label' => 'Submit'])
+                ->add('cancel',
+                      'submit',
+                      [
+                          'label' => 'Cancel',
+                          'attr'  => [
+                              'formnovalidate' => 'formnovalidate'
+                          ]
+                      ])
+                ->add('id',
+                      'hidden')
+                ->add('title',
+                      'hidden')
+                ->add('server_file_name',
+                      'hidden')
+                ->add('m',
+                      'hidden')
+                ->add('wp_get_referer',
+                      'hidden')
         ;
     }
 
@@ -92,11 +74,9 @@ class EditTitleType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(
-            [
-                'data_class' => 'RpsCompetition\Entity\Form\EditTitle',
-            ]
-        );
+        $resolver->setDefaults([
+                                   'data_class' => 'RpsCompetition\Entity\Form\EditTitle',
+                               ]);
     }
 
     /**

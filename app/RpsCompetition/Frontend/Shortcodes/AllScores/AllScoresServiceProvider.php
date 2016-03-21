@@ -38,26 +38,18 @@ class AllScoresServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(
-            'AllScoresController',
+        $this->app->bind('AllScoresController',
             function (Application $app) {
-                return new AllScoresController(
-                    $app->make('ShortcodeView'), $app->make('AllScoresModel')
-                );
-            }
-        );
+                return new AllScoresController($app->make('ShortcodeView'), $app->make('AllScoresModel'));
+            });
 
-        $this->app->bind(
-            'AllScoresModel',
+        $this->app->bind('AllScoresModel',
             function (Application $app) {
-                return new AllScoresModel(
-                    $app->make('QueryCompetitions'),
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('SeasonHelper'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('formFactory')
-                );
-            }
-        );
+                return new AllScoresModel($app->make('QueryCompetitions'),
+                                          $app->make('QueryMiscellaneous'),
+                                          $app->make('SeasonHelper'),
+                                          $app->make('IlluminateRequest'),
+                                          $app->make('formFactory'));
+            });
     }
 }

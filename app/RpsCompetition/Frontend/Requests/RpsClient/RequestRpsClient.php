@@ -24,7 +24,7 @@ class RequestRpsClient
     public function __construct(Client $client, IlluminateRequest $request)
     {
 
-        $this->client = $client;
+        $this->client  = $client;
         $this->request = $request;
     }
 

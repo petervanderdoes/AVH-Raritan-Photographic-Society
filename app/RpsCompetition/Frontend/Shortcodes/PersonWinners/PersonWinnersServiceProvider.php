@@ -38,22 +38,14 @@ class PersonWinnersServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'PersonWinnersController',
+        $this->app->bind('PersonWinnersController',
             function (Application $app) {
-                return new PersonWinnersController(
-                    $app->make('ShortcodeView'), $app->make('PersonWinnersModel')
-                );
-            }
-        );
+                return new PersonWinnersController($app->make('ShortcodeView'), $app->make('PersonWinnersModel'));
+            });
 
-        $this->app->bind(
-            'PersonWinnersModel',
+        $this->app->bind('PersonWinnersModel',
             function (Application $app) {
-                return new PersonWinnersModel(
-                    $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
-                );
-            }
-        );
+                return new PersonWinnersModel($app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+            });
     }
 }

@@ -30,12 +30,14 @@ class ScoresCurrentUserType extends AbstractType
      */
     public function buildform(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('seasons', 'choice', [
-                'multiple' => false,
-                'expanded' => false,
-                'choices'  => $this->entity->getSeasonChoices(),
-                'attr'     => ['onchange' => 'submit_form("select_season")']
-            ]);
+        $builder->add('seasons',
+                      'choice',
+                      [
+                          'multiple' => false,
+                          'expanded' => false,
+                          'choices'  => $this->entity->getSeasonChoices(),
+                          'attr'     => ['onchange' => 'submit_form("select_season")']
+                      ]);
     }
 
     /**
@@ -44,8 +46,8 @@ class ScoresCurrentUserType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-                'data_class' => 'RpsCompetition\Entity\Form\ScoresCurrentUser',
-            ]);
+                                   'data_class' => 'RpsCompetition\Entity\Form\ScoresCurrentUser',
+                               ]);
     }
 
     /**

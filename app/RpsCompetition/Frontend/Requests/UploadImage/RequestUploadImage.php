@@ -33,20 +33,19 @@ class RequestUploadImage
      * @param FormFactory             $form_factory
      * @param Settings                $settings
      */
-    public function __construct(
-        EntityFormUploadImage $entity,
-        UploadImageType $upload_image_type,
-        RequestUploadImageModel $model,
-        IlluminateRequest $request,
-        FormFactory $form_factory,
-        Settings $settings
-    ) {
-        $this->entity = $entity;
+    public function __construct(EntityFormUploadImage $entity,
+                                UploadImageType $upload_image_type,
+                                RequestUploadImageModel $model,
+                                IlluminateRequest $request,
+                                FormFactory $form_factory,
+                                Settings $settings)
+    {
+        $this->entity            = $entity;
         $this->upload_image_type = $upload_image_type;
-        $this->model = $model;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
-        $this->settings = $settings;
+        $this->model             = $model;
+        $this->request           = $request;
+        $this->form_factory      = $form_factory;
+        $this->settings          = $settings;
     }
 
     /**
@@ -61,11 +60,9 @@ class RequestUploadImage
     {
 
         /** @var \Symfony\Component\Form\Form $form */
-        $form = $this->form_factory->create(
-            $this->upload_image_type,
-            $this->entity,
-            ['attr' => ['id' => 'uploadentry']]
-        );
+        $form = $this->form_factory->create($this->upload_image_type,
+                                            $this->entity,
+                                            ['attr' => ['id' => 'uploadentry']]);
         $form->handleRequest($this->request);
 
         $redirect_to = $this->entity->getWpGetReferer();

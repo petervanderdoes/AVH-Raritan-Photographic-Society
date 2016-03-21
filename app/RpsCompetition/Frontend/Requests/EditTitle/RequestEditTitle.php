@@ -35,21 +35,20 @@ class RequestEditTitle
      * @param FormFactory           $form_factory
      * @param Settings              $settings
      */
-    public function __construct(
-        EntityFormEditTitle $entity,
-        EditTitleType $edit_title_type,
-        RequestEditTitleModel $model,
-        IlluminateRequest $request,
-        FormFactory $form_factory,
-        Settings $settings
-    ) {
+    public function __construct(EntityFormEditTitle $entity,
+                                EditTitleType $edit_title_type,
+                                RequestEditTitleModel $model,
+                                IlluminateRequest $request,
+                                FormFactory $form_factory,
+                                Settings $settings)
+    {
 
-        $this->entity = $entity;
+        $this->entity          = $entity;
         $this->edit_title_type = $edit_title_type;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
-        $this->settings = $settings;
-        $this->model = $model;
+        $this->request         = $request;
+        $this->form_factory    = $form_factory;
+        $this->settings        = $settings;
+        $this->model           = $model;
     }
 
     /**
@@ -63,11 +62,9 @@ class RequestEditTitle
     public function handleRequestEditTitle()
     {
 
-        $form = $this->form_factory->create(
-            $this->edit_title_type,
-            $this->entity,
-            ['attr' => ['id' => 'edittitle']]
-        );
+        $form = $this->form_factory->create($this->edit_title_type,
+                                            $this->entity,
+                                            ['attr' => ['id' => 'edittitle']]);
         $form->handleRequest($this->request);
 
         $redirect_to = $this->entity->getWpGetReferer();
@@ -83,7 +80,7 @@ class RequestEditTitle
         }
 
         $server_file_name = $this->entity->getServerFileName();
-        $new_title = $this->entity->getNewTitle();
+        $new_title        = $this->entity->getNewTitle();
 
         if ($this->entity->getNewTitle() !== $this->entity->getTitle()) {
             $this->model->updateTitle($server_file_name, $new_title);

@@ -25,7 +25,7 @@ class CompetitionHelper
      */
     public function __construct(Settings $settings, RpsDb $rpsdb)
     {
-        $this->rpsdb = $rpsdb;
+        $this->rpsdb    = $rpsdb;
         $this->settings = $settings;
     }
 
@@ -62,8 +62,8 @@ class CompetitionHelper
     {
         $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
 
-        $date = $this->rpsdb->getMysqldate($date);
-        $return = false;
+        $date         = $this->rpsdb->getMysqldate($date);
+        $return       = false;
         $competitions = $query_competitions->getScoredCompetitions($date);
         if (is_array($competitions) && (!empty($competitions))) {
             $return = true;
