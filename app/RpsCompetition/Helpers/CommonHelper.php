@@ -1,6 +1,9 @@
 <?php
 namespace RpsCompetition\Helpers;
 
+use RpsCompetition\Db\QueryCompetitions;
+use Symfony\Component\Form\Form;
+
 /**
  * Class CommonHelper
  *
@@ -72,11 +75,11 @@ class CommonHelper
     /**
      * Get the thumbnail to display on the My Entries page.
      *
-     * @param $current_competition
+     * @param QueryCompetitions $current_competition
      *
      * @return mixed
      */
-    public static function getCompetitionThumbnail($current_competition)
+    public static function getCompetitionThumbnail(QueryCompetitions $current_competition)
     {
         $image = [];
         $image['Color Digital'] = '/thumb-comp-digital-color.jpg';
@@ -175,11 +178,11 @@ class CommonHelper
     /**
      * Check if user pressed cancel and if so redirect the user
      *
-     * @param \Symfony\Component\Form\Form $form   The Form that was submitted
-     * @param string                       $cancel The field to check for cancellation
-     * @param string                       $redirect_to
+     * @param Form   $form   The Form that was submitted
+     * @param string $cancel The field to check for cancellation
+     * @param string $redirect_to
      */
-    public static function isRequestCanceled($form, $cancel, $redirect_to)
+    public static function isRequestCanceled(Form $form, $cancel, $redirect_to)
     {
         if ($form->has($cancel)) {
             if ($form->get($cancel)
