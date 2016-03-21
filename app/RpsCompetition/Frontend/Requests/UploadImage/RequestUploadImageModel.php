@@ -11,6 +11,7 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -27,7 +28,7 @@ class RequestUploadImageModel
     private $comp_date;
     private $dest_name;
     private $entity;
-    /** @var \Symfony\Component\Form\Form $form */
+    /** @var Form $form */
     private $form;
     private $medium;
     private $photo_helper;
@@ -70,7 +71,7 @@ class RequestUploadImageModel
     /**
      * Check if the upload is valid, move the uploaded file and create thumbnails
      *
-     * @param \Symfony\Component\Form\Form $form
+     * @param Form $form
      *
      * @return bool
      */
@@ -292,13 +293,13 @@ class RequestUploadImageModel
     /**
      * Set the error for the form.
      *
-     * @param \Symfony\Component\Form\Form $form
-     * @param string                       $error_message
-     * @param string|null                  $form_field
+     * @param Form        $form
+     * @param string      $error_message
+     * @param string|null $form_field
      *
      * @return void
      */
-    private function setFormError($form, $error_message, $form_field = null)
+    private function setFormError(Form $form, $error_message, $form_field = null)
     {
         if ($form_field === null) {
             $form->addError(new FormError('Error: ' . $error_message));
