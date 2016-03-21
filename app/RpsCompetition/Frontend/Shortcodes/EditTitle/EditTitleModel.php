@@ -81,7 +81,7 @@ class EditTitleModel
      */
     public function getEntryId()
     {
-        return (int)$this->request->input('id');
+        return (int) $this->request->input('id');
     }
 
     /**

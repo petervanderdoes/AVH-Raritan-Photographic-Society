@@ -61,7 +61,7 @@ class RequestBanquetEntriesModel
      */
     public function addSelectedEntries()
     {
-        $entries = (array)$this->request->input('form.entry_id', []);
+        $entries = (array) $this->request->input('form.entry_id', []);
         foreach ($entries as $entry_id) {
             $entry = $this->query_entries->getEntryById($entry_id);
             $competition = $this->query_competitions->getCompetitionById($entry->Competition_ID);

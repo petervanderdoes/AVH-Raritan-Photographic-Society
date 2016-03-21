@@ -91,11 +91,11 @@ class QueryCompetitions
         $status = ['N' => 'open', 'Y' => 'closed'];
         $known_types = array_keys($status);
         $stats = [];
-        foreach ((array)$count as $row) {
+        foreach ((array) $count as $row) {
             // Don't count post-trashed toward totals
             $total += $row['num_competitions'];
             if (in_array($row['Closed'], $known_types)) {
-                $stats[$status[$row['Closed']]] = (int)$row['num_competitions'];
+                $stats[$status[$row['Closed']]] = (int) $row['num_competitions'];
             }
         }
 
@@ -106,7 +106,7 @@ class QueryCompetitions
             }
         }
 
-        $stats = (object)$stats;
+        $stats = (object) $stats;
 
         return $stats;
     }
@@ -434,7 +434,7 @@ class QueryCompetitions
         $options = get_option('avh-rps');
         // Are we updating or creating?
         if (!empty($data['ID'])) {
-            $competition_ID = (int)$data['ID'];
+            $competition_ID = (int) $data['ID'];
             $where = ['ID' => $competition_ID];
             if (!isset($data['Date_Modified'])) {
                 $data['Date_Modified'] = current_time('mysql');
@@ -478,7 +478,7 @@ class QueryCompetitions
                                      __('Could not insert competition into the database'),
                                      $this->rpsdb->last_error);
             }
-            $competition_ID = (int)$this->rpsdb->insert_id;
+            $competition_ID = (int) $this->rpsdb->insert_id;
         }
 
         return $competition_ID;

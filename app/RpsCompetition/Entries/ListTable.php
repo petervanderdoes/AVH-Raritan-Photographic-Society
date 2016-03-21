@@ -383,9 +383,9 @@ class ListTable extends \WP_List_Table
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        $number = (int)$this->request->input('number',
-                                             $entries_per_page + min(8,
-                                                                     $entries_per_page)); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
+        $number = (int) $this->request->input('number',
+                                              $entries_per_page + min(8,
+                                                                      $entries_per_page)); // Grab a few extra, when changing the 8 changes are need in avh-fdas.ipcachelist.js
 
         $where = '1=1';
         if ($this->request->has('user_id')) {
@@ -417,10 +417,10 @@ class ListTable extends \WP_List_Table
         }
         $page = $this->get_pagenum();
 
-        $start = (int)$this->request->input('start', ($page - 1) * $entries_per_page);
+        $start = (int) $this->request->input('start', ($page - 1) * $entries_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
-            $start += (int)$this->request->input('offset');
+            $start += (int) $this->request->input('offset');
         }
 
         $args = [

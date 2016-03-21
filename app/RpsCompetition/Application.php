@@ -274,7 +274,7 @@ class Application extends Container implements ApplicationInterface
         ];
 
         foreach ($core_aliases as $key => $aliases) {
-            foreach ((array)$aliases as $alias) {
+            foreach ((array) $aliases as $alias) {
                 $this->alias($key, $alias);
             }
         }

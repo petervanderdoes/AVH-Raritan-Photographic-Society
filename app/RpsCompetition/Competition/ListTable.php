@@ -420,14 +420,14 @@ class ListTable extends \WP_List_Table
 
         $doing_ajax = defined('DOING_AJAX') && DOING_AJAX;
 
-        $number = (int)$this->request->input('number', $competitions_per_page + min(8, $competitions_per_page));
+        $number = (int) $this->request->input('number', $competitions_per_page + min(8, $competitions_per_page));
 
         $page = $this->get_pagenum();
 
-        $start = (int)$this->request->input('start', ($page - 1) * $competitions_per_page);
+        $start = (int) $this->request->input('start', ($page - 1) * $competitions_per_page);
 
         if ($doing_ajax && $this->request->has('offset')) {
-            $start += (int)$this->request->input('offset', 0);
+            $start += (int) $this->request->input('offset', 0);
         }
 
         $args = [

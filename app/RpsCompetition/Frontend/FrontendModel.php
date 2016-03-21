@@ -116,7 +116,7 @@ class FrontendModel
     {
         $data = [];
 
-        $columns = (int)$short_code_atts['columns'];
+        $columns = (int) $short_code_atts['columns'];
 
         $layout = strtolower($short_code_atts['layout']);
 

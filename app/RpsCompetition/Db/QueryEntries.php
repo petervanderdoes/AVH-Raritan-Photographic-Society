@@ -299,7 +299,7 @@ class QueryEntries
     public function updateEntry($data)
     {
         if (!empty($data['ID'])) {
-            $entry_ID = (int)$data['ID'];
+            $entry_ID = (int) $data['ID'];
             $where = ['ID' => $entry_ID];
             if (!isset($data['Date_Modified'])) {
                 $data['Date_Modified'] = current_time('mysql');

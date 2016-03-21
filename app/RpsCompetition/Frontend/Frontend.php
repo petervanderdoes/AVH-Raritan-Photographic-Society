@@ -188,7 +188,7 @@ class Frontend
                                           $attr,
                                           'gallery');
 
-        $id = (int)($short_code_atts['id']);
+        $id = (int) ($short_code_atts['id']);
         if ('RAND' == $short_code_atts['order']) {
             $short_code_atts['orderby'] = 'none';
         }

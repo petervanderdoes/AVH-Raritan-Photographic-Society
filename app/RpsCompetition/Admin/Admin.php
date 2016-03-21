@@ -404,7 +404,7 @@ final class Admin
     {
         switch ($option) {
             case 'competitions_per_page':
-                $value = (int)$value;
+                $value = (int) $value;
                 $return = $value;
                 if ($value < 1 || $value > 999) {
                     $return = $error_value;
@@ -444,13 +444,13 @@ final class Admin
             $response = '';
             $result = null;
             if ($this->request->input('scored') == 'Yes') {
-                $data['ID'] = (int)$this->request->input('id');
+                $data['ID'] = (int) $this->request->input('id');
                 $data['Scored'] = 'N';
                 $result = $query_competitions->insertCompetition($data);
                 $response = json_encode(['text' => 'N', 'scored' => 'No', 'scoredtext' => 'Yes']);
             }
             if ($this->request->input('scored') == 'No') {
-                $data['ID'] = (int)$this->request->input('id');
+                $data['ID'] = (int) $this->request->input('id');
                 $data['Scored'] = 'Y';
                 $result = $query_competitions->insertCompetition($data);
                 $response = json_encode(['text' => 'Y', 'scored' => 'Yes', 'scoredtext' => 'No']);
@@ -575,19 +575,19 @@ final class Admin
                     $validator->validate();
 
                     foreach ($form_default_options['medium'] as $key => $value) {
-                        $form_new_options['medium'][$key] = (bool)avh_array_get($form_new_options,
-                                                                                'medium.' . $key,
-                                                                                false);
+                        $form_new_options['medium'][$key] = (bool) avh_array_get($form_new_options,
+                                                                                 'medium.' . $key,
+                                                                                 false);
                     }
                     foreach ($form_default_options['classification'] as $key => $value) {
-                        $form_new_options['classification'][$key] = (bool)avh_array_get($form_new_options,
-                                                                                        'classification.' . $key,
-                                                                                        false);
+                        $form_new_options['classification'][$key] = (bool) avh_array_get($form_new_options,
+                                                                                         'classification.' . $key,
+                                                                                         false);
                     }
 
-                    $form_new_options['special_event'] = (bool)avh_array_get($form_new_options,
-                                                                             'special_event',
-                                                                             false);
+                    $form_new_options['special_event'] = (bool) avh_array_get($form_new_options,
+                                                                              'special_event',
+                                                                              false);
 
                     $validator_errors = $validator->errors();
                     if (empty($validator_errors)) {
@@ -832,7 +832,7 @@ final class Admin
         if (!$this->request->has('competitions')) {
             $competitionIdsArray = [intval($this->request->input('competition'))];
         } else {
-            $competitionIdsArray = (array)$this->request->input('competitions');
+            $competitionIdsArray = (array) $this->request->input('competitions');
         }
 
         $formBuilder = new FormBuilder(new HtmlBuilder());
@@ -1068,21 +1068,21 @@ final class Admin
             switch ($this->request->input('update')) {
                 case 'del':
                 case 'del_many':
-                    $deleteCount = (int)$this->request->input('deleteCount', 0);
+                    $deleteCount = (int) $this->request->input('deleteCount', 0);
                     $messages[] = '<div id="message" class="updated"><p>' .
                                   sprintf(_n('Competition deleted.', '%s competitions deleted.', $deleteCount),
                                           number_format_i18n($deleteCount)) .
                                   '</p></div>';
                     break;
                 case 'open_many':
-                    $openCount = (int)$this->request->input('count', 0);
+                    $openCount = (int) $this->request->input('count', 0);
                     $messages[] = '<div id="message" class="updated"><p>' .
                                   sprintf(_n('Competition opened.', '%s competitions opened.', $openCount),
                                           number_format_i18n($openCount)) .
                                   '</p></div>';
                     break;
                 case 'close_many':
-                    $closeCount = (int)$this->request->input('count', 0);
+                    $closeCount = (int) $this->request->input('count', 0);
                     $messages[] = '<div id="message" class="updated"><p>' .
                                   sprintf(_n('Competition closed.', '%s competitions closed.', $closeCount),
                                           number_format_i18n($closeCount)) .
@@ -1156,7 +1156,7 @@ final class Admin
         if (!$this->request->has('competitions')) {
             $competitionIdsArray = [intval($this->request->input('competition'))];
         } else {
-            $competitionIdsArray = (array)$this->request->input('competitions');
+            $competitionIdsArray = (array) $this->request->input('competitions');
         }
 
         $formBuilder = new FormBuilder(new HtmlBuilder());
@@ -1215,7 +1215,7 @@ final class Admin
         if (!$this->request->has('entries')) {
             $entryIdsArray = [intval($this->request->input('entry'))];
         } else {
-            $entryIdsArray = (array)$this->request->input('entries');
+            $entryIdsArray = (array) $this->request->input('entries');
         }
 
         $this->displayAdminHeader('Delete Entries');
@@ -1368,7 +1368,7 @@ final class Admin
             switch ($this->request->input('update')) {
                 case 'del':
                 case 'del_many':
-                    $deleteCount = (int)$this->request->input('deleteCount', 0);
+                    $deleteCount = (int) $this->request->input('deleteCount', 0);
                     $messages[] = '<div id="message" class="updated"><p>' .
                                   sprintf(_n('Entry deleted.', '%s entries deleted.', $deleteCount),
                                           number_format_i18n($deleteCount)) .
@@ -1532,8 +1532,8 @@ final class Admin
 
                 $deleteCount = 0;
 
-                foreach ((array)$competitionIds as $id) {
-                    $id = (int)$id;
+                foreach ((array) $competitionIds as $id) {
+                    $id = (int) $id;
                     $query_competitions->deleteCompetition($id);
                     ++$deleteCount;
                 }
@@ -1550,9 +1550,9 @@ final class Admin
                 $competitionIds = $this->request->input('competitions');
                 $count = 0;
 
-                foreach ((array)$competitionIds as $id) {
+                foreach ((array) $competitionIds as $id) {
                     $data = [];
-                    $data['ID'] = (int)$id;
+                    $data['ID'] = (int) $id;
                     $data['Closed'] = 'N';
                     $query_competitions->insertCompetition($data);
                     ++$count;
@@ -1570,9 +1570,9 @@ final class Admin
                 $competitionIds = $this->request->input('competitions');
                 $count = 0;
 
-                foreach ((array)$competitionIds as $id) {
+                foreach ((array) $competitionIds as $id) {
                     $data = [];
-                    $data['ID'] = (int)$id;
+                    $data['ID'] = (int) $id;
                     $data['Closed'] = 'Y';
                     $query_competitions->insertCompetition($data);
                     ++$count;
@@ -1585,7 +1585,7 @@ final class Admin
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
                     $data = [];
-                    $data['ID'] = (int)$this->request->input('competition');
+                    $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'Y';
                     $query_competitions->insertCompetition($data);
                 }
@@ -1596,7 +1596,7 @@ final class Admin
                 if ($this->request->input('competition') !== '') {
                     check_admin_referer('score_' . $this->request->input('competition'));
                     $data = [];
-                    $data['ID'] = (int)$this->request->input('competition');
+                    $data['ID'] = (int) $this->request->input('competition');
                     $data['Scored'] = 'N';
                     $query_competitions->insertCompetition($data);
                 }
@@ -1661,8 +1661,8 @@ final class Admin
 
                 $deleteCount = 0;
 
-                foreach ((array)$entryIds as $id) {
-                    $id = (int)$id;
+                foreach ((array) $entryIds as $id) {
+                    $id = (int) $id;
                     $query_entries->deleteEntry($id);
                     ++$deleteCount;
                 }
@@ -1777,7 +1777,7 @@ final class Admin
         $competition_query = new QueryCompetitions($this->settings, $this->rpsdb);
 
         $formOptions = $this->request->input('entry-edit');
-        $id = (int)$this->request->input('entry');
+        $id = (int) $this->request->input('entry');
         $entry = $query_entries->getEntryById($id);
         /** @var QueryCompetitions $competition */
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);

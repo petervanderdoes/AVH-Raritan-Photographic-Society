@@ -29,7 +29,7 @@ class CommonHelper
             $sort_column_array[$col] = [];
             foreach ($array as $key => $row) {
                 if (is_object($row)) {
-                    $row = (array)$row;
+                    $row = (array) $row;
                     $row_is_object = true;
                 }
                 $sort_column_array[$col][$key] = strtolower($row[$col]);
@@ -50,7 +50,7 @@ class CommonHelper
         call_user_func_array('array_multisort', $params);
         if ($row_is_object) {
             foreach ($array as $key => $row) {
-                $array[$key] = (object)$row;
+                $array[$key] = (object) $row;
             }
         }
 

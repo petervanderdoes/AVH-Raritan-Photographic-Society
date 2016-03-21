@@ -67,7 +67,7 @@ class SeasonHelper
     {
         $options = get_option('avh-rps');
         $date_object = new \DateTime($date);
-        $selected_year = (int)$date_object->format('Y');
+        $selected_year = (int) $date_object->format('Y');
         if ($date_object->format('m') < $options['season_start_month_num']) {
             $selected_year--;
         }

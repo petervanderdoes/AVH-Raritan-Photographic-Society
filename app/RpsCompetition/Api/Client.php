@@ -266,9 +266,9 @@ class Client
         }
 
         foreach ($competition_results->Competitions as $competition) {
-            $comp_date = (string)$competition->CompDate;
-            $classification = (string)$competition->Classification;
-            $medium = (string)$competition->Medium;
+            $comp_date = (string) $competition->CompDate;
+            $classification = (string) $competition->Classification;
+            $medium = (string) $competition->Medium;
 
             foreach ($competition->Entries as $entry) {
                 $entry_id = $entry->ID;
