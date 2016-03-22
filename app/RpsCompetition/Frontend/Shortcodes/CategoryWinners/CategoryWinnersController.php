@@ -40,13 +40,11 @@ class CategoryWinnersController
      *                        - class
      *                        - award
      *                        - date
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
      *
      * @return string
      * @internal Shortcode: rps_category_winners
      */
-    public function shortcodeCategoryWinners($attr, $content, $tag)
+    public function shortcodeCategoryWinners($attr)
     {
         $class = 'Beginner';
         $award = '1';

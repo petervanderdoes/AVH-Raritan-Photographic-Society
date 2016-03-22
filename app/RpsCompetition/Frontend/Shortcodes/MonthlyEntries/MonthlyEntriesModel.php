@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend\Shortcodes\MonthlyEntries;
 
 use Avh\Framework\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Helpers\PhotoHelper;
 use RpsCompetition\Helpers\SeasonHelper;
@@ -120,6 +121,7 @@ class MonthlyEntriesModel
         $data['images'] = [];
         if (is_array($data['entries'])) {
             // Iterate through all the award winners and display each thumbnail in a grid
+            /** @var QueryEntries $entry */
             foreach ($data['entries'] as $entry) {
                 $data['images'][] = $this->photo_helper->dataPhotoMasonry($entry, $data['thumb_size']);
             }

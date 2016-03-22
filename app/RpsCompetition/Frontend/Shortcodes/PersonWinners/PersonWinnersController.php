@@ -32,13 +32,11 @@ class PersonWinnersController
      *
      * @param array  $attr    The shortcode argument list. Allowed arguments:
      *                        - id => The member ID
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
      *
      * @return string
      * @internal Shortcode: rps_person_winners
      */
-    public function shortcodePersonWinners($attr, $content, $tag)
+    public function shortcodePersonWinners($attr)
     {
         $attr = shortcode_atts(['id' => 0, 'images' => 6], $attr);
 

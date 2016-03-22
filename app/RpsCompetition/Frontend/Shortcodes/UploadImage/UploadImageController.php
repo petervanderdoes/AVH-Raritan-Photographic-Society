@@ -36,13 +36,9 @@ class UploadImageController
      *
      * @see Frontend::actionHandleHttpPostRpsUploadEntry
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
      * @return string
      */
-    public function shortcodeUploadImage($attr, $content, $tag)
+    public function shortcodeUploadImage()
     {
         if ($this->settings->has('formerror')) {
             $form = $this->model->getSubmittedForm();

@@ -38,13 +38,9 @@ class MonthlyWinnersController
      *
      * @internal Shortcode: rps_monthly_winners
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
      * @return string
      */
-    public function shortcodeMonthlyWinners($attr, $content, $tag)
+    public function shortcodeMonthlyWinners()
     {
 
         $output = '';

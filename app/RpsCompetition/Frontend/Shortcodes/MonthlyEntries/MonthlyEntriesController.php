@@ -39,13 +39,9 @@ class MonthlyEntriesController
      *
      * @internal Shortcode: rps_monthly_entries
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
      * @return string
      */
-    public function shortcodeMonthlyEntries($attr, $content, $tag)
+    public function shortcodeMonthlyEntries()
     {
         $output = '';
         $selected_date = $this->model->getSelectedDate();

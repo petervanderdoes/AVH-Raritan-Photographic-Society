@@ -136,9 +136,8 @@ class Frontend
      * @internal Hook: rps_showcase
      * @see      actionAfterThemeSetup
      *
-     * @param null $foo
      */
-    public function actionShowcaseCompetitionThumbnails($foo)
+    public function actionShowcaseCompetitionThumbnails()
     {
         if (is_front_page()) {
             $query_miscellaneous = $this->app->make('QueryMiscellaneous');

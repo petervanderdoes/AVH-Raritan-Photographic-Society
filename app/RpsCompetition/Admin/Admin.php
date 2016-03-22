@@ -361,12 +361,11 @@ final class Admin
      * @see      filter screen_meta_screen
      *
      * @param int $columns
-     * @param int $screen
      *
      * @internal Hook: screen_layout_columns
      * @return int
      */
-    public function filterScreenLayoutColumns($columns, $screen)
+    public function filterScreenLayoutColumns($columns)
     {
         return $columns;
     }

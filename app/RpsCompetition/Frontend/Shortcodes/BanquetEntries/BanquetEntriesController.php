@@ -38,7 +38,7 @@ class BanquetEntriesController
      *
      * @return string
      */
-    public function shortcodeBanquetEntries($attr, $content, $tag)
+    public function shortcodeBanquetEntries()
     {
         $model_data = $this->model->getAllData();
         $data = $model_data['data'];

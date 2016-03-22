@@ -238,11 +238,10 @@ class WpseoHelper
      * Running the shortcodes now does not effect the final rendering of the post.
      *
      * @param string $post_content
-     * @param object $post
      *
      * @return string
      */
-    public function filterWpseoPreAnalysisPostsContent($post_content, $post)
+    public function filterWpseoPreAnalysisPostsContent($post_content)
     {
         if (has_shortcode($post_content, 'rps_category_winners')) {
             $post_content = do_shortcode($post_content);
@@ -338,11 +337,9 @@ class WpseoHelper
     /**
      * Handle the replacement variable for WordPress Seo by Yoast.
      *
-     * @param $foo
-     *
      * @return string
      */
-    public function handleWpSeoTitleReplace($foo)
+    public function handleWpSeoTitleReplace()
     {
         global $post;
 

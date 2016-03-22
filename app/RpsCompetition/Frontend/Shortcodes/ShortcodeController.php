@@ -36,7 +36,7 @@ final class ShortcodeController
      *
      * @return string
      */
-    public function shortcodeEmail($attr, $content, $tag)
+    public function shortcodeEmail($attr, $content)
     {
         return $this->html->mailto($attr['email'], $content, $attr);
     }

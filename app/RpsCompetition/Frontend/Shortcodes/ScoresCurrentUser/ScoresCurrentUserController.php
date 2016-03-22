@@ -33,13 +33,9 @@ class ScoresCurrentUserController
      * By default the scores of the latest season is shown.
      * A drop down with a season list is shown for the user to select.
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
      * @return string
      */
-    public function shortcodeScoresCurrentUser($attr, $content, $tag)
+    public function shortcodeScoresCurrentUser()
     {
         $model_data = $this->model->getAllData();
         $data = $model_data['data'];

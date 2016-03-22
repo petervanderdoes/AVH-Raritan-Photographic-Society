@@ -34,12 +34,10 @@ class MyEntriesController
      *
      * @param array  $attr    The shortcode argument list. Allowed arguments:
      *                        - medium
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
      *
      * @return string
      */
-    public function shortcodeMyEntries($attr, $content, $tag)
+    public function shortcodeMyEntries($attr)
     {
 
         $attr = shortcode_atts(['medium' => 'digital'], $attr);

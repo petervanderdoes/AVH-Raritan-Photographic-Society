@@ -39,13 +39,9 @@ class EditTitleController
      *
      * @see Frontend::actionHandleHttpPostRpsEditTitle
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
      * @return string
      */
-    public function shortcodeEditTitle($attr, $content, $tag)
+    public function shortcodeEditTitle()
     {
 
         if ($this->settings->has('formerror')) {
