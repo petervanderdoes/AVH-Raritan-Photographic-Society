@@ -66,12 +66,13 @@ class QueryMiscellaneous
                 ORDER BY RAND()',
                                      $competition_date_start,
                                      $competition_date_end);
-        $result = $this->rpsdb->get_results($sql,ARRAY_A);
+        $result = $this->rpsdb->get_results($sql, ARRAY_A);
         foreach ($result as $record) {
             $e = new Entry();
             $e->map($record);
             $return[] = $e;
         }
+
         return $return;
     }
 
@@ -300,13 +301,12 @@ class QueryMiscellaneous
      */
     public function getWinner($date, $award, $class)
     {
-        $sql = $this->rpsdb->prepare('SELECT c.Competition_Date, c.Classification,
-                c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
-            FROM competitions c, entries e
-                WHERE c.ID = e.Competition_ID and
-                    c.Competition_Date = %s AND
-                    e.Award =%s AND
-                    c.Classification = %s
+        $sql = $this->rpsdb->prepare('SELECT e.* FROM entries e 
+                INNER JOIN competitions c 
+                ON (c.ID = e.Competition_ID AND
+                    c.Competition_Date =  %s AND
+                    e.Award = %s AND
+                    c.Classification = %s)
                 ORDER BY c.Medium',
                                      $date,
                                      $award,
