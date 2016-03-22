@@ -84,14 +84,14 @@ class RequestUploadImageModel
         }
 
         $record = $this->getCompetitionRecord();
-        if ($record === false) {
+        if ($record === null) {
             return false;
         }
 
         // Prepare the title and client file name for storing in the database
         $title = trim($this->entity->getTitle());
 
-        if (!$this->isValid($record['ID'], $record['Max_Entries'], $title)) {
+        if (!$this->isValid($record->ID, $record->Max_Entries, $title)) {
             return false;
         }
         $succes = $this->moveUploadedFile($title);
@@ -99,7 +99,7 @@ class RequestUploadImageModel
             return false;
         }
 
-        $succes = $this->addEntry($record['ID'], $title);
+        $succes = $this->addEntry($record->ID, $title);
         if ($succes === false) {
             return false;
         }
@@ -195,18 +195,15 @@ class RequestUploadImageModel
     /**
      * get the Competition record.
      *
-     * @return array|bool|QueryCompetitions
+     * @return bool|QueryCompetitions
      */
     private function getCompetitionRecord()
     {
         $recs = $this->query_competitions->getCompetitionByDateClassMedium($this->comp_date,
                                                                            $this->classification,
-                                                                           $this->medium,
-                                                                           ARRAY_A);
+                                                                           $this->medium);
 
-        if (is_array($recs)) {
-            $return = $recs;
-        } else {
+        if ($recs === null) {
             $error_message = 'Competition ' .
                              $this->comp_date .
                              '/' .
@@ -215,11 +212,9 @@ class RequestUploadImageModel
                              $this->medium .
                              ' not found in database';
             $this->setFormError($this->form, $error_message);
-
-            $return = false;
         }
 
-        return $return;
+        return $recs;
     }
 
     /**
