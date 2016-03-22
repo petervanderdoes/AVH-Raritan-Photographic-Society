@@ -51,7 +51,7 @@ class RequestEditTitleModel
     public function updateTitle($server_file_name, $new_title)
     {
         $competition = $this->query_competitions->getCompetitionByEntryId($this->entity->getId());
-        if ($competition == null) {
+        if ($competition === null) {
             wp_die('Failed to SELECT competition for entry ID: ' . $this->entity->getId());
             exit();
         }

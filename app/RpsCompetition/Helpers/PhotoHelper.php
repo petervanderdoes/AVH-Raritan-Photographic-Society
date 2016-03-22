@@ -210,7 +210,7 @@ class PhotoHelper
 
         $new_size = ImageSizeHelper::getImageSize($size);
 
-        if ($new_size['height'] == null) {
+        if ($new_size['height'] === null) {
             $box = $image->getSize()
                          ->widen($new_size['width'])
             ;

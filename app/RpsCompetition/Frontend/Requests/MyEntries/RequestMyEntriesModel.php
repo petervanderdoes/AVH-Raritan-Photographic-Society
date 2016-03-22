@@ -44,7 +44,7 @@ class RequestMyEntriesModel
         if (is_array($entries)) {
             foreach ($entries as $id) {
                 $entry_record = $this->query_entries->getEntryById($id);
-                if ($entry_record == false) {
+                if ($entry_record === false) {
                     $this->settings->set('errmsg',
                                          sprintf('<b>Failed to SELECT competition entry with ID %s from database</b><br>',
                                                  $id));

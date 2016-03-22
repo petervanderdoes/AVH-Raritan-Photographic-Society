@@ -128,7 +128,7 @@ class ListTable extends \WP_List_Table
         $options = get_option('avh-rps');
 
         $competition = $query_competitions->getCompetitionById($entry->Competition_ID);
-        if ($competition != false) {
+        if ($competition !== false) {
             $unix_date = mysql2date('U', $competition->Competition_Date);
             $competition_month = date('n', $unix_date);
             if ($competition_month >= $options['season_start_month_num'] &&
