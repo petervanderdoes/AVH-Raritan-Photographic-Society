@@ -155,7 +155,7 @@ class PhotoHelper
      */
     public function deleteEntryFromDisk(QueryEntries $entry)
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $competition_record = $query_competitions->getCompetitionById($entry->Competition_ID);
         $competition_path = $this->request->server('DOCUMENT_ROOT') .

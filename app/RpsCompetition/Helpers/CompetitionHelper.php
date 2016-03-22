@@ -60,7 +60,7 @@ class CompetitionHelper
      */
     public function isScoredCompetitionDate($date)
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $date = $this->rpsdb->getMysqldate($date);
         $return = false;

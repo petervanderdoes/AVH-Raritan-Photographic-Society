@@ -420,7 +420,7 @@ final class Admin
      */
     public function handleAjax()
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         if ($this->request->has('scored')) {
             $data = [];
             $response = '';
@@ -502,7 +502,7 @@ final class Admin
     public function menuCompetitionAdd()
     {
         $options = get_option('avh-rps');
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition_add');
 
@@ -809,7 +809,7 @@ final class Admin
         global $wpdb;
 
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         if (!$this->request->has('competitions')) {
             $competitionIdsArray = [intval($this->request->input('competition'))];
@@ -886,7 +886,7 @@ final class Admin
         /**
          * @var string $wp_http_referer
          */
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $formBuilder = new FormBuilder(new HtmlBuilder());
         $formBuilder->setOptionName('competition-edit');
@@ -1120,7 +1120,7 @@ final class Admin
          */
         global $wpdb;
 
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $title = '';
         $action_verb = '';
@@ -1188,7 +1188,7 @@ final class Admin
     private function displayPageEntriesDelete()
     {
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $formBuilder = new FormBuilder(new HtmlBuilder());
 
@@ -1254,7 +1254,7 @@ final class Admin
          * @var string $wp_http_referer
          */
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         /** @var PhotoHelper $photo_helper */
         $photo_helper = $this->app->make('PhotoHelper');
 
@@ -1414,7 +1414,7 @@ final class Admin
     private function doUpdateEntry($formOptionsNew, $id, QueryEntries $entry, QueryCompetitions $competition)
     {
         $query_entries = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         /** @var PhotoHelper $photo_helper */
         $photo_helper = $this->app->make('PhotoHelper');
         $medium_array = Constants::getMediums();
@@ -1475,7 +1475,7 @@ final class Admin
      */
     private function handleRequestCompetition()
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         if ($this->request->has('wp_http_referer')) {
             $redirect = remove_query_arg(['wp_http_referer', 'updated', 'delete_count'],
                                          stripslashes($this->request->input('wp_http_referer')));
@@ -1706,7 +1706,7 @@ final class Admin
     private function updateCompetition()
     {
         $options = get_option('avh-rps');
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
         $formOptionsNew = [];
         $data = [];
         $formOptions = $this->request->input('competition-edit');
@@ -1754,7 +1754,7 @@ final class Admin
     private function updateEntry()
     {
         $query_entries = new QueryEntries($this->rpsdb);
-        $competition_query = new QueryCompetitions($this->settings, $this->rpsdb);
+        $competition_query = new QueryCompetitions($this->rpsdb);
 
         $formOptions = $this->request->input('entry-edit');
         $id = (int) $this->request->input('entry');
