@@ -3,7 +3,6 @@ namespace RpsCompetition\Frontend;
 
 use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Definitions\ViewAbstract;
-use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class FrontendView
@@ -14,22 +13,15 @@ use RpsCompetition\Helpers\PhotoHelper;
  */
 class FrontendView extends ViewAbstract
 {
-    /** @var PhotoHelper */
-    private $photo_helper;
-    private $settings;
-
     /**
      * Constructor
      *
-     * @param string      $template_dir
-     * @param string      $cache_dir
-     * @param Settings    $settings
-     * @param PhotoHelper $photo_helper
+     * @param string $template_dir
+     * @param string $cache_dir
+     *
      */
-    public function __construct($template_dir, $cache_dir, Settings $settings, PhotoHelper $photo_helper)
+    public function __construct($template_dir, $cache_dir)
     {
-        $this->settings = $settings;
-        $this->photo_helper = $photo_helper;
         parent::__construct($template_dir, $cache_dir);
     }
 

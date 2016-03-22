@@ -164,10 +164,7 @@ class AVH_RPS_Client
             function(Application $app) {
                 $settings = $app->make('Settings');
 
-                return new FrontendView($settings->get('template_dir'),
-                                        $settings->get('upload_dir') . '/twig-cache/',
-                                        $settings,
-                                        $app->make('PhotoHelper'));
+                return new FrontendView($settings->get('template_dir'), $settings->get('upload_dir') . '/twig-cache/');
             });
         $this->app->bind('FrontendModel',
             function(Application $app) {
