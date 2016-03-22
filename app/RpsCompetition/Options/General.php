@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Options;
 
-use Avh\Framework\Utility\Common;
 use Avh\Framework\Utility\OptionsAbstract;
 use RpsCompetition\Helpers\ImageSizeHelper;
 
