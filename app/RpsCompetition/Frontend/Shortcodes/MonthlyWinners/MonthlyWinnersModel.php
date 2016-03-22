@@ -4,6 +4,7 @@ namespace RpsCompetition\Frontend\Shortcodes\MonthlyWinners;
 use Avh\Framework\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
 use RpsCompetition\Helpers\SeasonHelper;
 
@@ -140,7 +141,9 @@ class MonthlyWinnersModel
                     $data['row'][$row]['competition']['medium'] = $competition->Medium;
                 }
                 // Display this thumbnail in the the next available column
-                $data['row'][$row]['images'][] = $this->photo_helper->dataPhotoGallery($competition, '75');
+                $entry = new Entry();
+                $entry->map($competition);
+                $data['row'][$row]['images'][] = $this->photo_helper->dataPhotoGallery($entry, '75');
             }
         }
 
