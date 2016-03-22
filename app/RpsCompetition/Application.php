@@ -92,7 +92,7 @@ class Application extends Container implements ApplicationInterface
     {
         $this->registerBaseBindings();
         $items = [];
-        $this->instance('config', $config = new Repository($items));
+        $this->instance('config', new Repository($items));
 
         $this->config['app.providers'] = [
             '\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesServiceProvider',
@@ -297,7 +297,7 @@ class Application extends Container implements ApplicationInterface
             unset($this->deferredServices[$service]);
         }
 
-        $this->register($instance = new $provider($this));
+        $this->register(new $provider($this));
     }
 
     /**
