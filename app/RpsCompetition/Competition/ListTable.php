@@ -25,18 +25,16 @@ class ListTable extends \WP_List_Table
     private $html;
     private $request;
     private $rpsdb;
-    private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
-     * @param Request  $request
+     * @param RpsDb   $rpsdb
+     * @param Request $request
+     *
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb, Request $request)
+    public function __construct(RpsDb $rpsdb, Request $request)
     {
-        $this->settings = $settings;
         $this->rpsdb = $rpsdb;
         $this->request = $request;
         $this->html = new HtmlBuilder();

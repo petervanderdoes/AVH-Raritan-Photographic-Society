@@ -171,7 +171,7 @@ final class Admin
      */
     public function actionLoadPagehookCompetition()
     {
-        $this->competition_list = new CompetitionListTable($this->settings, $this->rpsdb, $this->request);
+        $this->competition_list = new CompetitionListTable($this->rpsdb, $this->request);
 
         $this->handleRequestCompetition();
 
@@ -194,7 +194,7 @@ final class Admin
      */
     public function actionLoadPagehookCompetitionAdd()
     {
-        $this->competition_list = new CompetitionListTable($this->settings, $this->rpsdb, $this->request);
+        $this->competition_list = new CompetitionListTable($this->rpsdb, $this->request);
 
         add_filter('screen_layout_columns', [$this, 'filterScreenLayoutColumns'], 10, 2);
         // WordPress core Styles and Scripts
