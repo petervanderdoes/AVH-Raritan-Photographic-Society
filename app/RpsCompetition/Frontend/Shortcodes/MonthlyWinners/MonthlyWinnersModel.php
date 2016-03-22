@@ -4,7 +4,6 @@ namespace RpsCompetition\Frontend\Shortcodes\MonthlyWinners;
 use Avh\Framework\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
 use RpsCompetition\Helpers\SeasonHelper;
 
@@ -19,6 +18,7 @@ class MonthlyWinnersModel
 {
     private $photo_helper;
     private $query_competitions;
+    private $query_entries;
     private $query_miscellaneous;
     private $season_helper;
     private $session;
@@ -83,8 +83,8 @@ class MonthlyWinnersModel
      */
     public function getFacebookData($selected_start_date, $selected_end_date)
     {
-        $entries = $this->query_miscellaneous->getWinners($selected_start_date, $selected_end_date);
-        $data = $this->photo_helper->getFacebookThumbs($entries);
+        $award_entries = $this->query_miscellaneous->getWinners($selected_start_date, $selected_end_date);
+        $data = $this->photo_helper->getFacebookThumbs($award_entries);
 
         return $data;
     }
@@ -127,23 +127,22 @@ class MonthlyWinnersModel
             $data['winners'] = true;
             $data['max_awards'] = $max_num_awards;
             $data['awards'] = $this->getAwardsData($max_num_awards);
-            $award_winners = $this->query_miscellaneous->getWinners($selected_date);
+            $award_entries = $this->query_miscellaneous->getWinners($selected_date);
             $row = 0;
             $prev_comp = '';
-            foreach ($award_winners as $competition) {
-                $comp = $competition->ID;
+            foreach ($award_entries as $award_entry) {
+                $comp = $award_entry->Competition_ID;
                 // If we're at the end of a row, finish off the row and get ready for the next one
                 if ($prev_comp != $comp) {
                     $prev_comp = $comp;
                     // Initialize the new row
                     $row++;
+                    $competition = $this->query_competitions->getCompetitionById($comp);
                     $data['row'][$row]['competition']['classification'] = $competition->Classification;
                     $data['row'][$row]['competition']['medium'] = $competition->Medium;
                 }
                 // Display this thumbnail in the the next available column
-                $entry = new Entry();
-                $entry->map($competition);
-                $data['row'][$row]['images'][] = $this->photo_helper->dataPhotoGallery($entry, '75');
+                $data['row'][$row]['images'][] = $this->photo_helper->dataPhotoGallery($award_entry, '75');
             }
         }
 

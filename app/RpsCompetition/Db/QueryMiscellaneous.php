@@ -334,15 +334,8 @@ class QueryMiscellaneous
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
         $sql = $this->rpsdb->prepare('SELECT
-c.ID,
-c.Competition_Date,
-c.Classification,
-if(c.Classification = "Beginner",1, if(c.Classification = "Advanced",2, if(c.Classification = "Salon",3,0))) as "Class_Code", 
-c.Medium,
-e.Title,
-e.Server_File_Name,
-e.Award,
-e.Member_ID
+e.*,
+if(c.Classification = "Beginner",1, if(c.Classification = "Advanced",2, if(c.Classification = "Salon",3,0))) AS "Class_Code"
 FROM
 	entries e
 		INNER JOIN
@@ -359,8 +352,13 @@ ORDER BY
 	e.Award',
                                      $competition_date_start,
                                      $competition_date_end);
-        $results = $this->rpsdb->get_results($sql);
+        $result = $this->rpsdb->get_results($sql);
+        foreach ($result as $record) {
+            $e = new Entry();
+            $e->map($record);
+            $return[] = $e;
+        }
 
-        return $results;
+        return $return;
     }
 }
