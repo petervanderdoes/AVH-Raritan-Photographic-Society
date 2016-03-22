@@ -9,6 +9,7 @@ use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entity\Db\Entry;
 
 /**
  * Class PhotoHelper
@@ -127,12 +128,12 @@ class PhotoHelper
     /**
      * Collect needed data to render a photo in masonry style.
      *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
+     * @param Entry  $record
+     * @param string $thumb_size
      *
      * @return array
      */
-    public function dataPhotoMasonry(QueryEntries $record, $thumb_size)
+    public function dataPhotoMasonry(Entry $record, $thumb_size)
     {
         $data = [];
         $user_info = get_userdata($record->Member_ID);

@@ -5,6 +5,7 @@ use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
 
@@ -397,7 +398,7 @@ class WpseoHelper
                 $entries = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
                 $data_images = [];
                 if (is_array($entries)) {
-                    /** @var QueryEntries $record */
+                    /** @var Entry $record */
                     $image_data = [];
                     foreach ($entries as $record) {
                         $user_info = get_userdata($record->Member_ID);

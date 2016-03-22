@@ -1,6 +1,8 @@
 <?php
 namespace RpsCompetition\Db;
 
+use RpsCompetition\Entity\Db\Entry;
+
 /**
  * Class QueryMiscellaneous
  *
@@ -64,8 +66,12 @@ class QueryMiscellaneous
                 ORDER BY RAND()',
                                      $competition_date_start,
                                      $competition_date_end);
-        $return = $this->rpsdb->get_results($sql);
-
+        $result = $this->rpsdb->get_results($sql,ARRAY_A);
+        foreach ($result as $record) {
+            $e = new Entry();
+            $e->map($record);
+            $return[] = $e;
+        }
         return $return;
     }
 
