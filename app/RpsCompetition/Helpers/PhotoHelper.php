@@ -23,19 +23,18 @@ class PhotoHelper
     private $imagine;
     private $request;
     private $rpsdb;
-    private $settings;
+
 
     /**
      * Constructor
      *
-     * @param Settings          $settings
      * @param IlluminateRequest $request
      * @param RpsDb             $rpsdb
      * @param ImagineInterface  $imagine
+     *
      */
-    public function __construct(Settings $settings, IlluminateRequest $request, RpsDb $rpsdb, ImagineInterface $imagine)
+    public function __construct(IlluminateRequest $request, RpsDb $rpsdb, ImagineInterface $imagine)
     {
-        $this->settings = $settings;
         $this->request = $request;
         $this->rpsdb = $rpsdb;
         $this->imagine = $imagine;

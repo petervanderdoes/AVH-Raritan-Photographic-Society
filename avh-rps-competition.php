@@ -178,8 +178,7 @@ class AVH_RPS_Client
 
         $this->app->bind('PhotoHelper',
             function(Application $app) {
-                return new PhotoHelper($app->make('Settings'),
-                                       $app->make('IlluminateRequest'),
+                return new PhotoHelper($app->make('IlluminateRequest'),
                                        $app->make('RpsDb'),
                                        $app->make('\Imagine\Image\ImagineInterface'));
             });
