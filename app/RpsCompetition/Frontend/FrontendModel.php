@@ -159,6 +159,7 @@ class FrontendModel
      */
     public function getShowcaseData($records, $size)
     {
+        $data = [];
         $data['images'] = [];
         foreach ($records as $recs) {
             $data['images'][] = $this->dataPhotoGallery($recs, $size);
