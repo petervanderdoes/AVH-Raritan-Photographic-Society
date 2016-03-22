@@ -28,18 +28,17 @@ use RpsCompetition\Helpers\SeasonHelper;
 class QueryCompetitions
 {
     private $rpsdb;
-    private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
+     * @param RpsDb $rpsdb
+     *
+     * @internal param \Illuminate\Config\Repository $settings
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb)
+    public function __construct(RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;
-        $this->settings = $settings;
     }
 
     /**
