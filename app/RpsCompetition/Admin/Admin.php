@@ -212,9 +212,7 @@ final class Admin
      */
     public function actionLoadPagehookEntries()
     {
-        $this->entries_list = $this->competition_list = new EntriesListTable($this->settings,
-                                                                             $this->rpsdb,
-                                                                             $this->request);
+        $this->entries_list = $this->competition_list = new EntriesListTable($this->rpsdb, $this->request);
         $this->handleRequestEntries();
 
         add_filter('screen_layout_columns', [$this, 'filterScreenLayoutColumns'], 10, 2);
