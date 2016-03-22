@@ -297,7 +297,7 @@ class QueryMiscellaneous
      * @param string $award
      * @param string $class
      *
-     * @return QueryMiscellaneous
+     * @return array
      */
     public function getWinner($date, $award, $class)
     {
@@ -311,9 +311,14 @@ class QueryMiscellaneous
                                      $date,
                                      $award,
                                      $class);
-        $results = $this->rpsdb->get_results($sql);
+        $result = $this->rpsdb->get_results($sql, ARRAY_A);
+        foreach ($result as $record) {
+            $e = new Entry();
+            $e->map($record);
+            $return[] = $e;
+        }
 
-        return $results;
+        return $return;
     }
 
     /**

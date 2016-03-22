@@ -102,12 +102,12 @@ class PhotoHelper
     /**
      * Collect needed data to render a photo in masonry style.
      *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
+     * @param Entry  $record
+     * @param string $thumb_size
      *
      * @return array<string,string|array>
      */
-    public function dataPhotoGallery(QueryEntries $record, $thumb_size)
+    public function dataPhotoGallery(Entry $record, $thumb_size)
     {
 
         $data = [];
@@ -265,6 +265,7 @@ class PhotoHelper
     public function getFacebookThumbs($entries)
     {
         $images = [];
+        /** @var Entry $entry */
         foreach ($entries as $entry) {
             $images[] = $this->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
         }

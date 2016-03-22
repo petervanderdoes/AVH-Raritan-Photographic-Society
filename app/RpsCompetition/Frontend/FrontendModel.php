@@ -3,6 +3,7 @@
 namespace RpsCompetition\Frontend;
 
 use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
 
 /**
@@ -44,7 +45,7 @@ class FrontendModel
             $img_url = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
-                $entry = new \stdClass;
+                $entry = new Entry();
                 $img_relative_path = substr($img_url, strlen($home_url));
                 $entry->Server_File_Name = $img_relative_path;
                 $entries[] = $entry;
