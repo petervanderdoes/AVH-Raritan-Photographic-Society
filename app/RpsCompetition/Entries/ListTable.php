@@ -205,8 +205,6 @@ class ListTable extends \WP_List_Table
      */
     public function display()
     {
-        //extract($this->_args);
-
         $this->display_tablenav('top');
 
         echo '<table class="wp-list-table ' . implode(' ', $this->get_table_classes()) . '" cellspacing="0">';

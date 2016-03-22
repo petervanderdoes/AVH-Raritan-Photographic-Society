@@ -145,7 +145,6 @@ class ScoresCurrentUserModel
                 $prev_date = $date_parts[0];
             }
             if ($prev_medium == $entry['medium']) {
-                // $medium = "";
                 $entry['theme'] = '';
             } else {
                 $prev_medium = $entry['medium'];

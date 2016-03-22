@@ -111,17 +111,6 @@ class ListTable extends \WP_List_Table
         ];
         $urlEdit = $url . http_build_query($queryEdit, '', '&');
 
-        // We'll not add these for now, maybe later. There is no real need to open/close a single part of a competition anyway.
-        // if ($competition->Closed == 'Y') {
-        // $queryOpen = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'open','wp_http_referer' => $wp_http_referer);
-        // $urlOpen = $url . http_build_query($queryOpen, '', '&');
-        // $actions['open'] = '<a ' . Common::attributes(array('href' => $urlOpen,'title' => 'Open this competition')) . '>' . 'Open' . '</a>';
-        // } else {
-        // $queryClose = array('page' => Constants::MENU_SLUG_COMPETITION,'competition' => $competition->ID,'action' => 'close','wp_http_referer' => $wp_http_referer);
-        // $urlClose = $url . http_build_query($queryClose, '', '&');
-        // $actions['close'] = '<a ' . Common::attributes(array('href' => $urlClose,'title' => 'Close this competition')) . '>' . 'Close' . '</a>';
-        // }
-
         $actions = [];
         $actions['delete'] = $this->html->anchor($urlDelete,
                                                  'Delete',
@@ -169,20 +158,6 @@ class ListTable extends \WP_List_Table
     public function column_scored($competition)
     {
         echo '<span class="text">' . $competition->Scored . '</span>';
-
-        // The commented code below is to be used when we decided to not use AJAX for toggle the score setting. This is mot implemented yet, only AJAX way is implemented.
-        // $url = admin_url('admin.php') . '?';
-
-        // $queryReferer = array('page' => Constants::MENU_SLUG_COMPETITION);
-        // $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
-
-        // $nonceScore = wp_create_nonce('score_' . $competition->ID);
-        // $querySetScore = array('page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'setscore', '_wpnonce' => $nonceScore);
-        // $urlSetScore = $url . http_build_query($querySetScore, '', '&');
-
-        // $nonceUnsetScore = wp_create_nonce('score_' . $competition->ID);
-        // $queryUnsetScore = array('page' => Constants::MENU_SLUG_COMPETITION, 'competition' => $competition->ID, 'action' => 'unsetscore', '_wpnonce' => $nonceScore);
-        // $urlUnsetScore = $url . http_build_query($queryUnsetScore, '', '&');
 
         $actions = [];
         if ($competition->Scored == 'Y') {
@@ -236,8 +211,6 @@ class ListTable extends \WP_List_Table
      */
     public function display()
     {
-        //extract($this->_args);
-
         wp_nonce_field('fetch-list-' . get_class($this), '_ajax_fetch_list_nonce', false);
 
         $this->display_tablenav('top');

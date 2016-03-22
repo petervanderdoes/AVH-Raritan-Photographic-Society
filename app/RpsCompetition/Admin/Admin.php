@@ -185,9 +185,6 @@ final class Admin
 
         wp_enqueue_style('avhrps-admin-css');
         wp_enqueue_style('avhrps-jquery-css');
-
-        // add_screen_option('per_page', array ( 'label' => _x('IP\'s', 'ip\'s per page (screen options)'), 'default' => 20, 'option' => 'ipcachelog_per_page' ));
-        // add_contextual_help($current_screen, '<p>' . __('You can manage IP\'s added to the IP cache Log. This screen is customizable in the same ways as other management screens, and you can act on IP\'s using the on-hover action links or the Bulk Actions.') . '</p>');
     }
 
     /**
@@ -204,8 +201,6 @@ final class Admin
         wp_enqueue_script('common');
         wp_enqueue_script('jquery-ui-datepicker');
         // Plugin Style and Scripts
-        // wp_enqueue_script('avhrps-competition-js');
-
         wp_enqueue_style('avhrps-admin-css');
         wp_enqueue_style('avhrps-jquery-css');
     }
@@ -230,8 +225,6 @@ final class Admin
         wp_enqueue_script('postbox');
         wp_enqueue_style('css/dashboard');
         // Plugin Style and Scripts
-        // wp_enqueue_script('avhrps-competition-js');
-
         wp_enqueue_style('avhrps-admin-css');
         wp_enqueue_style('avhrps-jquery-css');
     }
@@ -326,7 +319,6 @@ final class Admin
     public function displayAdminFooter()
     {
         echo '</div></div></div>';
-        // $this->admin_sidebar();
         $this->printAdminFooter();
         echo '</div>';
     }
@@ -376,16 +368,6 @@ final class Admin
      */
     public function filterScreenLayoutColumns($columns, $screen)
     {
-        //switch ($screen) {
-        // We can define columns here
-        // case $this->hooks['avhrps_menu_competition']:
-        // $columns[$this->hooks['avhfdas_menu_overview']] = 1;
-        // break;
-        // case $this->hooks['avhrps_menu_competition_add']:
-        // $columns[$this->hooks['avhfdas_menu_general']] = 1;
-        // break;
-        //}
-
         return $columns;
     }
 
@@ -960,7 +942,6 @@ final class Admin
             $time_text = date('g:i a', strtotime($time_val));
             $time[$time_val] = $time_text;
         }
-        // echo $formBuilder->select('Closing Time', 'close-time', $time, $formOptions['close-time'], array('autocomplete' => 'off'));
         echo $formBuilder->outputLabel($formBuilder->label('close-time', 'Closing Time'));
         echo $formBuilder->outputField($formBuilder->select('close-time', $time, $formOptions['close-time']));
 
@@ -1119,7 +1100,6 @@ final class Admin
         if ($this->request->has('paged')) {
             echo $formBuilder->hidden('paged', absint($this->request->input('paged')));
         }
-        // $this->competition_list->search_box(__('Find IP', 'avh-rps'), 'find_ip');
         $this->competition_list->display();
         echo $formBuilder->close();
 
