@@ -3,7 +3,6 @@ namespace RpsCompetition\Frontend\Requests\EditTitle;
 
 use Illuminate\Support\ServiceProvider;
 use RpsCompetition\Application;
-use RpsCompetition\Form\Type\EditTitleType;
 
 /**
  * Class RequestEditTitleServiceProvider
@@ -40,12 +39,7 @@ class RequestEditTitleServiceProvider extends ServiceProvider
     {
 
         $this->app->singleton('\RpsCompetition\Entity\Form\EditTitle');
-        $this->app->bind('\RpsCompetition\Form\Type\EditTitleType',
-            function(Application $app) {
-                $entity = $app->make('\RpsCompetition\Entity\Form\EditTitle');
-
-                return new EditTitleType($entity);
-            });
+        $this->app->bind('\RpsCompetition\Form\Type\EditTitleType', '\RpsCompetition\Form\Type\EditTitleType');
         $this->app->bind('\RpsCompetition\Frontend\Requests\EditTitle\RequestEditTitleModel',
             function(Application $app) {
                 return new RequestEditTitleModel($app->make('\RpsCompetition\Entity\Form\EditTitle'),

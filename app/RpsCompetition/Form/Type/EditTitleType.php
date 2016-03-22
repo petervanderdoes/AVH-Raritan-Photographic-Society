@@ -16,14 +16,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class EditTitleType extends AbstractType
 {
-    private $entity;
-
     /**
-     * @param \RpsCompetition\Entity\Form\EditTitle $entity
+     * EditTitleType constructor.
      */
-    public function __construct($entity)
+    public function __construct()
     {
-        $this->entity = $entity;
     }
 
     /**

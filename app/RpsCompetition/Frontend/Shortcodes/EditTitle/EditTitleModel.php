@@ -121,7 +121,7 @@ class EditTitleModel
         $entity->setServerFileName($server_file_name);
         $entity->setM($medium_subset);
         $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
-        $form = $this->form_factory->create(new EditTitleType($entity),
+        $form = $this->form_factory->create(new EditTitleType(),
                                             $entity,
                                             ['action' => $action, 'attr' => ['id' => 'edittitle']]);
 
