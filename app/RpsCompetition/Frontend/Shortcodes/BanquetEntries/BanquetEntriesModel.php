@@ -218,11 +218,11 @@ class BanquetEntriesModel
                      ') AND Member_ID = "' .
                      get_current_user_id() .
                      '"';
-            $this->banquet_entries = $this->query_entries->query(['where' => $where]);
+            $banquet_entries = $this->query_entries->query(['where' => $where]);
         }
 
-        if (!is_array($this->banquet_entries)) {
-            $this->banquet_entries = [];
+        if (is_array($banquet_entries)) {
+            $this->banquet_entries = $banquet_entries;
         }
 
         return;
