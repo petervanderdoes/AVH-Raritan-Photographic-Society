@@ -333,17 +333,30 @@ class QueryMiscellaneous
     {
         $competition_date_end = ($competition_date_end === null) ? $competition_date_start : $competition_date_end;
 
-        $sql = $this->rpsdb->prepare('SELECT c.ID, c.Competition_Date, c.Classification,
-                if(c.Classification = "Beginner",1,
-                if(c.Classification = "Advanced",2,
-                if(c.Classification = "Salon",3,0))) as "Class_Code",
-                c.Medium, e.Title, e.Server_File_Name, e.Award, e.Member_ID
-            FROM competitions c, entries e
-                WHERE c.ID = e.Competition_ID and
-                    c.Competition_Date >= %s AND
-                    c.Competition_Date <= %s AND
-                    e.Award <> ""
-                ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Award',
+        $sql = $this->rpsdb->prepare('SELECT
+c.ID,
+c.Competition_Date,
+c.Classification,
+if(c.Classification = "Beginner",1, if(c.Classification = "Advanced",2, if(c.Classification = "Salon",3,0))) as "Class_Code", 
+c.Medium,
+e.Title,
+e.Server_File_Name,
+e.Award,
+e.Member_ID
+FROM
+	entries e
+		INNER JOIN
+		competitions c
+		ON
+        (c.ID = e.Competition_ID AND
+         c.Competition_Date >= %s AND
+         c.Competition_Date <= %s AND
+         e.Award <> "")
+ORDER BY
+	c.Competition_Date,
+	Class_Code,
+	c.Medium,
+	e.Award',
                                      $competition_date_start,
                                      $competition_date_end);
         $results = $this->rpsdb->get_results($sql);
