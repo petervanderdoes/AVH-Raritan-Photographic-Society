@@ -34,7 +34,6 @@ class QueryCompetitions
      *
      * @param RpsDb $rpsdb
      *
-     * @internal param \Illuminate\Config\Repository $settings
      */
     public function __construct(RpsDb $rpsdb)
     {
