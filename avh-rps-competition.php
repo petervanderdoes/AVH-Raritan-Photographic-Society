@@ -199,7 +199,7 @@ class AVH_RPS_Client
 
         $this->app->bind('CompetitionHelper',
             function(Application $app) {
-                return new CompetitionHelper($app->make('Settings'), $app->make('RpsDb'));
+                return new CompetitionHelper($app->make('RpsDb'));
             });
 
         $this->app->bind('HtmlBuilder', '\Avh\Framework\Html\HtmlBuilder');
