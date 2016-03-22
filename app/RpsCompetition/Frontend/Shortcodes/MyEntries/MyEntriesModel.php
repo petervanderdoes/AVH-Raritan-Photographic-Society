@@ -150,7 +150,7 @@ class MyEntriesModel
      * @param string $medium_subset_medium
      * @param array  $open_competitions
      *
-     * @return array|mixed|QueryCompetitions
+     * @return QueryCompetitions
      */
     private function getCurrentCompetition($medium_subset_medium, $open_competitions)
     {

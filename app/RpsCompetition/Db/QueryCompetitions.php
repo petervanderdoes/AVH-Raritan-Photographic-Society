@@ -133,7 +133,7 @@ class QueryCompetitions
      * @param string $medium
      * @param string $output
      *
-     * @return QueryCompetitions|array
+     * @return QueryCompetitions
      */
     public function getCompetitionByDateClassMedium($competition_date, $classification, $medium, $output = OBJECT)
     {
