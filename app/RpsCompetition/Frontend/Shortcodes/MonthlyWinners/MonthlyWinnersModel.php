@@ -18,7 +18,6 @@ class MonthlyWinnersModel
 {
     private $photo_helper;
     private $query_competitions;
-    private $query_entries;
     private $query_miscellaneous;
     private $season_helper;
     private $session;

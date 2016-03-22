@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Db;
 
-use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Helpers\SeasonHelper;
 
 /**

@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Frontend;
 
-use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Definitions\ViewAbstract;
 
 /**

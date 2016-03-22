@@ -3,7 +3,6 @@ namespace RpsCompetition\Frontend;
 
 use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\CommonHelper;
