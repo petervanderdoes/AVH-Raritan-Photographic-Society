@@ -2,7 +2,6 @@
 namespace RpsCompetition\Entries;
 
 use Avh\Framework\Html\HtmlBuilder;
-use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
@@ -31,8 +30,8 @@ class ListTable extends \WP_List_Table
     /**
      * Constructor
      *
-     * @param RpsDb    $rpsdb
-     * @param Request  $request
+     * @param RpsDb   $rpsdb
+     * @param Request $request
      */
     public function __construct(RpsDb $rpsdb, Request $request)
     {

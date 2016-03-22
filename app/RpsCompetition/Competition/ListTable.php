@@ -2,7 +2,6 @@
 namespace RpsCompetition\Competition;
 
 use Avh\Framework\Html\HtmlBuilder;
-use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;

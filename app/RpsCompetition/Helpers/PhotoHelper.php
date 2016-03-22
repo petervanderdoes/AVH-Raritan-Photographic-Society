@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Helpers;
 
-use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use Imagine\Image\Box;
 use Imagine\Image\ImagineInterface;
