@@ -204,6 +204,7 @@ class BanquetEntriesModel
         $banquet_id = $this->query_banquet->getBanquets($season_start_date, $season_end_date);
         $this->banquet_id_array = [];
         $this->banquet_entries = [];
+        $banquet_entries = null;
         if (is_array($banquet_id) && !empty($banquet_id)) {
             foreach ($banquet_id as $record) {
                 $this->banquet_id_array[] = $record['ID'];

@@ -72,7 +72,7 @@ class CategoryWinnersModel
      * @param string $award
      * @param string $date
      *
-     * @return QueryMiscellaneous
+     * @return array
      */
     public function getWinner($class, $award, $date)
     {

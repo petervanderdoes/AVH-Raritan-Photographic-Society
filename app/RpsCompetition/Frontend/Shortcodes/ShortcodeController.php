@@ -32,7 +32,6 @@ final class ShortcodeController
      *                        - email
      *                        - HTML Attributes
      * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
      *
      * @return string
      */
