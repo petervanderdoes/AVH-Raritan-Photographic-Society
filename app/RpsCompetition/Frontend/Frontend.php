@@ -201,7 +201,7 @@ class Frontend
         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
          *
-         * @see \RpsCompetition\Frontend\WpseoHelper::filterWpseoPreAnalysisPostsContent
+         * @see RpsCompetition\Frontend\Plugins\Wpseo\WpseoHelper::filterWpseoPreAnalysisPostsContent
          */
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
 
