@@ -20,7 +20,6 @@ namespace RpsCompetition\Frontend\Plugins\Wpseo;
 use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
-use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
 
