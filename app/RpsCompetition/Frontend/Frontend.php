@@ -457,5 +457,11 @@ class Frontend
         add_action('wpseo_do_sitemap_competition-winners', [$wpseo_sitemap, 'actionWpseoSitemapCompetitionWinners']);
         add_filter('wpseo_sitemap_index', [$wpseo_sitemap, 'filterWpseoSitemapIndex']);
         add_filter('wpseo_sitemap_entry', [$wpseo_sitemap, 'filterSitemapEntry'], 10, 3);
+        add_filter('wpseo_sitemap_post_single_change_freq', [$wpseo_sitemap, 'filterChangeFreq'], 10, 2);
+        add_filter('wpseo_sitemap_page_single_change_freq', [$wpseo_sitemap, 'filterChangeFreq'], 10, 2);
+        // Disable the transient caching of the sitemaps when we are developing locally.
+        if (defined('WP_LOCAL_DEV') && WP_LOCAL_DEV === true) {
+            add_filter('wpseo_enable_xml_sitemap_transient_caching', '__return_false', 10, 2);
+        }
     }
 }

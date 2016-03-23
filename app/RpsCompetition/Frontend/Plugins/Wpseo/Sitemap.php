@@ -70,6 +70,9 @@ class Sitemap
 
     /**
      * Build sitemap for Competition Winners
+     *
+     * @internal \RpsCompetition\Frontend\Frontend::setupWpSeoActionsFilters
+     *
      */
     public function actionWpseoSitemapCompetitionWinners()
     {
@@ -77,6 +80,18 @@ class Sitemap
         $url = get_permalink($options['monthly_winners_post_id']);
         $this->buildWpseoSitemap($url);
         exit();
+    }
+
+    /**
+     * Set the change frequency in the sitemap.
+     *
+     * @internal \RpsCompetition\Frontend\Frontend::setupWpSeoActionsFilters
+     *
+     * @return string
+     */
+    public function filterChangeFreq()
+    {
+        return 'yearly';
     }
 
     /**
@@ -90,13 +105,15 @@ class Sitemap
      * @param string   $type
      * @param \WP_Post $current_post
      *
+     * @internal \RpsCompetition\Frontend\Frontend::setupWpSeoActionsFilters
+     *
      * @return array
      */
     public function filterSitemapEntry($data, $type, $current_post)
     {
         if ($type === 'post' && $current_post->ID == get_option('page_on_front')) {
             $data['pri'] = 1;
-            $data['chf'] = 'daily';
+            $data['chf'] = 'weekly';
 
             $post_date_modified = [];
             // Setup query for sticky posts.
@@ -123,6 +140,8 @@ class Sitemap
 
     /**
      * Add extra sitemap link to existing sitemap root.
+     *
+     * @internal \RpsCompetition\Frontend\Frontend::setupWpSeoActionsFilters
      *
      * @return string
      */
