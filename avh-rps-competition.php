@@ -16,6 +16,8 @@ use RpsCompetition\Constants;
 use RpsCompetition\Frontend\Frontend;
 use RpsCompetition\Frontend\FrontendModel;
 use RpsCompetition\Frontend\FrontendView;
+use RpsCompetition\Frontend\Plugins\Wpseo\Sitemap as WpseoSitemap;
+use RpsCompetition\Frontend\Plugins\Wpseo\WpseoHelper;
 use RpsCompetition\Frontend\Requests\RequestController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeController;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
@@ -23,7 +25,6 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksController;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksRouter;
 use RpsCompetition\Frontend\SocialNetworks\SocialNetworksView;
-use RpsCompetition\Frontend\WpseoHelper;
 use RpsCompetition\Helpers\CompetitionHelper;
 use RpsCompetition\Helpers\PhotoHelper;
 use RpsCompetition\Helpers\SeasonHelper;
@@ -194,6 +195,13 @@ class AVH_RPS_Client
                                        $app->make('QueryCompetitions'),
                                        $app->make('QueryMiscellaneous'),
                                        $app->make('PhotoHelper'));
+            });
+        $this->app->bind('WpSeoSitemap',
+            function(Application $app) {
+                return new WpseoSitemap($app->make('Settings'),
+                                        $app->make('QueryCompetitions'),
+                                        $app->make('QueryMiscellaneous'),
+                                        $app->make('PhotoHelper'));
             });
 
         $this->app->bind('CompetitionHelper',
