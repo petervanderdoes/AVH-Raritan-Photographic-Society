@@ -17,6 +17,12 @@
 
 namespace RpsCompetition\Frontend\Plugins\Wpseo;
 
+use Illuminate\Config\Repository as Settings;
+use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Entity\Db\Entry;
+use RpsCompetition\Helpers\PhotoHelper;
+
 /**
  * Class Sitemap
  *
@@ -86,7 +92,7 @@ class Sitemap
      *
      * @return array
      */
-    public function filterSitemapEntry($data, $type, \WP_Post $current_post)
+    public function filterSitemapEntry($data, $type, $current_post)
     {
         if ($type === 'post' && $current_post->ID == get_option('page_on_front')) {
             $data['pri'] = 1;
