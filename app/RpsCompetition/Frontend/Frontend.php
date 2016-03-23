@@ -201,7 +201,7 @@ class Frontend
         /**
          * Check if we ran the filter filterWpseoPreAnalysisPostsContent.
          *
-         * @see \RpsCompetition\Frontend\WpseoHelper::filterWpseoPreAnalysisPostsContent
+         * @see RpsCompetition\Frontend\Plugins\Wpseo\WpseoHelper::filterWpseoPreAnalysisPostsContent
          */
         $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent', false);
 
@@ -446,15 +446,22 @@ class Frontend
     {
         $wpseo = $this->app->make('WpSeoHelper');
         add_action('wpseo_register_extra_replacements', [$wpseo, 'actionWpseoRegisterExtraReplacements']);
-        add_action('wpseo_do_sitemap_competition-entries', [$wpseo, 'actionWpseoSitemapCompetitionEntries']);
-        add_action('wpseo_do_sitemap_competition-winners', [$wpseo, 'actionWpseoSitemapCompetitionWinners']);
-
         add_filter('wpseo_pre_analysis_post_content', [$wpseo, 'filterWpseoPreAnalysisPostsContent'], 10, 2);
         add_filter('wpseo_opengraph_image', [$wpseo, 'filterWpseoOpengraphImage'], 10, 1);
         add_filter('wpseo_metadesc', [$wpseo, 'filterWpseoMetaDescription'], 10, 1);
-        add_filter('wpseo_sitemap_index', [$wpseo, 'filterWpseoSitemapIndex']);
         add_filter('wp_title_parts', [$wpseo, 'filterWpTitleParts'], 10, 1);
         add_filter('wpseo_opengraph_title', [$wpseo, 'filterOpenGraphTitle'], 10, 1);
-        add_filter('wpseo_sitemap_entry', [$wpseo, 'filterSitemapEntry'], 10, 3);
+
+        $wpseo_sitemap = $this->app->make('WpSeoSitemap');
+        add_action('wpseo_do_sitemap_competition-entries', [$wpseo_sitemap, 'actionWpseoSitemapCompetitionEntries']);
+        add_action('wpseo_do_sitemap_competition-winners', [$wpseo_sitemap, 'actionWpseoSitemapCompetitionWinners']);
+        add_filter('wpseo_sitemap_index', [$wpseo_sitemap, 'filterWpseoSitemapIndex']);
+        add_filter('wpseo_sitemap_entry', [$wpseo_sitemap, 'filterSitemapEntry'], 10, 3);
+        add_filter('wpseo_sitemap_post_single_change_freq', [$wpseo_sitemap, 'filterChangeFreq'], 10, 2);
+        add_filter('wpseo_sitemap_page_single_change_freq', [$wpseo_sitemap, 'filterChangeFreq'], 10, 2);
+        // Disable the transient caching of the sitemaps when we are developing locally.
+        if (defined('WP_LOCAL_DEV') && WP_LOCAL_DEV === true) {
+            add_filter('wpseo_enable_xml_sitemap_transient_caching', '__return_false', 10, 2);
+        }
     }
 }
