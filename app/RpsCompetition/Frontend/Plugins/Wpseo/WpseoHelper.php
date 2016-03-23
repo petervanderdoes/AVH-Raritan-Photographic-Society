@@ -59,6 +59,8 @@ class WpseoHelper
 
     /**
      * Setup replace variables for WordPress Seo by Yoast.
+     *
+     * We use this variable to build a title page for the dynamic pages.
      */
     public function actionWpseoRegisterExtraReplacements()
     {
@@ -85,9 +87,10 @@ class WpseoHelper
         return $title;
     }
 
-
     /**
      * Filter for the title of pages.
+     *
+     * If the page is one of the dynamic pages we build a better title for the page.
      *
      * @param array $title_array
      *
@@ -225,7 +228,6 @@ class WpseoHelper
 
         return $post_content;
     }
-
 
     /**
      * Handle the replacement variable for WordPress Seo by Yoast.
