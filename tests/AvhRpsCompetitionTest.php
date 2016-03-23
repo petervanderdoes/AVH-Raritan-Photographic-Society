@@ -3,11 +3,6 @@
 class AvhRpsCompetitiontest extends WP_UnitTestCase
 {
     /**
-     * @var PDO
-     */
-    private $pdo;
-
-    /**
      * Setup the test environment.
      */
     public function setUp()
