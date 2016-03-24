@@ -21,7 +21,6 @@ use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Helpers\CommonHelper;
-use RpsCompetition\Helpers\PhotoHelper;
 
 /**
  * Class WpseoHelper
@@ -32,7 +31,6 @@ use RpsCompetition\Helpers\PhotoHelper;
  */
 class WpseoHelper
 {
-    private $photo_helper;
     private $query_competitions;
     private $query_miscellaneous;
     private $settings;
@@ -43,18 +41,15 @@ class WpseoHelper
      * @param Settings           $settings
      * @param QueryCompetitions  $query_competitions
      * @param QueryMiscellaneous $query_miscellaneous
-     * @param PhotoHelper        $photo_helper
+     *
      */
     public function __construct(Settings $settings,
                                 QueryCompetitions $query_competitions,
-                                QueryMiscellaneous $query_miscellaneous,
-                                PhotoHelper $photo_helper)
+                                QueryMiscellaneous $query_miscellaneous)
     {
-
         $this->settings = $settings;
         $this->query_competitions = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
     }
 
     /**

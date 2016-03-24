@@ -35,23 +35,19 @@ class Sitemap
     private $photo_helper;
     private $query_competitions;
     private $query_miscellaneous;
-    private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings           $settings
      * @param QueryCompetitions  $query_competitions
      * @param QueryMiscellaneous $query_miscellaneous
      * @param PhotoHelper        $photo_helper
+     *
      */
-    public function __construct(Settings $settings,
-                                QueryCompetitions $query_competitions,
+    public function __construct(QueryCompetitions $query_competitions,
                                 QueryMiscellaneous $query_miscellaneous,
                                 PhotoHelper $photo_helper)
     {
-
-        $this->settings = $settings;
         $this->query_competitions = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
         $this->photo_helper = $photo_helper;

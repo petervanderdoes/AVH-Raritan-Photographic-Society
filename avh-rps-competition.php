@@ -193,13 +193,11 @@ class AVH_RPS_Client
             function(Application $app) {
                 return new WpseoHelper($app->make('Settings'),
                                        $app->make('QueryCompetitions'),
-                                       $app->make('QueryMiscellaneous'),
-                                       $app->make('PhotoHelper'));
+                                       $app->make('QueryMiscellaneous'));
             });
         $this->app->bind('WpSeoSitemap',
             function(Application $app) {
-                return new WpseoSitemap($app->make('Settings'),
-                                        $app->make('QueryCompetitions'),
+                return new WpseoSitemap($app->make('QueryCompetitions'),
                                         $app->make('QueryMiscellaneous'),
                                         $app->make('PhotoHelper'));
             });
