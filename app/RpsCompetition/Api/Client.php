@@ -328,16 +328,16 @@ WHERE ID = :entryid";
 
         $this->json->setStatusSuccess();
 
-        $medium_clause = '';
+
+        $sql_select = "SELECT * FROM competitions";
+        $sql_where = " WHERE Competition_Date = DATE(:compdate) AND Closed = 'Y'";
         if (!empty($requested_medium)) {
             if ($requested_medium == 'prints') {
-                $medium_clause = " AND Medium like '%Prints'";
+                $sql_where .= " AND Medium like '%Prints'";
             } else {
-                $medium_clause = " AND Medium like '%Digital'";
+                $sql_where .= " AND Medium like '%Digital'";
             }
         }
-        $sql_select = "SELECT * FROM competitions";
-        $sql_where = " WHERE Competition_Date = DATE(:compdate) AND Closed = 'Y'" . $medium_clause;
         $sql_order = " ORDER BY MEDIUM, Classification";
         $sql = $sql_select . $sql_where . $sql_order;
         try {
