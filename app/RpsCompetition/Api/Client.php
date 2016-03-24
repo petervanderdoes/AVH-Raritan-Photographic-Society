@@ -204,10 +204,10 @@ class Client
     {
 
         try {
-            $sql = "SELECT *
+            $sql = 'SELECT *
 FROM entries
 WHERE Competition_ID = :comp_id
-ORDER BY Member_ID, Title";
+ORDER BY Member_ID, Title';
             $sth_entries = $db->prepare($sql);
             $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
             $sth_entries->execute();
@@ -255,9 +255,9 @@ ORDER BY Member_ID, Title";
     {
         $this->json->setStatusSuccess();
         try {
-            $sql = "UPDATE entries
+            $sql = 'UPDATE entries
 SET Score = :score, Date_Modified = NOW(), Award = :award
-WHERE ID = :entryid";
+WHERE ID = :entryid';
             $stmt = $db->prepare($sql);
         } catch (\PDOException $e) {
             $this->json->addError($e->getMessage());
@@ -338,7 +338,7 @@ WHERE ID = :entryid";
                 $sql_where .= " AND Medium like '%Digital'";
             }
         }
-        $sql_order = " ORDER BY MEDIUM, Classification";
+        $sql_order = ' ORDER BY MEDIUM, Classification';
         $sql = $sql_select . $sql_where . $sql_order;
         try {
             $sth_competitions = $db->prepare($sql);
