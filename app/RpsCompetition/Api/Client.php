@@ -251,7 +251,7 @@ ORDER BY Member_ID, Title';
      *
      * @return string|null
      */
-    private function handleCompetitionResults(RpsPdo $db, \stdClass $competition_results)
+    private function handleCompetitionResults(RpsPdo $db, $competition_results)
     {
         $this->json->setStatusSuccess();
         try {
