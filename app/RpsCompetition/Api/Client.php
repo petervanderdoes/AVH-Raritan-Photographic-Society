@@ -204,11 +204,10 @@ class Client
     {
 
         try {
-            $sql = 'SELECT entries.ID, entries.Title, entries.Member_ID,
-            entries.Server_File_Name, entries.Score, entries.Award
-            FROM entries
-                WHERE entries.Competition_ID = :comp_id
-                        ORDER BY entries.Member_ID, entries.Title';
+            $sql = "SELECT *
+FROM entries
+WHERE Competition_ID = :comp_id
+ORDER BY Member_ID, Title";
             $sth_entries = $db->prepare($sql);
             $sth_entries->bindValue(':comp_id', $comp_id, \PDO::PARAM_INT);
             $sth_entries->execute();
@@ -256,7 +255,9 @@ class Client
     {
         $this->json->setStatusSuccess();
         try {
-            $sql = 'UPDATE entries SET Score = :score, Date_Modified = NOW(), Award = :award WHERE ID = :entryid';
+            $sql = "UPDATE entries
+SET Score = :score, Date_Modified = NOW(), Award = :award
+WHERE ID = :entryid";
             $stmt = $db->prepare($sql);
         } catch (\PDOException $e) {
             $this->json->addError($e->getMessage());
@@ -330,15 +331,15 @@ class Client
         $medium_clause = '';
         if (!empty($requested_medium)) {
             if ($requested_medium == 'prints') {
-                $medium_clause = ' AND Medium like \'%Prints\' ';
+                $medium_clause = " AND Medium like '%Prints'";
             } else {
-                $medium_clause = ' AND Medium like \'%Digital\' ';
+                $medium_clause = " AND Medium like '%Digital'";
             }
         }
-        $sql = 'SELECT ID, Competition_Date, Theme, Medium, Classification, Image_Size
-        FROM competitions
-        WHERE Competition_Date = DATE(:compdate) AND Closed = "Y" ' . $medium_clause . '
-        ORDER BY Medium, Classification';
+        $sql_select = "SELECT * FROM competitions";
+        $sql_where = " WHERE Competition_Date = DATE(:compdate) AND Closed = 'Y'" . $medium_clause;
+        $sql_order = " ORDER BY MEDIUM, Classification";
+        $sql = $sql_select . $sql_where . $sql_order;
         try {
             $sth_competitions = $db->prepare($sql);
             $sth_competitions->bindParam(':compdate', $comp_date);
@@ -459,10 +460,11 @@ class Client
     private function markCompetitonScored(RpsPdo $db, $comp_date, $classification, $medium)
     {
         try {
-            $sql_update = 'UPDATE competitions SET Scored = "Y", Date_Modified = NOW()
-                        WHERE Competition_Date = :comp_date AND
-                        Classification = :classification AND
-                        Medium = :medium';
+            $sql_update = "UPDATE competitions
+SET Scored = 'Y', Date_Modified = NOW()
+WHERE Competition_Date = :comp_date AND
+      Classification = :classification AND
+      Medium = :medium";
             $stmt_update = $db->prepare($sql_update);
             $date = new \DateTime($comp_date);
             $sql_date = $date->format('Y-m-d H:i:s');
