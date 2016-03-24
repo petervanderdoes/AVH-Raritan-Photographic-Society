@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Frontend\Plugins\Wpseo;
 
-use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Db\Entry;
