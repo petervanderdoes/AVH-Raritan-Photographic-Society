@@ -255,12 +255,12 @@ final class Admin
     /**
      * Show the Classification meta on the user profile page.
      *
-     * @param \WP_User $user
+     * @param \stdClass|\WP_User $user
      *
      * @internal Hook: edit_user_profile
      * @internal Hook: show_user_profile
      */
-    public function actionUserProfile(\WP_User $user)
+    public function actionUserProfile(\stdClass $user)
     {
         $userID = $user->ID;
 
@@ -339,13 +339,13 @@ final class Admin
     /**
      * Add row action link to users list to display all their entries.
      *
-     * @param array    $actions
-     * @param \WP_User $user
+     * @param array              $actions
+     * @param \stdClass|\WP_User $user
      *
      * @return array
      * @internal Hook: user_row_actions
      */
-    public function filterRpsUserActionLinks($actions, \WP_User $user)
+    public function filterRpsUserActionLinks($actions, \stdClass $user)
     {
         $link = admin_url() . '?page=avh-rps-entries&user_id=' . $user->ID;
         $actions['entries'] = '<a href="' . $link . '">Entries</a>';

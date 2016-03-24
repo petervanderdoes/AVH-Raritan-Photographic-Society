@@ -97,15 +97,15 @@ class Sitemap
      * by getting the articles on the front page and using the most recent modified date of that post.
      * If we don't do this, the entry will take the modified date from the actual page, which never changes.
      *
-     * @param array    $data
-     * @param string   $type
-     * @param \WP_Post $current_post
-     *
-     * @internal \RpsCompetition\Frontend\Frontend::setupWpSeoActionsFilters
+     * @param array              $data
+     * @param string             $type
+     * @param \stdClass|\WP_Post $current_post
      *
      * @return array
+     * @internal \RpsCompetition\Frontend\Frontend::setupWpSeoActionsFilters
+     *
      */
-    public function filterSitemapEntry($data, $type, $current_post)
+    public function filterSitemapEntry($data, $type, \stdClass $current_post)
     {
         if ($type === 'post' && $current_post->ID == get_option('page_on_front')) {
             $data['pri'] = 1;
