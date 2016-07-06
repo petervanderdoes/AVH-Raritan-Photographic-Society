@@ -30,8 +30,8 @@ class RequestMyEntriesModel
     {
 
         $this->query_entries = $query_entries;
-        $this->photo_helper = $photo_helper;
-        $this->settings = $settings;
+        $this->photo_helper  = $photo_helper;
+        $this->settings      = $settings;
     }
 
     /**

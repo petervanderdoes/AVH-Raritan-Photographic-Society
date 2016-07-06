@@ -27,13 +27,14 @@ class Sitemap
      * @param PhotoHelper        $photo_helper
      *
      */
-    public function __construct(QueryCompetitions $query_competitions,
-                                QueryMiscellaneous $query_miscellaneous,
-                                PhotoHelper $photo_helper)
-    {
-        $this->query_competitions = $query_competitions;
+    public function __construct(
+        QueryCompetitions $query_competitions,
+        QueryMiscellaneous $query_miscellaneous,
+        PhotoHelper $photo_helper
+    ) {
+        $this->query_competitions  = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
+        $this->photo_helper        = $photo_helper;
     }
 
     /**
@@ -42,7 +43,7 @@ class Sitemap
     public function actionWpseoSitemapCompetitionEntries()
     {
         $options = get_option('avh-rps');
-        $url = get_permalink($options['monthly_entries_post_id']);
+        $url     = get_permalink($options['monthly_entries_post_id']);
         $this->buildWpseoSitemap($url, true);
         exit();
     }
@@ -56,7 +57,7 @@ class Sitemap
     public function actionWpseoSitemapCompetitionWinners()
     {
         $options = get_option('avh-rps');
-        $url = get_permalink($options['monthly_winners_post_id']);
+        $url     = get_permalink($options['monthly_winners_post_id']);
         $this->buildWpseoSitemap($url);
         exit();
     }
@@ -111,7 +112,7 @@ class Sitemap
             }
             rsort($post_date_modified);
             $date_modified = new \DateTime(reset($post_date_modified));
-            $data['mod'] = $date_modified->format('c');
+            $data['mod']   = $date_modified->format('c');
         }
 
         return $data;
@@ -127,24 +128,24 @@ class Sitemap
     public function filterWpseoSitemapIndex()
     {
         $all_competitions = $this->query_competitions->getScoredCompetitions('1970-01-01', '2200-01-01');
-        $years = [];
-        $old_year = 0;
-        $old_mod_date = 0;
+        $years            = [];
+        $old_year         = 0;
+        $old_mod_date     = 0;
         foreach ($all_competitions as $competition) {
             $date = new \DateTime($competition->Competition_Date);
             $year = $date->format('Y');
 
-            $date_modified = new \DateTime($competition->Date_Modified,
-                                           new \DateTimeZone(get_option('timezone_string')));
-            $mod_date = $date_modified->format('U');
+            $date_modified      = new \DateTime($competition->Date_Modified,
+                                                new \DateTimeZone(get_option('timezone_string')));
+            $mod_date           = $date_modified->format('U');
             $last_modified_date = $date_modified->format('c');
 
             if ($year != $old_year) {
                 $old_mod_date = 0;
-                $old_year = $year;
+                $old_year     = $year;
             }
             if ($mod_date > $old_mod_date) {
-                $old_mod_date = $mod_date;
+                $old_mod_date       = $mod_date;
                 $last_modified_date = $date_modified->format('c');
             }
             $years[$year] = $last_modified_date;
@@ -199,15 +200,16 @@ class Sitemap
         $date->setDate($sitemap_n, 1, 1);
         $start_date = $date->format('Y-m-d');
         $date->setDate($sitemap_n, 12, 31);
-        $end_date = $date->format('Y-m-d');
+        $end_date            = $date->format('Y-m-d');
         $scored_competitions = $this->query_competitions->getScoredCompetitions($start_date, $end_date);
 
         $sitemap_data = [];
         /** @var QueryCompetitions $competition */
         foreach ($scored_competitions as $competition) {
             $competition_date = new \DateTime($competition->Competition_Date);
-            $key = $competition_date->format('U');
-            $date = new \DateTime($competition->Date_Modified, new \DateTimeZone(get_option('timezone_string')));
+            $key              = $competition_date->format('U');
+            $date             = new \DateTime($competition->Date_Modified,
+                                              new \DateTimeZone(get_option('timezone_string')));
 
             $sitemap_data[$key] = [
                 'loc' => $url . $competition_date->format('Y-m-d') . '/',
@@ -217,7 +219,7 @@ class Sitemap
             ];
 
             if ($include_images) {
-                $entries = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
+                $entries     = $this->query_miscellaneous->getAllEntries($competition_date->format('Y-m-d'));
                 $data_images = [];
                 if (is_array($entries)) {
                     /** @var Entry $record */
@@ -225,15 +227,15 @@ class Sitemap
                     foreach ($entries as $record) {
                         $user_info = get_userdata($record->Member_ID);
 
-                        $image_data['loc'] = $this->photo_helper->getThumbnailUrl($record->Server_File_Name,
-                                                                                  '800');
-                        $image_data['title'] = $record->Title;
+                        $image_data['loc']     = $this->photo_helper->getThumbnailUrl($record->Server_File_Name,
+                                                                                      '800');
+                        $image_data['title']   = $record->Title;
                         $image_data['caption'] = $record->Title .
                                                  ' Credit: ' .
                                                  $user_info->user_firstname .
                                                  ' ' .
                                                  $user_info->user_lastname;
-                        $data_images[] = $image_data;
+                        $data_images[]         = $image_data;
                     }
                 }
                 $sitemap_data[$key]['images'] = $data_images;

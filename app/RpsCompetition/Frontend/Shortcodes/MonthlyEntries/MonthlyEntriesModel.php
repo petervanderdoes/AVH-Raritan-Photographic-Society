@@ -32,18 +32,19 @@ class MonthlyEntriesModel
      * @param PhotoHelper        $photo_helper
      * @param SeasonHelper       $season_helper
      */
-    public function __construct(Session $session,
-                                QueryCompetitions $query_competitions,
-                                QueryMiscellaneous $query_miscellaneous,
-                                PhotoHelper $photo_helper,
-                                SeasonHelper $season_helper)
-    {
+    public function __construct(
+        Session $session,
+        QueryCompetitions $query_competitions,
+        QueryMiscellaneous $query_miscellaneous,
+        PhotoHelper $photo_helper,
+        SeasonHelper $season_helper
+    ) {
 
-        $this->session = $session;
-        $this->query_competitions = $query_competitions;
+        $this->session             = $session;
+        $this->query_competitions  = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
-        $this->season_helper = $season_helper;
+        $this->photo_helper        = $photo_helper;
+        $this->season_helper       = $season_helper;
     }
 
     /**
@@ -56,10 +57,10 @@ class MonthlyEntriesModel
     public function dataMonthAndSeasonSelectionForm($months)
     {
         global $post;
-        $data = [];
-        $data['action'] = home_url('/' . get_page_uri($post->ID));
-        $data['months'] = $months;
-        $seasons = $this->season_helper->getSeasons();
+        $data            = [];
+        $data['action']  = home_url('/' . get_page_uri($post->ID));
+        $data['months']  = $months;
+        $seasons         = $this->season_helper->getSeasons();
         $data['seasons'] = array_combine($seasons, $seasons);
 
         return $data;
@@ -76,7 +77,7 @@ class MonthlyEntriesModel
     public function getFacebookData($selected_start_date, $selected_end_date)
     {
         $entries = $this->query_miscellaneous->getAllEntries($selected_start_date, $selected_end_date);
-        $data = $this->photo_helper->getFacebookThumbs($entries);
+        $data    = $this->photo_helper->getFacebookThumbs($entries);
 
         return $data;
     }
@@ -92,28 +93,28 @@ class MonthlyEntriesModel
      */
     public function getMonthlyEntries($selected_season, $selected_date, $scored_competitions)
     {
-        $data = [];
-        $data['selected_season'] = $selected_season;
-        $data['selected_date'] = $selected_date;
+        $data                           = [];
+        $data['selected_season']        = $selected_season;
+        $data['selected_date']          = $selected_date;
         $data['is_scored_competitions'] = false;
-        $data['thumb_size'] = '150w';
+        $data['thumb_size']             = '150w';
 
         if (is_array($scored_competitions) && (!empty($scored_competitions))) {
             $months = [];
             $themes = [];
             foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
+                $date_object  = new \DateTime($competition->Competition_Date);
+                $key          = $date_object->format('Y-m-d');
                 $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
                 $themes[$key] = $competition->Theme;
             }
-            $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
-            $date = new \DateTime($selected_date);
-            $data['date_text'] = $date->format('F j, Y');
-            $data['theme_name'] = $themes[$selected_date];
-            $data['entries'] = $this->query_miscellaneous->getAllEntries($selected_date,
-                                                                         $selected_date);
-            $data['count_entries'] = count($data['entries']);
+            $data['month_season_form']      = $this->dataMonthAndSeasonSelectionForm($months);
+            $date                           = new \DateTime($selected_date);
+            $data['date_text']              = $date->format('F j, Y');
+            $data['theme_name']             = $themes[$selected_date];
+            $data['entries']                = $this->query_miscellaneous->getAllEntries($selected_date,
+                                                                                        $selected_date);
+            $data['count_entries']          = count($data['entries']);
             $data['is_scored_competitions'] = true;
         }
 
@@ -138,9 +139,9 @@ class MonthlyEntriesModel
      */
     public function getMonthlyEntriesData($selected_date)
     {
-        $selected_season = $this->session->get('monthly_entries_selected_season');
+        $selected_season     = $this->session->get('monthly_entries_selected_season');
         $scored_competitions = $this->getScoredCompetitions($selected_season);
-        $data = $this->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
+        $data                = $this->getMonthlyEntries($selected_season, $selected_date, $scored_competitions);
 
         return $data;
     }

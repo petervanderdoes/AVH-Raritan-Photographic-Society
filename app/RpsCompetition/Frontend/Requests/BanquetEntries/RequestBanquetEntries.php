@@ -39,18 +39,19 @@ class RequestBanquetEntries
      * @param IlluminateRequest          $request
      * @param FormFactory                $form_factory
      */
-    public function __construct(EntityFormBanquetEntries $entity,
-                                BanquetEntriesType $banquet_current_user_type,
-                                RequestBanquetEntriesModel $model,
-                                IlluminateRequest $request,
-                                FormFactory $form_factory)
-    {
+    public function __construct(
+        EntityFormBanquetEntries $entity,
+        BanquetEntriesType $banquet_current_user_type,
+        RequestBanquetEntriesModel $model,
+        IlluminateRequest $request,
+        FormFactory $form_factory
+    ) {
 
-        $this->entity = $entity;
-        $this->model = $model;
+        $this->entity                    = $entity;
+        $this->model                     = $model;
         $this->banquet_current_user_type = $banquet_current_user_type;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
+        $this->request                   = $request;
+        $this->form_factory              = $form_factory;
     }
 
     /**

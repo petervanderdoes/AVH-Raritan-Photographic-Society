@@ -29,18 +29,19 @@ class MonthlyWinnersModel
      * @param PhotoHelper        $photo_helper
      * @param SeasonHelper       $season_helper
      */
-    public function __construct(Session $session,
-                                QueryCompetitions $query_competitions,
-                                QueryMiscellaneous $query_miscellaneous,
-                                PhotoHelper $photo_helper,
-                                SeasonHelper $season_helper)
-    {
+    public function __construct(
+        Session $session,
+        QueryCompetitions $query_competitions,
+        QueryMiscellaneous $query_miscellaneous,
+        PhotoHelper $photo_helper,
+        SeasonHelper $season_helper
+    ) {
 
-        $this->session = $session;
-        $this->query_competitions = $query_competitions;
+        $this->session             = $session;
+        $this->query_competitions  = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
-        $this->season_helper = $season_helper;
+        $this->photo_helper        = $photo_helper;
+        $this->season_helper       = $season_helper;
     }
 
     /**
@@ -53,7 +54,7 @@ class MonthlyWinnersModel
     public function getAwardsData($max_num_awards)
     {
         $data = [];
-        for ($i = 0; $i < $max_num_awards; $i++) {
+        for ($i = 0; $i < $max_num_awards; $i ++) {
             switch ($i) {
                 case 0:
                     $data[] = '1st';
@@ -83,7 +84,7 @@ class MonthlyWinnersModel
     public function getFacebookData($selected_start_date, $selected_end_date)
     {
         $award_entries = $this->query_miscellaneous->getWinners($selected_start_date, $selected_end_date);
-        $data = $this->photo_helper->getFacebookThumbs($award_entries);
+        $data          = $this->photo_helper->getFacebookThumbs($award_entries);
 
         return $data;
     }
@@ -101,44 +102,44 @@ class MonthlyWinnersModel
 
         $max_num_awards = $this->query_miscellaneous->getMaxAwards($selected_date);
 
-        $data = [];
-        $data['selected_season'] = $selected_season;
-        $data['selected_date'] = $selected_date;
+        $data                           = [];
+        $data['selected_season']        = $selected_season;
+        $data['selected_date']          = $selected_date;
         $data['is_scored_competitions'] = false;
-        $data['thumb_size'] = '75';
+        $data['thumb_size']             = '75';
 
         if ($this->isScoredCompetition($selected_date)) {
-            $scored_competitions = $this->getScoredCompetitions($selected_season);
-            $months = [];
-            $themes = [];
+            $scored_competitions            = $this->getScoredCompetitions($selected_season);
+            $months                         = [];
+            $themes                         = [];
             $data['is_scored_competitions'] = true;
             foreach ($scored_competitions as $competition) {
-                $date_object = new \DateTime($competition->Competition_Date);
-                $key = $date_object->format('Y-m-d');
+                $date_object  = new \DateTime($competition->Competition_Date);
+                $key          = $date_object->format('Y-m-d');
                 $months[$key] = $date_object->format('F') . ': ' . $competition->Theme;
                 $themes[$key] = $competition->Theme;
             }
             $data['month_season_form'] = $this->dataMonthAndSeasonSelectionForm($months);
-            $date = new \DateTime($selected_date);
-            $data['date_text'] = $date->format('F j, Y');
-            $data['count_entries'] = $this->query_miscellaneous->countAllEntries($selected_date);
-            $data['theme_name'] = $themes[$selected_date];
-            $data['winners'] = true;
-            $data['max_awards'] = $max_num_awards;
-            $data['awards'] = $this->getAwardsData($max_num_awards);
-            $award_entries = $this->query_miscellaneous->getWinners($selected_date);
-            $row = 0;
-            $prev_comp = '';
+            $date                      = new \DateTime($selected_date);
+            $data['date_text']         = $date->format('F j, Y');
+            $data['count_entries']     = $this->query_miscellaneous->countAllEntries($selected_date);
+            $data['theme_name']        = $themes[$selected_date];
+            $data['winners']           = true;
+            $data['max_awards']        = $max_num_awards;
+            $data['awards']            = $this->getAwardsData($max_num_awards);
+            $award_entries             = $this->query_miscellaneous->getWinners($selected_date);
+            $row                       = 0;
+            $prev_comp                 = '';
             foreach ($award_entries as $award_entry) {
                 $comp = $award_entry->Competition_ID;
                 // If we're at the end of a row, finish off the row and get ready for the next one
                 if ($prev_comp != $comp) {
                     $prev_comp = $comp;
                     // Initialize the new row
-                    $row++;
-                    $competition = $this->query_competitions->getCompetitionById($comp);
+                    $row ++;
+                    $competition                                        = $this->query_competitions->getCompetitionById($comp);
                     $data['row'][$row]['competition']['classification'] = $competition->Classification;
-                    $data['row'][$row]['competition']['medium'] = $competition->Medium;
+                    $data['row'][$row]['competition']['medium']         = $competition->Medium;
                 }
                 // Display this thumbnail in the the next available column
                 $data['row'][$row]['images'][] = $this->photo_helper->dataPhotoGallery($award_entry, '75');
@@ -206,10 +207,10 @@ class MonthlyWinnersModel
     private function dataMonthAndSeasonSelectionForm($months)
     {
         global $post;
-        $data = [];
-        $data['action'] = home_url('/' . get_page_uri($post->ID));
-        $data['months'] = $months;
-        $seasons = $this->season_helper->getSeasons();
+        $data            = [];
+        $data['action']  = home_url('/' . get_page_uri($post->ID));
+        $data['months']  = $months;
+        $seasons         = $this->season_helper->getSeasons();
         $data['seasons'] = array_combine($seasons, $seasons);
 
         return $data;

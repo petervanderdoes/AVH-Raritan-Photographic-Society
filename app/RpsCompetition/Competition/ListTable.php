@@ -34,11 +34,11 @@ class ListTable extends \WP_List_Table
      */
     public function __construct(RpsDb $rpsdb, Request $request)
     {
-        $this->rpsdb = $rpsdb;
+        $this->rpsdb   = $rpsdb;
         $this->request = $request;
-        $this->html = new HtmlBuilder();
+        $this->html    = new HtmlBuilder();
 
-        $this->screen = 'avh_rps_page_avh_rps_competition_';
+        $this->screen   = 'avh_rps_page_avh_rps_competition_';
         $default_status = get_user_option('avhrps_competition_list_last_view');
         if (empty($default_status)) {
             $default_status = 'all';
@@ -88,7 +88,7 @@ class ListTable extends \WP_List_Table
 
         $url = admin_url('admin.php') . '?';
 
-        $queryReferer = ['page' => Constants::MENU_SLUG_COMPETITION];
+        $queryReferer    = ['page' => Constants::MENU_SLUG_COMPETITION];
         $wp_http_referer = 'admin.php?' . http_build_query($queryReferer, '', '&');
 
         $nonceDelete = wp_create_nonce('bulk-competitions');
@@ -98,7 +98,7 @@ class ListTable extends \WP_List_Table
             'action'      => 'delete',
             '_wpnonce'    => $nonceDelete
         ];
-        $urlDelete = $url . http_build_query($queryDelete, '', '&');
+        $urlDelete   = $url . http_build_query($queryDelete, '', '&');
 
         $queryEdit = [
             'page'            => Constants::MENU_SLUG_COMPETITION,
@@ -106,13 +106,13 @@ class ListTable extends \WP_List_Table
             'action'          => 'edit',
             'wp_http_referer' => $wp_http_referer
         ];
-        $urlEdit = $url . http_build_query($queryEdit, '', '&');
+        $urlEdit   = $url . http_build_query($queryEdit, '', '&');
 
-        $actions = [];
+        $actions           = [];
         $actions['delete'] = $this->html->anchor($urlDelete,
                                                  'Delete',
                                                  ['class' => 'delete', 'title' => 'Delete this competition']);
-        $actions['edit'] = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this competition']);
+        $actions['edit']   = $this->html->anchor($urlEdit, 'Edit', ['title' => 'Edit this competition']);
 
         echo '<div class="row-actions">';
         $sep = '';
@@ -135,7 +135,7 @@ class ListTable extends \WP_List_Table
         $query_entries = new QueryEntries($this->rpsdb);
 
         $sqlWhere = $wpdb->prepare('Competition_ID=%d', $competition->ID);
-        $entries = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
+        $entries  = $query_entries->query(['where' => $sqlWhere, 'count' => true]);
         echo $entries;
 
         unset($query_entries);
@@ -321,8 +321,8 @@ class ListTable extends \WP_List_Table
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $num_competitions = $query_competitions->countCompetitions();
-        $status_links = [];
-        $stati = [
+        $status_links     = [];
+        $stati            = [
             'all'    => _nx_noop('All', 'All', 'competitions'),
             'open'   => _n_noop('Open <span class="count">(<span class="open-count">%s</span>)</span>',
                                 'Open <span class="count">(<span class="open-count">%s</span>)</span>'),
@@ -409,8 +409,8 @@ class ListTable extends \WP_List_Table
             'order'   => $order
         ];
 
-        $competitions = $query_competitions->query($args);
-        $this->items = array_slice($competitions, 0, $competitions_per_page);
+        $competitions      = $query_competitions->query($args);
+        $this->items       = array_slice($competitions, 0, $competitions_per_page);
         $this->extra_items = array_slice($competitions, $competitions_per_page);
 
         $total_competitions = $query_competitions->query(array_merge($args,
@@ -431,7 +431,7 @@ class ListTable extends \WP_List_Table
     public function single_row($a_competition)
     {
         $competition = $a_competition;
-        $status = ($competition->Closed == 'Y' ? '' : 'closed');
+        $status      = ($competition->Closed == 'Y' ? '' : 'closed');
         echo '<tr id="competition-' . $competition->ID . '" class="' . $status . '">';
         $this->single_row_columns($competition);
         echo '</tr>';

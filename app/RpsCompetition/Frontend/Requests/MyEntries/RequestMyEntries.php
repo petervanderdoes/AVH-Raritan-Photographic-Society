@@ -38,22 +38,23 @@ class RequestMyEntries
      * @param FormFactory           $form_factory
      * @param Session               $session
      */
-    public function __construct(EntityFormMyEntries $entity,
-                                MyEntriesType $my_entries_type,
-                                RequestMyEntriesModel $model,
-                                QueryCompetitions $query_competitions,
-                                IlluminateRequest $request,
-                                FormFactory $form_factory,
-                                Session $session)
-    {
+    public function __construct(
+        EntityFormMyEntries $entity,
+        MyEntriesType $my_entries_type,
+        RequestMyEntriesModel $model,
+        QueryCompetitions $query_competitions,
+        IlluminateRequest $request,
+        FormFactory $form_factory,
+        Session $session
+    ) {
 
         $this->query_competitions = $query_competitions;
-        $this->entity = $entity;
-        $this->my_entries_type = $my_entries_type;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
-        $this->session = $session;
-        $this->model = $model;
+        $this->entity             = $entity;
+        $this->my_entries_type    = $my_entries_type;
+        $this->request            = $request;
+        $this->form_factory       = $form_factory;
+        $this->session            = $session;
+        $this->model              = $model;
     }
 
     /**
@@ -73,14 +74,14 @@ class RequestMyEntries
         $form = $this->form_factory->create($this->my_entries_type, $this->entity, ['attr' => ['id' => 'myentries']]);
         $form->handleRequest($this->request);
 
-        $page = explode('-', $post->post_name);
+        $page          = explode('-', $post->post_name);
         $medium_subset = $page[1];
 
         if ($form->has('submit_control')) {
             $competition_date = $this->entity->getSelectComp();
-            $classification = $this->entity->getClassification();
-            $medium = $this->entity->getSelectedMedium();
-            $entry_array = $this->request->input('form.entryid', null);
+            $classification   = $this->entity->getClassification();
+            $medium           = $this->entity->getSelectedMedium();
+            $entry_array      = $this->request->input('form.entryid', null);
 
             switch ($this->entity->getSubmitControl()) {
                 case 'add':
@@ -90,7 +91,7 @@ class RequestMyEntries
                     ) {
                         $query = ['m' => $medium_subset];
                         $query = build_query($query);
-                        $loc = '/member/upload-image/?' . $query;
+                        $loc   = '/member/upload-image/?' . $query;
                         wp_redirect($loc);
                         exit();
                     }
@@ -106,7 +107,7 @@ class RequestMyEntries
                                 // @TODO Add Nonce
                                 $query = ['id' => $id, 'm' => $medium_subset];
                                 $query = build_query($query);
-                                $loc = '/member/edit-title/?' . $query;
+                                $loc   = '/member/edit-title/?' . $query;
                                 wp_redirect($loc);
                                 exit();
                             }
@@ -129,10 +130,10 @@ class RequestMyEntries
                     break;
             }
             $medium_subset_medium = $this->session->get('myentries.subset');
-            $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
-            $current_competition = $this->query_competitions->getCompetitionByDateClassMedium($competition_date,
-                                                                                              $classification,
-                                                                                              $medium);
+            $classification       = CommonHelper::getUserClassification(get_current_user_id(), $medium);
+            $current_competition  = $this->query_competitions->getCompetitionByDateClassMedium($competition_date,
+                                                                                               $classification,
+                                                                                               $medium);
 
             $this->session->set('myentries.' . $medium_subset_medium . '.competition_date',
                                 $current_competition->Competition_Date);

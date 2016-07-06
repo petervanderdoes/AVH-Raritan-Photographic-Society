@@ -46,22 +46,23 @@ class BanquetEntriesModel
      * @param IlluminateRequest  $requests
      * @param Session            $session
      */
-    public function __construct(FormFactory $form_factory,
-                                SeasonHelper $season_helper,
-                                QueryMiscellaneous $query_miscellaneous,
-                                QueryBanquet $query_banquet,
-                                QueryEntries $query_entries,
-                                IlluminateRequest $requests,
-                                Session $session)
-    {
+    public function __construct(
+        FormFactory $form_factory,
+        SeasonHelper $season_helper,
+        QueryMiscellaneous $query_miscellaneous,
+        QueryBanquet $query_banquet,
+        QueryEntries $query_entries,
+        IlluminateRequest $requests,
+        Session $session
+    ) {
 
-        $this->season_helper = $season_helper;
+        $this->season_helper       = $season_helper;
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->query_banquet = $query_banquet;
-        $this->query_entries = $query_entries;
-        $this->form_factory = $form_factory;
-        $this->requests = $requests;
-        $this->session = $session;
+        $this->query_banquet       = $query_banquet;
+        $this->query_entries       = $query_entries;
+        $this->form_factory        = $form_factory;
+        $this->requests            = $requests;
+        $this->session             = $session;
 
         $this->form_disabled = false;
     }
@@ -74,8 +75,8 @@ class BanquetEntriesModel
     public function getAllData()
     {
 
-        $data = [];
-        $season_options = $this->getSeasonsOptions();
+        $data            = [];
+        $season_options  = $this->getSeasonsOptions();
         $selected_season = $this->requests->input('form.seasons', end($season_options));
 
         $scores = $this->getScores($selected_season);
@@ -128,8 +129,8 @@ class BanquetEntriesModel
             $form->remove('cancel');
             $form->remove('reset');
         }
-        $return = [];
-        $return['data'] = $data;
+        $return          = [];
+        $return['data']  = $data;
         $return ['form'] = $form;
 
         return $return;
@@ -175,9 +176,9 @@ class BanquetEntriesModel
      */
     public function getTemplateData($season_options, $selected_season, $scores)
     {
-        $data = [];
-        $data['disabled'] = $this->form_disabled;
-        $data['seasons'] = $season_options;
+        $data                    = [];
+        $data['disabled']        = $this->form_disabled;
+        $data['seasons']         = $season_options;
         $data['selected_season'] = $selected_season;
 
         $data['entries'] = $this->getEntriesData($scores);
@@ -201,10 +202,10 @@ class BanquetEntriesModel
     public function setupBanquetInformation($season)
     {
         list ($season_start_date, $season_end_date) = $this->season_helper->getSeasonStartEnd($season);
-        $banquet_id = $this->query_banquet->getBanquets($season_start_date, $season_end_date);
+        $banquet_id             = $this->query_banquet->getBanquets($season_start_date, $season_end_date);
         $this->banquet_id_array = [];
-        $this->banquet_entries = [];
-        $banquet_entries = null;
+        $this->banquet_entries  = [];
+        $banquet_entries        = null;
         if (is_array($banquet_id) && !empty($banquet_id)) {
             foreach ($banquet_id as $record) {
                 $this->banquet_id_array[] = $record['ID'];
@@ -213,12 +214,12 @@ class BanquetEntriesModel
                 }
             }
 
-            $where = 'Competition_ID in (' .
-                     implode(',',
-                             $this->banquet_id_array) .
-                     ') AND Member_ID = "' .
-                     get_current_user_id() .
-                     '"';
+            $where           = 'Competition_ID in (' .
+                               implode(',',
+                                       $this->banquet_id_array) .
+                               ') AND Member_ID = "' .
+                               get_current_user_id() .
+                               '"';
             $banquet_entries = $this->query_entries->query(['where' => $where]);
         }
 
@@ -239,9 +240,9 @@ class BanquetEntriesModel
     private function getEntriesData($scores)
     {
         // Build the list of submitted images
-        $data = [];
-        $comp_count = 0;
-        $prev_date = '';
+        $data        = [];
+        $comp_count  = 0;
+        $prev_date   = '';
         $prev_medium = '';
 
         foreach ($scores as $record) {
@@ -250,24 +251,24 @@ class BanquetEntriesModel
                 continue;
             }
 
-            $date_parts = explode(' ', $record['Competition_Date']);
-            $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
-            $entry['date'] = $date_parts[0];
+            $date_parts                = explode(' ', $record['Competition_Date']);
+            $date_parts[0]             = strftime('%d-%b-%Y', strtotime($date_parts[0]));
+            $entry['date']             = $date_parts[0];
             $entry['competition_date'] = $date_parts[0];
-            $entry['medium'] = $record['Medium'];
-            $entry['theme'] = $record['Theme'];
-            $entry['title'] = $record['Title'];
-            $entry['score'] = $record['Score'];
-            $entry['award'] = $record['Award'];
+            $entry['medium']           = $record['Medium'];
+            $entry['theme']            = $record['Theme'];
+            $entry['title']            = $record['Title'];
+            $entry['score']            = $record['Score'];
+            $entry['award']            = $record['Award'];
             if ($date_parts[0] != $prev_date) {
-                $comp_count++;
+                $comp_count ++;
                 $prev_medium = '';
             }
 
             $entry['image_url'] = home_url($record['Server_File_Name']);
 
             if ($prev_date == $entry['date']) {
-                $entry['date'] = '';
+                $entry['date']  = '';
                 $entry['theme'] = '';
             } else {
                 $prev_date = $date_parts[0];
@@ -288,7 +289,7 @@ class BanquetEntriesModel
             $entry['checked'] = $this->isEntryChecked($entry);
 
             $entry['entry_id'] = $record['Entry_ID'];
-            $data[] = $entry;
+            $data[]            = $entry;
         }
 
         return $data;

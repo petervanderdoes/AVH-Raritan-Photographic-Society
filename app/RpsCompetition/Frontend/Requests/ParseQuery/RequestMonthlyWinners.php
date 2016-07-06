@@ -32,18 +32,19 @@ class RequestMonthlyWinners
      * @param IlluminateRequest $request
      * @param Session           $session
      */
-    public function __construct(ParseQueryHelper $pq_helper,
-                                QueryCompetitions $query_competitions,
-                                SeasonHelper $season_helper,
-                                IlluminateRequest $request,
-                                Session $session)
-    {
+    public function __construct(
+        ParseQueryHelper $pq_helper,
+        QueryCompetitions $query_competitions,
+        SeasonHelper $season_helper,
+        IlluminateRequest $request,
+        Session $session
+    ) {
 
         $this->query_competitions = $query_competitions;
-        $this->season_helper = $season_helper;
-        $this->request = $request;
-        $this->session = $session;
-        $this->pq_helper = $pq_helper;
+        $this->season_helper      = $season_helper;
+        $this->request            = $request;
+        $this->session            = $session;
+        $this->pq_helper          = $pq_helper;
     }
 
     /**
@@ -51,8 +52,8 @@ class RequestMonthlyWinners
      */
     public function handleRequestMonthlyWinners()
     {
-        $redirect = false;
-        $status = 303;
+        $redirect                = false;
+        $status                  = 303;
         $query_var_selected_date = get_query_var('selected_date', false);
 
         /**

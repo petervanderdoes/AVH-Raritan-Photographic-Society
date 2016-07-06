@@ -27,7 +27,7 @@ class RequestController
      */
     public function __construct(Application $app)
     {
-        $this->app = $app;
+        $this->app     = $app;
         $this->options = get_option('avh-rps');
         $this->request = $app->make('IlluminateRequest');
     }

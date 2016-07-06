@@ -43,12 +43,13 @@ class WpseoHelper
      * @param QueryMiscellaneous $query_miscellaneous
      *
      */
-    public function __construct(Settings $settings,
-                                QueryCompetitions $query_competitions,
-                                QueryMiscellaneous $query_miscellaneous)
-    {
-        $this->settings = $settings;
-        $this->query_competitions = $query_competitions;
+    public function __construct(
+        Settings $settings,
+        QueryCompetitions $query_competitions,
+        QueryMiscellaneous $query_miscellaneous
+    ) {
+        $this->settings            = $settings;
+        $this->query_competitions  = $query_competitions;
         $this->query_miscellaneous = $query_miscellaneous;
     }
 
@@ -101,14 +102,14 @@ class WpseoHelper
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
             $selected_date = get_query_var('selected_date');
-            $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
-            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
-            $competition = current($competitions);
+            $date          = new \DateTime($selected_date);
+            $date_text     = $date->format('F j, Y');
+            $competitions  = $this->query_competitions->getCompetitionByDates($selected_date);
+            $competition   = current($competitions);
 
-            $new_title_array = [];
+            $new_title_array   = [];
             $new_title_array[] = $post->post_title . ' for the theme "' . $competition->Theme . '" on ' . $date_text;
-            $title_array = $new_title_array;
+            $title_array       = $new_title_array;
         }
 
         return $title_array;
@@ -130,15 +131,15 @@ class WpseoHelper
         if (!is_object($post)) {
             return $meta_description;
         }
-        $options = get_option('avh-rps');
+        $options     = get_option('avh-rps');
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post->ID])) {
-            $selected_date = get_query_var('selected_date');
-            $competitions = $this->query_competitions->getCompetitionByDates($selected_date);
-            $competition = current($competitions);
-            $theme = ucfirst($competition->Theme);
-            $date = new \DateTime($selected_date);
-            $date_text = $date->format('F j, Y');
+            $selected_date  = get_query_var('selected_date');
+            $competitions   = $this->query_competitions->getCompetitionByDates($selected_date);
+            $competition    = current($competitions);
+            $theme          = ucfirst($competition->Theme);
+            $date           = new \DateTime($selected_date);
+            $date_text      = $date->format('F j, Y');
             $entries_amount = $this->query_miscellaneous->countAllEntries($selected_date);
 
             if ($post->ID == $options['monthly_entries_post_id']) {

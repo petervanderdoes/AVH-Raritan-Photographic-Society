@@ -74,7 +74,7 @@ class FrontendView extends ViewAbstract
      */
     public function renderPostGalleryFeed($attachments, $size)
     {
-        $output = "\n";
+        $output         = "\n";
         $attachments_id = array_keys($attachments);
         foreach ($attachments_id as $id) {
             $output .= wp_get_attachment_link($id, $size, true) . "\n";

@@ -26,7 +26,7 @@ class PersonWinnersModel
     {
 
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
+        $this->photo_helper        = $photo_helper;
     }
 
     /**
@@ -39,11 +39,11 @@ class PersonWinnersModel
      */
     public function getPersonWinners($user_id, $amount_of_images)
     {
-        $entries = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
-        $entries_id = array_rand($entries, $amount_of_images);
-        $data = [];
+        $entries            = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
+        $entries_id         = array_rand($entries, $amount_of_images);
+        $data               = [];
         $data['thumb_size'] = '150w';
-        $data['records'] = [];
+        $data['records']    = [];
         foreach ($entries_id as $key) {
             $data['entries'][] = $entries[$key];
         }

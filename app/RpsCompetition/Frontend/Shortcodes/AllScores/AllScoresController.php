@@ -24,7 +24,7 @@ class AllScoresController
     public function __construct(ShortcodeView $view, AllScoresModel $model)
     {
 
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
@@ -39,7 +39,7 @@ class AllScoresController
 
         $data = $model_data['data'];
         /** @var \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface $form */
-        $form = $model_data['form'];
+        $form   = $model_data['form'];
         $output = $this->view->fetch('all-scores.html.twig', ['data' => $data, 'form' => $form->createView()]);
 
         return $output;

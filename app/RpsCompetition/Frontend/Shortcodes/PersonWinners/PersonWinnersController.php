@@ -23,14 +23,14 @@ class PersonWinnersController
      */
     public function __construct(ShortcodeView $view, PersonWinnersModel $model)
     {
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
     /**
      * Display the eights and higher for a given member ID.
      *
-     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     * @param array $attr     The shortcode argument list. Allowed arguments:
      *                        - id => The member ID
      *
      * @return string

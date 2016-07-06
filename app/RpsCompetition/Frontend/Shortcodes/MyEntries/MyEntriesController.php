@@ -22,7 +22,7 @@ class MyEntriesController
     public function __construct(ShortcodeView $view, MyEntriesModel $model)
     {
 
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
@@ -32,7 +32,7 @@ class MyEntriesController
      *
      * @see Frontend::actionHandleHttpPostRpsMyEntries
      *
-     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     * @param array $attr     The shortcode argument list. Allowed arguments:
      *                        - medium
      *
      * @return string
@@ -40,7 +40,7 @@ class MyEntriesController
     public function shortcodeMyEntries($attr)
     {
 
-        $attr = shortcode_atts(['medium' => 'digital'], $attr);
+        $attr       = shortcode_atts(['medium' => 'digital'], $attr);
         $model_data = $this->model->getMyEntries($attr['medium']);
         if ($model_data === false) {
             return $this->view->fetch('add_entries_no_open_competition.html.twig');

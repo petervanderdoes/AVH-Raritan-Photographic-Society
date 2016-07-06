@@ -31,15 +31,16 @@ class ScoresCurrentUserModel
      * @param SeasonHelper       $season_helper
      * @param IlluminateRequest  $requests
      */
-    public function __construct(FormFactory $form_factory,
-                                QueryMiscellaneous $query_miscellaneous,
-                                SeasonHelper $season_helper,
-                                IlluminateRequest $requests)
-    {
+    public function __construct(
+        FormFactory $form_factory,
+        QueryMiscellaneous $query_miscellaneous,
+        SeasonHelper $season_helper,
+        IlluminateRequest $requests
+    ) {
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->season_helper = $season_helper;
-        $this->requests = $requests;
-        $this->form_factory = $form_factory;
+        $this->season_helper       = $season_helper;
+        $this->requests            = $requests;
+        $this->form_factory        = $form_factory;
     }
 
     /**
@@ -51,7 +52,7 @@ class ScoresCurrentUserModel
     {
         global $post;
 
-        $season_options = $this->getSeasonsOptions();
+        $season_options  = $this->getSeasonsOptions();
         $selected_season = $this->requests->input('form.seasons', end($season_options));
 
         $scores = $this->getScores($selected_season);
@@ -68,8 +69,8 @@ class ScoresCurrentUserModel
                                             $entity,
                                             ['action' => $action, 'attr' => ['id' => 'scorescurrentuser']]);
 
-        $return = [];
-        $return['data'] = $data;
+        $return          = [];
+        $return['data']  = $data;
         $return ['form'] = $form;
 
         return $return;
@@ -114,32 +115,32 @@ class ScoresCurrentUserModel
     public function getTemplateData($season_options, $selected_season, $scores)
     {
 
-        $data = [];
-        $data['seasons'] = $season_options;
+        $data                    = [];
+        $data['seasons']         = $season_options;
         $data['selected_season'] = $selected_season;
-        $data['scores'] = true;
-        $comp_count = 0;
-        $prev_date = '';
-        $prev_medium = '';
+        $data['scores']          = true;
+        $comp_count              = 0;
+        $prev_date               = '';
+        $prev_medium             = '';
         foreach ($scores as $recs) {
-            $entry = [];
-            $date_parts = explode(' ', $recs['Competition_Date']);
-            $date_parts[0] = strftime('%d-%b-%Y', strtotime($date_parts[0]));
+            $entry                     = [];
+            $date_parts                = explode(' ', $recs['Competition_Date']);
+            $date_parts[0]             = strftime('%d-%b-%Y', strtotime($date_parts[0]));
             $entry['competition_date'] = $date_parts[0];
-            $entry['medium'] = $recs['Medium'];
-            $entry['theme'] = $recs['Theme'];
-            $entry['title'] = $recs['Title'];
-            $entry['score'] = $recs['Score'];
-            $entry['award'] = $recs['Award'];
+            $entry['medium']           = $recs['Medium'];
+            $entry['theme']            = $recs['Theme'];
+            $entry['title']            = $recs['Title'];
+            $entry['score']            = $recs['Score'];
+            $entry['award']            = $recs['Award'];
             if ($date_parts[0] != $prev_date) {
-                $comp_count++;
+                $comp_count ++;
                 $prev_medium = '';
             }
 
             $entry['image_url'] = home_url($recs['Server_File_Name']);
 
             if ($prev_date == $date_parts[0]) {
-                $date_parts[0] = '';
+                $date_parts[0]  = '';
                 $entry['theme'] = '';
             } else {
                 $prev_date = $date_parts[0];
@@ -163,7 +164,7 @@ class ScoresCurrentUserModel
                                    '/' .
                                    $entry['medium'] .
                                    $score_award;
-            $data['entries'][] = $entry;
+            $data['entries'][]   = $entry;
         }
 
         return $data;

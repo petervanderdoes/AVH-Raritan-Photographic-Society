@@ -23,7 +23,6 @@ class PhotoHelper
     private $request;
     private $rpsdb;
 
-
     /**
      * Constructor
      *
@@ -35,7 +34,7 @@ class PhotoHelper
     public function __construct(IlluminateRequest $request, RpsDb $rpsdb, ImagineInterface $imagine)
     {
         $this->request = $request;
-        $this->rpsdb = $rpsdb;
+        $this->rpsdb   = $rpsdb;
         $this->imagine = $imagine;
     }
 
@@ -62,7 +61,7 @@ class PhotoHelper
     public function createThumbnail($file_path, $size)
     {
         $file_parts = pathinfo($file_path);
-        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_dir  = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
         $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
 
         CommonHelper::createDirectory($thumb_dir);
@@ -90,8 +89,8 @@ class PhotoHelper
      */
     public function dataPhotoCredit($title, $first_name, $last_name)
     {
-        $data = [];
-        $data['title'] = $title;
+        $data           = [];
+        $data['title']  = $title;
         $data['credit'] = $first_name . ' ' . $last_name;
 
         return $data;
@@ -108,17 +107,17 @@ class PhotoHelper
     public function dataPhotoGallery(Entry $record, $thumb_size)
     {
 
-        $data = [];
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
-        $data['award'] = $record->Award;
-        $data['url_large'] = $this->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data               = [];
+        $user_info          = get_userdata($record->Member_ID);
+        $title              = $record->Title;
+        $last_name          = $user_info->user_lastname;
+        $first_name         = $user_info->user_firstname;
+        $data['award']      = $record->Award;
+        $data['url_large']  = $this->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb']  = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+        $data['title']      = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption']    = $this->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
@@ -133,16 +132,16 @@ class PhotoHelper
      */
     public function dataPhotoMasonry(Entry $record, $thumb_size)
     {
-        $data = [];
-        $user_info = get_userdata($record->Member_ID);
-        $title = $record->Title;
-        $last_name = $user_info->user_lastname;
-        $first_name = $user_info->user_firstname;
-        $data['url_large'] = $this->getThumbnailUrl($record->Server_File_Name, '800');
-        $data['url_thumb'] = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
+        $data               = [];
+        $user_info          = get_userdata($record->Member_ID);
+        $title              = $record->Title;
+        $last_name          = $user_info->user_lastname;
+        $first_name         = $user_info->user_firstname;
+        $data['url_large']  = $this->getThumbnailUrl($record->Server_File_Name, '800');
+        $data['url_thumb']  = $this->getThumbnailUrl($record->Server_File_Name, $thumb_size);
         $data['dimensions'] = $this->getThumbnailImageSize($record->Server_File_Name, $thumb_size);
-        $data['title'] = $title . ' by ' . $first_name . ' ' . $last_name;
-        $data['caption'] = $this->dataPhotoCredit($title, $first_name, $last_name);
+        $data['title']      = $title . ' by ' . $first_name . ' ' . $last_name;
+        $data['caption']    = $this->dataPhotoCredit($title, $first_name, $last_name);
 
         return $data;
     }
@@ -157,12 +156,12 @@ class PhotoHelper
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
         $competition_record = $query_competitions->getCompetitionById($entry->Competition_ID);
-        $competition_path = $this->request->server('DOCUMENT_ROOT') .
-                            $this->getCompetitionPath($competition_record->Competition_Date,
-                                                      $competition_record->Classification,
-                                                      $competition_record->Medium);
-        $file_parts = pathinfo($entry->Server_File_Name);
-        $thumbnail_path = $competition_path . '/thumbnails';
+        $competition_path   = $this->request->server('DOCUMENT_ROOT') .
+                              $this->getCompetitionPath($competition_record->Competition_Date,
+                                                        $competition_record->Classification,
+                                                        $competition_record->Medium);
+        $file_parts         = pathinfo($entry->Server_File_Name);
+        $thumbnail_path     = $competition_path . '/thumbnails';
 
         // Remove main file from disk
         if (is_file($competition_path . $entry->Server_File_Name)) {
@@ -204,7 +203,7 @@ class PhotoHelper
             return true;
         }
 
-        $image = $this->imagine->open($image_name);
+        $image               = $this->imagine->open($image_name);
         $original_image_size = $image->getSize();
 
         $new_size = ImageSizeHelper::getImageSize($size);
@@ -283,7 +282,7 @@ class PhotoHelper
     {
 
         $file_parts = pathinfo($file_path);
-        $thumb_dir = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
+        $thumb_dir  = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
         $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
 
         if (!file_exists($thumb_dir . '/' . $thumb_name)) {
@@ -307,7 +306,7 @@ class PhotoHelper
         $this->createThumbnail($file_path, $size);
         $file_parts = pathinfo($file_path);
         $path_parts = explode('/', $file_parts['dirname']);
-        $path = home_url();
+        $path       = home_url();
         foreach ($path_parts as $part) {
             $path .= rawurlencode($part) . '/';
         }
@@ -356,7 +355,7 @@ class PhotoHelper
         $status = rename($path . '/' . $old_name, $path . '/' . $new_name);
         if ($status) {
             $parts = pathinfo($old_name);
-            $name = $parts['filename'];
+            $name  = $parts['filename'];
             // Rename any and all thumbnails of this file
             $this->removeThumbnails($path, $name);
         }

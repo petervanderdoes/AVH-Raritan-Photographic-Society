@@ -58,8 +58,8 @@ class CompetitionHelper
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
-        $date = $this->rpsdb->getMysqldate($date);
-        $return = false;
+        $date         = $this->rpsdb->getMysqldate($date);
+        $return       = false;
         $competitions = $query_competitions->getScoredCompetitions($date);
         if (is_array($competitions) && (!empty($competitions))) {
             $return = true;
