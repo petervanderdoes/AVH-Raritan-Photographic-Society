@@ -14,7 +14,7 @@ use Symfony\Component\Form\FormFactory;
  *
  * @package   RpsCompetition\Frontend\Requests\EditTitle
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class RequestEditTitle
 {
@@ -34,7 +34,6 @@ class RequestEditTitle
      * @param IlluminateRequest     $request
      * @param FormFactory           $form_factory
      * @param Settings              $settings
-     *
      */
     public function __construct(
         EntityFormEditTitle $entity,
@@ -45,12 +44,12 @@ class RequestEditTitle
         Settings $settings
     ) {
 
-        $this->entity = $entity;
+        $this->entity          = $entity;
         $this->edit_title_type = $edit_title_type;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
-        $this->settings = $settings;
-        $this->model = $model;
+        $this->request         = $request;
+        $this->form_factory    = $form_factory;
+        $this->settings        = $settings;
+        $this->model           = $model;
     }
 
     /**
@@ -58,17 +57,15 @@ class RequestEditTitle
      * This method handles the POST request generated on the page Edit Title
      * The action is called from the theme!
      *
-     * @see      Shortcodes::shortcodeEditTitle
      * @internal Hook: suffusion_before_post
+     * @see      Shortcodes::shortcodeEditTitle
      */
     public function handleRequestEditTitle()
     {
 
-        $form = $this->form_factory->create(
-            $this->edit_title_type,
-            $this->entity,
-            ['attr' => ['id' => 'edittitle']]
-        );
+        $form = $this->form_factory->create($this->edit_title_type,
+                                            $this->entity,
+                                            ['attr' => ['id' => 'edittitle']]);
         $form->handleRequest($this->request);
 
         $redirect_to = $this->entity->getWpGetReferer();
@@ -84,7 +81,7 @@ class RequestEditTitle
         }
 
         $server_file_name = $this->entity->getServerFileName();
-        $new_title = $this->entity->getNewTitle();
+        $new_title        = $this->entity->getNewTitle();
 
         if ($this->entity->getNewTitle() !== $this->entity->getTitle()) {
             $this->model->updateTitle($server_file_name, $new_title);

@@ -10,7 +10,7 @@ use RpsCompetition\Db\QueryBanquet;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class BanquetEntriesServiceProvider extends ServiceProvider
 {
@@ -39,36 +39,24 @@ class BanquetEntriesServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'BanquetEntriesController',
-            function (Application $app) {
-                return new BanquetEntriesController(
-                    $app->make('ShortcodeView'), $app->make('BanquetEntriesModel')
-                );
-            }
-        );
+        $this->app->bind('BanquetEntriesController',
+            function(Application $app) {
+                return new BanquetEntriesController($app->make('ShortcodeView'), $app->make('BanquetEntriesModel'));
+            });
 
-        $this->app->bind(
-            'QueryBanquet',
-            function (Application $app) {
-                return new QueryBanquet(
-                    $app->make('RpsDb')
-                );
-            }
-        );
-        $this->app->bind(
-            'BanquetEntriesModel',
-            function (Application $app) {
-                return new BanquetEntriesModel(
-                    $app->make('formFactory'),
-                    $app->make('SeasonHelper'),
-                    $app->make('QueryMiscellaneous'),
-                    $app->make('QueryBanquet'),
-                    $app->make('QueryEntries'),
-                    $app->make('IlluminateRequest'),
-                    $app->make('Session')
-                );
-            }
-        );
+        $this->app->bind('QueryBanquet',
+            function(Application $app) {
+                return new QueryBanquet($app->make('RpsDb'));
+            });
+        $this->app->bind('BanquetEntriesModel',
+            function(Application $app) {
+                return new BanquetEntriesModel($app->make('formFactory'),
+                                               $app->make('SeasonHelper'),
+                                               $app->make('QueryMiscellaneous'),
+                                               $app->make('QueryBanquet'),
+                                               $app->make('QueryEntries'),
+                                               $app->make('IlluminateRequest'),
+                                               $app->make('Session'));
+            });
     }
 }

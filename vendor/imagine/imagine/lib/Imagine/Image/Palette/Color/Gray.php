@@ -11,19 +11,21 @@
 
 namespace Imagine\Image\Palette\Color;
 
-use Imagine\Exception\InvalidArgumentException;
 use Imagine\Image\Palette\Grayscale;
+use Imagine\Exception\InvalidArgumentException;
 
 final class Gray implements ColorInterface
 {
     /**
      * @var integer
      */
-    private $alpha;
+    private $gray;
+
     /**
      * @var integer
      */
-    private $gray;
+    private $alpha;
+
     /**
      *
      * @var Grayscale
@@ -38,41 +40,16 @@ final class Gray implements ColorInterface
     }
 
     /**
-     * Returns hex representation of the color
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return sprintf('#%02x%02x%02x', $this->gray, $this->gray, $this->gray);
-    }
-
-    /**
      * {@inheritdoc}
      */
-    public function darken($shade)
+    public function getValue($component)
     {
-        return $this->palette->color([max(0, $this->gray - $shade)], $this->alpha);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function dissolve($alpha)
-    {
-        return $this->palette->color(
-            [$this->gray],
-            $this->alpha + $alpha
-        )
-            ;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAlpha()
-    {
-        return $this->alpha;
+        switch ($component) {
+            case ColorInterface::COLOR_GRAY:
+                return $this->getGray();
+            default:
+                throw new InvalidArgumentException(sprintf('Color component %s is not valid', $component));
+        }
     }
 
     /**
@@ -96,14 +73,35 @@ final class Gray implements ColorInterface
     /**
      * {@inheritdoc}
      */
-    public function getValue($component)
+    public function getAlpha()
     {
-        switch ($component) {
-            case ColorInterface::COLOR_GRAY:
-                return $this->getGray();
-            default:
-                throw new InvalidArgumentException(sprintf('Color component %s is not valid', $component));
-        }
+        return $this->alpha;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function dissolve($alpha)
+    {
+        return $this->palette->color(
+            array($this->gray), $this->alpha + $alpha
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function lighten($shade)
+    {
+        return $this->palette->color(array(min(255, $this->gray + $shade)), $this->alpha);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function darken($shade)
+    {
+        return $this->palette->color(array(max(0, $this->gray - $shade)), $this->alpha);
     }
 
     /**
@@ -123,11 +121,13 @@ final class Gray implements ColorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Returns hex representation of the color
+     *
+     * @return string
      */
-    public function lighten($shade)
+    public function __toString()
     {
-        return $this->palette->color([min(255, $this->gray + $shade)], $this->alpha);
+        return sprintf('#%02x%02x%02x', $this->gray, $this->gray, $this->gray);
     }
 
     /**
@@ -156,9 +156,7 @@ final class Gray implements ColorInterface
     private function setColor(array $color)
     {
         if (count($color) !== 1) {
-            throw new InvalidArgumentException(
-                'Color argument must look like array(gray), where gray is the integer value between 0 and 255 for the grayscale'
-            );
+            throw new InvalidArgumentException('Color argument must look like array(gray), where gray is the integer value between 0 and 255 for the grayscale');
         }
 
         list($this->gray) = array_values($color);

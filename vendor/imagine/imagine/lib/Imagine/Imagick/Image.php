@@ -118,7 +118,6 @@ final class Image extends AbstractImage
             );
         }
 
-        /** @var self $mask */
         $mask = $mask->mask();
         $mask->imagick->negateImage(true);
 
@@ -137,7 +136,9 @@ final class Image extends AbstractImage
     }
 
     /**
-     * @return Image
+     * {@inheritdoc}
+     *
+     * @return ImageInterface
      */
     public function copy()
     {
@@ -303,7 +304,7 @@ final class Image extends AbstractImage
     /**
      * Returns the underlying \Imagick instance
      *
-     * @return \Imagick
+     * @return Imagick
      */
     public function getImagick()
     {
@@ -665,9 +666,9 @@ final class Image extends AbstractImage
     /**
      * Performs optimized gradient fill for non-opaque linear gradients
      *
-     * @param FillInterface|Linear $fill
+     * @param Linear $fill
      */
-    private function applyFastLinear(FillInterface $fill)
+    private function applyFastLinear(Linear $fill)
     {
         $gradient = new \Imagick();
         $size = $this->getSize();

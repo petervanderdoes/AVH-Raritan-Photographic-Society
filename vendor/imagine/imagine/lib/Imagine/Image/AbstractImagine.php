@@ -11,26 +11,15 @@
 
 namespace Imagine\Image;
 
-use Imagine\Exception\InvalidArgumentException;
 use Imagine\Image\Metadata\DefaultMetadataReader;
+use Imagine\Image\Metadata\ExifMetadataReader;
 use Imagine\Image\Metadata\MetadataReaderInterface;
+use Imagine\Exception\InvalidArgumentException;
 
 abstract class AbstractImagine implements ImagineInterface
 {
     /** @var MetadataReaderInterface */
     private $metadataReader;
-
-    /**
-     * @return MetadataReaderInterface
-     */
-    public function getMetadataReader()
-    {
-        if (null === $this->metadataReader) {
-            $this->metadataReader = new DefaultMetadataReader();
-        }
-
-        return $this->metadataReader;
-    }
 
     /**
      * @param MetadataReaderInterface $metadataReader
@@ -42,6 +31,22 @@ abstract class AbstractImagine implements ImagineInterface
         $this->metadataReader = $metadataReader;
 
         return $this;
+    }
+
+    /**
+     * @return MetadataReaderInterface
+     */
+    public function getMetadataReader()
+    {
+        if (null === $this->metadataReader) {
+            if (ExifMetadataReader::isSupported()) {
+                $this->metadataReader = new ExifMetadataReader();
+            } else {
+                $this->metadataReader = new DefaultMetadataReader();
+            }
+        }
+
+        return $this->metadataReader;
     }
 
     /**

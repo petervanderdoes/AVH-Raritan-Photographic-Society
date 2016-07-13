@@ -10,7 +10,7 @@ use RpsCompetition\Application;
  *
  * @package   RpsCompetition\Frontend\Requests
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class RequestController
 {
@@ -27,7 +27,7 @@ class RequestController
      */
     public function __construct(Application $app)
     {
-        $this->app = $app;
+        $this->app     = $app;
         $this->options = get_option('avh-rps');
         $this->request = $app->make('IlluminateRequest');
     }
@@ -35,12 +35,12 @@ class RequestController
     /**
      * Handle HTTP Requests.
      *
-     * @param $wp_query
+     * @param \WP_Query $wp_query
      *
      * @internal Hook: parse_query
      * @see      FrontEnd::setupRequestHandling
      */
-    public function handleParseQuery($wp_query)
+    public function handleParseQuery(\WP_Query $wp_query)
     {
         if (isset($wp_query->query['page_id'])) {
             if ($wp_query->query['page_id'] == $this->options['monthly_entries_post_id']) {
@@ -56,6 +56,9 @@ class RequestController
         }
     }
 
+    /**
+     * Handle the request redirection for the RPS Competition Client
+     */
     public function handleTemplateRedirect()
     {
         if ($this->request->has('rpswinclient')) {

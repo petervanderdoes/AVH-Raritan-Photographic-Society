@@ -27,6 +27,16 @@ abstract class ImagineAware implements FilterInterface
     private $imagine;
 
     /**
+     * Set ImagineInterface instance.
+     *
+     * @param ImagineInterface $imagine An ImagineInterface instance
+     */
+    public function setImagine(ImagineInterface $imagine)
+    {
+        $this->imagine = $imagine;
+    }
+
+    /**
      * Get ImagineInterface instance.
      *
      * @return ImagineInterface
@@ -36,24 +46,9 @@ abstract class ImagineAware implements FilterInterface
     public function getImagine()
     {
         if (!$this->imagine instanceof ImagineInterface) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'In order to use %s pass an Imagine\Image\ImagineInterface instance to filter constructor',
-                    get_class($this)
-                )
-            );
+            throw new InvalidArgumentException(sprintf('In order to use %s pass an Imagine\Image\ImagineInterface instance to filter constructor', get_class($this)));
         }
 
         return $this->imagine;
-    }
-
-    /**
-     * Set ImagineInterface instance.
-     *
-     * @param ImagineInterface $imagine An ImagineInterface instance
-     */
-    public function setImagine(ImagineInterface $imagine)
-    {
-        $this->imagine = $imagine;
     }
 }

@@ -16,41 +16,6 @@ use Imagine\Exception\InvalidArgumentException;
 abstract class AbstractMetadataReader implements MetadataReaderInterface
 {
     /**
-     * Extracts metadata from raw data
-     *
-     * @param $data
-     *
-     * @return array An associative array of metadata
-     */
-    abstract protected function extractFromData($data);
-
-    /**
-     * Extracts metadata from a file
-     *
-     * @param $file
-     *
-     * @return array An associative array of metadata
-     */
-    abstract protected function extractFromFile($file);
-
-    /**
-     * Extracts metadata from a stream
-     *
-     * @param $resource
-     *
-     * @return array An associative array of metadata
-     */
-    abstract protected function extractFromStream($resource);
-
-    /**
-     * {@inheritdoc}
-     */
-    public function readData($data)
-    {
-        return new MetadataBag($this->extractFromData($data));
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function readFile($file)
@@ -60,12 +25,18 @@ abstract class AbstractMetadataReader implements MetadataReaderInterface
                 throw new InvalidArgumentException(sprintf('File %s does not exist.', $file));
             }
 
-            return new MetadataBag(
-                array_merge(['filepath' => realpath($file), 'uri' => $file], $this->extractFromFile($file))
-            );
+            return new MetadataBag(array_merge(array('filepath' => realpath($file), 'uri' => $file), $this->extractFromFile($file)));
         }
 
-        return new MetadataBag(array_merge(['uri' => $file], $this->extractFromFile($file)));
+        return new MetadataBag(array_merge(array('uri' => $file), $this->extractFromFile($file)));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function readData($data)
+    {
+        return new MetadataBag($this->extractFromData($data));
     }
 
     /**
@@ -89,7 +60,7 @@ abstract class AbstractMetadataReader implements MetadataReaderInterface
      */
     private function getStreamMetadata($resource)
     {
-        $metadata = [];
+        $metadata = array();
 
         if (false !== $data = @stream_get_meta_data($resource)) {
             $metadata['uri'] = $data['uri'];
@@ -100,4 +71,31 @@ abstract class AbstractMetadataReader implements MetadataReaderInterface
 
         return $metadata;
     }
+
+    /**
+     * Extracts metadata from a file
+     *
+     * @param $file
+     *
+     * @return array An associative array of metadata
+     */
+    abstract protected function extractFromFile($file);
+
+    /**
+     * Extracts metadata from raw data
+     *
+     * @param $data
+     *
+     * @return array An associative array of metadata
+     */
+    abstract protected function extractFromData($data);
+
+    /**
+     * Extracts metadata from a stream
+     *
+     * @param $resource
+     *
+     * @return array An associative array of metadata
+     */
+    abstract protected function extractFromStream($resource);
 }

@@ -86,7 +86,7 @@ interface ImageInterface extends ManipulatorInterface
      *
      * @throws RuntimeException
      *
-     * @return ColorInterface|\Imagine\Image\Palette\Color\RGB|\Imagine\Image\Palette\Color\CMYK|\Imagine\Image\Palette\Color\Gray
+     * @return ColorInterface
      */
     public function getColorAt(PointInterface $point);
 
@@ -109,7 +109,7 @@ interface ImageInterface extends ManipulatorInterface
      *
      * @param string $scheme
      *
-     * @throws \InvalidArgumentException When an unsupported Interface type is supplied
+     * @throws InvalidArgumentException When an unsupported Interface type is supplied
      *
      * @return ImageInterface
      */
@@ -143,7 +143,7 @@ interface ImageInterface extends ManipulatorInterface
     /**
      * Returns the Image's meta data
      *
-     * @return \Imagine\Image\ImageInterface
+     * @return Metadata\MetadataInterface
      */
     public function metadata();
 

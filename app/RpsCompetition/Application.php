@@ -2,8 +2,8 @@
 
 namespace RpsCompetition;
 
-use Avh\Contracts\Foundation\ApplicationInterface;
-use Avh\Support\ProviderRepository;
+use Avh\Framework\Contracts\Foundation\ApplicationInterface;
+use Avh\Framework\Support\ProviderRepository;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
@@ -14,7 +14,7 @@ use RpsCompetition\Helpers\CommonHelper;
  *
  * @package   RpsCompetition
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class Application extends Container implements ApplicationInterface
 {
@@ -87,13 +87,12 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * Constructor
-     *
      */
     public function __construct()
     {
         $this->registerBaseBindings();
         $items = [];
-        $this->instance('config', $config = new Repository($items));
+        $this->instance('config', new Repository($items));
 
         $this->config['app.providers'] = [
             '\RpsCompetition\Frontend\Requests\BanquetEntries\RequestBanquetEntriesServiceProvider',
@@ -139,12 +138,10 @@ class Application extends Container implements ApplicationInterface
     {
         $name = is_string($provider) ? $provider : get_class($provider);
 
-        return array_first(
-            $this->serviceProviders,
-            function ($key, $value) use ($name) {
+        return array_first($this->serviceProviders,
+            function($key, $value) use ($name) {
                 return $value instanceof $name;
-            }
-        );
+            });
     }
 
     /**
@@ -201,7 +198,6 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * Resolve the given type from the container.
-     *
      * (Overriding Container::make)
      *
      * @param  string $abstract
@@ -209,7 +205,7 @@ class Application extends Container implements ApplicationInterface
      *
      * @return mixed
      */
-    public function make($abstract, $parameters = [])
+    public function make($abstract, array $parameters = [])
     {
         $abstract = $this->getAlias($abstract);
 
@@ -250,11 +246,10 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * Register all of the configured providers.
-     *
      */
     public function registerConfiguredProviders()
     {
-        $upload_dir_info = wp_upload_dir();
+        $upload_dir_info        = wp_upload_dir();
         $manifestPath_directory = $upload_dir_info['basedir'] . '/avh-rps/framework';
         CommonHelper::createDirectory($manifestPath_directory);
         $manifestPath = $manifestPath_directory . '/services.json';
@@ -302,7 +297,7 @@ class Application extends Container implements ApplicationInterface
             unset($this->deferredServices[$service]);
         }
 
-        $this->register($instance = new $provider($this));
+        $this->register(new $provider($this));
     }
 
     /**

@@ -1,12 +1,15 @@
 <?php
 namespace RpsCompetition\Helpers;
 
+use RpsCompetition\Db\QueryCompetitions;
+use Symfony\Component\Form\Form;
+
 /**
  * Class CommonHelper
  *
  * @package   RpsCompetition\Helpers
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class CommonHelper
 {
@@ -20,7 +23,7 @@ class CommonHelper
      */
     public static function arrayMsort($array, $cols)
     {
-        $row_is_object = false;
+        $row_is_object     = false;
         $sort_column_array = [];
 
         // Create multiple arrays using the array $cols.
@@ -29,7 +32,7 @@ class CommonHelper
             $sort_column_array[$col] = [];
             foreach ($array as $key => $row) {
                 if (is_object($row)) {
-                    $row = (array) $row;
+                    $row           = (array) $row;
                     $row_is_object = true;
                 }
                 $sort_column_array[$col][$key] = strtolower($row[$col]);
@@ -72,32 +75,31 @@ class CommonHelper
     /**
      * Get the thumbnail to display on the My Entries page.
      *
-     * @param $current_competition
+     * @param QueryCompetitions $current_competition
      *
      * @return mixed
      */
-    public static function getCompetitionThumbnail($current_competition)
+    public static function getCompetitionThumbnail(QueryCompetitions $current_competition)
     {
-        $image = [];
+        $image                  = [];
         $image['Color Digital'] = '/thumb-comp-digital-color.jpg';
-        $image['Color Prints'] = '/thumb-comp-print-color.jpg';
-        $image['B&W Digital'] = '/thumb-comp-digital-bw.jpg';
-        $image['B&W Prints'] = '/thumb-comp-print-bw.jpg';
-        $img = $image[$current_competition->Medium];
+        $image['Color Prints']  = '/thumb-comp-print-color.jpg';
+        $image['B&W Digital']   = '/thumb-comp-digital-bw.jpg';
+        $image['B&W Prints']    = '/thumb-comp-print-bw.jpg';
+        $img                    = $image[$current_competition->Medium];
 
         return $img;
     }
 
     /**
      * Get the Dynamic Pages.
-     *
      * These are the pages where we implement javascript to get different competitions and seasons within the page.
      *
      * @return array
      */
     public static function getDynamicPages()
     {
-        $options = get_option('avh-rps');
+        $options     = get_option('avh-rps');
         $pages_array = [$options['monthly_entries_post_id'] => true, $options['monthly_winners_post_id'] => true];
 
         return $pages_array;
@@ -124,8 +126,8 @@ class CommonHelper
     /**
      * Get the user classification based on the medium
      *
-     * @param integer $userID
-     * @param string  $medium
+     * @param int    $userID
+     * @param string $medium
      *
      * @return string
      */
@@ -154,9 +156,9 @@ class CommonHelper
     /**
      * Check if the user is a paid member
      *
-     * @param integer|null $user_id UserID to check
+     * @param int|null $user_id UserID to check
      *
-     * @return boolean true if a paid member, false if non-existing user or non-paid member.`
+     * @return bool true if a paid member, false if non-existing user or non-paid member.`
      */
     public static function isPaidMember($user_id = null)
     {
@@ -170,17 +172,17 @@ class CommonHelper
             return false;
         }
 
-        return in_array('s2member_level4', (array) $user->roles);
+        return ($user->has_cap('access_s2member_level4'));
     }
 
     /**
      * Check if user pressed cancel and if so redirect the user
      *
-     * @param \Symfony\Component\Form\Form $form   The Form that was submitted
-     * @param string                       $cancel The field to check for cancellation
-     * @param string                       $redirect_to
+     * @param Form   $form   The Form that was submitted
+     * @param string $cancel The field to check for cancellation
+     * @param string $redirect_to
      */
-    public static function isRequestCanceled($form, $cancel, $redirect_to)
+    public static function isRequestCanceled(Form $form, $cancel, $redirect_to)
     {
         if ($form->has($cancel)) {
             if ($form->get($cancel)

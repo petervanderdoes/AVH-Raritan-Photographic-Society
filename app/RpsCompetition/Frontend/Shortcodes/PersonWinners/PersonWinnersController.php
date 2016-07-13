@@ -8,7 +8,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\PersonWinners
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class PersonWinnersController
 {
@@ -23,23 +23,20 @@ class PersonWinnersController
      */
     public function __construct(ShortcodeView $view, PersonWinnersModel $model)
     {
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
     /**
      * Display the eights and higher for a given member ID.
      *
-     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     * @param array $attr     The shortcode argument list. Allowed arguments:
      *                        - id => The member ID
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
      *
      * @return string
-     *
      * @internal Shortcode: rps_person_winners
      */
-    public function shortcodePersonWinners($attr, $content, $tag)
+    public function shortcodePersonWinners($attr)
     {
         $attr = shortcode_atts(['id' => 0, 'images' => 6], $attr);
 

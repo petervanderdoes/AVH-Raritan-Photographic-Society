@@ -13,7 +13,7 @@ use Symfony\Component\Form\FormFactory;
  *
  * @package   RpsCompetition\Frontend\Requests\BanquetEntries
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class RequestBanquetEntries
 {
@@ -47,11 +47,11 @@ class RequestBanquetEntries
         FormFactory $form_factory
     ) {
 
-        $this->entity = $entity;
-        $this->model = $model;
+        $this->entity                    = $entity;
+        $this->model                     = $model;
         $this->banquet_current_user_type = $banquet_current_user_type;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
+        $this->request                   = $request;
+        $this->form_factory              = $form_factory;
     }
 
     /**
@@ -63,12 +63,10 @@ class RequestBanquetEntries
      */
     public function handleBanquetEntries()
     {
-        /** @var \Symfony\Component\Form\Form $form */
-        $form = $this->form_factory->create(
-            $this->banquet_current_user_type,
-            $this->entity,
-            ['attr' => ['id' => 'banquetentries']]
-        );
+        /** @var \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface $form */
+        $form = $this->form_factory->create($this->banquet_current_user_type,
+                                            $this->entity,
+                                            ['attr' => ['id' => 'banquetentries']]);
         $form->handleRequest($this->request);
 
         $this->model->removeUpdateSession();
@@ -89,7 +87,6 @@ class RequestBanquetEntries
 
     /**
      * Handles the required functions for when a user submits their Banquet Entries
-     *
      */
     private function handleUpdate()
     {

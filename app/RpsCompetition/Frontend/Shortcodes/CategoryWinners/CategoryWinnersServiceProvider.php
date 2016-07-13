@@ -9,7 +9,7 @@ use RpsCompetition\Application;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\CategoryWinners
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class CategoryWinnersServiceProvider extends ServiceProvider
 {
@@ -38,22 +38,16 @@ class CategoryWinnersServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'CategoryWinnersController',
-            function (Application $app) {
-                return new CategoryWinnersController(
-                    $app->make('ShortcodeView'), $app->make('CategoryWinnersModel'), $app->make('Settings')
-                );
-            }
-        );
+        $this->app->bind('CategoryWinnersController',
+            function(Application $app) {
+                return new CategoryWinnersController($app->make('ShortcodeView'),
+                                                     $app->make('CategoryWinnersModel'),
+                                                     $app->make('Settings'));
+            });
 
-        $this->app->bind(
-            'CategoryWinnersModel',
-            function (Application $app) {
-                return new CategoryWinnersModel(
-                    $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
-                );
-            }
-        );
+        $this->app->bind('CategoryWinnersModel',
+            function(Application $app) {
+                return new CategoryWinnersModel($app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+            });
     }
 }

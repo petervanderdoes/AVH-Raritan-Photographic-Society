@@ -11,18 +11,18 @@
 
 namespace Imagine\Gd;
 
-use Imagine\Exception\NotSupportedException;
-use Imagine\Exception\RuntimeException;
 use Imagine\Image\AbstractLayers;
+use Imagine\Exception\RuntimeException;
 use Imagine\Image\Metadata\MetadataBag;
 use Imagine\Image\Palette\PaletteInterface;
+use Imagine\Exception\NotSupportedException;
 
 class Layers extends AbstractLayers
 {
     private $image;
     private $offset;
-    private $palette;
     private $resource;
+    private $palette;
 
     public function __construct(Image $image, PaletteInterface $palette, $resource)
     {
@@ -39,9 +39,8 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
-    public function animate($format, $delay, $loops)
+    public function merge()
     {
-        return $this;
     }
 
     /**
@@ -54,9 +53,9 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
-    public function count()
+    public function animate($format, $delay, $loops)
     {
-        return 1;
+        return $this;
     }
 
     /**
@@ -78,16 +77,33 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
-    public function merge()
+    public function next()
     {
+        ++$this->offset;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function next()
+    public function rewind()
     {
-        ++$this->offset;
+        $this->offset = 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function valid()
+    {
+        return $this->offset < 1;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return 1;
     }
 
     /**
@@ -124,21 +140,5 @@ class Layers extends AbstractLayers
     public function offsetUnset($offset)
     {
         throw new NotSupportedException('GD does not support layer unset');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->offset = 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid()
-    {
-        return $this->offset < 1;
     }
 }

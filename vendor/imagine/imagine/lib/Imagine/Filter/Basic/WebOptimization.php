@@ -11,30 +11,27 @@
 
 namespace Imagine\Filter\Basic;
 
-use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\Palette\RGB;
+use Imagine\Filter\FilterInterface;
 
 /**
  * A filter to render web-optimized images
  */
 class WebOptimization implements FilterInterface
 {
-    private $options;
     private $palette;
     private $path;
+    private $options;
 
-    public function __construct($path = null, array $options = [])
+    public function __construct($path = null, array $options = array())
     {
         $this->path = $path;
-        $this->options = array_replace(
-            [
-                'resolution-units' => ImageInterface::RESOLUTION_PIXELSPERINCH,
-                'resolution-y'     => 72,
-                'resolution-x'     => 72,
-            ],
-            $options
-        );
+        $this->options = array_replace(array(
+            'resolution-units' => ImageInterface::RESOLUTION_PIXELSPERINCH,
+            'resolution-y'     => 72,
+            'resolution-x'     => 72,
+        ), $options);
         $this->palette = new RGB();
     }
 
@@ -43,9 +40,9 @@ class WebOptimization implements FilterInterface
      */
     public function apply(ImageInterface $image)
     {
-        $image->usePalette($this->palette)
-              ->strip()
-        ;
+        $image
+            ->usePalette($this->palette)
+            ->strip();
 
         if (is_callable($this->path)) {
             $path = call_user_func($this->path, $image);

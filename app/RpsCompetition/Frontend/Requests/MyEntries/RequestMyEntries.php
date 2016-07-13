@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Requests\MyEntries;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
@@ -15,7 +15,7 @@ use Symfony\Component\Form\FormFactory;
  *
  * @package   RpsCompetition\Frontend\Requests\MyEntries
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class RequestMyEntries
 {
@@ -49,12 +49,12 @@ class RequestMyEntries
     ) {
 
         $this->query_competitions = $query_competitions;
-        $this->entity = $entity;
-        $this->my_entries_type = $my_entries_type;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
-        $this->session = $session;
-        $this->model = $model;
+        $this->entity             = $entity;
+        $this->my_entries_type    = $my_entries_type;
+        $this->request            = $request;
+        $this->form_factory       = $form_factory;
+        $this->session            = $session;
+        $this->model              = $model;
     }
 
     /**
@@ -62,8 +62,8 @@ class RequestMyEntries
      * This method handles the POST request generated on the page for editing entries
      * The action is called from the theme!
      *
-     * @see      Shortcodes::shortcodeMyEntries
      * @internal Hook: suffusion_before_post
+     * @see      Shortcodes::shortcodeMyEntries
      */
     public function handleRequestMyEntries()
     {
@@ -74,44 +74,40 @@ class RequestMyEntries
         $form = $this->form_factory->create($this->my_entries_type, $this->entity, ['attr' => ['id' => 'myentries']]);
         $form->handleRequest($this->request);
 
-        $page = explode('-', $post->post_name);
+        $page          = explode('-', $post->post_name);
         $medium_subset = $page[1];
 
         if ($form->has('submit_control')) {
             $competition_date = $this->entity->getSelectComp();
-            $classification = $this->entity->getClassification();
-            $medium = $this->entity->getSelectedMedium();
-            $entry_array = $this->request->input('form.entryid', null);
+            $classification   = $this->entity->getClassification();
+            $medium           = $this->entity->getSelectedMedium();
+            $entry_array      = $this->request->input('form.entryid', null);
 
             switch ($this->entity->getSubmitControl()) {
                 case 'add':
-                    if (!$this->query_competitions->checkCompetitionClosed(
-                        $competition_date,
-                        $classification,
-                        $medium
-                    )
+                    if (!$this->query_competitions->checkCompetitionClosed($competition_date,
+                                                                           $classification,
+                                                                           $medium)
                     ) {
                         $query = ['m' => $medium_subset];
                         $query = build_query($query);
-                        $loc = '/member/upload-image/?' . $query;
+                        $loc   = '/member/upload-image/?' . $query;
                         wp_redirect($loc);
                         exit();
                     }
                     break;
 
                 case 'edit':
-                    if (!$this->query_competitions->checkCompetitionClosed(
-                        $competition_date,
-                        $classification,
-                        $medium
-                    )
+                    if (!$this->query_competitions->checkCompetitionClosed($competition_date,
+                                                                           $classification,
+                                                                           $medium)
                     ) {
                         if (is_array($entry_array)) {
                             foreach ($entry_array as $id) {
                                 // @TODO Add Nonce
                                 $query = ['id' => $id, 'm' => $medium_subset];
                                 $query = build_query($query);
-                                $loc = '/member/edit-title/?' . $query;
+                                $loc   = '/member/edit-title/?' . $query;
                                 wp_redirect($loc);
                                 exit();
                             }
@@ -120,11 +116,9 @@ class RequestMyEntries
                     break;
 
                 case 'delete':
-                    if (!$this->query_competitions->checkCompetitionClosed(
-                        $competition_date,
-                        $classification,
-                        $medium
-                    )
+                    if (!$this->query_competitions->checkCompetitionClosed($competition_date,
+                                                                           $classification,
+                                                                           $medium)
                     ) {
                         if ($entry_array !== null) {
                             $this->model->deleteCompetitionEntries($entry_array);
@@ -136,22 +130,16 @@ class RequestMyEntries
                     break;
             }
             $medium_subset_medium = $this->session->get('myentries.subset');
-            $classification = CommonHelper::getUserClassification(get_current_user_id(), $medium);
-            $current_competition = $this->query_competitions->getCompetitionByDateClassMedium(
-                $competition_date,
-                $classification,
-                $medium
-            );
+            $classification       = CommonHelper::getUserClassification(get_current_user_id(), $medium);
+            $current_competition  = $this->query_competitions->getCompetitionByDateClassMedium($competition_date,
+                                                                                               $classification,
+                                                                                               $medium);
 
-            $this->session->set(
-                'myentries.' . $medium_subset_medium . '.competition_date',
-                $current_competition->Competition_Date
-            );
+            $this->session->set('myentries.' . $medium_subset_medium . '.competition_date',
+                                $current_competition->Competition_Date);
             $this->session->set('myentries.' . $medium_subset_medium . '.medium', $current_competition->Medium);
-            $this->session->set(
-                'myentries.' . $medium_subset_medium . '.classification',
-                $current_competition->Classification
-            );
+            $this->session->set('myentries.' . $medium_subset_medium . '.classification',
+                                $current_competition->Classification);
             $redirect = get_permalink($post->ID);
             wp_redirect($redirect);
             exit();

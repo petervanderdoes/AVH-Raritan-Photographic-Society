@@ -15,7 +15,7 @@ use Symfony\Component\Form\FormFactory;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\EditTitle
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class EditTitleModel
 {
@@ -42,10 +42,10 @@ class EditTitleModel
         IlluminateRequest $request
     ) {
         $this->query_entries = $query_entries;
-        $this->photo_helper = $photo_helper;
-        $this->form_factory = $form_factory;
-        $this->settings = $settings;
-        $this->request = $request;
+        $this->photo_helper  = $photo_helper;
+        $this->form_factory  = $form_factory;
+        $this->settings      = $settings;
+        $this->request       = $request;
     }
 
     /**
@@ -57,7 +57,7 @@ class EditTitleModel
      */
     public function getData($server_filename)
     {
-        $data = [];
+        $data                    = [];
         $data['image']['source'] = $this->photo_helper->getThumbnailUrl($server_filename, '200');
 
         return $data;
@@ -66,7 +66,7 @@ class EditTitleModel
     /**
      * Get the entry
      *
-     * @param integer $entry_id
+     * @param int $entry_id
      *
      * @return QueryEntries
      */
@@ -78,7 +78,7 @@ class EditTitleModel
     /**
      * Get the entry ID based on the reqeust
      *
-     * @return integer
+     * @return int
      */
     public function getEntryId()
     {
@@ -101,9 +101,9 @@ class EditTitleModel
     /**
      * Create a new form
      *
-     * @param integer $entry_id
-     * @param string  $title
-     * @param string  $server_file_name
+     * @param int    $entry_id
+     * @param string $title
+     * @param string $server_file_name
      *
      * @return \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface
      */
@@ -111,7 +111,7 @@ class EditTitleModel
     public function getNewForm($entry_id, $title, $server_file_name)
     {
         global $post;
-        $entity = new EntityFormEditTitle();
+        $entity        = new EntityFormEditTitle();
         $medium_subset = $this->getMediumSubset();
 
         $action = add_query_arg(['id' => $entry_id, 'm' => strtolower($medium_subset)], get_permalink($post->ID));
@@ -122,11 +122,9 @@ class EditTitleModel
         $entity->setServerFileName($server_file_name);
         $entity->setM($medium_subset);
         $entity->setWpGetReferer(remove_query_arg(['m', 'id'], wp_get_referer()));
-        $form = $this->form_factory->create(
-            new EditTitleType($entity),
-            $entity,
-            ['action' => $action, 'attr' => ['id' => 'edittitle']]
-        );
+        $form = $this->form_factory->create(new EditTitleType(),
+                                            $entity,
+                                            ['action' => $action, 'attr' => ['id' => 'edittitle']]);
 
         return $form;
     }
@@ -140,7 +138,7 @@ class EditTitleModel
     {
         /** @var \Symfony\Component\Form\FormErrorIterator $error_obj */
         $error_obj = $this->settings->get('formerror');
-        $form = $error_obj->getForm();
+        $form      = $error_obj->getForm();
 
         return $form;
     }

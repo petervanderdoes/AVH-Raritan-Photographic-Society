@@ -9,7 +9,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\EditTitle
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class EditTitleController
 {
@@ -29,35 +29,31 @@ class EditTitleController
      */
     public function __construct(ShortcodeView $view, EditTitleModel $model, Settings $settings)
     {
-        $this->view = $view;
-        $this->model = $model;
+        $this->view     = $view;
+        $this->model    = $model;
         $this->settings = $settings;
     }
 
     /**
      * Display the form to edit the title of the selected entry
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
+     * @see Frontend::actionHandleHttpPostRpsEditTitle
      *
      * @return string
-     *
-     * @see Frontend::actionHandleHttpPostRpsEditTitle
      */
-    public function shortcodeEditTitle($attr, $content, $tag)
+    public function shortcodeEditTitle()
     {
 
         if ($this->settings->has('formerror')) {
-            $form = $this->model->getSubmittedForm();
+            $form             = $this->model->getSubmittedForm();
             $server_file_name = $form->get('server_file_name')
                                      ->getData()
             ;
         } else {
-            $entry_id = $this->model->getEntryId();
-            $entry = $this->model->getEntry($entry_id);
+            $entry_id         = $this->model->getEntryId();
+            $entry            = $this->model->getEntry($entry_id);
             $server_file_name = $entry->Server_File_Name;
-            $form = $this->model->getNewForm($entry_id, $entry->Title, $entry->Server_File_Name);
+            $form             = $this->model->getNewForm($entry_id, $entry->Title, $entry->Server_File_Name);
         }
         $data = $this->model->getData($server_file_name);
 

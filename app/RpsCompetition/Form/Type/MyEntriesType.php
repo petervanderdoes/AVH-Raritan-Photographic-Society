@@ -5,18 +5,17 @@ namespace RpsCompetition\Form\Type;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class MyEntriesType
  *
  * @package   RpsCompetition\Form\Type
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class MyEntriesType extends AbstractType
 {
-    /** @var EntityFormMyEntries */
     private $entity;
 
     /**
@@ -37,27 +36,33 @@ class MyEntriesType extends AbstractType
         $builder->add('submit_control', 'hidden')
                 ->add('classification', 'hidden')
                 ->add('_wpnonce', 'hidden')
-                ->add(
-                    'select_comp',
-                    'choice',
-                    [
-                        'multiple' => false,
-                        'expanded' => false,
-                        'choices'  => $this->entity->getSelectedCompChoices(),
-                        'attr'     => ['onchange' => 'submit_form("select_comp")']
-                    ]
-                )
-                ->add(
-                    'selected_medium',
-                    'choice',
-                    [
-                        'multiple' => false,
-                        'expanded' => false,
-                        'choices'  => $this->entity->getSelectedMediumChoices(),
-                        'attr'     => ['onchange' => 'submit_form("select_medium")']
-                    ]
-                )
+                ->add('select_comp',
+                      'choice',
+                      [
+                          'multiple' => false,
+                          'expanded' => false,
+                          'choices'  => $this->entity->getSelectedCompChoices(),
+                          'attr'     => ['onchange' => 'submit_form("select_comp")']
+                      ])
+                ->add('selected_medium',
+                      'choice',
+                      [
+                          'multiple' => false,
+                          'expanded' => false,
+                          'choices'  => $this->entity->getSelectedMediumChoices(),
+                          'attr'     => ['onchange' => 'submit_form("select_medium")']
+                      ])
         ;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+                                   'data_class' => 'RpsCompetition\Entity\Form\MyEntries',
+                               ]);
     }
 
     /**
@@ -66,17 +71,5 @@ class MyEntriesType extends AbstractType
     public function getName()
     {
         return 'form';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
-    {
-        $resolver->setDefaults(
-            [
-                'data_class' => 'RpsCompetition\Entity\Form\MyEntries',
-            ]
-        );
     }
 }

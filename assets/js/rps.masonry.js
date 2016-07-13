@@ -1,32 +1,44 @@
-(function ($, window, document) {
-    $(document).ready(function () {
-        var $container = $('.gallery-masonry').masonry({
-            itemSelector: '.gallery-item-masonry',
-            columnWidth: '.grid-sizer',
-            isFitWidth: true
-        });
-        if (typeof getRpsMasonryItems == 'function') {
-            var $items = getRpsMasonryItems();
-            $container.masonryImagesReveal($items);
-        }
+/* global masonry getRpsMasonryItems */
+/* eslint no-undef: ["error", { "typeof": false }] */
+function rpsImagesReveal($, document) {
+  $(document).ready(function onReady() {
+    var $items;
+    var $container;
+    $container = $('.gallery-masonry').masonry({
+      itemSelector: '.gallery-item-masonry',
+      columnWidth: '.grid-sizer',
+      isFitWidth: true
     });
-}(window.jQuery, window, document));
-jQuery.fn.masonryImagesReveal = function ($items) {
-    var msnry = this.data('masonry');
-    var itemSelector = msnry.options.itemSelector;
-    // hide by default
-    $items.hide();
-    // append to container
-    this.append($items);
-    $items.imagesLoaded().progress(function (imgLoad, image) {
+    if (typeof getRpsMasonryItems === 'function') {
+      $items = getRpsMasonryItems();
+      $container.masonryImagesReveal($items);
+    }
+  });
+}
 
-        // get item
-        // image is imagesLoaded class, not <img>, <img> is image.img
-        var $item = jQuery(image.img).parents(itemSelector);
-        // un-hide item
-        $item.show();
-        // masonry does its thing
-        msnry.appended($item);
-    });
-    return this;
-};
+function rpsMasonryImagesReveal($items) {
+  var msnry = this.data('masonry');
+  var itemSelector = msnry.options.itemSelector;
+
+  // hide by default
+  $items.hide();
+
+  // append to container
+  this.append($items);
+  $items.imagesLoaded().progress(function handleProgress(imgLoad, image) {
+    // get item
+    // image is imagesLoaded class, not <img>, <img> is image.img
+    var $item;
+    $item = jQuery(image.img).parents(itemSelector);
+
+    // un-hide item
+    $item.show();
+
+    // masonry does its thing
+    msnry.appended($item);
+  });
+
+  return this;
+}
+jQuery.fn.masonryImagesReveal = rpsMasonryImagesReveal;
+rpsImagesReveal(window.jQuery, document);

@@ -8,7 +8,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\MyEntries
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class MyEntriesController
 {
@@ -22,7 +22,7 @@ class MyEntriesController
     public function __construct(ShortcodeView $view, MyEntriesModel $model)
     {
 
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
@@ -30,19 +30,17 @@ class MyEntriesController
      * Display the entries of the current user.
      * This page shows the current entries for a competition of the current user.
      *
-     * @param array  $attr    The shortcode argument list. Allowed arguments:
+     * @see Frontend::actionHandleHttpPostRpsMyEntries
+     *
+     * @param array $attr     The shortcode argument list. Allowed arguments:
      *                        - medium
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
      *
      * @return string
-     *
-     * @see Frontend::actionHandleHttpPostRpsMyEntries
      */
-    public function shortcodeMyEntries($attr, $content, $tag)
+    public function shortcodeMyEntries($attr)
     {
 
-        $attr = shortcode_atts(['medium' => 'digital'], $attr);
+        $attr       = shortcode_atts(['medium' => 'digital'], $attr);
         $model_data = $this->model->getMyEntries($attr['medium']);
         if ($model_data === false) {
             return $this->view->fetch('add_entries_no_open_competition.html.twig');

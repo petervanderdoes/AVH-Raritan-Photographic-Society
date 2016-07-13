@@ -9,7 +9,7 @@ use RpsCompetition\Application;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\PersonWinners
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class PersonWinnersServiceProvider extends ServiceProvider
 {
@@ -38,22 +38,14 @@ class PersonWinnersServiceProvider extends ServiceProvider
     public function register()
     {
         // My Entries Shortcode
-        $this->app->bind(
-            'PersonWinnersController',
-            function (Application $app) {
-                return new PersonWinnersController(
-                    $app->make('ShortcodeView'), $app->make('PersonWinnersModel')
-                );
-            }
-        );
+        $this->app->bind('PersonWinnersController',
+            function(Application $app) {
+                return new PersonWinnersController($app->make('ShortcodeView'), $app->make('PersonWinnersModel'));
+            });
 
-        $this->app->bind(
-            'PersonWinnersModel',
-            function (Application $app) {
-                return new PersonWinnersModel(
-                    $app->make('QueryMiscellaneous'), $app->make('PhotoHelper')
-                );
-            }
-        );
+        $this->app->bind('PersonWinnersModel',
+            function(Application $app) {
+                return new PersonWinnersModel($app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+            });
     }
 }

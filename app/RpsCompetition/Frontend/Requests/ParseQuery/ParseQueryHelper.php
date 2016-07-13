@@ -11,7 +11,7 @@ use RpsCompetition\Helpers\SeasonHelper;
  *
  * @package   RpsCompetition\Frontend\Requests\ParseQuery
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class ParseQueryHelper
 {
@@ -33,35 +33,37 @@ class ParseQueryHelper
     ) {
 
         $this->query_competitions = $query_competitions;
-        $this->season_helper = $season_helper;
+        $this->season_helper      = $season_helper;
         $this->competition_helper = $competition_helper;
     }
 
+    /**
+     * Set the date of the last competition for the selected season.
+     */
     public function checkScoredCompetition()
     {
         if (!$this->competition_helper->isScoredCompetitionDate($this->selected_date)) {
-            $competitions = $this->query_competitions->getCompetitionBySeasonId(
-                $this->selected_season,
-                ['Scored' => 'Y']
-            );
+            $competitions = $this->query_competitions->getCompetitionBySeasonId($this->selected_season,
+                                                                                ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
-            $competition = end($competitions);
-            $date_object = new \DateTime($competition->Competition_Date);
+            $competition         = end($competitions);
+            $date_object         = new \DateTime($competition->Competition_Date);
             $this->selected_date = $date_object->format(('Y-m-d'));
         }
     }
 
+    /**
+     * Set selected date of the last competition for the selected season
+     */
     public function checkValidSeason()
     {
         if (!$this->season_helper->isValidSeason($this->selected_season)) {
             $this->selected_season = $this->season_helper->getSeasonId(date('r'));
-            $competitions = $this->query_competitions->getCompetitionBySeasonId(
-                $this->selected_season,
-                ['Scored' => 'Y']
-            );
+            $competitions          = $this->query_competitions->getCompetitionBySeasonId($this->selected_season,
+                                                                                         ['Scored' => 'Y']);
             /** @var QueryCompetitions $competition */
-            $competition = end($competitions);
-            $date_object = new \DateTime($competition->Competition_Date);
+            $competition         = end($competitions);
+            $date_object         = new \DateTime($competition->Competition_Date);
             $this->selected_date = $date_object->format(('Y-m-d'));
         }
     }

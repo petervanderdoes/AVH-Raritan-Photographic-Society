@@ -14,7 +14,7 @@ use Symfony\Component\Form\FormFactory;
  *
  * @package   RpsCompetition\Frontend\Requests\UploadImage
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class RequestUploadImage
 {
@@ -41,12 +41,12 @@ class RequestUploadImage
         FormFactory $form_factory,
         Settings $settings
     ) {
-        $this->entity = $entity;
+        $this->entity            = $entity;
         $this->upload_image_type = $upload_image_type;
-        $this->model = $model;
-        $this->request = $request;
-        $this->form_factory = $form_factory;
-        $this->settings = $settings;
+        $this->model             = $model;
+        $this->request           = $request;
+        $this->form_factory      = $form_factory;
+        $this->settings          = $settings;
     }
 
     /**
@@ -54,18 +54,16 @@ class RequestUploadImage
      * This method handles the POST request generated when uploading a photo
      * The action is called from the theme!
      *
-     * @see      Shortcodes::shortcodeUploadImage
      * @internal Hook: suffusion_before_post
+     * @see      Shortcodes::shortcodeUploadImage
      */
     public function handleUploadImage()
     {
 
         /** @var \Symfony\Component\Form\Form $form */
-        $form = $this->form_factory->create(
-            $this->upload_image_type,
-            $this->entity,
-            ['attr' => ['id' => 'uploadentry']]
-        );
+        $form = $this->form_factory->create($this->upload_image_type,
+                                            $this->entity,
+                                            ['attr' => ['id' => 'uploadentry']]);
         $form->handleRequest($this->request);
 
         $redirect_to = $this->entity->getWpGetReferer();

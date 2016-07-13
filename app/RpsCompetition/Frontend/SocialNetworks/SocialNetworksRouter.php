@@ -9,7 +9,7 @@ use RpsCompetition\Helpers\CommonHelper;
  *
  * @package   RpsCompetition\Frontend\SocialNetworks
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 final class SocialNetworksRouter
 {
@@ -27,13 +27,12 @@ final class SocialNetworksRouter
     public function __construct(Settings $settings, SocialNetworksController $controller)
     {
 
-        $this->settings = $settings;
+        $this->settings   = $settings;
         $this->controller = $controller;
     }
 
     /**
      * Initialize for Social Networks
-     *
      * Add the action/filter/style/scripts
      *
      * @param array $data
@@ -42,13 +41,12 @@ final class SocialNetworksRouter
     {
         $rps_social_buttons_script = $data['script'];
 
-        wp_register_script(
-            'rps-competition.social-buttons.script',
-            CommonHelper::getPluginUrl($rps_social_buttons_script, $this->settings->get('javascript_dir')),
-            [],
-            'to_remove',
-            true
-        );
+        wp_register_script('rps-competition.social-buttons.script',
+                           CommonHelper::getPluginUrl($rps_social_buttons_script,
+                                                      $this->settings->get('javascript_dir')),
+                           [],
+                           'to_remove',
+                           true);
         wp_enqueue_script('rps-competition.social-buttons.script');
 
         add_action('wp_head', [$this->controller, 'actionWpHead']);

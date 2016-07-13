@@ -9,7 +9,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\MonthlyWinners
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class MonthlyWinnersController
 {
@@ -26,8 +26,8 @@ class MonthlyWinnersController
      */
     public function __construct(ShortcodeView $view, MonthlyWinnersModel $model, Settings $settings)
     {
-        $this->view = $view;
-        $this->model = $model;
+        $this->view     = $view;
+        $this->model    = $model;
         $this->settings = $settings;
     }
 
@@ -36,19 +36,15 @@ class MonthlyWinnersController
      * All winners of the month are shown, which defaults to the latest month.
      * A dropdown selection to choose different months and/or season is also displayed.
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
+     * @internal Shortcode: rps_monthly_winners
      *
      * @return string
-     *
-     * @internal Shortcode: rps_monthly_winners
      */
-    public function shortcodeMonthlyWinners($attr, $content, $tag)
+    public function shortcodeMonthlyWinners()
     {
 
-        $output = '';
-        $selected_date = $this->model->getSelectedDate();
+        $output          = '';
+        $selected_date   = $this->model->getSelectedDate();
         $selected_season = $this->model->getSelectedSeason();
 
         if ($this->model->isScoredCompetition($selected_date)) {
@@ -57,15 +53,13 @@ class MonthlyWinnersController
              *
              * @see Frontend::filterWpseoPreAnalysisPostsContent
              */
-            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get(
-                'didFilterWpseoPreAnalysisPostsContent',
-                false
-            );
+            $didFilterWpseoPreAnalysisPostsContent = $this->settings->get('didFilterWpseoPreAnalysisPostsContent',
+                                                                          false);
             if (!$didFilterWpseoPreAnalysisPostsContent) {
-                $data = $this->model->getFacebookData($selected_date, $selected_date);
+                $data   = $this->model->getFacebookData($selected_date, $selected_date);
                 $output = $this->view->fetch('facebook.html.twig', $data);
             } else {
-                $data = $this->model->getMonthlyWinners($selected_season, $selected_date);
+                $data   = $this->model->getMonthlyWinners($selected_season, $selected_date);
                 $output = $this->view->fetch('monthly-winners.html.twig', $data);
             }
         }

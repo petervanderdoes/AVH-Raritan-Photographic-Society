@@ -2,7 +2,7 @@
 
 namespace RpsCompetition\Frontend\Requests\UploadImage;
 
-use Avh\Network\Session;
+use Avh\Framework\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Constants;
@@ -11,6 +11,7 @@ use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -19,7 +20,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
  *
  * @package   RpsCompetition\Frontend\Requests\UploadImage
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class RequestUploadImageModel
 {
@@ -27,7 +28,7 @@ class RequestUploadImageModel
     private $comp_date;
     private $dest_name;
     private $entity;
-    /** @var \Symfony\Component\Form\Form $form */
+    /** @var Form $form */
     private $form;
     private $medium;
     private $photo_helper;
@@ -59,19 +60,19 @@ class RequestUploadImageModel
         PhotoHelper $photo_helper
     ) {
 
-        $this->session = $session;
-        $this->request = $request;
+        $this->session            = $session;
+        $this->request            = $request;
         $this->query_competitions = $query_competitions;
-        $this->query_entries = $query_entries;
-        $this->photo_helper = $photo_helper;
-        $this->entity = $entity;
-        $this->settings = $settings;
+        $this->query_entries      = $query_entries;
+        $this->photo_helper       = $photo_helper;
+        $this->entity             = $entity;
+        $this->settings           = $settings;
     }
 
     /**
      * Check if the upload is valid, move the uploaded file and create thumbnails
      *
-     * @param \Symfony\Component\Form\Form $form
+     * @param Form $form
      *
      * @return bool
      */
@@ -84,14 +85,14 @@ class RequestUploadImageModel
         }
 
         $record = $this->getCompetitionRecord();
-        if ($record === false) {
+        if ($record === null) {
             return false;
         }
 
         // Prepare the title and client file name for storing in the database
         $title = trim($this->entity->getTitle());
 
-        if (!$this->isValid($record['ID'], $record['Max_Entries'], $title)) {
+        if (!$this->isValid($record->ID, $record->Max_Entries, $title)) {
             return false;
         }
         $succes = $this->moveUploadedFile($title);
@@ -99,29 +100,26 @@ class RequestUploadImageModel
             return false;
         }
 
-        $succes = $this->addEntry($record['ID'], $title);
+        $succes = $this->addEntry($record->ID, $title);
         if ($succes === false) {
             return false;
         }
 
-        $this->photo_helper->createCommonThumbnails(
-            $this->query_entries->getEntryById($this->query_entries->getInsertId())
-        );
+        $this->photo_helper->createCommonThumbnails($this->query_entries->getEntryById($this->query_entries->getInsertId()));
 
         return true;
     }
 
     /**
      * Check if the uploaded entry is valid.
-     *
      * Checks include:
      * - Duplicate Title
      * - Maximum entries per competition
      * - Maximum entries per date (Hmm, not sure if this is needed)
      *
-     * @param integer $comp_id
-     * @param integer $max_entries
-     * @param string  $title
+     * @param int    $comp_id
+     * @param int    $max_entries
+     * @param string $title
      *
      * @return bool
      */
@@ -131,7 +129,9 @@ class RequestUploadImageModel
         // an entry already submitted to this competition. Duplicate title result in duplicate
         // file names on the server
         if ($this->query_entries->checkDuplicateTitle($comp_id, $title, get_current_user_id())) {
-            $error_message = 'You have already submitted an entry with a title of "' . $title . '" in this competition. Please submit your entry again with a different title.';
+            $error_message = 'You have already submitted an entry with a title of "' .
+                             $title .
+                             '" in this competition. Please submit your entry again with a different title.';
             $this->setFormError($this->form, $error_message, 'title');
 
             return false;
@@ -142,7 +142,9 @@ class RequestUploadImageModel
         // maximum images per competition by having two upload windows open simultaneously.
         $max_per_id = $this->query_entries->countEntriesByCompetitionId($comp_id, get_current_user_id());
         if ($max_per_id >= $max_entries) {
-            $error_message = 'You have already submitted the maximum of ' . $max_entries . ' entries into this competition. You must Remove an image before you can submit another';
+            $error_message = 'You have already submitted the maximum of ' .
+                             $max_entries .
+                             ' entries into this competition. You must Remove an image before you can submit another';
             $this->setFormError($this->form, $error_message);
 
             return false;
@@ -151,7 +153,9 @@ class RequestUploadImageModel
         $max_per_date = $this->query_entries->countEntriesByCompetitionDate($this->comp_date, get_current_user_id());
         if ($max_per_date >= $this->settings->get('club_max_entries_per_member_per_date')) {
             $max_entries_member_date = $this->settings->get('club_max_entries_per_member_per_date');
-            $error_message = 'You have already submitted the maximum of ' . $max_entries_member_date . ' entries for this competition date. You must Remove an image before you can submit another';
+            $error_message           = 'You have already submitted the maximum of ' .
+                                       $max_entries_member_date .
+                                       ' entries for this competition date. You must Remove an image before you can submit another';
             $this->setFormError($this->form, $error_message);
 
             return false;
@@ -163,24 +167,24 @@ class RequestUploadImageModel
     /**
      * Add the netry to the database.
      *
-     * @param integer $comp_id
-     * @param string  $title
+     * @param int    $comp_id
+     * @param string $title
      *
      * @return bool
      */
     private function addEntry($comp_id, $title)
     {
-        $file = $this->request->file('form.file_name');
+        $file             = $this->request->file('form.file_name');
         $client_file_name = $file->getClientOriginalName();
 
         $server_file_name = $this->relative_server_path . '/' . $this->dest_name . '.jpg';
-        $data = [
+        $data             = [
             'Competition_ID'   => $comp_id,
             'Title'            => $title,
             'Client_File_Name' => $client_file_name,
             'Server_File_Name' => $server_file_name
         ];
-        $result = $this->query_entries->addEntry($data, get_current_user_id());
+        $result           = $this->query_entries->addEntry($data, get_current_user_id());
         if ($result === false) {
             $error_message = 'Failed to INSERT entry record into database';
             $this->setFormError($this->form, $error_message);
@@ -192,27 +196,26 @@ class RequestUploadImageModel
     /**
      * get the Competition record.
      *
-     * @return array|bool|QueryCompetitions
+     * @return bool|QueryCompetitions
      */
     private function getCompetitionRecord()
     {
-        $recs = $this->query_competitions->getCompetitionByDateClassMedium(
-            $this->comp_date,
-            $this->classification,
-            $this->medium,
-            ARRAY_A
-        );
+        $recs = $this->query_competitions->getCompetitionByDateClassMedium($this->comp_date,
+                                                                           $this->classification,
+                                                                           $this->medium);
 
-        if (is_array($recs)) {
-            $return = $recs;
-        } else {
-            $error_message = 'Competition ' . $this->comp_date . '/' . $this->classification . '/' . $this->medium . ' not found in database';
+        if ($recs === null) {
+            $error_message = 'Competition ' .
+                             $this->comp_date .
+                             '/' .
+                             $this->classification .
+                             '/' .
+                             $this->medium .
+                             ' not found in database';
             $this->setFormError($this->form, $error_message);
-
-            $return = false;
         }
 
-        return $return;
+        return $recs;
     }
 
     /**
@@ -224,9 +227,9 @@ class RequestUploadImageModel
     {
         $return = true;
         if ($this->session->has('myentries')) {
-            $subset = $this->session->get('myentries.subset', null);
-            $this->comp_date = $this->session->get('myentries.' . $subset . '.competition_date', null);
-            $this->medium = $this->session->get('myentries.' . $subset . '.medium', null);
+            $subset               = $this->session->get('myentries.subset', null);
+            $this->comp_date      = $this->session->get('myentries.' . $subset . '.competition_date', null);
+            $this->medium         = $this->session->get('myentries.' . $subset . '.medium', null);
             $this->classification = $this->session->get('myentries.' . $subset . '.classification', null);
         } else {
             $error_message = 'Missing "myentries" in session.';
@@ -248,24 +251,28 @@ class RequestUploadImageModel
     private function moveUploadedFile($title)
     {
         // Move the file to its final location
-        $relative_server_path = $this->photo_helper->getCompetitionPath(
-            $this->comp_date,
-            $this->classification,
-            $this->medium
-        );
-        $full_server_path = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
+        $relative_server_path = $this->photo_helper->getCompetitionPath($this->comp_date,
+                                                                        $this->classification,
+                                                                        $this->medium);
+        $full_server_path     = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
 
-        $user = wp_get_current_user();
-        $file = $this->request->file('form.file_name');
+        $user               = wp_get_current_user();
+        $file               = $this->request->file('form.file_name');
         $uploaded_file_name = $file->getRealPath();
         $uploaded_file_info = getimagesize($uploaded_file_name);
-        $dest_name = sanitize_file_name($title) . '+' . $user->user_login . '+' . filemtime($uploaded_file_name);
+        $dest_name          = sanitize_file_name($title) .
+                              '+' .
+                              $user->user_login .
+                              '+' .
+                              filemtime($uploaded_file_name);
         // Need to create the destination folder?
         CommonHelper::createDirectory($full_server_path);
 
         // If the .jpg file is too big resize it
         $return = true;
-        if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY || $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY) {
+        if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY ||
+            $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY
+        ) {
             // Resize the image and deposit it in the destination directory
             $this->photo_helper->doResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
         } else {
@@ -278,7 +285,7 @@ class RequestUploadImageModel
             }
         }
         $this->relative_server_path = $relative_server_path;
-        $this->dest_name = $dest_name;
+        $this->dest_name            = $dest_name;
 
         return $return;
     }
@@ -286,13 +293,13 @@ class RequestUploadImageModel
     /**
      * Set the error for the form.
      *
-     * @param \Symfony\Component\Form\Form $form
-     * @param string                       $error_message
-     * @param string|null                  $form_field
+     * @param Form        $form
+     * @param string      $error_message
+     * @param string|null $form_field
      *
      * @return void
      */
-    private function setFormError($form, $error_message, $form_field = null)
+    private function setFormError(Form $form, $error_message, $form_field = null)
     {
         if ($form_field === null) {
             $form->addError(new FormError('Error: ' . $error_message));

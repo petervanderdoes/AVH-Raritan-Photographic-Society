@@ -9,7 +9,7 @@ use RpsCompetition\Helpers\PhotoHelper;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\PersonWinners
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class PersonWinnersModel
 {
@@ -26,24 +26,24 @@ class PersonWinnersModel
     {
 
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
+        $this->photo_helper        = $photo_helper;
     }
 
     /**
      * Get given amount of random images for the given user.
      *
-     * @param integer $user_id
-     * @param integer $amount_of_images
+     * @param int $user_id
+     * @param int $amount_of_images
      *
      * @return array
      */
     public function getPersonWinners($user_id, $amount_of_images)
     {
-        $entries = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
-        $entries_id = array_rand($entries, $amount_of_images);
-        $data = [];
+        $entries            = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
+        $entries_id         = array_rand($entries, $amount_of_images);
+        $data               = [];
         $data['thumb_size'] = '150w';
-        $data['records'] = [];
+        $data['records']    = [];
         foreach ($entries_id as $key) {
             $data['entries'][] = $entries[$key];
         }

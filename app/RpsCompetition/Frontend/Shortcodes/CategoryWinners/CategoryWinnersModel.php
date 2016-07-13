@@ -10,7 +10,7 @@ use RpsCompetition\Helpers\PhotoHelper;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\CategoryWinners
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class CategoryWinnersModel
 {
@@ -27,7 +27,7 @@ class CategoryWinnersModel
     {
 
         $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper = $photo_helper;
+        $this->photo_helper        = $photo_helper;
     }
 
     /**
@@ -41,11 +41,11 @@ class CategoryWinnersModel
      */
     public function getCategoryWinners($class, $entries, $thumb_size)
     {
-        $data = [];
-        $data['class'] = $class;
-        $data['records'] = $entries;
+        $data               = [];
+        $data['class']      = $class;
+        $data['records']    = $entries;
         $data['thumb_size'] = $thumb_size;
-        $data['images'] = [];
+        $data['images']     = [];
         foreach ($data['records'] as $recs) {
             $data['images'][] = $this->photo_helper->dataPhotoGallery($recs, $data['thumb_size']);
         }
@@ -60,14 +60,9 @@ class CategoryWinnersModel
      *
      * @return array
      */
-    public function getFacebookThumbs($entries)
+    public function getFacebookData($entries)
     {
-        $images = [];
-        foreach ($entries as $entry) {
-            $images[] = $this->photo_helper->getThumbnailUrl($entry->Server_File_Name, 'fb_thumb');
-        }
-
-        return ['images' => $images];
+        return $this->photo_helper->getFacebookThumbs($entries);
     }
 
     /**
@@ -77,12 +72,12 @@ class CategoryWinnersModel
      * @param string $award
      * @param string $date
      *
-     * @return QueryMiscellaneous
+     * @return array
      */
     public function getWinner($class, $award, $date)
     {
         $competition_date = date('Y-m-d H:i:s', strtotime($date));
-        $award_map = ['1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM'];
+        $award_map        = ['1' => '1st', '2' => '2nd', '3' => '3rd', 'H' => 'HM'];
 
         return $this->query_miscellaneous->getWinner($competition_date, $award_map[$award], $class);
     }

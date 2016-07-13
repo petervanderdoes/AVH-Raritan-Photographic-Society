@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Helpers;
 
-use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\RpsDb;
 
@@ -10,23 +9,20 @@ use RpsCompetition\Db\RpsDb;
  *
  * @package   RpsCompetition\Helpers
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class CompetitionHelper
 {
     private $rpsdb;
-    private $settings;
 
     /**
-     * Constructor
+     * CompetitionHelper constructor.
      *
-     * @param Settings $settings
-     * @param RpsDb    $rpsdb
+     * @param RpsDb $rpsdb
      */
-    public function __construct(Settings $settings, RpsDb $rpsdb)
+    public function __construct(RpsDb $rpsdb)
     {
         $this->rpsdb = $rpsdb;
-        $this->settings = $settings;
     }
 
     /**
@@ -60,10 +56,10 @@ class CompetitionHelper
      */
     public function isScoredCompetitionDate($date)
     {
-        $query_competitions = new QueryCompetitions($this->settings, $this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
 
-        $date = $this->rpsdb->getMysqldate($date);
-        $return = false;
+        $date         = $this->rpsdb->getMysqldate($date);
+        $return       = false;
         $competitions = $query_competitions->getScoredCompetitions($date);
         if (is_array($competitions) && (!empty($competitions))) {
             $return = true;

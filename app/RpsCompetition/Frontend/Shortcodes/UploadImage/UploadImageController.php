@@ -9,7 +9,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\UploadImage
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class UploadImageController
 {
@@ -26,23 +26,19 @@ class UploadImageController
      */
     public function __construct(ShortcodeView $view, UploadImageModel $model, Settings $settings)
     {
-        $this->view = $view;
-        $this->model = $model;
+        $this->view     = $view;
+        $this->model    = $model;
         $this->settings = $settings;
     }
 
     /**
      * Displays the form to upload a new entry.
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
+     * @see Frontend::actionHandleHttpPostRpsUploadEntry
      *
      * @return string
-     *
-     * @see Frontend::actionHandleHttpPostRpsUploadEntry
      */
-    public function shortcodeUploadImage($attr, $content, $tag)
+    public function shortcodeUploadImage()
     {
         if ($this->settings->has('formerror')) {
             $form = $this->model->getSubmittedForm();

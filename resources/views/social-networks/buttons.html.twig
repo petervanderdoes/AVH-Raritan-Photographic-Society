@@ -19,7 +19,7 @@
                 </li>
             {% else %}
                 <li class="share-{{ key }}">
-                    <a class="social-button" href="mailto:?subject={{ title }}&body={{ title }}: {{ url }}">
+                    <a class="social-button" href="mailto:?subject={{ title|escape('url') }}&body={{ title|escape('url') }}:%20{{ url|escape('url') }}">
                         <i class="fa fa-{{ value.icon }}"></i>
                         <span class="text">{{ value.text }}</span>
                     </a>

@@ -7,7 +7,7 @@ namespace RpsCompetition\Entity\Form;
  *
  * @package   RpsCompetition\Entity\Form
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class MyEntries
 {
@@ -18,8 +18,8 @@ class MyEntries
     protected $selected_medium;
     protected $submit_control;
     protected $wp_nonce;
-    private $selected_comp_choices = [];
-    private $selected_medium_choices = [];
+    private   $selected_comp_choices   = [];
+    private   $selected_medium_choices = [];
 
     /**
      * @return string

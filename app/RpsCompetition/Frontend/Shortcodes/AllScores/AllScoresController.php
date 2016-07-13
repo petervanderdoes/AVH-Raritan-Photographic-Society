@@ -8,7 +8,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\AllScores
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class AllScoresController
 {
@@ -24,7 +24,7 @@ class AllScoresController
     public function __construct(ShortcodeView $view, AllScoresModel $model)
     {
 
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
@@ -38,7 +38,8 @@ class AllScoresController
         $model_data = $this->model->getAllData();
 
         $data = $model_data['data'];
-        $form = $model_data['form'];
+        /** @var \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface $form */
+        $form   = $model_data['form'];
         $output = $this->view->fetch('all-scores.html.twig', ['data' => $data, 'form' => $form->createView()]);
 
         return $output;

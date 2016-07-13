@@ -4,18 +4,17 @@ namespace RpsCompetition\Form\Type;
 use RpsCompetition\Entity\Form\BanquetEntries as EntityFormBanquetEntries;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class BanquetEntriesType
  *
  * @package   RpsCompetition\Form\Type
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class BanquetEntriesType extends AbstractType
 {
-    /** @var EntityFormBanquetEntries */
     private $entity;
 
     /**
@@ -34,16 +33,14 @@ class BanquetEntriesType extends AbstractType
         $builder->add('allentries', 'hidden')
                 ->add('banquetids', 'hidden')
                 ->add('wp_get_referer', 'hidden')
-                ->add(
-                    'seasons',
-                    'choice',
-                    [
-                        'multiple' => false,
-                        'expanded' => false,
-                        'choices'  => $this->entity->getSeasonsChoices(),
-                        'attr'     => ['onchange' => 'submit_form("select_season")']
-                    ]
-                )
+                ->add('seasons',
+                      'choice',
+                      [
+                          'multiple' => false,
+                          'expanded' => false,
+                          'choices'  => $this->entity->getSeasonsChoices(),
+                          'attr'     => ['onchange' => 'submit_form("select_season")']
+                      ])
                 ->add('update', 'submit', ['label' => 'Update'])
                 ->add('cancel', 'submit', ['label' => 'Cancel', 'attr' => ['formnovalidate' => 'formnovalidate']])
                 ->add('reset', 'reset', ['label' => 'Reset', 'attr' => ['formnovalidate' => 'formnovalidate']])
@@ -53,20 +50,18 @@ class BanquetEntriesType extends AbstractType
     /**
      * {@inheritDoc}
      */
-    public function getName()
+    public function configureOptions(OptionsResolver $resolver)
     {
-        return 'form';
+        $resolver->setDefaults([
+                                   'data_class' => 'RpsCompetition\Entity\Form\BanquetEntries',
+                               ]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function getName()
     {
-        $resolver->setDefaults(
-            [
-                'data_class' => 'RpsCompetition\Entity\Form\BanquetEntries',
-            ]
-        );
+        return 'form';
     }
 }

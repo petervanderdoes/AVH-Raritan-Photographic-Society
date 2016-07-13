@@ -84,9 +84,9 @@ final class Image extends AbstractImage
     }
 
     /**
-     * @param ImageInterface $mask
+     * {@inheritdoc}
      *
-     * @return $this
+     * @return ImageInterface
      */
     public function applyMask(ImageInterface $mask)
     {
@@ -108,7 +108,6 @@ final class Image extends AbstractImage
         }
 
         try {
-            /** @var \Imagine\Gmagick\Image $mask */
             $mask = $mask->copy();
             $this->gmagick->compositeimage($mask->gmagick, \Gmagick::COMPOSITE_DEFAULT, 0, 0);
         } catch (\GmagickException $e) {
@@ -121,7 +120,7 @@ final class Image extends AbstractImage
     /**
      * {@inheritdoc}
      *
-     * @return \Imagine\Gmagick\Image
+     * @return ImageInterface
      */
     public function copy()
     {
@@ -286,7 +285,7 @@ final class Image extends AbstractImage
     /**
      * Returns gmagick instance
      *
-     * @return \Gmagick
+     * @return Gmagick
      */
     public function getGmagick()
     {

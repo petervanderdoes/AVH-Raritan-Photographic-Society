@@ -10,7 +10,7 @@ use RpsCompetition\Api\Client;
  *
  * @package   RpsCompetition\Frontend\Requests\RpsClient
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class RequestRpsClient
 {
@@ -24,7 +24,7 @@ class RequestRpsClient
     public function __construct(Client $client, IlluminateRequest $request)
     {
 
-        $this->client = $client;
+        $this->client  = $client;
         $this->request = $request;
     }
 
@@ -41,14 +41,14 @@ class RequestRpsClient
         status_header(200);
         switch ($this->request->input('rpswinclient')) {
             case 'getcompdate':
-                $this->client->sendXmlCompetitionDates($this->request);
-                break;
+                $this->client->sendCompetitionDates($this->request);
+                die();
             case 'download':
                 $this->client->sendCompetitions($this->request);
-                break;
+                die();
             case 'uploadscore':
-                $this->client->doUploadScore($this->request);
-                break;
+                $this->client->receiveScores($this->request);
+                die();
             default:
                 break;
         }
@@ -56,7 +56,6 @@ class RequestRpsClient
 
     /**
      * Disable able all known WordPress cache plugins.
-     *
      */
     private function disableCachePlugins()
     {

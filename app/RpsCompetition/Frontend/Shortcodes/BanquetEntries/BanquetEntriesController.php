@@ -9,7 +9,7 @@ use RpsCompetition\Frontend\Shortcodes\ShortcodeView;
  *
  * @package   RpsCompetition\Frontend\Shortcodes\BanquetEntries
  * @author    Peter van der Does <peter@avirtualhome.com>
- * @copyright Copyright (c) 2014-2015, AVH Software
+ * @copyright Copyright (c) 2014-2016, AVH Software
  */
 class BanquetEntriesController
 {
@@ -23,25 +23,21 @@ class BanquetEntriesController
     public function __construct(ShortcodeView $view, BanquetEntriesModel $model)
     {
 
-        $this->view = $view;
+        $this->view  = $view;
         $this->model = $model;
     }
 
     /**
      * Display the possible Banquet entries for the current user.
      *
-     * @param array  $attr    The shortcode argument list
-     * @param string $content The content of a shortcode when it wraps some content.
-     * @param string $tag     The shortcode name
-     *
      * @see Frontend::actionHandleHttpPostRpsBanquetEntries
      *
      * @return string
      */
-    public function shortcodeBanquetEntries($attr, $content, $tag)
+    public function shortcodeBanquetEntries()
     {
         $model_data = $this->model->getAllData();
-        $data = $model_data['data'];
+        $data       = $model_data['data'];
         /** @var \Symfony\Component\Form\Form $form */
         $form = $model_data['form'];
 

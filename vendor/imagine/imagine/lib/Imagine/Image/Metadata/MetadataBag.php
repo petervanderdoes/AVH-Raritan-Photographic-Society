@@ -19,9 +19,22 @@ class MetadataBag implements \ArrayAccess, \IteratorAggregate, \Countable
     /** @var array */
     private $data;
 
-    public function __construct(array $data = [])
+    public function __construct(array $data = array())
     {
         $this->data = $data;
+    }
+
+    /**
+     * Returns the metadata key, default value if it does not exist
+     *
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        return array_key_exists($key, $this->data) ? $this->data[$key] : $default;
     }
 
     /**
@@ -51,14 +64,6 @@ class MetadataBag implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
-    public function offsetGet($offset)
-    {
-        return array_key_exists($offset, $this->data) ? $this->data[$offset] : null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function offsetSet($offset, $value)
     {
         $this->data[$offset] = $value;
@@ -70,6 +75,14 @@ class MetadataBag implements \ArrayAccess, \IteratorAggregate, \Countable
     public function offsetUnset($offset)
     {
         unset($this->data[$offset]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
     }
 
     /**
