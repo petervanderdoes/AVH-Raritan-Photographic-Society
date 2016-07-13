@@ -414,7 +414,7 @@ class Frontend
         $social_networks_controller = $this->app->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = 'a172153';
+            $social_buttons_script_version = '65d7485';
             $version_separator             = '-';
         } else {
             $social_buttons_script_version = '';
