@@ -3,7 +3,6 @@ namespace RpsCompetition\Api;
 
 use Illuminate\Http\Request;
 use PDO;
-use RpsCompetition\Constants;
 use RpsCompetition\Db\RpsPdo;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\ImageSizeHelper;
@@ -202,6 +201,7 @@ class Client
      */
     private function getEntries(RpsPdo $db, $comp_id)
     {
+        $options = get_option('avh-rps');
 
         try {
             $sql         = 'SELECT *
@@ -234,7 +234,7 @@ ORDER BY Member_ID, Title';
                 $entry['score']      = $entry_record['Score'];
                 $entry['award']      = $entry_record['Award'];
                 $entry['image_url']  = $this->photo_helper->getThumbnailUrl($entry_record['Server_File_Name'],
-                                                                            Constants::IMAGE_CLIENT_SIZE);
+                                                                            $options['default_image_size']);
                 $all_entries[]       = $entry;
                 $this->total_entries ++;
             }
@@ -324,8 +324,7 @@ WHERE ID = :entryid';
     {
         $competitions        = [];
         $this->total_entries = 0;
-        $image_size          = '1024';
-
+        $options             = get_option('avh-rps');
         $this->json->setStatusSuccess();
 
         $sql_select = "SELECT * FROM competitions";
@@ -361,7 +360,7 @@ WHERE ID = :entryid';
             $medium         = $record_competition['Medium'];
             $classification = $record_competition['Classification'];
             if (empty($record_competition['Image_Size'])) {
-                $image_size = '1024';
+                $image_size = $options['default_image_size'];
             } else {
                 $image_size = $record_competition['Image_Size'];
             }

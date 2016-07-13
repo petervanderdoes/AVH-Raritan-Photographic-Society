@@ -880,6 +880,7 @@ final class Admin
      */
     private function displayPageCompetitionEdit()
     {
+        $options = get_option('avh-rps');
         /**
          * @var string $wp_http_referer
          */
@@ -987,14 +988,14 @@ final class Admin
 
         $array_image_size = $this->getArrayImageSize();
         if ($competition->Image_Size === null) {
-            $selected_image_size = '1024';
+            $selected_image_size = $options['default_image_size'];
         } else {
             $selected_image_size = $competition->Image_Size;
         }
         echo $formBuilder->outputLabel($formBuilder->label('image_size', 'Image Size'));
         echo $formBuilder->outputField($formBuilder->select('image_size',
+                                                            $array_image_size,
                                                             $selected_image_size,
-                                                            $competition->Image_Size,
                                                             ['autocomplete' => 'off']));
         unset($array_image_size);
 
