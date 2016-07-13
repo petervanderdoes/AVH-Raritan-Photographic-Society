@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 3.0.0-rc.1
+#### Version 3.0.0
 * Add flexibility to the image size for the client.
   We can now change the size of the image that's being used by the client rather quickly.
   It's a matter of adding the size to the image_size array and updating the constant that set the client image size.
