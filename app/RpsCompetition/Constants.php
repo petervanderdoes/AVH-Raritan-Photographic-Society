@@ -13,7 +13,7 @@ final class Constants
     /**
      *  Image Constants
      */
-    const IMAGE_CLIENT_SIZE      = '1024';
+    const IMAGE_CLIENT_SIZE      = '1400';
     const IMAGE_MAX_HEIGHT_ENTRY = 1536;
     const IMAGE_MAX_WIDTH_ENTRY  = 2048;
     const IMAGE_QUALITY          = 90;
