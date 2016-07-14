@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 3.0.1
+* Fix image size issue.
+
 #### Version 3.0.0
 * Add flexibility to the image size for the client.
   We can now change the size of the image that's being used by the client rather quickly.

@@ -9,3 +9,7 @@ composer.lock
 config.rb
 phpunit.xml
 /CHANGES.md
+.eslintignore
+.eslintrc
+.jscsrc
+
