@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 3.0.1-dev.1
+#### Version 3.0.1-rc.1
 * Preparation for new development cycle.
 
 #### Version 3.0.0
