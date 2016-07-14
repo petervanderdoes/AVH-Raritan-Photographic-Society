@@ -1,7 +1,7 @@
 ## Changelog
 
 #### Version 3.0.1-rc.1
-* Preparation for new development cycle.
+* Fix image size issue.
 
 #### Version 3.0.0
 * Add flexibility to the image size for the client.
