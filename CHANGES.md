@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 3.0.1-rc.1
+#### Version 3.0.1
 * Fix image size issue.
 
 #### Version 3.0.0

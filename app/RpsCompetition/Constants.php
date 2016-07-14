@@ -37,7 +37,7 @@ final class Constants
      */
     const PLUGIN_FILE           = 'avh-rps-competition/avh-rps-competition.php';
     const PLUGIN_README_URL     = '';
-    const PLUGIN_VERSION        = '3.0.1-rc.1';
+    const PLUGIN_VERSION        = '3.0.1';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
 
     /**
