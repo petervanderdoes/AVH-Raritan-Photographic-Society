@@ -26,6 +26,6 @@
     }
   ],
   "require": {
-    "imagine/imagine": "v0.6.3-avh2"
+    "imagine/imagine": "0.6.3.2"
   }
 }

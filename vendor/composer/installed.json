@@ -1,8 +1,8 @@
 [
     {
         "name": "imagine/imagine",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
+        "version": "v0.6.3.2",
+        "version_normalized": "0.6.3.2",
         "source": {
             "type": "git",
             "url": "https://github.com/petervanderdoes/imagine.git",
