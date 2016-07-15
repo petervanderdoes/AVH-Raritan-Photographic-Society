@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Frontend\Shortcodes\PersonWinners;
 
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Helpers\PhotoHelper;
 
 /**
@@ -19,14 +18,14 @@ class PersonWinnersModel
     /**
      * Constructor
      *
-     * @param QueryMiscellaneous $query_miscellaneous
-     * @param PhotoHelper        $photo_helper
+     * @param QueryEntries $query_entries
+     * @param PhotoHelper  $photo_helper
      */
-    public function __construct(QueryMiscellaneous $query_miscellaneous, PhotoHelper $photo_helper)
+    public function __construct(QueryEntries $query_entries, PhotoHelper $photo_helper)
     {
 
-        $this->query_miscellaneous = $query_miscellaneous;
-        $this->photo_helper        = $photo_helper;
+        $this->query_entries = $query_entries;
+        $this->photo_helper  = $photo_helper;
     }
 
     /**
@@ -39,7 +38,7 @@ class PersonWinnersModel
      */
     public function getPersonWinners($user_id, $amount_of_images)
     {
-        $entries            = $this->query_miscellaneous->getEightsAndHigherPerson($user_id);
+        $entries            = $this->query_entries->getEightsAndHigherPerson($user_id);
         $entries_id         = array_rand($entries, $amount_of_images);
         $data               = [];
         $data['thumb_size'] = '150w';

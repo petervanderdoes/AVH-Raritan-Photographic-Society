@@ -5,7 +5,6 @@ use Avh\Framework\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
-use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Helpers\CommonHelper;
 
@@ -141,12 +140,12 @@ class Frontend
     public function actionShowcaseCompetitionThumbnails()
     {
         if (is_front_page()) {
-            /** @var QueryMiscellaneous $query_miscellaneous */
-            $query_miscellaneous = $this->app->make('QueryMiscellaneous');
-            $records             = $query_miscellaneous->getEightsAndHigher(5);
-            $data                = $this->model->getShowcaseData($records, '150');
+            /** @var QueryEntries $query_entries */
+            $query_entries = $this->app->make('QueryEntries');
+            $records       = $query_entries->getEightsAndHigher(5);
+            $data          = $this->model->getShowcaseData($records, '150');
             $this->view->renderShowcaseCompetitionThumbnails($data);
-            unset($query_miscellaneous);
+            unset($query_entries);
         }
     }
 

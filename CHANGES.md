@@ -1,7 +1,9 @@
 ## Changelog
 
-#### Version 3.0.2-dev.1
-* Preparation for new development cycle.
+#### Version 3.0.2-dev.8
+* Internal
+  * Move query methods to correct class.
+  * Make use of Entry entity.
 
 #### Version 3.0.1
 * Fix image size issue.
