@@ -5,6 +5,7 @@ use Avh\Framework\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
+use RpsCompetition\Frontend\Plugins\Wpseo\Sitemap;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Helpers\CommonHelper;
 
@@ -457,6 +458,7 @@ class Frontend
         add_filter('wp_title_parts', [$wpseo, 'filterWpTitleParts'], 10, 1);
         add_filter('wpseo_opengraph_title', [$wpseo, 'filterOpenGraphTitle'], 10, 1);
 
+        /** @var Sitemap $wpseo_sitemap */
         $wpseo_sitemap = $this->app->make('WpSeoSitemap');
         add_action('wpseo_do_sitemap_competition-entries', [$wpseo_sitemap, 'actionWpseoSitemapCompetitionEntries']);
         add_action('wpseo_do_sitemap_competition-winners', [$wpseo_sitemap, 'actionWpseoSitemapCompetitionWinners']);
