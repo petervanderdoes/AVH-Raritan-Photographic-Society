@@ -172,12 +172,12 @@ class FrontendModel
     /**
      * Collect needed data to render a photo.
      *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
+     * @param Entry  $record
+     * @param string $thumb_size
      *
      * @return array<string,string|array>
      */
-    private function dataPhotoGallery(QueryEntries $record, $thumb_size)
+    private function dataPhotoGallery(Entry $record, $thumb_size)
     {
         $user_info = get_userdata($record->Member_ID);
         $data      = $this->getImageData($record,
@@ -232,16 +232,16 @@ class FrontendModel
     /**
      * Collect image data
      *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
-     * @param string       $photo_title
-     * @param string       $photographer_first_name
-     * @param string       $photographer_last_name
+     * @param Entry  $record
+     * @param string $thumb_size
+     * @param string $photo_title
+     * @param string $photographer_first_name
+     * @param string $photographer_last_name
      *
      * @return array <string,string|array>
      */
     private function getImageData(
-        QueryEntries $record,
+        Entry $record,
         $thumb_size,
         $photo_title,
         $photographer_first_name,
