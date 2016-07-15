@@ -7,11 +7,11 @@
     {% for row in images|batch(general.columns) %}
         <div class="gallery-row{{ equalclass }}">
             {% for image in row %}
-                {% include 'inc/photo_gallery.html.twig' %}
+                {% include 'photo_gallery.html.twig' %}
             {% endfor %}
         </div>
     {% endfor %}
 </div>
 {% if general.layout == 'row-equal' %}
-    {% include 'inc/set_equal_height.js.twig' %}
+    {% include 'set_equal_height.js.twig' %}
 {% endif %}

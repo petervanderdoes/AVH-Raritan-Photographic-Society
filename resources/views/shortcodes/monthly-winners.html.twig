@@ -1,5 +1,5 @@
 <p class="competition-theme first-para">Out of {{ count_entries }} entries, a jury selected these winners of the competition with the theme "{{ theme_name }}" held on {{ date_text }}, which was organized by Raritan Photographic Society.</p>
-{% include 'inc/month_and_season_select_form.html.twig' %}
+{% include 'month_and_season_select_form.html.twig' %}
 
 {% for key, data in row %}
     <section class="rps-showcase-category-winner">
@@ -10,11 +10,11 @@
             <div class="gallery gallery-columns-{{ max_awards }} gallery-size-75">
                 <div class="gallery-row gallery-row-equal">
                     {% for image in data.images %}
-                        {% include 'inc/photo_gallery.html.twig' %}
+                        {% include 'photo_gallery.html.twig' %}
                     {% endfor %}
                 </div>
             </div>
         </div>
     </section>
 {% endfor %}
-{% include 'inc/set_equal_height.js.twig' %}
+{% include 'set_equal_height.js.twig' %}
