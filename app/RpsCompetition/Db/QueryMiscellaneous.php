@@ -277,12 +277,12 @@ ORDER BY c.Competition_Date, c.Medium",
         $sql_statement = "SELECT if(month(Competition_Date) >= %s AND month(Competition_Date) <= %s,
           concat_WS('-', year(Competition_Date), substr(year(Competition_Date) + 1, 3, 2)),
           concat_WS('-', year(Competition_Date) - 1, substr(year(Competition_Date), 3, 2))) AS \"Season\"
-FROM competitions
-GROUP BY Season";
+          FROM competitions
+          GROUP BY Season";
         if (strtoupper($order) === 'ASC') {
-            $sql_statement .= 'ORDER BY Season ASC';
+            $sql_statement .= ' ORDER BY Season ASC';
         } else {
-            $sql_statement .= 'ORDER BY Season DESC';
+            $sql_statement .= ' ORDER BY Season DESC';
         }
 
         $sql = $this->rpsdb->prepare($sql_statement, $season_start_month_num, $season_end_month_num);
