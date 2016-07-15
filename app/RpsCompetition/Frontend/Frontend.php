@@ -292,14 +292,16 @@ class Frontend
     {
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id])) {
-            $query_competitions = $this->app->make('QueryCompetitions');
-            $selected_date      = get_query_var('selected_date');
-            $competitions       = $query_competitions->getCompetitionByDates($selected_date);
-            $competition        = current($competitions);
-            $theme              = ucfirst($competition->Theme);
-            $date               = new \DateTime($selected_date);
-            $date_text          = $date->format('F j, Y');
-            $title .= ' for the theme "' . $theme . '" on ' . $date_text;
+            $selected_date = get_query_var('selected_date', null);
+            if (!is_null($selected_date)) {
+                $query_competitions = $this->app->make('QueryCompetitions');
+                $competitions       = $query_competitions->getCompetitionByDates($selected_date);
+                $competition        = current($competitions);
+                $theme              = ucfirst($competition->Theme);
+                $date               = new \DateTime($selected_date);
+                $date_text          = $date->format('F j, Y');
+                $title .= ' for the theme "' . $theme . '" on ' . $date_text;
+            }
         }
 
         return $title;
