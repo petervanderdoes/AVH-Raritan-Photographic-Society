@@ -13,7 +13,7 @@ use RpsCompetition\Helpers\PhotoHelper;
 class PersonWinnersModel
 {
     private $photo_helper;
-    private $query_miscellaneous;
+    private $query_entries;
 
     /**
      * Constructor
