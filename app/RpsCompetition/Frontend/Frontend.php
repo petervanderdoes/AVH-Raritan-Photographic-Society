@@ -418,15 +418,18 @@ class Frontend
         if (WP_LOCAL_DEV !== true) {
             $social_buttons_script_version = '65d7485';
             $version_separator             = '-';
+            $location_dir                  = '/prod';
         } else {
             $social_buttons_script_version = '';
             $version_separator             = '';
+            $location_dir                  = '';
         }
-        $data           = [];
-        $data['script'] = 'rps-competition.social-buttons' .
-                          $version_separator .
-                          $social_buttons_script_version .
-                          '.js';
+        $data              = [];
+        $data['script']    = 'rps-competition.social-buttons' .
+                             $version_separator .
+                             $social_buttons_script_version .
+                             '.js';
+        $data['directory'] = $this->settings->get('javascript_dir') . $location_dir;
         $social_networks_controller->initializeSocialNetworks($data);
     }
 
