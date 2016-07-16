@@ -290,10 +290,15 @@ class Frontend
      */
     public function filterTheTitle($title, $post_id)
     {
+        global $avh_rps_build_menu;
+        $avhDoingMenu = false;
+        if ((isset($avh_rps_build_menu) && $avh_rps_build_menu === true)) {
+            $avhDoingMenu = true;
+        }
         $pages_array = CommonHelper::getDynamicPages();
-        if (isset($pages_array[$post_id])) {
+        if (isset($pages_array[$post_id]) && $avhDoingMenu === false) {
             $selected_date = get_query_var('selected_date', null);
-            if (!is_null($selected_date)) {
+            if (!is_null($selected_date) ) {
                 $query_competitions = $this->app->make('QueryCompetitions');
                 $competitions       = $query_competitions->getCompetitionByDates($selected_date);
                 $competition        = current($competitions);

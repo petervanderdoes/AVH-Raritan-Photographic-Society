@@ -1,9 +1,11 @@
 ## Changelog
 
-#### Version 3.0.2-dev.8
+#### Version 3.0.2-dev.11
 * Internal
   * Move query methods to correct class.
   * Make use of Entry entity.
+* Bugfix
+  * Menu title has wrong text.
 
 #### Version 3.0.1
 * Fix image size issue.
