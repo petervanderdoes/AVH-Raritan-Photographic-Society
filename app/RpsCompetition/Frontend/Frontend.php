@@ -314,7 +314,7 @@ class Frontend
     {
         if (WP_LOCAL_DEV !== true) {
             $rps_competition_css_version = 'a06a6dd';
-            $rps_masonry_version         = 'a172153';
+            $rps_masonry_version         = '65d7485';
             $masonry_version             = 'f833162';
             $imagesloaded_version        = 'bce608e';
             $version_separator           = '-';
