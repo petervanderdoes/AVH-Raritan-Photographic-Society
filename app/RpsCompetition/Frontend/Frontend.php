@@ -298,7 +298,7 @@ class Frontend
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id]) && $avhDoingMenu === false) {
             $selected_date = get_query_var('selected_date', null);
-            if (!is_null($selected_date) ) {
+            if (!is_null($selected_date)) {
                 $query_competitions = $this->app->make('QueryCompetitions');
                 $competitions       = $query_competitions->getCompetitionByDates($selected_date);
                 $competition        = current($competitions);

@@ -39,7 +39,7 @@ final class SocialNetworksRouter
      */
     public function initializeSocialNetworks($data)
     {
-        $rps_social_buttons_script = $data['script'];
+        $rps_social_buttons_script    = $data['script'];
         $rps_social_buttons_directory = $data['directory'];
 
         wp_register_script('rps-competition.social-buttons.script',
