@@ -69,11 +69,7 @@ class CommonHelper
      */
     public static function checkDoingMenu()
     {
-        global $avh_rps_build_menu;
-        $return = false;
-        if ((isset($avh_rps_build_menu) && $avh_rps_build_menu === true)) {
-            $return = true;
-        }
+        $return = get_site_transient('avh_rps_doing_menu');
 
         return $return;
     }

@@ -58,6 +58,7 @@ class Frontend
      */
     public function __destruct()
     {
+        delete_site_transient('avh_rps_doing_menu');
         $this->session->save();
     }
 
@@ -148,6 +149,13 @@ class Frontend
             $this->view->renderShowcaseCompetitionThumbnails($data);
             unset($query_entries);
         }
+    }
+
+    public function filterDoingNavMenu($menu, $args)
+    {
+        set_site_transient('avh_rps_doing_menu', !get_site_transient('avh_rps_doing_menu'), 0);
+
+        return $menu;
     }
 
     /**
@@ -290,7 +298,7 @@ class Frontend
      */
     public function filterTheTitle($title, $post_id)
     {
-        $doing_menu = CommonHelper::checkDoingMenu();
+        $doing_menu  = CommonHelper::checkDoingMenu();
         $pages_array = CommonHelper::getDynamicPages();
         if (isset($pages_array[$post_id]) && $doing_menu === false) {
             $selected_date = get_query_var('selected_date', null);
@@ -307,7 +315,6 @@ class Frontend
 
         return $title;
     }
-
 
     /**
      * Register all javascript and css files for use in WordPress
@@ -378,6 +385,9 @@ class Frontend
         add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 3);
         add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
         add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
+
+        add_filter('pre_wp_nav_menu', [$this, 'filterDoingNavMenu'], 10, 2);
+        add_filter('wp_nav_menu', [$this, 'filterDoingNavMenu'], 10, 2);
     }
 
     /**
