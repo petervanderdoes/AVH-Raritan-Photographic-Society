@@ -61,6 +61,24 @@ class CommonHelper
     }
 
     /**
+     * Check if the navigation menu is beeing processed.
+     *
+     * This is highly integrated with the theme used. The variable $avh_rps_build_menu is being set in the theme.
+     *
+     * @return bool
+     */
+    public static function checkDoingMenu()
+    {
+        global $avh_rps_build_menu;
+        $return = false;
+        if ((isset($avh_rps_build_menu) && $avh_rps_build_menu === true)) {
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
      * Create a directory if it does not exist.
      *
      * @param string $path

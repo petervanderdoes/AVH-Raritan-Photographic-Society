@@ -290,13 +290,9 @@ class Frontend
      */
     public function filterTheTitle($title, $post_id)
     {
-        global $avh_rps_build_menu;
-        $avhDoingMenu = false;
-        if ((isset($avh_rps_build_menu) && $avh_rps_build_menu === true)) {
-            $avhDoingMenu = true;
-        }
+        $doing_menu = CommonHelper::checkDoingMenu();
         $pages_array = CommonHelper::getDynamicPages();
-        if (isset($pages_array[$post_id]) && $avhDoingMenu === false) {
+        if (isset($pages_array[$post_id]) && $doing_menu === false) {
             $selected_date = get_query_var('selected_date', null);
             if (!is_null($selected_date)) {
                 $query_competitions = $this->app->make('QueryCompetitions');
@@ -311,6 +307,7 @@ class Frontend
 
         return $title;
     }
+
 
     /**
      * Register all javascript and css files for use in WordPress
