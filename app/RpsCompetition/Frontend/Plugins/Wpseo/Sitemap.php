@@ -5,6 +5,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
+use \WPSEO_Sitemaps_Router;
 
 /**
  * Class Sitemap
@@ -156,7 +157,7 @@ class Sitemap
         foreach ($years as $year => $lastmod) {
             $sitemap .= '<sitemap>' . "\n";
             $sitemap .= '<loc>' .
-                        wpseo_xml_sitemaps_base_url('competition-entries') .
+                        WPSEO_Sitemaps_Router::get_base_url('competition-entries') .
                         '-sitemap' .
                         $year .
                         '.xml</loc>' .
@@ -168,7 +169,7 @@ class Sitemap
         foreach ($years as $year => $lastmod) {
             $sitemap .= '<sitemap>' . "\n";
             $sitemap .= '<loc>' .
-                        wpseo_xml_sitemaps_base_url('competition-winners') .
+                        WPSEO_Sitemaps_Router::get_base_url('competition-winners') .
                         '-sitemap' .
                         $year .
                         '.xml</loc>' .
