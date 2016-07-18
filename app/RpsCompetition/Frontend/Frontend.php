@@ -157,7 +157,7 @@ class Frontend
      * @param null|string $menu
      * @param object      $args
      *
-     * @return null|array
+     * @return null|string
      */
     public function filterDoingNavMenu($menu, $args)
     {

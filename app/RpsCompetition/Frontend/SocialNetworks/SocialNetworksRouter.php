@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Frontend\SocialNetworks;
 
-use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Helpers\CommonHelper;
 
 /**
@@ -19,7 +18,6 @@ final class SocialNetworksRouter
     /**
      * Constructor
      *
-     * @param Settings                 $settings
      * @param SocialNetworksController $controller
      */
     public function __construct(SocialNetworksController $controller)
