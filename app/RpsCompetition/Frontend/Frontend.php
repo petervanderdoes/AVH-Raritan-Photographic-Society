@@ -151,6 +151,14 @@ class Frontend
         }
     }
 
+    /**
+     * Set/Unset the transient variable used to determine if the navigation menu is being build.
+     *
+     * @param null|string $menu
+     * @param object      $args
+     *
+     * @return null|array
+     */
     public function filterDoingNavMenu($menu, $args)
     {
         set_site_transient('avh_rps_doing_menu', !get_site_transient('avh_rps_doing_menu'), 0);
