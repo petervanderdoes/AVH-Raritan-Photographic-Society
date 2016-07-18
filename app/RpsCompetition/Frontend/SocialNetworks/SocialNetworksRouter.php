@@ -15,8 +15,6 @@ final class SocialNetworksRouter
 {
     /** @var SocialNetworksController */
     private $controller;
-    /** @var Settings */
-    private $settings;
 
     /**
      * Constructor
@@ -24,10 +22,8 @@ final class SocialNetworksRouter
      * @param Settings                 $settings
      * @param SocialNetworksController $controller
      */
-    public function __construct(Settings $settings, SocialNetworksController $controller)
+    public function __construct(SocialNetworksController $controller)
     {
-
-        $this->settings   = $settings;
         $this->controller = $controller;
     }
 

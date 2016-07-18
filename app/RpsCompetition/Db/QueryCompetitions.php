@@ -77,7 +77,7 @@ class QueryCompetitions
      * @property int open
      * @property int closed
      * @property int all
-     * @return QueryCompetitions|array
+     * @return \stdClass
      */
     public function countCompetitions()
     {
@@ -291,11 +291,12 @@ class QueryCompetitions
             FROM competitions
             WHERE Competition_Date >= %s AND
                 Competition_Date < %s AND
-                Special_Event = "N"
+                Special_Event = %s
             GROUP BY Competition_Date
             ORDER BY Competition_Date',
                                         $date_start,
-                                        $date_end);
+                                        $date_end,
+                                        "N");
         $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
         return $return;
@@ -356,13 +357,13 @@ class QueryCompetitions
         $sql_pre_prepare = 'SELECT *
             FROM competitions c
             WHERE c.Classification IN  (%s)
-                AND c.Closed = "N"
-                AND c.Special_Event = "N"';
+                AND c.Closed = %s
+                AND c.Special_Event = %s';
         $sql_pre_prepare .= $and_medium_subset;
         $sql_pre_prepare .= ' GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium';
 
         $subset_detail = 'color ' . $subset;
-        $sql           = $this->rpsdb->prepare($sql_pre_prepare, $class2, '%' . $subset_detail . '%');
+        $sql           = $this->rpsdb->prepare($sql_pre_prepare, $class2, 'N', 'N', '%' . $subset_detail . '%');
         $color_set     = $this->rpsdb->get_results($sql, $output);
         $subset_detail = 'b&w ' . $subset;
         $sql           = $this->rpsdb->prepare($sql_pre_prepare, $class1, '%' . $subset_detail . '%');
@@ -410,10 +411,11 @@ class QueryCompetitions
             WHERE Competition_Date >= %s AND
                 Competition_Date <= %s AND
                 ' . $sql_filter . ' AND
-                Scored = "Y"
+                Scored = %s
             ORDER BY Competition_Date',
                                             $competition_date_start,
-                                            $competition_date_end);
+                                            $competition_date_end,
+                                            'Y');
         $return     = $this->rpsdb->get_results($sql, $output);
 
         return $return;
@@ -582,10 +584,12 @@ class QueryCompetitions
     {
         $current_time = current_time('mysql');
         $sql          = $this->rpsdb->prepare('UPDATE competitions
-            SET Closed="Y",  Date_Modified = %s
-            WHERE Closed="N"
+            SET Closed=%s,  Date_Modified = %s
+            WHERE Closed=%s
                 AND Close_Date < %s',
+                                              'Y',
                                               $current_time,
+                                              'N',
                                               $current_time);
         $result       = $this->rpsdb->query($sql);
 
