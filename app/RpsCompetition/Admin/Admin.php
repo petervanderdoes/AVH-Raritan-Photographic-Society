@@ -907,10 +907,11 @@ final class Admin
         $this->displayAdminHeader('Edit Competition');
 
         if ($this->request->has('update')) {
-            echo '<div id="message" class="updated">';
             if ($updated) {
+                echo '<div id="message" class="notice notice-success">';
                 echo '<p><strong>Competition updated.</strong></p>';
             } else {
+                echo '<div id="message" class="notice notice-error">';
                 echo '<p><strong>Competition not updated.</strong></p>';
             }
             if ($wp_http_referer) {
@@ -1277,11 +1278,14 @@ final class Admin
         $this->displayAdminHeader('Edit Entry');
 
         if ($this->request->has('update')) {
-            echo '<div id="message" class="updated">';
+
             if ($updated) {
+                echo '<div id="message" class="notice notice-success">';
                 echo '<p><strong>Entry updated.</strong></p>';
             } else {
-                echo '<p><strong>Entry not updated.</strong></p>';
+                echo '<div id="message" class="notice notice-error">';
+                /** @var \WP_Error $updated */
+                echo '<p><strong>Entry not updated.</strong>' . $updated->get_error_message() . '</p>';
             }
             if ($wp_http_referer) {
                 echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Entries</a></p>';
@@ -1676,6 +1680,42 @@ final class Admin
     }
 
     /**
+     * Perform check to see if the updated entry is valid.
+     *
+     * @param array             $formOptionsNew
+     * @param int               $id
+     * @param QueryEntries      $entry       Entry record
+     * @param QueryCompetitions $competition Competition record
+     *
+     * @return \WP_Error|bool
+     */
+    private function isValidEntry($formOptionsNew, $id, QueryEntries $entry, QueryCompetitions $competition)
+    {
+        $query_entries      = new QueryEntries($this->rpsdb);
+        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $medium_array         = Constants::getMediums();
+        $classification_array = Constants::getClassifications();
+        $return               = true;
+        $user                 = get_user_by('id', $entry->Member_ID);
+
+        $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
+                                                                                $classification_array[$formOptionsNew['classification']],
+                                                                                $medium_array[$formOptionsNew['medium']]);
+
+        $max_per_id = $this->query_entries->countEntriesByCompetitionId($new_competition->ID, $user->ID);
+        if ($max_per_id >= $new_competition->Max_Entries) {
+            $error_message = 'The maximum of ' .
+                             $new_competition->Max_Entries .
+                             ' entries into this competition has been reached. Update cancelled.';
+
+            $return = new \WP_Error('rps_admin_edit', $error_message);
+        }
+        unset($query_entries, $query_competitions);
+
+        return $return;
+    }
+
+    /**
      * Display plugin Copyright
      */
     private function printAdminFooter()
@@ -1780,7 +1820,10 @@ final class Admin
         $formOptionsNew['medium']         = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
 
-        $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);
+        $return = $this->isValidEntry($formOptionsNew, $id, $entry, $competition);
+        if (!is_wp_error($return)) {
+            $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);
+        }
 
         unset($query_entries);
 
