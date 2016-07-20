@@ -1427,25 +1427,34 @@ final class Admin
         $full_server_path     = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
         $dest_name            = sanitize_file_name($formOptionsNew['title']) . '+' . $user->user_login . '+' . time();
 
-        $new_competition          = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
-                                                                                         $classification_array[$formOptionsNew['classification']],
-                                                                                         $medium_array[$formOptionsNew['medium']]);
-        $data                     = [];
-        $data['Competition_ID']   = $new_competition->ID;
-        $data['ID']               = $id;
-        $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
-        $data['Title']            = $formOptionsNew['title'];
+        $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
+                                                                                $classification_array[$formOptionsNew['classification']],
+                                                                                $medium_array[$formOptionsNew['medium']]);
 
-        // Need to create the destination folder?
-        CommonHelper::createDirectory($full_server_path);
-        $updated = rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
+        $max_per_id = $this->query_entries->countEntriesByCompetitionId($new_competition->ID, $user->ID);
+        if ($max_per_id >= $new_competition->Max_Entries) {
+            $error_message = 'The maximum of ' .
+                             $new_competition->Max_Entries .
+                             ' entries into this competition has been reached. Update cancelled.';
 
-        if ($updated) {
-            $photo_helper->removeThumbnails(pathinfo($old_file, PATHINFO_DIRNAME),
-                                            pathinfo($old_file, PATHINFO_FILENAME));
-            $return = $query_entries->updateEntry($data);
+            $return = new \WP_Error('rps_admin_edit', $error_message);
+        } else {
+            $data                     = [];
+            $data['Competition_ID']   = $new_competition->ID;
+            $data['ID']               = $id;
+            $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
+            $data['Title']            = $formOptionsNew['title'];
+
+            // Need to create the destination folder?
+            CommonHelper::createDirectory($full_server_path);
+            $updated = rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
+
+            if ($updated) {
+                $photo_helper->removeThumbnails(pathinfo($old_file, PATHINFO_DIRNAME),
+                                                pathinfo($old_file, PATHINFO_FILENAME));
+                $return = $query_entries->updateEntry($data);
+            }
         }
-
         unset($query_entries, $query_competitions, $photo_helper);
 
         return $return;
