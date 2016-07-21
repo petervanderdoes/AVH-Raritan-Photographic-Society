@@ -188,7 +188,7 @@ ORDER BY RAND()
 LIMIT %d",
                                         $limit);
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
-        $return = $this->doMapToEntityEntry($result);
+        $return = $this->mapArrayEntry($result);
 
         return $return;
     }
@@ -220,7 +220,7 @@ WHERE c.ID = e.Competition_ID AND
 ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
                                         $member_id);
         $result = $this->rpsdb->get_results($sql, ARRAY_A);
-        $return = $this->doMapToEntityEntry($result);
+        $return = $this->mapArrayEntry($result);
 
         return $return;
     }
@@ -270,7 +270,9 @@ ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
             WHERE ID = %s',
                                      $id);
 
-        return $this->rpsdb->get_row($sql, $output);
+        $result = $this->rpsdb->get_row($sql);
+
+        return $this->mapEntry($result);
     }
 
     /**
@@ -388,19 +390,35 @@ ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
      * The result of rpsdb->get_results return each object as a stdClass.
      * This function converts each array entry to an Entry class.
      *
-     * @param $result
+     * @param array $result
      *
      * @return array
      */
-    private function doMapToEntityEntry($result)
+    private function mapArrayEntry($result)
     {
         $return = [];
         foreach ($result as $record) {
-            $e = new Entry();
-            $e->map($record);
-            $return[] = $e;
+            $return[] = $this->mapEntry($record);
         }
 
         return $return;
+    }
+
+    /**
+     * Convert a stdClass record to the Entry class
+     *
+     * @param array|object $record
+     *
+     * @return Entry
+     */
+    private function mapEntry($record)
+    {
+        $entry = new Entry();
+        if (is_object($record)) {
+            $record = get_object_vars($record);
+        }
+        $entry->map($record);
+
+        return $entry;
     }
 }
