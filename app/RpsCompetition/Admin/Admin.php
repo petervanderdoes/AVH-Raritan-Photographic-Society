@@ -1683,13 +1683,12 @@ final class Admin
      * Perform check to see if the updated entry is valid.
      *
      * @param array             $formOptionsNew
-     * @param int               $id
      * @param QueryEntries      $entry       Entry record
      * @param QueryCompetitions $competition Competition record
      *
-     * @return \WP_Error|bool
+     * @return bool|\WP_Error
      */
-    private function isValidEntry($formOptionsNew, $id, QueryEntries $entry, QueryCompetitions $competition)
+    private function isValidEntry($formOptionsNew, QueryEntries $entry, QueryCompetitions $competition)
     {
         $query_entries      = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
@@ -1820,7 +1819,7 @@ final class Admin
         $formOptionsNew['medium']         = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
 
-        $return = $this->isValidEntry($formOptionsNew, $id, $entry, $competition);
+        $return = $this->isValidEntry($formOptionsNew, $entry, $competition);
         if (!is_wp_error($return)) {
             $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);
         }
