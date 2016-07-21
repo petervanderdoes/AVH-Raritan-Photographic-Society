@@ -6,7 +6,6 @@ use Imagine\Image\Box;
 use Imagine\Image\ImagineInterface;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entity\Db\Entry;
 
@@ -41,9 +40,9 @@ class PhotoHelper
     /**
      * Create the most commonly used thumbnails.
      *
-     * @param QueryEntries $entry
+     * @param Entry $entry
      */
-    public function createCommonThumbnails(QueryEntries $entry)
+    public function createCommonThumbnails(Entry $entry)
     {
         $standard_size = ['75', '150w', '800', 'fb_thumb'];
 
@@ -149,9 +148,9 @@ class PhotoHelper
     /**
      * Delete the files from server.
      *
-     * @param QueryEntries $entry
+     * @param Entry $entry
      */
-    public function deleteEntryFromDisk(QueryEntries $entry)
+    public function deleteEntryFromDisk(Entry $entry)
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
 

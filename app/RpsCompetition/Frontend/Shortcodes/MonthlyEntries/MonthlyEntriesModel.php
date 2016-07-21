@@ -5,6 +5,7 @@ namespace RpsCompetition\Frontend\Shortcodes\MonthlyEntries;
 use Avh\Framework\Network\Session;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
 use RpsCompetition\Helpers\SeasonHelper;
 

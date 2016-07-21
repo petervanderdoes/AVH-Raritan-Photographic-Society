@@ -261,7 +261,7 @@ ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
      * @param int    $id
      * @param string $output
      *
-     * @return QueryEntries
+     * @return Entry
      */
     public function getEntryById($id, $output = OBJECT)
     {
@@ -270,7 +270,7 @@ ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
             WHERE ID = %s',
                                      $id);
 
-        $result = $this->rpsdb->get_row($sql);
+        $result = $this->rpsdb->get_row($sql, $output);
 
         return $this->mapEntry($result);
     }
