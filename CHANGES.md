@@ -1,11 +1,12 @@
 ## Changelog
 
-#### Version 3.0.2-dev.11
+#### Version 3.0.2-dev.31
 * Internal
   * Move query methods to correct class.
   * Make use of Entry entity.
 * Bugfix
   * Menu title has wrong text.
+  * Can exceed number of entries in a competition when editing an entry in admin.
 
 #### Version 3.0.1
 * Fix image size issue.
