@@ -1411,12 +1411,12 @@ final class Admin
      *
      * @param array             $formOptionsNew
      * @param int               $id
-     * @param QueryEntries      $entry       Entry record
+     * @param Entry             $entry
      * @param QueryCompetitions $competition Competition record
      *
-     * @return \WP_Error|bool
+     * @return bool|\WP_Error
      */
-    private function doUpdateEntry($formOptionsNew, $id, QueryEntries $entry, QueryCompetitions $competition)
+    private function doUpdateEntry($formOptionsNew, $id, Entry $entry, QueryCompetitions $competition)
     {
         $query_entries      = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
