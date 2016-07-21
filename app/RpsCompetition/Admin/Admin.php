@@ -11,6 +11,7 @@ use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Helpers\CommonHelper;
 use RpsCompetition\Helpers\PhotoHelper;
@@ -1279,13 +1280,15 @@ final class Admin
 
         if ($this->request->has('update')) {
 
-            if ($updated) {
-                echo '<div id="message" class="notice notice-success">';
-                echo '<p><strong>Entry updated.</strong></p>';
-            } else {
+            if (is_wp_error($updated)) {
                 echo '<div id="message" class="notice notice-error">';
                 /** @var \WP_Error $updated */
-                echo '<p><strong>Entry not updated.</strong>' . $updated->get_error_message() . '</p>';
+                echo '<p><strong>Entry not updated.</strong>' .
+                     $updated->get_error_message('rpsAdminEditEntry') .
+                     '</p>';
+            } else {
+                echo '<div id="message" class="notice notice-success">';
+                echo '<p><strong>Entry updated.</strong></p>';
             }
             if ($wp_http_referer) {
                 echo '<p><a href="' . esc_url($wp_http_referer) . '">&larr; Back to Entries</a></p>';
@@ -1435,30 +1438,22 @@ final class Admin
                                                                                 $classification_array[$formOptionsNew['classification']],
                                                                                 $medium_array[$formOptionsNew['medium']]);
 
-        $max_per_id = $this->query_entries->countEntriesByCompetitionId($new_competition->ID, $user->ID);
-        if ($max_per_id >= $new_competition->Max_Entries) {
-            $error_message = 'The maximum of ' .
-                             $new_competition->Max_Entries .
-                             ' entries into this competition has been reached. Update cancelled.';
+        $data                     = [];
+        $data['Competition_ID']   = $new_competition->ID;
+        $data['ID']               = $id;
+        $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
+        $data['Title']            = $formOptionsNew['title'];
 
-            $return = new \WP_Error('rps_admin_edit', $error_message);
-        } else {
-            $data                     = [];
-            $data['Competition_ID']   = $new_competition->ID;
-            $data['ID']               = $id;
-            $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
-            $data['Title']            = $formOptionsNew['title'];
+        // Need to create the destination folder?
+        CommonHelper::createDirectory($full_server_path);
+        $updated = rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
 
-            // Need to create the destination folder?
-            CommonHelper::createDirectory($full_server_path);
-            $updated = rename($old_file, $full_server_path . '/' . $dest_name . '.jpg');
-
-            if ($updated) {
-                $photo_helper->removeThumbnails(pathinfo($old_file, PATHINFO_DIRNAME),
-                                                pathinfo($old_file, PATHINFO_FILENAME));
-                $return = $query_entries->updateEntry($data);
-            }
+        if ($updated) {
+            $photo_helper->removeThumbnails(pathinfo($old_file, PATHINFO_DIRNAME),
+                                            pathinfo($old_file, PATHINFO_FILENAME));
+            $return = $query_entries->updateEntry($data);
         }
+
         unset($query_entries, $query_competitions, $photo_helper);
 
         return $return;
@@ -1683,15 +1678,15 @@ final class Admin
      * Perform check to see if the updated entry is valid.
      *
      * @param array             $formOptionsNew
-     * @param QueryEntries      $entry       Entry record
+     * @param Entry             $entry       Entry record
      * @param QueryCompetitions $competition Competition record
      *
      * @return bool|\WP_Error
      */
-    private function isValidEntry($formOptionsNew, QueryEntries $entry, QueryCompetitions $competition)
+    private function isValidEntry($formOptionsNew, Entry $entry, $competition)
     {
-        $query_entries      = new QueryEntries($this->rpsdb);
-        $query_competitions = new QueryCompetitions($this->rpsdb);
+        $query_entries        = new QueryEntries($this->rpsdb);
+        $query_competitions   = new QueryCompetitions($this->rpsdb);
         $medium_array         = Constants::getMediums();
         $classification_array = Constants::getClassifications();
         $return               = true;
@@ -1701,13 +1696,13 @@ final class Admin
                                                                                 $classification_array[$formOptionsNew['classification']],
                                                                                 $medium_array[$formOptionsNew['medium']]);
 
-        $max_per_id = $this->query_entries->countEntriesByCompetitionId($new_competition->ID, $user->ID);
+        $max_per_id = $query_entries->countEntriesByCompetitionId($new_competition->ID, $user->ID);
         if ($max_per_id >= $new_competition->Max_Entries) {
             $error_message = 'The maximum of ' .
                              $new_competition->Max_Entries .
                              ' entries into this competition has been reached. Update cancelled.';
 
-            $return = new \WP_Error('rps_admin_edit', $error_message);
+            $return = new \WP_Error('rpsAdminEditEntry', $error_message);
         }
         unset($query_entries, $query_competitions);
 
