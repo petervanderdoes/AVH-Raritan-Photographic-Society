@@ -790,7 +790,7 @@ final class Admin
         $this->printDatepickerDefaults();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
-        echo '	$( "#date" ).datepicker();' . "\n";
+        echo '	$( "#date" ).datepicker({dateFormat: "yy-mm-dd"});' . "\n";
         echo '});', "\n";
         echo '</script>';
         $this->displayAdminFooter();
@@ -1029,8 +1029,8 @@ final class Admin
         $this->printDatepickerDefaults();
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
-        echo '	$( "#date" ).datepicker();' . "\n";
-        echo '	$( "#close-date" ).datepicker();' . "\n";
+        echo '	$( "#date" ).datepicker({dateFormat: "yy-mm-dd"});' . "\n";
+        echo '	$( "#close-date" ).datepicker({dateFormat: "yy-mm-dd"});' . "\n";
         echo '});', "\n";
         echo '</script>';
 
@@ -1730,7 +1730,6 @@ final class Admin
         echo '<script type="text/javascript">' . "\n";
         echo 'jQuery(function($) {' . "\n";
         echo ' $.datepicker.setDefaults({' . "\n";
-        echo '   dateFormat: \'yy-mm-dd\', ' . "\n";
         echo '   showButtonPanel: true, ' . "\n";
         echo '   buttonImageOnly: true, ' . "\n";
         echo '   buttonImage: "' . CommonHelper::getPluginUrl('calendar.png',
