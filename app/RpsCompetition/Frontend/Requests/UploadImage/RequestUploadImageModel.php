@@ -5,11 +5,12 @@ namespace RpsCompetition\Frontend\Requests\UploadImage;
 use Avh\Framework\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
-use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Entity\Db\Competition;
 use RpsCompetition\Entity\Form\UploadImage as EntityFormUploadImage;
 use RpsCompetition\Helpers\CommonHelper;
+use RpsCompetition\Helpers\ImageSizeHelper;
 use RpsCompetition\Helpers\PhotoHelper;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
@@ -95,7 +96,7 @@ class RequestUploadImageModel
         if (!$this->isValid($record->ID, $record->Max_Entries, $title)) {
             return false;
         }
-        $succes = $this->moveUploadedFile($title);
+        $succes = $this->moveUploadedFile($title, $record->Image_Size);
         if ($succes === false) {
             return false;
         }
@@ -196,7 +197,7 @@ class RequestUploadImageModel
     /**
      * get the Competition record.
      *
-     * @return bool|QueryCompetitions
+     * @return bool|Competition
      */
     private function getCompetitionRecord()
     {
@@ -248,7 +249,7 @@ class RequestUploadImageModel
      *
      * @return bool
      */
-    private function moveUploadedFile($title)
+    private function moveUploadedFile($title, $image_size)
     {
         // Move the file to its final location
         $relative_server_path = $this->photo_helper->getCompetitionPath($this->comp_date,
@@ -269,12 +270,16 @@ class RequestUploadImageModel
         CommonHelper::createDirectory($full_server_path);
 
         // If the .jpg file is too big resize it
-        $return = true;
-        if ($uploaded_file_info[0] > Constants::IMAGE_MAX_WIDTH_ENTRY ||
-            $uploaded_file_info[1] > Constants::IMAGE_MAX_HEIGHT_ENTRY
+        $return           = true;
+        $image_size_array = ImageSizeHelper::getImageSize($image_size);
+        if ($uploaded_file_info[0] > $image_size_array['width'] ||
+            $uploaded_file_info[1] > $image_size_array['height']
         ) {
             // Resize the image and deposit it in the destination directory
-            $this->photo_helper->doResizeImage($uploaded_file_name, $full_server_path, $dest_name . '.jpg', 'FULL');
+            $this->photo_helper->doResizeImage($uploaded_file_name,
+                                               $full_server_path,
+                                               $dest_name . '.jpg',
+                                               $image_size);
         } else {
             try {
                 $file->move($full_server_path, $dest_name . '.jpg');
