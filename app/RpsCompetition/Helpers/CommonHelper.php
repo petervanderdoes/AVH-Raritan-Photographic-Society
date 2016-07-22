@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Helpers;
 
-use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Entity\Db\Competition;
 use Symfony\Component\Form\Form;
 
 /**
@@ -89,11 +89,11 @@ class CommonHelper
     /**
      * Get the thumbnail to display on the My Entries page.
      *
-     * @param QueryCompetitions $current_competition
+     * @param Competition $current_competition
      *
      * @return mixed
      */
-    public static function getCompetitionThumbnail(QueryCompetitions $current_competition)
+    public static function getCompetitionThumbnail(Competition $current_competition)
     {
         $image                  = [];
         $image['Color Digital'] = '/thumb-comp-digital-color.jpg';
