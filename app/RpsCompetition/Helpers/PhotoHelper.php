@@ -163,8 +163,8 @@ class PhotoHelper
         $thumbnail_path     = $competition_path . '/thumbnails';
 
         // Remove main file from disk
-        if (is_file($competition_path . $entry->Server_File_Name)) {
-            unlink($competition_path . $entry->Server_File_Name);
+        if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {
+            unlink($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name);
         }
 
         // Remove thumbnails
