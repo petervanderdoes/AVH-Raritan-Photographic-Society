@@ -78,11 +78,12 @@ class RequestBanquetEntries
                      ->isClicked()
             ) {
                 $this->handleUpdate();
+                wp_redirect($this->request->fullUrl());
+                exit();
             }
         }
 
-        wp_redirect($this->request->fullUrl());
-        exit();
+
     }
 
     /**
