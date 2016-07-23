@@ -5,6 +5,7 @@ use Avh\Framework\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
+use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Frontend\Plugins\Wpseo\Sitemap;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Helpers\CommonHelper;
