@@ -117,7 +117,7 @@ class MyEntriesModel
      * Add the Add/Edit/Delete buttons when needed.
      *
      * @param Competition $current_competition
-     * @param Form              $form
+     * @param Form        $form
      */
     private function addFormButtons(Competition $current_competition, Form $form)
     {

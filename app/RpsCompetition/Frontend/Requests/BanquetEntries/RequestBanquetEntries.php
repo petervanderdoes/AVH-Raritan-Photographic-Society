@@ -82,8 +82,6 @@ class RequestBanquetEntries
                 exit();
             }
         }
-
-
     }
 
     /**

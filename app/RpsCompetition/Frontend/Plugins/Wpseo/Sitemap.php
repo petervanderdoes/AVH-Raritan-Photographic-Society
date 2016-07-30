@@ -5,7 +5,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
-use \WPSEO_Sitemaps_Router;
+use WPSEO_Sitemaps_Router;
 
 /**
  * Class Sitemap
