@@ -1692,17 +1692,21 @@ final class Admin
         $return               = true;
         $user                 = get_user_by('id', $entry->Member_ID);
 
-        $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
-                                                                                $classification_array[$formOptionsNew['classification']],
-                                                                                $medium_array[$formOptionsNew['medium']]);
+        if ($competition->Medium !== $formOptionsNew['medium'] ||
+            $competition->Classification !== $formOptionsNew['classiification']
+        ) {
+            $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
+                                                                                    $classification_array[$formOptionsNew['classification']],
+                                                                                    $medium_array[$formOptionsNew['medium']]);
 
-        $max_per_id = $query_entries->countEntriesByCompetitionId($new_competition->ID, $user->ID);
-        if ($max_per_id >= $new_competition->Max_Entries) {
-            $error_message = 'The maximum of ' .
-                             $new_competition->Max_Entries .
-                             ' entries into this competition has been reached. Update cancelled.';
+            $max_per_id = $query_entries->countEntriesByCompetitionId($new_competition->ID, $user->ID);
+            if ($max_per_id >= $new_competition->Max_Entries) {
+                $error_message = 'The maximum of ' .
+                                 $new_competition->Max_Entries .
+                                 ' entries into this competition has been reached. Update cancelled.';
 
-            $return = new \WP_Error('rpsAdminEditEntry', $error_message);
+                $return = new \WP_Error('rpsAdminEditEntry', $error_message);
+            }
         }
         unset($query_entries, $query_competitions);
 
