@@ -40,6 +40,17 @@ final class Constants
     const PLUGIN_VERSION        = '3.0.2-dev.39';
     const SLUG_COMPETITION_EDIT = 'avh-rps-competition-edit';
 
+    public static function getAwards()
+    {
+        return [
+            '1st' => '1st',
+            '2nd' => '2nd',
+            '3rd' => '3rd',
+            'HM'  => 'HM',
+            null  => 'None'
+        ];
+    }
+
     /**
      * Return an array with the available classifications.
      *

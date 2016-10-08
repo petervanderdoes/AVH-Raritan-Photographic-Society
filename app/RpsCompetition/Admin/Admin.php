@@ -11,6 +11,7 @@ use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
+use RpsCompetition\Entity\Db\Competition;
 use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Entries\ListTable as EntriesListTable;
 use RpsCompetition\Helpers\CommonHelper;
@@ -1328,6 +1329,17 @@ final class Admin
                                                             $selectedClassification,
                                                             ['autocomplete' => 'off']));
 
+        echo $formBuilder->outputLabel($formBuilder->label('score', 'Score'));
+        echo $formBuilder->outputField($formBuilder->text('score', $entry->Score));
+
+        $awards        = Constants::getAwards();
+        $selectedAward = array_search($entry->Award, $awards);
+        echo $formBuilder->outputLabel($formBuilder->label('award', 'Award'));
+        echo $formBuilder->outputField($formBuilder->select('award',
+                                                            $awards,
+                                                            $selectedAward,
+                                                            ['autocomplete' => 'off']));
+
         echo $formBuilder->closeTable();
         echo $formBuilder->submit('submit', 'Update Entry', ['class' => 'button-primary']);
         if (!empty($wp_http_referer)) {
@@ -1409,14 +1421,14 @@ final class Admin
     /**
      * Perform the actual update of an entry.
      *
-     * @param array             $formOptionsNew
-     * @param int               $id
-     * @param Entry             $entry
-     * @param QueryCompetitions $competition Competition record
+     * @param array       $formOptionsNew
+     * @param int         $id
+     * @param Entry       $entry
+     * @param Competition $competition Competition record
      *
      * @return bool|\WP_Error
      */
-    private function doUpdateEntry($formOptionsNew, $id, Entry $entry, QueryCompetitions $competition)
+    private function doUpdateEntry($formOptionsNew, $id, Entry $entry, Competition $competition)
     {
         $query_entries      = new QueryEntries($this->rpsdb);
         $query_competitions = new QueryCompetitions($this->rpsdb);
@@ -1443,6 +1455,8 @@ final class Admin
         $data['ID']               = $id;
         $data['Server_File_Name'] = $relative_server_path . '/' . $dest_name . '.jpg';
         $data['Title']            = $formOptionsNew['title'];
+        $data['Score']            = $formOptionsNew['score'];
+        $data['Award']            = $formOptionsNew['award'];
 
         // Need to create the destination folder?
         CommonHelper::createDirectory($full_server_path);
@@ -1677,23 +1691,23 @@ final class Admin
     /**
      * Perform check to see if the updated entry is valid.
      *
-     * @param array             $formOptionsNew
-     * @param Entry             $entry       Entry record
-     * @param QueryCompetitions $competition Competition record
+     * @param array       $formOptions
+     * @param array       $formOptionsNew
+     * @param Entry       $entry       Entry record
+     * @param Competition $competition Competition record
      *
      * @return bool|\WP_Error
      */
-    private function isValidEntry($formOptionsNew, Entry $entry, $competition)
+    private function isValidEntry($formOptions, $formOptionsNew, Entry $entry, $competition)
     {
         $query_entries        = new QueryEntries($this->rpsdb);
         $query_competitions   = new QueryCompetitions($this->rpsdb);
         $medium_array         = Constants::getMediums();
         $classification_array = Constants::getClassifications();
-        $return               = true;
         $user                 = get_user_by('id', $entry->Member_ID);
 
-        if ($competition->Medium !== $formOptionsNew['medium'] ||
-            $competition->Classification !== $formOptionsNew['classiification']
+        if ($formOptions['medium'] !== $formOptionsNew['medium'] ||
+            $formOptions['classification'] !== $formOptionsNew['classification']
         ) {
             $new_competition = $query_competitions->getCompetitionByDateClassMedium($competition->Competition_Date,
                                                                                     $classification_array[$formOptionsNew['classification']],
@@ -1705,12 +1719,46 @@ final class Admin
                                  $new_competition->Max_Entries .
                                  ' entries into this competition has been reached. Update cancelled.';
 
-                $return = new \WP_Error('rpsAdminEditEntry', $error_message);
+                return new \WP_Error('rpsAdminEditEntry', $error_message);
             }
         }
+
+        $awards_array = Constants::getAwards();
+        if (!array_key_exists($formOptionsNew['award'], $awards_array)) {
+            $error_message = 'Invalid Award. Update cancelled.';
+
+            return new \WP_Error('rpsAdminEditEntry', $error_message);
+        }
+        $return = $this->isValidScore($formOptionsNew);
+
         unset($query_entries, $query_competitions);
 
         return $return;
+    }
+
+    /**
+     * @param $formOptionsNew
+     *
+     * @return bool|\WP_Error
+     */
+    private function isValidScore($formOptionsNew)
+    {
+        if (is_null($formOptionsNew['score'])) {
+            return true;
+        }
+        if (!is_numeric($formOptionsNew['score'])) {
+            $error_message = 'The score has to be numeric. Update cancelled.';
+
+            return new \WP_Error('rpsAdminEditEntry', $error_message);
+        }
+
+        if ($formOptionsNew['score'] < 6 || $formOptionsNew['score'] > 9) {
+            $error_message = 'The score has to be between 6 and 9. Update cancelled.';
+
+            return new \WP_Error('rpsAdminEditEntry', $error_message);
+        }
+
+        return true;
     }
 
     /**
@@ -1803,7 +1851,6 @@ final class Admin
         $formOptions = $this->request->input('entry-edit');
         $id          = (int) $this->request->input('entry');
         $entry       = $query_entries->getEntryById($id);
-        /** @var QueryCompetitions $competition */
         $competition = $competition_query->getCompetitionById($entry->Competition_ID);
 
         $medium_array         = Constants::getMediums();
@@ -1816,8 +1863,10 @@ final class Admin
         $formOptionsNew['title']          = empty($formOptions['title']) ? $entry->Title : $formOptions['title'];
         $formOptionsNew['medium']         = empty($formOptions['medium']) ? $selectedMedium : $formOptions['medium'];
         $formOptionsNew['classification'] = empty($formOptions['classification']) ? $selectedClassification : $formOptions['classification'];
+        $formOptionsNew['score']          = empty($formOptions['score']) ? null : $formOptions['score'];
+        $formOptionsNew['award']          = $formOptions['award'];
 
-        $return = $this->isValidEntry($formOptionsNew, $entry, $competition);
+        $return = $this->isValidEntry($formOptions, $formOptionsNew, $entry, $competition);
         if (!is_wp_error($return)) {
             $return = $this->doUpdateEntry($formOptionsNew, $id, $entry, $competition);
         }
