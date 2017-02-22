@@ -194,16 +194,16 @@ class PhotoHelper
      */
     public function doResizeImage($image_name, $thumb_path, $thumb_name, $size)
     {
+        $thumb_name_utf8 = utf8_encode($thumb_name);
         // Open the original image
-        if (!file_exists($image_name)) {
+        if (!file_exists(utf8_encode($image_name))) {
             return false;
         }
-        if (file_exists($thumb_path . '/' . $thumb_name)) {
+        if (file_exists($thumb_path . '/' . $thumb_name_utf8)) {
             return true;
         }
 
-        $image               = $this->imagine->open($image_name);
-        $original_image_size = $image->getSize();
+        $image = $this->imagine->open(utf8_encode($image_name));
 
         $new_size = ImageSizeHelper::getImageSize($size);
 
@@ -220,14 +220,7 @@ class PhotoHelper
             ;
         }
 
-        $resized_image_size = $image->getSize();
-        if ($original_image_size->getHeight() == $resized_image_size->getHeight() &&
-            $original_image_size->getWidth() == $resized_image_size->getWidth()
-        ) {
-            copy($image_name, $thumb_path . '/' . $thumb_name);
-        } else {
-            $image->save($thumb_path . '/' . $thumb_name, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
-        }
+        $image->save($thumb_path . '/' . $thumb_name_utf8, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
 
         unset($image);
 
@@ -311,7 +304,7 @@ class PhotoHelper
         }
         $path .= 'thumbnails/';
 
-        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
+        $path .= utf8_uri_encode(utf8_encode($file_parts['filename'])) . '_' . $size . '.' . $file_parts['extension'];
 
         return ($path);
     }
