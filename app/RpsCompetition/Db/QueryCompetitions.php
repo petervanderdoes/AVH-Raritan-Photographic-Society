@@ -1,6 +1,7 @@
 <?php
 namespace RpsCompetition\Db;
 
+use RpsCompetition\Entity\Db\Competition;
 use RpsCompetition\Helpers\SeasonHelper;
 
 /**
@@ -77,7 +78,7 @@ class QueryCompetitions
      * @property int open
      * @property int closed
      * @property int all
-     * @return QueryCompetitions|array
+     * @return \stdClass
      */
     public function countCompetitions()
     {
@@ -130,7 +131,7 @@ class QueryCompetitions
      * @param string $medium
      * @param string $output
      *
-     * @return QueryCompetitions
+     * @return Competition
      */
     public function getCompetitionByDateClassMedium($competition_date, $classification, $medium, $output = OBJECT)
     {
@@ -144,7 +145,9 @@ class QueryCompetitions
                                         $competition_date,
                                         $classification,
                                         $medium);
-        $return = $this->rpsdb->get_row($sql, $output);
+        $result = $this->rpsdb->get_row($sql, $output);
+
+        $return = $this->mapCompetition($result);
 
         return $return;
     }
@@ -173,7 +176,9 @@ class QueryCompetitions
                                         $competition_date_end);
         $result = $this->rpsdb->get_results($sql, $output);
 
-        return $result;
+        $return = $this->mapArrayCompetition($result);
+
+        return $return;
     }
 
     /**
@@ -182,7 +187,7 @@ class QueryCompetitions
      * @param int    $entry_id
      * @param string $output
      *
-     * @return QueryCompetitions|array
+     * @return Competition
      */
     public function getCompetitionByEntryId($entry_id, $output = OBJECT)
     {
@@ -192,8 +197,9 @@ class QueryCompetitions
                 AND e.ID = %s',
                                         $entry_id);
         $result = $this->rpsdb->get_row($sql, $output);
+        $return = $this->mapCompetition($result);
 
-        return $result;
+        return $return;
     }
 
     /**
@@ -202,14 +208,16 @@ class QueryCompetitions
      * @param int    $id
      * @param string $output default is OBJECT
      *
-     * @return QueryCompetitions|array
+     * @return Competition
      */
     public function getCompetitionById($id, $output = OBJECT)
     {
         $where  = $this->rpsdb->prepare('ID=%d', $id);
         $result = $this->query(['where' => $where, 'number' => 1], $output);
 
-        return $result;
+        $return = $this->mapCompetition($result);
+
+        return $return;
     }
 
     /**
@@ -247,7 +255,9 @@ class QueryCompetitions
             ORDER BY Competition_Date',
                                         $season_start_date,
                                         $season_end_date);
-        $return = $this->rpsdb->get_results($sql, $output);
+        $result = $this->rpsdb->get_results($sql, $output);
+
+        $return = $this->mapArrayCompetition($result);
 
         return $return;
     }
@@ -291,11 +301,12 @@ class QueryCompetitions
             FROM competitions
             WHERE Competition_Date >= %s AND
                 Competition_Date < %s AND
-                Special_Event = "N"
+                Special_Event = %s
             GROUP BY Competition_Date
             ORDER BY Competition_Date',
                                         $date_start,
-                                        $date_end);
+                                        $date_end,
+                                        "N");
         $return = $this->rpsdb->get_results($sql, ARRAY_A);
 
         return $return;
@@ -356,18 +367,20 @@ class QueryCompetitions
         $sql_pre_prepare = 'SELECT *
             FROM competitions c
             WHERE c.Classification IN  (%s)
-                AND c.Closed = "N"
-                AND c.Special_Event = "N"';
+                AND c.Closed = %s
+                AND c.Special_Event = %s';
         $sql_pre_prepare .= $and_medium_subset;
         $sql_pre_prepare .= ' GROUP BY c.ID ORDER BY c.Competition_Date, c.Medium';
 
         $subset_detail = 'color ' . $subset;
-        $sql           = $this->rpsdb->prepare($sql_pre_prepare, $class2, '%' . $subset_detail . '%');
+        $sql           = $this->rpsdb->prepare($sql_pre_prepare, $class2, 'N', 'N', '%' . $subset_detail . '%');
         $color_set     = $this->rpsdb->get_results($sql, $output);
         $subset_detail = 'b&w ' . $subset;
-        $sql           = $this->rpsdb->prepare($sql_pre_prepare, $class1, '%' . $subset_detail . '%');
+        $sql           = $this->rpsdb->prepare($sql_pre_prepare, $class1, 'N', 'N', '%' . $subset_detail . '%');
         $bw_set        = $this->rpsdb->get_results($sql, $output);
-        $return        = array_merge($color_set, $bw_set);
+        $result        = array_merge($color_set, $bw_set);
+
+        $return = $this->mapArrayCompetition($result);
 
         return $return;
     }
@@ -410,11 +423,13 @@ class QueryCompetitions
             WHERE Competition_Date >= %s AND
                 Competition_Date <= %s AND
                 ' . $sql_filter . ' AND
-                Scored = "Y"
+                Scored = %s
             ORDER BY Competition_Date',
                                             $competition_date_start,
-                                            $competition_date_end);
-        $return     = $this->rpsdb->get_results($sql, $output);
+                                            $competition_date_end,
+                                            'Y');
+        $result     = $this->rpsdb->get_results($sql, $output);
+        $return     = $this->mapArrayCompetition($result);
 
         return $return;
     }
@@ -567,10 +582,16 @@ class QueryCompetitions
         }
 
         if ($number == 1) {
-            return $this->rpsdb->get_row($query, $output);
+            $result = $this->rpsdb->get_row($query, $output);
+            $return = $this->mapCompetition($result);
+
+            return $return;
         }
 
-        return $this->rpsdb->get_results($query, $output);
+        $result = $this->rpsdb->get_results($query, $output);
+        $return = $this->mapArrayCompetition($result);
+
+        return $return;
     }
 
     /**
@@ -582,13 +603,53 @@ class QueryCompetitions
     {
         $current_time = current_time('mysql');
         $sql          = $this->rpsdb->prepare('UPDATE competitions
-            SET Closed="Y",  Date_Modified = %s
-            WHERE Closed="N"
+            SET Closed=%s,  Date_Modified = %s
+            WHERE Closed=%s
                 AND Close_Date < %s',
+                                              'Y',
                                               $current_time,
+                                              'N',
                                               $current_time);
         $result       = $this->rpsdb->query($sql);
 
         return $result;
+    }
+
+    /**
+     * Convert an array with stdClass to Competition class.
+     *
+     * The result of rpsdb->get_results return each object as a stdClass.
+     * This function converts each array entry to an Entry class.
+     *
+     * @param array $result
+     *
+     * @return array
+     */
+    private function mapArrayCompetition($result)
+    {
+        $return = [];
+        foreach ($result as $record) {
+            $return[] = $this->mapCompetition($record);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Convert a stdClass record to the Entry class
+     *
+     * @param array|object $record
+     *
+     * @return Competition
+     */
+    private function mapCompetition($record)
+    {
+        $entry = new Competition();
+        if (is_object($record)) {
+            $record = get_object_vars($record);
+        }
+        $entry->map($record);
+
+        return $entry;
     }
 }

@@ -3,7 +3,7 @@
  * Plugin Name: AVH RPS Competition
  * Plugin URI: http://blog.avirtualhome.com/wordpress-plugins
  * Description: This plugin was written to manage the competitions of the Raritan Photographic Society.
- * Version: 3.0.1
+ * Version: 3.0.2
  * Author: Peter van der Does
  * Author URI: http://blog.avirtualhome.com/
  * GitHub Plugin URI: https://github.com/petervanderdoes/AVH-Raritan-Photographic-Society
@@ -48,7 +48,7 @@ if (realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
  */
 require __DIR__ . '/vendor/autoload.php';
 
-$rps_dir = pathinfo($plugin, PATHINFO_DIRNAME);
+$rps_dir      = pathinfo($plugin, PATHINFO_DIRNAME);
 $rps_basename = plugin_basename($plugin);
 
 /**
@@ -87,12 +87,20 @@ class AVH_RPS_Client
         }
     }
 
+    /**
+     * Run by the init action hook/
+     *
+     */
     public function actionInit()
     {
         $this->setupRewriteRules();
         add_image_size('150w', 150, 9999);
     }
 
+    /**
+     * Actually start the plugin.
+     *
+     */
     public function load()
     {
         $this->app->make('OptionsGeneral');
@@ -132,6 +140,10 @@ class AVH_RPS_Client
         flush_rewrite_rules();
     }
 
+    /**
+     * Register bindings with the container.
+     *
+     */
     public function registerBindings()
     {
 
@@ -219,8 +231,8 @@ class AVH_RPS_Client
      */
     private function doUpgrade()
     {
-        $db_version = 1;
-        $options = get_option('avh-rps');
+        $db_version         = 1;
+        $options            = get_option('avh-rps');
         $current_db_version = avh_array_get($options, 'db_version', 0);
         if ($db_version == $current_db_version) {
             return;
@@ -275,7 +287,7 @@ class AVH_RPS_Client
     {
         $this->app->bind('SocialNetworksRouter',
             function(Application $app) {
-                return new SocialNetworksRouter($app->make('Settings'), $app->make('SocialNetworksController'));
+                return new SocialNetworksRouter($app->make('SocialNetworksController'));
             });
         $this->app->bind('SocialNetworksController',
             function(Application $app) {
@@ -300,7 +312,7 @@ class AVH_RPS_Client
             function(Application $app) {
                 $validator_builder = Validation::createValidatorBuilder();
                 $validator_builder->addMethodMapping('loadValidatorMetadata');
-                $validator = $validator_builder->getValidator();
+                $validator   = $validator_builder->getValidator();
                 $formFactory = SymfonyForms::createFormFactoryBuilder()
                                            ->addExtension(new ValidatorExtension($validator))
                                            ->addExtension(new HttpFoundationExtension())
@@ -317,8 +329,8 @@ class AVH_RPS_Client
     private function setSettings()
     {
 
-        $dir = $this->settings->get('plugin_dir');
-        $basename = $this->settings->get('plugin_file');
+        $dir             = $this->settings->get('plugin_dir');
+        $basename        = $this->settings->get('plugin_file');
         $upload_dir_info = wp_upload_dir();
 
         $this->settings->set('template_dir', $dir . '/resources/views');
@@ -341,7 +353,7 @@ class AVH_RPS_Client
     private function setupRewriteRules()
     {
         $options = get_option('avh-rps');
-        $url = get_permalink($options['monthly_entries_post_id']);
+        $url     = get_permalink($options['monthly_entries_post_id']);
         if ($url !== false) {
             $url = substr(parse_url($url, PHP_URL_PATH), 1);
             add_rewrite_rule($url . '?([^/]*)',

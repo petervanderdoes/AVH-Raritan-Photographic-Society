@@ -1,7 +1,6 @@
 <?php
 namespace RpsCompetition\Frontend\SocialNetworks;
 
-use Illuminate\Config\Repository as Settings;
 use RpsCompetition\Helpers\CommonHelper;
 
 /**
@@ -15,19 +14,14 @@ final class SocialNetworksRouter
 {
     /** @var SocialNetworksController */
     private $controller;
-    /** @var Settings */
-    private $settings;
 
     /**
      * Constructor
      *
-     * @param Settings                 $settings
      * @param SocialNetworksController $controller
      */
-    public function __construct(Settings $settings, SocialNetworksController $controller)
+    public function __construct(SocialNetworksController $controller)
     {
-
-        $this->settings   = $settings;
         $this->controller = $controller;
     }
 
@@ -39,11 +33,11 @@ final class SocialNetworksRouter
      */
     public function initializeSocialNetworks($data)
     {
-        $rps_social_buttons_script = $data['script'];
+        $rps_social_buttons_script    = $data['script'];
+        $rps_social_buttons_directory = $data['directory'];
 
         wp_register_script('rps-competition.social-buttons.script',
-                           CommonHelper::getPluginUrl($rps_social_buttons_script,
-                                                      $this->settings->get('javascript_dir')),
+                           CommonHelper::getPluginUrl($rps_social_buttons_script, $rps_social_buttons_directory),
                            [],
                            'to_remove',
                            true);

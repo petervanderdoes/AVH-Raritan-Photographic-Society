@@ -1,7 +1,7 @@
 <?php
 namespace RpsCompetition\Helpers;
 
-use RpsCompetition\Db\QueryCompetitions;
+use RpsCompetition\Entity\Db\Competition;
 use Symfony\Component\Form\Form;
 
 /**
@@ -61,6 +61,20 @@ class CommonHelper
     }
 
     /**
+     * Check if the navigation menu is beeing processed.
+     *
+     * This is highly integrated with the theme used. The variable $avh_rps_build_menu is being set in the theme.
+     *
+     * @return bool
+     */
+    public static function checkDoingMenu()
+    {
+        $return = get_site_transient('avh_rps_doing_menu');
+
+        return $return;
+    }
+
+    /**
      * Create a directory if it does not exist.
      *
      * @param string $path
@@ -75,11 +89,11 @@ class CommonHelper
     /**
      * Get the thumbnail to display on the My Entries page.
      *
-     * @param QueryCompetitions $current_competition
+     * @param Competition $current_competition
      *
      * @return mixed
      */
-    public static function getCompetitionThumbnail(QueryCompetitions $current_competition)
+    public static function getCompetitionThumbnail(Competition $current_competition)
     {
         $image                  = [];
         $image['Color Digital'] = '/thumb-comp-digital-color.jpg';

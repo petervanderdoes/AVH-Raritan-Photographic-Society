@@ -2,7 +2,6 @@
 
 namespace RpsCompetition\Frontend;
 
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
 
@@ -172,12 +171,12 @@ class FrontendModel
     /**
      * Collect needed data to render a photo.
      *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
+     * @param Entry  $record
+     * @param string $thumb_size
      *
      * @return array<string,string|array>
      */
-    private function dataPhotoGallery(QueryEntries $record, $thumb_size)
+    private function dataPhotoGallery(Entry $record, $thumb_size)
     {
         $user_info = get_userdata($record->Member_ID);
         $data      = $this->getImageData($record,
@@ -205,8 +204,8 @@ class FrontendModel
             $img_url  = wp_get_attachment_url($id);
             $home_url = home_url();
             if (substr($img_url, 0, strlen($home_url)) == $home_url) {
-                /** @var QueryEntries $entry */
-                $entry                   = new \stdClass;
+                /** @var Entry $entry */
+                $entry                   = new Entry();
                 $img_relative_path       = substr($img_url, strlen($home_url));
                 $entry->Server_File_Name = $img_relative_path;
                 $entry->ID               = $attachment->ID;
@@ -232,16 +231,16 @@ class FrontendModel
     /**
      * Collect image data
      *
-     * @param QueryEntries $record
-     * @param string       $thumb_size
-     * @param string       $photo_title
-     * @param string       $photographer_first_name
-     * @param string       $photographer_last_name
+     * @param Entry  $record
+     * @param string $thumb_size
+     * @param string $photo_title
+     * @param string $photographer_first_name
+     * @param string $photographer_last_name
      *
      * @return array <string,string|array>
      */
     private function getImageData(
-        QueryEntries $record,
+        Entry $record,
         $thumb_size,
         $photo_title,
         $photographer_first_name,

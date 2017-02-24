@@ -7,6 +7,7 @@ use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Entity\Db\Competition;
 use RpsCompetition\Entity\Form\MyEntries as EntityFormMyEntries;
 use RpsCompetition\Form\Type\MyEntriesType;
 use RpsCompetition\Helpers\CommonHelper;
@@ -115,10 +116,10 @@ class MyEntriesModel
     /**
      * Add the Add/Edit/Delete buttons when needed.
      *
-     * @param QueryCompetitions $current_competition
-     * @param Form              $form
+     * @param Competition $current_competition
+     * @param Form        $form
      */
-    private function addFormButtons(QueryCompetitions $current_competition, Form $form)
+    private function addFormButtons(Competition $current_competition, Form $form)
     {
         // Retrieve the maximum number of entries per member for this competition
         $max_entries_per_member_per_comp = $this->query_competitions->getCompetitionMaxEntries($current_competition->Competition_Date,
@@ -151,7 +152,7 @@ class MyEntriesModel
      * @param string $medium_subset_medium
      * @param array  $open_competitions
      *
-     * @return QueryCompetitions
+     * @return Competition
      */
     private function getCurrentCompetition($medium_subset_medium, $open_competitions)
     {
@@ -171,11 +172,11 @@ class MyEntriesModel
     /**
      * Get the template data for all the entries of the given competition.
      *
-     * @param QueryCompetitions $current_competition
+     * @param Competition $current_competition
      *
      * @return array
      */
-    private function getEntries(QueryCompetitions $current_competition)
+    private function getEntries(Competition $current_competition)
     {
         $data    = [];
         $entries = $this->query_entries->getEntriesSubmittedByMember(get_current_user_id(),
@@ -252,11 +253,11 @@ class MyEntriesModel
     /**
      * Get all the data need to fill the template.
      *
-     * @param QueryCompetitions $current_competition
+     * @param Competition $current_competition
      *
      * @return array
      */
-    private function getTemplateData(QueryCompetitions $current_competition)
+    private function getTemplateData(Competition $current_competition)
     {
         $data                     = [];
         $data['competition_date'] = $current_competition->Competition_Date;
@@ -294,10 +295,10 @@ class MyEntriesModel
      * Save the session.
      * We store the Competition Date, Medium and Classification in a session.
      *
-     * @param string            $medium_subset_medium
-     * @param QueryCompetitions $current_competition
+     * @param string      $medium_subset_medium
+     * @param Competition $current_competition
      */
-    private function saveSession($medium_subset_medium, QueryCompetitions $current_competition)
+    private function saveSession($medium_subset_medium, Competition $current_competition)
     {
         $this->session->set('myentries.subset', $medium_subset_medium);
         $this->session->set('myentries.' . $medium_subset_medium . '.competition_date',

@@ -6,7 +6,6 @@ use Imagine\Image\Box;
 use Imagine\Image\ImagineInterface;
 use RpsCompetition\Constants;
 use RpsCompetition\Db\QueryCompetitions;
-use RpsCompetition\Db\QueryEntries;
 use RpsCompetition\Db\RpsDb;
 use RpsCompetition\Entity\Db\Entry;
 
@@ -41,9 +40,9 @@ class PhotoHelper
     /**
      * Create the most commonly used thumbnails.
      *
-     * @param QueryEntries $entry
+     * @param Entry $entry
      */
-    public function createCommonThumbnails(QueryEntries $entry)
+    public function createCommonThumbnails(Entry $entry)
     {
         $standard_size = ['75', '150w', '800', 'fb_thumb'];
 
@@ -149,9 +148,9 @@ class PhotoHelper
     /**
      * Delete the files from server.
      *
-     * @param QueryEntries $entry
+     * @param Entry $entry
      */
-    public function deleteEntryFromDisk(QueryEntries $entry)
+    public function deleteEntryFromDisk(Entry $entry)
     {
         $query_competitions = new QueryCompetitions($this->rpsdb);
 
@@ -164,8 +163,8 @@ class PhotoHelper
         $thumbnail_path     = $competition_path . '/thumbnails';
 
         // Remove main file from disk
-        if (is_file($competition_path . $entry->Server_File_Name)) {
-            unlink($competition_path . $entry->Server_File_Name);
+        if (is_file($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name)) {
+            unlink($this->request->server('DOCUMENT_ROOT') . $entry->Server_File_Name);
         }
 
         // Remove thumbnails
@@ -195,16 +194,16 @@ class PhotoHelper
      */
     public function doResizeImage($image_name, $thumb_path, $thumb_name, $size)
     {
+        $thumb_name_utf8 = utf8_encode($thumb_name);
         // Open the original image
-        if (!file_exists($image_name)) {
+        if (!file_exists(utf8_encode($image_name))) {
             return false;
         }
-        if (file_exists($thumb_path . '/' . $thumb_name)) {
+        if (file_exists($thumb_path . '/' . $thumb_name_utf8)) {
             return true;
         }
 
-        $image               = $this->imagine->open($image_name);
-        $original_image_size = $image->getSize();
+        $image = $this->imagine->open(utf8_encode($image_name));
 
         $new_size = ImageSizeHelper::getImageSize($size);
 
@@ -221,14 +220,7 @@ class PhotoHelper
             ;
         }
 
-        $resized_image_size = $image->getSize();
-        if ($original_image_size->getHeight() == $resized_image_size->getHeight() &&
-            $original_image_size->getWidth() == $resized_image_size->getWidth()
-        ) {
-            copy($image_name, $thumb_path . '/' . $thumb_name);
-        } else {
-            $image->save($thumb_path . '/' . $thumb_name, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
-        }
+        $image->save($thumb_path . '/' . $thumb_name_utf8, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
 
         unset($image);
 
@@ -312,7 +304,7 @@ class PhotoHelper
         }
         $path .= 'thumbnails/';
 
-        $path .= rawurlencode($file_parts['filename']) . '_' . $size . '.' . $file_parts['extension'];
+        $path .= utf8_uri_encode(utf8_encode($file_parts['filename'])) . '_' . $size . '.' . $file_parts['extension'];
 
         return ($path);
     }

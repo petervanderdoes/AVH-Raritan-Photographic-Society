@@ -40,6 +40,7 @@ class ViewAbstract
     public function __construct($template_dir, $cache_dir)
     {
         $this->loader = new \Twig_Loader_Filesystem([$template_dir]);
+        $this->addTemplateDir($template_dir . '/inc');
         if (WP_LOCAL_DEV !== true) {
             $this->environmentOptions['cache'] = $cache_dir;
         }

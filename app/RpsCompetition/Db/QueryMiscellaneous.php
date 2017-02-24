@@ -124,69 +124,6 @@ ORDER BY c.Medium DESC, Class_Code, c.Competition_Date",
     }
 
     /**
-     * Get random entries that scored 8 or higher.
-     * The amount of records returned can be set by the $limit argument.
-     *
-     * @param int $limit Amount of records to return. Default is 5.
-     *
-     * @return mixed
-     */
-    public function getEightsAndHigher($limit = 5)
-    {
-        $sql    = $this->rpsdb->prepare("SELECT
-  c.Competition_Date,
-  c.Classification,
-  if(c.Classification = 'Beginner', 1,
-     if(c.Classification = 'Advanced', 2,
-        if(c.Classification = 'Salon', 3, 0))) AS \"Class_Code\",
-  c.Medium,
-  e.Title,
-  e.Server_File_Name,
-  e.Award,
-  e.Member_ID
-FROM competitions c, entries e
-WHERE c.ID = e.Competition_ID AND
-      e.Score >= 8
-ORDER BY RAND()
-LIMIT %d",
-                                        $limit);
-        $return = $this->rpsdb->get_results($sql);
-
-        return $return;
-    }
-
-    /**
-     * Get all photos of the given member_id with a score that is 8 or higher.
-     *
-     * @param int $member_id
-     *
-     * @return array
-     */
-    public function getEightsAndHigherPerson($member_id)
-    {
-        $sql    = $this->rpsdb->prepare("SELECT
-  c.Competition_Date,
-  c.Classification,
-  if(c.Classification = 'Beginner', 1,
-     if(c.Classification = 'Advanced', 2,
-        if(c.Classification = 'Salon', 3, 0))) AS \"Class_Code\",
-  c.Medium,
-  e.Title,
-  e.Server_File_Name,
-  e.Award,
-  e.Member_ID
-FROM competitions c, entries e
-WHERE c.ID = e.Competition_ID AND
-      e.Member_ID = %s AND
-      e.Score >= 8
-ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
-                                        $member_id);
-        $return = $this->rpsdb->get_results($sql);
-
-        return $return;
-    }
-
-    /**
      * Get the maximum awards per competition date, classification and medium between the given competition dates
      *
      * @param string      $competition_date_start
@@ -277,12 +214,12 @@ ORDER BY c.Competition_Date, c.Medium",
         $sql_statement = "SELECT if(month(Competition_Date) >= %s AND month(Competition_Date) <= %s,
           concat_WS('-', year(Competition_Date), substr(year(Competition_Date) + 1, 3, 2)),
           concat_WS('-', year(Competition_Date) - 1, substr(year(Competition_Date), 3, 2))) AS \"Season\"
-FROM competitions
-GROUP BY Season";
+          FROM competitions
+          GROUP BY Season";
         if (strtoupper($order) === 'ASC') {
-            $sql_statement .= 'ORDER BY Season ASC';
+            $sql_statement .= ' ORDER BY Season ASC';
         } else {
-            $sql_statement .= 'ORDER BY Season DESC';
+            $sql_statement .= ' ORDER BY Season DESC';
         }
 
         $sql = $this->rpsdb->prepare($sql_statement, $season_start_month_num, $season_end_month_num);

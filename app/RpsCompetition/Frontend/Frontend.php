@@ -5,7 +5,8 @@ use Avh\Framework\Network\Session;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request;
 use RpsCompetition\Application;
-use RpsCompetition\Db\QueryMiscellaneous;
+use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Frontend\Plugins\Wpseo\Sitemap;
 use RpsCompetition\Frontend\Shortcodes\ShortcodeRouter;
 use RpsCompetition\Helpers\CommonHelper;
 
@@ -58,6 +59,7 @@ class Frontend
      */
     public function __destruct()
     {
+        delete_site_transient('avh_rps_doing_menu');
         $this->session->save();
     }
 
@@ -141,13 +143,28 @@ class Frontend
     public function actionShowcaseCompetitionThumbnails()
     {
         if (is_front_page()) {
-            /** @var QueryMiscellaneous $query_miscellaneous */
-            $query_miscellaneous = $this->app->make('QueryMiscellaneous');
-            $records             = $query_miscellaneous->getEightsAndHigher(5);
-            $data                = $this->model->getShowcaseData($records, '150');
+            /** @var QueryEntries $query_entries */
+            $query_entries = $this->app->make('QueryEntries');
+            $records       = $query_entries->getEightsAndHigher(5);
+            $data          = $this->model->getShowcaseData($records, '150');
             $this->view->renderShowcaseCompetitionThumbnails($data);
-            unset($query_miscellaneous);
+            unset($query_entries);
         }
+    }
+
+    /**
+     * Set/Unset the transient variable used to determine if the navigation menu is being build.
+     *
+     * @param null|string $menu
+     * @param object      $args
+     *
+     * @return null|string
+     */
+    public function filterDoingNavMenu($menu, $args)
+    {
+        set_site_transient('avh_rps_doing_menu', !get_site_transient('avh_rps_doing_menu'), 0);
+
+        return $menu;
     }
 
     /**
@@ -290,16 +307,19 @@ class Frontend
      */
     public function filterTheTitle($title, $post_id)
     {
+        $doing_menu  = CommonHelper::checkDoingMenu();
         $pages_array = CommonHelper::getDynamicPages();
-        if (isset($pages_array[$post_id])) {
-            $query_competitions = $this->app->make('QueryCompetitions');
-            $selected_date      = get_query_var('selected_date');
-            $competitions       = $query_competitions->getCompetitionByDates($selected_date);
-            $competition        = current($competitions);
-            $theme              = ucfirst($competition->Theme);
-            $date               = new \DateTime($selected_date);
-            $date_text          = $date->format('F j, Y');
-            $title .= ' for the theme "' . $theme . '" on ' . $date_text;
+        if (isset($pages_array[$post_id]) && $doing_menu === false) {
+            $selected_date = get_query_var('selected_date', null);
+            if (!is_null($selected_date)) {
+                $query_competitions = $this->app->make('QueryCompetitions');
+                $competitions       = $query_competitions->getCompetitionByDates($selected_date);
+                $competition        = current($competitions);
+                $theme              = ucfirst($competition->Theme);
+                $date               = new \DateTime($selected_date);
+                $date_text          = $date->format('F j, Y');
+                $title .= ' for the theme "' . $theme . '" on ' . $date_text;
+            }
         }
 
         return $title;
@@ -311,10 +331,10 @@ class Frontend
     private function registerScriptsStyles()
     {
         if (WP_LOCAL_DEV !== true) {
-            $rps_competition_css_version = 'a06a6dd';
-            $rps_masonry_version         = 'a172153';
-            $masonry_version             = 'f833162';
-            $imagesloaded_version        = 'bce608e';
+            $rps_competition_css_version = 'a06a6ddd';
+            $rps_masonry_version         = '65d7485e';
+            $masonry_version             = 'f833162a';
+            $imagesloaded_version        = 'bce608e1';
             $version_separator           = '-';
             $location_dir                = '/prod';
         } else {
@@ -374,6 +394,9 @@ class Frontend
         add_filter('post_gallery', [$this, 'filterPostGallery'], 10, 3);
         add_filter('_get_page_link', [$this, 'filterPostLink'], 10, 2);
         add_filter('the_title', [$this, 'filterTheTitle'], 10, 2);
+
+        add_filter('pre_wp_nav_menu', [$this, 'filterDoingNavMenu'], 10, 2);
+        add_filter('wp_nav_menu', [$this, 'filterDoingNavMenu'], 10, 2);
     }
 
     /**
@@ -414,17 +437,20 @@ class Frontend
         $social_networks_controller = $this->app->make('SocialNetworksRouter');
 
         if (WP_LOCAL_DEV !== true) {
-            $social_buttons_script_version = '65d7485';
+            $social_buttons_script_version = '65d7485e';
             $version_separator             = '-';
+            $location_dir                  = '/prod';
         } else {
             $social_buttons_script_version = '';
             $version_separator             = '';
+            $location_dir                  = '';
         }
-        $data           = [];
-        $data['script'] = 'rps-competition.social-buttons' .
-                          $version_separator .
-                          $social_buttons_script_version .
-                          '.js';
+        $data              = [];
+        $data['script']    = 'rps-competition.social-buttons' .
+                             $version_separator .
+                             $social_buttons_script_version .
+                             '.js';
+        $data['directory'] = $this->settings->get('javascript_dir') . $location_dir;
         $social_networks_controller->initializeSocialNetworks($data);
     }
 
@@ -456,6 +482,7 @@ class Frontend
         add_filter('wp_title_parts', [$wpseo, 'filterWpTitleParts'], 10, 1);
         add_filter('wpseo_opengraph_title', [$wpseo, 'filterOpenGraphTitle'], 10, 1);
 
+        /** @var Sitemap $wpseo_sitemap */
         $wpseo_sitemap = $this->app->make('WpSeoSitemap');
         add_action('wpseo_do_sitemap_competition-entries', [$wpseo_sitemap, 'actionWpseoSitemapCompetitionEntries']);
         add_action('wpseo_do_sitemap_competition-winners', [$wpseo_sitemap, 'actionWpseoSitemapCompetitionWinners']);

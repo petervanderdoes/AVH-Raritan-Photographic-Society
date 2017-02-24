@@ -1,5 +1,20 @@
 ## Changelog
 
+#### Version 3.0.2
+* Internal
+  * Move query methods to correct class.
+  * Make use of Entry entity.
+  * Make use of Competition entity.
+* Bugfix
+  * Menu title has wrong text.
+  * Can exceed number of entries in a competition when editing an entry in admin.
+  * Date format in the Competition screen is wrong.
+  * Toggle of Scored in Competition list does not work correctly.
+  * When an entry is deleted the photo is not removed from disk.
+  * Resizing of the photo's does not work as expected.
+  * Switching season in the Banquet entries does not work.
+  * Entries with international characters cause a problem.
+
 #### Version 3.0.1
 * Fix image size issue.
 

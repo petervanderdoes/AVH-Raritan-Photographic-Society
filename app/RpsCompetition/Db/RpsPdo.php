@@ -1,8 +1,6 @@
 <?php
 namespace RpsCompetition\Db;
 
-use PDO;
-
 /**
  * Class RpsPdo
  *

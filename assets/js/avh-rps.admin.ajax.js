@@ -16,7 +16,7 @@ function avhrpsClickScored($) {
             global: false,
             data: args,
             datatype: 'json',
-            $context: $('#competition-' + args.id),
+            context: $('#competition-' + args.id),
             success: function handleSuccess(data) {
               var response = JSON.parse(data);
               $(this).find('.text').text(response.text);

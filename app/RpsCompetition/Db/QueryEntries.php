@@ -1,6 +1,8 @@
 <?php
 namespace RpsCompetition\Db;
 
+use RpsCompetition\Entity\Db\Entry;
+
 /**
  * Class QueryEntries
  *
@@ -159,6 +161,71 @@ class QueryEntries
     }
 
     /**
+     * Get random entries that scored 8 or higher.
+     * The amount of records returned can be set by the $limit argument.
+     *
+     * @param int $limit Amount of records to return. Default is 5.
+     *
+     * @return mixed
+     */
+    public function getEightsAndHigher($limit = 5)
+    {
+        $sql    = $this->rpsdb->prepare("SELECT
+  c.Competition_Date,
+  c.Classification,
+  if(c.Classification = 'Beginner', 1,
+     if(c.Classification = 'Advanced', 2,
+        if(c.Classification = 'Salon', 3, 0))) AS \"Class_Code\",
+  c.Medium,
+  e.Title,
+  e.Server_File_Name,
+  e.Award,
+  e.Member_ID
+FROM competitions c, entries e
+WHERE c.ID = e.Competition_ID AND
+      e.Score >= 8
+ORDER BY RAND()
+LIMIT %d",
+                                        $limit);
+        $result = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->mapArrayEntry($result);
+
+        return $return;
+    }
+
+    /**
+     * Get all photos of the given member_id with a score that is 8 or higher.
+     *
+     * @param int $member_id
+     *
+     * @return array
+     */
+    public function getEightsAndHigherPerson($member_id)
+    {
+        $sql    = $this->rpsdb->prepare("SELECT
+  c.Competition_Date,
+  c.Classification,
+  if(c.Classification = 'Beginner', 1,
+     if(c.Classification = 'Advanced', 2,
+        if(c.Classification = 'Salon', 3, 0))) AS \"Class_Code\",
+  c.Medium,
+  e.Title,
+  e.Server_File_Name,
+  e.Award,
+  e.Member_ID
+FROM competitions c, entries e
+WHERE c.ID = e.Competition_ID AND
+      e.Member_ID = %s AND
+      e.Score >= 8
+ORDER BY c.Competition_Date, Class_Code, c.Medium, e.Score",
+                                        $member_id);
+        $result = $this->rpsdb->get_results($sql, ARRAY_A);
+        $return = $this->mapArrayEntry($result);
+
+        return $return;
+    }
+
+    /**
      * Get entries submitted for the member on the given competition date in the given classification and medium
      *
      * @param int    $user_id
@@ -194,7 +261,7 @@ class QueryEntries
      * @param int    $id
      * @param string $output
      *
-     * @return QueryEntries
+     * @return Entry
      */
     public function getEntryById($id, $output = OBJECT)
     {
@@ -203,7 +270,9 @@ class QueryEntries
             WHERE ID = %s',
                                      $id);
 
-        return $this->rpsdb->get_row($sql, $output);
+        $result = $this->rpsdb->get_row($sql, $output);
+
+        return $this->mapEntry($result);
     }
 
     /**
@@ -313,5 +382,43 @@ class QueryEntries
         }
 
         return true;
+    }
+
+    /**
+     * Convert an array with stdClass to Entry class.
+     *
+     * The result of rpsdb->get_results return each object as a stdClass.
+     * This function converts each array entry to an Entry class.
+     *
+     * @param array $result
+     *
+     * @return array
+     */
+    private function mapArrayEntry($result)
+    {
+        $return = [];
+        foreach ($result as $record) {
+            $return[] = $this->mapEntry($record);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Convert a stdClass record to the Entry class
+     *
+     * @param array|object $record
+     *
+     * @return Entry
+     */
+    private function mapEntry($record)
+    {
+        $entry = new Entry();
+        if (is_object($record)) {
+            $record = get_object_vars($record);
+        }
+        $entry->map($record);
+
+        return $entry;
     }
 }

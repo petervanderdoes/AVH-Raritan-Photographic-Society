@@ -5,6 +5,7 @@ use RpsCompetition\Db\QueryCompetitions;
 use RpsCompetition\Db\QueryMiscellaneous;
 use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Helpers\PhotoHelper;
+use WPSEO_Sitemaps_Router;
 
 /**
  * Class Sitemap
@@ -81,17 +82,17 @@ class Sitemap
      * by getting the articles on the front page and using the most recent modified date of that post.
      * If we don't do this, the entry will take the modified date from the actual page, which never changes.
      *
-     * @param array              $data
-     * @param string             $type
-     * @param \stdClass|\WP_Post $current_post
+     * @param array                      $data
+     * @param string                     $type
+     * @param \WP_Post|\WP_Term|\WP_User $object
      *
      * @return array
      * @internal \RpsCompetition\Frontend\Frontend::setupWpSeoActionsFilters
      *
      */
-    public function filterSitemapEntry($data, $type, \stdClass $current_post)
+    public function filterSitemapEntry($data, $type, $object)
     {
-        if ($type === 'post' && $current_post->ID == get_option('page_on_front')) {
+        if ($type === 'post' && $object->ID == get_option('page_on_front')) {
             $data['pri'] = 1;
             $data['chf'] = 'weekly';
 
@@ -156,7 +157,7 @@ class Sitemap
         foreach ($years as $year => $lastmod) {
             $sitemap .= '<sitemap>' . "\n";
             $sitemap .= '<loc>' .
-                        wpseo_xml_sitemaps_base_url('competition-entries') .
+                        WPSEO_Sitemaps_Router::get_base_url('competition-entries') .
                         '-sitemap' .
                         $year .
                         '.xml</loc>' .
@@ -168,7 +169,7 @@ class Sitemap
         foreach ($years as $year => $lastmod) {
             $sitemap .= '<sitemap>' . "\n";
             $sitemap .= '<loc>' .
-                        wpseo_xml_sitemaps_base_url('competition-winners') .
+                        WPSEO_Sitemaps_Router::get_base_url('competition-winners') .
                         '-sitemap' .
                         $year .
                         '.xml</loc>' .

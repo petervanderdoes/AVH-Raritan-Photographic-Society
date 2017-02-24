@@ -5,6 +5,7 @@ namespace RpsCompetition\Frontend\Shortcodes\EditTitle;
 use Illuminate\Config\Repository as Settings;
 use Illuminate\Http\Request as IlluminateRequest;
 use RpsCompetition\Db\QueryEntries;
+use RpsCompetition\Entity\Db\Entry;
 use RpsCompetition\Entity\Form\EditTitle as EntityFormEditTitle;
 use RpsCompetition\Form\Type\EditTitleType;
 use RpsCompetition\Helpers\PhotoHelper;
@@ -68,7 +69,7 @@ class EditTitleModel
      *
      * @param int $entry_id
      *
-     * @return QueryEntries
+     * @return Entry
      */
     public function getEntry($entry_id)
     {

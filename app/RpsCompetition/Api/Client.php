@@ -17,6 +17,7 @@ use RpsCompetition\Helpers\PhotoHelper;
  */
 class Client
 {
+    private $fp;
     private $json;
     private $photo_helper;
     private $total_entries;
@@ -31,6 +32,14 @@ class Client
     {
         $this->photo_helper = $photo_helper;
         $this->json         = $json;
+        $this->fp           = fopen('peter.json', 'w');
+    }
+
+    public function __destruct()
+    {
+        fwrite($this->fp,
+               $this->json->getJson(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        fclose($this->fp);
     }
 
     /**
@@ -230,7 +239,7 @@ ORDER BY Member_ID, Title';
                 $entry['id']         = $entry_record['ID'];
                 $entry['first_name'] = $user->user_firstname;
                 $entry['last_name']  = $user->user_lastname;
-                $entry['title']      = $entry_record['Title'];
+                $entry['title']      = utf8_encode($entry_record['Title']);
                 $entry['score']      = $entry_record['Score'];
                 $entry['award']      = $entry_record['Award'];
                 $entry['image_url']  = $this->photo_helper->getThumbnailUrl($entry_record['Server_File_Name'],
@@ -322,6 +331,7 @@ WHERE ID = :entryid';
      */
     private function jsonCompetitionData(RpsPdo $db, $requested_medium, $comp_date)
     {
+
         $competitions        = [];
         $this->total_entries = 0;
         $options             = get_option('avh-rps');
@@ -336,6 +346,7 @@ WHERE ID = :entryid';
                 $sql_where .= " AND Medium like '%Digital'";
             }
         }
+
         $sql_order = ' ORDER BY MEDIUM, Classification';
         $sql       = $sql_select . $sql_where . $sql_order;
         try {
@@ -349,6 +360,7 @@ WHERE ID = :entryid';
 
             return;
         }
+
         // Iterate through all the matching Competitions
         $record_competitions = $sth_competitions->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -380,11 +392,6 @@ WHERE ID = :entryid';
         }
         $this->jsonCompetitionInformation($image_size);
         $this->json->addResource('competitions', $competitions);
-
-        $fp = fopen('peter.json', 'w');
-        fwrite($fp,
-               $this->json->getJson(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-        fclose($fp);
 
         return;
     }

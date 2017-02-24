@@ -4,12 +4,12 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b1ba7250b3149306a184494ff504d847",
-    "content-hash": "d0cead43b797969f7b57e1f32f2e8a87",
+    "hash": "6cdc2d211a0e3eadb394c23585431742",
+    "content-hash": "75fb7b7d70c48cf863ef1ccb6b890924",
     "packages": [
         {
             "name": "imagine/imagine",
-            "version": "dev-master",
+            "version": "v0.6.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/petervanderdoes/imagine.git",
@@ -83,9 +83,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "imagine/imagine": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

@@ -26,6 +26,6 @@
     }
   ],
   "require": {
-    "imagine/imagine": "dev-master"
+    "imagine/imagine": "0.6.3.2"
   }
 }

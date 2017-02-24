@@ -45,7 +45,7 @@ class PersonWinnersServiceProvider extends ServiceProvider
 
         $this->app->bind('PersonWinnersModel',
             function(Application $app) {
-                return new PersonWinnersModel($app->make('QueryMiscellaneous'), $app->make('PhotoHelper'));
+                return new PersonWinnersModel($app->make('QueryEntries'), $app->make('PhotoHelper'));
             });
     }
 }
