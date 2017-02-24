@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 3.0.2-rc.1
+#### Version 3.0.2
 * Internal
   * Move query methods to correct class.
   * Make use of Entry entity.
