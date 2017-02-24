@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 3.0.2-dev.39
+#### Version 3.0.2
 * Internal
   * Move query methods to correct class.
   * Make use of Entry entity.
@@ -13,6 +13,7 @@
   * When an entry is deleted the photo is not removed from disk.
   * Resizing of the photo's does not work as expected.
   * Switching season in the Banquet entries does not work.
+  * Entries with international characters cause a problem.
 
 #### Version 3.0.1
 * Fix image size issue.
