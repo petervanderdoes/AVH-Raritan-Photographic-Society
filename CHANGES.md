@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 3.0.3-dev.1
+* Preparation for new development cycle.
+
 #### Version 3.0.2
 * Internal
   * Move query methods to correct class.
