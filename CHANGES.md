@@ -13,6 +13,7 @@
   * When an entry is deleted the photo is not removed from disk.
   * Resizing of the photo's does not work as expected.
   * Switching season in the Banquet entries does not work.
+  * Entries with international characters cause a problem.
 
 #### Version 3.0.1
 * Fix image size issue.
