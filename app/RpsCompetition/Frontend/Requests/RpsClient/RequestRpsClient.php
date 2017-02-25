@@ -63,5 +63,6 @@ class RequestRpsClient
         global $hyper_cache_stop;
         $hyper_cache_stop = true;
         add_filter('w3tc_can_print_comment', '__return_false');
+        add_filter('do_rocket_generate_caching_files', '__return_false');
     }
 }
