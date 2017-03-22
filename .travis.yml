@@ -11,7 +11,7 @@ sudo: false
 
 # WordPress version used in first build configuration.
 env:
-    - WP_VERSION=4.5.3
+    - WP_VERSION=4.7.3
 
 # Next we define our matrix of additional build configurations to test against.
 # The versions listed above will automatically create our first configuration,
@@ -26,10 +26,10 @@ env:
 # along with 2 versions of WordPress (which would build 8 configs otherwise).
 # This takes half as long to run while still providing adequate coverage.
 
-matrix:
-  include:
-    - php: "7"
-      env: WP_VERSION=4.5
+#imatrix:
+#  include:
+#    - php: "7"
+#      env: WP_VERSION=4.7
 
 
 # Clones WordPress and configures our testing environment.
