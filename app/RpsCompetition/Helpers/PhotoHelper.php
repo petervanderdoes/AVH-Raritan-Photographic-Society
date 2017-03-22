@@ -65,7 +65,7 @@ class PhotoHelper
 
         CommonHelper::createDirectory($thumb_dir);
 
-        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+        if (!$this->isFile($thumb_dir . '/' . $thumb_name)) {
             $this->doResizeImage($this->request->server('DOCUMENT_ROOT') .
                                  '/' .
                                  $file_parts['dirname'] .
@@ -199,7 +199,7 @@ class PhotoHelper
         if (!file_exists(utf8_encode($image_name))) {
             return false;
         }
-        if (file_exists($thumb_path . '/' . $thumb_name_utf8)) {
+        if ($this->isFile($thumb_path . '/' . $thumb_name_utf8)) {
             return true;
         }
 
@@ -221,7 +221,6 @@ class PhotoHelper
         }
 
         $image->save($thumb_path . '/' . $thumb_name_utf8, ['jpeg_quality' => Constants::IMAGE_QUALITY]);
-
         unset($image);
 
         return true;
@@ -277,7 +276,7 @@ class PhotoHelper
         $thumb_dir  = $this->request->server('DOCUMENT_ROOT') . '/' . $file_parts['dirname'] . '/thumbnails';
         $thumb_name = $file_parts['filename'] . '_' . $size . '.' . $file_parts['extension'];
 
-        if (!file_exists($thumb_dir . '/' . $thumb_name)) {
+        if (!$this->isFile($thumb_dir . '/' . $thumb_name)) {
             $this->createThumbnail($file_path, $size);
         }
         $data = getimagesize($thumb_dir . '/' . $thumb_name);
@@ -353,5 +352,20 @@ class PhotoHelper
         }
 
         return $status;
+    }
+
+    private function isFile($thumbnail)
+    {
+
+        if (!file_exists($thumbnail)) {
+            return false;
+        }
+        $file_size = filesize($thumbnail);
+
+        if ($file_size === false || $file_size === 0) {
+            return false;
+        }
+
+        return true;
     }
 }
