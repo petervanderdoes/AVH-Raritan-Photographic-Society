@@ -58,26 +58,22 @@ class RequestEditTitleModel
         }
 
         // Rename the image file on the server file system
-        $path                = $this->photo_helper->getCompetitionPath($competition->Competition_Date,
-                                                                       $competition->Classification,
-                                                                       $competition->Medium);
-        $old_file_parts      = pathinfo($server_file_name);
-        $old_file_name       = $old_file_parts['basename'];
-        $ext                 = $old_file_parts['extension'];
-        $current_user        = wp_get_current_user();
-        $new_file_name_noext = sanitize_file_name($new_title) .
-                               '+' .
-                               $current_user->user_login .
-                               '+' .
-                               filemtime($this->request->server('DOCUMENT_ROOT') . $server_file_name);
-        $new_file_name       = $new_file_name_noext . '.' . $ext;
+        $path           = $this->photo_helper->getCompetitionPath($competition->Competition_Date,
+                                                                  $competition->Classification,
+                                                                  $competition->Medium);
+        $old_file_parts = pathinfo($server_file_name);
+        $old_file_name  = $old_file_parts['basename'];
+        $ext            = $old_file_parts['extension'];
+        $new_file_name  = $this->photo_helper->createFileName($new_title,
+                                                              $this->request->server('DOCUMENT_ROOT'),
+                                                              $ext);
         if (!$this->photo_helper->renameImageFile($path, $old_file_name, $new_file_name)) {
             die('<b>Failed to rename image file</b><br>Path: ' .
                 $path .
                 '<br>Old Name: ' .
                 $old_file_name .
                 '<br>New Name: ' .
-                $new_file_name_noext);
+                $new_file_name);
         }
 
         // Update the Title and File Name in the database

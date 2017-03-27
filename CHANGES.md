@@ -1,6 +1,6 @@
 ## Changelog
 
-#### Version 3.0.3-dev.4
+#### Version 3.0.3-dev.7
 * Preparation for new development cycle.
 
 #### Version 3.0.2

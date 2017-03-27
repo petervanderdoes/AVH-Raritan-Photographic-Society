@@ -178,7 +178,7 @@ class RequestUploadImageModel
         $file             = $this->request->file('form.file_name');
         $client_file_name = $file->getClientOriginalName();
 
-        $server_file_name = $this->relative_server_path . '/' . $this->dest_name . '.jpg';
+        $server_file_name = $this->relative_server_path . '/' . $this->dest_name;
         $data             = [
             'Competition_ID'   => $comp_id,
             'Title'            => $title,
@@ -257,15 +257,10 @@ class RequestUploadImageModel
                                                                         $this->medium);
         $full_server_path     = $this->request->server('DOCUMENT_ROOT') . $relative_server_path;
 
-        $user               = wp_get_current_user();
         $file               = $this->request->file('form.file_name');
         $uploaded_file_name = $file->getRealPath();
         $uploaded_file_info = getimagesize($uploaded_file_name);
-        $dest_name          = sanitize_file_name($title) .
-                              '+' .
-                              $user->user_login .
-                              '+' .
-                              filemtime($uploaded_file_name);
+        $dest_name          = $this->photo_helper->createFileName($title, $uploaded_file_name, 'jpg');
         // Need to create the destination folder?
         CommonHelper::createDirectory($full_server_path);
 
@@ -278,11 +273,11 @@ class RequestUploadImageModel
             // Resize the image and deposit it in the destination directory
             $this->photo_helper->doResizeImage($uploaded_file_name,
                                                $full_server_path,
-                                               $dest_name . '.jpg',
+                                               $dest_name,
                                                $image_size);
         } else {
             try {
-                $file->move($full_server_path, $dest_name . '.jpg');
+                $file->move($full_server_path, $dest_name);
             } catch (FileException $e) {
                 $this->setFormError($this->form, $e->getMessage());
 

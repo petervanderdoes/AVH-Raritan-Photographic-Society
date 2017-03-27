@@ -1,4 +1,5 @@
 <?php
+
 namespace RpsCompetition\Helpers;
 
 use Illuminate\Http\Request as IlluminateRequest;
@@ -49,6 +50,30 @@ class PhotoHelper
         foreach ($standard_size as $size) {
             $this->createThumbnail($entry->Server_File_Name, $size);
         }
+    }
+
+    /**
+     * Create the file name without extension used to save the image to disk.
+     *
+     * @param string $title
+     * @param string $file
+     *
+     * @param string $extension
+     *
+     * @return string
+     */
+    public function createFileName($title, $file, $extension)
+    {
+        $current_user = wp_get_current_user();
+        $file_name    = sanitize_file_name($title) .
+                        '+' .
+                        $current_user->user_login .
+                        '+' .
+                        filemtime($file) .
+                        '.' .
+                        $extension;
+
+        return $file_name;
     }
 
     /**
