@@ -17,22 +17,9 @@ env:
 matrix:
   include:
   - php: 7.0
-    env: WP_TRAVISCI=travis:js
-  - php: hhvm
-    sudo: required
-    dist: trusty
-    group: edge
-    addons:
-      apt:
-        packages:
-        - mysql-server-5.6
-        - mysql-client-core-5.6
-        - mysql-client-5.6
-  - php: 7.0
   - php: 7.1
   - php: nightly
   allow_failures:
-  - php: hhvm
   - php: nightly
 
 # Clones WordPress and configures our testing environment.
@@ -45,34 +32,44 @@ before_script:
       fi
     - export GIT_NAME=$(basename $(pwd))
     - export PLUGIN_SLUG="avh-rps-competition"
-    - git clone git://develop.git.wordpress.org/ /tmp/wordpress
-    - git clone git://github.com/petervanderdoes/AVH-Framework.git /tmp/avh-framework
-    - cd ..
-    - mkdir -p "/tmp/wordpress/src/wp-content/plugins/"
-    - mv $GIT_NAME /tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG
-    - cd /tmp/avh-framework
-    - git checkout develop
-    - mkdir -p "/tmp/wordpress/src/wp-content/mu-plugins/"
-    - mv "/tmp/avh-framework" "/tmp/wordpress/src/wp-content/mu-plugins/avh-framework"
-    - mv "/tmp/wordpress/src/wp-content/mu-plugins/avh-framework/avh-framework.php" "/tmp/wordpress/src/wp-content/mu-plugins"
-    - cd /tmp/wordpress
-    - git checkout $WP_VERSION
-    - mysql -e "CREATE DATABASE wordpress_tests;" -uroot
-    - mysql -e "CREATE DATABASE rps_tests;" -uroot
-    - cp wp-tests-config-sample.php wp-tests-config.php
-    - sed -i "s/youremptytestdbnamehere/wordpress_tests/" wp-tests-config.php
-    - sed -i "s/yourusernamehere/travis/" wp-tests-config.php
-    - sed -i "s/yourpasswordhere//" wp-tests-config.php
-# Comment out the echo as this interferes with Sessions.
-    - sed -i 's/echo/\/\/echo/' tests/phpunit/includes/bootstrap.php
-    - sed -i 's/echo/\/\/echo/' tests/phpunit/includes/install.php
-# Setup database credentials
-    - echo "define( 'RPS_DB_NAME', 'rps_tests' );" >> wp-tests-config.php
-    - echo "define( 'RPS_DB_USER', 'travis' );" >> wp-tests-config.php
-    - echo "define( 'RPS_DB_PASSWORD', '' );" >> wp-tests-config.php
-    - echo "define( 'WP_LOCAL_DEV', false );" >> wp-tests-config.php
-    - cd "/tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG"
-    - mkdir -p /tmp/wordpress/src/wp-content/uploads/avh-rps/framework/
+    - |
+      # Setup WordPress
+      git clone git://develop.git.wordpress.org/ /tmp/wordpress
+      cd /tmp/wordpress
+      git checkout $WP_VERSION
+    - |
+      # Setup AVH Framework
+      git clone git://github.com/petervanderdoes/AVH-Framework.git /tmp/avh-framework
+
+      cd /tmp/avh-framework
+      git checkout develop
+      mkdir -p "/tmp/wordpress/src/wp-content/mu-plugins/"
+      mv "/tmp/avh-framework" "/tmp/wordpress/src/wp-content/mu-plugins/avh-framework"
+      mv "/tmp/wordpress/src/wp-content/mu-plugins/avh-framework/avh-framework.php" "/tmp/wordpress/src/wp-content/mu-plugins"
+    - |
+      # Setup Databases
+      mysql -e "CREATE DATABASE wordpress_tests;"
+      mysql -e "CREATE DATABASE rps_tests;"
+      cp wp-tests-config-sample.php wp-tests-config.php
+      sed -i "s/youremptytestdbnamehere/wordpress_tests/" wp-tests-config.php
+      sed -i "s/yourusernamehere/travis/" wp-tests-config.php
+      sed -i "s/yourpasswordhere//" wp-tests-config.php
+    - |
+      # Comment out the echo as this interferes with Sessions.
+      sed -i 's/echo/\/\/echo/' tests/phpunit/includes/bootstrap.php
+      sed -i 's/echo/\/\/echo/' tests/phpunit/includes/install.php
+    - |
+      # Setup Extra database credentials
+      echo "define( 'RPS_DB_NAME', 'rps_tests' );" >> wp-tests-config.php
+      echo "define( 'RPS_DB_USER', 'travis' );" >> wp-tests-config.php
+      echo "define( 'RPS_DB_PASSWORD', '' );" >> wp-tests-config.php
+      echo "define( 'WP_LOCAL_DEV', false );" >> wp-tests-config.php
+    - |
+      # Setup Plugin
+      mkdir -p "/tmp/wordpress/src/wp-content/plugins/"
+      mv $GIT_NAME /tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG
+      cd "/tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG"
+      mkdir -p /tmp/wordpress/src/wp-content/uploads/avh-rps/framework/
     - |
       # Export Composer's global bin dir to PATH, but not on PHP 5.2:
       if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
